@@ -157,6 +157,7 @@ The glossary should include context description, canonical language entries, ali
 
 - "User says make it available, but in this repo that means workspace sync, user sync, and runtime-link verification; convert that wording into the glossary."
 - "Inspect how the word skill means source package, generated handle, and active runtime capability in different places; define the canonical terms and flag the ambiguity."
+- "User says feed the failure back into the start of the pipeline; define the term as an upstream feedback loop, distinguish it from after-the-fact patching, and add the validator or ratchet language that makes it enforceable."
 - "Validate whether billing and fulfillment language belong in one root UBIQUITOUS.md or need a UBIQUITOUS-MAP.md."
 - "Grill this plan against the existing domain model, challenge every fuzzy
   term, check contradictions in code, and update the glossary as terms resolve."

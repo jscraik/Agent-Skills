@@ -30,12 +30,27 @@
       "provider": "codex",
       "mode": "local",
       "host": "codex-cli-profile",
-      "model": "gpt-oss:20b",
+      "model": "qwen3.5:9b-mlx",
       "model_role": "local_sandbox_eval_default",
       "model_settings": {
         "num_ctx": 8192,
+        "num_predict": 1024,
         "temperature": 0.1,
         "top_p": 0.9
+      },
+      "runtime_metadata": {
+        "model_id": "203e30078279",
+        "size_gb": 8.9,
+        "architecture": "qwen3_5",
+        "parameters": "9.4B",
+        "quantization": "nvfp4",
+        "context_length": 262144,
+        "metadata_source": "ollama_show"
+      },
+      "smoke_guard": {
+        "max_tokens_used": 5000,
+        "forbid_visible_thinking": true,
+        "forbid_fallback_metadata": true
       },
       "network_required": true,
       "secret_env_names": [],
@@ -48,12 +63,27 @@
       "provider": "codex",
       "mode": "local",
       "host": "codex-cli-profile",
-      "model": "gpt-oss:20b",
+      "model": "qwen3.5:9b-mlx",
       "model_role": "larger_local_transcript_trial",
       "model_settings": {
         "num_ctx": 16384,
+        "num_predict": 1536,
         "temperature": 0.1,
         "top_p": 0.9
+      },
+      "runtime_metadata": {
+        "model_id": "203e30078279",
+        "size_gb": 8.9,
+        "architecture": "qwen3_5",
+        "parameters": "9.4B",
+        "quantization": "nvfp4",
+        "context_length": 262144,
+        "metadata_source": "ollama_show"
+      },
+      "smoke_guard": {
+        "max_tokens_used": 5000,
+        "forbid_visible_thinking": true,
+        "forbid_fallback_metadata": true
       },
       "network_required": true,
       "secret_env_names": [],
@@ -70,9 +100,12 @@
       "model_role": "code_heavy_specialist",
       "model_settings": {
         "num_ctx": 8192,
+        "num_predict": 1024,
         "temperature": 0.1,
         "top_p": 0.9
       },
+      "runtime_metadata": null,
+      "smoke_guard": null,
       "network_required": true,
       "secret_env_names": [],
       "auth_boundary": "none",
@@ -88,9 +121,12 @@
       "model_role": "fast_fallback",
       "model_settings": {
         "num_ctx": 8192,
+        "num_predict": 1024,
         "temperature": 0.1,
         "top_p": 0.9
       },
+      "runtime_metadata": null,
+      "smoke_guard": null,
       "network_required": true,
       "secret_env_names": [],
       "auth_boundary": "none",
@@ -106,12 +142,14 @@
       "model_role": "local_security_specialist",
       "model_settings": {
         "num_ctx": 8192,
-        "num_predict": 2048,
+        "num_predict": 1024,
         "repeat_penalty": 1.15,
         "temperature": 0.35,
         "top_k": 40,
         "top_p": 0.9
       },
+      "runtime_metadata": null,
+      "smoke_guard": null,
       "network_required": true,
       "secret_env_names": [],
       "auth_boundary": "none",
@@ -126,6 +164,8 @@
       "model": "deepseek-v4-flash:cloud",
       "model_role": "cloud_confirmation",
       "model_settings": null,
+      "runtime_metadata": null,
+      "smoke_guard": null,
       "network_required": true,
       "secret_env_names": [
         "OLLAMA_API_KEY"
@@ -142,6 +182,8 @@
       "model": "gpt-5.3-codex-spark",
       "model_role": "codex_fast_smoke",
       "model_settings": null,
+      "runtime_metadata": null,
+      "smoke_guard": null,
       "network_required": true,
       "secret_env_names": [],
       "auth_boundary": "codex_cli_auth",

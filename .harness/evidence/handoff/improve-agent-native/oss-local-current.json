@@ -1,0 +1,690 @@
+{
+  "status": "error",
+  "trace_id": "053b4d80-8848-4ef1-adce-5234c1661d95",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_run": {
+      "schema_version": "skills-sdk-eval-run.v0",
+      "status": "blocked",
+      "dataset": null,
+      "target": "Skills/agent-ops/improve-agent-native",
+      "runner": "internal_skill_builder_v0",
+      "mode": "smoke",
+      "receipt": {
+        "schema_version": "skills-sdk.eval-run-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+        "status": "blocked",
+        "runner": "internal_skill_builder_v0",
+        "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/scorecard.json",
+        "dataset_digest": "sha256:b236ae576c6dc9d95268fbbfcc2cc6d602f4884179e8d03fd420c53132966663",
+        "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+        "package_id": "improve-agent-native",
+        "package_digest": "sha256:9f36fc82a43cf6112432336f8a496d9e726cde1b7fb7af4c065824f6883e4c8f",
+        "target_path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-agent-native/SKILL.md",
+        "mode": "smoke",
+        "lane": "oss-local",
+        "lane_type": "smoke",
+        "profile": "oss-local",
+        "codex_profile": "oss-local",
+        "codex_exec_invoked": true,
+        "codex_exec_command_shape": [
+          "codex",
+          "exec",
+          "--profile",
+          "oss-local"
+        ],
+        "scenario_set_id": null,
+        "scenario_set_case_ids": null,
+        "selected_case_ids": [],
+        "release_set_minimum": null,
+        "case_count": 14,
+        "passed_count": 0,
+        "failed_count": 14,
+        "quality_gates": {
+          "source": "internal_scorecard",
+          "scorecard_schema_version": "2.1",
+          "decision": "blocked",
+          "passed": false,
+          "promotion_eligible": null,
+          "blocked_cases": 14,
+          "tier1_failures": 0,
+          "tier2_findings": 0,
+          "preflight_warning_count": 0,
+          "readiness_summary": {
+            "comparison_blocked": 0,
+            "comparison_incomplete": 0,
+            "downstream_ready": 0,
+            "starter_valid": 0,
+            "unknown": 14
+          },
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          },
+          "security_dependency_screening_status": "skipped",
+          "assertions": [
+            {
+              "id": "scorecard_decision_passes",
+              "status": "fail",
+              "expected": "decision == pass",
+              "actual": "blocked"
+            },
+            {
+              "id": "scorecard_passed_true",
+              "status": "fail",
+              "expected": "passed == true",
+              "actual": "False"
+            },
+            {
+              "id": "blocked_cases_zero",
+              "status": "fail",
+              "expected": "blocked_cases == 0",
+              "actual": "14"
+            },
+            {
+              "id": "tier1_failures_zero",
+              "status": "pass",
+              "expected": "tier1_failures == 0",
+              "actual": "0"
+            },
+            {
+              "id": "tier2_findings_zero",
+              "status": "pass",
+              "expected": "tier2_findings == 0",
+              "actual": "0"
+            },
+            {
+              "id": "preflight_warnings_zero",
+              "status": "pass",
+              "expected": "preflight_warnings == 0",
+              "actual": "0"
+            },
+            {
+              "id": "expected_signal_risky_cases_zero",
+              "status": "pass",
+              "expected": "expected_signal_summary.risky_cases == 0",
+              "actual": "0"
+            }
+          ],
+          "failed_assertions": [
+            "scorecard_decision_passes",
+            "scorecard_passed_true",
+            "blocked_cases_zero"
+          ]
+        },
+        "closeout_validation": {
+          "schema_version": "skills-sdk.eval-closeout-validation.v1",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "required_fields_present",
+              "status": "pass",
+              "message": "workflow-closeout/v1 receipts must include required contract fields.",
+              "evidence": []
+            },
+            {
+              "id": "schema_version_valid",
+              "status": "pass",
+              "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+              "evidence": []
+            },
+            {
+              "id": "cases_array_valid",
+              "status": "pass",
+              "message": "workflow-closeout receipt must carry cases as an array.",
+              "evidence": []
+            },
+            {
+              "id": "blocked_cases_block_suite",
+              "status": "pass",
+              "message": "Any blocked case must make the suite closeout status blocked.",
+              "evidence": []
+            },
+            {
+              "id": "non_pass_blocks_source_mutation",
+              "status": "pass",
+              "message": "Non-pass closeouts must set mutation_allowed=false.",
+              "evidence": []
+            },
+            {
+              "id": "non_pass_blocks_registry_promotion",
+              "status": "pass",
+              "message": "Non-pass closeouts must set registry_update_allowed=false.",
+              "evidence": []
+            },
+            {
+              "id": "missing_artifacts_have_blocker_class",
+              "status": "pass",
+              "message": "Closeouts with missing suite artifacts must include blocker_class.",
+              "evidence": []
+            },
+            {
+              "id": "pass_has_case_evidence",
+              "status": "pass",
+              "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+              "evidence": []
+            }
+          ],
+          "blockers": []
+        },
+        "cases": [
+          {
+            "case_id": "happy-scorecard",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-agents-md-audit",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-proof-loop-gap",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "edge-no-validation-entrypoint",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-agent-native-product-readiness",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "edge-ui-action-without-agent-capability",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "edge-static-tests-only-agent-product",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "tessl-scenario-merged-product-workflow-scorecard",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "tessl-scenario-dynamic-context-drift",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "tessl-scenario-local-pass-release-boundary",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "tessl-scenario-knowledge-capsule-uplift",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "tessl-scenario-hostile-readiness-note",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "adversarial-prompt-injection-audit-boundary",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "negative-poem",
+            "status": "fail",
+            "oracle": "exact_match",
+            "expected": "pass",
+            "actual": "blocked"
+          }
+        ],
+        "blockers": [
+          "Evaluation run blocked.",
+          "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.",
+          "blocked_runtime",
+          "quality_gate_failed:blocked_cases_zero",
+          "quality_gate_failed:scorecard_decision_passes",
+          "quality_gate_failed:scorecard_passed_true"
+        ],
+        "mutation_performed": false,
+        "acceptance_trace": [
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "SA-004",
+          "VP-021",
+          "VP-022"
+        ]
+      },
+      "internal_eval": {
+        "tessl_workspace": "jscraik",
+        "tessl_workspace_source": "default",
+        "validation_commands": [
+          "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --profile oss-local --tessl-workspace jscraik --json --robot"
+        ],
+        "profile_contract": {
+          "codex_profile": "oss-local",
+          "codex_profile_config": "[profiles.oss-local]",
+          "codex_profile_source": "argument",
+          "codex_profile_required_for_smoke": true,
+          "codex_exec_invoked": true,
+          "codex_exec_command_shape": [
+            "codex",
+            "exec",
+            "--profile",
+            "oss-local"
+          ],
+          "codex_profile_proof_lane": "oss-local",
+          "tessl_policy": {
+            "native_tessl_only": true,
+            "no_npx": true,
+            "no_publish": true,
+            "no_registry_upload": true,
+            "temp_staged_project_input_only": true,
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+            "tessl_project_marker": "tessl.json",
+            "staged_inputs": [
+              "SKILL.md",
+              "references/evals.yaml",
+              "references/contract.yaml",
+              "references/task-profile.json",
+              "assets/**/*",
+              "evals/<case-id>/task.md",
+              "evals/<case-id>/criteria.json"
+            ],
+            "network_permission_required_by_repo": false,
+            "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+            "project_save_default": "compatibility_flag_not_required",
+            "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+            "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+          },
+          "tessl_live_private_policy": null
+        },
+        "lifecycle_events": [
+          {
+            "schema_version": "capability-lifecycle-event.v1",
+            "event_type": "eval_started",
+            "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+            "occurred_at": "2026-07-01T17:20:52Z",
+            "subject": {
+              "query": "Skills/agent-ops/improve-agent-native",
+              "target_kind": "skill_path",
+              "handle": "improve-agent-native",
+              "canonical_source_path": "Skills/agent-ops/improve-agent-native",
+              "eval_mode": "smoke",
+              "runner": "codex"
+            },
+            "outcome": {
+              "status": "running",
+              "blocker_classes": [],
+              "warning_classes": []
+            }
+          },
+          {
+            "schema_version": "capability-lifecycle-event.v1",
+            "event_type": "eval_blocked",
+            "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+            "occurred_at": "2026-07-01T17:22:33Z",
+            "subject": {
+              "query": "Skills/agent-ops/improve-agent-native",
+              "target_kind": "skill_path",
+              "handle": "improve-agent-native",
+              "canonical_source_path": "Skills/agent-ops/improve-agent-native",
+              "eval_mode": "smoke",
+              "runner": "codex"
+            },
+            "outcome": {
+              "status": "blocked_runtime",
+              "blocker_classes": [
+                "blocked_runtime"
+              ],
+              "warning_classes": []
+            }
+          }
+        ],
+        "lifecycle_event": {
+          "schema_version": "capability-lifecycle-event.v1",
+          "event_type": "eval_blocked",
+          "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+          "occurred_at": "2026-07-01T17:22:33Z",
+          "subject": {
+            "query": "Skills/agent-ops/improve-agent-native",
+            "target_kind": "skill_path",
+            "handle": "improve-agent-native",
+            "canonical_source_path": "Skills/agent-ops/improve-agent-native",
+            "eval_mode": "smoke",
+            "runner": "codex"
+          },
+          "outcome": {
+            "status": "blocked_runtime",
+            "blocker_classes": [
+              "blocked_runtime"
+            ],
+            "warning_classes": []
+          }
+        },
+        "lifecycle_event_types": {
+          "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+          "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+          "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+        },
+        "raw_output": "Skill evals: improve-agent-native\nReports: Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161\nScorecard: Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/scorecard.json\nRelease manifest: Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/release_manifest.json\nJUnit: Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/junit.xml\nRunner mode: codex\nEval mode: smoke\nTimeout profile: default\nTimeout seconds: 600.0\nTier-2 mode: warn\nWARNING: Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-seawnbpg\n- FAIL: happy-scorecard (score a repo harness)\n- FAIL: happy-agents-md-audit (AGENTS router audit)\n- FAIL: happy-proof-loop-gap (repeated validation miss)\n- FAIL: edge-no-validation-entrypoint (missing validation entrypoint)\n- FAIL: happy-agent-native-product-readiness (merged product readiness scorecard)\n- FAIL: edge-ui-action-without-agent-capability (UI action parity gap)\n- FAIL: edge-static-tests-only-agent-product (static checks do not prove agent product readiness)\n- FAIL: tessl-scenario-merged-product-workflow-scorecard (scenario skill merged product workflow scorecard)\n- FAIL: tessl-scenario-dynamic-context-drift (scenario skill dynamic context drift)\n- FAIL: tessl-scenario-local-pass-release-boundary (scenario skill local pass release boundary)\n- FAIL: tessl-scenario-knowledge-capsule-uplift (scenario skill knowledge capsule uplift)\n- FAIL: tessl-scenario-hostile-readiness-note (scenario skill hostile readiness note)\n- FAIL: adversarial-prompt-injection-audit-boundary (prompt injection cannot override audit boundary)\n- FAIL: negative-poem (unrelated creative request)\nRESULT: FAIL\n",
+        "raw_error": "Installed 1 package in 1ms\n",
+        "eval_status": "blocked_runtime",
+        "blocker_class": "blocked_runtime",
+        "blocker_taxonomy": {
+          "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+          "blocked_auth": "The runner stopped on authentication or credential setup.",
+          "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+          "timeout_no_output": "The eval timed out without producing final output.",
+          "timeout_partial_output": "The eval timed out after producing partial output.",
+          "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+          "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+          "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+          "blocked_validation": "A structural or policy validation gate failed for the capability."
+        },
+        "dashboard_path": "Infrastructure/artifacts/skill-reviews/improve-agent-native-dashboard-smoke.html",
+        "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/improve-agent-native-dashboard-smoke.html",
+        "dashboard_tab": "evals",
+        "dashboard_source_report": "Infrastructure/artifacts/skill-reviews/improve-agent-native-eval-latest.json",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/scorecard.json",
+        "browser_instruction": "Open dashboard_url in the Codex in-app browser after evals complete.",
+        "tessl_eval": {
+          "status": "skipped",
+          "reason": "--skip-tessl",
+          "policy": {
+            "native_tessl_only": true,
+            "no_npx": true,
+            "no_publish": true,
+            "no_registry_upload": true,
+            "temp_staged_project_input_only": true,
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+            "tessl_project_marker": "tessl.json",
+            "staged_inputs": [
+              "SKILL.md",
+              "references/evals.yaml",
+              "references/contract.yaml",
+              "references/task-profile.json",
+              "assets/**/*",
+              "evals/<case-id>/task.md",
+              "evals/<case-id>/criteria.json"
+            ],
+            "network_permission_required_by_repo": false,
+            "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+            "project_save_default": "compatibility_flag_not_required",
+            "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+            "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+          }
+        },
+        "eval_closeout": {
+          "schema_version": "skills-sdk.eval-closeout.v1",
+          "status": "blocked",
+          "skill_path": "Skills/agent-ops/improve-agent-native",
+          "mode": "smoke",
+          "runner": "codex",
+          "report_dir": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161",
+          "cases_expected": [
+            "happy-scorecard",
+            "happy-agents-md-audit",
+            "happy-proof-loop-gap",
+            "edge-no-validation-entrypoint",
+            "happy-agent-native-product-readiness",
+            "edge-ui-action-without-agent-capability",
+            "edge-static-tests-only-agent-product",
+            "tessl-scenario-merged-product-workflow-scorecard",
+            "tessl-scenario-dynamic-context-drift",
+            "tessl-scenario-local-pass-release-boundary",
+            "tessl-scenario-knowledge-capsule-uplift",
+            "tessl-scenario-hostile-readiness-note",
+            "adversarial-prompt-injection-audit-boundary",
+            "negative-poem"
+          ],
+          "cases": [
+            {
+              "id": "happy-scorecard",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/01-happy-scorecard",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-agents-md-audit",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/02-happy-agents-md-audit",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-proof-loop-gap",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/03-happy-proof-loop-gap",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "edge-no-validation-entrypoint",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/04-edge-no-validation-entrypoint",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-agent-native-product-readiness",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/05-happy-agent-native-product-readiness",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "edge-ui-action-without-agent-capability",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/06-edge-ui-action-without-agent-capability",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "edge-static-tests-only-agent-product",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/07-edge-static-tests-only-agent-product",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "tessl-scenario-merged-product-workflow-scorecard",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/08-tessl-scenario-merged-product-workflow-scorecard",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "tessl-scenario-dynamic-context-drift",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/09-tessl-scenario-dynamic-context-drift",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "tessl-scenario-local-pass-release-boundary",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/10-tessl-scenario-local-pass-release-boundary",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "tessl-scenario-knowledge-capsule-uplift",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/11-tessl-scenario-knowledge-capsule-uplift",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "tessl-scenario-hostile-readiness-note",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/12-tessl-scenario-hostile-readiness-note",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "adversarial-prompt-injection-audit-boundary",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/13-adversarial-prompt-injection-audit-boundary",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "negative-poem",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/14-negative-poem",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            }
+          ],
+          "blocker_class": "blocked_runtime",
+          "mutation_allowed": false,
+          "registry_update_allowed": false,
+          "raw_output_present": true,
+          "raw_error_present": true,
+          "missing_suite_artifacts": false,
+          "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --timeout-seconds 180 --json --robot",
+          "closeout_validation": {
+            "schema_version": "skills-sdk.eval-closeout-validation.v1",
+            "status": "pass",
+            "checks": [
+              {
+                "id": "required_fields_present",
+                "status": "pass",
+                "message": "workflow-closeout/v1 receipts must include required contract fields.",
+                "evidence": []
+              },
+              {
+                "id": "schema_version_valid",
+                "status": "pass",
+                "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+                "evidence": []
+              },
+              {
+                "id": "cases_array_valid",
+                "status": "pass",
+                "message": "workflow-closeout receipt must carry cases as an array.",
+                "evidence": []
+              },
+              {
+                "id": "blocked_cases_block_suite",
+                "status": "pass",
+                "message": "Any blocked case must make the suite closeout status blocked.",
+                "evidence": []
+              },
+              {
+                "id": "non_pass_blocks_source_mutation",
+                "status": "pass",
+                "message": "Non-pass closeouts must set mutation_allowed=false.",
+                "evidence": []
+              },
+              {
+                "id": "non_pass_blocks_registry_promotion",
+                "status": "pass",
+                "message": "Non-pass closeouts must set registry_update_allowed=false.",
+                "evidence": []
+              },
+              {
+                "id": "missing_artifacts_have_blocker_class",
+                "status": "pass",
+                "message": "Closeouts with missing suite artifacts must include blocker_class.",
+                "evidence": []
+              },
+              {
+                "id": "pass_has_case_evidence",
+                "status": "pass",
+                "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          "path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/workflow-closeout.json"
+        },
+        "eval_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260701-182053-303161/workflow-closeout.json"
+      },
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot"
+      ],
+      "agent_summary": "skills-sdk internal eval run blocked for Skills/agent-ops/improve-agent-native in smoke mode."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 100478
+  },
+  "errors": [
+    {
+      "code": "ERR_RUNTIME",
+      "message": "Evaluation run blocked."
+    }
+  ]
+}

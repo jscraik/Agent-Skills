@@ -26,6 +26,10 @@ AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
 AB_JUDGE_SCORE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
+_CODEX_TOKENS_USED_RE = re.compile(r"(?im)tokens used\s*(?::|\n)\s*([0-9][0-9,]*)")
+_CODEX_JSON_TOKENS_USED_RE = re.compile(r'"tokens_used"\s*:\s*([0-9]+)')
+_CODEX_FALLBACK_METADATA_RE = re.compile(r"(?i)(model metadata .*not found|fallback metadata)")
+_VISIBLE_THINKING_RE = re.compile(r"(?im)(<think\b|</think>|^\s*thinking\s*$|thinking trace)")
 __all__ = ["CodexJudgeResult"]
 
 
@@ -510,23 +514,49 @@ def _score_decision(
     mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds, repo_root, evidence["output_file"])
-    except CodexProfileConfigError:
+    except (CodexProfileConfigError, OSError, subprocess.TimeoutExpired) as exc:
+        return _score_runner_exception(repo_root, evidence, blockers, exc, mutation_performed)
+    return _score_runner_result(repo_root, preview, judge_profile, evidence, blockers, result, mutation_performed)
+
+
+def _score_runner_exception(
+    repo_root: Path,
+    evidence: dict[str, Any],
+    blockers: list[str],
+    exc: Exception,
+    mutation_performed: bool,
+) -> tuple[dict[str, Any] | None, str | None, bool, bool, bool]:
+    if isinstance(exc, CodexProfileConfigError):
         blockers.append("codex_profile_config_missing")
         return _blocked_score_decision(mutation_performed)
-    except OSError:
+    if isinstance(exc, OSError):
         blockers.append("judge_provider_unavailable")
         return _blocked_score_decision(mutation_performed)
-    except subprocess.TimeoutExpired as exc:
-        stdout = _timeout_output_text(exc.stdout)
-        _write_text_evidence(repo_root, evidence["output_file"], stdout)
-        blockers.append("judge_provider_timeout")
-        return None, _digest_text(stdout), True, True, mutation_performed
+    stdout = _timeout_output_text(exc.stdout)
+    _write_text_evidence(repo_root, evidence["output_file"], stdout)
+    blockers.append("judge_provider_timeout")
+    return None, _digest_text(stdout), True, True, mutation_performed
+
+
+def _score_runner_result(
+    repo_root: Path,
+    preview: dict[str, Any],
+    judge_profile: dict[str, Any],
+    evidence: dict[str, Any],
+    blockers: list[str],
+    result: CodexJudgeResult,
+    mutation_performed: bool,
+) -> tuple[dict[str, Any] | None, str | None, bool, bool, bool]:
     output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text) or result.stdout
     if not _contained_file_exists(repo_root, evidence["output_file"]):
         _write_text_evidence(repo_root, evidence["output_file"], output_text)
     output_digest = _digest_text(output_text)
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
+        return None, output_digest, True, True, mutation_performed
+    runtime_guard_blockers = _codex_runtime_guard_blockers(judge_profile, result, output_text)
+    if runtime_guard_blockers:
+        blockers.extend(runtime_guard_blockers)
         return None, output_digest, True, True, mutation_performed
     decision, blocker = _parse_judge_decision(output_text, preview["comparison_payload"])
     if blocker:
@@ -625,6 +655,79 @@ def _timeout_output_text(value: object) -> str:
     if isinstance(value, str):
         return value
     return ""
+
+
+def _codex_runtime_guard_blockers(
+    judge_profile: dict[str, Any],
+    result: CodexJudgeResult,
+    output_text: str,
+) -> list[str]:
+    guard = judge_profile.get("smoke_guard")
+    if not isinstance(guard, dict):
+        return []
+    combined_output = "\n".join([result.stdout, result.stderr, output_text])
+    blockers: list[str] = []
+    if guard.get("forbid_fallback_metadata") is True and _CODEX_FALLBACK_METADATA_RE.search(combined_output):
+        blockers.append("codex_runtime_metadata_fallback")
+    if guard.get("forbid_visible_thinking") is True and (
+        _VISIBLE_THINKING_RE.search(combined_output) or _has_codex_reasoning_event(combined_output)
+    ):
+        blockers.append("codex_runtime_visible_thinking")
+    max_tokens = guard.get("max_tokens_used")
+    if isinstance(max_tokens, int):
+        observed_tokens = _codex_observed_tokens_used(combined_output)
+        if observed_tokens is not None and observed_tokens > max_tokens:
+            blockers.append("codex_runtime_token_budget_exceeded")
+    return blockers
+
+
+def _codex_observed_tokens_used(text: str) -> int | None:
+    values: list[int] = []
+    for pattern in (_CODEX_TOKENS_USED_RE, _CODEX_JSON_TOKENS_USED_RE):
+        for match in pattern.finditer(text):
+            try:
+                values.append(int(match.group(1).replace(",", "")))
+            except ValueError:
+                continue
+    values.extend(_codex_jsonl_token_totals(text))
+    return max(values) if values else None
+
+
+def _codex_jsonl_token_totals(text: str) -> list[int]:
+    totals: list[int] = []
+    for line in text.splitlines():
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        usage = payload.get("usage")
+        if not isinstance(usage, dict):
+            continue
+        token_values = [
+            usage.get("input_tokens"),
+            usage.get("output_tokens"),
+            usage.get("reasoning_output_tokens"),
+        ]
+        total = sum(value for value in token_values if isinstance(value, int))
+        if total > 0:
+            totals.append(total)
+    return totals
+
+
+def _has_codex_reasoning_event(text: str) -> bool:
+    for line in text.splitlines():
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        item = payload.get("item")
+        if isinstance(item, dict) and item.get("type") == "reasoning":
+            return True
+    return False
 
 
 def _score_receipt_payload(

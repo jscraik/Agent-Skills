@@ -12,6 +12,42 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 EXECUTABLE="$MACOS_DIR/ImproveAgentNativeMenuBar"
 MODULE_CACHE="$BUILD_ROOT/clang-module-cache"
 SWIFTPM_BUILD="$BUILD_ROOT/swiftpm-build"
+OPEN_APP=0
+SAFE_OPEN=0
+
+usage() {
+  cat <<'USAGE'
+Usage: ./Launch.command [--open|--open-safe]
+
+Builds and signs the Improve Agent Native menu-bar prototype.
+
+Default: build only; do not launch.
+--open: build, sign, then open the .app bundle with LaunchServices.
+--open-safe: open with the Tessl CLI disabled for launch validation.
+
+The launcher intentionally never starts the raw executable directly.
+USAGE
+}
+
+for arg in "$@"; do
+  case "$arg" in
+    --open)
+      OPEN_APP=1
+      ;;
+    --open-safe)
+      OPEN_APP=1
+      SAFE_OPEN=1
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
 
 rm -rf "$APP_DIR" "$MODULE_CACHE"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$MODULE_CACHE"
@@ -26,7 +62,16 @@ stop_existing() {
 
 stop_existing
 
-cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
+SAFE_ENV_PLIST=""
+if [[ "$SAFE_OPEN" == "1" ]]; then
+  SAFE_ENV_PLIST='  <key>LSEnvironment</key>
+  <dict>
+    <key>IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI</key>
+    <string>1</string>
+  </dict>'
+fi
+
+cat > "$CONTENTS_DIR/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -51,6 +96,7 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
   <string>Local prototype</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
+${SAFE_ENV_PLIST}
 </dict>
 </plist>
 PLIST
@@ -62,34 +108,32 @@ XDG_STATE_HOME="$BUILD_ROOT/xdg-state" \
 MISE_CACHE_DIR="$BUILD_ROOT/mise-cache" \
 MISE_STATE_DIR="$BUILD_ROOT/mise-state" \
 CLANG_MODULE_CACHE_PATH="$MODULE_CACHE" \
-swift build --build-system native --disable-sandbox --build-path "$SWIFTPM_BUILD" >/dev/null
+xcrun swiftc -target "$(uname -m)-apple-macos14.0" -parse-as-library "$SOURCE" -o "$EXECUTABLE"
 popd >/dev/null
-cp "$SWIFTPM_BUILD/debug/ImproveAgentNativeMenuBar" "$EXECUTABLE"
 chmod +x "$EXECUTABLE"
 cp "$SCRIPT_DIR/Sources/ImproveAgentNativeMenuBar/Resources/TesslLogo.png" "$RESOURCES_DIR/TesslLogo.png"
 /usr/bin/codesign --force --sign - "$APP_DIR" >/dev/null
 
 echo "Built $APP_DIR"
 
-if [[ "${NO_OPEN:-0}" == "1" ]]; then
+if [[ "${NO_OPEN:-0}" == "1" || "$OPEN_APP" != "1" ]]; then
+  echo "Build-only mode; not launching. Use ./Launch.command --open or ./Launch.command --open-safe to launch deliberately."
   exit 0
 fi
 
-echo "Opening menu-bar prototype..."
-if /usr/bin/open -n "$APP_DIR"; then
-  exit 0
+if [[ "$SAFE_OPEN" == "1" ]]; then
+  echo "Opening menu-bar prototype with Tessl CLI disabled..."
+else
+  echo "Opening menu-bar prototype..."
 fi
-
-echo "LaunchServices open failed; launching bundled executable directly..."
 LOG_FILE="$BUILD_ROOT/ImproveAgentNativeMenuBar.log"
 PID_FILE="$BUILD_ROOT/ImproveAgentNativeMenuBar.pid"
-nohup "$EXECUTABLE" >"$LOG_FILE" 2>&1 &
-APP_PID="$!"
-echo "$APP_PID" > "$PID_FILE"
-sleep 0.6
-if kill -0 "$APP_PID" >/dev/null 2>&1; then
-  echo "Launched ImproveAgentNativeMenuBar pid=$APP_PID"
+rm -f "$PID_FILE"
+: > "$LOG_FILE"
+if /usr/bin/open -n "$APP_DIR"; then
+  echo "LaunchServices open requested for $APP_DIR"
+  exit 0
 else
-  echo "ImproveAgentNativeMenuBar exited during launch; see $LOG_FILE" >&2
+  echo "LaunchServices open failed; see $LOG_FILE" >&2
   exit 1
 fi

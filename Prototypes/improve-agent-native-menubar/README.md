@@ -8,23 +8,27 @@ It renders a Tessl-style card while keeping evidence lanes separate:
 - Local SDK quality comes from ./bin/ask skills package verify.
 - Local SDK impact comes from ./bin/ask sdk eval scenario-quality --preview.
 - Local SDK security comes from ./bin/ask sdk security risk-modes --preview.
-- Tessl status comes from tessl plugin info jscraik/improve-agent-native, then URL probes as fallback diagnostics.
+- Tessl status and registry metrics come from one bounded tessl plugin info jscraik/improve-agent-native --json process per app launch, then URL probes as fallback diagnostics.
 
 The current private Tessl plugin may require CLI authentication. When Tessl auth or URL fetch is unavailable, the popover shows that blocker instead of inventing a registry score.
-For private Tessl registry metadata, launch it from a shell where the Tessl CLI can authenticate. The app first uses an exported TESSL_TOKEN, then falls back to op run when 1Password CLI is available.
+For private Tessl registry metadata, launch it from a shell where the Tessl CLI can authenticate and where tessl is on PATH. You can also set TESSL_CLI or TESSL_BIN to the executable path before launch. If tessl is unavailable, the popover reports the CLI blocker instead of inventing registry data. The app does not start tessl login, does not call op run, and does not retry with a second non-JSON tessl command; a timeout or auth prompt is cached until the app is relaunched.
+
+The app loads local SDK evidence once per app process. It does not poll in the background. Tessl CLI lookup is intentionally one-shot per app process.
 
 Run:
 
   cd Prototypes/improve-agent-native-menubar
   ./Launch.command
 
-Or double-click Launch.command in Finder.
+That command builds and signs the app without launching it. Launch deliberately only after checking for stale prototype or Tessl-login processes:
 
-The launcher compiles with xcrun swiftc, creates a temporary app bundle at
-${TMPDIR}/improve-agent-native-menubar/Improve Agent Native.app, and opens it
-with AGENT_SKILLS_ROOT pointed at this checkout. It intentionally avoids the
-default SwiftPM GUI launch path because swift run can fail on this workstation
-with an XCBuild property list initialization error.
+  ./Launch.command --open
+
+The launcher compiles with xcrun swiftc and creates an app bundle under
+dist/Improve Agent Native.app. It intentionally avoids the default SwiftPM GUI
+launch path because swift run can fail on this workstation with an XCBuild
+property list initialization error. It also intentionally avoids launching the
+raw executable directly; --open uses LaunchServices only.
 
 Validation:
 
@@ -32,7 +36,7 @@ Validation:
 
 Launcher validation:
 
-  NO_OPEN=1 ./Launch.command
+  ./Launch.command
 
 Compile-only validation:
 

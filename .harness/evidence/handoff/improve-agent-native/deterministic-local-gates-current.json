@@ -1,0 +1,45 @@
+{
+  "schema_version": "skills-sdk.handoff-lane-summary.v1",
+  "status": "pass",
+  "lane": "deterministic_local_gates",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "created_at": "2026-07-01T17:20:00Z",
+  "commands": [
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_regex_heavy_release_rubric_before_tessl tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_single_positive_regex_in_release_rubric tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_release_rubric_without_two_semantic_checks",
+      "outcome": "pass",
+      "evidence": "3 passed in 0.14s"
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot",
+      "outcome": "pass",
+      "trace_id": "da8f9075-1194-4e4f-b7c9-85c942a201e9"
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+      "outcome": "pass"
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "outcome": "pass",
+      "trace_id": "not captured in summary output",
+      "scenario_count": 71,
+      "promotion_ready_count": 71,
+      "blocked_count": 0
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "outcome": "pass",
+      "trace_id": "b5954b44-21d8-4645-a08c-183aae0880f5",
+      "ready": true
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "outcome": "pass",
+      "trace_id": "5174a7db-66ea-4474-9d25-f039d117c227",
+      "ready": true
+    }
+  ],
+  "what_this_proves": "Current deterministic package, audit, scenario-quality, scorer-quality, and scorer-calibration gates passed for improve-agent-native after the regex criteria ratchet.",
+  "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl local proof, Tessl dry-run, or live Tessl scoring."
+}

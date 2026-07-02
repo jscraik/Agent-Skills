@@ -52,7 +52,7 @@ AB_RUBRIC_STAGE_POLICIES = [
     {
         "stage": "local_oss_loop",
         "judge_profile": "oss-local",
-        "default_model": "gpt-oss:20b",
+        "default_model": "qwen3.5:9b-mlx",
         "confidence_weight": "fast_signal",
         "promotion_gate": "improvement_signal_only",
     },

@@ -56,13 +56,15 @@ Do not use this skill to make scenarios easier after a failed eval. Fix the skil
 1. Confirm the named gate in `references/sdk-pipeline-setup.md`; load only the target skill, contract, eval YAML, selected fixtures, and latest relevant receipt.
 2. Classify each failing case before editing: leakage, low scenario value, weak comparator, vague criteria, missing fixture, baseline tie, baseline win, stale task, hidden dependency, unsupported assertion, or runtime mismatch.
 3. Treat Tessl rejection as a pipeline defect until SDK scenario-quality also blocks that class. Patch the shared quality gate or generator contract before rerunning live Tessl.
-4. Keep task text realistic and agent-facing. Do not include `Required behavior`, `Failure mode`, `Return these exact fields`, copied criteria, long expected answers, or scoring mechanics in the visible task.
-5. Keep criteria scorer-facing. Put expected behavior, failure modes, and rubric dimensions in acceptance criteria or hidden metadata, not in `prompt` or exported `task.md`.
-6. Keep low-value unrelated negatives in local routing smoke only. Release/Tessl negatives must test realistic safety, authority, evidence, boundary, or should-not-trigger pressure.
-7. Use concrete fixtures for repo-audit scenarios. If the case asks for file-path evidence, command evidence, or repo state, inline the relevant files in `task.md` or provide a staged fixture artifact.
-8. Import only reviewed cases into canonical eval assets; never copy raw generated scenarios into `references/evals.yaml`.
-9. Run package verify, scenario-quality, scorer-quality, and scorer-calibration before oss-local, oss-cloud, Tessl local proof, dry Tessl, or live Tessl.
-10. Use `oss-local` before `oss-cloud`; `fast` is smoke only. Treat Tessl as staged confirmation after internal gates and run-budget proof.
+4. Feed repeat failures back to the start of the pipeline. Patch the source fixture, scenario adapter, scenario-quality gate, or skill package before `oss-local`; do not spend `oss-cloud` or live Tessl runs rediscovering a shape defect.
+5. Keep task text realistic and agent-facing. Do not include `Required behavior`, `Failure mode`, `Return these exact fields`, copied criteria, long expected answers, or scoring mechanics in the visible task.
+6. Keep criteria scorer-facing. Put expected behavior, failure modes, and rubric dimensions in acceptance criteria or hidden metadata, not in `prompt` or exported `task.md`.
+7. For generated fixture scenarios that score a packaged skill, ask the runner to score package instructions and references, not a fresh chat response. Criteria must not expect `raw_response`, `final.json`, or observable response text unless the runner actually creates that artifact.
+8. Keep low-value unrelated negatives in local routing smoke only. Release/Tessl negatives must test realistic safety, authority, evidence, boundary, or should-not-trigger pressure.
+9. Use concrete fixtures for repo-audit scenarios. If the case asks for file-path evidence, command evidence, or repo state, inline the relevant files in `task.md` or provide a staged fixture artifact.
+10. Import only reviewed cases into canonical eval assets; never copy raw generated scenarios into `references/evals.yaml`.
+11. Run package verify, scenario-quality, scorer-quality, and scorer-calibration before oss-local, oss-cloud, Tessl local proof, dry Tessl, or live Tessl.
+12. Use `oss-local` before `oss-cloud`; `fast` is smoke only. Treat Tessl as staged confirmation after internal gates and run-budget proof.
 
 ## Failure Mode
 

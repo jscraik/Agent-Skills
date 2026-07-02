@@ -14,6 +14,35 @@ from ask.skills_sdk.eval_profiles import build_eval_profile_preview_receipt  # n
 from ask.skills_sdk.typed_contracts import validate_eval_profile_preview_receipt  # noqa: E402
 
 
+def _judge_by_id() -> dict[str, dict[str, object]]:
+    receipt = build_eval_profile_preview_receipt()
+    return {profile["id"]: profile for profile in receipt["judge_profiles"]}
+
+
+def _assert_qwen_local_profile(test: unittest.TestCase, profile: dict[str, object]) -> None:
+    test.assertEqual(profile["provider"], "codex")
+    test.assertEqual(profile["codex_profile"], "oss-local")
+    test.assertEqual(profile["model"], "qwen3.5:9b-mlx")
+    test.assertEqual(profile["model_role"], "local_sandbox_eval_default")
+    test.assertEqual(profile["model_settings"]["num_ctx"], 8192)
+    test.assertEqual(profile["model_settings"]["num_predict"], 1024)
+    test.assertEqual(profile["runtime_metadata"]["model_id"], "203e30078279")
+    test.assertEqual(profile["runtime_metadata"]["architecture"], "qwen3_5")
+    test.assertEqual(profile["runtime_metadata"]["quantization"], "nvfp4")
+    test.assertEqual(profile["smoke_guard"]["max_tokens_used"], 5000)
+    test.assertTrue(profile["smoke_guard"]["forbid_visible_thinking"])
+    test.assertTrue(profile["smoke_guard"]["forbid_fallback_metadata"])
+
+
+def _assert_cloud_profile(test: unittest.TestCase, profile: dict[str, object]) -> None:
+    test.assertEqual(profile["provider"], "codex")
+    test.assertEqual(profile["model"], "deepseek-v4-flash:cloud")
+    test.assertEqual(profile["host"], "codex-cli-profile")
+    test.assertTrue(profile["network_required"])
+    test.assertEqual(profile["secret_env_names"], ["OLLAMA_API_KEY"])
+    test.assertEqual(profile["auth_boundary"], "codex_cli_auth")
+
+
 class TestSkillsSdkEvalProfiles(unittest.TestCase):
     def test_preview_receipt_keeps_judge_secrets_out_of_skill_execution(self) -> None:
         receipt = build_eval_profile_preview_receipt()
@@ -26,22 +55,18 @@ class TestSkillsSdkEvalProfiles(unittest.TestCase):
         validate_eval_profile_preview_receipt(receipt)
 
     def test_preview_receipt_declares_codex_backed_oss_profiles(self) -> None:
-        receipt = build_eval_profile_preview_receipt()
-        judge_by_id = {profile["id"]: profile for profile in receipt["judge_profiles"]}
+        judge_by_id = _judge_by_id()
+        _assert_qwen_local_profile(self, judge_by_id["oss-local"])
 
-        self.assertEqual(judge_by_id["oss-local"]["provider"], "codex")
-        self.assertEqual(judge_by_id["oss-local"]["codex_profile"], "oss-local")
-        self.assertEqual(judge_by_id["oss-local"]["model"], "gpt-oss:20b")
-        self.assertEqual(judge_by_id["oss-local"]["model_role"], "local_sandbox_eval_default")
-        self.assertEqual(judge_by_id["oss-local"]["model_settings"]["num_ctx"], 8192)
         self.assertEqual(judge_by_id["oss-local"]["model_settings"]["temperature"], 0.1)
         self.assertEqual(judge_by_id["oss-local"]["model_settings"]["top_p"], 0.9)
         self.assertEqual(judge_by_id["oss-local"]["host"], "codex-cli-profile")
         self.assertTrue(judge_by_id["oss-local"]["network_required"])
         self.assertEqual(judge_by_id["oss-local"]["auth_boundary"], "none")
-        self.assertEqual(judge_by_id["oss-local-large-transcript"]["model"], "gpt-oss:20b")
+        self.assertEqual(judge_by_id["oss-local-large-transcript"]["model"], "qwen3.5:9b-mlx")
         self.assertEqual(judge_by_id["oss-local-large-transcript"]["model_role"], "larger_local_transcript_trial")
         self.assertEqual(judge_by_id["oss-local-large-transcript"]["model_settings"]["num_ctx"], 16384)
+        self.assertEqual(judge_by_id["oss-local-large-transcript"]["model_settings"]["num_predict"], 1536)
         self.assertEqual(judge_by_id["oss-local-code"]["codex_profile"], "oss-local-code")
         self.assertEqual(judge_by_id["oss-local-code"]["model"], "qwen3-coder:30b")
         self.assertEqual(judge_by_id["oss-local-code"]["model_role"], "code_heavy_specialist")
@@ -54,12 +79,7 @@ class TestSkillsSdkEvalProfiles(unittest.TestCase):
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["temperature"], 0.35)
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["top_k"], 40)
         self.assertEqual(judge_by_id["oss-security"]["auth_boundary"], "none")
-        self.assertEqual(judge_by_id["oss-cloud"]["provider"], "codex")
-        self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
-        self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
-        self.assertTrue(judge_by_id["oss-cloud"]["network_required"])
-        self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
-        self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")
+        _assert_cloud_profile(self, judge_by_id["oss-cloud"])
         self.assertEqual(judge_by_id["codex-fast"]["model"], "gpt-5.3-codex-spark")
         self.assertEqual(judge_by_id["codex-fast"]["host"], "codex-cli-authenticated-session")
         self.assertTrue(judge_by_id["codex-fast"]["network_required"])

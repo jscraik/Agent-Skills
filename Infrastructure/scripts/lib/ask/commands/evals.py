@@ -1398,19 +1398,27 @@ def _parse_generated_eval_fixture(fixture_path: Path, source_root: Path) -> dict
     display_name = title.split(":", 1)[1].strip() if ":" in title else raw_id
     behavior = fields.get("behavior_under_test") or fields.get("knowledge_claim") or should
     prompt = "\n".join([
-        f"Help with this situation: {given}",
-        "Keep the response concise. Include the safest next action, any boundary that must be preserved, and the proof or check that would make the next step reliable.",
+        "Evaluate whether the installed skill package covers the reviewed operator boundary case described by the hidden checklist.",
+        "Score the package instructions and references, not a freshly generated chat response. Look for the safest next action, the boundary that must be preserved, and the proof or check that would make the next step reliable.",
     ])
     acceptance: list[dict[str, str]] = [
         {
             "type": "expected_signal",
-            "value": good,
+            "value": f"The skill package instructs agents to {good}",
+        },
+        {
+            "type": "expected_signal",
+            "value": "The skill package names the proof or validation boundary and cites observable package evidence.",
+        },
+        {
+            "type": "expected_signal",
+            "value": "The skill package avoids the expected failure mode and blocks readiness overclaims when proof is missing.",
         },
     ]
     if bad:
         acceptance.append({
             "type": "must_not",
-            "value": bad,
+            "value": f"The skill package encourages or permits this failure mode: {bad}",
         })
     return {
         "id": case_id,
@@ -1545,8 +1553,8 @@ GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
 GENERIC_GENERATED_SHOULD = (
-    "Produce a response that follows the reviewed behavior under test, preserves "
-    "safety boundaries, and states the next verifiable action."
+    "Expose package instructions or references that encode the reviewed behavior "
+    "under test, preserve safety boundaries, and name the next verifiable action."
 )
 SHALLOW_EXPECTED_SIGNAL_VALUES = {
     "mission-grounded next step",

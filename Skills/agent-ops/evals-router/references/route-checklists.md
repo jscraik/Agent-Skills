@@ -27,6 +27,12 @@ formatter. A live handoff is blocked while `receipt.feedback_loop.status` is
 assessments, usage below the live handoff threshold, or no aggregate lift.
 Every live Tessl regression must become an internal regression obligation, with
 owner classification and rerun evidence, before the next live handoff claim.
+If Tessl reports no response artifact, no raw response, or package-only
+solution contents, do not patch the skill blindly. First classify whether the
+scenario is supposed to score the installed package or a generated response.
+Package-scored generated fixtures must ask for package instructions and
+references, and scenario-quality must block `raw_response`, `final.json`,
+transcript, or chat-output expectations unless the runner creates them.
 
 ## Skills SDK Scenario Runtime Lanes
 

@@ -92,6 +92,22 @@ class EvalJudgeModelSettings(_SdkContractModel):
     top_p: Annotated[float, Field(ge=0, le=1)]
 
 
+class EvalJudgeRuntimeMetadata(_SdkContractModel):
+    model_id: str = Field(min_length=1)
+    size_gb: Annotated[float, Field(gt=0)]
+    architecture: str = Field(min_length=1)
+    parameters: str = Field(min_length=1)
+    quantization: str = Field(min_length=1)
+    context_length: Annotated[int, Field(ge=1)]
+    metadata_source: Literal["ollama_show"]
+
+
+class EvalJudgeSmokeGuard(_SdkContractModel):
+    max_tokens_used: Annotated[int, Field(ge=1)]
+    forbid_visible_thinking: bool
+    forbid_fallback_metadata: bool
+
+
 class EvalJudgeProfile(_SdkContractModel):
     id: str = Field(min_length=1)
     codex_profile: str = Field(min_length=1)
@@ -109,6 +125,8 @@ class EvalJudgeProfile(_SdkContractModel):
         "codex_fast_smoke",
     ]
     model_settings: EvalJudgeModelSettings | None
+    runtime_metadata: EvalJudgeRuntimeMetadata | None
+    smoke_guard: EvalJudgeSmokeGuard | None
     network_required: bool
     secret_env_names: list[str]
     auth_boundary: Literal["none", "env_secret", "codex_cli_auth"]

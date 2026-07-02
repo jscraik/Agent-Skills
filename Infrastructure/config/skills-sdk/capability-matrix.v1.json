@@ -463,7 +463,7 @@
         "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
       ],
       "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
-      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for gpt-oss:20b, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:9b-mlx, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
     },
     {
       "id": "ab_rubric",
@@ -480,7 +480,7 @@
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_rubric_fixture_records_stable_cross_stage_scorecard"
       ],
       "next_slice": "Use this rubric digest for Codex oss-local judge execution before adding Codex oss-cloud DeepSeek and Tessl confirmation receipts.",
-      "notes": "The SDK now exposes one stable A/B scorecard for local gpt-oss:20b, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
+      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:9b-mlx, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
     },
     {
       "id": "ab_preview",
@@ -546,7 +546,7 @@
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input"
       ],
       "next_slice": "Use this sanitized input as the only payload sent to local advisory judge scoring.",
-      "notes": "The SDK can now derive a sanitized A/B judge input payload and prompt digest from a completed ab-run receipt without invoking Codex judge state, network, or mutation. The local default judge profile is Codex oss-local with gpt-oss:20b."
+      "notes": "The SDK can now derive a sanitized A/B judge input payload and prompt digest from a completed ab-run receipt without invoking Codex judge state, network, or mutation. The local default judge profile is Codex oss-local with qwen3.5:9b-mlx."
     },
     {
       "id": "ab_judge_score",
@@ -562,7 +562,7 @@
         "Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_score_fixture_records_codex_profile_advisory_decision"
       ],
-      "next_slice": "Add Codex oss-cloud DeepSeek confirmation only after local gpt-oss:20b scoring receipts are calibrated against expected labels.",
+      "next_slice": "Add Codex oss-cloud DeepSeek confirmation only after local qwen3.5:9b-mlx scoring receipts are calibrated against expected labels.",
       "notes": "The SDK can now invoke Codex exec with --profile oss-local against sanitized A/B evidence, validate the returned decision contract, and emit advisory score receipts. Codex oss-cloud, Codex-fast, and Tessl remain separate confirmation lanes."
     },
     {

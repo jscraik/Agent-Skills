@@ -37,7 +37,7 @@
     "provider": "codex",
     "mode": "local",
     "host": "codex-cli-profile",
-    "model": "gpt-oss:20b",
+    "model": "qwen3.5:9b-mlx",
     "model_role": "local_sandbox_eval_default",
     "model_settings": {
       "num_ctx": 8192,

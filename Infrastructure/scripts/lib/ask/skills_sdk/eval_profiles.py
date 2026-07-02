@@ -8,22 +8,41 @@ EVAL_PROFILE_PREVIEW_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
 )
 EVAL_PROFILE_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
-LOCAL_SANDBOX_DEFAULT_SETTINGS = {"num_ctx": 8192, "temperature": 0.1, "top_p": 0.9}
-LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS = {"num_ctx": 16384, "temperature": 0.1, "top_p": 0.9}
+LOCAL_SANDBOX_DEFAULT_SETTINGS = {"num_ctx": 8192, "num_predict": 1024, "temperature": 0.1, "top_p": 0.9}
+LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS = {
+    "num_ctx": 16384,
+    "num_predict": 1536,
+    "temperature": 0.1,
+    "top_p": 0.9,
+}
 LOCAL_SECURITY_SPECIALIST_SETTINGS = {
     "num_ctx": 8192,
-    "num_predict": 2048,
+    "num_predict": 1024,
     "repeat_penalty": 1.15,
     "temperature": 0.35,
     "top_k": 40,
     "top_p": 0.9,
 }
+LOCAL_QWEN35_MLX_RUNTIME_METADATA = {
+    "model_id": "203e30078279",
+    "size_gb": 8.9,
+    "architecture": "qwen3_5",
+    "parameters": "9.4B",
+    "quantization": "nvfp4",
+    "context_length": 262144,
+    "metadata_source": "ollama_show",
+}
+LOCAL_QWEN35_SMOKE_GUARD = {
+    "max_tokens_used": 5000,
+    "forbid_visible_thinking": True,
+    "forbid_fallback_metadata": True,
+}
 _LOCAL_JUDGE_PROFILE_SPECS = (
-    ("oss-local", "oss-local", "gpt-oss:20b", "local_sandbox_eval_default", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local", "oss-local", "qwen3.5:9b-mlx", "local_sandbox_eval_default", LOCAL_SANDBOX_DEFAULT_SETTINGS),
     (
         "oss-local-large-transcript",
         "oss-local",
-        "gpt-oss:20b",
+        "qwen3.5:9b-mlx",
         "larger_local_transcript_trial",
         LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS,
     ),
@@ -77,6 +96,8 @@ def _judge_profiles() -> list[dict[str, Any]]:
             "model": "deepseek-v4-flash:cloud",
             "model_role": "cloud_confirmation",
             "model_settings": None,
+            "runtime_metadata": None,
+            "smoke_guard": None,
             "network_required": True,
             "secret_env_names": ["OLLAMA_API_KEY"],
             "auth_boundary": "codex_cli_auth",
@@ -91,6 +112,8 @@ def _judge_profiles() -> list[dict[str, Any]]:
             "model": "gpt-5.3-codex-spark",
             "model_role": "codex_fast_smoke",
             "model_settings": None,
+            "runtime_metadata": None,
+            "smoke_guard": None,
             "network_required": True,
             "secret_env_names": [],
             "auth_boundary": "codex_cli_auth",
@@ -116,11 +139,25 @@ def _local_judge_profile(
         "model": model,
         "model_role": model_role,
         "model_settings": dict(settings),
+        "runtime_metadata": _runtime_metadata_for_model(model),
+        "smoke_guard": _smoke_guard_for_model(model),
         "network_required": True,
         "secret_env_names": [],
         "auth_boundary": "none",
         "receives_sanitized_outputs_only": True,
     }
+
+
+def _runtime_metadata_for_model(model: str) -> dict[str, Any] | None:
+    if model == "qwen3.5:9b-mlx":
+        return dict(LOCAL_QWEN35_MLX_RUNTIME_METADATA)
+    return None
+
+
+def _smoke_guard_for_model(model: str) -> dict[str, Any] | None:
+    if model == "qwen3.5:9b-mlx":
+        return dict(LOCAL_QWEN35_SMOKE_GUARD)
+    return None
 
 
 def _profile_by_id(profiles: list[dict[str, Any]], profile_id: str, profile_kind: str) -> dict[str, Any]:
