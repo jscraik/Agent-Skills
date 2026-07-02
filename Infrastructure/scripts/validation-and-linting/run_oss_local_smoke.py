@@ -14,7 +14,9 @@ from typing import Any
 from check_oss_local_smoke_output import DEFAULT_MAX_TOKENS_USED, _findings
 
 
-DEFAULT_PROFILE_SOURCE = Path("/Users/jamiecraik/.codex/oss-local.config.toml")
+DEFAULT_PROFILE_SOURCE = Path(
+    os.environ.get("CODEX_OSS_LOCAL_PROFILE_SOURCE", str(Path.home() / ".codex/oss-local.config.toml"))
+)
 DEFAULT_MARKER = "CODEX_OSS_LOCAL_OK"
 
 
