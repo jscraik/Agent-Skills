@@ -162,9 +162,15 @@
               "properties": {
                 "max_tokens_used": {"type": "integer", "minimum": 1},
                 "forbid_visible_thinking": {"type": "boolean"},
+                "allow_codex_jsonl_reasoning_events": {"type": "boolean"},
                 "forbid_fallback_metadata": {"type": "boolean"}
               },
-              "required": ["max_tokens_used", "forbid_visible_thinking", "forbid_fallback_metadata"]
+              "required": [
+                "max_tokens_used",
+                "forbid_visible_thinking",
+                "allow_codex_jsonl_reasoning_events",
+                "forbid_fallback_metadata"
+              ]
             }
           ]
         },

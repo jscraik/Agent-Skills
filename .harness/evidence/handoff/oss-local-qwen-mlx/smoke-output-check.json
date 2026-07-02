@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "code": "codex_runtime_metadata_fallback",
+      "message": "Codex reported missing model metadata or fallback metadata."
+    },
+    {
+      "code": "codex_runtime_token_budget_exceeded",
+      "message": "Smoke transcript used 8279 tokens; limit is 5000."
+    }
+  ],
+  "max_tokens_used": 5000,
+  "paths_checked": [
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/stderr.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/stdout.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/last-message.txt"
+  ],
+  "runtime_observations": {
+    "approval": "never",
+    "metadata_fallback_observed": true,
+    "model": "qwen3.5:9b-mlx",
+    "provider": "ollama",
+    "sandbox": "read-only",
+    "session_id": "019f241c-b505-79a1-bb69-8a4efceda0a4",
+    "tokens_used": 8279,
+    "visible_thinking_observed": false
+  },
+  "schema_version": "skills-sdk.oss-local-smoke-output-check.v0",
+  "status": "fail"
+}

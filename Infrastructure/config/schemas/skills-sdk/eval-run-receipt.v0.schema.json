@@ -30,6 +30,7 @@
         "decision": {"type": ["string", "null"]},
         "passed": {"type": ["boolean", "null"]},
         "promotion_eligible": {"type": ["boolean", "null"]},
+        "case_count": {"type": "integer", "minimum": 0},
         "blocked_cases": {"type": "integer", "minimum": 0},
         "tier1_failures": {"type": "integer", "minimum": 0},
         "tier2_findings": {"type": "integer", "minimum": 0},
@@ -64,7 +65,7 @@
         },
         "failed_assertions": {"type": "array", "items": {"type": "string", "minLength": 1}}
       },
-      "required": ["source", "scorecard_schema_version", "decision", "passed", "promotion_eligible", "blocked_cases", "tier1_failures", "tier2_findings", "preflight_warning_count", "readiness_summary", "expected_signal_summary", "security_dependency_screening_status", "assertions", "failed_assertions"]
+      "required": ["source", "scorecard_schema_version", "decision", "passed", "promotion_eligible", "case_count", "blocked_cases", "tier1_failures", "tier2_findings", "preflight_warning_count", "readiness_summary", "expected_signal_summary", "security_dependency_screening_status", "assertions", "failed_assertions"]
     },
     "closeout_validation": {
       "type": ["object", "null"],

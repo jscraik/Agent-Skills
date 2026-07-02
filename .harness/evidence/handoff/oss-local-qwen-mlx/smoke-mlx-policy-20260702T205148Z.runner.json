@@ -1,0 +1,31 @@
+{
+  "codex_profile": "oss-local",
+  "command": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--ignore-rules",
+    "--skip-git-repo-check",
+    "--output-last-message",
+    "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-mlx-policy-20260702T205148Z/last-message.txt",
+    "Reply exactly CODEX_OSS_LOCAL_OK"
+  ],
+  "duration_seconds": 13.663,
+  "exit_code": 0,
+  "findings": [],
+  "last_message_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-mlx-policy-20260702T205148Z/last-message.txt",
+  "marker": "CODEX_OSS_LOCAL_OK",
+  "max_tokens_used": 7000,
+  "model": "qwen3.5:9b-mlx",
+  "model_provider": "ollama",
+  "schema_version": "skills-sdk.oss-local-smoke-run.v0",
+  "status": "pass",
+  "stderr_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-mlx-policy-20260702T205148Z/stderr.txt",
+  "stdout_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-mlx-policy-20260702T205148Z/stdout.txt",
+  "work_dir": "/Users/jamiecraik/dev/agent-skills"
+}

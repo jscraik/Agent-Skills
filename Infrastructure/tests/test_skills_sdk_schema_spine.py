@@ -348,6 +348,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(judge_by_id["oss-local"]["runtime_metadata"]["metadata_source"], "ollama_show")
         self.assertTrue(judge_by_id["oss-local"]["smoke_guard"]["forbid_fallback_metadata"])
         self.assertTrue(judge_by_id["oss-local"]["smoke_guard"]["forbid_visible_thinking"])
+        self.assertTrue(judge_by_id["oss-local"]["smoke_guard"]["allow_codex_jsonl_reasoning_events"])
         self.assertEqual(judge_by_id["oss-local"]["host"], "codex-cli-profile")
         self.assertEqual(judge_by_id["oss-local-large-transcript"]["model"], "qwen3.5:9b-mlx")
         self.assertEqual(judge_by_id["oss-local-large-transcript"]["model_settings"]["num_ctx"], 16384)
@@ -680,6 +681,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
             "decision": "pass",
             "passed": True,
             "promotion_eligible": None,
+            "case_count": 1,
             "blocked_cases": 0,
             "tier1_failures": 0,
             "tier2_findings": 0,

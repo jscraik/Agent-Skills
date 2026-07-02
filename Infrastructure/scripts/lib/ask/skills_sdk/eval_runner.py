@@ -188,6 +188,7 @@ def _quality_gate_fields(scorecard: dict[str, Any]) -> dict[str, Any]:
     passed = scorecard.get("passed")
     preflight_warnings = _actionable_preflight_warnings(scorecard.get("preflight_warnings"))
     security_screening = scorecard.get("security_dependency_screening")
+    cases = scorecard.get("cases")
     return {
         "scorecard_schema_version": str(scorecard.get("schema_version") or "") or None,
         "decision": decision,
@@ -195,6 +196,7 @@ def _quality_gate_fields(scorecard: dict[str, Any]) -> dict[str, Any]:
         "promotion_eligible": scorecard.get("promotion_eligible")
         if isinstance(scorecard.get("promotion_eligible"), bool)
         else None,
+        "case_count": len(cases) if isinstance(cases, list) else 0,
         "blocked_cases": _summary_count(scorecard.get("blocked_cases")),
         "tier1_failures": _summary_count(scorecard.get("tier1_failures")),
         "tier2_findings": _summary_count(scorecard.get("tier2_findings")),
@@ -214,6 +216,7 @@ def _quality_assertions(fields: dict[str, Any]) -> list[dict[str, str]]:
     assertions = [
         _quality_assertion("scorecard_decision_passes", "decision == pass", fields["decision"], fields["decision"] == "pass"),
         _quality_assertion("scorecard_passed_true", "passed == true", fields["passed"], fields["passed"] is True),
+        _quality_assertion("case_count_positive", "case_count > 0", fields["case_count"], fields["case_count"] > 0),
         _quality_assertion("blocked_cases_zero", "blocked_cases == 0", fields["blocked_cases"], fields["blocked_cases"] == 0),
         _quality_assertion("tier1_failures_zero", "tier1_failures == 0", fields["tier1_failures"], fields["tier1_failures"] == 0),
         _quality_assertion("tier2_findings_zero", "tier2_findings == 0", fields["tier2_findings"], fields["tier2_findings"] == 0),

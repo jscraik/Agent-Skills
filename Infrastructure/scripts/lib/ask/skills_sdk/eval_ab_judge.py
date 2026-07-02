@@ -669,8 +669,10 @@ def _codex_runtime_guard_blockers(
     blockers: list[str] = []
     if guard.get("forbid_fallback_metadata") is True and _CODEX_FALLBACK_METADATA_RE.search(combined_output):
         blockers.append("codex_runtime_metadata_fallback")
+    jsonl_reasoning_allowed = guard.get("allow_codex_jsonl_reasoning_events") is True
     if guard.get("forbid_visible_thinking") is True and (
-        _VISIBLE_THINKING_RE.search(combined_output) or _has_codex_reasoning_event(combined_output)
+        _VISIBLE_THINKING_RE.search(combined_output)
+        or (not jsonl_reasoning_allowed and _has_codex_reasoning_event(combined_output))
     ):
         blockers.append("codex_runtime_visible_thinking")
     max_tokens = guard.get("max_tokens_used")

@@ -1,0 +1,74 @@
+{
+  "blocker_class": "blocked_validation",
+  "case_evidence_present": false,
+  "cases": [],
+  "cases_expected": [],
+  "closeout_validation": {
+    "blockers": [],
+    "checks": [
+      {
+        "evidence": [],
+        "id": "required_fields_present",
+        "message": "workflow-closeout/v1 receipts must include required contract fields.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "schema_version_valid",
+        "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "cases_array_valid",
+        "message": "workflow-closeout receipt must carry cases as an array.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "blocked_cases_block_suite",
+        "message": "Any blocked case must make the suite closeout status blocked.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "non_pass_blocks_source_mutation",
+        "message": "Non-pass closeouts must set mutation_allowed=false.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "non_pass_blocks_registry_promotion",
+        "message": "Non-pass closeouts must set registry_update_allowed=false.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "missing_artifacts_have_blocker_class",
+        "message": "Closeouts with missing suite artifacts must include blocker_class.",
+        "status": "pass"
+      },
+      {
+        "evidence": [],
+        "id": "pass_has_case_evidence",
+        "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+        "status": "pass"
+      }
+    ],
+    "schema_version": "skills-sdk.eval-closeout-validation.v1",
+    "status": "pass"
+  },
+  "missing_suite_artifacts": true,
+  "mode": "smoke",
+  "mutation_allowed": false,
+  "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --timeout-seconds 120 --json --robot",
+  "path": "Infrastructure/artifacts/evals/closeouts/20260702T212122Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
+  "raw_error_present": true,
+  "raw_output_present": false,
+  "registry_update_allowed": false,
+  "report_dir": null,
+  "runner": "codex",
+  "schema_version": "skills-sdk.eval-closeout.v1",
+  "skill_path": "Skills/agent-ops/improve-agent-native",
+  "status": "blocked"
+}

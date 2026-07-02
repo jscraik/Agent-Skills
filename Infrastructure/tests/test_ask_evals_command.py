@@ -105,6 +105,53 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
     assert run_mock.call_args.kwargs["start_new_session"] is True
 
 
+def test_eval_blocker_classifies_no_matching_eval_cases_as_validation() -> None:
+    blocker = evals._classify_eval_blocker(
+        raw_output="",
+        raw_error="ERROR: No eval cases matched the selected filters and eval mode 'smoke'.",
+    )
+
+    assert blocker == "blocked_validation"
+
+
+def test_eval_blocker_classifies_smoke_only_case_live_runner_skip_as_validation() -> None:
+    blocker = evals._classify_eval_blocker(
+        raw_output="",
+        raw_error=(
+            "ERROR: selected case filters matched only smoke-only discovery contract cases, "
+            "which live/model runners skip."
+        ),
+    )
+
+    assert blocker == "blocked_validation"
+
+
+def test_eval_closeout_blocks_no_case_evidence_from_filter_error(tmp_path: Path) -> None:
+    raw_error = "ERROR: No eval cases matched the selected filters and eval mode 'smoke'."
+    blocker = evals._classify_eval_blocker(raw_output="", raw_error=raw_error)
+
+    closeout = evals._write_eval_closeout(
+        tmp_path,
+        skill_path="Skills/agent-ops/improve-agent-native",
+        mode="smoke",
+        runner="codex",
+        raw_output="",
+        raw_error=raw_error,
+        eval_status="fail",
+        blocker_class=blocker,
+        started_at=0,
+        timeout_seconds=120,
+    )
+
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_validation"
+    assert closeout["cases"] == []
+    assert closeout["case_evidence_present"] is False
+    assert closeout["mutation_allowed"] is False
+    assert closeout["registry_update_allowed"] is False
+    assert closeout["closeout_validation"]["status"] == "pass"
+
+
 def test_tessl_json_parser_skips_bracketed_log_prefix_and_trailing_text() -> None:
     assert evals._parse_json_value_from_text(
         '[info] preparing eval\n[{"evalRunId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}]'

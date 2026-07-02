@@ -1,0 +1,9 @@
+{
+  "schema_version": "oss-local-qwen-config-blocker/v1",
+  "target_model": "qwen3.5:9b-mlx",
+  "home_profile_model": "qwen3.5:9b-mlx",
+  "configs_profile_model": "qwen3.5:9b-mlx",
+  "configs_status": "## codex/workspace-net-sandbox-runtime-roots-ff...origin/codex/workspace-net-sandbox-runtime-roots [ahead 2, behind 4]\n M codex/config.toml\n M codex/oss-local.config.toml\n M codex/rules/default.rules\n M codex/scripts/tests/test_validate_codex_config.py\n M codex/scripts/validate-codex-config.py\n?? .build/\n?? codex/usage-data/context-dedupe/\n?? codex/usage-data/session-collector.json",
+  "unmerged_paths": [],
+  "status": "pass"
+}

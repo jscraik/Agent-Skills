@@ -97,6 +97,31 @@ def test_no_invention_scenarios_accept_plain_slack_channel_negative() -> None:
     assert "narrow_no_invention_negative_acceptance" not in {finding["code"] for finding in findings}
 
 
+def test_expected_signal_rejects_scorer_boilerplate() -> None:
+    findings = tessl_eval_quality_findings([
+        {
+            "id": "scorer-boilerplate-signal",
+            "unit": "AGENTS router audit",
+            "given": "A user wants root and nested AGENTS.md files reviewed.",
+            "should": "Recommend keep, move, or delete decisions with file evidence.",
+            "prompt": "Review AGENTS.md routing in the current repository.",
+            "actual_artifact": "artifacts/agents-router-audit.md",
+            "eval_modes": ["smoke", "release"],
+            "acceptance": [
+                {
+                    "type": "expected_signal",
+                    "value": (
+                        "Semantically covers the scenario-specific evidence and decision "
+                        "signals: keep, move, delete."
+                    ),
+                }
+            ],
+        }
+    ])
+
+    assert "scorer_boilerplate_expected_signal" in {finding["code"] for finding in findings}
+
+
 def test_no_invention_guardrail_does_not_self_trigger_from_acceptance_text() -> None:
     findings = tessl_eval_quality_findings([
         {

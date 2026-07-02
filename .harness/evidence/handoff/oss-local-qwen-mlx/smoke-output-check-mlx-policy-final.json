@@ -1,0 +1,15 @@
+{
+  "findings": [],
+  "max_tokens_used": 7000,
+  "paths_checked": [
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-mlx-policy-20260702T205148Z/combined.txt"
+  ],
+  "runtime_observations": {
+    "codex_jsonl_reasoning_event_observed": true,
+    "metadata_fallback_observed": false,
+    "tokens_used": 3828,
+    "visible_thinking_observed": false
+  },
+  "schema_version": "skills-sdk.oss-local-smoke-output-check.v0",
+  "status": "pass"
+}

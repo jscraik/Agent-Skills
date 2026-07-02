@@ -47,7 +47,22 @@
     "network_required": true,
     "secret_env_names": [],
     "auth_boundary": "none",
-    "receives_sanitized_outputs_only": true
+    "receives_sanitized_outputs_only": true,
+    "runtime_metadata": {
+      "model_id": "203e30078279",
+      "size_gb": 8.9,
+      "architecture": "qwen3_5",
+      "parameters": "9.4B",
+      "quantization": "nvfp4",
+      "context_length": 262144,
+      "metadata_source": "ollama_show"
+    },
+    "smoke_guard": {
+      "max_tokens_used": 7000,
+      "forbid_visible_thinking": true,
+      "allow_codex_jsonl_reasoning_events": true,
+      "forbid_fallback_metadata": true
+    }
   },
   "evidence_root": ".harness/artifacts/sdk-ab-evals",
   "experiment_id": "2f17c65de51f3a24",

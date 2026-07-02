@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f244c-8068-7613-b6f9-be77d034c599",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivery_evidence": "codex_app__send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "delivered_at": "2026-07-02T21:12:00Z",
+  "message_summary": "Delivered PR 301 current blocker: all checks pass, mergeability blocked by two live App.swift review threads, and source patch is blocked by approval-reviewer internal error."
+}

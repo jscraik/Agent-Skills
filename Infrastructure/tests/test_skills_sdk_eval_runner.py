@@ -163,6 +163,36 @@ def _successful_internal_result(codex_profile: str | None = None) -> CallResult:
     return internal_result
 
 
+def _successful_internal_result_with_blocked_closeout_validation() -> CallResult:
+    internal_result = CallResult(status="success")
+    internal_result.data.update(
+        {
+            "eval_status": "pass",
+            "resolved_skill_path": "Skills/agent-ops/testing",
+            "raw_output": "RESULT: PASS",
+            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
+            "eval_closeout": {
+                "schema_version": "skills-sdk.eval-closeout.v1",
+                "status": "pass",
+                "skill_path": "Skills/agent-ops/testing",
+                "mode": "smoke",
+                "runner": "codex",
+                "cases": [],
+                "mutation_allowed": True,
+                "registry_update_allowed": False,
+                "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --json --robot",
+                "closeout_validation": _closeout_validation("blocked"),
+            },
+            "profile_contract": {
+                "codex_profile": "oss-local",
+                "codex_exec_invoked": True,
+                "codex_exec_command_shape": ["codex", "exec", "--profile", "oss-local"],
+            },
+        }
+    )
+    return internal_result
+
+
 def _successful_internal_result_without_artifact_receipt() -> CallResult:
     internal_result = CallResult(status="success")
     internal_result.data.update(
@@ -717,12 +747,36 @@ cases:
                 "readiness_summary": {"unknown": 1},
                 "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
                 "security_dependency_screening": {"status": "skipped"},
+                "cases": [{"id": "case-pass", "passed": True, "blocked": False}],
             }
         )
 
         self.assertIsNotNone(gates)
         self.assertEqual(gates["preflight_warning_count"], 0)
         self.assertNotIn("preflight_warnings_zero", gates["failed_assertions"])
+        self.assertNotIn("case_count_positive", gates["failed_assertions"])
+
+    def test_internal_scorecard_quality_gates_block_zero_case_pass(self) -> None:
+        gates = internal_scorecard_quality_gates(
+            {
+                "schema_version": "2.1",
+                "decision": "pass",
+                "passed": True,
+                "blocked_cases": 0,
+                "tier1_failures": 0,
+                "tier2_findings": 0,
+                "preflight_warnings": [],
+                "readiness_summary": {"unknown": 0},
+                "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+                "security_dependency_screening": {"status": "skipped"},
+                "cases": [],
+            }
+        )
+
+        self.assertIsNotNone(gates)
+        assert gates is not None
+        self.assertEqual(gates["case_count"], 0)
+        self.assertIn("case_count_positive", gates["failed_assertions"])
 
     def test_internal_scorecard_quality_gates_keep_actionable_preflight_warning(self) -> None:
         gates = internal_scorecard_quality_gates(
@@ -737,6 +791,7 @@ cases:
                 "readiness_summary": {"unknown": 1},
                 "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
                 "security_dependency_screening": {"status": "skipped"},
+                "cases": [{"id": "case-pass", "passed": True, "blocked": False}],
             }
         )
 
@@ -768,6 +823,26 @@ cases:
         self.assertIsNotNone(receipt.quality_gates)
         self.assertEqual(receipt.quality_gates.failed_assertions, [])
         self.assertIn("model unavailable", receipt.blockers)
+
+    def test_sdk_internal_runner_blocks_when_closeout_validation_blocks(self) -> None:
+        internal_result = _successful_internal_result_with_blocked_closeout_validation()
+        with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/testing",
+                mode="smoke",
+                runner="internal",
+                codex_profile="oss-local",
+            )
+
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.closeout_validation.status, "blocked")
+        self.assertIn("closeout_validation:pass_has_case_evidence", receipt.blockers)
 
 
 if __name__ == "__main__":

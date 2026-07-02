@@ -39,6 +39,10 @@ INLINE_INPUT_MARKERS = (
 GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
+SCORER_BOILERPLATE_EXPECTED_SIGNAL_RE = re.compile(
+    r"(?is)\bsemantically\s+covers\s+the\s+scenario-specific\s+evidence\s+and\s+decision\s+signals?\b|"
+    r"\banchors?\s+the\s+judg(?:e)?ment\s+in\s+concrete\s+file,\s*command,\s*validation,\s*artifact,\s*or\s*proof\s+evidence\b"
+)
 SHALLOW_EXPECTED_SIGNAL_VALUES = {
     "mission-grounded next step",
     "direct non-workspace handling",
@@ -344,6 +348,14 @@ def _case_has_shallow_routing_oracle(case: dict[str, object]) -> bool:
     if not expected_values:
         return True
     return all(value in SHALLOW_EXPECTED_SIGNAL_VALUES for value in expected_values)
+
+
+def _case_has_scorer_boilerplate_expected_signal(case: dict[str, object]) -> bool:
+    return any(
+        SCORER_BOILERPLATE_EXPECTED_SIGNAL_RE.search(_acceptance_value(item))
+        for item in _normalized_acceptance_items(case)
+        if str(item.get("type") or "").strip().lower() == "expected_signal"
+    )
 
 
 def _case_has_fixture_path_acceptance(case: dict[str, object]) -> bool:
@@ -687,6 +699,11 @@ TESSL_CASE_FINDING_RULES = (
         _case_has_shallow_routing_oracle,
         "shallow_routing_oracle",
         "Tessl live-private evals must not rely only on skill selection plus generic expected signals. Add scenario-specific behavior, artifact, safety, or refusal criteria that create a plausible baseline failure path.",
+    ),
+    (
+        _case_has_scorer_boilerplate_expected_signal,
+        "scorer_boilerplate_expected_signal",
+        "Tessl expected_signal criteria must describe observable output obligations. Do not score boilerplate such as 'semantically covers scenario-specific evidence and decision signals'.",
     ),
     (
         _case_has_fixture_path_acceptance,

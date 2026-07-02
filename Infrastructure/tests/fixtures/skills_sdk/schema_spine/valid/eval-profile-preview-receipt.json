@@ -50,6 +50,7 @@
       "smoke_guard": {
         "max_tokens_used": 5000,
         "forbid_visible_thinking": true,
+        "allow_codex_jsonl_reasoning_events": true,
         "forbid_fallback_metadata": true
       },
       "network_required": true,
@@ -83,6 +84,7 @@
       "smoke_guard": {
         "max_tokens_used": 5000,
         "forbid_visible_thinking": true,
+        "allow_codex_jsonl_reasoning_events": true,
         "forbid_fallback_metadata": true
       },
       "network_required": true,

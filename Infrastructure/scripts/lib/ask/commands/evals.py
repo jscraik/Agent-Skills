@@ -4976,6 +4976,8 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
         "validation failed",
         "strict audit failed",
         "policy validation",
+        "no eval cases matched the selected filters",
+        "selected case filters matched only smoke-only discovery contract cases",
         "requires eval cases",
         "none matched the selected filters",
         "add discovery-specific smoke_mode cases",
@@ -5331,6 +5333,9 @@ def _write_eval_closeout(
     if missing_suite_artifacts:
         status = "blocked"
         closeout_blocker = closeout_blocker or "blocked_missing_artifact"
+    if not cases:
+        status = "blocked"
+        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
     if cases and any(case.get("status") == "blocked" for case in cases):
         status = "blocked"
         closeout_blocker = closeout_blocker or "blocked_missing_artifact"
@@ -5361,6 +5366,7 @@ def _write_eval_closeout(
         "raw_output_present": bool(raw_output.strip()),
         "raw_error_present": bool(raw_error.strip()),
         "missing_suite_artifacts": missing_suite_artifacts,
+        "case_evidence_present": bool(cases),
         "next_reproduce_command": _evals_run_validation_command(
             skill_path,
             mode=mode,

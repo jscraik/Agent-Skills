@@ -385,13 +385,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             output_file: Path,
         ) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            reasoning_event = json.dumps({
-                "type": "item.completed",
-                "item": {"id": "item_1", "type": "reasoning", "text": "hidden chain should not leak"},
-            })
             return CodexJudgeResult(
                 exit_code=0,
-                stdout=reasoning_event + "\n" + json.dumps(_decision(run_receipt["experiment_id"])),
+                stdout="<think>hidden chain should not leak</think>\n" + json.dumps(_decision(run_receipt["experiment_id"])),
                 stderr="",
             )
 
@@ -405,6 +401,38 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("codex_runtime_visible_thinking", receipt["blockers"])
         self.assertIsNone(receipt["decision"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_allows_codex_jsonl_reasoning_telemetry_when_guard_allows_it(self) -> None:
+        def telemetry_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            reasoning_event = json.dumps({
+                "type": "item.completed",
+                "item": {"id": "item_1", "type": "reasoning", "text": "structured telemetry"},
+            })
+            output_file.write_text(json.dumps(_decision(run_receipt["experiment_id"])), encoding="utf-8")
+            return CodexJudgeResult(
+                exit_code=0,
+                stdout=reasoning_event,
+                stderr="",
+            )
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=telemetry_runner,
+        )
+
+        self.assertEqual(receipt["status"], "scored")
+        self.assertEqual(receipt["blockers"], [])
+        self.assertIsNotNone(receipt["decision"])
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_codex_token_budget_blowout_before_scoring(self) -> None:
@@ -911,6 +939,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("CODEX_HOME", captured_env)
         self.assertIn("CODEX_SQLITE_HOME", captured_env)
         self.assertIn('model = "qwen3.5:9b-mlx"', captured_profile_text)
+        self.assertIn('model_catalog_json = "', captured_profile_text)
+        self.assertIn("model_context_window = 262144", captured_profile_text)
+        self.assertIn("hide_agent_reasoning = true", captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)

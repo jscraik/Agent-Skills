@@ -105,6 +105,7 @@ class EvalJudgeRuntimeMetadata(_SdkContractModel):
 class EvalJudgeSmokeGuard(_SdkContractModel):
     max_tokens_used: Annotated[int, Field(ge=1)]
     forbid_visible_thinking: bool
+    allow_codex_jsonl_reasoning_events: bool = False
     forbid_fallback_metadata: bool
 
 

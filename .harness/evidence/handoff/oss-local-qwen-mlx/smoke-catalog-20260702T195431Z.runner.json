@@ -1,0 +1,36 @@
+{
+  "codex_profile": "oss-local",
+  "command": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--ignore-rules",
+    "--skip-git-repo-check",
+    "--output-last-message",
+    "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-catalog-20260702T195431Z/last-message.txt",
+    "Reply exactly CODEX_OSS_LOCAL_OK"
+  ],
+  "duration_seconds": 3.47,
+  "exit_code": 0,
+  "findings": [
+    {
+      "code": "codex_runtime_visible_thinking",
+      "message": "Model output exposed a thinking trace in the smoke transcript."
+    }
+  ],
+  "last_message_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-catalog-20260702T195431Z/last-message.txt",
+  "marker": "CODEX_OSS_LOCAL_OK",
+  "max_tokens_used": 7000,
+  "model": "qwen3.5:9b-mlx",
+  "model_provider": "ollama",
+  "schema_version": "skills-sdk.oss-local-smoke-run.v0",
+  "status": "fail",
+  "stderr_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-catalog-20260702T195431Z/stderr.txt",
+  "stdout_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-catalog-20260702T195431Z/stdout.txt",
+  "work_dir": "/Users/jamiecraik/dev/agent-skills"
+}

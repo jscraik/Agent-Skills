@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
+
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
 _CODEX_TMPDIR_ENV = "ASK_CODEX_TMPDIR"
 _CODEX_OP_ENV_FILE_ENV = "ASK_CODEX_OP_ENV_FILE"
@@ -110,7 +112,7 @@ def _codex_model_setting_overrides(judge_profile: dict[str, Any]) -> list[str]:
         value = settings[key]
         if isinstance(value, bool):
             encoded = "true" if value else "false"
-        elif isinstance(value, int | float) and not isinstance(value, bool):
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
             encoded = str(value)
         elif isinstance(value, str):
             encoded = _json_toml_string(value)
@@ -171,6 +173,7 @@ def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) 
     codex_home.mkdir(parents=True, exist_ok=True)
     target = codex_home / f"{profile_id}.config.toml"
     shutil.copy2(source, target)
+    augment_local_codex_profile_config(target, _codex_profile_model(judge_profile))
     target.chmod(0o600)
     return target
 
@@ -206,6 +209,11 @@ def _safe_regular_file(path: Path, root: Path) -> Path | None:
     if path.is_symlink() or not path.is_file():
         return None
     return path
+
+
+def _codex_profile_model(judge_profile: dict[str, Any]) -> str | None:
+    model = judge_profile.get("model")
+    return model if isinstance(model, str) and model else None
 
 
 def _safe_existing_env_file(path: Path, root: Path) -> Path | None:

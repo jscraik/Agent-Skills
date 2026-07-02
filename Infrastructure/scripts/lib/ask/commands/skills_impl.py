@@ -7339,6 +7339,8 @@ def _skills_sdk_internal_eval_receipt_counts(
                 closeout_blockers.append(str(reason))
             for failure in raw_case.get("failures") or []:
                 closeout_blockers.append(str(failure))
+        if closeout_blockers and closeout_status == "pass":
+            closeout_status = "blocked"
         closeout_path = closeout.get("path")
         dataset_path = str(closeout_path or "internal:skill-builder-closeout")
         digest_path = repo_root / dataset_path if closeout_path and not Path(str(closeout_path)).is_absolute() else Path(str(closeout_path or ""))

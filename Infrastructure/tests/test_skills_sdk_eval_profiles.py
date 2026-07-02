@@ -29,8 +29,9 @@ def _assert_qwen_local_profile(test: unittest.TestCase, profile: dict[str, objec
     test.assertEqual(profile["runtime_metadata"]["model_id"], "203e30078279")
     test.assertEqual(profile["runtime_metadata"]["architecture"], "qwen3_5")
     test.assertEqual(profile["runtime_metadata"]["quantization"], "nvfp4")
-    test.assertEqual(profile["smoke_guard"]["max_tokens_used"], 5000)
+    test.assertEqual(profile["smoke_guard"]["max_tokens_used"], 7000)
     test.assertTrue(profile["smoke_guard"]["forbid_visible_thinking"])
+    test.assertTrue(profile["smoke_guard"]["allow_codex_jsonl_reasoning_events"])
     test.assertTrue(profile["smoke_guard"]["forbid_fallback_metadata"])
 
 

@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f244a-60f4-72d3-8746-cac4880336cf",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivery_evidence": "codex_app__send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "delivered_at": "2026-07-02T19:46:33Z",
+  "message_summary": "PM notified that Shell.run was extracted into a testable prototype core module, XCTest was added, app build and compiled core smoke passed, and XCTest execution remains blocked by local SwiftPM/Xcode runner issues."
+}
