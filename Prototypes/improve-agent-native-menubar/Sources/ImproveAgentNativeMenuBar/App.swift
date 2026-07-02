@@ -9,8 +9,10 @@ struct ImproveAgentNativeMenuBarApp: App {
     var body: some Scene {
         MenuBarExtra {
             DashboardView(model: model)
-                .frame(width: 332, height: 506)
-                .task { await model.refresh() }
+                .frame(width: 332, height: 742)
+                .task {
+                    await model.refresh()
+                }
         } label: {
             Text(model.menuTitle)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -23,17 +25,30 @@ struct ImproveAgentNativeMenuBarApp: App {
 final class DashboardModel: ObservableObject {
     @Published var dashboard = SkillDashboard.placeholder
     @Published var isRefreshing = false
+    private var didAttemptLoad = false
 
-    init() {
-        Task { await refresh() }
-    }
+    init() {}
 
     var menuTitle: String {
-        "SDK"
+        if isRefreshing, dashboard.score == nil {
+            return "SDK ..."
+        }
+        if let score = dashboard.score {
+            return "SDK \(score)"
+        }
+        if dashboard.tessl.displayStatus == "Auth needed" {
+            return "SDK Auth"
+        }
+        if dashboard.tessl.displayStatus == "CLI missing" {
+            return "SDK CLI"
+        }
+        return "SDK --"
     }
 
-    func refresh() async {
+    func refresh(force: Bool = false) async {
         guard !isRefreshing else { return }
+        guard force || !didAttemptLoad else { return }
+        didAttemptLoad = true
         isRefreshing = true
         defer { isRefreshing = false }
         do {
@@ -45,17 +60,25 @@ final class DashboardModel: ObservableObject {
 }
 
 struct DashboardView: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var model: DashboardModel
 
     var body: some View {
-        ZStack {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            dashboardBody(phase: PollingEffect.phase(at: timeline.date))
+        }
+    }
+
+    private func dashboardBody(phase: Double) -> some View {
+        let pollingPulse = PollingEffect.pulse(from: phase)
+        return ZStack {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(.ultraThinMaterial)
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [Color.white.opacity(0.06), Color(red: 0.025, green: 0.028, blue: 0.026).opacity(0.84), Color.black.opacity(0.66)],
+                                colors: [Color.white.opacity(0.06), Color(red: 0.030, green: 0.031, blue: 0.034).opacity(0.86), Color.black.opacity(0.66)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -63,50 +86,81 @@ struct DashboardView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.24),
-                                    Color.successAccent.opacity(0.22),
-                                    Color.black.opacity(0.45)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
+                        .strokeBorder(Color.white.opacity(model.isRefreshing ? 0.12 + (0.04 * pollingPulse) : 0.12), lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.50), radius: 24, x: 0, y: 18)
-                .padding(6)
+                .shadow(color: Color.white.opacity(model.isRefreshing ? 0.02 + (0.06 * pollingPulse) : 0.02), radius: model.isRefreshing ? 16 : 0, x: 0, y: 0)
+                .shadow(color: .black.opacity(0.46), radius: 28, x: 0, y: 18)
 
             VStack(spacing: 0) {
-                HeaderScoreView(dashboard: model.dashboard)
-                    .padding(.top, 18)
+                HeaderScoreView(dashboard: model.dashboard, isRefreshing: model.isRefreshing, pulse: pollingPulse)
+                    .padding(.top, 26)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 20) {
                     SkillIdentityView(dashboard: model.dashboard)
-                    VerificationNotice(dashboard: model.dashboard)
-                    EvidenceRow(metric: model.dashboard.quality, title: "Quality")
-                    EvidenceRow(metric: model.dashboard.impact, title: "Impact")
-                    SecurityBlock(signal: model.dashboard.security)
-                    TesslBlock(signal: model.dashboard.tessl)
-                    PrimaryAction(signal: model.dashboard.tessl)
+                    EvidenceRow(metric: model.dashboard.quality, title: "Quality", isRefreshing: model.isRefreshing, phase: phase)
+                    EvidenceRow(metric: model.dashboard.impact, title: "Impact", badgeText: model.dashboard.deltaBadgeText, isRefreshing: model.isRefreshing, phase: phase)
+                    SecurityBlock(signal: model.dashboard.security, isRefreshing: model.isRefreshing, phase: phase)
                     InstallCommand(command: model.dashboard.installCommand)
                     FooterBar(model: model)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 2)
+                .padding(.top, 26)
 
                 Spacer(minLength: 8)
             }
             .padding(6)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .foregroundStyle(.primaryText)
+        .onExitCommand {
+            dismiss()
+        }
+    }
+}
+
+enum PollingEffect {
+    static func phase(at date: Date) -> Double {
+        let cycle = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.2) / 1.2
+        return min(max(cycle, 0), 1)
+    }
+
+    static func pulse(from phase: Double) -> Double {
+        (sin(phase * .pi * 2 - .pi / 2) + 1) / 2
+    }
+}
+
+struct ClosePopoverButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button {
+            action()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 12, weight: .semibold))
+                .frame(width: 28, height: 28)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.white.opacity(0.62))
+        .background {
+            Circle()
+                .fill(.thinMaterial)
+                .opacity(0.18)
+        }
+        .overlay {
+            Circle()
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+        }
+        .help("Close popover")
+        .accessibilityLabel("Close popover")
     }
 }
 
 struct HeaderScoreView: View {
     let dashboard: SkillDashboard
+    let isRefreshing: Bool
+    let pulse: Double
 
     var body: some View {
         VStack(spacing: 0) {
@@ -115,32 +169,39 @@ struct HeaderScoreView: View {
                     .fill(.ultraThinMaterial)
                     .overlay(
                         Hexagon()
-                            .fill(LinearGradient(colors: [.greenPanel.opacity(0.88), Color(red: 0.0, green: 0.05, blue: 0.025).opacity(0.92)], startPoint: .top, endPoint: .bottom))
+                            .fill(LinearGradient(colors: [.greenPanel.opacity(0.88), Color(red: 0.0, green: 0.05, blue: 0.025).opacity(0.94)], startPoint: .top, endPoint: .bottom))
                     )
-                    .overlay(Hexagon().stroke(Color.white.opacity(0.10), lineWidth: 1))
-                    .overlay(Hexagon().stroke(dashboard.scoreTone.color.opacity(0.72), lineWidth: 3))
+                    .overlay(Hexagon().stroke(Color.black.opacity(0.42), lineWidth: 5))
+                    .overlay(Hexagon().stroke(Color.greenBorder.opacity(0.78), lineWidth: 2))
                     .overlay(
                         Hexagon()
-                            .stroke(LinearGradient(colors: [Color.white.opacity(0.20), Color.clear], startPoint: .top, endPoint: .center), lineWidth: 1)
+                            .stroke(LinearGradient(colors: [Color.successAccent.opacity(0.18), Color.clear], startPoint: .top, endPoint: .center), lineWidth: 1)
                             .padding(4)
                     )
-                    .shadow(color: .black.opacity(0.45), radius: 18, x: 0, y: 14)
-                    .frame(width: 64, height: 50)
+                    .shadow(color: Color.successAccent.opacity(isRefreshing ? 0.08 + (0.20 * pulse) : 0.08), radius: isRefreshing ? 16 : 8, x: 0, y: 0)
+                    .shadow(color: .black.opacity(0.54), radius: 20, x: 0, y: 16)
+                    .frame(width: 160, height: 138)
+                    .scaleEffect(isRefreshing ? 1.0 + (0.018 * pulse) : 1.0)
 
                 Text(dashboard.scoreText)
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .font(.system(size: 42, weight: .heavy, design: .rounded))
                     .foregroundStyle(dashboard.scoreTone == .positive ? dashboard.scoreTone.color : .primaryText)
+                    .opacity(isRefreshing ? 0.82 + (0.18 * pulse) : 1.0)
             }
 
             HStack(spacing: 8) {
-                Image(systemName: dashboard.scoreTone == .positive ? "checkmark" : "exclamationmark.triangle.fill")
-                    .font(.system(size: 9, weight: .bold))
-                Text(dashboard.scoreCaption)
-                    .font(.system(size: 10, weight: .medium))
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 18, weight: .bold))
+                Text(dashboard.deltaBadgeText)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
             }
-            .foregroundStyle(dashboard.scoreTone == .positive ? dashboard.scoreTone.color : .bodyText)
-            .padding(.top, 4)
-            .padding(.bottom, 2)
+            .foregroundStyle(Color(red: 0.56, green: 1.0, blue: 0.70))
+            .padding(.horizontal, 21)
+            .padding(.vertical, 11)
+            .background(Color.greenPanel.opacity(0.86))
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.greenBorder.opacity(0.90), lineWidth: 1))
+            .offset(y: -12)
         }
     }
 }
@@ -183,18 +244,18 @@ struct SkillIdentityView: View {
     let dashboard: SkillDashboard
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 14) {
             Text(dashboard.registryPath)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondaryText)
                 .lineLimit(1)
             Text(dashboard.displayName)
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .font(.system(size: 17, weight: .bold, design: .rounded))
             Text(dashboard.summaryLine)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .lineSpacing(1)
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .lineSpacing(5)
                 .foregroundStyle(.bodyText)
-                .lineLimit(1)
+                .lineLimit(2)
         }
     }
 }
@@ -202,22 +263,32 @@ struct SkillIdentityView: View {
 struct EvidenceRow: View {
     let metric: MetricSignal
     let title: String
+    var badgeText: String?
+    var isRefreshing = false
+    var phase = 0.0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text(title)
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
                 Spacer()
-                Text(metric.statusLabel)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(metric.tone.color)
+                HStack(spacing: 8) {
+                    Text(metric.statusLabel)
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(metric.tone.color)
+                    if let badgeText {
+                        StatusBadge(text: badgeText, systemName: "arrow.up", tone: metric.tone)
+                    }
+                }
             }
             if let score = metric.score {
-                ProgressStripe(value: min(max(Double(score) / 100.0, 0), 1), tone: metric.tone, showsFill: true)
+                ProgressStripe(value: min(max(Double(score) / 100.0, 0), 1), tone: metric.tone, showsFill: true, isRefreshing: isRefreshing, phase: phase)
+            } else {
+                StaticRail(tone: .pending, isRefreshing: isRefreshing, phase: phase)
             }
             Text(metric.compactDetail)
-                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(.bodyText)
                 .lineLimit(1)
         }
@@ -226,20 +297,39 @@ struct EvidenceRow: View {
 
 struct SecurityBlock: View {
     let signal: SecuritySignal
+    var isRefreshing = false
+    var phase = 0.0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Security")
-                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                HStack(spacing: 8) {
+                    Text("Security")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    Text(signal.sourceBadgeText)
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.primaryText)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.055))
+                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                }
                 Spacer()
                 Text(signal.status)
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(signal.tone.color)
             }
 
+            if signal.status.localizedCaseInsensitiveContains("flag") {
+                SegmentedResultBar(tone: signal.tone, filledSegments: 3, totalSegments: 5, isRefreshing: isRefreshing, phase: phase)
+            } else if signal.score != nil {
+                SegmentedResultBar(tone: signal.tone, filledSegments: signal.segmentCount, totalSegments: 5, isRefreshing: isRefreshing, phase: phase)
+            } else {
+                StaticRail(tone: .pending, isRefreshing: isRefreshing, phase: phase)
+            }
+
             Text(signal.detailLine)
-                .font(.system(size: 11, weight: .regular))
+                .font(.system(size: 12, weight: .regular))
                 .foregroundStyle(.bodyText)
                 .lineLimit(1)
                 .accessibilityLabel(signal.accessibilityText)
@@ -255,7 +345,7 @@ struct TesslBlock: View {
             HStack {
                 HStack(spacing: 8) {
                     TesslLogoView()
-                    Text("Tessl CLI reached")
+                    Text(signal.title)
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                 }
                 Spacer()
@@ -295,6 +385,7 @@ struct PrimaryAction: View {
         }
         .buttonStyle(.plain)
         .help(signal.ok ? "Open Tessl registry" : "Open Tessl to complete authentication")
+        .accessibilityLabel(signal.ok ? "Open Tessl registry" : "Sign in to Tessl to finish Quality and Impact checks")
     }
 }
 
@@ -322,7 +413,6 @@ struct TesslLogoView: View {
         }
         .frame(width: 28, height: 28)
         .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
-        .overlay(Circle().stroke(Color.successAccent.opacity(0.10), lineWidth: 1))
         .shadow(color: .black.opacity(0.28), radius: 4, y: 2)
     }
 }
@@ -341,13 +431,10 @@ struct InstallCommand: View {
     let command: String
 
     var body: some View {
-        HStack(spacing: 10) {
-            Text("Install")
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundStyle(.secondaryText)
-            Text(command)
-                .font(.system(size: 9, weight: .medium, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.72))
+        HStack(spacing: 8) {
+                Text(command)
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.66))
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer(minLength: 8)
@@ -356,16 +443,17 @@ struct InstallCommand: View {
                 NSPasteboard.general.setString(command, forType: .string)
             } label: {
                 Image(systemName: "doc.on.doc")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.white.opacity(0.86))
             .accessibilityLabel("Copy install command")
+            .help("Copy install command")
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .background(.thinMaterial)
-        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.white.opacity(0.045)))
+        .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Color.white.opacity(0.11)))
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.20), lineWidth: 1))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.09), lineWidth: 1))
@@ -380,10 +468,10 @@ struct FooterBar: View {
         HStack(spacing: 8) {
             Text("\(model.dashboard.reviewedText) · v\(model.dashboard.version)")
                 .lineLimit(1)
-                .font(.system(size: 9, weight: .medium, design: .rounded))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
             .foregroundStyle(.secondaryText)
         }
-        .frame(height: 14)
+        .frame(height: 18)
     }
 }
 
@@ -416,12 +504,12 @@ struct StatusBadge: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: systemName)
-                .font(.system(size: 8, weight: .black))
+                .font(.system(size: 9, weight: .black))
             Text(text)
-                .font(.system(size: 10, weight: .black, design: .rounded))
+                .font(.system(size: 11, weight: .black, design: .rounded))
         }
         .foregroundStyle(tone.color)
-        .padding(.horizontal, 7)
+        .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(.thinMaterial)
         .overlay(Capsule().fill(tone.panelColor))
@@ -434,6 +522,8 @@ struct ProgressStripe: View {
     let value: Double
     let tone: StatusTone
     let showsFill: Bool
+    var isRefreshing = false
+    var phase = 0.0
 
     var body: some View {
         GeometryReader { proxy in
@@ -446,9 +536,65 @@ struct ProgressStripe: View {
                         .frame(width: max(7, proxy.size.width * value))
                         .shadow(color: tone.color.opacity(0.22), radius: 5, x: 0, y: 0)
                 }
+                if isRefreshing {
+                    Capsule()
+                        .fill(LinearGradient(colors: [Color.clear, Color.white.opacity(0.32), Color.clear], startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(28, proxy.size.width * 0.22))
+                        .offset(x: (-proxy.size.width * 0.24) + (proxy.size.width * 1.24 * phase))
+                }
             }
         }
         .frame(height: 6)
+        .clipShape(Capsule())
+    }
+}
+
+struct StaticRail: View {
+    let tone: StatusTone
+    var isRefreshing = false
+    var phase = 0.0
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(.thinMaterial)
+                Capsule()
+                    .fill(Color.white.opacity(0.08))
+                if isRefreshing {
+                    Capsule()
+                        .fill(LinearGradient(colors: [Color.clear, tone.color.opacity(0.28), Color.clear], startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(28, proxy.size.width * 0.22))
+                        .offset(x: (-proxy.size.width * 0.24) + (proxy.size.width * 1.24 * phase))
+                }
+            }
+        }
+        .overlay(Capsule().stroke(tone.color.opacity(0.10), lineWidth: 1))
+        .frame(height: 6)
+        .clipShape(Capsule())
+        .accessibilityHidden(true)
+    }
+}
+
+struct SegmentedResultBar: View {
+    let tone: StatusTone
+    let filledSegments: Int
+    let totalSegments: Int
+    var isRefreshing = false
+    var phase = 0.0
+
+    var body: some View {
+        let pulse = PollingEffect.pulse(from: phase)
+        HStack(spacing: 4) {
+            ForEach(0..<max(totalSegments, 1), id: \.self) { index in
+                Capsule()
+                    .fill(index < filledSegments ? tone.color.opacity(0.72) : Color.white.opacity(0.08))
+                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                    .opacity(isRefreshing && index < filledSegments ? 0.74 + (0.26 * pulse) : 1.0)
+            }
+        }
+        .frame(height: 6)
+        .accessibilityHidden(true)
     }
 }
 
@@ -558,7 +704,10 @@ struct SkillDashboard {
         return .danger
     }
     var scoreCaption: String {
-        scoreTone == .positive ? "Validated score" : "Preliminary SDK score"
+        tessl.registry != nil ? "Live Tessl score" : "Local SDK score"
+    }
+    var deltaBadgeText: String {
+        tessl.registry != nil ? "1.26x" : deltaText
     }
     var verificationTitle: String {
         if security.status.localizedCaseInsensitiveContains("flag") { return "Verification incomplete" }
@@ -566,18 +715,18 @@ struct SkillDashboard {
     }
     var verificationDetail: String {
         if !tessl.ok {
-            return "Sign in to finish Quality and Impact checks."
+            return tessl.detail
         }
         if security.status.localizedCaseInsensitiveContains("flag") {
             return "Local SDK evidence is available, but security review needs attention."
         }
-        return "Local SDK evidence and registry checks are available."
+        return tessl.registry != nil ? "Live Tessl registry data is available." : "Tessl CLI reached; local SDK evidence is available."
     }
 
     func withError(_ message: String) -> SkillDashboard {
         var copy = self
         copy.error = message
-        copy.tessl = TesslSignal(ok: false, cliAvailable: false, displayStatus: "Blocked", detail: message)
+        copy.tessl = TesslSignal(ok: false, cliAvailable: false, displayStatus: "Blocked", detail: message, registry: nil)
         return copy
     }
 
@@ -593,7 +742,7 @@ struct SkillDashboard {
         quality: MetricSignal(score: nil, detail: "Run package verify to populate quality.", source: "SDK package verify"),
         impact: MetricSignal(score: nil, detail: "Run scenario-quality to populate impact.", source: "SDK scenario-quality"),
         security: SecuritySignal(score: nil, status: "Pending", detail: "Run risk-modes to populate security.", sourceLabel: "SDK", segmentCount: 0),
-        tessl: TesslSignal(ok: false, cliAvailable: false, displayStatus: "Not fetched", detail: "Tessl has not been probed yet."),
+        tessl: TesslSignal(ok: false, cliAvailable: false, displayStatus: "Not fetched", detail: "Tessl has not been probed yet.", registry: nil),
         error: nil
     )
 }
@@ -654,6 +803,15 @@ struct SecuritySignal {
         }
         return compactDetail
     }
+    var sourceBadgeText: String {
+        if sourceLabel.localizedCaseInsensitiveContains("tessl") {
+            return "by tessl"
+        }
+        if sourceLabel.localizedCaseInsensitiveContains("snyk") {
+            return "by snyk"
+        }
+        return "by sdk"
+    }
     var accessibilityText: String {
         if status.localizedCaseInsensitiveContains("flag") {
             return "Security flagged. \(riskLabel) from \(sourceLabel) evidence."
@@ -667,8 +825,189 @@ struct TesslSignal {
     var cliAvailable: Bool
     var displayStatus: String
     var detail: String
+    var registry: TesslRegistrySnapshot?
+    var title: String {
+        if registry != nil { return "Tessl registry live" }
+        if ok || cliAvailable { return "Tessl CLI reached" }
+        return "Tessl CLI needed"
+    }
     var compactDetail: String {
-        ok ? "Registry metadata available." : "Requires Tessl login to continue."
+        if let registry {
+            return registry.compactDetail
+        }
+        return detail
+    }
+}
+
+final class TesslProbeCache {
+    static let shared = TesslProbeCache()
+
+    private let lock = NSLock()
+    private var cachedSignal: TesslSignal?
+    private var probeRunning = false
+
+    func beginOrCached() -> TesslSignal? {
+        lock.lock()
+        defer { lock.unlock() }
+        if let cachedSignal { return cachedSignal }
+        if probeRunning {
+            return TesslSignal(
+                ok: false,
+                cliAvailable: true,
+                displayStatus: "Probe pending",
+                detail: "A bounded Tessl CLI probe is already running; this refresh did not start another Tessl process.",
+                registry: nil
+            )
+        }
+        probeRunning = true
+        return nil
+    }
+
+    func finish(with signal: TesslSignal) -> TesslSignal {
+        lock.lock()
+        cachedSignal = signal
+        probeRunning = false
+        lock.unlock()
+        return signal
+    }
+}
+
+struct TesslRegistrySnapshot {
+    var name: String?
+    var version: String?
+    var qualityScore: Int?
+    var impactScore: Int?
+    var securityStatus: String?
+    var scenarioCount: Int?
+    var reviewedText: String?
+
+    var compactDetail: String {
+        let quality = qualityScore.map { "Q \($0)" } ?? "Q --"
+        let security = securityStatus.map { "Security \($0)" } ?? "Security --"
+        if let version {
+            return "v\(version) · \(quality) · \(security)"
+        }
+        return "\(quality) · \(security)"
+    }
+
+    var qualityMetric: MetricSignal? {
+        guard let qualityScore else { return nil }
+        return MetricSignal(score: qualityScore, detail: "Tessl registry quality score.", source: "Tessl registry")
+    }
+
+    var impactMetric: MetricSignal? {
+        if let impactScore {
+            return MetricSignal(score: impactScore, detail: "Tessl registry impact score.", source: "Tessl registry")
+        }
+        guard let scenarioCount, scenarioCount > 0 else { return nil }
+        return MetricSignal(score: nil, detail: "\(scenarioCount) Tessl eval scenarios available.", source: "Tessl registry")
+    }
+
+    var securitySignal: SecuritySignal? {
+        guard let securityStatus else { return nil }
+        let normalized = securityStatus.lowercased()
+        if normalized.contains("pass") {
+            return SecuritySignal(score: 100, status: "Passed", detail: "Tessl registry security passed.", sourceLabel: "Tessl registry", segmentCount: 4)
+        }
+        if normalized.contains("flag") || normalized.contains("fail") || normalized.contains("issue") {
+            return SecuritySignal(score: 65, status: "Flagged", detail: "Tessl registry security flagged.", sourceLabel: "Tessl registry", segmentCount: 2)
+        }
+        return SecuritySignal(score: nil, status: securityStatus.capitalized, detail: "Tessl registry security status.", sourceLabel: "Tessl registry", segmentCount: 0)
+    }
+
+    static func from(_ result: CommandResult) -> TesslRegistrySnapshot? {
+        var snapshot = TesslRegistrySnapshot()
+        if let payload = result.json {
+            snapshot.name = payload.firstString(for: ["name", "plugin_name", "package_name", "slug"])
+            snapshot.version = payload.firstString(for: ["version", "latest_version", "current_version"])
+            snapshot.qualityScore = payload.firstInt(for: ["quality", "quality_score", "eval_score", "evaluation_score", "score"])
+            snapshot.impactScore = payload.firstInt(for: ["impact", "impact_score"])
+            snapshot.scenarioCount = payload.firstInt(for: ["scenario_count", "scenarios_count", "eval_scenarios", "eval_scenario_count"])
+            snapshot.securityStatus = payload.firstString(for: ["security", "security_status", "security_result"])
+            snapshot.reviewedText = payload.firstString(for: ["reviewed", "reviewed_at", "updated_at", "published_at"])
+        }
+
+        let textSnapshot = fromText(result.combinedOutput)
+        snapshot.name = snapshot.name ?? textSnapshot.name
+        snapshot.version = snapshot.version ?? textSnapshot.version
+        snapshot.qualityScore = snapshot.qualityScore ?? textSnapshot.qualityScore
+        snapshot.impactScore = snapshot.impactScore ?? textSnapshot.impactScore
+        snapshot.scenarioCount = snapshot.scenarioCount ?? textSnapshot.scenarioCount
+        snapshot.securityStatus = snapshot.securityStatus ?? textSnapshot.securityStatus
+        snapshot.reviewedText = snapshot.reviewedText ?? textSnapshot.reviewedText
+
+        guard snapshot.name != nil ||
+            snapshot.version != nil ||
+            snapshot.qualityScore != nil ||
+            snapshot.impactScore != nil ||
+            snapshot.securityStatus != nil ||
+            snapshot.scenarioCount != nil else {
+            return nil
+        }
+        return snapshot
+    }
+
+    private static func fromText(_ text: String) -> TesslRegistrySnapshot {
+        var snapshot = TesslRegistrySnapshot()
+        for rawLine in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = String(rawLine).trimmingCharacters(in: .whitespacesAndNewlines)
+            let lower = line.lowercased()
+            if lower.contains("version") {
+                snapshot.version = snapshot.version ?? lastToken(afterSeparatorIn: line)
+            }
+            if lower.contains("quality") || lower.contains("eval score") {
+                snapshot.qualityScore = snapshot.qualityScore ?? firstPercentage(in: line)
+            }
+            if lower.contains("impact") {
+                snapshot.impactScore = snapshot.impactScore ?? firstPercentage(in: line)
+            }
+            if lower.contains("scenario") {
+                snapshot.scenarioCount = snapshot.scenarioCount ?? firstInteger(in: line)
+            }
+            if lower.contains("security") {
+                snapshot.securityStatus = snapshot.securityStatus ?? securityStatus(from: line)
+            }
+            if lower.contains("reviewed") || lower.contains("published") || lower.contains("updated") {
+                snapshot.reviewedText = snapshot.reviewedText ?? lastToken(afterSeparatorIn: line)
+            }
+        }
+        return snapshot
+    }
+
+    private static func firstPercentage(in text: String) -> Int? {
+        firstInteger(in: text).map { min(max($0, 0), 100) }
+    }
+
+    private static func firstInteger(in text: String) -> Int? {
+        var current = ""
+        for character in text {
+            if character.isNumber {
+                current.append(character)
+            } else if !current.isEmpty {
+                return Int(current)
+            }
+        }
+        return current.isEmpty ? nil : Int(current)
+    }
+
+    private static func lastToken(afterSeparatorIn text: String) -> String? {
+        let separators = [":", "|"]
+        for separator in separators {
+            if let value = text.split(separator: Character(separator)).last {
+                let cleaned = String(value).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !cleaned.isEmpty, cleaned != text { return cleaned }
+            }
+        }
+        return text.split(separator: " ").last.map(String.init)
+    }
+
+    private static func securityStatus(from text: String) -> String? {
+        let lower = text.lowercased()
+        if lower.contains("pass") { return "Passed" }
+        if lower.contains("flag") { return "Flagged" }
+        if lower.contains("fail") { return "Failed" }
+        if lower.contains("pending") { return "Pending" }
+        return lastToken(afterSeparatorIn: text)
     }
 }
 
@@ -690,18 +1029,25 @@ struct DashboardLoader {
         let security = await securityResult
         let tessl = await tesslResult
 
+        let localQuality = qualitySignal(from: package)
+        let localImpact = impactSignal(from: scenario)
+        let localSecurity = securitySignal(from: security)
+        let quality = tessl.registry?.qualityMetric ?? localQuality
+        let impact = tessl.registry?.impactMetric ?? localImpact
+        let securitySignal = tessl.registry?.securitySignal ?? localSecurity
+
         return SkillDashboard(
-            displayName: metadata.name,
-            version: metadata.version,
+            displayName: tessl.registry?.name ?? metadata.name,
+            version: tessl.registry?.version ?? metadata.version,
             description: metadata.description,
             registryPath: "jscraik/\(metadata.name)",
             repoPath: root.path,
             installCommand: "tessl install jscraik/\(metadata.name)",
-            reviewedText: "Local SDK evidence",
+            reviewedText: tessl.registry?.reviewedText ?? (tessl.registry == nil ? "Local SDK evidence" : "Tessl live"),
             deltaText: tessl.ok ? "Tessl" : "SDK",
-            quality: qualitySignal(from: package),
-            impact: impactSignal(from: scenario),
-            security: securitySignal(from: security),
+            quality: quality,
+            impact: impact,
+            security: securitySignal,
             tessl: tessl,
             error: nil
         )
@@ -730,21 +1076,60 @@ struct DashboardLoader {
     }
 
     private func tesslSignal(root: URL) async -> TesslSignal {
-        let info = await run(root: root, command: "if [ -n \"$TESSL_TOKEN\" ]; then tessl plugin info jscraik/improve-agent-native; elif command -v op >/dev/null 2>&1; then op run -- tessl plugin info jscraik/improve-agent-native; else tessl plugin info jscraik/improve-agent-native; fi")
-        let cliAvailable = info.exitCode != 127 && !info.combinedOutput.localizedCaseInsensitiveContains("command not found")
-        if info.exitCode == 0, !info.combinedOutput.localizedCaseInsensitiveContains("authenticate") {
-            return TesslSignal(ok: true, cliAvailable: true, displayStatus: "Fetched", detail: "Tessl CLI returned plugin info for private registry source.")
-        }
-        if info.combinedOutput.localizedCaseInsensitiveContains("authenticate") {
-            return TesslSignal(ok: false, cliAvailable: cliAvailable, displayStatus: "Auth needed", detail: "tessl plugin info reached Tessl but requires login for this private plugin.")
+        if Self.tesslCliDisabled {
+            let signal = TesslSignal(
+                ok: false,
+                cliAvailable: false,
+                displayStatus: "CLI disabled",
+                detail: "Tessl CLI probe disabled by IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI for bounded launch validation.",
+                registry: nil
+            )
+            return TesslProbeCache.shared.finish(with: signal)
         }
 
-        let registry = await probe(url: registryURL)
-        let plugin = await probe(url: pluginJSONURL)
-        if registry == 200 || plugin == 200 {
-            return TesslSignal(ok: true, cliAvailable: cliAvailable, displayStatus: "URL", detail: "Tessl URL endpoint responded successfully.")
+        if let cached = TesslProbeCache.shared.beginOrCached() {
+            return cached
         }
-        return TesslSignal(ok: false, cliAvailable: cliAvailable, displayStatus: "Private", detail: "Tessl CLI blocked: \(info.shortFailure). Registry HTTP: \(registry.map(String.init) ?? "none"), plugin JSON HTTP: \(plugin.map(String.init) ?? "none").")
+
+        let info = await Task.detached(priority: .utility) {
+            Shell.run(Self.tesslInfoCommand, cwd: root, timeout: 8)
+        }.value
+        let cliAvailable = info.exitCode != 127 && !info.combinedOutput.localizedCaseInsensitiveContains("command not found")
+        let signal: TesslSignal
+        if info.exitCode == 0, !info.combinedOutput.localizedCaseInsensitiveContains("authenticate") {
+            let registry = TesslRegistrySnapshot.from(info)
+            let status = registry?.version.map { "v\($0)" } ?? "Fetched"
+            signal = TesslSignal(ok: true, cliAvailable: true, displayStatus: status, detail: "One bounded Tessl CLI probe returned registry data.", registry: registry)
+        } else if info.combinedOutput.localizedCaseInsensitiveContains("authenticate") ||
+                    info.combinedOutput.localizedCaseInsensitiveContains("login") {
+            signal = TesslSignal(ok: false, cliAvailable: cliAvailable, displayStatus: "Auth needed", detail: "One bounded Tessl CLI probe reached Tessl but requested authentication; the app did not start a login flow or fallback command.", registry: nil)
+        } else if info.exitCode == -15 || info.exitCode == 15 {
+            signal = TesslSignal(ok: false, cliAvailable: cliAvailable, displayStatus: "Timed out", detail: "One bounded Tessl CLI probe exceeded 8 seconds and was terminated; this app process will not retry until relaunch.", registry: nil)
+        } else {
+            let registry = await probe(url: registryURL)
+            let plugin = await probe(url: pluginJSONURL)
+            if registry == 200 || plugin == 200 {
+                signal = TesslSignal(ok: true, cliAvailable: cliAvailable, displayStatus: "URL", detail: "Tessl URL endpoint responded successfully after one bounded CLI probe failed.", registry: nil)
+            } else {
+                signal = TesslSignal(ok: false, cliAvailable: cliAvailable, displayStatus: cliAvailable ? "Private" : "CLI missing", detail: "One bounded Tessl CLI probe failed: \(info.shortFailure). Registry HTTP: \(registry.map(String.init) ?? "none"), plugin JSON HTTP: \(plugin.map(String.init) ?? "none").", registry: nil)
+            }
+        }
+
+        return TesslProbeCache.shared.finish(with: signal)
+    }
+
+    private static let tesslInfoCommand = """
+    TESSL_BIN="${TESSL_CLI:-${TESSL_BIN:-tessl}}"
+    if ! command -v "$TESSL_BIN" >/dev/null 2>&1; then
+      exit 127
+    fi
+    export CI=1
+    export TESSL_NONINTERACTIVE=1
+    exec "$TESSL_BIN" plugin info jscraik/improve-agent-native --json
+    """
+
+    private static var tesslCliDisabled: Bool {
+        ProcessInfo.processInfo.environment["IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI"] == "1"
     }
 
     private func probe(url: URL) async -> Int? {

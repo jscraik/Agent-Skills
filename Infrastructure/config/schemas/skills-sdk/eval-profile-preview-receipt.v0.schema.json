@@ -126,6 +126,48 @@
             }
           ]
         },
+        "runtime_metadata": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "model_id": {"type": "string", "minLength": 1},
+                "size_gb": {"type": "number", "minimum": 0},
+                "architecture": {"type": "string", "minLength": 1},
+                "parameters": {"type": "string", "minLength": 1},
+                "quantization": {"type": "string", "minLength": 1},
+                "context_length": {"type": "integer", "minimum": 1},
+                "metadata_source": {"type": "string", "const": "ollama_show"}
+              },
+              "required": [
+                "model_id",
+                "size_gb",
+                "architecture",
+                "parameters",
+                "quantization",
+                "context_length",
+                "metadata_source"
+              ]
+            }
+          ]
+        },
+        "smoke_guard": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "max_tokens_used": {"type": "integer", "minimum": 1},
+                "forbid_visible_thinking": {"type": "boolean"},
+                "forbid_fallback_metadata": {"type": "boolean"}
+              },
+              "required": ["max_tokens_used", "forbid_visible_thinking", "forbid_fallback_metadata"]
+            }
+          ]
+        },
         "network_required": {"type": "boolean"},
         "secret_env_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "auth_boundary": {"type": "string", "enum": ["none", "env_secret", "codex_cli_auth"]},
@@ -140,6 +182,8 @@
         "model",
         "model_role",
         "model_settings",
+        "runtime_metadata",
+        "smoke_guard",
         "network_required",
         "secret_env_names",
         "auth_boundary",

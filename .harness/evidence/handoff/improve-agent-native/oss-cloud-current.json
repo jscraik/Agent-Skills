@@ -1,0 +1,15 @@
+{
+  "schema_version": "skills-sdk.handoff-lane-summary.v1",
+  "status": "blocked",
+  "lane": "oss-cloud",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "created_at": "2026-07-01T17:26:00Z",
+  "command": "set -a; source /Users/jamiecraik/.codex/.env; set +a; XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
+  "blocker": "blocked_runtime: oss-cloud command did not produce a JSON receipt within the evidence window and was interrupted to avoid leaving a background session running.",
+  "blocker_class": "blocked_runtime",
+  "stderr_excerpt": "KeyboardInterrupt while subprocess.run waited for codex exec output.",
+  "codex_profile": "oss-cloud",
+  "codex_exec_invoked": "unknown_after_interrupt",
+  "what_this_proves": "The oss-cloud diagnostic continuation did not complete in this Codex session.",
+  "what_this_does_not_prove": "Does not prove skill behavior failure or Tessl readiness."
+}

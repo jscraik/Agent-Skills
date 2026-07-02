@@ -76,7 +76,7 @@ class TestSkillsSdkAbRubric(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         receipt = payload["data"]["skills_sdk_eval_ab_rubric"]["receipt"]
-        self.assertEqual(receipt["rubric"]["stage_policies"][0]["default_model"], "gpt-oss:20b")
+        self.assertEqual(receipt["rubric"]["stage_policies"][0]["default_model"], "qwen3.5:9b-mlx")
         validate_ab_rubric_receipt(receipt)
 
 

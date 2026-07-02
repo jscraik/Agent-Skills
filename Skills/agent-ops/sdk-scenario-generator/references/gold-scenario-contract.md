@@ -85,6 +85,10 @@ the file-based harness shape instead of copying SDK-internal fields verbatim:
 - For tile exports, the scorer must be able to grade from final files only; if
   workflow evidence matters, the task must request a file artifact that records
   the decision or command evidence.
+- For generated fixtures that evaluate an installed skill package, the scorer
+  must grade the package instructions and references. Do not require
+  `raw_response`, `final.json`, transcripts, or observable chat output unless
+  the selected runner actually creates those artifacts.
 
 ## Run Budget Gate
 
@@ -111,6 +115,10 @@ lanes separate:
 Regression criteria where with-context underperforms baseline must be prioritized
 above ordinary tile gaps. Redundant criteria where baseline already scores high
 must be flagged for user choice rather than silently removed.
+A recurring Tessl or OSS failure class must feed back before the next pipeline
+lane: source fixture, scenario adapter, scenario-quality rule, route checklist,
+or skill package first; then rerun `oss-local` before `oss-cloud`, dry Tessl,
+or live Tessl.
 
 ## Anti-Easy Findings
 

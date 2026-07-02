@@ -163,7 +163,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "scored")
         self.assertEqual(receipt["operation"], "ab_judge_score")
         self.assertEqual(receipt["judge_profile"]["id"], "oss-local")
-        self.assertEqual(receipt["judge_profile"]["model"], "gpt-oss:20b")
+        self.assertEqual(receipt["judge_profile"]["model"], "qwen3.5:9b-mlx")
         self.assertEqual(receipt["judge_profile"]["model_role"], "local_sandbox_eval_default")
         self.assertEqual(receipt["judge_profile"]["model_settings"]["num_ctx"], 8192)
         self.assertEqual(receipt["decision"]["winner"], "skill_b")
@@ -175,7 +175,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertTrue(receipt["calibration_required"])
         self.assertEqual(receipt["blockers"], [])
         self.assertEqual(len(calls), 1)
-        self.assertIn("gpt-oss:20b", calls[0])
+        self.assertIn("qwen3.5:9b-mlx", calls[0])
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).is_file())
         validate_ab_judge_score_receipt(receipt)
 
@@ -217,12 +217,12 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         judge_profile = {
             "id": "oss-local-large-transcript",
             "codex_profile": "oss-local",
-            "model": "gpt-oss:20b",
+            "model": "qwen3.5:9b-mlx",
             "model_settings": {"num_ctx": 16384, "temperature": 0.1, "top_p": 0.9},
         }
         result, command, _env, _profile_text, _op_env_file = _run_codex_with_captured_subprocess(
             "oss-local",
-            'model = "gpt-oss:20b"\n',
+            'model = "qwen3.5:9b-mlx"\n',
             judge_profile,
         )
 
@@ -347,6 +347,92 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("judge_output_invalid_json", receipt["blockers"])
         self.assertTrue(receipt["provider_invoked"])
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).is_file())
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_codex_metadata_fallback_before_scoring(self) -> None:
+        def fallback_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            return CodexJudgeResult(
+                exit_code=0,
+                stdout=json.dumps(_decision(run_receipt["experiment_id"])),
+                stderr="warning: Model metadata for qwen3.5:9b-mlx not found. Defaulting to fallback metadata.",
+            )
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=fallback_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("codex_runtime_metadata_fallback", receipt["blockers"])
+        self.assertIsNone(receipt["decision"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_visible_thinking_before_scoring(self) -> None:
+        def thinking_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            reasoning_event = json.dumps({
+                "type": "item.completed",
+                "item": {"id": "item_1", "type": "reasoning", "text": "hidden chain should not leak"},
+            })
+            return CodexJudgeResult(
+                exit_code=0,
+                stdout=reasoning_event + "\n" + json.dumps(_decision(run_receipt["experiment_id"])),
+                stderr="",
+            )
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=thinking_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("codex_runtime_visible_thinking", receipt["blockers"])
+        self.assertIsNone(receipt["decision"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_codex_token_budget_blowout_before_scoring(self) -> None:
+        def costly_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            usage_event = json.dumps({
+                "type": "turn.completed",
+                "usage": {"input_tokens": 8231, "output_tokens": 53, "reasoning_output_tokens": 0},
+            })
+            stdout = json.dumps(_decision(run_receipt["experiment_id"])) + "\n" + usage_event + "\n"
+            return CodexJudgeResult(exit_code=0, stdout=stdout, stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=costly_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("codex_runtime_token_budget_exceeded", receipt["blockers"])
+        self.assertIsNone(receipt["decision"])
         validate_ab_judge_score_receipt(receipt)
 
     def test_parse_judge_decision_accepts_fenced_json_and_derives_normalized_scores(self) -> None:
@@ -809,8 +895,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_local_codex_runner_uses_oss_local_profile(self) -> None:
         result, captured_command, captured_env, captured_profile_text, _op_env_file = _run_codex_with_captured_subprocess(
             "oss-local",
-            'model = "gpt-oss:20b"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
-            {"id": "oss-local", "codex_profile": "oss-local", "model": "gpt-oss:20b"},
+            'model = "qwen3.5:9b-mlx"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-local", "codex_profile": "oss-local", "model": "qwen3.5:9b-mlx"},
         )
 
         self.assertEqual(result.exit_code, 0)
@@ -824,7 +910,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(result.output_text, "{}")
         self.assertIn("CODEX_HOME", captured_env)
         self.assertIn("CODEX_SQLITE_HOME", captured_env)
-        self.assertIn('model = "gpt-oss:20b"', captured_profile_text)
+        self.assertIn('model = "qwen3.5:9b-mlx"', captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)

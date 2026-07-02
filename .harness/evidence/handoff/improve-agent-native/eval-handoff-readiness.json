@@ -1,0 +1,38 @@
+{
+  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
+  "candidate_id": "improve-agent-native-live-rerun-2026-07-01",
+  "lanes": [
+    {
+      "id": "deterministic_local_gates",
+      "status": "pass",
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_regex_heavy_release_rubric_before_tessl tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_single_positive_regex_in_release_rubric tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_release_rubric_without_two_semantic_checks && ./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot && ./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot && ./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot && ./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot && ./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/deterministic-local-gates-current.json"
+    },
+    {
+      "id": "oss-local",
+      "status": "skip",
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/oss-local-current.json",
+      "blocker": "operator_waived_for_demo: Jamie explicitly waived oss-local on 2026-07-01 to proceed to Tessl local proof, Tessl dry-run, then live Tessl for tonight's demo. Underlying receipt remains blocked_runtime: codex exec --profile oss-local was invoked, but the internal scorecard blocked all 14 smoke cases because the runner produced no usable case outputs."
+    },
+    {
+      "id": "oss-cloud",
+      "status": "skip",
+      "command": "set -a; source /Users/jamiecraik/.codex/.env; set +a; XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/oss-cloud-current.json",
+      "blocker": "operator_waived_for_demo: Jamie explicitly waived oss-cloud on 2026-07-01 to proceed to Tessl local proof, Tessl dry-run, then live Tessl for tonight's demo. Underlying receipt remains blocked_runtime: oss-cloud diagnostic did not produce a JSON receipt within the evidence window and was interrupted."
+    },
+    {
+      "id": "tessl-local-proof",
+      "status": "blocked",
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/improve-agent-native --workspace jscraik --execute --json --robot",
+      "blocker": "blocked_validation: not run because live handoff stopped at oss-local and oss-cloud runtime blockers in this turn."
+    },
+    {
+      "id": "tessl-live-dry-run",
+      "status": "blocked",
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --no-dashboard --json --robot",
+      "blocker": "blocked_validation: not rerun because live handoff stopped at oss-local and oss-cloud runtime blockers in this turn; previous dry-run evidence remains separate."
+    }
+  ]
+}

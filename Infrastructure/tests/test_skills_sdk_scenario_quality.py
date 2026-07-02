@@ -20,6 +20,7 @@ from ask.skills_sdk.scenario_quality import (  # noqa: E402
     _strip_yaml_comment,
     _yaml_safe_load,
 )
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: E402
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
 from ask.skills_sdk.tessl_eval_quality import tessl_eval_quality_findings  # noqa: E402
 
@@ -603,6 +604,88 @@ Expected failure: The agent applies another one-off fix without addressing recur
             {row["id"] for row in receipt["scenario_rows"]},
         )
         validate_scenario_quality_receipt(receipt)
+
+    def test_generated_fixtures_score_package_behavior_not_missing_response_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+            fixture_dir = skill_dir / "references" / "evals"
+            fixture_dir.mkdir()
+            (fixture_dir / "eval.harness.done-without-validation.md").write_text(
+                """# eval.harness.done-without-validation: Done Without Validation Is Rejected
+
+Knowledge claim: The skill rejects readiness claims without validation evidence.
+Behavior under test: Observable agent behavior when an agent reports done without validation.
+Failure mode: The agent says done because implementation edits were made.
+Expected agent move: The agent marks validation as not_run_with_reason or blocked, names the missing proof, and avoids closure.
+
+Given: An agent finished editing files and reports the stage as done without running validation or naming why validation is not applicable.
+Should: The agent marks validation as not_run_with_reason or blocked, names the missing proof, and avoids closure.
+Expected failure: The agent says done because implementation edits were made.
+""",
+                encoding="utf-8",
+            )
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            case = next(
+                case
+                for case in parse_generated_eval_fixtures(skill_dir)
+                if case["id"] == "generated-eval.harness.done-without-validation"
+            )
+
+        row = next(
+            row
+            for row in receipt["scenario_rows"]
+            if row["id"] == "generated-eval.harness.done-without-validation"
+        )
+        acceptance_text = " ".join(str(item.get("value", "")) for item in case["acceptance"])
+        self.assertEqual(row["promotion_status"], "promotion_ready")
+        self.assertIn("Score the package instructions and references", str(case["prompt"]))
+        self.assertIn("The skill package instructs agents", acceptance_text)
+        self.assertEqual(case["actual_artifact"], "installed skill package instructions and references")
+        self.assertNotIn("Produce a response", str(case["should"]))
+        self.assertNotIn("supplied fixture", acceptance_text)
+        validate_scenario_quality_receipt(receipt)
+
+    def test_generated_fixture_package_cases_block_response_artifact_contracts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: generated-response-artifact-leak
+  category: pressure
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Reviewed generated fixture imported into the skill package for private Tessl assessment.
+  given: A repeated feedback case needs durable package guidance.
+  should: Score package instructions and references.
+  actual_artifact: staged-artifacts/generated/generated-response-artifact-leak/final.json
+  expected_artifact: references/evals/eval.harness.feedback.md
+  reproduce: references/evals/eval.harness.feedback.md
+  source_kind: generated_fixture
+  tessl:
+    generated: true
+  claim_ids:
+  - generated_fixture.behavior
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: The skill package records a durable guardrail before the next lane.
+  - type: expected_signal
+    value: The skill package names the proof boundary.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("generated_fixture_package_artifact_contract", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_durable_guardrail_language_is_not_hallucination_guardrail_calibration(self) -> None:
         case = {

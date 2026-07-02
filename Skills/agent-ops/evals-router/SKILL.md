@@ -36,13 +36,14 @@ Artifact shapes:
 - error-analysis: `trace_id | failure_mode | owner | rerun_command`
 - evaluate-rag: `sentence_id -> supported chunk_ref | unsupported`
 
-## Procedure
+## Workflow
 
 1. Choose one route and one proof method from the table below.
 2. Confirm the required evidence exists before editing prompts, judges, or eval data. If it is missing, stop with a blocked report naming the missing file, label set, trace, chunk, or score receipt.
 3. Produce the smallest checkable artifact: claim-to-case map, trace failure table, binary judge prompt, calibration bundle, synthetic case file, sentence-support map, or review schema.
 4. Run the route check. If it fails, patch only the failed prompt, case, judge, retrieval evidence, or report section; rerun that same check before widening scope.
 5. For Skills SDK score trends, Tessl score history, or judge release claims, run the scorer commands in Validation and use references/route-checklists.md before trusting the score.
+6. For package-only/no-response Tessl failures, classify the owner before patching: `task` when visible task text asks for a response the runner cannot create, `criteria` when scoring expects `raw_response`, `final.json`, or transcripts, and `pipeline guardrail` when scenario-quality allowed either shape through.
 
 Route checks:
 
@@ -96,7 +97,7 @@ Use judge_pass only when every factual sentence is supported.
 
 - SDK scorer command: ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot. For release-impacting scorers, follow with ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot.
 
-## Rules
+## Execution Boundaries
 
 - Redact secrets and private data from eval inputs.
 - Prefer deterministic file, schema, regex, command, or artifact checks over LLM judges.
@@ -104,3 +105,11 @@ Use judge_pass only when every factual sentence is supported.
 - For stochastic judges, record the audit fields named in references/route-checklists.md.
 - Require held-out calibration before using a judge or scorer as behavioral proof.
 - Never invent a score.
+
+## References
+
+- `references/route-checklists.md`
+- `references/knowledge-capsule-routing.md`
+- `references/knowledge-capsule.manifest.yaml`
+- `references/source-context.yaml`
+- `references/evals.yaml`

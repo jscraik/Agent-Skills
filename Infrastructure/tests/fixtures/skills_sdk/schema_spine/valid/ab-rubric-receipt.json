@@ -83,7 +83,7 @@
       {
         "stage": "local_oss_loop",
         "judge_profile": "oss-local",
-        "default_model": "gpt-oss:20b",
+        "default_model": "qwen3.5:9b-mlx",
         "confidence_weight": "fast_signal",
         "promotion_gate": "improvement_signal_only"
       },
@@ -110,7 +110,7 @@
       "unvalidated_judges_are_advisory": true
     }
   },
-  "rubric_digest": "sha256:0063e3f35e8bbd93c5de20d2672075267e7b74fb33278db7ab48c5858b99b574",
+  "rubric_digest": "sha256:65e2c3a27f20e18ff2199f840045ac1b62b6d1babce538391b084b8a8a9824d1",
   "calibration_required": true,
   "provider_invoked": false,
   "network_accessed": false,

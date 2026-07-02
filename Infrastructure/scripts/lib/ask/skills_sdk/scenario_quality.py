@@ -62,12 +62,12 @@ STRUCTURED_FIELD_ASSERTION_KEYS = (
     "source_confidence",
 )
 PLATFORM_PARITY_GATE_ID_PREFIX = "platform_tessl_quality"
+GENERATED_FIXTURE_RESPONSE_ARTIFACT_TERMS = ("final.json", "raw_response", "transcript", "chat output")
 
 class ScenarioQualityError(ValueError):
     def __init__(self, receipt: dict[str, Any]) -> None:
         super().__init__(receipt["agent_summary"])
         self.receipt = receipt
-
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
     try:
@@ -75,10 +75,8 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
     except ValueError:
         return path.as_posix()
 
-
 def _check(check_id: str, status: str, message: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": evidence or []}
-
 
 def _yaml_safe_load(text: str) -> Any:
     try:
@@ -98,7 +96,6 @@ def _yaml_safe_load(text: str) -> Any:
     except yaml.YAMLError as exc:  # type: ignore[attr-defined]
         raise ValueError(str(exc)) from exc
 
-
 def _ruby_yaml_safe_load(text: str) -> Any | None:
     code = "require 'yaml'; require 'json'; print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: false))"
     try:
@@ -109,7 +106,6 @@ def _ruby_yaml_safe_load(text: str) -> Any | None:
         return json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
         raise ValueError(f"ruby_yaml_json_decode_error: {exc}") from exc
-
 
 def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
     state: dict[str, Any] = {
@@ -141,11 +137,9 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
             raise ValueError("minimal_yaml_parse_unsupported")
     return {"cases": state["cases"]}
 
-
 def _minimal_line(raw_line: str) -> tuple[str, int]:
     line = _strip_yaml_comment(raw_line).rstrip()
     return line.strip(), len(line) - len(line.lstrip(" "))
-
 
 def _strip_yaml_comment(raw_line: str) -> str:
     in_single = False
@@ -161,12 +155,10 @@ def _strip_yaml_comment(raw_line: str) -> str:
             return raw_line[:index]
     return raw_line
 
-
 def _is_yaml_single_quote_delimiter(text: str, index: int) -> bool:
     previous_char = text[index - 1] if index > 0 else ""
     next_char = text[index + 1] if index + 1 < len(text) else ""
     return not (previous_char.isalnum() and next_char.isalnum())
-
 
 def _is_escaped(text: str, index: int) -> bool:
     slash_count = 0
@@ -176,10 +168,8 @@ def _is_escaped(text: str, index: int) -> bool:
         cursor -= 1
     return slash_count % 2 == 1
 
-
 def _is_yaml_comment_start(text: str, index: int, char: str, in_single: bool, in_double: bool) -> bool:
     return char == "#" and not in_single and not in_double and (index == 0 or text[index - 1].isspace())
-
 
 def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> bool:
     case_indent = state.get("case_indent")
@@ -188,7 +178,6 @@ def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> 
     if state["current"] is None:
         return False
     return _consume_nested_value(state, stripped, indent) or _consume_case_field(state, stripped, indent)
-
 
 def _start_minimal_case(state: dict[str, Any], item: str, indent: int) -> bool:
     current: dict[str, Any] = {}
@@ -201,7 +190,6 @@ def _start_minimal_case(state: dict[str, Any], item: str, indent: int) -> bool:
         state["case_indent"] = indent
     _assign_inline_pair(current, item)
     return True
-
 
 def _consume_case_field(state: dict[str, Any], stripped: str, indent: int) -> bool:
     field_indent = int(state.get("case_indent") or 0) + 2
@@ -223,7 +211,6 @@ def _consume_case_field(state: dict[str, Any], stripped: str, indent: int) -> bo
         state["last_scalar_key"] = None
     return True
 
-
 def _consume_nested_value(state: dict[str, Any], stripped: str, indent: int) -> bool:
     field_indent = int(state.get("case_indent") or 0) + 2
     nested_indent = int(state.get("case_indent") or 0) + 4
@@ -232,7 +219,6 @@ def _consume_nested_value(state: dict[str, Any], stripped: str, indent: int) -> 
         or _consume_mapping_value(state, stripped, indent, nested_indent)
         or _consume_scalar_continuation(state, stripped, indent, nested_indent)
     )
-
 
 def _consume_list_value(state: dict[str, Any], stripped: str, indent: int, field_indent: int, nested_indent: int) -> bool:
     current_list = state["current_list"]
@@ -256,7 +242,6 @@ def _consume_list_value(state: dict[str, Any], stripped: str, indent: int, field
         return True
     return _consume_latest_dict_continuation(latest, stripped, indent, nested_indent)
 
-
 def _consume_latest_dict_continuation(latest: Any, stripped: str, indent: int, nested_indent: int) -> bool:
     if not isinstance(latest, dict) or not latest or indent < nested_indent:
         return False
@@ -266,7 +251,6 @@ def _consume_latest_dict_continuation(latest: Any, stripped: str, indent: int, n
         latest[key] = f"{prior} {stripped}"
         return True
     return False
-
 
 def _consume_mapping_value(state: dict[str, Any], stripped: str, indent: int, nested_indent: int) -> bool:
     current_mapping = state["current_mapping"]
@@ -280,7 +264,6 @@ def _consume_mapping_value(state: dict[str, Any], stripped: str, indent: int, ne
     state["last_scalar_key"] = None
     return True
 
-
 def _consume_scalar_continuation(state: dict[str, Any], stripped: str, indent: int, nested_indent: int) -> bool:
     if indent < nested_indent or not state.get("last_scalar_key") or not isinstance(state["current"], dict):
         return False
@@ -291,13 +274,11 @@ def _consume_scalar_continuation(state: dict[str, Any], stripped: str, indent: i
         return True
     return False
 
-
 def _assign_inline_pair(target: dict[str, Any], item: str) -> None:
     if ":" not in item:
         raise ValueError("minimal_yaml_parse_unsupported")
     key, value = item.split(":", 1)
     target[key] = _parse_scalar(value.strip())
-
 
 def _parse_list_item(item: str) -> Any:
     if ":" not in item:
@@ -313,14 +294,12 @@ def _parse_list_item(item: str) -> Any:
         result[key.strip().strip("{}")] = _parse_scalar(value.strip().strip("{}"))
     return result
 
-
 def _parse_scalar(value: str) -> Any:
     if value in {"true", "false"}:
         return value == "true"
     if value.startswith("[") and value.endswith("]"):
         return [item.strip().strip("'\"") for item in value[1:-1].split(",") if item.strip()]
     return value.strip("'\"")
-
 
 def _load_evals(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     try:
@@ -331,26 +310,21 @@ def _load_evals(path: Path) -> tuple[dict[str, Any] | None, str | None]:
         return None, "evals_yaml_not_object"
     return loaded, None
 
-
 def _scenario_id(case: dict[str, Any], index: int) -> str:
     raw = case.get("id")
     return raw if isinstance(raw, str) and raw.strip() else f"case-{index}"
-
 
 def _list_field(case: dict[str, Any], key: str) -> list[Any]:
     value = case.get(key)
     return value if isinstance(value, list) else []
 
-
 def _text_field(case: dict[str, Any], key: str) -> str:
     value = case.get(key)
     return value if isinstance(value, str) else ""
 
-
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
     lowered = text.lower()
     return any(term in lowered for term in terms)
-
 
 def _acceptance_text(case: dict[str, Any]) -> str:
     parts: list[str] = []
@@ -362,7 +336,6 @@ def _acceptance_text(case: dict[str, Any]) -> str:
         else:
             parts.append(str(item))
     return " ".join(parts)
-
 
 def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     malformed_text_fields: list[str] = []
@@ -399,7 +372,6 @@ def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list
         ),
     ]
 
-
 def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     """Apply the Tessl live-private scenario quality gate to SDK scenario rows."""
     try:
@@ -424,7 +396,6 @@ def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict
         for finding in findings
     ]
 
-
 def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
     if assertion_type not in TEXT_FIELD_ASSERTION_TYPES:
         return False
@@ -435,7 +406,6 @@ def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -
     has_expected = assertion_type in {"text_field_present", "text_field_absent"} or _has_text_field_expected_value(item)
     return not (has_field or has_fields) or not has_expected
 
-
 def _has_text_field_expected_value(item: dict[str, Any]) -> bool:
     value = item.get("value")
     if isinstance(value, str) and value.strip():
@@ -443,21 +413,17 @@ def _has_text_field_expected_value(item: dict[str, Any]) -> bool:
     values = item.get("values")
     return isinstance(values, list) and any(isinstance(value, str) and value.strip() for value in values)
 
-
 def _regex_structured_field_refs(item: dict[str, Any], assertion_type: str, marker: str) -> list[str]:
     if assertion_type != "regex":
         return []
     value = str(item.get("value") or "")
     return [f"{marker}:{key}" for key in STRUCTURED_FIELD_ASSERTION_KEYS if key in value][:1]
 
-
 def _case_has_release_mode(case: dict[str, Any]) -> bool:
     return "release" in {str(mode) for mode in _list_field(case, "eval_modes")}
 
-
 def _case_claim_ids(case: dict[str, Any]) -> set[str]:
     return {str(claim) for claim in _list_field(case, "claim_ids")}
-
 
 def _release_metadata_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     if not _case_has_release_mode(case):
@@ -474,6 +440,31 @@ def _release_metadata_checks(case: dict[str, Any], scenario_id: str) -> list[dic
         )
     ]
 
+def _case_is_generated_fixture(case: dict[str, Any]) -> bool:
+    tessl = case.get("tessl")
+    return case.get("source_kind") == "generated_fixture" or (isinstance(tessl, dict) and tessl.get("generated") is True)
+
+def _generated_fixture_artifact_contract_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    if not _case_is_generated_fixture(case):
+        return []
+    artifact_text = "\n".join(
+        str(case.get(field) or "")
+        for field in (
+            "actual_artifact",
+            "raw_response_artifact",
+            "judge_detail_artifact",
+            "judge_raw_output_artifact",
+        )
+    ).lower()
+    blocked_terms = [term for term in GENERATED_FIXTURE_RESPONSE_ARTIFACT_TERMS if term in artifact_text]
+    return [
+        _check(
+            "generated_fixture_package_artifact_contract",
+            "blocker" if blocked_terms else "pass",
+            "Generated fixture scenarios score installed package instructions and references unless the runner explicitly creates response artifacts.",
+            [f"{scenario_id}:{term}" for term in blocked_terms],
+        )
+    ]
 
 def _registry_dependency_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     if REGISTRY_DEPENDENCY_CLAIM not in _case_claim_ids(case):
@@ -510,7 +501,6 @@ def _registry_dependency_checks(case: dict[str, Any], scenario_id: str) -> list[
         ),
     ]
 
-
 def _release_rubric_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     if not _case_has_release_mode(case):
         return []
@@ -546,7 +536,6 @@ def _release_rubric_checks(case: dict[str, Any], scenario_id: str) -> list[dict[
         )
     return checks
 
-
 def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     scenario_id = _scenario_id(case, index)
     prompt = case.get("prompt")
@@ -575,10 +564,10 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     checks.extend(_release_metadata_checks(case, scenario_id))
     checks.extend(_release_rubric_checks(case, scenario_id))
     checks.extend(_registry_dependency_checks(case, scenario_id))
+    checks.extend(_generated_fixture_artifact_contract_checks(case, scenario_id))
     checks.extend(_acceptance_assertion_checks(case, scenario_id))
     checks.extend(_platform_parity_checks(case, scenario_id))
     return checks
-
 
 def _scenario_row(case: dict[str, Any], index: int) -> dict[str, Any]:
     checks = _scenario_checks(case, index)
@@ -591,7 +580,6 @@ def _scenario_row(case: dict[str, Any], index: int) -> dict[str, Any]:
         "checks": checks,
         "blockers": blockers,
     }
-
 
 def _rows(cases: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
     rows: list[dict[str, Any]] = []
@@ -608,7 +596,6 @@ def _rows(cases: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
         seen.add(row["id"])
         rows.append(row)
     return rows, errors
-
 
 def _quality_checks(
     repo_root: Path,
@@ -627,7 +614,6 @@ def _quality_checks(
     checks.extend(_release_suite_checks(case_list))
     checks.extend(build_release_scenario_set_checks(evals_payload, case_list))
     return checks
-
 
 def _release_suite_checks(case_list: list[Any]) -> list[dict[str, Any]]:
     release_count, pressure_count, negative_or_edge_count = _release_suite_counts(case_list)
@@ -659,11 +645,9 @@ def _release_suite_checks(case_list: list[Any]) -> list[dict[str, Any]]:
         ),
     ]
 
-
 def _release_requirement_check(check_id: str, has_release_cases: bool, observed: int, minimum: int, message: str, evidence_label: str) -> dict[str, Any]:
     blocked = has_release_cases and observed < minimum
     return _check(check_id, "blocker" if blocked else "pass", message, [f"{evidence_label}:{observed}"] if blocked else [])
-
 
 def _release_suite_counts(case_list: list[Any]) -> tuple[int, int, int]:
     release_cases = [case for case in case_list if isinstance(case, dict) and _case_has_release_mode(case)]
@@ -671,7 +655,6 @@ def _release_suite_counts(case_list: list[Any]) -> tuple[int, int, int]:
     pressure_count = sum(1 for category in categories if category in {"pressure", "regression"})
     negative_or_edge_count = sum(1 for category in categories if category in {"negative", "edge"})
     return len(release_cases), pressure_count, negative_or_edge_count
-
 
 def _receipt(
     repo_root: Path,
@@ -706,7 +689,6 @@ def _receipt(
         "agent_summary": f"scenario quality preview checked {len(scenario_rows)} scenario(s) for {query}.",
     }
 
-
 def _selected_canonical_ids(
     evals_payload: dict[str, Any] | None,
     scenario_set: str | None,
@@ -724,7 +706,6 @@ def _selected_canonical_ids(
         ]
     return selected_release_ids or all_canonical_ids, []
 
-
 def _scenario_quality_inputs(
     skill_md: Path,
 ) -> tuple[Path, dict[str, Any] | None, str | None, list[dict[str, Any]]]:
@@ -741,7 +722,6 @@ def _scenario_quality_inputs(
             if str(case.get("id")) not in known_ids
         ],
     ]
-
 
 def _scenario_quality_parity(
     repo_root: Path,
@@ -761,7 +741,6 @@ def _scenario_quality_parity(
         repo_root, skill_md.parent, canonical_ids, tessl_staged_json, tessl_score_json
     )
     return scenario_set_parity, [*selector_checks, *parity_checks]
-
 
 def build_scenario_quality_receipt(
     repo_root: Path,

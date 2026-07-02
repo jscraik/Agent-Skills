@@ -83,6 +83,15 @@
       "review_after": "2026-09-21"
     },
     {
+      "id": "improve-agent-native-latest-eval-summary",
+      "match_type": "exact",
+      "pattern": "Infrastructure/artifacts/skill-reviews/improve-agent-native-eval-latest.json",
+      "classification": "historical_artifact",
+      "reason": "Latest improve-agent-native eval summary retained as reviewed handoff evidence for Skills SDK and Tessl score reconciliation until a governed receipt store replaces this artifact path.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
       "id": "teach-scorer-calibration-bundle",
       "match_type": "prefix",
       "pattern": "Skills/github/teach/references/scorer-calibration/",

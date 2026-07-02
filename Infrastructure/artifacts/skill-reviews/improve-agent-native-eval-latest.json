@@ -8,7 +8,7 @@
         }
       }
     },
-    "generated_at": "2026-06-13T13:07:53Z",
+    "generated_at": "2026-07-01T17:22:33Z",
     "plugin_eval": {
       "status": "not_run",
       "stdout": "Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the static budget and ergonomics lane."
@@ -46,7 +46,7 @@
       },
       "tessl_lint": {
         "command": "./bin/ask skills external-review <path> --json --robot",
-        "role": "disposable tile.json package-shape check, not a direct content finding",
+        "role": "disposable .tessl-plugin/plugin.json package-shape check, not a direct content finding",
         "status": "not_run_in_eval_only_dashboard"
       },
       "tessl_review": {

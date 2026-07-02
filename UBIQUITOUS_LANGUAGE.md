@@ -4,7 +4,7 @@
 
 - Scope: `agent-skills` repository operations, Skills SDK product direction, skill authoring, skill sync, and runtime visibility.
 - Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-06-26
+- Last updated: 2026-07-01
 
 ## Canonical Terms
 
@@ -19,6 +19,10 @@
 | **Strong Guardrails** | The SDK boundary work that blocks or labels unsafe adoption, weak evidence, permission drift, unresolved review, package ambiguity, and runtime overclaiming before a skill is treated as ready. | security section, generic safety, warnings | High |
 | **Durable Memory** | First-party routed knowledge, glossary, provenance, references, and learned steering that move with the package or repo instead of living only in chat or local cache. | notes, memories, arbitrary docs | High |
 | **Self Improving** | The product posture that turns eval results, runtime feedback, review findings, observability, and high-signal steering into bounded source, scenario, rubric, or guardrail improvements with fresh proof. | auto magic, self healing, vague learning loop | High |
+| **Upstream Feedback Loop** | The Skills SDK practice of turning recurring eval, Tessl, review, or operator failures into source fixture, adapter, validator, route checklist, or package changes before the next `oss-local` run. | post-run patching, live Tessl tweak, after-the-fact fix | High |
+| **Pipeline Ratchet** | A deterministic validator, helper, schema, or route rule that prevents a previously seen failure shape from reaching a later pipeline lane again. | reminder, convention, soft guidance | High |
+| **Package-Scored Generated Fixture** | A reviewed generated eval case whose Tessl task scores installed package instructions and references rather than a freshly generated chat response. | response eval, final.json case, transcript case | High |
+| **Response-Producing Scenario** | An eval case whose runner explicitly creates `raw_response`, `final.json`, transcript, or another observable output artifact for scoring. | package fixture, static package review | High |
 | **Canonical Skills SDK Pipeline** | The six-stage product path: Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth. Use this pipeline when placing backlog items, atlas cards, route-map entries, and product claims. | roadmap, lifecycle, platform flow | High |
 | **Foundry Stage** | The pipeline stage where `agent-skills` authors, dogfoods, captures steering, and keeps canonical source intent before the SDK professionalizes it. | source repo, project, bootstrap only | High |
 | **SDK Lifecycle Stage** | The pipeline stage where the SDK parses source, builds SkillIR/package identity, validates schemas, and emits local lifecycle receipts. | compiler pass, package build only | High |
@@ -111,6 +115,7 @@
 | "professional output" | Apply the mantra as **Thin Surface**, **Strong Guardrails**, **Durable Memory**, **Self Improving**, and **Professional Output**. | "Place the change on the canonical pipeline and prove the package has shape, guardrails, durable memory, a bounded improvement loop, and replayable evidence before calling it professional output." |
 | "pass with not_run refs" | Distinguish **Evidence Inventory** from **Evidence Replay**. | "Treat `sdk evidence verify` as inventory/classification; run or plan replay receipts before claiming command behavior is proven." |
 | "make the atlas clearer" | Use the **Canonical Skills SDK Pipeline** and four named loops. | "Redesign or review atlas visuals around Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth, with Author, Proof, Release, and Runtime loops." |
+| "feed it in at the start of the pipeline" | Use the **Upstream Feedback Loop** and **Pipeline Ratchet**. | "Classify the recurring failure, patch the source fixture, adapter, validator, route checklist, or package before `oss-local`, and prove scenario-quality blocks the old shape before widening to `oss-cloud` or Tessl." |
 
 ## Relationships
 
@@ -118,6 +123,8 @@
 - The **agent-skills Foundry** supplies source packages, fixtures, and governance memory to the **Skills SDK**; it should not be described as the finished product, registry, or runtime truth.
 - **Skills SDK** professionalizes foundry source through the **Professional Lifecycle Contract** before any **Tessl Distribution Stage** or **Local Runtime Truth Stage** claim is made.
 - The **Canonical Skills SDK Pipeline** is the shared route for roadmap, atlas, route-map, and capability language. Backlog cards should name a pipeline stage and one of the **Author Loop**, **Proof Loop**, **Release Loop**, or **Runtime Loop** before they become implementation slices.
+- An **Upstream Feedback Loop** turns a failed downstream signal into a **Pipeline Ratchet** before the next lane starts; it is not complete if the change only patches the current live Tessl result.
+- A **Package-Scored Generated Fixture** must not require **Response-Producing Scenario** artifacts such as `raw_response`, `final.json`, transcripts, or chat output unless the selected runner actually produces them.
 - **Evidence Inventory** can prove that evidence references are present and classified; **Evidence Replay** is required before command refs or external lanes prove current behavior.
 - A **Runtime Projection** entry becomes available to user-level Codex sessions through **User Runtime Links** after **User Sync**.
 - In this repository, `.agents/skills/**` is a **Runtime Projection** for generated root skill sets and system bridges. In another owner repo, `.agents/skills/**` or `.codex/skills/**` is editable source only when a project-local `skills-sdk.json` declares that root as **Manifest-Declared Project Skill Source**.
@@ -160,6 +167,7 @@
 - "agent-skills" can mean the repository, the broader Agent Skills Kit, or the foundry role in the Skills SDK product direction. Recommendation: say **agent-skills Foundry** when discussing product boundary, and **Agent Skills Kit** when discussing the governed repo/CLI system.
 - "Skills SDK" can mean the local `ask sdk` command surface or the professional lifecycle contract. Recommendation: say **Skills SDK** for the contract and name the specific command when discussing implementation.
 - "Proof" can mean inventory, replay, eval score, hosted CI, Tessl run, or installed runtime behavior. Recommendation: use **Evidence Inventory**, **Evidence Replay**, **Evals/Proof Stage**, **Tessl Distribution Stage**, or **Local Runtime Truth Stage** to avoid overclaiming.
+- "Feedback loop" can mean a conversational reminder, a post-run patch, or a true **Upstream Feedback Loop**. Recommendation: reserve **Upstream Feedback Loop** for changes that land before `oss-local` and are enforced by a **Pipeline Ratchet**.
 - "Professional output" can mean polished docs or the actual package-readiness target. Recommendation: reserve it for the combination of **Thin Surface**, **Strong Guardrails**, **Durable Memory**, **Self Improving**, and receipt-backed package/runtime boundaries.
 - ".agents/skills" can mean an interoperable source root in another project or the generated runtime projection in this repository. Recommendation: check the owner repo's `skills-sdk.json` before editing.
 - "Sync" can mean **Workspace Sync**, **User Sync**, or a lower-level projection refresh script. Recommendation: default to both `./bin/ask skills sync --scope workspace` and `./bin/ask skills sync --scope user` when the user says "sync my skills."
