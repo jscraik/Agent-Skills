@@ -232,7 +232,7 @@ def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[st
         if isinstance(value, str) and value == source_id:
             return True
     for value in _case_registry_ref_values(case):
-        if source_id and (value == source_id or source_id in value):
+        if source_id and value == source_id:
             return True
     return False
 
@@ -261,7 +261,11 @@ def _collect_registry_ref_values(value: Any, values: list[str]) -> None:
             _collect_registry_ref_values(nested, values)
         return
     if isinstance(value, str) and "registry://" in value:
-        values.append(value)
+        values.extend(_registry_ids_from_text(value))
+
+
+def _registry_ids_from_text(value: str) -> list[str]:
+    return [match.rstrip(".,;:)]}'\"") for match in re.findall(r"registry://\S+", value)]
 
 
 def _schema_validation_error(receipt: dict[str, Any]) -> str | None:

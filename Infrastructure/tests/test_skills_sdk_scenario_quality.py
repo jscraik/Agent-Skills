@@ -530,6 +530,30 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
         )
         self.assertIn("registry_source_mismatch", evidence)
 
+    def test_builder_blocks_registry_source_id_prefix_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _nested_registry_reference_evals_yaml("registry://shared/proof-boundary-v2"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id="registry://shared/proof-boundary",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
     def test_builder_blocks_partial_adaptation_receipt_missing_schema_required_fields(self) -> None:
         registry_id = "registry://shared/proof-boundary"
         with tempfile.TemporaryDirectory() as tmp:
