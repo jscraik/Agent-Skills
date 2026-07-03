@@ -114,6 +114,7 @@ def _write_adaptation_receipt(
     case_id: str,
     registry_id: str,
     target_path: str | None = None,
+    package_id: str = "sample",
     include_full_schema_fields: bool = True,
 ) -> Path:
     receipt_dir = skill_dir / "references" / "scenario-adaptation-receipts"
@@ -130,7 +131,7 @@ def _write_adaptation_receipt(
             },
             "target_skill": {
                 "path": target_path or skill_dir.as_posix(),
-                "package_id": "sample",
+                "package_id": package_id,
                 "source_head": "960493d",
             },
             "target_case_id": case_id,
@@ -423,6 +424,29 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
                 case_id="proof-boundary",
                 registry_id=registry_id,
                 target_path=skill_dir.name,
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("target_skill_mismatch", evidence)
+
+    def test_builder_blocks_wrong_package_id_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                package_id="other-skill",
             )
 
             with self.assertRaises(ScenarioQualityError) as raised:

@@ -36,6 +36,5 @@
     "source": "local-skill-scenario",
     "evidence_refs": ["Skills/agent-ops/technical-writer/references/evals.yaml"]
   },
-  "promotion_status": "candidate",
-  "demotion_reason": ""
+  "promotion_status": "candidate"
 }

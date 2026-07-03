@@ -61,6 +61,16 @@
     "mutation_manifest",
     "blockers"
   ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {"properties": {"blockers": {"minItems": 1}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "pass"}}},
+      "then": {"properties": {"blockers": {"maxItems": 0}}}
+    }
+  ],
   "definitions": {
     "commandEvidence": {
       "type": "object",

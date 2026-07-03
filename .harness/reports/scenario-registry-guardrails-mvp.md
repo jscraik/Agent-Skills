@@ -2,7 +2,7 @@
 
 Date: 2026-07-03
 
-Branch: `codex-scenario-registry-guardrails`
+Branch: `codex/scenario-registry-guardrails`
 
 Status: implementation slice
 

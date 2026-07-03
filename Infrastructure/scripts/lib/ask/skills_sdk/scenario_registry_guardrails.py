@@ -25,18 +25,20 @@ ADAPTATION_RECEIPT_SCHEMA_PATH = (
 
 def no_direct_registry_use_checks(skill_dir: Path, cases: list[Any]) -> list[dict[str, Any]]:
     """Return scenario-quality checks for governed registry scenario usage."""
+    skill_md_refs = _skill_md_registry_refs(skill_dir)
+    missing_refs = _missing_adaptation_receipt_refs(skill_dir, cases)
     return [
         _check(
             "registry_reference_not_in_skill_entrypoint",
-            "blocker" if _skill_md_registry_refs(skill_dir) else "pass",
+            "blocker" if skill_md_refs else "pass",
             "SKILL.md must not load or invoke shared scenario registry references directly.",
-            _skill_md_registry_refs(skill_dir),
+            skill_md_refs,
         ),
         _check(
             "registry_reference_requires_sdk_adaptation_receipt",
-            "blocker" if _missing_adaptation_receipt_refs(skill_dir, cases) else "pass",
+            "blocker" if missing_refs else "pass",
             "Registry-derived scenarios must be SDK-adapted locally with a scenario adaptation receipt before they count as coverage.",
-            _missing_adaptation_receipt_refs(skill_dir, cases),
+            missing_refs,
         ),
     ]
 
@@ -158,10 +160,28 @@ def _target_skill_matches(target_skill: dict[str, Any], skill_dir: Path) -> bool
     expected = _skill_path_aliases(skill_dir)
     candidates = {
         alias
-        for raw_candidate in (target_skill.get("path"), target_skill.get("package_path"))
+        for raw_candidate in (target_skill.get("path"),)
         for alias in _candidate_path_aliases(str(raw_candidate or ""))
     }
-    return bool(expected & candidates)
+    package_id = target_skill.get("package_id")
+    package_matches = isinstance(package_id, str) and package_id in _skill_package_ids(skill_dir)
+    return bool(expected & candidates) and package_matches
+
+
+def _skill_package_ids(skill_dir: Path) -> set[str]:
+    ids = {skill_dir.name}
+    skill_md = skill_dir / "SKILL.md"
+    try:
+        lines = skill_md.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return ids
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("name:"):
+            name = stripped.split(":", 1)[1].strip().strip("'\"")
+            if name:
+                ids.add(name)
+    return ids
 
 
 def _skill_path_aliases(skill_dir: Path) -> set[str]:
@@ -253,6 +273,24 @@ def _validate_schema_node(value: Any, schema: dict[str, Any], root_schema: dict[
         schema = _resolve_ref(str(schema["$ref"]), root_schema)
 
     errors: list[str] = []
+    for index, nested_schema in enumerate(schema.get("allOf", [])):
+        if isinstance(nested_schema, dict):
+            errors.extend(_validate_schema_node(value, nested_schema, root_schema, f"{path}:allOf[{index}]"))
+    for keyword in ("anyOf", "oneOf"):
+        nested_schemas = schema.get(keyword)
+        if isinstance(nested_schemas, list):
+            matches = [
+                nested_schema
+                for nested_schema in nested_schemas
+                if isinstance(nested_schema, dict) and not _validate_schema_node(value, nested_schema, root_schema, path)
+            ]
+            if (keyword == "anyOf" and not matches) or (keyword == "oneOf" and len(matches) != 1):
+                errors.append(f"{path}:{keyword}")
+    if "if" in schema and isinstance(schema["if"], dict):
+        branch_name = "then" if not _validate_schema_node(value, schema["if"], root_schema, path) else "else"
+        branch_schema = schema.get(branch_name)
+        if isinstance(branch_schema, dict):
+            errors.extend(_validate_schema_node(value, branch_schema, root_schema, path))
     if "const" in schema and value != schema["const"]:
         errors.append(f"{path}:const")
     if "enum" in schema and value not in schema["enum"]:
@@ -265,10 +303,23 @@ def _validate_schema_node(value: Any, schema: dict[str, Any], root_schema: dict[
 
     if isinstance(value, str) and "minLength" in schema and len(value) < int(schema["minLength"]):
         errors.append(f"{path}:minLength")
+    pattern = schema.get("pattern")
+    if isinstance(pattern, str) and isinstance(value, str) and not re.search(pattern, value):
+        errors.append(f"{path}:pattern")
 
     if isinstance(value, list):
         if "minItems" in schema and len(value) < int(schema["minItems"]):
             errors.append(f"{path}:minItems")
+        if "maxItems" in schema and len(value) > int(schema["maxItems"]):
+            errors.append(f"{path}:maxItems")
+        if schema.get("uniqueItems") is True:
+            seen: set[str] = set()
+            for item in value:
+                marker = json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else repr(item)
+                if marker in seen:
+                    errors.append(f"{path}:uniqueItems")
+                    break
+                seen.add(marker)
         item_schema = schema.get("items")
         if isinstance(item_schema, dict):
             for index, item in enumerate(value):

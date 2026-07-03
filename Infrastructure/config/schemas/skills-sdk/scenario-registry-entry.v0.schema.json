@@ -52,8 +52,13 @@
     "proven_gates",
     "score_history",
     "provenance",
-    "promotion_status",
-    "demotion_reason"
+    "promotion_status"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"promotion_status": {"enum": ["deprecated", "quarantined", "retired"]}}},
+      "then": {"required": ["demotion_reason"], "properties": {"demotion_reason": {"minLength": 1}}}
+    }
   ],
   "definitions": {
     "gateEvidence": {

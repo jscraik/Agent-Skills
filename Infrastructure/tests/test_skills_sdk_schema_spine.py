@@ -220,6 +220,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("technical-writing", payload["domain_tags"])
         self.assertIn("expected_signal", payload["acceptance_schema"])
 
+    def test_scenario_registry_entry_requires_demotion_reason_only_for_demoted_states(self) -> None:
+        schema = self.schemas["scenario-registry-entry"]
+        payload = self.assert_valid("scenario-registry-entry", "scenario-registry-entry.json")
+        payload["promotion_status"] = "deprecated"
+
+        with self.assertRaisesRegex(AssertionError, "demotion_reason"):
+            _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
+
+        payload["demotion_reason"] = "Superseded by stronger release-lane coverage."
+        _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
+
     def test_scenario_adaptation_receipt_fixture_records_sdk_authorized_localization(self) -> None:
         payload = self.assert_valid("scenario-adaptation-receipt", "scenario-adaptation-receipt.json")
 
@@ -227,6 +238,21 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["authorized_stage"], "scenario_generation")
         self.assertTrue(payload["criteria_ownership"]["local_criteria_authoritative"])
         self.assertEqual(payload["target_case_id"], "proof-boundary")
+
+    def test_scenario_adaptation_receipt_links_status_and_blockers(self) -> None:
+        schema = self.schemas["scenario-adaptation-receipt"]
+        payload = self.assert_valid("scenario-adaptation-receipt", "scenario-adaptation-receipt.json")
+        payload["status"] = "blocked"
+
+        with self.assertRaisesRegex(AssertionError, "minItems"):
+            _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
+
+        payload["blockers"] = ["missing local adaptation receipt"]
+        _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
+
+        payload["status"] = "pass"
+        with self.assertRaisesRegex(AssertionError, "maxItems"):
+            _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
 
     def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
         payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")
