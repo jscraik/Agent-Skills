@@ -215,26 +215,59 @@ def _candidate_path_aliases(value: str) -> set[str]:
 def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[str, Any]) -> bool:
     source_id = str(registry_source.get("canonical_scenario_id") or registry_source.get("id") or "")
     source_version = str(registry_source.get("version") or "")
-    case_source = case.get("registry_source")
-    if isinstance(case_source, dict):
+    source_digest = str(registry_source.get("digest") or "")
+    for case_source in _case_registry_sources(case):
         case_id = str(case_source.get("canonical_scenario_id") or case_source.get("id") or "")
         case_version = str(case_source.get("version") or "")
         case_digest = str(case_source.get("digest") or "")
-        source_digest = str(registry_source.get("digest") or "")
-        return bool(
+        if (
             source_id
             and source_id == case_id
             and (not case_version or source_version == case_version)
             and (not case_digest or source_digest == case_digest)
-        )
-    for key in ("scenario_registry_id", "canonical_scenario_id", "shared_scenario_ref"):
-        value = case.get(key)
-        if isinstance(value, str) and value == source_id:
-            return True
-    for value in _case_registry_ref_values(case):
-        if source_id and value == source_id:
+        ):
             return True
     return False
+
+
+def _case_registry_sources(value: Any) -> list[dict[str, str]]:
+    sources: list[dict[str, str]] = []
+    _collect_registry_sources(value, sources)
+    return sources
+
+
+def _collect_registry_sources(value: Any, sources: list[dict[str, str]]) -> None:
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if str(key) in {"scenario_registry_id", "canonical_scenario_id", "shared_scenario_ref"} and isinstance(
+                nested, str
+            ):
+                sources.append({"canonical_scenario_id": nested})
+            elif str(key) == "registry_source" and isinstance(nested, dict):
+                source = _registry_source_from_dict(nested)
+                if source:
+                    sources.append(source)
+                continue
+            _collect_registry_sources(nested, sources)
+        return
+    if isinstance(value, list):
+        for nested in value:
+            _collect_registry_sources(nested, sources)
+        return
+    if isinstance(value, str) and "registry://" in value:
+        sources.extend({"canonical_scenario_id": registry_id} for registry_id in _registry_ids_from_text(value))
+
+
+def _registry_source_from_dict(value: dict[str, Any]) -> dict[str, str]:
+    source_id = value.get("canonical_scenario_id") or value.get("id")
+    if not isinstance(source_id, str) or not source_id:
+        return {}
+    source = {"canonical_scenario_id": source_id}
+    for key in ("version", "digest"):
+        nested = value.get(key)
+        if isinstance(nested, str) and nested:
+            source[key] = nested
+    return source
 
 
 def _case_registry_ref_values(value: Any) -> list[str]:

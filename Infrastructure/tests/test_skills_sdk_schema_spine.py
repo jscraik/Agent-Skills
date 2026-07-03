@@ -254,6 +254,14 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "maxItems"):
             _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
 
+    def test_scenario_adaptation_receipt_pass_status_requires_pass_validation_rows(self) -> None:
+        schema = self.schemas["scenario-adaptation-receipt"]
+        payload = self.assert_valid("scenario-adaptation-receipt", "scenario-adaptation-receipt.json")
+        payload["validation"][0]["status"] = "fail"
+
+        with self.assertRaisesRegex(AssertionError, "expected const 'pass'"):
+            _validate_schema_subset(schema, payload, {**self.schemas, **self.schemas_by_file})
+
     def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
         payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")
 
