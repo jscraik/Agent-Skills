@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"019f2465-b157-7ca0-99a6-db6d00a0e209"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"reasoning","text":"The user is asking me to reply with a specific string \"CODEX_OSS_LOCAL_OK\". This appears to be following the instructions at the top of the message that say to reply exactly with that string.\n\nI need to respond with exactly what was requested without adding any additional text or commentary."}}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"CODEX_OSS_LOCAL_OK"}}
+{"type":"turn.completed","usage":{"input_tokens":3751,"cached_input_tokens":0,"output_tokens":68,"reasoning_output_tokens":0}}
+
+Reading additional input from stdin...
+
+CODEX_OSS_LOCAL_OK

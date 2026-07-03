@@ -652,104 +652,44 @@ def _case_has_broad_no_invention_negative_acceptance(case: dict[str, object]) ->
     )
     if not negative_text.strip():
         return False
-    if NO_INVENTION_SUPPORT_RE.search(case_text) and not BROAD_SUPPORT_CHANNEL_NEGATIVE_RE.search(negative_text):
+    if NO_INVENTION_SUPPORT_RE.search(case_text) and not _has_broad_support_negative(negative_text):
         return False
-    if NO_INVENTION_COMMAND_RE.search(case_text) and not BROAD_COMMAND_NEGATIVE_RE.search(negative_text):
+    if NO_INVENTION_COMMAND_RE.search(case_text) and not _has_broad_command_negative(negative_text):
         return False
     return True
 
 
+def _has_broad_support_negative(text: str) -> bool:
+    lowered = text.lower()
+    channel_examples = re.findall(r"#[a-z0-9_-]+", lowered)
+    return "#[a-z" in lowered or r"#\[" in lowered or len(channel_examples) >= 2 or "slack channel" in lowered or "slack support" in lowered
+
+
+def _has_broad_command_negative(text: str) -> bool:
+    lowered = text.lower()
+    has_command_family = re.search(r"(?i)(?:pytest|uv|mise|npm|pnpm|yarn)", text)
+    return "setup command" in lowered or "validation command" in lowered or bool(has_command_family)
+
+
 TESSL_CASE_FINDING_RULES = (
-    (
-        _missing_scenario_context,
-        "missing_scenario_context",
-        "Tessl eval cases must include unit/given/should context or an equivalent structured prompt so the scorer can judge behaviour, not only keywords.",
-    ),
-    (
-        _missing_behavioral_acceptance,
-        "missing_behavioral_acceptance",
-        "Tessl eval cases must include at least one behavioural acceptance item such as expected_signal, skill_selected, artifact_exists, command_success, or a must_not/forbidden signal.",
-    ),
-    (
-        _missing_skill_lift_acceptance,
-        "missing_skill_lift_acceptance",
-        "Tessl eval cases must include at least one acceptance item that tests the skill's behaviour. Provenance-only fixture-path signals are useful supporting evidence, but they do not prove the skill improves the answer.",
-    ),
-    (
-        _case_has_keyword_only_acceptance,
-        "keyword_only_acceptance",
-        "Regex and contains checks are allowed only as supporting evidence; they cannot be the whole Tessl scoring contract because baseline runs can pass them without demonstrating skill lift.",
-    ),
-    (
-        _case_scores_skill_name_as_primary_proof,
-        "skill_name_primary_proof",
-        "Skill selection or skill-name mentions are supporting routing evidence only. Tessl criteria must score the observable behavior or output artifact that the skill should improve.",
-    ),
-    (
-        _release_case_missing_output_artifact,
-        "missing_concrete_output_artifact",
-        "Release Tessl scenarios must request or name a concrete output artifact such as a markdown report, JSON receipt, or schema output so scoring is based on final files rather than hidden process traces.",
-    ),
-    (
-        _case_depends_on_hidden_reference_read,
-        "hidden_reference_dependency",
-        "Discovery scenarios must be scoreable from the visible task and final artifact. Do not require isolated runners to read hidden references before producing the expected discovery question.",
-    ),
-    (
-        _case_has_shallow_routing_oracle,
-        "shallow_routing_oracle",
-        "Tessl live-private evals must not rely only on skill selection plus generic expected signals. Add scenario-specific behavior, artifact, safety, or refusal criteria that create a plausible baseline failure path.",
-    ),
-    (
-        _case_has_scorer_boilerplate_expected_signal,
-        "scorer_boilerplate_expected_signal",
-        "Tessl expected_signal criteria must describe observable output obligations. Do not score boilerplate such as 'semantically covers scenario-specific evidence and decision signals'.",
-    ),
-    (
-        _case_has_fixture_path_acceptance,
-        "fixture_path_acceptance",
-        "Tessl eval cases must not score provenance-only fixture path mentions. Fixture paths belong in scenario metadata, while acceptance must test observable behaviour that distinguishes skill lift from baseline output.",
-    ),
-    (
-        _case_has_prompt_scoring_mechanics,
-        "prompt_exposes_scoring_mechanics",
-        "Tessl eval prompts must read like realistic user tasks and must not expose scenario fixture mechanics or tell the agent it is handling a generated scoring fixture.",
-    ),
-    (
-        _case_has_answer_leakage,
-        "answer_leakage",
-        "Tessl eval task text must not contain the long-form expected answer that is later used as the scoring signal. Keep expected behaviour in hidden metadata or acceptance criteria, not in the agent-visible task.",
-    ),
-    (
-        _case_has_semantic_answer_leakage,
-        "semantic_answer_leakage",
-        "Tessl eval task text must not preview the same answer dimensions later scored by positive criteria. Move expected dimensions into criteria and keep the visible task realistic.",
-    ),
-    (
-        _case_is_low_value_negative,
-        "low_value_negative_scenario",
-        "Release scenarios should not spend live Tessl budget on unrelated creative negative prompts. Keep such cases in local routing smoke or rewrite them into realistic safety, authority, or boundary pressure.",
-    ),
-    (
-        _case_has_unstaged_repo_path_reference,
-        "unstaged_repo_path_reference",
-        "Tessl live-private evals stage a controlled skill package copy, not the live repository. Use package-relative paths such as SKILL.md or references/contract.yaml, or provide an explicit fixture artifact before scoring repo-root paths.",
-    ),
-    (
-        _case_depends_on_hidden_input_file,
-        "hidden_input_file_dependency",
-        "SDK and Tessl release scenarios must inline required input file contents or provide a staged fixture artifact; do not ask isolated runners to inspect package-relative files that are absent from the visible task.",
-    ),
-    (
-        _case_requires_file_side_effect_without_final_answer_path,
-        "read_only_file_artifact_side_effect",
-        "OSS read-only release scenarios must ask for file artifact contents in the final answer rather than requiring the agent to write, save, create, or produce files in the sandbox.",
-    ),
-    (
-        lambda case: not _case_has_broad_no_invention_negative_acceptance(case),
-        "narrow_no_invention_negative_acceptance",
-        "No-invention scenarios must include broad negative acceptance for the forbidden support paths or command families they name, so plausible invented Slack channels, setup commands, validation commands, owners, dates, recovery paths, or acceptance criteria cannot pass by synonym.",
-    ),
+    (_missing_scenario_context, "missing_scenario_context", "Tessl eval cases must include unit/given/should context or an equivalent structured prompt so the scorer can judge behaviour, not only keywords."),
+    (_missing_behavioral_acceptance, "missing_behavioral_acceptance", "Tessl eval cases must include at least one behavioural acceptance item such as expected_signal, skill_selected, artifact_exists, command_success, or a must_not/forbidden signal."),
+    (_missing_skill_lift_acceptance, "missing_skill_lift_acceptance", "Tessl eval cases must include at least one acceptance item that tests the skill's behaviour. Provenance-only fixture-path signals are useful supporting evidence, but they do not prove the skill improves the answer."),
+    (_case_has_keyword_only_acceptance, "keyword_only_acceptance", "Regex and contains checks are allowed only as supporting evidence; they cannot be the whole Tessl scoring contract because baseline runs can pass them without demonstrating skill lift."),
+    (_case_scores_skill_name_as_primary_proof, "skill_name_primary_proof", "Skill selection or skill-name mentions are supporting routing evidence only. Tessl criteria must score the observable behavior or output artifact that the skill should improve."),
+    (_release_case_missing_output_artifact, "missing_concrete_output_artifact", "Release Tessl scenarios must request or name a concrete output artifact such as a markdown report, JSON receipt, or schema output so scoring is based on final files rather than hidden process traces."),
+    (_case_depends_on_hidden_reference_read, "hidden_reference_dependency", "Discovery scenarios must be scoreable from the visible task and final artifact. Do not require isolated runners to read hidden references before producing the expected discovery question."),
+    (_case_has_shallow_routing_oracle, "shallow_routing_oracle", "Tessl live-private evals must not rely only on skill selection plus generic expected signals. Add scenario-specific behavior, artifact, safety, or refusal criteria that create a plausible baseline failure path."),
+    (_case_has_scorer_boilerplate_expected_signal, "scorer_boilerplate_expected_signal", "Tessl expected_signal criteria must describe observable output obligations. Do not score boilerplate such as 'semantically covers scenario-specific evidence and decision signals'."),
+    (_case_has_fixture_path_acceptance, "fixture_path_acceptance", "Tessl eval cases must not score provenance-only fixture path mentions. Fixture paths belong in scenario metadata, while acceptance must test observable behaviour that distinguishes skill lift from baseline output."),
+    (_case_has_prompt_scoring_mechanics, "prompt_exposes_scoring_mechanics", "Tessl eval prompts must read like realistic user tasks and must not expose scenario fixture mechanics or tell the agent it is handling a generated scoring fixture."),
+    (_case_has_answer_leakage, "answer_leakage", "Tessl eval task text must not contain the long-form expected answer that is later used as the scoring signal. Keep expected behaviour in hidden metadata or acceptance criteria, not in the agent-visible task."),
+    (_case_has_semantic_answer_leakage, "semantic_answer_leakage", "Tessl eval task text must not preview the same answer dimensions later scored by positive criteria. Move expected dimensions into criteria and keep the visible task realistic."),
+    (_case_is_low_value_negative, "low_value_negative_scenario", "Release scenarios should not spend live Tessl budget on unrelated creative negative prompts. Keep such cases in local routing smoke or rewrite them into realistic safety, authority, or boundary pressure."),
+    (_case_has_unstaged_repo_path_reference, "unstaged_repo_path_reference", "Tessl live-private evals stage a controlled skill package copy, not the live repository. Use package-relative paths such as SKILL.md or references/contract.yaml, or provide an explicit fixture artifact before scoring repo-root paths."),
+    (_case_depends_on_hidden_input_file, "hidden_input_file_dependency", "SDK and Tessl release scenarios must inline required input file contents or provide a staged fixture artifact; do not ask isolated runners to inspect package-relative files that are absent from the visible task."),
+    (_case_requires_file_side_effect_without_final_answer_path, "read_only_file_artifact_side_effect", "OSS read-only release scenarios must ask for file artifact contents in the final answer rather than requiring the agent to write, save, create, or produce files in the sandbox."),
+    (lambda case: not _case_has_broad_no_invention_negative_acceptance(case), "narrow_no_invention_negative_acceptance", "No-invention scenarios must include broad negative acceptance for the forbidden support paths or command families they name, so plausible invented Slack channels, setup commands, validation commands, owners, dates, recovery paths, or acceptance criteria cannot pass by synonym."),
 )
 
 TESSL_NEGATED_CASE_FINDING_RULES = (

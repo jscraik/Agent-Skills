@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -16,7 +15,14 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates, run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt, validate_robot_envelope  # noqa: E402
 from ask.commands.skills_impl import _load_release_scenario_sets, skills_sdk_eval_run  # noqa: E402
-from ask.envelope import CallResult, ErrorObject  # noqa: E402
+from eval_runner_helpers import (  # noqa: E402
+    blocked_internal_result_with_passing_scorecard,
+    command_env,
+    internal_result_with_scorecard,
+    successful_internal_result,
+    successful_internal_result_with_blocked_closeout_validation,
+    successful_internal_result_without_artifact_receipt,
+)
 
 
 PASS_DATASET = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json"
@@ -43,180 +49,6 @@ TECHNICAL_WRITER_RELEASE_20 = [
     "regression-capsule-runtime-boundary",
     "regression-stale-command-example",
 ]
-
-
-def _closeout_validation(status: str = "pass") -> dict[str, object]:
-    checks = [
-        {
-            "id": "artifact_receipt_present",
-            "status": "pass",
-            "message": "eval closeout evidence was emitted",
-            "evidence": ["mocked eval backend fixture"],
-        }
-    ]
-    return {
-        "schema_version": "skills-sdk.eval-closeout-validation.v1",
-        "status": status,
-        "checks": checks,
-        "blockers": [] if status == "pass" else checks,
-    }
-
-
-def _internal_result_with_scorecard(scorecard_path: Path) -> CallResult:
-    scorecard_path.write_text(
-        json.dumps(
-            {
-                "schema_version": "2.1",
-                "decision": "fail",
-                "passed": False,
-                "blocked_cases": 0,
-                "tier1_failures": 1,
-                "tier2_findings": 0,
-                "preflight_warnings": [],
-                "readiness_summary": {"unknown": 2},
-                "expected_signal_summary": {"runs": 1, "average": 1.0, "minimum": 1.0, "risky_cases": []},
-                "security_dependency_screening": {"status": "skipped"},
-                "cases": [
-                    {"id": "case-pass", "passed": True, "blocked": False},
-                    {
-                        "id": "case-fail",
-                        "passed": False,
-                        "blocked": False,
-                        "tier1_failures": ["expected signal missing"],
-                    },
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
-    internal_result = CallResult(status="success")
-    internal_result.data.update(
-        {
-            "eval_status": "pass",
-            "resolved_skill_path": "Skills/agent-ops/testing",
-            "raw_output": f"Scorecard: {scorecard_path}\n",
-            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
-            "eval_closeout": {"closeout_validation": _closeout_validation("pass")},
-        }
-    )
-    return internal_result
-
-
-def _blocked_internal_result_with_passing_scorecard(scorecard_path: Path) -> CallResult:
-    scorecard_path.write_text(
-        json.dumps(
-            {
-                "schema_version": "2.1",
-                "decision": "pass",
-                "passed": True,
-                "blocked_cases": 0,
-                "tier1_failures": 0,
-                "tier2_findings": 0,
-                "preflight_warnings": [],
-                "readiness_summary": {"unknown": 1},
-                "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
-                "security_dependency_screening": {"status": "skipped"},
-                "cases": [{"id": "case-pass", "passed": True, "blocked": False}],
-            }
-        ),
-        encoding="utf-8",
-    )
-    internal_result = CallResult(status="error")
-    internal_result.data.update(
-        {
-            "eval_status": "blocked_runtime",
-            "resolved_skill_path": "Skills/agent-ops/testing",
-            "raw_output": f"Scorecard: {scorecard_path}\n",
-            "eval_closeout": {"closeout_validation": _closeout_validation("pass")},
-        }
-    )
-    internal_result.errors.append(ErrorObject(code="ERR_RUNTIME", message="model unavailable"))
-    return internal_result
-
-
-def _successful_internal_result(codex_profile: str | None = None) -> CallResult:
-    internal_result = CallResult(status="success")
-    data = {
-        "eval_status": "pass",
-        "resolved_skill_path": "Skills/agent-ops/testing",
-        "raw_output": "Scorecard: Infrastructure/artifacts/evals/testing.json",
-        "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
-        "eval_closeout": {
-            "schema_version": "skills-sdk.eval-closeout.v1",
-            "status": "pass",
-            "skill_path": "Skills/agent-ops/testing",
-            "mode": "smoke",
-            "runner": "codex",
-            "cases": [{"id": "case-pass", "status": "pass"}],
-            "mutation_allowed": True,
-            "registry_update_allowed": True,
-            "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --json --robot",
-        },
-    }
-    if codex_profile:
-        data["profile_contract"] = {
-            "codex_profile": codex_profile,
-            "codex_exec_invoked": True,
-            "codex_exec_command_shape": ["codex", "exec", "--profile", codex_profile],
-        }
-    internal_result.data.update(data)
-    return internal_result
-
-
-def _successful_internal_result_with_blocked_closeout_validation() -> CallResult:
-    internal_result = CallResult(status="success")
-    internal_result.data.update(
-        {
-            "eval_status": "pass",
-            "resolved_skill_path": "Skills/agent-ops/testing",
-            "raw_output": "RESULT: PASS",
-            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
-            "eval_closeout": {
-                "schema_version": "skills-sdk.eval-closeout.v1",
-                "status": "pass",
-                "skill_path": "Skills/agent-ops/testing",
-                "mode": "smoke",
-                "runner": "codex",
-                "cases": [],
-                "mutation_allowed": True,
-                "registry_update_allowed": False,
-                "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --json --robot",
-                "closeout_validation": _closeout_validation("blocked"),
-            },
-            "profile_contract": {
-                "codex_profile": "oss-local",
-                "codex_exec_invoked": True,
-                "codex_exec_command_shape": ["codex", "exec", "--profile", "oss-local"],
-            },
-        }
-    )
-    return internal_result
-
-
-def _successful_internal_result_without_artifact_receipt() -> CallResult:
-    internal_result = CallResult(status="success")
-    internal_result.data.update(
-        {
-            "eval_status": "pass",
-            "resolved_skill_path": "Skills/agent-ops/testing",
-            "raw_output": "RESULT: PASS",
-            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
-        }
-    )
-    return internal_result
-
-
-def _command_env() -> dict[str, str]:
-    env = os.environ.copy()
-    temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
-    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
-    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
-    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
-    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
-    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
-    env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
-    return env
-
 
 class TestSkillsSdkEvalRunner(unittest.TestCase):
     def test_runner_passes_exact_match_jsonl_dataset(self) -> None:
@@ -278,7 +110,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
                 "--robot",
             ],
             cwd=REPO_ROOT,
-            env=_command_env(),
+            env=command_env(),
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -320,7 +152,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
                     "--robot",
                 ],
                 cwd=REPO_ROOT,
-                env=_command_env(),
+                env=command_env(),
                 text=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -352,7 +184,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
                 "--robot",
             ],
             cwd=REPO_ROOT,
-            env=_command_env(),
+            env=command_env(),
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -369,7 +201,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["failed_count"], 1)
 
     def test_sdk_internal_runner_delegates_to_existing_eval_backend(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-cloud")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -403,7 +235,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["internal_eval"]["tessl_eval"]["status"], "skipped")
 
     def test_sdk_internal_runner_blocks_synthetic_pass_without_scorecard_or_closeout(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result_without_artifact_receipt()):
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result_without_artifact_receipt()):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -419,7 +251,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("blocked_missing_artifact:no_scorecard_or_closeout", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_codex_profile_override(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-cloud")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -449,7 +281,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["receipt"]["codex_exec_command_shape"][:4], ["codex", "exec", "--profile", "oss-cloud"])
 
     def test_sdk_internal_runner_keeps_fast_profile_in_smoke_check_lane(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("fast")):
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("fast")):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -465,7 +297,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["receipt"]["codex_profile"], "fast")
 
     def test_sdk_internal_runner_blocks_oss_lane_without_codex_exec_proof(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result()):
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result()):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -480,7 +312,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("blocked_missing_artifact:codex_profile_exec_receipt_missing:oss-local", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_timeout_override(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -506,7 +338,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("--timeout-seconds 45", payload["validation_commands"][0])
 
     def test_sdk_internal_runner_replay_command_includes_case_filters(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -524,7 +356,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("--case edge-case", command)
 
     def test_oss_release_lane_expands_default_release_scenario_set(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/technical-writer",
@@ -600,7 +432,7 @@ cases:
 
     def test_release_lane_accepts_full_case_set_in_any_order(self) -> None:
         reversed_cases = list(reversed(TECHNICAL_WRITER_RELEASE_20))
-        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/technical-writer",
@@ -700,7 +532,7 @@ cases:
     def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             scorecard_path = Path(temp_dir) / "scorecard.json"
-            internal_result = _internal_result_with_scorecard(scorecard_path)
+            internal_result = internal_result_with_scorecard(scorecard_path)
             with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
                 result = skills_sdk_eval_run(
                     REPO_ROOT,
@@ -802,7 +634,7 @@ cases:
     def test_sdk_internal_runner_does_not_upgrade_backend_blocker_to_pass(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             scorecard_path = Path(temp_dir) / "scorecard.json"
-            internal_result = _blocked_internal_result_with_passing_scorecard(scorecard_path)
+            internal_result = blocked_internal_result_with_passing_scorecard(scorecard_path)
             with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
                 result = skills_sdk_eval_run(
                     REPO_ROOT,
@@ -825,7 +657,7 @@ cases:
         self.assertIn("model unavailable", receipt.blockers)
 
     def test_sdk_internal_runner_blocks_when_closeout_validation_blocks(self) -> None:
-        internal_result = _successful_internal_result_with_blocked_closeout_validation()
+        internal_result = successful_internal_result_with_blocked_closeout_validation()
         with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
             result = skills_sdk_eval_run(
                 REPO_ROOT,

@@ -60,6 +60,34 @@ def _fake_codex_script(*, bad: bool) -> str:
     )
 
 
+def _fallback_thinking_transcript() -> str:
+    return (
+        "model: qwen3.5:9b-mlx\n"
+        "provider: ollama\n"
+        "approval: never\n"
+        "sandbox: read-only\n"
+        "session id: 019f241c-b505-79a1-bb69-8a4efceda0a4\n"
+        "warning: Model metadata for qwen3.5:9b-mlx not found. Defaulting to fallback metadata.\n"
+        "<think>working</think>\n"
+        "CODEX_OSS_LOCAL_OK\n"
+        "tokens used\n24,039\n"
+    )
+
+
+def _expected_runtime_observations() -> dict[str, object]:
+    return {
+        "model": "qwen3.5:9b-mlx",
+        "provider": "ollama",
+        "approval": "never",
+        "sandbox": "read-only",
+        "session_id": "019f241c-b505-79a1-bb69-8a4efceda0a4",
+        "tokens_used": 24039,
+        "codex_jsonl_reasoning_event_observed": False,
+        "metadata_fallback_observed": True,
+        "visible_thinking_observed": True,
+    }
+
+
 class TestOssLocalSmokeOutputCheck(unittest.TestCase):
     def test_runner_command_uses_json_and_ignores_rules_for_marker_smoke(self) -> None:
         command = RUNNER_MODULE._codex_command(Path("/tmp/last-message.txt"), "CODEX_OSS_LOCAL_OK")
@@ -113,18 +141,7 @@ class TestOssLocalSmokeOutputCheck(unittest.TestCase):
     def test_check_fails_fallback_thinking_and_token_blowout(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             transcript = Path(tmp_dir) / "smoke.txt"
-            transcript.write_text(
-                "model: qwen3.5:9b-mlx\n"
-                "provider: ollama\n"
-                "approval: never\n"
-                "sandbox: read-only\n"
-                "session id: 019f241c-b505-79a1-bb69-8a4efceda0a4\n"
-                "warning: Model metadata for qwen3.5:9b-mlx not found. Defaulting to fallback metadata.\n"
-                "<think>working</think>\n"
-                "CODEX_OSS_LOCAL_OK\n"
-                "tokens used\n24,039\n",
-                encoding="utf-8",
-            )
+            transcript.write_text(_fallback_thinking_transcript(), encoding="utf-8")
 
             proc = subprocess.run(
                 [sys.executable, str(SCRIPT), str(transcript), "--json"],
@@ -146,20 +163,7 @@ class TestOssLocalSmokeOutputCheck(unittest.TestCase):
                 "codex_runtime_token_budget_exceeded",
             },
         )
-        self.assertEqual(
-            payload["runtime_observations"],
-            {
-                "model": "qwen3.5:9b-mlx",
-                "provider": "ollama",
-                "approval": "never",
-                "sandbox": "read-only",
-                "session_id": "019f241c-b505-79a1-bb69-8a4efceda0a4",
-                "tokens_used": 24039,
-                "codex_jsonl_reasoning_event_observed": False,
-                "metadata_fallback_observed": True,
-                "visible_thinking_observed": True,
-            },
-        )
+        self.assertEqual(payload["runtime_observations"], _expected_runtime_observations())
 
     def test_check_allows_codex_jsonl_reasoning_telemetry_but_tracks_it(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

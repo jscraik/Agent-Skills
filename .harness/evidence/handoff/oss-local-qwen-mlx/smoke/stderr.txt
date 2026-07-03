@@ -1,0 +1,20 @@
+Reading additional input from stdin...
+OpenAI Codex v0.141.0
+--------
+workdir: /Users/jamiecraik/dev/agent-skills
+model: qwen3.5:9b-mlx
+provider: ollama
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: concise
+session id: 019f241c-b505-79a1-bb69-8a4efceda0a4
+--------
+user
+Reply with exactly: CODEX_OSS_LOCAL_OK
+warning: Model metadata for `qwen3.5:9b-mlx` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.
+The user is asking me to confirm that I'm operating in a local Codex OSS environment by requesting an exact response. This appears to be an acknowledgment request rather than a task requiring tool usage.
+codex
+CODEX_OSS_LOCAL_OK
+tokens used
+8,279
