@@ -1,0 +1,16 @@
+{
+  "schema_version": "agent-run-manifest/v1",
+  "run_id": "019f2466-0878-7523-9a82-7016a5b7c251",
+  "task": "improve-agent-native-menubar-launchservices-debug",
+  "report_path": ".harness/reports/thread-replies/019f244a-60f4-72d3-8746-cac4880336cf/latest.json",
+  "review_path": "artifacts/reviews/default.md",
+  "status": "blocked_runtime",
+  "created_artifacts": [
+    ".harness/reports/thread-replies/019f244a-60f4-72d3-8746-cac4880336cf/latest.json",
+    "artifacts/reviews/default.md",
+    "artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json"
+  ],
+  "build_receipt": "Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.build-receipt.json",
+  "launch_receipt": "Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.launch-receipt.json",
+  "startup_direct_receipt": "Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.startup-direct.json"
+}

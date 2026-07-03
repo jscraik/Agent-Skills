@@ -1,0 +1,43 @@
+{
+  "schema_version": "agent-run-manifest/v1",
+  "agent_id": "019f24ba-a5c8-7e01-9767-e1544212b3df",
+  "task": "qwen oss-local happy-agents-md-audit focused repair",
+  "status": "blocked_runtime",
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "branch": "codex/improve-native-release-ratchets",
+  "head": "d21eb4674",
+  "pm_report_path": ".harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json",
+  "review_artifact": "artifacts/reviews/default.md",
+  "focused_case": "happy-agents-md-audit",
+  "owner_classification": "scenario_criteria_original_failure; runtime_runner_completion_current_blocker",
+  "changed_files": [
+    "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+    "Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py",
+    "Infrastructure/tests/test_skills_sdk_tessl_eval_quality.py",
+    ".harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json",
+    "artifacts/reviews/default.md"
+  ],
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache PYTHONPYCACHEPREFIX=/private/tmp/qwen-case-pycache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_tessl_eval_quality.py::test_expected_signal_rejects_scorer_boilerplate",
+      "outcome": "pass",
+      "evidence": "1 passed"
+    },
+    {
+      "command": "PYTHONPYCACHEPREFIX=/private/tmp/qwen-case-pycache python3 -m py_compile Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py",
+      "outcome": "pass"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json --json",
+      "outcome": "pass"
+    }
+  ],
+  "blocked_command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 45 --case happy-agents-md-audit --json --robot",
+  "blocker_evidence": "Latest artifact directory Infrastructure/artifacts/skills/improve-agent-native/20260702-223706-917494 contains prompt.txt only; scorecard.json and Codex final/stdout/stderr artifacts are missing.",
+  "blocked_next_gates": [
+    "oss-local-release-eval",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ]
+}

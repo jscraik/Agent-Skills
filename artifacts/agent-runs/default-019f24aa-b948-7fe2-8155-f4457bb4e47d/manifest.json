@@ -1,0 +1,24 @@
+{
+  "schema_version": "agent-run-manifest/v1",
+  "agent_id": "019f24aa-b948-7fe2-8155-f4457bb4e47d",
+  "task_name": "pr301_review_thread_repair",
+  "status": "blocked_policy_or_approval",
+  "report_path": ".harness/reports/thread-replies/019f244c-8068-7613-b6f9-be77d034c599/latest.json",
+  "review_artifact": "artifacts/reviews/default.md",
+  "manifest_path": "artifacts/agent-runs/default-019f24aa-b948-7fe2-8155-f4457bb4e47d/manifest.json",
+  "pr": "https://github.com/jscraik/Agent-Skills/pull/301",
+  "pushed_commit": "97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7",
+  "remaining_blockers": [
+    "Review-thread mutation blocked by tenant policy without explicit approval.",
+    "Semgrep (SAST) and Semgrep OSS pending in latest poll.",
+    "One live unresolved PR #301 review thread remains reported by GraphQL."
+  ],
+  "validation": [
+    "thread report validation pass",
+    "focused Python compile pass",
+    "focused pytest pass, 25 passed",
+    "validate_steering_uptake pass",
+    "swiftc parse App.swift pass",
+    "git diff --check pass"
+  ]
+}

@@ -1,0 +1,2 @@
+WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/codex-home", but that path does not exist
+Error finding codex home: CODEX_HOME points to ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/codex-home", but that path does not exist
