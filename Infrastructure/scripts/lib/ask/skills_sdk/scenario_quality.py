@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks, release_scenario_set_case_ids
+from ask.skills_sdk.scenario_registry_guardrails import no_direct_registry_use_checks
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
 from ask.skills_sdk.release_rubric_checks import release_rubric_regex_checks
@@ -599,6 +600,7 @@ def _rows(cases: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
 
 def _quality_checks(
     repo_root: Path,
+    skill_dir: Path,
     evals_path: Path,
     evals_payload: dict[str, Any] | None,
     case_list: list[Any],
@@ -613,6 +615,7 @@ def _quality_checks(
     ]
     checks.extend(_release_suite_checks(case_list))
     checks.extend(build_release_scenario_set_checks(evals_payload, case_list))
+    checks.extend(no_direct_registry_use_checks(skill_dir, case_list))
     return checks
 
 def _release_suite_checks(case_list: list[Any]) -> list[dict[str, Any]]:
@@ -754,7 +757,7 @@ def build_scenario_quality_receipt(
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     evals_path, evals_payload, load_error, case_list = _scenario_quality_inputs(skill_md)
     scenario_rows, row_errors = _rows(case_list)
-    receipt_checks = _quality_checks(repo_root, evals_path, evals_payload, case_list, load_error, row_errors)
+    receipt_checks = _quality_checks(repo_root, skill_md.parent, evals_path, evals_payload, case_list, load_error, row_errors)
     scenario_set_parity, parity_checks = _scenario_quality_parity(
         repo_root, skill_md, evals_payload, scenario_set, scenario_rows, tessl_staged_json, tessl_score_json
     )

@@ -32,6 +32,8 @@ SCHEMA_NAMES = {
     "security-adapter-discovery-receipt": "security-adapter-discovery-receipt.v0.schema.json",
     "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
     "scenario-quality-receipt": "scenario-quality-receipt.v0.schema.json",
+    "scenario-registry-entry": "scenario-registry-entry.v0.schema.json",
+    "scenario-adaptation-receipt": "scenario-adaptation-receipt.v0.schema.json",
     "scorer-quality-receipt": "scorer-quality-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
@@ -210,6 +212,21 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["blockers"], [])
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
+
+    def test_scenario_registry_entry_fixture_records_governed_seed(self) -> None:
+        payload = self.assert_valid("scenario-registry-entry", "scenario-registry-entry.json")
+
+        self.assertEqual(payload["promotion_status"], "candidate")
+        self.assertIn("technical-writing", payload["domain_tags"])
+        self.assertIn("expected_signal", payload["acceptance_schema"])
+
+    def test_scenario_adaptation_receipt_fixture_records_sdk_authorized_localization(self) -> None:
+        payload = self.assert_valid("scenario-adaptation-receipt", "scenario-adaptation-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["authorized_stage"], "scenario_generation")
+        self.assertTrue(payload["criteria_ownership"]["local_criteria_authoritative"])
+        self.assertEqual(payload["target_case_id"], "proof-boundary")
 
     def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
         payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")

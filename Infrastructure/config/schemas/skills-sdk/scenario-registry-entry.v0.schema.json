@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/scenario-registry-entry.v0.schema.json",
+  "title": "Skills SDK Scenario Registry Entry v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.scenario-registry-entry.v0"},
+    "canonical_scenario_id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "domain_tags": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "capability_tags": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "source_skill": {"type": "string", "minLength": 1},
+    "source_case_id": {"type": "string", "minLength": 1},
+    "source_commit": {"type": "string", "minLength": 7},
+    "scenario_contract_type": {
+      "type": "string",
+      "enum": ["routing_smoke", "release_behavior", "negative_boundary", "pressure_case", "generated_fixture", "scorer_calibration", "regression"]
+    },
+    "required_fixture_assets": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "adaptation_rules": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "nonportable_assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "acceptance_schema": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "scorer_rubric_mapping": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "proven_gates": {"type": "array", "items": {"$ref": "#/definitions/gateEvidence"}},
+    "score_history": {"type": "array", "items": {"$ref": "#/definitions/gateEvidence"}},
+    "provenance": {"type": "object", "additionalProperties": false, "properties": {
+      "owner": {"type": "string", "minLength": 1},
+      "source": {"type": "string", "minLength": 1},
+      "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+    }, "required": ["owner", "source", "evidence_refs"]},
+    "promotion_status": {"type": "string", "enum": ["candidate", "promoted_seed", "deprecated", "quarantined", "retired"]},
+    "demotion_reason": {"type": "string"}
+  },
+  "required": [
+    "schema_version",
+    "canonical_scenario_id",
+    "version",
+    "title",
+    "domain_tags",
+    "capability_tags",
+    "source_skill",
+    "source_case_id",
+    "source_commit",
+    "scenario_contract_type",
+    "required_fixture_assets",
+    "adaptation_rules",
+    "nonportable_assumptions",
+    "acceptance_schema",
+    "scorer_rubric_mapping",
+    "proven_gates",
+    "score_history",
+    "provenance",
+    "promotion_status",
+    "demotion_reason"
+  ],
+  "definitions": {
+    "gateEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gate": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "fail", "blocked", "not_run"]},
+        "receipt_ref": {"type": "string", "minLength": 1}
+      },
+      "required": ["gate", "status", "receipt_ref"]
+    }
+  }
+}

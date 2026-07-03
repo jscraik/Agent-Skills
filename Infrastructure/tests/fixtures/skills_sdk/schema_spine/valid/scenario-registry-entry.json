@@ -1,0 +1,41 @@
+{
+  "schema_version": "skills-sdk.scenario-registry-entry.v0",
+  "canonical_scenario_id": "docs.boundary.no-readiness-without-proof",
+  "version": "0.1.0",
+  "title": "Block readiness claims without command proof",
+  "domain_tags": ["skills-sdk", "technical-writing"],
+  "capability_tags": ["release-readiness", "claim-vs-evidence"],
+  "source_skill": "Skills/agent-ops/technical-writer",
+  "source_case_id": "regression-stale-command-example",
+  "source_commit": "960493d",
+  "scenario_contract_type": "regression",
+  "required_fixture_assets": [],
+  "adaptation_rules": [
+    "Rewrite task text for the target skill domain before use.",
+    "Keep local acceptance criteria authoritative after adaptation."
+  ],
+  "nonportable_assumptions": ["Original skill path must not be required by the adapted case."],
+  "acceptance_schema": ["expected_signal", "not_contains"],
+  "scorer_rubric_mapping": ["claim_vs_evidence"],
+  "proven_gates": [
+    {
+      "gate": "scenario-quality",
+      "status": "pass",
+      "receipt_ref": ".harness/evidence/example/scenario-quality.json"
+    }
+  ],
+  "score_history": [
+    {
+      "gate": "oss-local",
+      "status": "pass",
+      "receipt_ref": ".harness/evidence/example/oss-local.json"
+    }
+  ],
+  "provenance": {
+    "owner": "Agent Skills Team",
+    "source": "local-skill-scenario",
+    "evidence_refs": ["Skills/agent-ops/technical-writer/references/evals.yaml"]
+  },
+  "promotion_status": "candidate",
+  "demotion_reason": ""
+}
