@@ -68,11 +68,10 @@
     },
     {
       "if": {"properties": {"status": {"const": "pass"}}},
-      "then": {"properties": {"blockers": {"maxItems": 0}}}
-    },
-    {
-      "if": {"properties": {"status": {"const": "pass"}}},
-      "then": {"properties": {"validation": {"items": {"properties": {"status": {"const": "pass"}}}}}}
+      "then": {"properties": {
+        "blockers": {"maxItems": 0},
+        "validation": {"items": {"properties": {"status": {"const": "pass"}}}}
+      }}
     }
   ],
   "definitions": {

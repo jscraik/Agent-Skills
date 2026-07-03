@@ -216,18 +216,28 @@ def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[st
     source_id = str(registry_source.get("canonical_scenario_id") or registry_source.get("id") or "")
     source_version = str(registry_source.get("version") or "")
     source_digest = str(registry_source.get("digest") or "")
-    for case_source in _case_registry_sources(case):
-        case_id = str(case_source.get("canonical_scenario_id") or case_source.get("id") or "")
-        case_version = str(case_source.get("version") or "")
-        case_digest = str(case_source.get("digest") or "")
-        if (
-            source_id
-            and source_id == case_id
-            and (not case_version or source_version == case_version)
-            and (not case_digest or source_digest == case_digest)
-        ):
+    if not source_id:
+        return False
+    matching_sources = [
+        case_source
+        for case_source in _case_registry_sources(case)
+        if source_id == str(case_source.get("canonical_scenario_id") or case_source.get("id") or "")
+    ]
+    constrained_sources = [
+        case_source for case_source in matching_sources if case_source.get("version") or case_source.get("digest")
+    ]
+    for case_source in constrained_sources or matching_sources:
+        if _registry_source_constraints_match(case_source, source_version=source_version, source_digest=source_digest):
             return True
     return False
+
+
+def _registry_source_constraints_match(
+    case_source: dict[str, str], *, source_version: str, source_digest: str
+) -> bool:
+    case_version = str(case_source.get("version") or "")
+    case_digest = str(case_source.get("digest") or "")
+    return bool((not case_version or source_version == case_version) and (not case_digest or source_digest == case_digest))
 
 
 def _case_registry_sources(value: Any) -> list[dict[str, str]]:
