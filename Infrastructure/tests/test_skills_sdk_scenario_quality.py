@@ -729,8 +729,8 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
             if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
             for evidence in check["evidence"]
         )
-        self.assertIn("schema_invalid", evidence)
-        self.assertIn("operation:required", evidence)
+        self.assertIn("receipt_missing_required_fields", evidence)
+        self.assertIn("operation", evidence)
 
     def test_builder_blocks_adaptation_receipt_missing_full_schema_fields(self) -> None:
         registry_id = "registry://shared/proof-boundary"
@@ -751,8 +751,9 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
             if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
             for evidence in check["evidence"]
         )
-        self.assertIn("schema_invalid", evidence)
-        self.assertIn("validation:required", evidence)
+        self.assertIn("receipt_missing_required_fields", evidence)
+        self.assertIn("validation", evidence)
+        self.assertIn("mutation_manifest", evidence)
 
     def test_builder_blocks_text_duplicate_when_pinned_registry_source_digest_mismatches(self) -> None:
         registry_id = "registry://shared/proof-boundary"

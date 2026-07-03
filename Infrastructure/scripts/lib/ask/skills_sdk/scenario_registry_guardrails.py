@@ -21,6 +21,26 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 ADAPTATION_RECEIPT_SCHEMA_PATH = (
     REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json"
 )
+ADAPTATION_RECEIPT_REQUIRED_FIELDS = (
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "authorized_stage",
+    "operator_context",
+    "registry_source",
+    "target_skill",
+    "target_case_id",
+    "localization_summary",
+    "criteria_ownership",
+    "fixture_asset_plan",
+    "acceptance_mapping",
+    "domain_fit",
+    "nonportable_assumptions_removed",
+    "validation",
+    "mutation_manifest",
+    "blockers",
+)
 
 
 def no_direct_registry_use_checks(skill_dir: Path, cases: list[Any]) -> list[dict[str, Any]]:
@@ -133,6 +153,9 @@ def _adaptation_receipt_error(receipt_path: Path, skill_dir: Path, case: dict[st
         return f"unreadable_receipt:{type(exc).__name__}"
     if not isinstance(receipt, dict):
         return "receipt_not_object"
+    required_fields_error = _receipt_required_fields_error(receipt)
+    if required_fields_error:
+        return required_fields_error
     schema_error = _schema_validation_error(receipt)
     if schema_error:
         return schema_error
@@ -153,6 +176,13 @@ def _adaptation_receipt_error(receipt_path: Path, skill_dir: Path, case: dict[st
     registry_source = receipt.get("registry_source")
     if not isinstance(registry_source, dict) or not _registry_source_matches_case(registry_source, case):
         return "registry_source_mismatch"
+    return None
+
+
+def _receipt_required_fields_error(receipt: dict[str, Any]) -> str | None:
+    missing = [field for field in ADAPTATION_RECEIPT_REQUIRED_FIELDS if field not in receipt]
+    if missing:
+        return f"receipt_missing_required_fields:{','.join(missing)}"
     return None
 
 
