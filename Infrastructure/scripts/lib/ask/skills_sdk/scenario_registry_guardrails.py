@@ -165,7 +165,7 @@ def _target_skill_matches(target_skill: dict[str, Any], skill_dir: Path) -> bool
 
 
 def _skill_path_aliases(skill_dir: Path) -> set[str]:
-    aliases = {skill_dir.as_posix(), skill_dir.name}
+    aliases = {skill_dir.as_posix()}
     resolved = skill_dir.resolve(strict=False)
     aliases.add(resolved.as_posix())
     try:
@@ -179,7 +179,7 @@ def _candidate_path_aliases(value: str) -> set[str]:
     if not value:
         return set()
     candidate = Path(value)
-    aliases = {value, candidate.name}
+    aliases = {value}
     if candidate.is_absolute():
         resolved = candidate.resolve(strict=False)
     else:
@@ -204,7 +204,37 @@ def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[st
         value = case.get(key)
         if isinstance(value, str) and value == source_id:
             return True
+    for value in _case_registry_ref_values(case):
+        if source_id and (value == source_id or source_id in value):
+            return True
     return False
+
+
+def _case_registry_ref_values(value: Any) -> list[str]:
+    values: list[str] = []
+    _collect_registry_ref_values(value, values)
+    return values
+
+
+def _collect_registry_ref_values(value: Any, values: list[str]) -> None:
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if str(key) in {"scenario_registry_id", "canonical_scenario_id", "shared_scenario_ref"} and isinstance(
+                nested, str
+            ):
+                values.append(nested)
+            elif str(key) == "registry_source" and isinstance(nested, dict):
+                nested_id = nested.get("canonical_scenario_id") or nested.get("id")
+                if isinstance(nested_id, str):
+                    values.append(nested_id)
+            _collect_registry_ref_values(nested, values)
+        return
+    if isinstance(value, list):
+        for nested in value:
+            _collect_registry_ref_values(nested, values)
+        return
+    if isinstance(value, str) and "registry://" in value:
+        values.append(value)
 
 
 def _schema_validation_error(receipt: dict[str, Any]) -> str | None:

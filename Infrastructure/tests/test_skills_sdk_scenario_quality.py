@@ -61,6 +61,31 @@ cases:
 """
 
 
+def _nested_registry_reference_evals_yaml(registry_id: str = "registry://shared/proof-boundary") -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants to preserve nested registry provenance after SDK adaptation.
+  should: Use the SDK-adapted local scenario and local criteria only when an adaptation receipt exists.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  metadata:
+    scenario_registry_id: "{registry_id}"
+    provenance: "Adapted from {registry_id} through the Skills SDK pipeline."
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
 def _plain_evals_yaml() -> str:
     return """schema_version: '2.0'
 skill_name: sample
@@ -383,6 +408,40 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
                 registry_id=registry_id,
                 target_path=target_path,
             )
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+
+    def test_builder_blocks_basename_only_target_skill_path_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                target_path=skill_dir.name,
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("target_skill_mismatch", evidence)
+
+    def test_builder_allows_nested_registry_reference_after_sdk_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _nested_registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(skill_dir, case_id="proof-boundary", registry_id=registry_id)
 
             receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
 
