@@ -219,7 +219,14 @@ def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[st
     if isinstance(case_source, dict):
         case_id = str(case_source.get("canonical_scenario_id") or case_source.get("id") or "")
         case_version = str(case_source.get("version") or "")
-        return bool(source_id and source_id == case_id and (not case_version or source_version == case_version))
+        case_digest = str(case_source.get("digest") or "")
+        source_digest = str(registry_source.get("digest") or "")
+        return bool(
+            source_id
+            and source_id == case_id
+            and (not case_version or source_version == case_version)
+            and (not case_digest or source_digest == case_digest)
+        )
     for key in ("scenario_registry_id", "canonical_scenario_id", "shared_scenario_ref"):
         value = case.get(key)
         if isinstance(value, str) and value == source_id:
