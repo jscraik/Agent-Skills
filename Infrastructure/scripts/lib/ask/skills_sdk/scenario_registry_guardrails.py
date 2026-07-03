@@ -17,6 +17,10 @@ ADAPTATION_RECEIPT_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json"
 )
 ADAPTATION_RECEIPT_DIR = Path("references/scenario-adaptation-receipts")
+REPO_ROOT = Path(__file__).resolve().parents[5]
+ADAPTATION_RECEIPT_SCHEMA_PATH = (
+    REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json"
+)
 
 
 def no_direct_registry_use_checks(skill_dir: Path, cases: list[Any]) -> list[dict[str, Any]]:
@@ -127,6 +131,9 @@ def _adaptation_receipt_error(receipt_path: Path, skill_dir: Path, case: dict[st
         return f"unreadable_receipt:{type(exc).__name__}"
     if not isinstance(receipt, dict):
         return "receipt_not_object"
+    schema_error = _schema_validation_error(receipt)
+    if schema_error:
+        return schema_error
     if receipt.get("schema_version") != ADAPTATION_RECEIPT_SCHEMA_VERSION:
         return "schema_version_mismatch"
     if receipt.get("schema_uri") != ADAPTATION_RECEIPT_SCHEMA_URI:
@@ -148,12 +155,41 @@ def _adaptation_receipt_error(receipt_path: Path, skill_dir: Path, case: dict[st
 
 
 def _target_skill_matches(target_skill: dict[str, Any], skill_dir: Path) -> bool:
-    expected = skill_dir.as_posix()
-    candidates = [
-        str(target_skill.get("path") or ""),
-        str(target_skill.get("package_path") or ""),
-    ]
-    return expected in candidates or skill_dir.name in candidates
+    expected = _skill_path_aliases(skill_dir)
+    candidates = {
+        alias
+        for raw_candidate in (target_skill.get("path"), target_skill.get("package_path"))
+        for alias in _candidate_path_aliases(str(raw_candidate or ""))
+    }
+    return bool(expected & candidates)
+
+
+def _skill_path_aliases(skill_dir: Path) -> set[str]:
+    aliases = {skill_dir.as_posix(), skill_dir.name}
+    resolved = skill_dir.resolve(strict=False)
+    aliases.add(resolved.as_posix())
+    try:
+        aliases.add(resolved.relative_to(REPO_ROOT.resolve(strict=False)).as_posix())
+    except ValueError:
+        pass
+    return {alias for alias in aliases if alias}
+
+
+def _candidate_path_aliases(value: str) -> set[str]:
+    if not value:
+        return set()
+    candidate = Path(value)
+    aliases = {value, candidate.name}
+    if candidate.is_absolute():
+        resolved = candidate.resolve(strict=False)
+    else:
+        resolved = (REPO_ROOT / candidate).resolve(strict=False)
+    aliases.add(resolved.as_posix())
+    try:
+        aliases.add(resolved.relative_to(REPO_ROOT.resolve(strict=False)).as_posix())
+    except ValueError:
+        pass
+    return {alias for alias in aliases if alias}
 
 
 def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[str, Any]) -> bool:
@@ -169,6 +205,85 @@ def _registry_source_matches_case(registry_source: dict[str, Any], case: dict[st
         if isinstance(value, str) and value == source_id:
             return True
     return False
+
+
+def _schema_validation_error(receipt: dict[str, Any]) -> str | None:
+    try:
+        schema = json.loads(ADAPTATION_RECEIPT_SCHEMA_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"schema_unavailable:{type(exc).__name__}"
+    errors = _validate_schema_node(receipt, schema, schema, "$")
+    if errors:
+        return f"schema_invalid:{errors[0]}"
+    return None
+
+
+def _validate_schema_node(value: Any, schema: dict[str, Any], root_schema: dict[str, Any], path: str) -> list[str]:
+    if "$ref" in schema:
+        schema = _resolve_ref(str(schema["$ref"]), root_schema)
+
+    errors: list[str] = []
+    if "const" in schema and value != schema["const"]:
+        errors.append(f"{path}:const")
+    if "enum" in schema and value not in schema["enum"]:
+        errors.append(f"{path}:enum")
+
+    expected_type = schema.get("type")
+    if expected_type and not _schema_type_matches(value, str(expected_type)):
+        errors.append(f"{path}:type:{expected_type}")
+        return errors
+
+    if isinstance(value, str) and "minLength" in schema and len(value) < int(schema["minLength"]):
+        errors.append(f"{path}:minLength")
+
+    if isinstance(value, list):
+        if "minItems" in schema and len(value) < int(schema["minItems"]):
+            errors.append(f"{path}:minItems")
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, item in enumerate(value):
+                errors.extend(_validate_schema_node(item, item_schema, root_schema, f"{path}[{index}]"))
+
+    if isinstance(value, dict):
+        required = schema.get("required")
+        if isinstance(required, list):
+            for key in required:
+                if isinstance(key, str) and key not in value:
+                    errors.append(f"{path}.{key}:required")
+        properties = schema.get("properties")
+        known_keys = set(properties) if isinstance(properties, dict) else set()
+        if schema.get("additionalProperties") is False:
+            for key in value:
+                if key not in known_keys:
+                    errors.append(f"{path}.{key}:additionalProperties")
+        if isinstance(properties, dict):
+            for key, nested_schema in properties.items():
+                if key in value and isinstance(nested_schema, dict):
+                    errors.extend(_validate_schema_node(value[key], nested_schema, root_schema, f"{path}.{key}"))
+    return errors
+
+
+def _resolve_ref(ref: str, root_schema: dict[str, Any]) -> dict[str, Any]:
+    if not ref.startswith("#/"):
+        return {}
+    current: Any = root_schema
+    for part in ref[2:].split("/"):
+        if not isinstance(current, dict):
+            return {}
+        current = current.get(part)
+    return current if isinstance(current, dict) else {}
+
+
+def _schema_type_matches(value: Any, expected_type: str) -> bool:
+    if expected_type == "object":
+        return isinstance(value, dict)
+    if expected_type == "array":
+        return isinstance(value, list)
+    if expected_type == "string":
+        return isinstance(value, str)
+    if expected_type == "boolean":
+        return isinstance(value, bool)
+    return True
 
 
 def _repo_relative(base: Path, path: Path) -> str:

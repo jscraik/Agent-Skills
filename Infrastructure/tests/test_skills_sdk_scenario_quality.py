@@ -83,37 +83,46 @@ cases:
 """
 
 
-def _write_adaptation_receipt(skill_dir: Path, *, case_id: str, registry_id: str) -> Path:
+def _write_adaptation_receipt(
+    skill_dir: Path,
+    *,
+    case_id: str,
+    registry_id: str,
+    target_path: str | None = None,
+    include_full_schema_fields: bool = True,
+) -> Path:
     receipt_dir = skill_dir / "references" / "scenario-adaptation-receipts"
     receipt_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = receipt_dir / f"{case_id}.json"
-    receipt_path.write_text(
-        json.dumps({
+    payload = {
             "schema_version": "skills-sdk.scenario-adaptation-receipt.v0",
             "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json",
             "status": "pass",
-            "operation": "scenario_registry_adapt",
-            "authorized_stage": "scenario_generation",
-            "operator_context": {
-                "command": "./bin/ask sdk eval scenario-registry adapt sample --scenario registry --apply --json --robot",
-                "workspace": "jscraik",
-            },
             "registry_source": {
                 "canonical_scenario_id": registry_id,
                 "version": "0.1.0",
                 "digest": "sha256:fixture",
             },
             "target_skill": {
-                "path": skill_dir.as_posix(),
+                "path": target_path or skill_dir.as_posix(),
                 "package_id": "sample",
                 "source_head": "960493d",
             },
             "target_case_id": case_id,
-            "localization_summary": "Adapted the registry seed to a local sample skill case.",
             "criteria_ownership": {
                 "local_criteria_authoritative": True,
                 "criteria_path": f"{skill_dir.as_posix()}/references/evals.yaml#{case_id}",
             },
+    }
+    if include_full_schema_fields:
+        payload.update({
+            "operation": "scenario_registry_adapt",
+            "authorized_stage": "scenario_generation",
+            "operator_context": {
+                "command": "./bin/ask sdk eval scenario-registry adapt sample --scenario registry --apply --json --robot",
+                "workspace": "jscraik",
+            },
+            "localization_summary": "Adapted the registry seed to a local sample skill case.",
             "fixture_asset_plan": [],
             "acceptance_mapping": ["expected_signal -> local expected_signal"],
             "domain_fit": "The local skill needs proof-boundary behavior.",
@@ -130,9 +139,8 @@ def _write_adaptation_receipt(skill_dir: Path, *, case_id: str, registry_id: str
                 receipt_path.as_posix(),
             ],
             "blockers": [],
-        }),
-        encoding="utf-8",
-    )
+        })
+    receipt_path.write_text(json.dumps(payload), encoding="utf-8")
     return receipt_path
 
 
@@ -363,6 +371,47 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
         self.assertEqual(receipt["blocked_count"], 0)
         quality_check_ids = {check["id"]: check["status"] for check in receipt["quality_checks"]}
         self.assertEqual(quality_check_ids["registry_reference_requires_sdk_adaptation_receipt"], "pass")
+
+    def test_builder_allows_repo_relative_target_skill_path_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            target_path = skill_dir.relative_to(REPO_ROOT).as_posix()
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                target_path=target_path,
+            )
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+
+    def test_builder_blocks_partial_adaptation_receipt_missing_schema_required_fields(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                include_full_schema_fields=False,
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("schema_invalid", evidence)
+        self.assertIn("operation:required", evidence)
 
     def test_builder_blocks_direct_registry_reference_in_skill_entrypoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
