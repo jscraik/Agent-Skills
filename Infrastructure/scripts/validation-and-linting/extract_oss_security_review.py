@@ -101,6 +101,8 @@ def _review_status_blockers(payload: dict[str, Any]) -> list[str]:
 def validate_review(path: Path, *, expected_digest: str | None = None) -> dict[str, Any]:
     try:
         payload = _extract_json(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return _blocked([f"review output could not be read: {exc}"])
     except (JSONDecodeError, ValueError) as exc:
         return _blocked([f"review output is not valid JSON: {exc}"])
     blockers = [
