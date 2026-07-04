@@ -2,6 +2,7 @@
 name: ubiquitous-language
 description: Build shared project vocabulary, glossary terms, aliases, prompt translations, domain-grill interviews, and agent instruction links when wording is fuzzy or overloaded.
 metadata:
+  version: "0.1.0"
   skill-type: team_automation
 ---
 
@@ -22,12 +23,20 @@ Make the user's natural language more powerful instead of making the user sound 
 
 Do not use for ordinary symbol renaming, generic copyediting, or broad docs rewrites without reusable terminology.
 
-## Required inputs
+## Inputs
 
 - Current conversation and the user's natural wording.
 - Existing `UBIQUITOUS-MAP.md`, `UBIQUITOUS.md`, or legacy `UBIQUITOUS_LANGUAGE.md`, if present.
 - Nearby project guidance such as `AGENTS.md`, `README.md`, `docs/**`, `instructions/**`, or handoff files.
 - Session logs only when the user explicitly asks for history-backed vocabulary.
+
+## Outputs
+
+The glossary should include context description, canonical language entries,
+aliases to avoid, relationships, example dialogue, flagged ambiguities, and
+source notes. Include prompt translations when informal user wording needs to
+map to repo-native actions. Structured output should include `schema_version: 1`
+when automation consumes it.
 
 ## Workflow
 
@@ -126,10 +135,6 @@ For multi-context repositories, create or update a root `UBIQUITOUS-MAP.md`:
 - Group terms under subheadings when natural clusters emerge. Use a flat list when all terms belong to one cohesive area.
 - Write an example dialogue between a developer and a domain expert that demonstrates how terms interact and clarifies boundaries between related concepts.
 
-## Deliverables
-
-The glossary should include context description, canonical language entries, aliases to avoid, relationships, example dialogue, flagged ambiguities, and source notes. Include prompt translations when informal user wording needs to map to repo-native actions. Structured output should include `schema_version: 1` when automation consumes it.
-
 ## Safety
 
 - Do not copy raw private transcripts, secrets, tokens, or unnecessary personal data.
@@ -162,7 +167,7 @@ The glossary should include context description, canonical language entries, ali
 - "Grill this plan against the existing domain model, challenge every fuzzy
   term, check contradictions in code, and update the glossary as terms resolve."
 
-## Failure mode
+## Failure Mode
 
 If the scope, source glossary, or authority for a terminology change is unclear, stop with one missing input rather than rewriting vocabulary by guesswork.
 
@@ -171,14 +176,20 @@ If the scope, source glossary, or authority for a terminology change is unclear,
 - Natural user wording is evidence; do not erase it when choosing canonical terms.
 - Avoid broad docs rewrites when a glossary pointer would solve the routing problem.
 
-## Progressive Disclosure
+## Validation
+
+Confirm the active glossary exists, every canonical term has a one- or
+two-sentence definition, aliases to avoid are listed for terms with competing
+names, flagged ambiguities include a resolution, prompt translations include at
+least one user phrase when informal wording exists, and the agent instruction
+pointer references the active ubiquitous-language file. Fail fast: stop at the
+first failed gate and do not proceed until the blocker is fixed.
+
+## References
 
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
-- Output template: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
+- Output template: `references/output-format.md` when present; otherwise use
+  `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
 - Archived long-form workflow: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/`
-
-## Validation
-
-Confirm the active glossary exists, every canonical term has a one- or two-sentence definition, aliases to avoid are listed for terms with competing names, flagged ambiguities include a resolution, prompt translations include at least one user phrase when informal wording exists, and the agent instruction pointer references the active ubiquitous-language file. Fail fast: stop at the first failed gate and do not proceed until the blocker is fixed.
