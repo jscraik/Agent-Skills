@@ -74,6 +74,8 @@ def build_comparison(
     local_cases = _cases_by_id(local_proof_set)
     cloud_cases = _cases_by_id(cloud_proof_set or {})
     has_cloud = bool(cloud_cases)
+    local_gate_status = str(local_proof_set.get("gate_status") or "")
+    cloud_gate_status = str((cloud_proof_set or {}).get("gate_status") or "")
     comparisons = []
     for case_id, local_case in local_cases.items():
         cloud_case = cloud_cases.get(case_id)
@@ -112,7 +114,12 @@ def build_comparison(
         "missing_cloud_count": sum(1 for item in comparisons if item["oss_cloud_status"] == "missing"),
         "missing_delta_owner_count": missing_owner_count,
     }
-    status = "pass" if summary["case_count"] > 0 and summary["delta_count"] == 0 else "blocked"
+    proof_sets_passed = local_gate_status == "pass" and cloud_gate_status == "pass"
+    status = (
+        "pass"
+        if summary["case_count"] > 0 and summary["delta_count"] == 0 and proof_sets_passed
+        else "blocked"
+    )
     if missing_owner_count:
         status = "blocked"
     return {
@@ -122,6 +129,10 @@ def build_comparison(
         "skill": local_proof_set.get("skill"),
         "baseline_profile": local_proof_set.get("codex_profile"),
         "comparison_profile": (cloud_proof_set or {}).get("codex_profile", "oss-cloud"),
+        "proof_set_gate_statuses": {
+            "oss-local": local_gate_status or "missing",
+            "oss-cloud": cloud_gate_status or "missing",
+        },
         "shard_size_limit": local_proof_set.get("shard_size_limit"),
         "summary": summary,
         "stage_maturity_expectations": stage_maturity_expectations or DEFAULT_STAGE_MATURITY_EXPECTATIONS,

@@ -15,9 +15,10 @@ from build_oss_minimum_comparison import _parse_stage_maturity_expectations, bui
 
 
 def _proof_set(profile: str, statuses: dict[str, str]) -> dict[str, object]:
+    gate_status = "pass" if statuses and all(status == "pass" for status in statuses.values()) else "blocked"
     return {
         "schema_version": "oss-minimum-proof-set/v1",
-        "gate_status": "pass",
+        "gate_status": gate_status,
         "skill": "Skills/agent-ops/improve-agent-native",
         "codex_profile": profile,
         "policy": "15-core-plus-5-regression",
@@ -69,6 +70,20 @@ class OssMinimumComparisonTests(unittest.TestCase):
         self.assertNotIn("oss-cloud-eval-run", receipt["blocked_next_gates"])
         self.assertIn("tessl-dry-run", receipt["blocked_next_gates"])
         self.assertIn("tessl-live", receipt["blocked_next_gates"])
+
+    def test_matching_non_pass_proof_sets_still_block_comparison(self) -> None:
+        local = _proof_set("oss-local", {"case-a": "blocked"})
+        cloud = _proof_set("oss-cloud", {"case-a": "blocked"})
+
+        receipt = build_comparison(local_proof_set=local, cloud_proof_set=cloud, delta_owners={})
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["summary"]["delta_count"], 0)
+        self.assertEqual(receipt["proof_set_gate_statuses"], {
+            "oss-local": "blocked",
+            "oss-cloud": "blocked",
+        })
+        self.assertIn("oss-cloud-eval-run", receipt["blocked_next_gates"])
 
     def test_non_parity_requires_owner_classification(self) -> None:
         local = _proof_set("oss-local", {"case-a": "pass"})

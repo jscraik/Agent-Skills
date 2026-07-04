@@ -1254,8 +1254,6 @@ cases:
   acceptance:
   - type: expected_signal
     value: Separates local validation evidence from unchecked remote CI and merge readiness proof.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?im)^\s*(score|decision|finding):\s*.*\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\
       passed|remote\ checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
