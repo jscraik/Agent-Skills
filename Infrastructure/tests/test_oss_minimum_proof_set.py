@@ -11,7 +11,7 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
 
-from build_oss_minimum_proof_set import _load_policy_cases, _parse_args, build_proof_set, default_blocked_next_gates  # noqa: E402
+from build_oss_minimum_proof_set import _load_policy_cases, _parse_args, build_proof_set, collect_case_evidence, default_blocked_next_gates  # noqa: E402
 
 
 def _write_run(root: Path, run_id: str, cases: list[dict[str, object]], *, closeout_status: str = "fail") -> None:
@@ -89,6 +89,7 @@ class OssMinimumProofSetTests(unittest.TestCase):
                 regression_cases=["core-two"],
                 codex_profile="oss-local",
                 model="qwen3.5:9b-mlx",
+                policy="15-core-plus-5-regression",
                 blocked_next_gates=["oss-cloud"],
                 shard_size_limit=2,
             )
@@ -120,6 +121,7 @@ class OssMinimumProofSetTests(unittest.TestCase):
                 regression_cases=["missing-regression"],
                 codex_profile="oss-cloud",
                 model=None,
+                policy="15-core-plus-5-regression",
                 blocked_next_gates=["tessl-dry-run"],
             )
 
@@ -163,6 +165,7 @@ class OssMinimumProofSetTests(unittest.TestCase):
                 regression_cases=[],
                 codex_profile="oss-local",
                 model="qwen3.5:9b-mlx",
+                policy="15-core-plus-5-regression",
                 blocked_next_gates=["oss-cloud"],
             )
             cloud_receipt = build_proof_set(
@@ -172,6 +175,7 @@ class OssMinimumProofSetTests(unittest.TestCase):
                 regression_cases=[],
                 codex_profile="oss-cloud",
                 model="oss-cloud",
+                policy="15-core-plus-5-regression",
                 blocked_next_gates=["tessl-dry-run"],
             )
 
@@ -190,6 +194,7 @@ class OssMinimumProofSetTests(unittest.TestCase):
                     "fixture": {
                         "skill": "Skills/fixture",
                         "shard_size_limit": 2,
+                        "policy": "custom-2-case-policy",
                         "core_cases": ["core-one"],
                         "regression_cases": ["regression-one"],
                     }
@@ -199,12 +204,38 @@ class OssMinimumProofSetTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            skill, core_cases, regression_cases, shard_size_limit = _load_policy_cases(policy_path, "fixture")
+            skill, policy, core_cases, regression_cases, shard_size_limit = _load_policy_cases(policy_path, "fixture")
 
         self.assertEqual(skill, "Skills/fixture")
+        self.assertEqual(policy, "custom-2-case-policy")
         self.assertEqual(core_cases, ["core-one"])
         self.assertEqual(regression_cases, ["regression-one"])
         self.assertEqual(shard_size_limit, 2)
+
+    def test_missing_result_path_stays_null(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifacts = Path(temp_dir)
+            run_dir = artifacts / "20260704-000004"
+            run_dir.mkdir()
+            (run_dir / "scorecard.json").write_text(
+                json.dumps({"run_id": "20260704-000004", "cases": [{"id": "core-one", "passed": True}]}),
+                encoding="utf-8",
+            )
+
+            evidence = collect_case_evidence(artifacts, "core-one", "core")
+
+        self.assertEqual(evidence.status, "pass")
+        self.assertIsNone(evidence.result_path)
+
+    def test_malformed_scorecard_raises_contextual_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifacts = Path(temp_dir)
+            run_dir = artifacts / "20260704-000005"
+            run_dir.mkdir()
+            (run_dir / "scorecard.json").write_text("{not json", encoding="utf-8")
+
+            with self.assertRaisesRegex(RuntimeError, "failed to parse JSON file"):
+                collect_case_evidence(artifacts, "core-one", "core")
 
 
 if __name__ == "__main__":

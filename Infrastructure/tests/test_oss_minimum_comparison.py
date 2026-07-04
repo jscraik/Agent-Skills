@@ -46,7 +46,7 @@ class OssMinimumComparisonTests(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["summary"]["case_count"], 2)
         self.assertEqual(receipt["summary"]["missing_cloud_count"], 2)
-        self.assertEqual(receipt["summary"]["missing_delta_owner_count"], 2)
+        self.assertEqual(receipt["summary"]["missing_delta_owner_count"], 0)
         self.assertEqual(receipt["comparisons"][0]["owner_if_delta"], "missing_cloud_evidence")
         self.assertEqual(receipt["shard_size_limit"], 2)
         self.assertIn("oss-cloud-eval-run", receipt["blocked_next_gates"])
@@ -77,6 +77,7 @@ class OssMinimumComparisonTests(unittest.TestCase):
         receipt = build_comparison(local_proof_set=local, cloud_proof_set=cloud, delta_owners={})
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["summary"]["missing_delta_owner_count"], 1)
+        self.assertEqual(receipt["comparisons"][0]["owner_if_delta"], "unclassified_delta")
 
         classified = build_comparison(
             local_proof_set=local,

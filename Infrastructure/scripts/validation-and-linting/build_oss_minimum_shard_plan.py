@@ -6,17 +6,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-def _load_json(path: Path) -> dict[str, Any]:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return payload if isinstance(payload, dict) else {}
+from oss_minimum_io import load_json_object
 
 
 def _selected_policy(policy_file: Path, proof_set_id: str | None) -> dict[str, Any]:
-    payload = _load_json(policy_file)
+    payload = load_json_object(policy_file)
     proof_sets = payload.get("proof_sets")
     if not isinstance(proof_sets, dict):
         return {}

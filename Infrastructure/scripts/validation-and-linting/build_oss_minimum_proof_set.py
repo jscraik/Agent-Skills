@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from oss_minimum_io import load_json_object
+
 
 DEFAULT_BLOCKED_NEXT_GATES = [
     "oss-local-full-release-expansion",
@@ -39,14 +41,6 @@ class CaseEvidence:
     failures: list[str]
     codex_exec_invoked: bool | None
     trace_total_tokens: int | None
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return payload if isinstance(payload, dict) else {}
 
 
 def _case_status(raw_case: dict[str, Any]) -> str:
@@ -96,10 +90,10 @@ def _workflow_validation_status(closeout: dict[str, Any]) -> str | None:
 def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> CaseEvidence:
     latest: CaseEvidence | None = None
     for scorecard_path in sorted(artifacts_root.glob("*/scorecard.json")):
-        scorecard = _load_json(scorecard_path)
+        scorecard = load_json_object(scorecard_path)
         run_id = str(scorecard.get("run_id") or scorecard_path.parent.name)
         closeout_path = scorecard_path.with_name("workflow-closeout.json")
-        closeout = _load_json(closeout_path)
+        closeout = load_json_object(closeout_path) if closeout_path.is_file() else {}
         closeout_case = _closeout_case(closeout, case_id)
         for raw_case in scorecard.get("cases") or []:
             if not isinstance(raw_case, dict) or raw_case.get("id") != case_id:
@@ -116,7 +110,10 @@ def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> Ca
                 workflow_closeout_path=str(closeout_path) if closeout_path.is_file() else None,
                 workflow_closeout_status=str(closeout.get("status")) if closeout.get("status") else None,
                 workflow_closeout_validation_status=_workflow_validation_status(closeout),
-                result_path=str(raw_case.get("dir") or closeout_case.get("result_path") if closeout_case else raw_case.get("dir")),
+                result_path=_optional_str(
+                    raw_case.get("dir")
+                    or (closeout_case.get("result_path") if closeout_case else None)
+                ),
                 blocker_class=str(raw_case.get("blocker_class")) if raw_case.get("blocker_class") else None,
                 failures=[str(item) for item in raw_case.get("tier1_failures") or []],
                 codex_exec_invoked=_runner_codex_exec(raw_case),
@@ -149,6 +146,7 @@ def build_proof_set(
     regression_cases: list[str],
     codex_profile: str,
     model: str | None,
+    policy: str | None = None,
     blocked_next_gates: list[str],
     shard_size_limit: int | None = None,
 ) -> dict[str, Any]:
@@ -175,7 +173,7 @@ def build_proof_set(
         "skill": skill,
         "codex_profile": codex_profile,
         "model": model,
-        "policy": "15-core-plus-5-regression",
+        "policy": policy or "unspecified",
         "shard_size_limit": shard_size_limit,
         "summary": summary,
         "blocked_next_gates": blocked_next_gates,
@@ -201,7 +199,7 @@ def build_proof_set(
             for case in cases
         ],
         "notes": [
-            "This artifact scopes Jamie's immediate OSS start gate to 15 core plus 5 regression cases.",
+            f"This artifact scopes Jamie's immediate OSS start gate to {len(core_cases)} core plus {len(regression_cases)} regression cases.",
             later_lane_notes.get(
                 codex_profile,
                 "It does not prove the full release lane, later OSS lanes, Tessl dry-run, Tessl live, CI, merge, publish, or release readiness.",
@@ -215,23 +213,29 @@ def default_blocked_next_gates(codex_profile: str) -> list[str]:
     return list(DEFAULT_BLOCKED_NEXT_GATES_BY_PROFILE.get(codex_profile, DEFAULT_BLOCKED_NEXT_GATES))
 
 
-def _load_policy_cases(policy_file: Path | None, proof_set_id: str | None) -> tuple[str | None, list[str], list[str], int | None]:
+def _optional_str(value: object) -> str | None:
+    return str(value) if value is not None else None
+
+
+def _load_policy_cases(policy_file: Path | None, proof_set_id: str | None) -> tuple[str | None, str | None, list[str], list[str], int | None]:
     if not policy_file:
-        return None, [], [], None
-    payload = _load_json(policy_file)
+        return None, None, [], [], None
+    payload = load_json_object(policy_file)
     proof_sets = payload.get("proof_sets")
     if not isinstance(proof_sets, dict):
-        return None, [], [], None
+        return None, None, [], [], None
     selected_id = proof_set_id or next(iter(proof_sets), None)
     selected = proof_sets.get(selected_id) if isinstance(selected_id, str) else None
     if not isinstance(selected, dict):
-        return None, [], [], None
+        return None, None, [], [], None
     skill = selected.get("skill")
+    policy = selected.get("policy")
     core_cases = selected.get("core_cases")
     regression_cases = selected.get("regression_cases")
     shard_size_limit = selected.get("shard_size_limit")
     return (
         skill if isinstance(skill, str) else None,
+        policy if isinstance(policy, str) else None,
         [str(case_id) for case_id in core_cases or [] if str(case_id).strip()],
         [str(case_id) for case_id in regression_cases or [] if str(case_id).strip()],
         shard_size_limit if isinstance(shard_size_limit, int) and not isinstance(shard_size_limit, bool) else None,
@@ -256,7 +260,7 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = _parse_args()
-    policy_skill, policy_core_cases, policy_regression_cases, shard_size_limit = _load_policy_cases(
+    policy_skill, policy_label, policy_core_cases, policy_regression_cases, shard_size_limit = _load_policy_cases(
         args.policy_file,
         args.proof_set_id,
     )
@@ -270,6 +274,7 @@ def main() -> int:
         regression_cases=regression_cases,
         codex_profile=args.codex_profile,
         model=args.model,
+        policy=policy_label,
         blocked_next_gates=args.blocked_next_gate or default_blocked_next_gates(args.codex_profile),
         shard_size_limit=shard_size_limit,
     )

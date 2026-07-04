@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from oss_minimum_io import load_json_object
+
 
 BLOCKED_NEXT_GATES_WHEN_BLOCKED = ["oss-cloud-eval-run", "tessl-dry-run", "tessl-live"]
 BLOCKED_NEXT_GATES_AFTER_PASS = ["tessl-dry-run", "tessl-live"]
@@ -23,16 +25,9 @@ DELTA_OWNERS = {
     "runtime",
     "environment",
     "none",
-    "missing_cloud_evidence",
 }
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return payload if isinstance(payload, dict) else {}
+MISSING_CLOUD_EVIDENCE_OWNER = "missing_cloud_evidence"
+UNCLASSIFIED_DELTA_OWNER = "unclassified_delta"
 
 
 def _case_status(case: dict[str, Any]) -> str:
@@ -60,13 +55,13 @@ def _cases_by_id(proof_set: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def _owner_for_delta(case_id: str, delta_owners: dict[str, str], *, has_cloud: bool, local_status: str, cloud_status: str) -> str:
     if not has_cloud:
-        return "missing_cloud_evidence"
+        return MISSING_CLOUD_EVIDENCE_OWNER
     if local_status == cloud_status:
         return "none"
     owner = delta_owners.get(case_id)
     if owner in DELTA_OWNERS:
         return owner
-    return "missing_cloud_evidence"
+    return UNCLASSIFIED_DELTA_OWNER
 
 
 def build_comparison(
@@ -108,7 +103,7 @@ def build_comparison(
             }
         )
     missing_owner_count = sum(
-        1 for item in comparisons if item["delta"] and item["owner_if_delta"] == "missing_cloud_evidence"
+        1 for item in comparisons if item["delta"] and item["owner_if_delta"] == UNCLASSIFIED_DELTA_OWNER
     )
     summary = {
         "case_count": len(comparisons),
@@ -143,7 +138,7 @@ def build_comparison(
 def _parse_owner_map(path: Path | None) -> dict[str, str]:
     if not path:
         return {}
-    payload = _load_json(path)
+    payload = load_json_object(path)
     raw = payload.get("delta_owners", payload)
     if not isinstance(raw, dict):
         return {}
@@ -153,7 +148,7 @@ def _parse_owner_map(path: Path | None) -> dict[str, str]:
 def _parse_stage_maturity_expectations(policy_file: Path | None, proof_set_id: str | None) -> dict[str, str]:
     if not policy_file:
         return DEFAULT_STAGE_MATURITY_EXPECTATIONS
-    payload = _load_json(policy_file)
+    payload = load_json_object(policy_file)
     proof_sets = payload.get("proof_sets")
     if not isinstance(proof_sets, dict):
         return DEFAULT_STAGE_MATURITY_EXPECTATIONS
@@ -183,8 +178,8 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     receipt = build_comparison(
-        local_proof_set=_load_json(args.oss_local_proof),
-        cloud_proof_set=_load_json(args.oss_cloud_proof) if args.oss_cloud_proof else None,
+        local_proof_set=load_json_object(args.oss_local_proof),
+        cloud_proof_set=load_json_object(args.oss_cloud_proof) if args.oss_cloud_proof else None,
         delta_owners=_parse_owner_map(args.delta_owner_map),
         stage_maturity_expectations=_parse_stage_maturity_expectations(args.policy_file, args.proof_set_id),
     )
