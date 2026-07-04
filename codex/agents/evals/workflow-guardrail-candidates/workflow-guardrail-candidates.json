@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "name": "workflow-guardrail-candidates",
+  "purpose": "Binary calibration pack for recurring workflow guardrail recommendations.",
+  "binary_criteria": "PASS iff the candidate is deterministic, bounded, and enforceable by one repo-native validator or fixture; otherwise FAIL.",
+  "calibration_policy": "Treat held_out cases as calibration-only before using any score as proof.",
+  "cases": [
+    {
+      "id": "mise-uv-cache-drift",
+      "source_pattern": "Repeated runtime drift in mise shim resolution or uv cache writes.",
+      "binary_verdict": "track",
+      "recommended_action": "implement",
+      "confidence": "high",
+      "suggested_validator": "validate-runtime-toolchain",
+      "evidence_refs": [
+        "codex/scripts/validate-runtime-toolchain.py"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "stale-feature-flag",
+      "source_pattern": "A stale feature flag or removed config key keeps reappearing in workflow evidence.",
+      "binary_verdict": "track",
+      "recommended_action": "implement",
+      "confidence": "high",
+      "suggested_validator": "validate-codex-config",
+      "evidence_refs": [
+        "codex/scripts/validate-codex-config.py"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "missing-closeout-evidence",
+      "source_pattern": "Readiness claims keep appearing without an exact command or workflow-closeout receipt.",
+      "binary_verdict": "track",
+      "recommended_action": "implement",
+      "confidence": "high",
+      "suggested_validator": "workflow-closeout",
+      "evidence_refs": [
+        "codex/scripts/workflow-closeout.py"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "subagent-artifact-missing",
+      "source_pattern": "A coordinator or subagent reports completion without the required artifact or manifest.",
+      "binary_verdict": "track",
+      "recommended_action": "implement",
+      "confidence": "high",
+      "suggested_validator": "validate-agent-artifacts",
+      "evidence_refs": [
+        "codex/scripts/validate-agent-artifacts.py"
+      ],
+      "split": "train"
+    },
+    {
+      "id": "linear-p0-blocking",
+      "source_pattern": "A new workflow P0 should block unrelated work until it is implemented, explicitly deferred, or downgraded by evidence.",
+      "binary_verdict": "track",
+      "recommended_action": "implement",
+      "confidence": "high",
+      "suggested_validator": "workflow-priority-gate",
+      "evidence_refs": [
+        "codex/scripts/workflow-priority-gate.py"
+      ],
+      "split": "held_out"
+    },
+    {
+      "id": "semgrep-anti-pattern",
+      "source_pattern": "A recurring Codex workflow anti-pattern is broad enough to deserve policy coverage but still needs a narrow machine-checkable surface.",
+      "binary_verdict": "track",
+      "recommended_action": "defer",
+      "confidence": "medium",
+      "suggested_validator": "validate-codex-hooks",
+      "evidence_refs": [
+        "codex/scripts/validate-codex-hooks.sh"
+      ],
+      "split": "held_out"
+    }
+  ],
+  "held_out_case_ids": [
+    "linear-p0-blocking",
+    "semgrep-anti-pattern"
+  ]
+}

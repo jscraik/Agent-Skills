@@ -903,6 +903,51 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 {gap["type"] for gap in summary["blocking_gaps"]},
             )
 
+    def test_release_claim_gate_does_not_block_focused_subset_missing_evidence_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [runner artifact]
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Focused diagnostic release run.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+                focused_subset=True,
+            )
+
+            self.assertTrue(summary["passed"])
+            self.assertEqual(summary["blocking_gaps"], [])
+            self.assertNotIn(
+                "claim_without_evidence_surface",
+                {gap["type"] for gap in summary["gaps"]},
+            )
+
     def test_release_claim_gate_counts_expected_evidence_surface(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             evals_path = Path(tmp) / "evals.yaml"
@@ -1032,6 +1077,44 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             "claim_without_passing_case",
             {gap["type"] for gap in claim_summary["blocking_gaps"]},
         )
+
+    def test_claim_execution_results_do_not_block_focused_subset_without_passing_artifact_case(self) -> None:
+        claim_summary = {
+            "claims": [
+                {
+                    "id": "demo.execution",
+                    "risk": "high",
+                    "hard_gate": True,
+                    "cases": ["execution"],
+                }
+            ],
+            "gaps": [],
+            "blocking_gaps": [],
+            "passed": True,
+        }
+        _attach_claim_execution_results(
+            claim_summary,
+            [
+                {
+                    "id": "execution",
+                    "passed": False,
+                    "blocked": False,
+                    "tier1_failed": True,
+                    "tier2_failed": False,
+                    "runners": {
+                        "discovery-smoke": {
+                            "runner": "discovery-smoke",
+                            "artifacts": {"final": "reports/execution/final.txt"},
+                        }
+                    },
+                }
+            ],
+            eval_mode="release",
+            focused_subset=True,
+        )
+
+        self.assertTrue(claim_summary["passed"])
+        self.assertEqual(claim_summary["blocking_gaps"], [])
 
     def test_claim_execution_results_block_when_passing_case_has_only_generic_artifacts(self) -> None:
         claim_summary = {

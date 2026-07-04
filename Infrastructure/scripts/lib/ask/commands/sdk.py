@@ -34,6 +34,7 @@ from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_execute import build_review_execution
 from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
+from ask.skills_sdk.local_score import LOCAL_SCORE_GATES
 
 
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -153,6 +154,19 @@ def _add_sdk_check_parser(
     parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
+
+
+def _add_sdk_score_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    parser = sdk_subparsers.add_parser("score", help="Build local Skills SDK score receipts", parents=[global_parser])
+    subparsers = parser.add_subparsers(dest="score_action", required=True)
+    local = subparsers.add_parser("local", help="Build a local Quality/Impact/Security score receipt", parents=[global_parser])
+    local.add_argument("target", help="Skill handle or repo-relative skill source path")
+    local.add_argument("--gate", choices=LOCAL_SCORE_GATES, default="creation")
+    local.add_argument("--ttl-seconds", type=int, default=300)
+    local.add_argument("--write-current", action="store_true", help="Write current.json plus immutable history for SkillsBar consumption")
 
 
 def _add_sdk_start_parser(
@@ -315,6 +329,7 @@ def add_sdk_parser(
     sdk_subparsers = sdk_parser.add_subparsers(dest="action")
     _add_sdk_start_parser(sdk_subparsers, global_parser)
     _add_sdk_check_parser(sdk_subparsers, global_parser)
+    _add_sdk_score_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
     add_sdk_evidence_parser(sdk_subparsers, global_parser)
@@ -458,6 +473,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers = {
         "start": _dispatch_sdk_start,
         "check": _dispatch_sdk_check,
+        "score": _dispatch_sdk_score,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
         "evidence": dispatch_sdk_evidence,
@@ -488,6 +504,18 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.action in dispatchers:
         return dispatchers[args.action](repo_root, args)
     return build_unknown_action_result("sdk", args.action)
+
+
+def _dispatch_sdk_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.score_action == "local":
+        return skills_commands.skills_sdk_local_score(
+            repo_root,
+            target=args.target,
+            gate=args.gate,
+            ttl_seconds=args.ttl_seconds,
+            write_current=args.write_current,
+        )
+    return build_unknown_action_result("sdk score", args.score_action)
 
 
 def _dispatch_sdk_ir(repo_root: Path, args: argparse.Namespace) -> CallResult:

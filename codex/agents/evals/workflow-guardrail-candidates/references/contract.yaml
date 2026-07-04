@@ -1,0 +1,32 @@
+schema_version: "1.1"
+purpose: "Operational contract for workflow-guardrail-candidates routing and execution boundaries."
+triggers:
+  - "user requests workflow-guardrail-candidates behavior"
+  - "user asks to harden, audit, validate, or patch recurring workflow guardrail recommendations"
+inputs:
+  - "task intent"
+  - "target path or source context"
+  - "canonical source path or enough evidence to resolve it"
+outputs:
+  - "structured response with explicit status"
+  - "validation evidence using pass/fail/blocked"
+  - "candidate decision with confidence and validator"
+non_goals:
+  - "unrelated implementation work outside eval-pack scope"
+risks:
+  - "ambiguous intent can cause wrong lane selection"
+  - "copying long review prompts into SKILL.md can inflate invoke cost and hide routing"
+output_contract:
+  schema_version: "1"
+  required_fields:
+    - "schema_version"
+    - "mode"
+    - "validation_evidence"
+    - "context_lifecycle_status"
+    - "context.lifecycle.stage"
+observability: "Track pass/fail/blocked outcomes for each validation command in run output."
+context_lifecycle:
+  required_stages: [generate, test, distribute, observe, adapt]
+  minimum_for_behavior_change:
+    - "realistic eval or validation route updated"
+    - "future observation source named"

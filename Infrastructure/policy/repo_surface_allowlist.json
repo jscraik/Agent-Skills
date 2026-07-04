@@ -153,6 +153,51 @@
       "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
       "owner": "skills-sdk",
       "review_after": "2026-09-21"
+    },
+    {
+      "id": "skills-sdk-oss-security-review-evidence-20260704",
+      "match_type": "prefix",
+      "pattern": ".harness/evidence/skills-sdk/oss-security/",
+      "classification": "historical_artifact",
+      "reason": "Reviewed oss-security receipt-first experiment evidence for improve-agent-native, including deterministic lane receipts and candidate model-review transcripts retained for PR audit.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "improve-agent-native-eval-closeouts-20260703",
+      "match_type": "glob",
+      "pattern": "Infrastructure/artifacts/evals/closeouts/20260703*",
+      "classification": "historical_artifact",
+      "reason": "Reviewed improve-agent-native eval closeout receipts retained as release-ratchet evidence for the Skills SDK guardrail PR.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "improve-agent-native-dashboard-release-20260704",
+      "match_type": "exact",
+      "pattern": "Infrastructure/artifacts/skill-reviews/improve-agent-native-dashboard-release.html",
+      "classification": "historical_artifact",
+      "reason": "Reviewed generated dashboard release artifact retained as improve-agent-native release evidence until dashboard output moves to a governed receipt store.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "codex-workflow-guardrail-candidates-eval-package",
+      "match_type": "prefix",
+      "pattern": "codex/agents/evals/workflow-guardrail-candidates/",
+      "classification": "classification_required",
+      "reason": "Canonical workflow guardrail candidate eval package retained as reviewed source-candidate material while codex/ subtree ownership policy is formalized.",
+      "owner": "agent-skills validation",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "codex-workflow-guardrail-candidates-calibration-examples",
+      "match_type": "exact",
+      "pattern": "codex/agents/evals/workflow-guardrail-candidates/references/scorer-calibration/examples.jsonl",
+      "classification": "historical_artifact",
+      "reason": "Reviewed scorer-calibration examples retained with the workflow guardrail candidate eval package for regression and calibration evidence.",
+      "owner": "agent-skills validation",
+      "review_after": "2026-10-04"
     }
   ]
 }

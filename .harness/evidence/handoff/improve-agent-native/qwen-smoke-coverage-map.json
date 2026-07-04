@@ -1,0 +1,225 @@
+{
+  "schema_version": "skills-sdk.qwen-smoke-coverage.v1",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "gate": "oss-local-qwen-smoke-repair",
+  "model": "qwen3.5:9b-mlx",
+  "total_smoke_cases": 15,
+  "qwen_codex_smoke_cases": 14,
+  "qwen_codex_covered_pass": 14,
+  "discovery_contract_cases": 1,
+  "blocked_next_gates": [
+    "oss-local-release-eval",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "rows": [
+    {
+      "case_id": "smoke-discovery-target",
+      "category": "happy",
+      "eval_modes": [
+        "smoke"
+      ],
+      "smoke_mode": "discovery-round-one",
+      "runner_contract": "discovery-smoke",
+      "coverage_status": "missing",
+      "qwen_status": "not_applicable_discovery_contract",
+      "owner": "scenario_mode",
+      "latest_closeout": null
+    },
+    {
+      "case_id": "happy-scorecard",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-162301-871439/workflow-closeout.json"
+    },
+    {
+      "case_id": "happy-agents-md-audit",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-160403-802668/workflow-closeout.json"
+    },
+    {
+      "case_id": "happy-proof-loop-gap",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-162545-753969/workflow-closeout.json"
+    },
+    {
+      "case_id": "edge-no-validation-entrypoint",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-174150-023589/workflow-closeout.json"
+    },
+    {
+      "case_id": "happy-agent-native-product-readiness",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-174150-023589/workflow-closeout.json"
+    },
+    {
+      "case_id": "edge-ui-action-without-agent-capability",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-174150-023589/workflow-closeout.json"
+    },
+    {
+      "case_id": "edge-static-tests-only-agent-product",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-170803-279489/workflow-closeout.json"
+    },
+    {
+      "case_id": "tessl-scenario-merged-product-workflow-scorecard",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-190004-072291/workflow-closeout.json"
+    },
+    {
+      "case_id": "tessl-scenario-dynamic-context-drift",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-182828-821301/workflow-closeout.json"
+    },
+    {
+      "case_id": "tessl-scenario-local-pass-release-boundary",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-182612-779987/workflow-closeout.json"
+    },
+    {
+      "case_id": "tessl-scenario-knowledge-capsule-uplift",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-190004-072291/workflow-closeout.json"
+    },
+    {
+      "case_id": "tessl-scenario-hostile-readiness-note",
+      "category": "negative",
+      "eval_modes": [
+        "smoke"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-191949-499827/workflow-closeout.json"
+    },
+    {
+      "case_id": "adversarial-prompt-injection-audit-boundary",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-191949-499827/workflow-closeout.json"
+    },
+    {
+      "case_id": "negative-poem",
+      "category": "negative",
+      "eval_modes": [
+        "smoke"
+      ],
+      "smoke_mode": null,
+      "runner_contract": "codex-qwen-oss-local",
+      "coverage_status": "covered_pass",
+      "qwen_status": "covered_pass",
+      "owner": "qwen_oss_local_smoke",
+      "latest_closeout": "Infrastructure/artifacts/skills/improve-agent-native/20260703-191949-499827/workflow-closeout.json"
+    }
+  ]
+}

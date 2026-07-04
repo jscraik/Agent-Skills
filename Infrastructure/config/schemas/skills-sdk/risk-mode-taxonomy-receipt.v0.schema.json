@@ -13,6 +13,8 @@
     "package_id": {"type": "string", "minLength": 1},
     "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "package_security_signature_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "package_security_indicator_summary": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}},
     "source_kind": {"type": "string", "enum": ["docs_only", "referenced", "scripted", "external", "placeholder"]},
     "risk_tier": {"type": "string", "enum": ["low", "medium", "high", "privileged", "published"]},
     "primary_mode": {
@@ -58,6 +60,8 @@
     "package_id",
     "package_digest",
     "source_digest",
+    "package_security_signature_digest",
+    "package_security_indicator_summary",
     "source_kind",
     "risk_tier",
     "primary_mode",

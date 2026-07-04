@@ -1,0 +1,117 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f2871-1058-7a02-aeda-6cbaa76a91b9",
+  "repo_head": "5de2b741faa9adbbe60af25449028adfa73bf539",
+  "task_id": "shared-scenario-registry-pr306-sweep",
+  "status": "blocked",
+  "current_gate": "hosted-ci-and-review-policy",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "stacked-scenario-registry-implementation",
+    "merge",
+    "release"
+  ],
+  "commands": [
+    {
+      "command": "git fetch origin codex/scenario-registry-guardrails && git merge --ff-only origin/codex/scenario-registry-guardrails && gh pr view 306 --repo jscraik/Agent-Skills --json number,url,state,isDraft,mergeStateStatus,reviewDecision,headRefOid --jq '{number,url,state,isDraft,mergeStateStatus,reviewDecision,headRefOid}' && gh api graphql ... reviewThreads(first:100) ...",
+      "outcome": "pass",
+      "evidence": "Before the second repair, PR 306 head was 29ac6ee361c7231f93c5c9a49dacbfc73711f07c, OPEN, non-draft, mergeStateStatus BLOCKED, reviewDecision empty. GraphQL returned total_unresolved=5, live_unresolved=3, and live target threads 3520790957, 3521405760, and 3521540527."
+    },
+    {
+      "command": "env MISE_STATE_DIR=/private/tmp/agent-skills-scenario-registry-mise-state MISE_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-mise-cache MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-scenario-registry-guardrails-3/.mise.toml XDG_CACHE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_adaptation_receipt_missing_full_schema_fields tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_pass_adaptation_receipt_with_failed_validation_row tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_text_duplicate_when_pinned_registry_source_digest_mismatches tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_nested_registry_source_version_mismatch tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_nested_registry_source_digest_mismatch tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_scenario_adaptation_receipt_pass_status_requires_pass_validation_rows",
+      "outcome": "pass",
+      "evidence": "6 focused review-driven regressions passed for full schema receipt fields, pass validation evidence, duplicate text plus pinned source mismatch, and nested source version/digest mismatch."
+    },
+    {
+      "command": "env MISE_STATE_DIR=/private/tmp/agent-skills-scenario-registry-mise-state MISE_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-mise-cache MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-scenario-registry-guardrails-3/.mise.toml XDG_CACHE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/lib/ask/skills_sdk/scenario_registry_guardrails.py scripts/validation-and-linting/validate_no_direct_registry_scenario_use.py tests/test_skills_sdk_scenario_quality.py tests/test_skills_sdk_schema_spine.py && env MISE_STATE_DIR=/private/tmp/agent-skills-scenario-registry-mise-state MISE_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-mise-cache MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-scenario-registry-guardrails-3/.mise.toml XDG_CACHE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_scenario_quality.py tests/test_skills_sdk_schema_spine.py",
+      "outcome": "pass",
+      "evidence": "Affected compile and suite validation passed twice after the second repair sequence; latest full affected suite reported 157 passed and 45 subtests passed."
+    },
+    {
+      "command": "env MISE_STATE_DIR=/private/tmp/agent-skills-scenario-registry-mise-state MISE_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-mise-cache MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-scenario-registry-guardrails-3/.mise.toml XDG_CACHE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-scenario-registry-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-scenario-registry-uv-cache ./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot > /private/tmp/scenario-registry-guardrails-cli-after-review-fix-3.json && jq '{status, trace_id, scenario_count: .data.skills_sdk_eval_scenario_quality.receipt.scenario_count, promotion_ready_count: .data.skills_sdk_eval_scenario_quality.receipt.promotion_ready_count, blocked_count: .data.skills_sdk_eval_scenario_quality.receipt.blocked_count}' /private/tmp/scenario-registry-guardrails-cli-after-review-fix-3.json && git diff --check",
+      "outcome": "pass",
+      "evidence": "SDK scenario-quality fixture returned status=success, trace_id=d4badc71-d761-41c7-85ee-ab97d190d3b3, scenario_count=1, promotion_ready_count=1, blocked_count=0. git diff --check emitted no findings."
+    },
+    {
+      "command": "git commit -F /private/tmp/scenario-registry-review-commit-msg-2.txt && git push origin HEAD:codex/scenario-registry-guardrails && git ls-remote origin refs/heads/codex/scenario-registry-guardrails",
+      "outcome": "pass",
+      "evidence": "Created and pushed 320ad1aa992e0ab6649491a8556f5865ac194903 fix(sdk): prefer pinned registry source evidence. Git printed the known linked-worktree packed-refs.lock warning during commit, but branch push and ls-remote confirmed the remote head."
+    },
+    {
+      "command": "git commit -F /private/tmp/scenario-registry-review-commit-msg-3.txt && git push origin HEAD:codex/scenario-registry-guardrails && git ls-remote origin refs/heads/codex/scenario-registry-guardrails",
+      "outcome": "pass",
+      "evidence": "Created and pushed 5de2b741faa9adbbe60af25449028adfa73bf539 fix(sdk): fail closed on partial adaptation receipts. Git printed the known linked-worktree packed-refs.lock warning during commit, but branch push and ls-remote confirmed the remote head."
+    },
+    {
+      "command": "gh pr view 306 --repo jscraik/Agent-Skills --json number,url,title,state,isDraft,mergeStateStatus,mergeable,reviewDecision,headRefName,headRefOid,baseRefName --jq '{number,url,title,state,isDraft,mergeStateStatus,mergeable,reviewDecision,headRefName,headRefOid,baseRefName}' && gh pr checks 306 --repo jscraik/Agent-Skills --watch=false",
+      "outcome": "blocked",
+      "evidence": "Latest PR head is 5de2b741faa9adbbe60af25449028adfa73bf539, OPEN, non-draft, mergeable=MERGEABLE, mergeStateStatus=BLOCKED, reviewDecision empty. Latest check poll had CodeRabbit pass, with several hosted checks still pending including Analyze javascript/python, CircleCI pr-pipeline, Semgrep SAST, Trivy dependency scan, risk-policy-gate, security-scan, pr-pipeline, and ci/circleci."
+    },
+    {
+      "command": "gh api graphql ... reviewThreads(first:100) ...",
+      "outcome": "pass",
+      "evidence": "After head 5de2b741, GraphQL returned total_unresolved=5, live_unresolved=1. Threads 3521405760 and 3521540527 are now isOutdated=true. Thread 3520790957 remains live/non-outdated despite source proof for full receipt required-field validation."
+    },
+    {
+      "command": "gh api graphql mutation resolveReviewThread for PRRT_kwDOQ6nR9s6OQSAq PRRT_kwDOQ6nR9s6OQeti PRRT_kwDOQ6nR9s6OQetj",
+      "outcome": "blocked",
+      "evidence": "Earlier in this repair loop, CreateProcess rejected resolveReviewThread mutation because tenant policy denies review-thread mutation. No further mutation was attempted for PRRT_kwDOQ6nR9s6OOvIZ; it remains review-thread-policy unless a permitted actor resolves it."
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/reports/thread-replies/019f2871-1058-7a02-aeda-6cbaa76a91b9/latest.json",
+      "assertion": "This thread-report/v1 artifact records the PR 306 second review repair without advancing stacked implementation scope.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/memory/LEARNINGS.md",
+      "assertion": "The pinned-source, full-receipt, and pass-validation lessons are recorded for future scenario registry and adaptation lanes.",
+      "outcome": "pass"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/306",
+      "problem": "Source-owned review findings were patched and validated locally, but latest hosted checks are still settling and GitHub reports mergeStateStatus BLOCKED with reviewDecision empty.",
+      "owner": "github-review-policy-and-hosted-ci"
+    },
+    {
+      "artifact": "GitHub review threads",
+      "problem": "Thread 3520790957 remains live/non-outdated even after adding explicit required-field guard and regression proof. Tenant policy blocks agent-side resolveReviewThread mutation, so this is now a review-thread-policy lane unless a permitted actor resolves it or adds new source feedback.",
+      "owner": "review-thread-policy"
+    }
+  ],
+  "files_changed": [
+    ".harness/reports/thread-replies/019f2871-1058-7a02-aeda-6cbaa76a91b9/latest.json",
+    ".harness/reports/thread-replies/019f2871-1058-7a02-aeda-6cbaa76a91b9/pm-delivery.json",
+    ".harness/memory/LEARNINGS.md"
+  ],
+  "lessons": [
+    {
+      "lesson": "Shared scenario registry matching must prefer pinned source evidence over loose text references for the same canonical id.",
+      "failure_pattern": "A stale receipt can fail pinned version or digest comparison, then pass on a duplicate registry:// string elsewhere in the case.",
+      "carry_forward_target": "Scenario-quality registry guardrail and future registry adaptation command.",
+      "deterministic_guardrail": "Regression test blocks text duplicate when pinned registry_source digest mismatches.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "Focused pytest -> 6 passed; wider pytest -> 157 passed and 45 subtests passed."
+    },
+    {
+      "lesson": "Scenario adaptation receipts must fail closed on missing contract fields before selected-field success checks.",
+      "failure_pattern": "A partial hand-written receipt could otherwise appear to satisfy selected local fields while omitting operation, authorized stage, operator context, validation, mutation manifest, or digest evidence.",
+      "carry_forward_target": "Scenario adaptation receipt guardrail and no-direct-registry-use validator.",
+      "deterministic_guardrail": "ADAPTATION_RECEIPT_REQUIRED_FIELDS precheck plus regression tests for partial receipts.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "Focused and wider pytest passed after adding required-field precheck."
+    },
+    {
+      "lesson": "Review-thread mutation is a separate policy lane from source repair.",
+      "failure_pattern": "Attempting to resolve review threads from the agent was rejected by tenant policy.",
+      "carry_forward_target": "PR Green Sweep closeout classification.",
+      "deterministic_guardrail": "Classify unresolved review threads as review-thread-policy when source patches and tests exist but resolveReviewThread is denied.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "GitHub GraphQL review-thread query and blocked mutation evidence recorded."
+    }
+  ],
+  "next_action": "Wait for hosted checks on head 5de2b741faa9adbbe60af25449028adfa73bf539, then refresh PR 306. If no new source-owned comments appear, a human or permitted review actor must resolve/approve the remaining live review thread or provide new source feedback."
+}

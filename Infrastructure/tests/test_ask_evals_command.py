@@ -105,6 +105,32 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
     assert run_mock.call_args.kwargs["start_new_session"] is True
 
 
+def test_oss_codex_smoke_timeout_seconds_is_per_case_not_suite_budget() -> None:
+    completed = subprocess.CompletedProcess(
+        args=["run_skill_evals.py"],
+        returncode=0,
+        stdout="Skill evals: improve-agent-native\nRESULT: PASS\n",
+        stderr="",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
+        evals.run_evals(
+            REPO_ROOT,
+            "Skills/agent-ops/improve-agent-native",
+            mode="smoke",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            codex_profile="oss-local",
+            cases=["happy-scorecard", "happy-agents-md-audit", "happy-proof-loop-gap"],
+            timeout_seconds=120,
+        )
+
+    command = run_mock.call_args.args[0]
+    assert command[command.index("--timeout-sec") + 1] == "120"
+    assert run_mock.call_args.kwargs["timeout"] >= 420
+
+
 def test_eval_blocker_classifies_no_matching_eval_cases_as_validation() -> None:
     blocker = evals._classify_eval_blocker(
         raw_output="",
@@ -2073,7 +2099,7 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     generated_task = generated_case.read_text(encoding="utf-8")
     assert "Review the architecture situation" not in generated_task
     assert "Architecture situation:" not in generated_task
-    assert "Help with this situation:" in generated_task
+    assert "Return the smallest next action" in generated_task
     criteria = json.loads(
         (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
             encoding="utf-8"
@@ -4083,6 +4109,38 @@ def test_run_evals_writes_blocked_closeout_for_partial_report_dir(tmp_path: Path
     assert closeout["closeout_validation"]["status"] == "pass"
 
 
+def test_run_evals_discovers_partial_report_dir_without_stdout_marker(tmp_path: Path) -> None:
+    report_dir = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-no-marker"
+    case_dir = report_dir / "01-edge-case"
+    case_dir.mkdir(parents=True)
+    (case_dir / "prompt.txt").write_text("Task: sparse brief\n", encoding="utf-8")
+    completed = mock.Mock(returncode=0, stdout="", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_missing_artifact"
+    closeout = result.data["eval_closeout"]
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_missing_artifact"
+    assert closeout["report_dir"] == "Infrastructure/artifacts/skills/example-skill/run-no-marker"
+    assert closeout["raw_output_present"] is False
+    assert closeout["raw_error_present"] is False
+    assert closeout["cases"] == [
+        {
+            "id": "edge-case",
+            "status": "blocked",
+            "blocker_class": "blocked_missing_artifact",
+            "expected_artifacts": ["result.json"],
+            "actual_artifacts": ["prompt.txt"],
+            "result_path": "Infrastructure/artifacts/skills/example-skill/run-no-marker/01-edge-case",
+        }
+    ]
+    assert (tmp_path / result.data["eval_closeout_path"]).is_file()
+    assert closeout["closeout_validation"]["status"] == "pass"
+
+
 def test_run_evals_blocks_success_without_report_directory(tmp_path: Path) -> None:
     completed = mock.Mock(
         returncode=0,
@@ -4575,7 +4633,58 @@ def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> 
         "eval_started",
         "eval_blocked",
     ]
-    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
+
+
+def test_run_evals_blocks_oversized_qwen_oss_local_smoke_batch_before_subprocess(tmp_path: Path) -> None:
+    with mock.patch.object(evals.subprocess, "run") as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/improve-agent-native",
+            mode="smoke",
+            runner="codex",
+            codex_profile="oss-local",
+            cases=["one", "two", "three"],
+            dashboard=False,
+            skip_tessl=True,
+        )
+
+    run.assert_not_called()
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+    batch = result.data["qwen_oss_local_smoke_batch"]
+    assert batch["status"] == "blocked"
+    assert batch["failure_category"] == "runtime_mismatch"
+    assert batch["given"] == "3 selected cases for qwen oss-local smoke"
+    assert batch["should"] == "run at most 2 cases per qwen oss-local shard"
+    assert batch["actual"] == ["one", "two", "three"]
+    assert "qwen oss-local smoke selected 3 cases" in result.errors[0].message
+
+
+def test_run_evals_blocks_oversized_qwen_oss_local_release_batch_before_subprocess(tmp_path: Path) -> None:
+    with mock.patch.object(evals.subprocess, "run") as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/improve-agent-native",
+            mode="release",
+            runner="codex",
+            codex_profile="oss-local",
+            cases=["one", "two", "three"],
+            dashboard=False,
+            skip_tessl=True,
+        )
+
+    run.assert_not_called()
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+    batch = result.data["qwen_oss_local_smoke_batch"]
+    assert batch["status"] == "blocked"
+    assert batch["failure_category"] == "runtime_mismatch"
+    assert batch["given"] == "3 selected cases for qwen oss-local release"
+    assert batch["should"] == "run at most 2 cases per qwen oss-local shard"
+    assert batch["actual"] == ["one", "two", "three"]
+    assert "qwen oss-local release selected 3 cases" in result.errors[0].message
 
 
 def test_run_evals_stores_repo_relative_raw_output(tmp_path: Path) -> None:

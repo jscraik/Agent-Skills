@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 import textwrap
 from pathlib import Path
@@ -89,7 +90,7 @@ def test_release_evals_import_reviewed_generated_fixtures(tmp_path: Path) -> Non
     _assert_generated_fixture_case(runner, cases)
 
 
-def test_codex_profile_runner_preserves_profile_config(tmp_path: Path) -> None:
+def test_codex_profile_runner_ignores_base_user_config_while_preserving_profile(tmp_path: Path) -> None:
     runner = _load_runner_module()
     output_last_message_path = tmp_path / "last.txt"
     fake_proc = mock.Mock(returncode=0, stdout="", stderr="")
@@ -120,9 +121,10 @@ def test_codex_profile_runner_preserves_profile_config(tmp_path: Path) -> None:
     assert cmd[cmd.index("--profile") + 1] == "oss-local"
     assert "--disable" in cmd
     assert cmd[cmd.index("--disable") + 1] == "apps"
-    assert "--ignore-user-config" not in cmd
+    assert "--ignore-user-config" in cmd
+    assert cmd.index("--ignore-user-config") < cmd.index("--profile")
     assert mocked_run.call_args.kwargs["start_new_session"] is True
-    assert any("explicit --profile" in warning for warning in warnings)
+    assert any("preserving the explicit --profile" in warning for warning in warnings)
     assert any("Disabled Codex apps" in warning for warning in warnings)
 
 
@@ -136,6 +138,57 @@ def test_codex_help_probe_runs_in_isolated_session() -> None:
 
     assert "--profile" in help_text
     assert mocked_run.call_args.kwargs["start_new_session"] is True
+
+
+def test_codex_tool_payload_errors_block_runtime_before_skill_scoring() -> None:
+    runner = _load_runner_module()
+
+    blocker = runner._classify_runner_blocker(
+        output_text="",
+        stdout_text='{"type":"error","message":"input[32]: unknown input item type: agent_message"}',
+        stderr_text=(
+            "failed to parse function arguments: invalid type: string \"15000\", expected usize\n"
+            "Fatal error: tool exec invoked with incompatible payload\n"
+        ),
+        exit_code=1,
+    )
+
+    assert blocker == "blocked_runtime"
+
+
+def test_provisional_workflow_closeout_records_prompt_only_case_dir(tmp_path: Path) -> None:
+    runner = _load_runner_module()
+    reports_base = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-widened"
+    case_dir = reports_base / "02-happy-scorecard"
+    case_dir.mkdir(parents=True)
+    (case_dir / "prompt.txt").write_text("Task: score the fixture\n", encoding="utf-8")
+
+    closeout_path = runner._write_provisional_workflow_closeout(
+        reports_base=reports_base,
+        workspace_root=tmp_path,
+        skill_dir=tmp_path / "Skills/example-skill",
+        eval_mode="smoke",
+        runner_mode="codex",
+        next_reproduce_command="python3 run_skill_evals.py Skills/example-skill --eval-mode smoke --runner codex",
+    )
+
+    closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
+    assert closeout["schema_version"] == "skills-sdk.eval-closeout.v1"
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_missing_artifact"
+    assert closeout["mutation_allowed"] is False
+    assert closeout["registry_update_allowed"] is False
+    assert closeout["closeout_validation"]["status"] == "pass"
+    assert closeout["cases"] == [
+        {
+            "id": "happy-scorecard",
+            "status": "blocked",
+            "blocker_class": "blocked_missing_artifact",
+            "expected_artifacts": ["result.json"],
+            "actual_artifacts": ["prompt.txt"],
+            "result_path": "Infrastructure/artifacts/skills/example-skill/run-widened/02-happy-scorecard",
+        }
+    ]
 
 
 def test_discovery_question_assertion_accepts_scope_question_before_edits() -> None:

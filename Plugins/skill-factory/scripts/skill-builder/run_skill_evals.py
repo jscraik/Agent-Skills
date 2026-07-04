@@ -1213,6 +1213,7 @@ def _claim_to_evidence_summary(
     *,
     eval_mode: str,
     skill_dir: Path,
+    focused_subset: bool = False,
 ) -> Dict[str, Any]:
     claims = _load_claims(evals_doc)
     baselines = _load_baselines(evals_doc)
@@ -1231,7 +1232,12 @@ def _claim_to_evidence_summary(
         covering = [case for case in cases if claim_id in case.claim_ids]
         hard_gate = bool(claim.get("hard_gate"))
         risk = str(claim.get("risk") or "medium").strip().lower()
-        blocking = eval_mode == "release" and hard_gate and risk in {"critical", "high"}
+        blocking = (
+            eval_mode == "release"
+            and not focused_subset
+            and hard_gate
+            and risk in {"critical", "high"}
+        )
         evidence_required = _normalize_string_list(
             claim.get("evidence_required"),
             field_name=f"claims[{claim_id}].evidence_required",
@@ -1404,7 +1410,13 @@ def _claim_to_evidence_summary(
     }
 
 
-def _attach_claim_execution_results(claim_summary: Dict[str, Any], case_results: Sequence[Dict[str, Any]], *, eval_mode: str) -> None:
+def _attach_claim_execution_results(
+    claim_summary: Dict[str, Any],
+    case_results: Sequence[Dict[str, Any]],
+    *,
+    eval_mode: str,
+    focused_subset: bool = False,
+) -> None:
     cases_by_id = {str(case.get("id")): case for case in case_results}
     gaps = list(claim_summary.get("gaps") or [])
     existing_gap_keys = {
@@ -1443,6 +1455,7 @@ def _attach_claim_execution_results(claim_summary: Dict[str, Any], case_results:
         claim["case_results"] = linked_results
         if (
             eval_mode == "release"
+            and not focused_subset
             and claim.get("hard_gate")
             and str(claim.get("risk") or "").lower() in {"critical", "high"}
             and not any(
@@ -2402,7 +2415,15 @@ def run_codex_exec(
         # the isolated CODEX_HOME copied below.
         ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
         if effective_profile:
-            warnings.append("Preserved Codex user/profile config because an explicit --profile was requested.")
+            if ignore_user_config_support is not False:
+                cmd.append("--ignore-user-config")
+                warnings.append(
+                    "Ignored base Codex user config while preserving the explicit --profile for noninteractive eval subprocesses."
+                )
+            else:
+                warnings.append(
+                    "Codex CLI does not support --ignore-user-config; profile eval subprocess may inherit base user config."
+                )
             disable_support = _codex_supports_exec_flag(codex_bin, "--disable")
             if disable_support is not False:
                 cmd.extend(["--disable", "apps"])
@@ -3198,10 +3219,11 @@ def _classify_runner_blocker(
     tool_schema_markers = [
         "failed to parse function arguments",
         "tool exec invoked with incompatible payload",
+        "unknown input item type",
         "no last agent message",
         "wrote empty content to",
     ]
-    if exit_code == 0 and not (output_text or "").strip() and any(marker in low for marker in tool_schema_markers):
+    if not (output_text or "").strip() and any(marker in low for marker in tool_schema_markers):
         return "blocked_runtime"
     if any(marker in low for marker in hard_runtime_markers):
         return "blocked_runtime"
@@ -3457,6 +3479,185 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
         return str(path.relative_to(base))
     except ValueError:
         return str(path)
+
+
+WORKFLOW_CLOSEOUT_SCHEMA_VERSION = "skills-sdk.eval-closeout.v1"
+
+
+def _case_status_from_summary(case: Dict[str, Any]) -> str:
+    if case.get("blocked") is True:
+        return "blocked"
+    if case.get("passed") is True:
+        return "pass"
+    return "fail"
+
+
+def _case_closeout_from_summary(case: Dict[str, Any]) -> Dict[str, Any]:
+    status = _case_status_from_summary(case)
+    entry: Dict[str, Any] = {
+        "id": str(case.get("id") or case.get("name") or "unknown"),
+        "status": status,
+    }
+    if case.get("dir"):
+        entry["result_path"] = str(case.get("dir"))
+    blocker_classes = case.get("blocker_classes")
+    if status == "blocked" and isinstance(blocker_classes, list) and blocker_classes:
+        entry["blocker_class"] = str(blocker_classes[0])
+    if status != "pass":
+        failures = case.get("tier1_failures")
+        if isinstance(failures, list) and failures:
+            entry["failures"] = [str(item) for item in failures]
+        blocked_reasons = case.get("blocked_reasons")
+        if isinstance(blocked_reasons, list) and blocked_reasons:
+            entry["blocked_reasons"] = [str(item) for item in blocked_reasons]
+    return entry
+
+
+def _case_closeout_from_artifact_dir(case_dir: Path, workspace_root: Path) -> Dict[str, Any]:
+    case_id = re.sub(r"^\d+-", "", case_dir.name)
+    result_path = case_dir / "result.json"
+    if result_path.is_file():
+        try:
+            payload = json.loads(result_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+        if isinstance(payload, dict):
+            return _case_closeout_from_summary(payload)
+    actual_artifacts = [
+        path.relative_to(case_dir).as_posix()
+        for path in sorted(case_dir.rglob("*"))
+        if path.is_file()
+    ]
+    return {
+        "id": case_id,
+        "status": "blocked",
+        "blocker_class": "blocked_missing_artifact",
+        "expected_artifacts": ["result.json"],
+        "actual_artifacts": actual_artifacts,
+        "result_path": _make_relative(case_dir, workspace_root),
+    }
+
+
+def _workflow_closeout_validation(closeout: Dict[str, Any]) -> Dict[str, Any]:
+    checks: List[Dict[str, Any]] = []
+    required = {
+        "schema_version",
+        "status",
+        "skill_path",
+        "mode",
+        "runner",
+        "cases",
+        "mutation_allowed",
+        "registry_update_allowed",
+        "next_reproduce_command",
+    }
+    missing = sorted(required - set(closeout))
+    checks.append({
+        "id": "required_fields_present",
+        "status": "blocker" if missing else "pass",
+        "message": "workflow-closeout/v1 receipts must include required contract fields.",
+        "evidence": missing,
+    })
+    schema_version = closeout.get("schema_version")
+    checks.append({
+        "id": "schema_version_valid",
+        "status": "pass" if schema_version == WORKFLOW_CLOSEOUT_SCHEMA_VERSION else "blocker",
+        "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+        "evidence": [] if schema_version == WORKFLOW_CLOSEOUT_SCHEMA_VERSION else [str(schema_version)],
+    })
+    cases = closeout.get("cases")
+    case_list = cases if isinstance(cases, list) else []
+    checks.append({
+        "id": "cases_array_valid",
+        "status": "pass" if isinstance(cases, list) else "blocker",
+        "message": "workflow-closeout receipt must carry cases as an array.",
+        "evidence": [] if isinstance(cases, list) else [type(cases).__name__],
+    })
+    status = str(closeout.get("status") or "")
+    blocked_cases = [
+        str(case.get("id") or index)
+        for index, case in enumerate(case_list, start=1)
+        if isinstance(case, dict) and str(case.get("status") or "") == "blocked"
+    ]
+    checks.append({
+        "id": "blocked_cases_block_suite",
+        "status": "blocker" if blocked_cases and status != "blocked" else "pass",
+        "message": "Any blocked case must make the suite closeout status blocked.",
+        "evidence": blocked_cases if blocked_cases and status != "blocked" else [],
+    })
+    blockers = [check for check in checks if check["status"] == "blocker"]
+    return {
+        "schema_version": "skills-sdk.eval-closeout-validation.v1",
+        "status": "blocked" if blockers else "pass",
+        "checks": checks,
+        "blockers": blockers,
+    }
+
+
+def _write_workflow_closeout(
+    *,
+    reports_base: Path,
+    workspace_root: Path,
+    skill_dir: Path,
+    eval_mode: str,
+    runner_mode: str,
+    status: str,
+    cases: List[Dict[str, Any]],
+    blocker_class: Optional[str],
+    missing_suite_artifacts: bool,
+    next_reproduce_command: str,
+) -> Path:
+    closeout: Dict[str, Any] = {
+        "schema_version": WORKFLOW_CLOSEOUT_SCHEMA_VERSION,
+        "status": status,
+        "skill_path": _make_relative(skill_dir, workspace_root),
+        "mode": eval_mode,
+        "runner": runner_mode,
+        "report_dir": _make_relative(reports_base, workspace_root),
+        "cases_expected": [str(case.get("id") or "unknown") for case in cases],
+        "cases": cases,
+        "blocker_class": blocker_class,
+        "mutation_allowed": status == "pass",
+        "registry_update_allowed": status == "pass" and eval_mode == "release",
+        "raw_output_present": False,
+        "raw_error_present": False,
+        "missing_suite_artifacts": missing_suite_artifacts,
+        "case_evidence_present": bool(cases),
+        "next_reproduce_command": next_reproduce_command,
+    }
+    closeout["closeout_validation"] = _workflow_closeout_validation(closeout)
+    path = reports_base / "workflow-closeout.json"
+    path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def _write_provisional_workflow_closeout(
+    *,
+    reports_base: Path,
+    workspace_root: Path,
+    skill_dir: Path,
+    eval_mode: str,
+    runner_mode: str,
+    next_reproduce_command: str,
+) -> Path:
+    case_dirs = [
+        path
+        for path in sorted(reports_base.iterdir())
+        if path.is_dir() and re.match(r"^\d+-", path.name)
+    ]
+    cases = [_case_closeout_from_artifact_dir(path, workspace_root) for path in case_dirs]
+    return _write_workflow_closeout(
+        reports_base=reports_base,
+        workspace_root=workspace_root,
+        skill_dir=skill_dir,
+        eval_mode=eval_mode,
+        runner_mode=runner_mode,
+        status="blocked",
+        cases=cases,
+        blocker_class="blocked_missing_artifact",
+        missing_suite_artifacts=True,
+        next_reproduce_command=next_reproduce_command,
+    )
 
 
 def _release_dependency_scan_roots(skill_dir: Path) -> List[Path]:
@@ -3990,6 +4191,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cases,
             eval_mode=args.eval_mode,
             skill_dir=skill_dir,
+            focused_subset=bool(case_filters),
         )
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
@@ -4216,6 +4418,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     any_tier1_failed = False
     any_tier2_failed = False
     any_blocked = False
+    next_reproduce_command = " ".join(
+        shlex.quote(part)
+        for part in [
+            "python3",
+            "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
+            args.path,
+            "--eval-mode",
+            args.eval_mode,
+            "--runner",
+            args.runner,
+        ]
+    )
 
     for idx, c in enumerate(cases, 1):
         case_slug = _safe_slug(c.id or c.name)
@@ -4247,6 +4461,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             composed_prompt = prompt_body
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
+        _write_provisional_workflow_closeout(
+            reports_base=reports_base,
+            workspace_root=workspace_root,
+            skill_dir=skill_dir,
+            eval_mode=args.eval_mode,
+            runner_mode=summary["runner_mode"],
+            next_reproduce_command=next_reproduce_command,
+        )
         case_timeout_sec, case_timeout_profile = _resolve_case_timeout(
             c,
             cli_timeout_sec=args.timeout_sec,
@@ -4844,6 +5066,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         summary["claim_to_evidence"],
         summary["cases"],
         eval_mode=args.eval_mode,
+        focused_subset=bool(case_filters),
     )
     snyk_gate_passed = _snyk_release_gate_passed(summary["security_dependency_screening"])
     claim_gate_passed = bool(summary["claim_to_evidence"].get("passed", True))
@@ -4912,6 +5135,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     release_manifest_path.write_text(json.dumps(release_manifest, indent=2, ensure_ascii=False), encoding="utf-8")
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     scorecard_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    final_closeout_cases = [
+        _case_closeout_from_summary(case)
+        for case in summary["cases"]
+        if isinstance(case, dict)
+    ]
+    final_blocker_class = None
+    if summary["decision"] == "blocked":
+        for case in final_closeout_cases:
+            if case.get("blocker_class"):
+                final_blocker_class = str(case.get("blocker_class"))
+                break
+        final_blocker_class = final_blocker_class or "blocked_missing_artifact"
+    _write_workflow_closeout(
+        reports_base=reports_base,
+        workspace_root=workspace_root,
+        skill_dir=skill_dir,
+        eval_mode=args.eval_mode,
+        runner_mode=summary["runner_mode"],
+        status="pass" if summary["decision"] == "pass" else ("blocked" if summary["decision"] == "blocked" else "fail"),
+        cases=final_closeout_cases,
+        blocker_class=final_blocker_class,
+        missing_suite_artifacts=False,
+        next_reproduce_command=next_reproduce_command,
+    )
 
     if args.format == "json":
         print(json.dumps(summary, indent=2, ensure_ascii=False))

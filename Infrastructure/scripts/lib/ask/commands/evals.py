@@ -28,6 +28,7 @@ SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
 SMOKE_CASE_TIMEOUT_SECONDS = 600
 SMOKE_EVAL_TIMEOUT_SECONDS = 10800
 RELEASE_EVAL_TIMEOUT_SECONDS = 21600
+QWEN_OSS_LOCAL_MAX_BATCH_CASES = 2
 SMOKE_EVAL_MODEL = "gpt-5.3-codex-spark"
 # Codex CLI selects `[profiles.fast]` with the plain profile name.
 SMOKE_EVAL_PROFILE = "fast"
@@ -110,6 +111,39 @@ EVAL_CLOSEOUT_REQUIRED_FIELDS = {
     "registry_update_allowed",
     "next_reproduce_command",
 }
+
+
+def _qwen_oss_local_batch_blocker(
+    *,
+    mode: str,
+    runner: str,
+    codex_profile: str | None,
+    selected_cases: list[str],
+) -> dict[str, object] | None:
+    """Block oversized qwen oss-local batches before runtime degrades into prompt-only artifacts."""
+    if mode not in {"smoke", "release"} or runner != "codex" or codex_profile != "oss-local":
+        return None
+    if len(selected_cases) <= QWEN_OSS_LOCAL_MAX_BATCH_CASES:
+        return None
+
+    return {
+        "status": "blocked",
+        "blocker_class": "blocked_validation",
+        "failure_category": "runtime_mismatch",
+        "profile": codex_profile,
+        "given": f"{len(selected_cases)} selected cases for qwen oss-local {mode}",
+        "should": f"run at most {QWEN_OSS_LOCAL_MAX_BATCH_CASES} cases per qwen oss-local shard",
+        "actual": selected_cases,
+        "expected": "split the selected cases into smaller --case batches before widening the qwen eval lane",
+        "evidence_refs": [
+            "Infrastructure/artifacts/skills/improve-agent-native/20260703-193025-822290/workflow-closeout.json",
+            ".harness/evidence/handoff/improve-agent-native/qwen-smoke-coverage-map.json",
+        ],
+        "reproduce_command": (
+            "./bin/ask sdk eval run <skill> --runner internal --mode smoke "
+            "--codex-profile oss-local --timeout-seconds 120 --case <up-to-two-cases> --json --robot"
+        ),
+    }
 
 
 def _safe_slug(value: str) -> str:
@@ -5056,7 +5090,8 @@ def _eval_report_dir(
     scorecard_path = _scorecard_path_from_output(repo_root, raw_output)
     if scorecard_path is not None:
         return scorecard_path.parent
-    return None
+    skill_name = _eval_skill_name_for_reports(skill_path)
+    return _newest_report_dir_for_skill(repo_root, skill_name=skill_name, started_at=started_at)
 
 
 def _eval_closeout_status(eval_status: str, blocker_class: str | None) -> str:
@@ -5803,6 +5838,37 @@ def run_evals(
             _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
         return result
 
+    selected_cases: list[str] = []
+    for raw_case in cases or []:
+        for case in raw_case.split(","):
+            case = case.strip()
+            if case:
+                selected_cases.append(case)
+
+    qwen_batch_blocker = _qwen_oss_local_batch_blocker(
+        mode=mode,
+        runner=runner,
+        codex_profile=codex_profile,
+        selected_cases=selected_cases,
+    )
+    if qwen_batch_blocker is not None:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = json.dumps(qwen_batch_blocker, indent=2)
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["qwen_oss_local_smoke_batch"] = qwen_batch_blocker
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=(
+                f"qwen oss-local {mode} selected {len(selected_cases)} cases; "
+                f"maximum shard size is {QWEN_OSS_LOCAL_MAX_BATCH_CASES}."
+            ),
+            fix_suggestion=qwen_batch_blocker["expected"],
+        ))
+        return result
+
     cmd = [
         *_pyyaml_eval_python_command(),
         f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
@@ -5813,27 +5879,26 @@ def run_evals(
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
     if runner == "codex" and (mode == "smoke" or codex_profile is not None):
         sandbox = "read-only" if codex_profile in {"oss-local", "oss-cloud", "codex-fast"} else "workspace-write"
+        case_timeout = timeout_seconds or SMOKE_CASE_TIMEOUT_SECONDS
         cmd.extend([
             "--profile",
             effective_codex_profile,
             "--sandbox",
             sandbox,
             "--timeout-sec",
-            str(SMOKE_CASE_TIMEOUT_SECONDS),
+            str(case_timeout),
         ])
         if mode == "smoke" and (model or not codex_profile):
             cmd.extend(["--model", model or SMOKE_EVAL_MODEL])
-        timeout = SMOKE_EVAL_TIMEOUT_SECONDS
+        selected_case_count = max(len(selected_cases), 1)
+        timeout = max(SMOKE_EVAL_TIMEOUT_SECONDS, int(case_timeout) * selected_case_count + 60)
     elif mode == "smoke":
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
-    if timeout_seconds is not None:
+    if timeout_seconds is not None and not (runner == "codex" and (mode == "smoke" or codex_profile is not None)):
         timeout = timeout_seconds
 
-    for raw_case in cases or []:
-        for case in raw_case.split(","):
-            case = case.strip()
-            if case:
-                cmd.extend(["--case", case])
+    for case in selected_cases:
+        cmd.extend(["--case", case])
 
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
     eval_started_at = time.time()

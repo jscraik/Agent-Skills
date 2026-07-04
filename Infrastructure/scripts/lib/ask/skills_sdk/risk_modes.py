@@ -8,6 +8,7 @@ from typing import Any
 
 from ask.skills_sdk.contracts import body_without_frontmatter, read_skill_frontmatter_fields
 from ask.skills_sdk.package_build import build_package_digest_receipt
+from ask.skills_sdk.package_security_signature import build_package_security_signature_receipt
 from ask.skills_sdk.risk import build_risk_classification
 
 
@@ -190,6 +191,7 @@ def _mode_indicators(
     frontmatter: dict[str, Any],
     body: str,
     evidence_ref: str,
+    package_indicators: list[dict[str, str]] | None = None,
 ) -> list[dict[str, str]]:
     """
     Collect and refine risk indicators for a given risk mode.
@@ -209,6 +211,7 @@ def _mode_indicators(
     """
     text = _text_signals(frontmatter, body)
     indicators = _regex_indicators(mode, text, evidence_ref)
+    indicators.extend(_package_indicators_for_mode(mode, package_indicators or []))
     return _mode_specific_indicators(
         mode,
         indicators=indicators,
@@ -217,6 +220,39 @@ def _mode_indicators(
         frontmatter=frontmatter,
         evidence_ref=evidence_ref,
     )
+
+
+PACKAGE_INDICATOR_MODE_MAP: dict[str, tuple[str, ...]] = {
+    "malicious_supply_chain": (
+        "hidden_unicode_obfuscation",
+        "pipe_to_shell_download",
+        "suspicious_download_url",
+        "runtime_instruction_fetch",
+    ),
+    "negligent_instruction": (
+        "system_service_modification",
+        "destructive_local_capability",
+    ),
+    "vulnerable_operation": (
+        "hardcoded_secret_literal",
+        "insecure_credential_output",
+        "untrusted_content_ingestion",
+        "composed_capability_risk",
+    ),
+}
+
+
+def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, str]]) -> list[dict[str, str]]:
+    wanted = set(PACKAGE_INDICATOR_MODE_MAP.get(mode, ()))
+    return [
+        _indicator(
+            indicator["id"],
+            indicator["evidence_ref"],
+            f"Package security signature detected {indicator['id']}.",
+        )
+        for indicator in package_indicators
+        if indicator["id"] in wanted
+    ]
 
 
 def _mode_specific_indicators(
@@ -320,6 +356,7 @@ def _mode_result(
     frontmatter: dict[str, Any],
     body: str,
     evidence_ref: str,
+    package_indicators: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """
     Assesses whether a risk mode is present in the skill source.
@@ -334,6 +371,7 @@ def _mode_result(
         frontmatter=frontmatter,
         body=body,
         evidence_ref=evidence_ref,
+        package_indicators=package_indicators,
     )
     definition = MODE_DEFINITIONS[mode]
     return {
@@ -377,6 +415,7 @@ def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, quer
     body = body_without_frontmatter(text)
     classification = build_risk_classification(source, frontmatter, text)
     package_receipt = build_package_digest_receipt(repo_root, source_path=source, query=query)
+    package_security_receipt = build_package_security_signature_receipt(repo_root, source_path=source, query=query)
     evidence_ref = _repo_relative(repo_root, source)
     mode_results = [
         _mode_result(
@@ -385,6 +424,7 @@ def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, quer
             frontmatter=frontmatter,
             body=body,
             evidence_ref=evidence_ref,
+            package_indicators=package_security_receipt["indicators"],
         )
         for mode in RISK_MODE_ORDER
     ]
@@ -392,6 +432,7 @@ def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, quer
     return _taxonomy_receipt(
         query=query,
         package_receipt=package_receipt,
+        package_security_receipt=package_security_receipt,
         classification=classification,
         mode_results=mode_results,
         detected_modes=detected_modes,
@@ -402,6 +443,7 @@ def _taxonomy_receipt(
     *,
     query: str,
     package_receipt: dict[str, Any],
+    package_security_receipt: dict[str, Any],
     classification: dict[str, Any],
     mode_results: list[dict[str, Any]],
     detected_modes: list[str],
@@ -428,6 +470,8 @@ def _taxonomy_receipt(
         "package_id": package_receipt["package_id"],
         "package_digest": package_receipt["package_digest"],
         "source_digest": package_receipt["source_digest"],
+        "package_security_signature_digest": package_security_receipt["package_security_signature_digest"],
+        "package_security_indicator_summary": package_security_receipt["indicator_summary"],
         "source_kind": classification["source_kind"],
         "risk_tier": classification["risk_tier"],
         "primary_mode": _primary_mode(mode_results),

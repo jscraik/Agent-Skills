@@ -148,6 +148,22 @@
       "notes": "PU-033 separates malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes without executing source content, scanners, network, credentials, or mutation."
     },
     {
+      "id": "package_security_signature",
+      "title": "Package security signature receipt",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/package_security_signature.py",
+      "pipeline_sections": ["release_decision_matrix", "agent_execution_control_plane", "package_hardening"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk security package-signature Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/package-security-signature-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_package_security_signature.py"
+      ],
+      "next_slice": "Use package signatures as an external advisory adapter input only after scanner execution receipts are approved.",
+      "notes": "Adds Snyk-agent-scan-inspired package inspection over declared SKILL.md, reference, script, resource, and binary file hashes without emitting raw content, executing scanners, using network, reading credentials, or mutating state."
+    },
+    {
       "id": "skill_ir",
       "title": "SkillIR.v0 typed spine",
       "status": "implemented",

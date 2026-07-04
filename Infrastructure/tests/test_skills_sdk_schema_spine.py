@@ -20,10 +20,13 @@ SCHEMA_NAMES = {
     "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",
     "lockfile": "lockfile.v1.schema.json",
+    "local-score": "local-score.v1.schema.json",
     "skill-ir": "skill-ir.v0.schema.json",
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "package-security-signature-receipt": "package-security-signature-receipt.v0.schema.json",
+    "security-lane-receipt": "security-lane-receipt.v0.schema.json",
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "observability-promotion-receipt": "observability-promotion-receipt.v0.schema.json",
@@ -185,6 +188,19 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("sample", payload["entries"])
         self.assertEqual(payload["entries"]["sample"]["target_path"], ".agents/skills/sample")
 
+    def test_local_score_fixture_keeps_blocked_lane_evidence_usable(self) -> None:
+        payload = self.assert_valid("local-score", "local-score.json")
+
+        self.assertEqual(payload["score"]["value"], 60)
+        self.assertEqual(payload["score"]["status"], "partial")
+        self.assertFalse(payload["score"]["complete"])
+        self.assertTrue(payload["lanes"]["impact"]["evidence_usable"])
+        self.assertEqual(payload["lanes"]["impact"]["status"], "blocked")
+        self.assertIn("impact", payload["completeness"]["blocked_lanes"])
+
+    def test_local_score_schema_requires_lane_evidence_usability(self) -> None:
+        self.assert_invalid("local-score", "local-score-lane-missing-evidence-flag.json")
+
     def test_skill_ir_fixture_records_read_only_package_spine(self) -> None:
         payload = self.assert_valid("skill-ir", "skill-ir.json")
 
@@ -210,6 +226,39 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["blockers"], [])
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
+
+    def test_package_security_signature_fixture_records_non_executing_scan_boundary(self) -> None:
+        payload = self.assert_valid("package-security-signature-receipt", "package-security-signature-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertTrue(payload["redaction_performed"])
+        self.assertFalse(payload["redacted_content_emitted"])
+        self.assertFalse(payload["binary_content_embedded"])
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_package_security_signature_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("package-security-signature-receipt", "package-security-signature-executes.json")
+
+    def test_security_lane_fixture_records_deterministic_security_commands(self) -> None:
+        payload = self.assert_valid("security-lane-receipt", "security-lane-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertEqual(len(payload["commands"]), 2)
+        self.assertEqual(payload["profile_review"]["status"], "not_run")
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_security_lane_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("security-lane-receipt", "security-lane-executes.json")
 
     def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
         payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")
