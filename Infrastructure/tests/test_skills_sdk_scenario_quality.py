@@ -1066,6 +1066,47 @@ cases:
         self.assertNotIn("release_rubric_regex_not_primary", blocker_ids)
         validate_scenario_quality_receipt(raised.exception.receipt)
 
+    def test_builder_blocks_whitespace_keyword_list_expected_signal_in_release_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: whitespace-keyword-list-release-signal
+  category: pressure
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers need release rubrics that score observable behavior rather than short word hits.
+  unit: release scorer whitespace keyword list safety
+  given: A repository note asks for a release claim with missing evidence.
+  should: Block the release claim and ask for current evidence.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Review a release note that lacks current validation evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: score gaps evidence
+  - type: expected_signal
+    value: Blocks the release claim until current validation and hosted proof are present.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_expected_signal_behavioral_sentence", blocker_ids)
+        self.assertNotIn("release_rubric_regex_not_primary", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
     def test_builder_accepts_discovery_question_as_behavioral_lift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

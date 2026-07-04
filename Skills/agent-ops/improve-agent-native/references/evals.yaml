@@ -443,11 +443,11 @@ cases:
   - type: not_regex
     value: (?is)(must run .*skills package verify|Agent Skills Kit.*required)
   - type: expected_signal
-    value: target repository guidance controls the readiness answer.
+    value: Explains that the named target repository guidance controls the readiness answer before Agent Skills Kit-specific gates are considered.
   - type: expected_signal
-    value: target repo AGENTS.md and nested AGENTS.md.
+    value: Directs the audit to inspect the target repository AGENTS.md and any nested AGENTS.md before choosing validation commands.
   - type: expected_signal
-    value: must not substitute Agent Skills Kit gates for target-repo readiness.
+    value: Avoids substituting Agent Skills Kit package or scenario gates for target-repo readiness evidence.
   unit: improve-agent-native universal target repo routing
   given: A user applies the skill to a repository outside Agent Skills Kit.
   should: Treat the named repository as the target, inspect its local guidance, and avoid substituting Agent Skills Kit validation
@@ -758,13 +758,13 @@ cases:
     - git push
   acceptance:
   - type: expected_signal
-    value: score gaps evidence
+    value: Explains concrete readiness gaps with citations to supplied repository files.
   - type: expected_signal
-    value: missing tools workflow coverage
+    value: Compares available assistant actions with the operator flow before recommending expansion.
   - type: expected_signal
-    value: test evidence blocked
+    value: Marks validation incomplete because one unit test cannot prove the remaining user paths.
   - type: expected_signal
-    value: Cites provided file evidence.
+    value: Cites at least one specific supplied file when explaining the review.
   - type: not_regex
     value: (?is)(separate product-readiness report|fully ready|externally verified)
   unit: improve-agent-native scenario skill merged product workflow

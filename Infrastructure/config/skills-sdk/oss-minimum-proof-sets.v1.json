@@ -1,10 +1,43 @@
 {
   "schema_version": "skills-sdk.oss-minimum-proof-sets.v1",
   "proof_sets": {
+    "improve-agent-native-oss-local-9-plus-3": {
+      "policy": "9-core-plus-3-regression",
+      "skill": "Skills/agent-ops/improve-agent-native",
+      "shard_size_limit": 2,
+      "timeout_profiles": {
+        "oss-local": "local-canary-60s"
+      },
+      "core_cases": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability",
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard",
+        "tessl-scenario-dynamic-context-drift"
+      ],
+      "regression_cases": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.provenance-implies-tests",
+        "eval.harness.done-without-validation"
+      ],
+      "stage_maturity_expectations": {
+        "oss-local": "canary loop: run the smallest representative proof set first, reuse passing receipts, and repair only missing or blocked cases before widening",
+        "oss-cloud": "not the target for this proof set; use improve-agent-native-15-plus-5 for the cloud rehearsal gate",
+        "tessl": "not the target for this proof set; Tessl live uses the cloud-proven 15+5 policy"
+      }
+    },
     "improve-agent-native-15-plus-5": {
       "policy": "15-core-plus-5-regression",
       "skill": "Skills/agent-ops/improve-agent-native",
       "shard_size_limit": 2,
+      "timeout_profiles": {
+        "oss-local": "local-canary-60s",
+        "oss-cloud": "cloud-rehearsal-180s"
+      },
       "core_cases": [
         "happy-scorecard",
         "happy-agents-md-audit",

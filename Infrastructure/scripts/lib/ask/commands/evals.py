@@ -2094,6 +2094,31 @@ def _normalize_tessl_acceptance_item(item: dict[object, object]) -> dict[str, st
     return normalize_tessl_acceptance_item(item)
 
 
+def _tessl_acceptance_description(item: dict[str, str], case: dict[str, object]) -> str:
+    criterion_type = str(item.get("type") or "").strip().lower()
+    if criterion_type.startswith("text_field_"):
+        field = str(item.get("field") or item.get("path") or item.get("name") or "").strip()
+        expected_values = str(
+            item.get("value")
+            or item.get("expected")
+            or item.get("expected_value")
+            or item.get("values")
+            or ""
+        ).strip()
+        parts = [f"type={criterion_type}"]
+        if field:
+            parts.append(f"field={field}")
+        if expected_values:
+            parts.append(f"expected={expected_values}")
+        return "; ".join(parts)
+    return str(
+        item.get("value")
+        or item.get("expected_skill")
+        or case.get("expected_artifact")
+        or "Satisfies acceptance criterion."
+    ).strip()
+
+
 def _tessl_case_source(case: dict[str, object]) -> str:
     return str(case.get("source") or "references/evals.yaml")
 
@@ -2108,12 +2133,7 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
                 continue
             normalized_item = _normalize_tessl_acceptance_item(item)
             criterion_type = str(normalized_item.get("type") or "acceptance").strip().lower()
-            value = str(
-                normalized_item.get("value")
-                or normalized_item.get("expected_skill")
-                or case.get("expected_artifact")
-                or "Satisfies acceptance criterion."
-            ).strip()
+            value = _tessl_acceptance_description(normalized_item, case)
             category = "MUST_NOT" if criterion_type.startswith(("forbidden", "must_not")) else "INTENT"
             checklist.append({
                 "name": _safe_slug(f"{criterion_type}-{index}"),
@@ -2131,6 +2151,9 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
             "category": "INTENT",
             "source": source,
         })
+    criteria_obligation_hash = hashlib.sha256(
+        json.dumps(checklist, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
 
     return {
         "context": f"Evaluation criteria adapted from {source} for {case.get('id') or 'unknown'}.",
@@ -2140,6 +2163,7 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
             "schema_version": "ask-tessl-criteria-adapter.v1",
             "source_case_id": str(case.get("id") or "unknown"),
             "source": source,
+            "criteria_obligation_hash": criteria_obligation_hash,
             "source_kind": case.get("source_kind") or "skill_owned",
             "riteway": {
                 "unit": case.get("unit"),

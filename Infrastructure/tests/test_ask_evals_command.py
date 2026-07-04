@@ -1072,6 +1072,26 @@ def test_tessl_criteria_preserves_guardrail_calibration_examples() -> None:
     }
 
 
+def test_tessl_criteria_serializes_text_field_obligations() -> None:
+    case = {
+        "id": "typed-field-case",
+        "prompt": "Return a scorecard.",
+        "acceptance": [
+            {"type": "text_field_present", "field": "gaps"},
+            {"type": "text_field_equals", "field": "status", "value": "blocked"},
+            {"type": "text_field_in", "path": "decision", "values": "pass,blocked"},
+        ],
+    }
+
+    criteria = evals._tessl_criteria_from_case(case)
+    descriptions = [item["description"] for item in criteria["checklist"]]
+
+    assert "type=text_field_present; field=gaps" in descriptions
+    assert "type=text_field_equals; field=status; expected=blocked" in descriptions
+    assert "type=text_field_in; field=decision; expected=pass,blocked" in descriptions
+    assert len(criteria["metadata"]["criteria_obligation_hash"]) == 64
+
+
 def test_tessl_criteria_preserves_guardrail_extended_metadata() -> None:
     case = _calibrated_guardrail_case()
 
