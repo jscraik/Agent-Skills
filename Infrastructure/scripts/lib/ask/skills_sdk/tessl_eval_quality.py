@@ -22,6 +22,8 @@ BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "output_schema",
 }
 KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_contains"}
+# These types are accepted only when the Tessl criteria adapter preserves
+# their field/path and expected-value metadata.
 TEXT_FIELD_TESSL_ACCEPTANCE_TYPES = {"text_field_absent", "text_field_equals", "text_field_in", "text_field_present"}
 CONCRETE_OUTPUT_ARTIFACT_RE = re.compile(r"(?i)(?<![A-Za-z0-9_.-])[A-Za-z0-9_.-]+\.(?:md|json|txt|yaml|yml)(?![A-Za-z0-9_.-])")
 PROVENANCE_FIXTURE_PATH_RE = re.compile(r"(?i)\breferences/evals/[^\s]+\.md\b")

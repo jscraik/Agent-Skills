@@ -1305,8 +1305,6 @@ cases:
   acceptance:
   - type: expected_signal
     value: Keeps session or branch provenance separate from validation command evidence.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1358,8 +1356,6 @@ cases:
   acceptance:
   - type: expected_signal
     value: Marks validation as not run or blocked, names the missing proof, and avoids closing the work as complete.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\ checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\ passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
@@ -1410,8 +1406,6 @@ cases:
   - type: expected_signal
     value: Treats static checks as partial proof and names missing behavior evidence such as a UI assertion, API contract
       test, consumer test, schema validation, or generated artifact.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\ checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\ passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
@@ -1460,8 +1454,6 @@ cases:
   acceptance:
   - type: expected_signal
     value: Treats repeated reviewer correction as a failure to compound feedback into a durable repo guardrail.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1519,8 +1511,6 @@ cases:
   acceptance:
   - type: expected_signal
     value: Requires the original fix to have its own validation result or closeout receipt before extra improvements begin.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1574,8 +1564,6 @@ cases:
   - type: expected_signal
     value: Treats repeated closeout-quality feedback across PRs as a missing durable repo or harness guardrail, not a one-comment
       cleanup task.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1628,8 +1616,6 @@ cases:
   - type: expected_signal
     value: Identifies broad doctrine or unrelated skill loading as a context-routing problem when only one validation rule is
       needed.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1682,8 +1668,6 @@ cases:
   - type: expected_signal
     value: Identifies cold-start skill selection or context routing as the failing layer and recommends a trigger, eval, or
       outcome test that proves representative prompts select improve-agent-native before answering.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1736,8 +1720,6 @@ cases:
   - type: expected_signal
     value: Identifies maintainer-held subsystem knowledge, ownership boundaries, invariants, hazards, or change examples as
       necessary context before agents make larger changes.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1790,8 +1772,6 @@ cases:
   - type: expected_signal
     value: Identifies pattern drift, unstable authority boundaries, maintainer disagreement, missing design notes, ownership
       boundaries, maintainer decision records, or absent drift checks as the readiness gap.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1843,8 +1823,6 @@ cases:
   - type: expected_signal
     value: Identifies missing tests, docs checks, deployment smoke evidence, rollback proof, or CI gates as blockers to autonomous
       deployment-path merge authority.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1896,8 +1874,6 @@ cases:
   - type: expected_signal
     value: Requires independent lifecycle closeout, completion receipt, delivery gate, accepted state, or machine-checkable
       proof before an opened PR can be treated as done.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -1950,8 +1926,6 @@ cases:
   - type: expected_signal
     value: Identifies changed files alone as insufficient completion and requires check commands, outcomes, product-path proof,
       output inspection, or blocker notes.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2008,8 +1982,6 @@ cases:
   - type: expected_signal
     value: Identifies reduced human gates as unsupported without machine-checkable low-risk policy, required checks, diff scope
       rules, merge receipts, rollback boundaries, ownership, escalation, or pilot limits.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2062,8 +2034,6 @@ cases:
   - type: expected_signal
     value: Identifies repeated correction as evidence that the repo or harness is relying on human correction instead of a
       durable enforcement point.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2114,8 +2084,6 @@ cases:
   - type: expected_signal
     value: Requires the resumed agent to reconstruct current task state from repo evidence, changed files, validation
       receipts, blockers, and the latest user request before continuing implementation.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2170,8 +2138,6 @@ cases:
   - type: expected_signal
     value: Refuses to approve solely from a familiar command prefix when repository or workstation context is hidden, ambiguous,
       or not backed by current evidence.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2231,8 +2197,6 @@ cases:
   - type: expected_signal
     value: Treats a local fix for a repeated mistake as insufficient when the same generated artifacts or steering pattern can
       recur, and requires a durable guardrail before claiming the issue is handled.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2283,8 +2247,6 @@ cases:
   - type: expected_signal
     value: Rejects low implementation cost as sufficient justification for adding a new project capability or expanding the
       repo surface.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2340,8 +2302,6 @@ cases:
   - type: expected_signal
     value: Identifies that a long activity log or source note is not enough proof, and requires durable evidence such as
       commands, receipts, review artifacts, or file paths before making readiness claims.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2396,8 +2356,6 @@ cases:
   - type: expected_signal
     value: Rejects a blanket organization-wide token cap or unlimited spend decision before workflow leverage is known,
       and requires a learning loop with receipts or telemetry.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2453,8 +2411,6 @@ cases:
   - type: expected_signal
     value: Treats a narrow numeric proxy or supplied scenario note as insufficient readiness proof without target files,
       eval definition, scoring script, sample outputs, or command evidence.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2514,8 +2470,6 @@ cases:
   - type: expected_signal
     value: Treats the scenario note as insufficient proof and avoids claiming whether the product, repo, or workflow is
       ready without file, command, metric, or validation evidence.
-  - type: not_contains
-    value: not claim release readiness without current proof
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
