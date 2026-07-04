@@ -1,4 +1,4 @@
-# Continuous Cleanup
+# Ryan Continuous Cleanup
 
 Convert recurring feedback, drift, and cleanup pressure into small durable mechanisms that compound over repeated agent runs.
 

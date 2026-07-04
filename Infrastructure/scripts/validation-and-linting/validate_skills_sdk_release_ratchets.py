@@ -304,28 +304,68 @@ def _missing_capsule_routing(refs: Path, capsule_paths: list[str]) -> list[str]:
 def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
     handoff_dir = root / ".harness" / "evidence" / "handoff" / skill_dir.name
     receipts = sorted(handoff_dir.glob("tessl*.json")) if handoff_dir.is_dir() else []
+    accepted_legacy = _release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
     missing: list[str] = []
+    ignored_legacy: list[str] = []
     for receipt in receipts:
+        rel_path = _rel(receipt, root)
         try:
             payload = _json(receipt)
         except (OSError, ValueError):
-            missing.append(_rel(receipt, root))
+            if rel_path in accepted_legacy:
+                ignored_legacy.append(rel_path)
+            else:
+                missing.append(rel_path)
             continue
         if not isinstance(payload, dict):
-            missing.append(_rel(receipt, root))
+            if rel_path in accepted_legacy:
+                ignored_legacy.append(rel_path)
+            else:
+                missing.append(rel_path)
             continue
         tessl_payload = payload.get("tessl")
         tessl_lane = tessl_payload.get("lane") if isinstance(tessl_payload, dict) else None
         lane = payload.get("tessl_lane") or payload.get("lane") or tessl_lane
         if lane not in {"review", "dry_run", "live_eval", "score_receipt", "local_proof"}:
-            missing.append(_rel(receipt, root))
+            if rel_path in accepted_legacy:
+                ignored_legacy.append(rel_path)
+            else:
+                missing.append(rel_path)
     status = "pass" if not missing else "fail"
     return Finding(
         "tessl_lane_naming",
         status,
         "Tessl artifacts must name their lane so review, dry-run, live eval, and score receipts cannot be conflated.",
-        {"handoff_dir": _rel(handoff_dir, root), "receipt_count": len(receipts), "missing_lane": missing},
+        {
+            "handoff_dir": _rel(handoff_dir, root),
+            "receipt_count": len(receipts),
+            "missing_lane": missing,
+            "ignored_legacy": ignored_legacy,
+        },
     )
+
+
+def _release_ratchet_exception_paths(handoff_dir: Path, check: str) -> set[str]:
+    path = handoff_dir / "release-ratchet-exceptions.json"
+    try:
+        payload = _json(path)
+    except (OSError, ValueError):
+        return set()
+    if not isinstance(payload, dict):
+        return set()
+    entries = payload.get("accepted_exceptions")
+    if not isinstance(entries, list):
+        return set()
+    paths: set[str] = set()
+    for entry in entries:
+        if (
+            isinstance(entry, dict)
+            and entry.get("check") == check
+            and isinstance(entry.get("path"), str)
+            and entry["path"].strip()
+        ):
+            paths.add(entry["path"].strip())
+    return paths
 
 
 def _check_scenario_parser_parity(root: Path, refs: Path) -> Finding:
@@ -372,12 +412,14 @@ def _scenario_text_counts(text: str, case_text: str) -> tuple[int, int, list[str
 
 def _scenario_missing_fields(cases: list[Any]) -> list[dict[str, Any]]:
     missing_fields: list[dict[str, Any]] = []
-    required = ("id", "category", "task", "given", "should", "acceptance")
+    required = ("id", "category", "given", "should", "acceptance")
     for index, case in enumerate(cases):
         if not isinstance(case, dict):
             missing_fields.append({"index": index, "missing": ["mapping"]})
             continue
         missing = [field for field in required if not case.get(field)]
+        if not case.get("task") and not case.get("prompt"):
+            missing.append("task_or_prompt")
         if missing:
             missing_fields.append({"id": case.get("id", f"case[{index}]"), "missing": missing})
     return missing_fields

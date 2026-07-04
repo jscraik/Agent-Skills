@@ -1,4 +1,4 @@
-# PR Lifecycle
+# Harness PR Lifecycle
 
 Treat the pull request path as a repeatable skill loop from authored change through review, CI, conflict repair, queueing, and mainline landing.
 

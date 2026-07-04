@@ -1310,7 +1310,8 @@ cases:
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
-    value: Names the proof gap, requires validation receipt evidence, and keeps branch or session provenance as context only.
+    value: Names the proof gap, blocks the failure mode of treating provenance as validation proof, requires validation receipt
+      evidence, and keeps branch or session provenance as context only.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.provenance-implies-tests/final.json
@@ -1409,7 +1410,8 @@ cases:
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\ checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\ passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
-    value: Requires behavioral proof for dashboard label and API field changes before claiming verification.
+    value: Requires downstream artifact evidence for the dashboard label and API field behavior, and blocks unsupported verification
+      claims from source-only proof.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.static-checks-only-for-product-change/final.json
@@ -1453,14 +1455,14 @@ cases:
     - tessl publish
   acceptance:
   - type: expected_signal
-    value: Treats repeated reviewer correction as a failure to compound feedback into a durable repo guardrail.
+    value: Treats repeated reviewer correction as evidence of a failure to compound feedback into a durable repo guardrail.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
-    value: Proposes a mechanical guardrail such as a validator, checklist gate, regression test, or routing rule that would
-      catch the repeat before review.
+    value: Proposes a mechanical guardrail such as a validator, checklist gate, regression test, or routing rule with proof
+      evidence that would catch the repeat before review, and blocks the failure mode from recurring.
   risk_dimension: source-of-truth policy compliance and sentence-level evidence boundary
   label: adversarial
   positive_example_artifact: references/evals/examples/feedback-recurs-ordinary-pass.md
@@ -1570,7 +1572,7 @@ cases:
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
     value: Names a durable closeout-quality guardrail such as a closeout validator, review checklist gate, PR template check,
-      or repo-owned rule with validation evidence.
+      or repo-owned rule with validation evidence, and blocks the failure mode of only editing current comments.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.slop-feedback-not-systematized/final.json
@@ -1673,7 +1675,8 @@ cases:
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
-    value: Requires representative prompt-selection evidence before treating the skill as discoverable for its governed work.
+    value: Requires representative prompt-selection evidence before treating the skill as discoverable for its governed work,
+      and blocks the failure mode of assuming source instructions imply runtime selection.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.skill-frontmatter-not-routed/final.json
@@ -1719,14 +1722,14 @@ cases:
   acceptance:
   - type: expected_signal
     value: Identifies maintainer-held subsystem knowledge, ownership boundaries, invariants, hazards, or change examples as
-      necessary context before agents make larger changes.
+      necessary evidence context before agents make larger changes.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
     value: Recommends targeted tests, smoke checks, validators, change receipts, stop rules, escalation boundaries, or rollback
-      boundaries before expanding autonomy in the legacy area.
+      boundaries, and blocks the failure mode of expanding autonomy in the legacy area without proof.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.brownfield-harness-without-boundaries/final.json
@@ -1778,7 +1781,8 @@ cases:
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
     value: Recommends a pattern-decision lane, decision records, owner-approved pattern docs, drift check, review checklist,
-      PR closeout proof, or feedback uptake process before pattern-changing agent work spreads.
+      PR closeout proof, or feedback uptake process, and blocks the failure mode of letting pattern-changing agent work spread
+      without evidence.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.harness.architecture-drift-hidden-by-agent-velocity/final.json
@@ -1980,8 +1984,8 @@ cases:
     - tessl publish
   acceptance:
   - type: expected_signal
-    value: Identifies reduced human gates as unsupported without machine-checkable low-risk policy, required checks, diff scope
-      rules, merge receipts, rollback boundaries, ownership, escalation, or pilot limits.
+    value: Identifies reduced human gates as unsupported without evidence from machine-checkable low-risk policy, required checks,
+      diff scope rules, merge receipts, rollback boundaries, ownership, escalation, or pilot limits.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2033,7 +2037,7 @@ cases:
   acceptance:
   - type: expected_signal
     value: Identifies repeated correction as evidence that the repo or harness is relying on human correction instead of a
-      durable enforcement point.
+      durable enforcement point, and blocks the failure mode from recurring without a guardrail.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2203,7 +2207,8 @@ cases:
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
     value: Requires the repeated lesson to be propagated into a durable validator, workflow entrypoint check, steering uptake
-      record, or equivalent enforcement surface so adjacent lanes cannot recreate the same drift.
+      record, or equivalent enforcement surface so adjacent lanes cannot recreate the same drift, and blocks claiming the local
+      fix as sufficient.
   claim_ids:
   - improve-agent-native.execution
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.ryan.long-term-coherence-governance/final.json
@@ -2300,8 +2305,8 @@ cases:
     - tessl publish
   acceptance:
   - type: expected_signal
-    value: Identifies that a long activity log or source note is not enough proof, and requires durable evidence such as
-      commands, receipts, review artifacts, or file paths before making readiness claims.
+    value: Identifies that a long activity log or source note is not enough proof, requires durable evidence such as commands,
+      receipts, review artifacts, or file paths before making readiness claims, and blocks unsupported stakeholder certainty.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
@@ -2361,7 +2366,7 @@ cases:
       checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\
       passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
-    value: Uses workflow-scoped budgets, telemetry, review gates, bounded pilots, measured outcomes, or budget receipts
+    value: Uses workflow-scoped budgets, telemetry evidence, review gates, bounded pilots, measured outcomes, or budget receipts
       before setting durable organization-wide spend policy.
   claim_ids:
   - improve-agent-native.execution

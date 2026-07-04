@@ -1,4 +1,4 @@
-# Repo Knowledge
+# Ryan Repo Knowledge
 
 Treat repository-local, versioned, progressively disclosed knowledge as the agent control plane.
 

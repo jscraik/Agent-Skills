@@ -1,0 +1,8 @@
+{
+  "schema_version": "skills-sdk.release-gate-receipt.v1",
+  "gate": "tessl_local_proof",
+  "status": "pass",
+  "what_this_proves": "tessl_local_proof passed for the current improve-agent-native Tessl dry-run candidate.",
+  "what_this_does_not_prove": "This gate does not prove later gates, Tessl live score, publication, or release readiness.",
+  "evidence_refs": []
+}

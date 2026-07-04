@@ -158,6 +158,25 @@ def _has_carried_advisories(payload: dict[str, Any]) -> list[str]:
     return [path for path in _json_refs(payload, {"advisories", "warnings"}) if path not in accepted_paths]
 
 
+def _release_ratchet_exception_paths(evidence_dir: Path, check: str) -> set[str]:
+    payload, _error = _load_json(evidence_dir / "release-ratchet-exceptions.json")
+    if payload is None:
+        return set()
+    entries = payload.get("accepted_exceptions")
+    if not isinstance(entries, list):
+        return set()
+    paths: set[str] = set()
+    for entry in entries:
+        if (
+            isinstance(entry, dict)
+            and entry.get("check") == check
+            and isinstance(entry.get("path"), str)
+            and entry["path"].strip()
+        ):
+            paths.add(entry["path"].strip())
+    return paths
+
+
 def _check_factory_gate(root: Path, path: Path) -> dict[str, Any]:
     payload, error = _load_json(path)
     if payload is None:
@@ -278,6 +297,8 @@ RECEIPT_STEM_GATES = {
 
 def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
     carried = []
+    ignored = []
+    accepted = _release_ratchet_exception_paths(evidence_dir, "no_carried_advisories")
     required_gates = set(_required_gate_chain(target_gate))
     for path in sorted(evidence_dir.glob("*.json")) if evidence_dir.is_dir() else []:
         # Skip receipts for gates beyond the target gate
@@ -286,8 +307,25 @@ def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: st
             if gate_id in REQUIRED_GATE_CHAIN and gate_id not in required_gates:
                 continue
         payload, error = _load_json(path)
-        carried.extend([f"{_rel(path, root)}:{error}"] if payload is None else [f"{_rel(path, root)}:{item}" for item in _has_carried_advisories(payload)])
-    return _finding("no_carried_advisories", "pass" if not carried else "fail", "Promotion gates must repair advisories or record accepted exceptions.", {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20]})
+        if payload is None:
+            item = f"{_rel(path, root)}:{error}"
+            if item in accepted:
+                ignored.append(item)
+            else:
+                carried.append(item)
+            continue
+        for advisory_path in _has_carried_advisories(payload):
+            item = f"{_rel(path, root)}:{advisory_path}"
+            if item in accepted:
+                ignored.append(item)
+            else:
+                carried.append(item)
+    return _finding(
+        "no_carried_advisories",
+        "pass" if not carried else "fail",
+        "Promotion gates must repair advisories or record accepted exceptions.",
+        {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20], "ignored_legacy": ignored[:20]},
+    )
 
 
 def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:

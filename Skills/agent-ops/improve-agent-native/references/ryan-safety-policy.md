@@ -1,4 +1,4 @@
-# Safety Policy
+# Ryan Safety Policy
 
 Replace brittle command-shape steering with policy-aware approval, managed-file judgment, and enforceable safety boundaries.
 

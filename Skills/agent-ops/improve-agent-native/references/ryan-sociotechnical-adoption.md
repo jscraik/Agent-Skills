@@ -1,4 +1,4 @@
-# Sociotechnical Adoption
+# Ryan Sociotechnical Adoption
 
 Account for perception lag, pair-programming lock-in, capability refresh, and product education as part of agent adoption.
 

@@ -1,0 +1,8 @@
+{
+  "schema_version": "factory-gate/v1",
+  "user_outcome": "Move improve-agent-native from OSS-cloud proof into Tessl dry-run without conflating lanes.",
+  "copied_assumption": "Do not assume OSS-cloud or a Tessl dry-run pass proves Tessl live scoring or release readiness.",
+  "smallest_effective_mechanism": "Repair release-ratchet metadata, reference routing, lane receipts, and dry-run staging evidence.",
+  "artifact_decision": "IMPROVE_EXISTING",
+  "proof_needed": "validate_skills_sdk_release_ratchets.py through tessl_dry_run plus Tessl live-private dry-run receipt."
+}
