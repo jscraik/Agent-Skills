@@ -1,0 +1,12 @@
+{
+  "schema_version": "skills-sdk.live-handoff-lane-proof.v1",
+  "status": "pass",
+  "profile": "oss-cloud",
+  "codex_profile": "oss-cloud",
+  "codex_exec_invoked": true,
+  "case_count": 20,
+  "passed_count": 20,
+  "source_receipt": ".harness/evidence/handoff/improve-agent-native/oss-cloud-minimum-proof-set.json",
+  "what_this_proves": "oss-cloud minimum proof set has all selected cases passing with codex_exec_invoked=true.",
+  "what_this_does_not_prove": "This does not prove Tessl live score, publication, hosted CI, or merge readiness."
+}
