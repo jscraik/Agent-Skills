@@ -10,6 +10,29 @@ SEMANTIC_ACCEPTANCE_TYPES = {
     "text_field_in",
     "text_field_present",
 }
+BEHAVIOR_VERBS = {
+    "asks",
+    "avoids",
+    "blocks",
+    "cites",
+    "classifies",
+    "compares",
+    "distinguishes",
+    "explains",
+    "identifies",
+    "includes",
+    "maps",
+    "names",
+    "preserves",
+    "records",
+    "refuses",
+    "reports",
+    "returns",
+    "separates",
+    "states",
+    "uses",
+}
+
 
 NEGATED_BOUNDARY_PRONE_PHRASES = {
     "ci passed",
@@ -93,6 +116,17 @@ def _keyword_list_expected_signal_items(acceptance: list[Any], scenario_id: str)
             continue
         value = str(item.get("value") or "").strip()
         words = [word for word in value.replace(".", " ").replace(",", " ").split() if word]
-        if value.count(",") >= 2 and len(words) <= 8:
+        if (value.count(",") >= 2 and len(words) <= 8) or _looks_like_keyword_fragment(value, words):
             evidence.append(f"{scenario_id}:acceptance[{index}]")
     return evidence
+
+
+def _looks_like_keyword_fragment(value: str, words: list[str]) -> bool:
+    if not 2 <= len(words) <= 8:
+        return False
+    if any(separator in value for separator in [",", ";", ":", ".", "?", "!"]):
+        return False
+    normalized_words = [word.strip("()[]{}").lower() for word in words]
+    if any(word in BEHAVIOR_VERBS for word in normalized_words):
+        return False
+    return value[:1].islower()

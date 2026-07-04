@@ -14,7 +14,14 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-an
 from build_oss_minimum_proof_set import _load_policy_cases, _parse_args, build_proof_set, collect_case_evidence, default_blocked_next_gates  # noqa: E402
 
 
-def _write_run(root: Path, run_id: str, cases: list[dict[str, object]], *, closeout_status: str = "fail") -> None:
+def _write_run(
+    root: Path,
+    run_id: str,
+    cases: list[dict[str, object]],
+    *,
+    closeout_status: str = "fail",
+    closeout_validation_status: str = "pass",
+) -> None:
     run_dir = root / run_id
     run_dir.mkdir(parents=True)
     scorecard_cases = []
@@ -59,7 +66,7 @@ def _write_run(root: Path, run_id: str, cases: list[dict[str, object]], *, close
         json.dumps(
             {
                 "status": closeout_status,
-                "closeout_validation": {"status": "pass"},
+                "closeout_validation": {"status": closeout_validation_status},
                 "cases": closeout_cases,
             }
         ),
@@ -130,6 +137,35 @@ class OssMinimumProofSetTests(unittest.TestCase):
         missing = receipt["cases"][1]["latest_evidence"]
         self.assertEqual(missing["status"], "missing")
         self.assertEqual(missing["blocker_class"], "missing_case_evidence")
+
+    def test_failed_workflow_closeout_validation_blocks_selected_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifacts = Path(temp_dir)
+            _write_run(
+                artifacts,
+                "20260704-000006",
+                [{"id": "core-one", "status": "pass"}],
+                closeout_status="pass",
+                closeout_validation_status="blocked",
+            )
+
+            receipt = build_proof_set(
+                skill="Skills/fixture",
+                artifacts_root=artifacts,
+                core_cases=["core-one"],
+                regression_cases=[],
+                codex_profile="oss-local",
+                model="qwen3.5:9b-mlx",
+                policy="15-core-plus-5-regression",
+                blocked_next_gates=["oss-cloud"],
+            )
+
+        evidence = receipt["cases"][0]["latest_evidence"]
+        self.assertEqual(receipt["gate_status"], "blocked")
+        self.assertEqual(receipt["summary"]["blocked_count"], 1)
+        self.assertEqual(evidence["status"], "blocked")
+        self.assertEqual(evidence["blocker_class"], "workflow_closeout_validation_not_pass")
+        self.assertIn("workflow-closeout validation status is blocked", evidence["failures"][0])
 
     def test_blocked_next_gate_overrides_do_not_duplicate_defaults(self) -> None:
         with mock.patch(

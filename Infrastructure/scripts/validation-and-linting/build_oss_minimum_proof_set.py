@@ -87,6 +87,10 @@ def _workflow_validation_status(closeout: dict[str, Any]) -> str | None:
     return status if isinstance(status, str) else None
 
 
+def _blocked_by_closeout_validation(status: str | None) -> bool:
+    return status is not None and status != "pass"
+
+
 def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> CaseEvidence:
     latest: CaseEvidence | None = None
     for scorecard_path in sorted(artifacts_root.glob("*/scorecard.json")):
@@ -101,6 +105,15 @@ def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> Ca
             status = _case_status(raw_case)
             if closeout_case and closeout_case.get("status") in {"pass", "fail", "blocked"}:
                 status = str(closeout_case["status"])
+            workflow_validation_status = _workflow_validation_status(closeout)
+            failures = [str(item) for item in raw_case.get("tier1_failures") or []]
+            blocker_class = str(raw_case.get("blocker_class")) if raw_case.get("blocker_class") else None
+            if _blocked_by_closeout_validation(workflow_validation_status):
+                status = "blocked"
+                blocker_class = blocker_class or "workflow_closeout_validation_not_pass"
+                failures.append(
+                    f"workflow-closeout validation status is {workflow_validation_status}; expected pass."
+                )
             latest = CaseEvidence(
                 case_id=case_id,
                 bucket=bucket,
@@ -109,13 +122,13 @@ def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> Ca
                 scorecard_path=str(scorecard_path),
                 workflow_closeout_path=str(closeout_path) if closeout_path.is_file() else None,
                 workflow_closeout_status=str(closeout.get("status")) if closeout.get("status") else None,
-                workflow_closeout_validation_status=_workflow_validation_status(closeout),
+                workflow_closeout_validation_status=workflow_validation_status,
                 result_path=_optional_str(
                     raw_case.get("dir")
                     or (closeout_case.get("result_path") if closeout_case else None)
                 ),
-                blocker_class=str(raw_case.get("blocker_class")) if raw_case.get("blocker_class") else None,
-                failures=[str(item) for item in raw_case.get("tier1_failures") or []],
+                blocker_class=blocker_class,
+                failures=failures,
                 codex_exec_invoked=_runner_codex_exec(raw_case),
                 trace_total_tokens=_runner_total_tokens(raw_case),
             )

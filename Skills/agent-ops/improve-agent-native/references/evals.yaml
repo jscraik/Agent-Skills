@@ -758,11 +758,11 @@ cases:
     - git push
   acceptance:
   - type: expected_signal
-    value: score gaps evidence
+    value: Identifies score gaps using cited file or workflow evidence.
   - type: expected_signal
-    value: missing tools workflow coverage
+    value: Names missing assistant-tool coverage for the product workflow.
   - type: expected_signal
-    value: test evidence blocked
+    value: States that test evidence remains blocked until executable proof exists.
   - type: expected_signal
     value: Cites provided file evidence.
   - type: not_regex
