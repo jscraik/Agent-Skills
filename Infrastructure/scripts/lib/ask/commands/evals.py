@@ -2081,12 +2081,23 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
                 or "Satisfies acceptance criterion."
             ).strip()
             category = "MUST_NOT" if criterion_type.startswith(("forbidden", "must_not")) else "INTENT"
-            checklist.append({
+            criterion = {
                 "name": _safe_slug(f"{criterion_type}-{index}"),
                 "description": value,
                 "max_score": 1,
                 "category": category,
                 "source": source,
+            }
+            if criterion_type.startswith("text_field_"):
+                criterion["metadata"] = {
+                    "acceptance": {
+                        key: normalized_item[key]
+                        for key in sorted(normalized_item)
+                        if key in {"type", "field", "fields", "value", "values", "expected", "expected_values"}
+                    }
+                }
+            checklist.append({
+                **criterion,
             })
 
     if not checklist:

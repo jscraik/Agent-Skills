@@ -32,6 +32,9 @@ EXAMPLE_TESSL_EVAL_YAML = """cases:
         value: "(?is)(example|task)"
       - type: expected_signal
         value: Separates evidence from readiness claims while completing the example task.
+      - type: text_field_equals
+        field: status
+        value: blocked
 """
 
 
@@ -1727,6 +1730,12 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     descriptions = [item["description"] for item in criteria["checklist"]]
     assert "(?is)(example|task)" in descriptions
     assert "Preserves package shape and proves the skill-specific eval can be scored." in descriptions
+    typed = next(item for item in criteria["checklist"] if item["name"] == "text-field-equals-3")
+    assert typed["metadata"]["acceptance"] == {
+        "field": "status",
+        "type": "text_field_equals",
+        "value": "blocked",
+    }
     staged_skill = _assert_plugin_shaped_stage(staged_source, "example-skill")
     assert (staged_skill / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == "Runtime boundary details.\n"
     assert (staged_skill / "assets" / "example.png").read_bytes() == b"png"
@@ -2073,7 +2082,7 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     generated_task = generated_case.read_text(encoding="utf-8")
     assert "Review the architecture situation" not in generated_task
     assert "Architecture situation:" not in generated_task
-    assert "Help with this situation:" in generated_task
+    assert "next action" in generated_task
     criteria = json.loads(
         (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
             encoding="utf-8"
