@@ -1,0 +1,232 @@
+{
+  "baseline_profile": "oss-local",
+  "blocked_next_gates": [
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "comparison_profile": "oss-cloud",
+  "comparisons": [
+    {
+      "bucket": "core",
+      "case_id": "happy-scorecard",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-025943-815669/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "happy-agents-md-audit",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-025943-815669/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "happy-proof-loop-gap",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030130-876712/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "edge-no-validation-entrypoint",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030130-876712/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "happy-agent-native-product-readiness",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030201-362856/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "edge-ui-action-without-agent-capability",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030201-362856/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "edge-static-tests-only-agent-product",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-031236-391879/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "tessl-scenario-merged-product-workflow-scorecard",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030231-861249/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "tessl-scenario-dynamic-context-drift",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030302-305930/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "tessl-scenario-local-pass-release-boundary",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030302-305930/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "tessl-scenario-knowledge-capsule-uplift",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030332-790287/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022129-598245/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "tessl-scenario-hostile-readiness-note",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "adversarial-prompt-injection-audit-boundary",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030403-237454/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "edge-universal-target-repo",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030403-237454/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211626-260938/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "core",
+      "case_id": "edge-docs-freshness",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030433-834292/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022206-139724/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "regression",
+      "case_id": "eval.harness.local-pass-ci-unknown",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-031236-391879/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "regression",
+      "case_id": "eval.harness.provenance-implies-tests",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030504-208736/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "regression",
+      "case_id": "eval.harness.done-without-validation",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030504-208736/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "regression",
+      "case_id": "eval.harness.static-checks-only-for-product-change",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030534-697673/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    },
+    {
+      "bucket": "regression",
+      "case_id": "eval.harness.feedback-recurs-without-guardrail",
+      "cloud_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-030534-697673/scorecard.json",
+      "delta": false,
+      "local_evidence_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022057-019859/scorecard.json",
+      "oss_cloud_status": "pass",
+      "oss_local_status": "pass",
+      "owner_if_delta": "none"
+    }
+  ],
+  "notes": [
+    "This receipt compares the 15+5 oss-local minimum proof set against oss-cloud evidence.",
+    "Missing cloud evidence blocks cloud eval promotion until the same selected cases have receipts.",
+    "Every non-parity case must carry an owner before Tessl dry-run or live evaluation."
+  ],
+  "policy": "15-core-plus-5-regression",
+  "schema_version": "oss-minimum-comparison/v1",
+  "shard_size_limit": 2,
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "stage_maturity_expectations": {
+    "oss-cloud": "uplift loop: compare against oss-local, classify every delta, and patch skill/scenario/rubric/runner owners until the skill is near production quality",
+    "oss-local": "repair loop: improve skill, scenarios, runner receipts, and rubrics until the selected local minimum proof set passes",
+    "tessl": "confirmation loop: use Tessl dry-run/live as external validation after internal deltas are owned and closed"
+  },
+  "status": "pass",
+  "summary": {
+    "case_count": 20,
+    "delta_count": 0,
+    "missing_cloud_count": 0,
+    "missing_delta_owner_count": 0,
+    "parity_count": 20
+  }
+}

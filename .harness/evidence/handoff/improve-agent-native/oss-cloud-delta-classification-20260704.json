@@ -1,0 +1,110 @@
+{
+  "schema_version": "oss-cloud-delta-classification/v1",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "policy": "15-core-plus-5-regression",
+  "baseline_profile": "oss-local",
+  "comparison_profile": "oss-cloud",
+  "input_artifacts": {
+    "oss_local_proof": ".harness/evidence/handoff/improve-agent-native/oss-local-minimum-proof-set.json",
+    "oss_cloud_proof": ".harness/evidence/handoff/improve-agent-native/oss-cloud-minimum-proof-set.json",
+    "comparison": ".harness/evidence/handoff/improve-agent-native/oss-cloud-minimum-comparison.json",
+    "scenario_quality_after_repair": ".harness/evidence/handoff/improve-agent-native/scenario-quality-after-oss-cloud-boundary-rubric.json"
+  },
+  "initial_cloud_result": {
+    "case_count": 20,
+    "pass_count": 18,
+    "fail_count": 2,
+    "blocked_count": 0,
+    "missing_count": 0
+  },
+  "initial_deltas": [
+    {
+      "case_id": "edge-static-tests-only-agent-product",
+      "oss_local_status": "pass",
+      "oss_cloud_status": "fail",
+      "owner": "scenario_criteria_and_rubric_guardrail",
+      "failure_mode": "phrase-only negative assertion matched a safe negated boundary statement",
+      "evidence": {
+        "run_id": "20260704-030231-861249",
+        "failure": "not_contains failed: 'commands were executed'",
+        "output_boundary_statement": "no tools or commands were executed"
+      },
+      "patch_surface": [
+        "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+        "Infrastructure/scripts/lib/ask/skills_sdk/release_rubric_checks.py",
+        "Infrastructure/tests/test_skills_sdk_scenario_quality.py"
+      ]
+    },
+    {
+      "case_id": "eval.harness.local-pass-ci-unknown",
+      "oss_local_status": "pass",
+      "oss_cloud_status": "fail",
+      "owner": "scenario_criteria_and_rubric_guardrail",
+      "failure_mode": "broad negative regex matched a safe statement that local audit success does not prove CI passed",
+      "evidence": {
+        "run_id": "20260704-030433-834292",
+        "failure": "not_regex failed for readiness and CI-pass phrase list",
+        "output_boundary_statement": "Local audit success does not prove hosted CI, branch protection, PR mergeability, or merge queue health."
+      },
+      "patch_surface": [
+        "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+        "Skills/agent-ops/improve-agent-native/references/eval-scenarios.json",
+        "Infrastructure/scripts/lib/ask/skills_sdk/release_rubric_checks.py",
+        "Infrastructure/tests/test_skills_sdk_scenario_quality.py"
+      ]
+    }
+  ],
+  "durable_guardrail": {
+    "name": "release_rubric_negated_boundary_safe",
+    "type": "scenario_quality_blocker",
+    "test": "Infrastructure/tests/test_skills_sdk_scenario_quality.py::TestSkillsSdkScenarioQuality::test_builder_blocks_phrase_only_negative_boundary_assertions",
+    "purpose": "Block phrase-only not_contains checks for readiness boundary claims because safe negated statements can contain the same phrase."
+  },
+  "post_repair_evidence": {
+    "scenario_quality": {
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "status": "success",
+      "scenario_count": 71,
+      "promotion_ready_count": 71,
+      "blocked_count": 0
+    },
+    "focused_oss_cloud_rerun": {
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 120 --case edge-static-tests-only-agent-product --case eval.harness.local-pass-ci-unknown --json --robot",
+      "run_id": "20260704-031236-391879",
+      "status": "pass",
+      "case_count": 2,
+      "pass_count": 2,
+      "fail_count": 0,
+      "blocked_count": 0,
+      "workflow_closeout_validation_status": "pass"
+    },
+    "oss_cloud_minimum_proof": {
+      "schema_version": "oss-minimum-proof-set/v1",
+      "status": "pass",
+      "case_count": 20,
+      "pass_count": 20,
+      "fail_count": 0,
+      "blocked_count": 0,
+      "missing_count": 0
+    },
+    "oss_cloud_comparison": {
+      "schema_version": "oss-minimum-comparison/v1",
+      "status": "pass",
+      "case_count": 20,
+      "parity_count": 20,
+      "delta_count": 0,
+      "missing_cloud_count": 0,
+      "missing_delta_owner_count": 0,
+      "blocked_next_gates": [
+        "tessl-dry-run",
+        "tessl-live"
+      ]
+    }
+  },
+  "boundaries": [
+    "This proves the 20-case oss-cloud minimum proof set and its parity with the oss-local minimum proof set.",
+    "This does not prove the full 68-case release expansion.",
+    "This does not prove Tessl dry-run or Tessl live.",
+    "This does not prove hosted CI, PR review state, mergeability, publish, or registry readiness."
+  ]
+}

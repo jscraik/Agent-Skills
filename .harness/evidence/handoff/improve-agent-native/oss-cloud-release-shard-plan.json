@@ -1,0 +1,204 @@
+{
+  "schema_version": "oss-release-shard-plan/v1",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "baseline": {
+    "profile": "oss-local",
+    "ledger_path": ".harness/evidence/handoff/improve-agent-native/qwen-oss-local-full-release-ledger.json",
+    "case_count": 40,
+    "pass_count": 40
+  },
+  "target_profile": "oss-cloud",
+  "mode": "release",
+  "shard_size_limit": 2,
+  "shard_count": 20,
+  "shards": [
+    {
+      "index": 1,
+      "case_count": 2,
+      "case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case happy-scorecard --case happy-agents-md-audit --json --robot"
+    },
+    {
+      "index": 2,
+      "case_count": 2,
+      "case_ids": [
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot"
+    },
+    {
+      "index": 3,
+      "case_count": 2,
+      "case_ids": [
+        "edge-universal-target-repo",
+        "edge-docs-freshness"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case edge-universal-target-repo --case edge-docs-freshness --json --robot"
+    },
+    {
+      "index": 4,
+      "case_count": 2,
+      "case_ids": [
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case happy-agent-native-product-readiness --case edge-ui-action-without-agent-capability --json --robot"
+    },
+    {
+      "index": 5,
+      "case_count": 2,
+      "case_ids": [
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case edge-static-tests-only-agent-product --case tessl-scenario-merged-product-workflow-scorecard --json --robot"
+    },
+    {
+      "index": 6,
+      "case_count": 2,
+      "case_ids": [
+        "tessl-scenario-dynamic-context-drift",
+        "tessl-scenario-local-pass-release-boundary"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case tessl-scenario-dynamic-context-drift --case tessl-scenario-local-pass-release-boundary --json --robot"
+    },
+    {
+      "index": 7,
+      "case_count": 2,
+      "case_ids": [
+        "tessl-scenario-knowledge-capsule-uplift",
+        "adversarial-prompt-injection-audit-boundary"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case tessl-scenario-knowledge-capsule-uplift --case adversarial-prompt-injection-audit-boundary --json --robot"
+    },
+    {
+      "index": 8,
+      "case_count": 2,
+      "case_ids": [
+        "pressure-prompt-injection",
+        "pressure-dangerous-command"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case pressure-prompt-injection --case pressure-dangerous-command --json --robot"
+    },
+    {
+      "index": 9,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.provenance-implies-tests"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.local-pass-ci-unknown --case eval.harness.provenance-implies-tests --json --robot"
+    },
+    {
+      "index": 10,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.done-without-validation",
+        "eval.harness.static-checks-only-for-product-change"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.done-without-validation --case eval.harness.static-checks-only-for-product-change --json --robot"
+    },
+    {
+      "index": 11,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.feedback-recurs-without-guardrail",
+        "eval.harness.review-agent-doubles-scope"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.feedback-recurs-without-guardrail --case eval.harness.review-agent-doubles-scope --json --robot"
+    },
+    {
+      "index": 12,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.slop-feedback-not-systematized",
+        "eval.harness.context-dump-instead-of-slice"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.slop-feedback-not-systematized --case eval.harness.context-dump-instead-of-slice --json --robot"
+    },
+    {
+      "index": 13,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.skill-frontmatter-not-routed",
+        "eval.harness.brownfield-harness-without-boundaries"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.skill-frontmatter-not-routed --case eval.harness.brownfield-harness-without-boundaries --json --robot"
+    },
+    {
+      "index": 14,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.architecture-drift-hidden-by-agent-velocity",
+        "eval.harness.autonomy-without-validation"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.architecture-drift-hidden-by-agent-velocity --case eval.harness.autonomy-without-validation --json --robot"
+    },
+    {
+      "index": 15,
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.pr-lifecycle-stops-before-main",
+        "eval.harness.changed-files-without-behavior-proof"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.pr-lifecycle-stops-before-main --case eval.harness.changed-files-without-behavior-proof --json --robot"
+    },
+    {
+      "index": 16,
+      "case_count": 2,
+      "case_ids": [
+        "eval.ryan.autonomy-gate-threshold",
+        "eval.ryan.repeated-steering-to-durable-mechanism"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.ryan.autonomy-gate-threshold --case eval.ryan.repeated-steering-to-durable-mechanism --json --robot"
+    },
+    {
+      "index": 17,
+      "case_count": 2,
+      "case_ids": [
+        "eval.ryan.compaction-context-recovery",
+        "eval.ryan.policy-aware-approval"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.ryan.compaction-context-recovery --case eval.ryan.policy-aware-approval --json --robot"
+    },
+    {
+      "index": 18,
+      "case_count": 2,
+      "case_ids": [
+        "eval.ryan.long-term-coherence-governance",
+        "eval.ryan.maintenance-economics-boundary"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.ryan.long-term-coherence-governance --case eval.ryan.maintenance-economics-boundary --json --robot"
+    },
+    {
+      "index": 19,
+      "case_count": 2,
+      "case_ids": [
+        "eval.ryan.stakeholder-synthesis",
+        "eval.ryan.adoption-budget-pattern-discovery"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.ryan.stakeholder-synthesis --case eval.ryan.adoption-budget-pattern-discovery --json --robot"
+    },
+    {
+      "index": 20,
+      "case_count": 2,
+      "case_ids": [
+        "eval.ryan.benchmark-laundering-quality-gate",
+        "eval.ryan.perception-lock-adoption-decision"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --timeout-seconds 180 --case eval.ryan.benchmark-laundering-quality-gate --case eval.ryan.perception-lock-adoption-decision --json --robot"
+    }
+  ],
+  "blocked_next_gates": [
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "notes": [
+    "Release-scope oss-cloud proof must run the same case universe as the repaired oss-local qwen full-release ledger.",
+    "Tessl dry-run and Tessl live remain separate evidence lanes until cloud release evidence and comparison receipts are proven."
+  ]
+}
