@@ -1,0 +1,316 @@
+name: Release to private npm
+
+on:
+  push:
+    tags:
+      - "v[0-9]*.[0-9]*.[0-9]*"
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type "release" to publish the current tag on disk
+        required: true
+        default: ""
+      release_tag:
+        description: Semver tag to publish (for example v0.12.0)
+        required: true
+        default: ""
+      publish_auth:
+        description: Auth mode for publish (`token` for bootstrap, `oidc` for trusted publisher)
+        required: false
+        default: "oidc"
+        type: choice
+        options:
+          - token
+          - oidc
+
+concurrency:
+  group: release-private-npm-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: npm-release
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      (
+        github.event.inputs.confirm == 'release' &&
+        startsWith(github.event.inputs.release_tag, 'v')
+      )
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', github.event.inputs.release_tag) || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve and validate release tag
+        id: release-tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="${{ github.event.inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid release tag '$TAG'. Expected vX.Y.Z (optionally with prerelease/build suffix)."
+            exit 1
+          fi
+          if ! git rev-parse --verify --quiet "refs/tags/$TAG" >/dev/null; then
+            echo "::error::Tag '$TAG' is not available in this checkout."
+            exit 1
+          fi
+          echo "value=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: "26.3.0"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Configure npm authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Materialize CODESTYLE.md for CI
+        run: |
+          if [[ -L CODESTYLE.md && ! -e CODESTYLE.md ]]; then
+            rm CODESTYLE.md
+            cp src/templates/CODESTYLE.md CODESTYLE.md
+          fi
+
+      - name: Validate release candidate
+        run: npm run check
+
+      - name: Build package
+        run: npm run build
+
+      - name: Generate SBOM
+        # Use cyclonedx-npm with --ignore-npm-errors flag for pnpm compatibility
+        # pnpm overrides can cause npm ls to report version conflicts
+        run: |
+          npx --yes @cyclonedx/cyclonedx-npm@4.2.1 --ignore-npm-errors --output-file artifacts/sbom.cdx.json
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sbom
+          path: artifacts/sbom.cdx.json
+          retention-days: 90
+
+      - name: Create package tarball
+        id: package-tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARBALL="$(npm pack --silent)"
+          echo "path=$TARBALL" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test packed CLI artifact
+        run: |
+          set -euo pipefail
+          TARBALL="${{ steps.package-tarball.outputs.path }}"
+          TMP_DIR="$(mktemp -d)"
+          npm init -y --prefix "$TMP_DIR" >/dev/null 2>&1
+          npm install --prefix "$TMP_DIR" "./$TARBALL" >/dev/null
+
+          # Read package metadata to derive bin name and package name
+          eval "$(TARBALL="$TARBALL" TMP_DIR="$TMP_DIR" node <<'EOF'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const tmpDir = process.env.TMP_DIR;
+          const tarball = process.env.TARBALL;
+
+          // Extract package name from tarball or use env var
+          let packageName = process.env.PACKAGE_NAME || "";
+          if (!packageName) {
+            // Try to extract from package.json in workspace
+            try {
+              const workspacePkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+              packageName = workspacePkg.name;
+            } catch (err) {
+              // Fall back to first non-dot package
+              const nodeModules = path.join(tmpDir, "node_modules");
+              const entries = fs.readdirSync(nodeModules);
+              for (const entry of entries) {
+                if (entry.startsWith(".")) continue;
+                if (entry.startsWith("@")) {
+                  const scopedEntries = fs.readdirSync(path.join(nodeModules, entry));
+                  if (scopedEntries.length > 0) {
+                    packageName = `${entry}/${scopedEntries[0]}`;
+                    break;
+                  }
+                } else {
+                  packageName = entry;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (!packageName) {
+            console.error("Unable to determine installed package name for CLI smoke test");
+            process.exit(1);
+          }
+
+          const pkgDir = path.join(tmpDir, "node_modules", packageName);
+          const pkgJson = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8"));
+          const binEntries = pkgJson.bin || {};
+
+          if (Object.keys(binEntries).length === 0) {
+            console.error(`Packed package ${pkgJson.name || packageName} has no bin entry`);
+            process.exit(1);
+          }
+
+          const binName = typeof binEntries === "string" ? path.basename(pkgJson.name) : Object.keys(binEntries)[0];
+          const binEntryRelPath =
+            typeof binEntries === "string" ? binEntries : binEntries[binName];
+          const binEntryPath = path.join(pkgDir, binEntryRelPath);
+          if (!binEntryRelPath || !fs.existsSync(binEntryPath)) {
+            console.error(
+              `Packed package ${pkgJson.name || packageName} is missing declared bin target ${binEntryRelPath || "<undefined>"}`,
+            );
+            process.exit(1);
+          }
+          const binPath = path.join(tmpDir, "node_modules", ".bin", binName);
+
+          console.log(`export BIN_PATH="${binPath}"`);
+          console.log(`export BIN_NAME="${binName}"`);
+          console.log(`export PKG_NAME="${pkgJson.name}"`);
+          console.log(`export PKG_VERSION="${pkgJson.version}"`);
+          console.log(`export SKIP_CLI_TEST=0`);
+          EOF
+          )"
+
+          VERSION_FILE="$TMP_DIR/version.txt"
+          "$BIN_PATH" --version | tee "$VERSION_FILE"
+          VERSION_FILE="$VERSION_FILE" PKG_VERSION="$PKG_VERSION" node <<'EOF'
+          const fs = require("node:fs");
+          const pkgVersion = process.env.PKG_VERSION;
+          const versionOutput = fs.readFileSync(process.env.VERSION_FILE, "utf8").trim();
+          if (!versionOutput.includes(pkgVersion)) {
+            console.error(`CLI --version output does not contain expected version ${pkgVersion}: ${versionOutput}`);
+            process.exit(1);
+          }
+          console.log(`CLI version check passed: output contains ${pkgVersion}`);
+          EOF
+
+      - name: Verify tag matches package version
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${{ steps.release-tag.outputs.value }}"
+          TAG_VERSION="${TAG_VERSION#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag v${TAG_VERSION} does not match package.json version ${PKG_VERSION}"
+            exit 1
+          fi
+
+      - name: Verify publish auth mode
+        id: publish-auth
+        run: |
+          MODE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_auth || vars.NPM_PUBLISH_AUTH || 'oidc' }}"
+          if [[ -z "$MODE" ]]; then
+            MODE="oidc"
+          fi
+          if [[ "$MODE" != "token" && "$MODE" != "oidc" ]]; then
+            echo "::error::Unsupported publish_auth mode '$MODE'. Expected token or oidc."
+            exit 1
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Publish private package (token)
+        if: steps.publish-auth.outputs.mode == 'token'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::error::NPM_TOKEN secret is required when publish_auth=token."
+            exit 1
+          fi
+          npm publish --access restricted
+
+      - name: Publish private package (OIDC trusted publisher)
+        if: steps.publish-auth.outputs.mode == 'oidc'
+        run: npm publish --access restricted --provenance
+
+      - name: Generate build provenance attestation
+        id: attest
+        if: steps.publish-auth.outputs.mode == 'oidc'
+        continue-on-error: true
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: "*.tgz"
+
+      - name: Warn when attestations are unavailable
+        if: steps.publish-auth.outputs.mode == 'oidc' && steps.attest.outcome == 'failure'
+        run: |
+          echo "::warning::Build provenance attestations are unavailable for this repository type. Publish succeeded, but attestation generation was skipped."
+
+      - name: Verify attestations
+        if: steps.publish-auth.outputs.mode == 'oidc' && steps.attest.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          GH_BIN="${HARNESS_GH_BIN:-${GH_BIN:-gh}}"
+          TARBALL="${{ steps.package-tarball.outputs.path }}"
+          if [[ -z "$TARBALL" ]]; then
+            VERSION="$(node -p "require('./package.json').version")"
+            TARBALL="brainwav-coding-harness-${VERSION}.tgz"
+          fi
+          if [[ -f "$TARBALL" ]]; then
+            "$GH_BIN" attestation verify "$TARBALL" --repo "${{ github.repository }}"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          GH_BIN="${HARNESS_GH_BIN:-${GH_BIN:-gh}}"
+          VERSION="$(node -p "require('./package.json').version")"
+          if git rev-parse --verify --quiet "refs/tags/v${VERSION}" >/dev/null; then
+            RELEASE_ARGS=(--title "v${VERSION}")
+            if [[ -f CHANGELOG.md ]]; then
+              RELEASE_ARGS+=(--notes-file CHANGELOG.md)
+            else
+              RELEASE_ARGS+=(--generate-notes)
+            fi
+
+            if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+              RELEASE_ARGS+=(--latest)
+            fi
+
+            if "$GH_BIN" release view "v${VERSION}" >/dev/null 2>&1; then
+              echo "Release v${VERSION} already exists; skipping creation."
+            else
+              # Fail closed on create errors, but tolerate the duplicate race where
+              # another actor creates the release between view and create.
+              if ! "$GH_BIN" release create "v${VERSION}" "${RELEASE_ARGS[@]}"; then
+                if "$GH_BIN" release view "v${VERSION}" >/dev/null 2>&1; then
+                  echo "Release v${VERSION} appeared during create attempt; continuing."
+                else
+                  echo "::error::Failed to create GitHub release v${VERSION}."
+                  exit 1
+                fi
+              fi
+            fi
+          else
+            echo "::warning::Tag v${VERSION} is not present locally; skipping GitHub release creation."
+          fi

@@ -76,6 +76,10 @@ Validated on 2026-04-04 with:
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
+## Freshness review
+
+- 2026-07-04: Reviewed during coding-harness canary PR validation. The solution remains retained as historical troubleshooting guidance for Codex live smoke closeout stabilization.
+
 ## Follow-up
 
 - 2026-07-04 freshness review: retained as a historical solution entry. The
