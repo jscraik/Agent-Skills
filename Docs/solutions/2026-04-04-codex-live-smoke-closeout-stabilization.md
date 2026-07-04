@@ -3,8 +3,8 @@ title: Codex live smoke closeout stabilization
 asset_family: skill authoring family live smoke evaluation
 owner: Agent Skills Team
 source_artifact: Docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md
-freshness_reviewed_on: 2026-04-04
-last_updated: 2026-04-04
+freshness_reviewed_on: 2026-07-04
+last_updated: 2026-07-04
 review_after_days: 90
 ---
 
@@ -75,6 +75,10 @@ Validated on 2026-04-04 with:
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
+
+## Freshness review
+
+- 2026-07-04: Reviewed during coding-harness canary PR validation. The solution remains retained as historical troubleshooting guidance for Codex live smoke closeout stabilization.
 
 ## Follow-up
 

@@ -153,6 +153,69 @@
       "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
       "owner": "skills-sdk",
       "review_after": "2026-09-21"
+    },
+    {
+      "id": "harness-active-artifacts-index",
+      "match_type": "exact",
+      "pattern": ".harness/active-artifacts.md",
+      "classification": "classification_required",
+      "reason": "Harness bootstrap active-artifacts index is a tracked routing-control surface for current execution-input artifacts, not generated run output.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-artifact-provenance-index",
+      "match_type": "exact",
+      "pattern": ".harness/artifact-provenance.json",
+      "classification": "classification_required",
+      "reason": "Harness bootstrap artifact provenance registry is a tracked governance index for artifact authority and starts empty in canary scaffolds.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-review-log",
+      "match_type": "exact",
+      "pattern": ".harness/review-log.md",
+      "classification": "classification_required",
+      "reason": "Harness bootstrap review log is a tracked operational review reference consumed by agents during governance and quality-review handoff.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-diagram-context-pack",
+      "match_type": "exact",
+      "pattern": "AI/context/diagram-context.md",
+      "classification": "classification_required",
+      "reason": "Generated diagram context pack is retained as agent-facing architecture reference and is refreshed by the diagram workflow.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-codestyle-policy-pack",
+      "match_type": "prefix",
+      "pattern": "codestyle/",
+      "classification": "classification_required",
+      "reason": "Harness scaffolded codestyle modules are tracked policy sources paired with root CODESTYLE.md and coding-policy.json.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-coding-policy-index",
+      "match_type": "exact",
+      "pattern": "coding-policy.json",
+      "classification": "classification_required",
+      "reason": "Harness coding-policy index is the machine-readable policy-routing surface for codestyle modules and validation gates.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
+    },
+    {
+      "id": "harness-coding-policy-schema",
+      "match_type": "exact",
+      "pattern": "contracts/coding-policy.schema.json",
+      "classification": "classification_required",
+      "reason": "Harness coding-policy schema is the contract for the tracked machine-readable policy-routing surface.",
+      "owner": "coding-harness canary",
+      "review_after": "2026-10-04"
     }
   ]
 }
