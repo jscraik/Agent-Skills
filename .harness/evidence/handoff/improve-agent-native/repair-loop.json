@@ -101,6 +101,6 @@
     "eval.ryan.benchmark-laundering-quality-gate",
     "eval.ryan.perception-lock-adoption-decision"
   ],
-  "what_this_proves": "OSS-local and OSS-cloud repair outcomes were classified with no recorded cloud deltas before Tessl dry-run.",
+  "what_this_proves": "The listed repair-loop cases were classified before Tessl dry-run.",
   "what_this_does_not_prove": "It does not prove Tessl live scoring or release readiness."
 }
