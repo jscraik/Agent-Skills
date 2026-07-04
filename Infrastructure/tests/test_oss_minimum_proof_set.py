@@ -279,6 +279,27 @@ class OssMinimumProofSetTests(unittest.TestCase):
         self.assertEqual(regression_cases, ["regression-one"])
         self.assertEqual(shard_size_limit, 2)
 
+    def test_improve_agent_native_policy_has_lane_specific_case_counts(self) -> None:
+        policy_path = REPO_ROOT / "Infrastructure" / "config" / "skills-sdk" / "oss-minimum-proof-sets.v1.json"
+        payload = json.loads(policy_path.read_text(encoding="utf-8"))
+        proof_sets = payload["proof_sets"]
+
+        local = proof_sets["improve-agent-native-oss-local-9-plus-3"]
+        cloud = proof_sets["improve-agent-native-15-plus-5"]
+
+        self.assertEqual(local["lane"], "oss-local")
+        self.assertEqual(len(local["core_cases"]), 9)
+        self.assertEqual(len(local["regression_cases"]), 3)
+        self.assertEqual(local["total_case_count"], 12)
+        self.assertEqual(local["policy"], "oss-local-9-core-plus-3-regression")
+        self.assertIn("oss-cloud-15-plus-5-rehearsal", local["blocked_next_gates"])
+
+        self.assertEqual(cloud["lane"], "oss-cloud-and-tessl-live")
+        self.assertEqual(len(cloud["core_cases"]), 15)
+        self.assertEqual(len(cloud["regression_cases"]), 5)
+        self.assertEqual(cloud["total_case_count"], 20)
+        self.assertEqual(cloud["policy"], "15-core-plus-5-regression")
+
     def test_missing_result_path_stays_null(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifacts = Path(temp_dir)

@@ -783,9 +783,9 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
         "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
         "scenario_count_policy": (
-            "Tessl live is the paid external confirmation lane. Default live "
-            "runs are capped to the 20-case minimum proof set; larger sets need "
-            "an explicit budget/coverage decision before upload."
+            "oss-local uses a 12-case 9+3 repair canary; oss-cloud expands to "
+            "the 20-case 15+5 Tessl rehearsal set; Tessl live is capped to the "
+            "same 20-case 15+5 confirmation set by default."
         ),
         "oss_cloud_alignment_policy": (
             "oss-cloud is the Tessl rehearsal lane and must prove the same case "
