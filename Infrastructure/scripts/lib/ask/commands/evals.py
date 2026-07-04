@@ -37,6 +37,9 @@ TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
 TESSL_DEFAULT_WORKSPACE = "jscraik"
 TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 TESSL_LIVE_PRIVATE_MIN_SCENARIOS = 20
+TESSL_LIVE_PRIVATE_MAX_SCENARIOS = 20
+TESSL_LIVE_PRIVATE_VARIANT_COUNT = 2
+TESSL_LIVE_PRIVATE_MODEL_TASKS_PER_VARIANT = 2
 TESSL_WORKSPACE_RUN_LIMIT = 300
 TESSL_WORKSPACE_RUN_LIMIT_SOURCE = "operator_provided_limit"
 TESSL_WORKSPACE_RUN_RESERVE = 20
@@ -778,6 +781,23 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+        "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+        "scenario_count_policy": (
+            "Tessl live is the paid external confirmation lane. Default live "
+            "runs are capped to the 20-case minimum proof set; larger sets need "
+            "an explicit budget/coverage decision before upload."
+        ),
+        "oss_cloud_alignment_policy": (
+            "oss-cloud is the Tessl rehearsal lane and must prove the same case "
+            "set Tessl live will upload, not a looser subset or wider historical "
+            "ledger."
+        ),
+        "generated_scenario_policy": (
+            "generated-eval.* scenarios are blocked from Tessl live by default "
+            "unless a later budgeted lane explicitly opts them in with OSS local "
+            "and cloud proof plus cost profile evidence."
+        ),
+        "expected_variants": ["baseline", "usage-spec"],
         "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
         "pre_tessl_feedback_loop": {
             "required_order": [
@@ -844,6 +864,8 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "track_tokens_when_available": True,
             "track_cost_when_available": True,
             "missing_metrics_are_explicit": True,
+            "pre_live_budget_receipt": "skills-sdk.tessl-live-budget-preflight.v1",
+            "expected_model_tasks": "scenario_count * 2 variants * (solve + score)",
         },
         "run_limit_policy": {
             "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
@@ -3397,15 +3419,19 @@ def _tessl_live_oss_scenario_parity(
     lanes = _tessl_live_readiness_lanes(repo_root, source_path)
     lane_case_ids: dict[str, list[str]] = {}
     missing_by_lane: dict[str, list[str]] = {}
+    extra_by_lane: dict[str, list[str]] = {}
+    staged_case_set = set(staged_case_ids)
     for lane_id in ("oss-local", "oss-cloud"):
         lane = lanes.get(lane_id) or {}
         receipt_path = _resolve_tessl_live_evidence_path(repo_root, lane.get("receipt_path"))
         passed = _oss_pass_case_ids_for_live(repo_root, receipt_path)
         lane_case_ids[lane_id] = sorted(passed)
-        missing_by_lane[lane_id] = sorted(set(staged_case_ids) - passed)
+        missing_by_lane[lane_id] = sorted(staged_case_set - passed)
+        extra_by_lane[lane_id] = sorted(passed - staged_case_set)
 
     unproven = sorted(set().union(*(set(items) for items in missing_by_lane.values())))
-    ok = bool(staged_case_ids) and not unproven
+    extra = sorted(set().union(*(set(items) for items in extra_by_lane.values())))
+    ok = bool(staged_case_ids) and not unproven and not extra
     return {
         "schema_version": "skills-sdk.tessl-live-oss-scenario-parity.v1",
         "status": "pass" if ok else "blocked",
@@ -3414,9 +3440,55 @@ def _tessl_live_oss_scenario_parity(
         "oss_local_pass_count": len(lane_case_ids.get("oss-local", [])),
         "oss_cloud_pass_count": len(lane_case_ids.get("oss-cloud", [])),
         "missing_by_lane": missing_by_lane,
+        "extra_by_lane": extra_by_lane,
         "unproven_case_count": len(unproven),
         "unproven_case_ids": unproven,
-        "rule": "Every Tessl live scenario must have pass evidence from both oss-local and oss-cloud.",
+        "extra_case_count": len(extra),
+        "extra_case_ids": extra,
+        "rule": (
+            "The Tessl live scenario set must exactly match both oss-local and "
+            "oss-cloud pass evidence for the current live candidate."
+        ),
+    }
+
+
+def _tessl_live_budget_preflight(staged_source: Path) -> dict[str, object]:
+    """Return the paid-live Tessl scenario/cost-shape gate for staged input."""
+    staged_case_ids = _tessl_live_staged_case_ids(staged_source)
+    generated_case_ids = sorted(case_id for case_id in staged_case_ids if case_id.startswith("generated-eval."))
+    scenario_count = len(staged_case_ids)
+    expected_solution_runs = scenario_count * TESSL_LIVE_PRIVATE_VARIANT_COUNT
+    expected_score_runs = scenario_count * TESSL_LIVE_PRIVATE_VARIANT_COUNT
+    expected_model_tasks = scenario_count * TESSL_LIVE_PRIVATE_VARIANT_COUNT * TESSL_LIVE_PRIVATE_MODEL_TASKS_PER_VARIANT
+    blockers: list[str] = []
+    if scenario_count > TESSL_LIVE_PRIVATE_MAX_SCENARIOS:
+        blockers.append(
+            f"scenario_count {scenario_count} exceeds the default {TESSL_LIVE_PRIVATE_MAX_SCENARIOS}-case Tessl live cost cap"
+        )
+    if generated_case_ids:
+        blockers.append("generated-eval.* scenarios require an explicit budgeted live lane before upload")
+
+    return {
+        "schema_version": "skills-sdk.tessl-live-budget-preflight.v1",
+        "status": "pass" if not blockers else "blocked",
+        "blocker_class": None if not blockers else "blocked_validation",
+        "blockers": blockers,
+        "scenario_count": scenario_count,
+        "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+        "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+        "staged_case_ids": staged_case_ids,
+        "generated_case_count": len(generated_case_ids),
+        "generated_case_ids": generated_case_ids,
+        "expected_variants": ["baseline", "usage-spec"],
+        "expected_variant_count": TESSL_LIVE_PRIVATE_VARIANT_COUNT,
+        "expected_solution_runs": expected_solution_runs,
+        "expected_score_runs": expected_score_runs,
+        "expected_model_tasks": expected_model_tasks,
+        "rule": (
+            "Tessl live is capped to the 20-case OSS-proven confirmation set by default; "
+            "use smaller internal canaries before live and require an explicit budgeted "
+            "lane for larger or generated scenario uploads."
+        ),
     }
 
 
@@ -4081,17 +4153,9 @@ def _run_tessl_live_private_eval(
         dry_run=dry_run,
     )
     parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
+    budget_preflight = _tessl_live_budget_preflight(staged_source)
     common["oss_scenario_parity"] = parity
-    if dry_run:
-        return {
-            "status": "pass",
-            **common,
-            "raw_output": "",
-            "raw_error": "",
-            "exit_code": 0,
-            "blocker": None,
-            "blocker_class": None,
-        }
+    common["budget_preflight"] = budget_preflight
     if parity.get("status") != "pass":
         return {
             "status": "blocked",
@@ -4103,6 +4167,27 @@ def _run_tessl_live_private_eval(
                 "and oss-cloud pass evidence."
             ),
             "blocker_class": "blocked_validation",
+        }
+    if budget_preflight.get("status") != "pass":
+        blockers = budget_preflight.get("blockers")
+        blocker_text = "; ".join(str(item) for item in blockers) if isinstance(blockers, list) else None
+        return {
+            "status": "blocked",
+            **common,
+            "raw_output": "",
+            "raw_error": "",
+            "blocker": blocker_text or "Tessl live budget preflight blocked the staged scenario set.",
+            "blocker_class": budget_preflight.get("blocker_class") or "blocked_validation",
+        }
+    if dry_run:
+        return {
+            "status": "pass",
+            **common,
+            "raw_output": "",
+            "raw_error": "",
+            "exit_code": 0,
+            "blocker": None,
+            "blocker_class": None,
         }
 
     tessl_path = shutil.which("tessl")

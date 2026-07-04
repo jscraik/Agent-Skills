@@ -2407,6 +2407,58 @@ def test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl(tmp_path:
     run.assert_not_called()
 
 
+def test_evals_live_private_requires_oss_lanes_to_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: exact live case-set rehearsal\n"
+            "    given: A live Tessl candidate has one selected case.\n"
+            "    should: Block when oss-cloud evidence contains a different wider case set.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / "example-skill"
+    for lane_id in ("oss-local", "oss-cloud"):
+        receipt_path = evidence_root / f"{lane_id}.json"
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        payload["cases"].append({"case_id": "extra-not-in-live-upload", "status": "pass"})
+        receipt_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"]["oss-local"] == ["extra-not-in-live-upload"]
+    assert parity["extra_by_lane"]["oss-cloud"] == ["extra-not-in-live-upload"]
+    assert parity["extra_case_ids"] == ["extra-not-in-live-upload"]
+    run.assert_not_called()
+
+
 def test_tessl_live_private_policy_names_tessl_local_proof_gate() -> None:
     policy = evals._tessl_live_private_policy("jscraik")
     feedback_loop = policy["pre_tessl_feedback_loop"]
@@ -3035,6 +3087,47 @@ def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
     assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_environment"
     assert preflight["remaining_runs"] == evals.TESSL_WORKSPACE_RUN_RESERVE
+
+
+def test_tessl_live_budget_preflight_blocks_over_cap_and_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        case_id = f"case-{index:02d}"
+        case_root = evals_root / case_id
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+    generated_root = evals_root / "generated-eval.expensive-context-loop"
+    generated_root.mkdir(parents=True)
+    (generated_root / "task.md").write_text("Generated task.\n", encoding="utf-8")
+    (generated_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert preflight["scenario_count"] == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 2
+    assert preflight["expected_model_tasks"] == preflight["scenario_count"] * 4
+    assert preflight["generated_case_ids"] == ["generated-eval.expensive-context-loop"]
+    assert any("cost cap" in blocker for blocker in preflight["blockers"])
+    assert any("generated-eval" in blocker for blocker in preflight["blockers"])
+
+
+def test_tessl_live_budget_preflight_passes_twenty_non_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS):
+        case_root = evals_root / f"case-{index:02d}"
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "pass"
+    assert preflight["scenario_count"] == 20
+    assert preflight["expected_solution_runs"] == 40
+    assert preflight["expected_score_runs"] == 40
+    assert preflight["expected_model_tasks"] == 80
 
 
 def test_evals_live_private_uses_default_workspace(tmp_path: Path) -> None:
