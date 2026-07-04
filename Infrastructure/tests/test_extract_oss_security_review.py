@@ -71,3 +71,20 @@ def test_blocks_unknown_review_status(tmp_path: Path) -> None:
 
     assert result["status"] == "blocked"
     assert result["blockers"] == ["review_status is outside the accepted vocabulary"]
+
+
+def test_blocks_empty_summary_and_boundary(tmp_path: Path) -> None:
+    review = '''{
+  "schema_version": "skills-sdk.oss-security-review-input.v0",
+  "review_status": "pass",
+  "risk_summary": "",
+  "required_followups": [],
+  "evidence_digest_seen": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "reviewer_model_boundary": ""
+}'''
+
+    result = MODULE.validate_review(write_review(tmp_path, review))
+
+    assert result["status"] == "blocked"
+    assert "risk_summary must be a non-empty string" in result["blockers"]
+    assert "reviewer_model_boundary must be a non-empty string" in result["blockers"]

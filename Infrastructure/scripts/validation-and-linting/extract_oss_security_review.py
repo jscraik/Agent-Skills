@@ -44,22 +44,29 @@ def _extract_json(raw: str) -> dict[str, Any]:
     return payload
 
 
-def validate_review(path: Path, *, expected_digest: str | None = None) -> dict[str, Any]:
-    try:
-        payload = _extract_json(path.read_text(encoding="utf-8"))
-    except (JSONDecodeError, ValueError) as exc:
-        return {
-            "schema_version": "skills-sdk.oss-security-review-extraction.v0",
-            "status": "blocked",
-            "blockers": [f"review output is not valid JSON: {exc}"],
-            "review": None,
-        }
+def _blocked(blockers: list[str], review: dict[str, Any] | None = None) -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk.oss-security-review-extraction.v0",
+        "status": "blocked",
+        "blockers": blockers,
+        "review": review,
+    }
+
+
+def _review_shape_blockers(payload: dict[str, Any]) -> list[str]:
     missing = sorted(REQUIRED_KEYS - set(payload))
-    status = "pass"
     blockers: list[str] = []
     if missing:
-        status = "blocked"
         blockers.append(f"missing required key(s): {', '.join(missing)}")
+    for key in ("risk_summary", "reviewer_model_boundary"):
+        if not str(payload.get(key, "")).strip():
+            blockers.append(f"{key} must be a non-empty string")
+    if not isinstance(payload.get("required_followups"), list):
+        blockers.append("required_followups must be a list")
+    return blockers
+
+
+def _digest_blockers(payload: dict[str, Any], expected_digest: str | None) -> list[str]:
     expected = expected_digest.strip() if expected_digest else None
     observed = str(payload.get("evidence_digest_seen", "")).strip()
     expected_match = DIGEST_RE.search(expected) if expected else None
@@ -72,24 +79,38 @@ def validate_review(path: Path, *, expected_digest: str | None = None) -> dict[s
         or str(observed_canonical) in str(expected_canonical)
         or str(expected_canonical) in str(observed_canonical)
     )
-    if not digest_matches:
-        status = "blocked"
-        blockers.append(
+    if digest_matches:
+        return []
+    return [
             "evidence_digest_seen does not match expected digest "
             f"(expected={expected!r}, observed={observed!r}, "
             f"expected_canonical={expected_canonical!r}, observed_canonical={observed_canonical!r}, "
             f"digest_matches={digest_matches!r})"
-        )
+    ]
+
+
+def _review_status_blockers(payload: dict[str, Any]) -> list[str]:
     review_status = str(payload.get("review_status", "")).strip().lower()
-    if not any(
+    accepted_status = any(
         review_status == accepted or review_status.startswith(f"{accepted}:")
         for accepted in ("pass", "warn", "fail", "blocked")
-    ):
-        status = "blocked"
-        blockers.append("review_status is outside the accepted vocabulary")
+    )
+    return [] if accepted_status else ["review_status is outside the accepted vocabulary"]
+
+
+def validate_review(path: Path, *, expected_digest: str | None = None) -> dict[str, Any]:
+    try:
+        payload = _extract_json(path.read_text(encoding="utf-8"))
+    except (JSONDecodeError, ValueError) as exc:
+        return _blocked([f"review output is not valid JSON: {exc}"])
+    blockers = [
+        *_review_shape_blockers(payload),
+        *_digest_blockers(payload, expected_digest),
+        *_review_status_blockers(payload),
+    ]
     return {
         "schema_version": "skills-sdk.oss-security-review-extraction.v0",
-        "status": status,
+        "status": "blocked" if blockers else "pass",
         "blockers": blockers,
         "review": payload,
     }

@@ -71,7 +71,9 @@ def _review_prompt(review_input: dict[str, Any]) -> str:
         "schema_version, review_status, risk_summary, required_followups, "
         "evidence_digest_seen, reviewer_model_boundary. The evidence_digest_seen value "
         "must be the security_lane_digest from the receipt. The review_status value must "
-        "be exactly one of: pass, warn, fail, blocked.\n\n"
+        "be exactly one of: pass, warn, fail, blocked. The risk_summary value must be "
+        "a non-empty sentence. The reviewer_model_boundary value must explain that you "
+        "reviewed only the supplied receipt and did not run tools or commands.\n\n"
         "Receipt summary JSON:\n"
         f"{json.dumps(review_input, sort_keys=True)}\n"
     )
