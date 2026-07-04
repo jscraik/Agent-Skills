@@ -1,0 +1,37 @@
+{
+  "schema_version": "skills-sdk.package-security-signature-receipt.v0",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-security-signature-receipt.v0.schema.json",
+  "status": "pass",
+  "operation": "package_security_signature_preview",
+  "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "package_security_signature_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "inspected_file_count": 1,
+  "text_file_count": 1,
+  "script_file_count": 0,
+  "resource_file_count": 0,
+  "binary_file_count": 0,
+  "redaction_performed": true,
+  "redacted_content_emitted": false,
+  "binary_content_embedded": false,
+  "indicator_summary": {},
+  "indicators": [],
+  "file_results": [
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+      "kind": "skill_md",
+      "sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "size_bytes": 120,
+      "indicators": []
+    }
+  ],
+  "execution_performed": true,
+  "scanner_execution_performed": false,
+  "network_accessed": false,
+  "credentials_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-033", "FR-008", "SA-004", "SEC-001", "VP-033"],
+  "agent_summary": "invalid fixture claims execution."
+}
