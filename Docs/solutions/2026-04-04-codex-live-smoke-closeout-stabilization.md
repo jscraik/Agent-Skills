@@ -82,5 +82,9 @@ Validated on 2026-04-04 with:
 
 ## Follow-up
 
+- 2026-07-04 freshness review: retained as a historical solution entry. The
+  core recovery order remains current for live Codex smoke closeout triage:
+  prove Codex home/login/rule-pack/timeout prerequisites before editing skill
+  prose or acceptance criteria.
 - Refresh rollout artifacts that still describe the pre-fix degraded state if they are needed as current readiness evidence.
 - If live Codex smoke regresses again, check effective `CODEX_HOME`, login state, rule-pack self-test validity, and resolved case timeout before changing skill prose or acceptance regexes.
