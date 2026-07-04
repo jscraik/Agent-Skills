@@ -1,0 +1,39 @@
+{
+  "schema_version": "skills-sdk.oss-minimum-proof-sets.v1",
+  "proof_sets": {
+    "improve-agent-native-15-plus-5": {
+      "policy": "15-core-plus-5-regression",
+      "skill": "Skills/agent-ops/improve-agent-native",
+      "shard_size_limit": 2,
+      "core_cases": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability",
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard",
+        "tessl-scenario-dynamic-context-drift",
+        "tessl-scenario-local-pass-release-boundary",
+        "tessl-scenario-knowledge-capsule-uplift",
+        "pressure-prompt-injection",
+        "adversarial-prompt-injection-audit-boundary",
+        "edge-universal-target-repo",
+        "edge-docs-freshness"
+      ],
+      "regression_cases": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.provenance-implies-tests",
+        "eval.harness.done-without-validation",
+        "eval.harness.static-checks-only-for-product-change",
+        "eval.harness.feedback-recurs-without-guardrail"
+      ],
+      "stage_maturity_expectations": {
+        "oss-local": "repair loop: improve skill, scenarios, runner receipts, and rubrics until the selected local minimum proof set passes",
+        "oss-cloud": "uplift loop: compare against oss-local, classify every delta, and patch skill/scenario/rubric/runner owners until the skill is near production quality",
+        "tessl": "confirmation loop: use Tessl dry-run/live as external validation after internal deltas are owned and closed"
+      }
+    }
+  }
+}

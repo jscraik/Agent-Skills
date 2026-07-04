@@ -3,9 +3,13 @@ from __future__ import annotations
 import re
 
 
+# These types are accepted only when the Tessl criteria adapter preserves
+# their field/path and expected-value metadata.
+TEXT_FIELD_TESSL_ACCEPTANCE_TYPES = {"text_field_absent", "text_field_equals", "text_field_in", "text_field_present"}
 BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "expected_signal",
     "skill_selected",
+    *TEXT_FIELD_TESSL_ACCEPTANCE_TYPES,
     "artifact_exists",
     "artifact_contains",
     "command_success",
@@ -42,6 +46,13 @@ GENERIC_EXPECTED_SIGNAL_RE = re.compile(
 SCORER_BOILERPLATE_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)\bsemantically\s+covers\s+the\s+scenario-specific\s+evidence\s+and\s+decision\s+signals?\b|"
     r"\banchors?\s+the\s+judg(?:e)?ment\s+in\s+concrete\s+file,\s*command,\s*validation,\s*artifact,\s*or\s*proof\s+evidence\b"
+)
+GENERATED_BOILERPLATE_EXPECTED_SIGNAL_RE = re.compile(
+    r"(?is)\bfailure\s+class,\s*failure\s+category,\s*failure\s+mode,\s*classif\b|"
+    r"\bevidence\s+[_-]?\s*boundary,\s*proof\s+[_-]?\s*boundary,\s*claim\s+[_-]?\s*boundary,\s*"
+    r"(?:skill-local\s+evidence,\s*capsule\s+evidence|capsule\s+boundary)|"
+    r"\bdurable,\s*mechanism,\s*validator,\s*check,\s*mechanism,\s*bounded\s+skip\b|"
+    r"\bpass,\s*fail,\s*blocked,\s*not_run_with_reason,\s*not\s+run\b"
 )
 SHALLOW_EXPECTED_SIGNAL_VALUES = {
     "mission-grounded next step",
@@ -154,10 +165,17 @@ LEAKAGE_STOP_WORDS = {
     "skill",
     "state",
     "status",
+    "supplied",
+    "table",
     "that",
     "the",
     "this",
     "through",
+    "record",
+    "records",
+    "rationale",
+    "row",
+    "rows",
     "used",
     "using",
     "validation",
@@ -269,6 +287,7 @@ def _acceptance_item_tests_skill_lift(item: dict[str, str]) -> bool:
         "command_success",
         "discovery_question",
         "output_schema",
+        *TEXT_FIELD_TESSL_ACCEPTANCE_TYPES,
     }:
         return True
     if item_type.startswith(("forbidden", "must_not")):
@@ -295,7 +314,7 @@ def _case_scores_skill_name_as_primary_proof(case: dict[str, object]) -> bool:
     if types <= SUPPORTING_ONLY_ACCEPTANCE_TYPES:
         return True
     substantive_types = types - SUPPORTING_ONLY_ACCEPTANCE_TYPES
-    return not bool(substantive_types & {"expected_signal", "artifact_exists", "artifact_contains", "command_success", "output_schema", "must_not", "must_not_claim", "must_not_do", "forbidden_signal"})
+    return not bool(substantive_types & {"expected_signal", "artifact_exists", "artifact_contains", "command_success", "output_schema", "must_not", "must_not_claim", "must_not_do", "forbidden_signal", *TEXT_FIELD_TESSL_ACCEPTANCE_TYPES})
 
 
 def _case_has_keyword_only_acceptance(case: dict[str, object]) -> bool:
@@ -353,6 +372,14 @@ def _case_has_shallow_routing_oracle(case: dict[str, object]) -> bool:
 def _case_has_scorer_boilerplate_expected_signal(case: dict[str, object]) -> bool:
     return any(
         SCORER_BOILERPLATE_EXPECTED_SIGNAL_RE.search(_acceptance_value(item))
+        for item in _normalized_acceptance_items(case)
+        if str(item.get("type") or "").strip().lower() == "expected_signal"
+    )
+
+
+def _case_has_generated_boilerplate_expected_signal(case: dict[str, object]) -> bool:
+    return any(
+        GENERATED_BOILERPLATE_EXPECTED_SIGNAL_RE.search(_acceptance_value(item))
         for item in _normalized_acceptance_items(case)
         if str(item.get("type") or "").strip().lower() == "expected_signal"
     )
@@ -681,6 +708,7 @@ TESSL_CASE_FINDING_RULES = (
     (_case_depends_on_hidden_reference_read, "hidden_reference_dependency", "Discovery scenarios must be scoreable from the visible task and final artifact. Do not require isolated runners to read hidden references before producing the expected discovery question."),
     (_case_has_shallow_routing_oracle, "shallow_routing_oracle", "Tessl live-private evals must not rely only on skill selection plus generic expected signals. Add scenario-specific behavior, artifact, safety, or refusal criteria that create a plausible baseline failure path."),
     (_case_has_scorer_boilerplate_expected_signal, "scorer_boilerplate_expected_signal", "Tessl expected_signal criteria must describe observable output obligations. Do not score boilerplate such as 'semantically covers scenario-specific evidence and decision signals'."),
+    (_case_has_generated_boilerplate_expected_signal, "generated_boilerplate_expected_signal", "Generated expected_signal criteria must describe scenario-specific observable behavior. Do not score template fragments such as failure class/category, evidence boundary/capsule boundary, durable mechanism, or pass/fail/not_run_with_reason lists."),
     (_case_has_fixture_path_acceptance, "fixture_path_acceptance", "Tessl eval cases must not score provenance-only fixture path mentions. Fixture paths belong in scenario metadata, while acceptance must test observable behaviour that distinguishes skill lift from baseline output."),
     (_case_has_prompt_scoring_mechanics, "prompt_exposes_scoring_mechanics", "Tessl eval prompts must read like realistic user tasks and must not expose scenario fixture mechanics or tell the agent it is handling a generated scoring fixture."),
     (_case_has_answer_leakage, "answer_leakage", "Tessl eval task text must not contain the long-form expected answer that is later used as the scoring signal. Keep expected behaviour in hidden metadata or acceptance criteria, not in the agent-visible task."),

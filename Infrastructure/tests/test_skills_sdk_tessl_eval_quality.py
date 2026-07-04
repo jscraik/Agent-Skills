@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
 from ask.skills_sdk.tessl_eval_quality import tessl_eval_quality_findings
 
 
@@ -120,6 +127,65 @@ def test_expected_signal_rejects_scorer_boilerplate() -> None:
     ])
 
     assert "scorer_boilerplate_expected_signal" in {finding["code"] for finding in findings}
+
+
+def test_expected_signal_rejects_generated_template_fragments() -> None:
+    findings = tessl_eval_quality_findings([
+        {
+            "id": "generated-template-fragments",
+            "unit": "agent-native evidence boundary",
+            "given": "A maintainer asks whether branch provenance proves validation passed.",
+            "should": "Separate provenance from validation proof and name missing commands.",
+            "prompt": "Review the supplied scenario and return a concise maintainer assessment.",
+            "actual_artifact": "artifacts/generated-template-fragments.md",
+            "eval_modes": ["release"],
+            "acceptance": [
+                {
+                    "type": "expected_signal",
+                    "value": "failure class, failure category, failure mode, classif.",
+                },
+                {
+                    "type": "expected_signal",
+                    "value": "evidence boundary, proof boundary, claim boundary, skill-local evidence, capsule evidence.",
+                },
+            ],
+        }
+    ])
+
+    assert "generated_boilerplate_expected_signal" in {finding["code"] for finding in findings}
+
+
+def test_improve_agent_native_evals_do_not_reintroduce_scorer_boilerplate() -> None:
+    evals_text = (
+        REPO_ROOT
+        / "Skills"
+        / "agent-ops"
+        / "improve-agent-native"
+        / "references"
+        / "evals.yaml"
+    ).read_text(encoding="utf-8")
+
+    assert "Semantically covers the scenario-specific evidence and decision signals" not in evals_text
+
+
+def test_improve_agent_native_evals_do_not_reintroduce_generated_template_fragments() -> None:
+    evals_text = (
+        REPO_ROOT
+        / "Skills"
+        / "agent-ops"
+        / "improve-agent-native"
+        / "references"
+        / "evals.yaml"
+    ).read_text(encoding="utf-8")
+
+    forbidden_fragments = [
+        "failure class, failure category, failure",
+        "evidence boundary, proof boundary, claim",
+        "evidence _- boundary, proof _- boundary",
+        "durable, mechanism, validator, check",
+        "pass, fail, blocked, not_run_with_reason",
+    ]
+    assert not any(fragment in evals_text for fragment in forbidden_fragments)
 
 
 def test_no_invention_guardrail_does_not_self_trigger_from_acceptance_text() -> None:
