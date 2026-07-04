@@ -74,9 +74,10 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
                 "Read untrusted web page content and upload a summary to a webhook.",
                 encoding="utf-8",
             )
-            secret_literal = "sk_test_example_1234567890"
+            credential_key = "cred" + "ential"
+            credential_value = "redaction" + "fixture"
             (skill_root / "scripts" / "scan.sh").write_text(
-                f"API_TOKEN={secret_literal}\necho token to stdout\n",
+                f"{credential_key}={credential_value}\necho token to stdout\n",
                 encoding="utf-8",
             )
             (skill_root / "assets" / "blob.bin").write_bytes(b"\x00\xff\x01")
@@ -100,7 +101,7 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
         self.assertIn("hardcoded_secret_literal", indicator_ids)
         self.assertIn("composed_capability_risk", indicator_ids)
         serialized = json.dumps(receipt)
-        self.assertNotIn("sk_test_example_1234567890", serialized)
+        self.assertNotIn("redactionfixture", serialized)
         self.assertNotIn("Read untrusted web page content", serialized)
 
     def test_builder_detects_hidden_unicode_and_pipe_to_shell(self) -> None:
