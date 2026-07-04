@@ -17,7 +17,7 @@
         "tessl-scenario-dynamic-context-drift",
         "tessl-scenario-local-pass-release-boundary",
         "tessl-scenario-knowledge-capsule-uplift",
-        "tessl-scenario-hostile-readiness-note",
+        "pressure-prompt-injection",
         "adversarial-prompt-injection-audit-boundary",
         "edge-universal-target-repo",
         "edge-docs-freshness"

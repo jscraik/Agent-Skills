@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
@@ -51,6 +53,23 @@ class OssMinimumShardPlanTests(unittest.TestCase):
         self.assertIn("--codex-profile oss-cloud", first_command)
         self.assertIn("--case case-a --case case-b", first_command)
         self.assertNotIn("--case case-c", first_command)
+
+    def test_repo_minimum_proof_set_cases_are_release_mode_eligible(self) -> None:
+        policy_path = REPO_ROOT / "Infrastructure" / "config" / "skills-sdk" / "oss-minimum-proof-sets.v1.json"
+        evals_path = REPO_ROOT / "Skills" / "agent-ops" / "improve-agent-native" / "references" / "evals.yaml"
+        policy = json.loads(policy_path.read_text(encoding="utf-8"))
+        proof_set = policy["proof_sets"]["improve-agent-native-15-plus-5"]
+        selected_case_ids = proof_set["core_cases"] + proof_set["regression_cases"]
+        evals_payload = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
+        cases_by_id = {case["id"]: case for case in evals_payload["cases"]}
+
+        missing_or_not_release = [
+            case_id
+            for case_id in selected_case_ids
+            if case_id not in cases_by_id or "release" not in (cases_by_id[case_id].get("eval_modes") or [])
+        ]
+
+        self.assertEqual(missing_or_not_release, [])
 
 
 if __name__ == "__main__":

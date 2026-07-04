@@ -167,6 +167,37 @@ class OssMinimumProofSetTests(unittest.TestCase):
         self.assertEqual(evidence["blocker_class"], "workflow_closeout_validation_not_pass")
         self.assertIn("workflow-closeout validation status is blocked", evidence["failures"][0])
 
+    def test_missing_workflow_closeout_validation_blocks_selected_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifacts = Path(temp_dir)
+            _write_run(
+                artifacts,
+                "20260704-000007",
+                [{"id": "core-one", "status": "pass"}],
+                closeout_status="pass",
+            )
+            closeout_path = artifacts / "20260704-000007" / "workflow-closeout.json"
+            closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
+            closeout.pop("closeout_validation")
+            closeout_path.write_text(json.dumps(closeout), encoding="utf-8")
+
+            receipt = build_proof_set(
+                skill="Skills/fixture",
+                artifacts_root=artifacts,
+                core_cases=["core-one"],
+                regression_cases=[],
+                codex_profile="oss-local",
+                model="qwen3.5:9b-mlx",
+                policy="15-core-plus-5-regression",
+                blocked_next_gates=["oss-cloud"],
+            )
+
+        evidence = receipt["cases"][0]["latest_evidence"]
+        self.assertEqual(receipt["gate_status"], "blocked")
+        self.assertEqual(evidence["status"], "blocked")
+        self.assertEqual(evidence["blocker_class"], "workflow_closeout_validation_missing")
+        self.assertIn("workflow-closeout validation status is None", evidence["failures"][0])
+
     def test_blocked_next_gate_overrides_do_not_duplicate_defaults(self) -> None:
         with mock.patch(
             "sys.argv",
@@ -260,7 +291,8 @@ class OssMinimumProofSetTests(unittest.TestCase):
 
             evidence = collect_case_evidence(artifacts, "core-one", "core")
 
-        self.assertEqual(evidence.status, "pass")
+        self.assertEqual(evidence.status, "blocked")
+        self.assertEqual(evidence.blocker_class, "workflow_closeout_validation_missing")
         self.assertIsNone(evidence.result_path)
 
     def test_malformed_scorecard_raises_contextual_error(self) -> None:

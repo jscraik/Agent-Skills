@@ -88,7 +88,7 @@ def _workflow_validation_status(closeout: dict[str, Any]) -> str | None:
 
 
 def _blocked_by_closeout_validation(status: str | None) -> bool:
-    return status is not None and status != "pass"
+    return status != "pass"
 
 
 def _case_satisfies_gate(case: CaseEvidence) -> bool:
@@ -116,7 +116,11 @@ def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> Ca
             blocker_class = str(raw_case.get("blocker_class")) if raw_case.get("blocker_class") else None
             if _blocked_by_closeout_validation(workflow_validation_status):
                 status = "blocked"
-                blocker_class = blocker_class or "workflow_closeout_validation_not_pass"
+                blocker_class = blocker_class or (
+                    "workflow_closeout_validation_missing"
+                    if workflow_validation_status is None
+                    else "workflow_closeout_validation_not_pass"
+                )
                 failures.append(
                     f"workflow-closeout validation status is {workflow_validation_status}; expected pass."
                 )
