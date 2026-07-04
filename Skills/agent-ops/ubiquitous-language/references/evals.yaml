@@ -94,7 +94,7 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
-      - {type: regex, value: "(?is)(UBIQUITOUS_LANGUAGE\\.md|UBIQUITOUS\\.md|active local glossary).*CONTEXT\\.md"}
+      - {type: regex, value: "(?is)(?=.*CONTEXT\\.md)(?=.*(UBIQUITOUS_LANGUAGE\\.md|UBIQUITOUS\\.md|active local glossary))"}
   - id: edge-agent-pointer
     name: nearest instruction pointer
     category: edge
@@ -135,7 +135,7 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
-      - {type: regex, value: "(?i)(terminology|glossary).*(ADR|decision-record|architecture workflow|hand off)"}
+      - {type: regex, value: "(?is)(?=.*(terminology|glossary))(?=.*(ADR|decision-record|architecture workflow))(?=.*(hand off|handoff|route|defer|refuse|do not create|won't create|cannot create))"}
   - id: edge-existing-map
     name: existing UBIQUITOUS-MAP routing
     category: edge
