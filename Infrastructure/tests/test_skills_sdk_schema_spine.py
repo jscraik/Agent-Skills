@@ -1,11 +1,14 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
-from helpers.schema_validator import _validate_schema_subset
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
+
+from helpers.schema_validator import _validate_schema_subset  # noqa: E402
+
 SCHEMA_DIR = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk"
 FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine"
 
@@ -24,6 +27,8 @@ SCHEMA_NAMES = {
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "package-security-signature-receipt": "package-security-signature-receipt.v0.schema.json",
+    "security-lane-receipt": "security-lane-receipt.v0.schema.json",
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "observability-promotion-receipt": "observability-promotion-receipt.v0.schema.json",
@@ -212,6 +217,40 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["blockers"], [])
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
+
+    def test_package_security_signature_fixture_records_non_executing_scan_boundary(self) -> None:
+        payload = self.assert_valid("package-security-signature-receipt", "package-security-signature-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertTrue(payload["redaction_performed"])
+        self.assertFalse(payload["redacted_content_emitted"])
+        self.assertFalse(payload["binary_content_embedded"])
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_package_security_signature_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("package-security-signature-receipt", "package-security-signature-executes.json")
+
+    def test_security_lane_fixture_records_deterministic_security_commands(self) -> None:
+        payload = self.assert_valid("security-lane-receipt", "security-lane-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        command_text = "\n".join(row["command"] for row in payload["commands"])
+        self.assertIn("package-signature", command_text)
+        self.assertIn("risk-modes", command_text)
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_security_lane_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("security-lane-receipt", "security-lane-executes.json")
 
     def test_scenario_registry_entry_fixture_records_governed_seed(self) -> None:
         payload = self.assert_valid("scenario-registry-entry", "scenario-registry-entry.json")

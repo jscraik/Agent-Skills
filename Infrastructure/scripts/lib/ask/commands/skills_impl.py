@@ -293,7 +293,9 @@ __all__ = [
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
     "skills_sdk_security_adapters_preview",
+    "skills_sdk_security_package_signature_preview",
     "skills_sdk_security_risk_modes_preview",
+    "skills_sdk_security_run_lane_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
     "skills_sdk_eval_scorer_quality",
@@ -5447,6 +5449,73 @@ def skills_sdk_security_adapters_preview(repo_root: Path) -> CallResult:
     return result
 
 
+def skills_sdk_security_package_signature_preview(repo_root: Path, target: str) -> CallResult:
+    """Build a package security signature without executing source content."""
+    result = CallResult()
+    result.metadata["command"] = "sdk security package-signature"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK package security signature is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "security", "package-signature", query, "--preview"),
+            )
+        )
+        result.data["skills_sdk_package_security_signature"] = {
+            "schema_version": "skills-sdk-package-security-signature-preview.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "execution_performed": False,
+            "scanner_execution_performed": False,
+            "network_accessed": False,
+            "credentials_accessed": False,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "security", "package-signature", query, "--preview")
+            ],
+            "agent_summary": f"package security signature is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.package_security_signature import build_package_security_signature_receipt  # noqa: PLC0415
+
+    receipt = build_package_security_signature_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-package-security-signature-preview.v0",
+        "query": query,
+        "status": receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk security package-signature",
+        "package_id": receipt["package_id"],
+        "package_digest": receipt["package_digest"],
+        "package_security_signature_digest": receipt["package_security_signature_digest"],
+        "indicator_summary": receipt["indicator_summary"],
+        "indicators": receipt["indicators"],
+        "receipt": receipt,
+        "execution_performed": False,
+        "scanner_execution_performed": False,
+        "network_accessed": False,
+        "credentials_accessed": False,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "security", "package-signature", query, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_package_security_signature"] = payload
+    return result
+
+
 def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> CallResult:
     """
     Generate a security risk-mode taxonomy for a skill without executing it.
@@ -5519,6 +5588,98 @@ def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> Call
         "agent_summary": receipt["agent_summary"],
     }
     result.data["skills_sdk_risk_mode_taxonomy"] = payload
+    return result
+
+
+def skills_sdk_security_run_lane_preview(
+    repo_root: Path,
+    target: str,
+    *,
+    profile: str | None = None,
+    require_review: bool = False,
+) -> CallResult:
+    """Build the deterministic SDK security lane receipt without executing source content."""
+    result = CallResult()
+    result.metadata["command"] = "sdk security run-lane"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    validation_command_parts = ["sdk", "security", "run-lane", query, "--preview"]
+    if profile:
+        validation_command_parts.extend(["--profile", profile])
+    if require_review:
+        validation_command_parts.append("--require-review")
+    validation_command = _ask_validation_command(*validation_command_parts)
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK security lane is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=validation_command,
+            )
+        )
+        result.data["skills_sdk_security_lane"] = {
+            "schema_version": "skills-sdk-security-lane-preview.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "execution_performed": False,
+            "scanner_execution_performed": False,
+            "network_accessed": False,
+            "credentials_accessed": False,
+            "mutation_performed": False,
+            "validation_commands": [validation_command],
+            "agent_summary": f"security lane is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.security_lane import build_security_lane_receipt  # noqa: PLC0415
+
+    receipt = build_security_lane_receipt(
+        repo_root,
+        source_path=source_path,
+        query=query,
+        profile=profile,
+        require_review=require_review,
+    )
+    payload = {
+        "schema_version": "skills-sdk-security-lane-preview.v0",
+        "query": query,
+        "status": receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk security run-lane",
+        "package_id": receipt["package_id"],
+        "package_digest": receipt["package_digest"],
+        "security_lane_digest": receipt["security_lane_digest"],
+        "package_security_signature_digest": receipt["package_security_signature_digest"],
+        "risk_mode_taxonomy_digest": receipt["risk_mode_taxonomy_digest"],
+        "profile_review": receipt["profile_review"],
+        "receipt": receipt,
+        "execution_performed": False,
+        "scanner_execution_performed": False,
+        "network_accessed": False,
+        "credentials_accessed": False,
+        "mutation_performed": False,
+        "validation_commands": [validation_command],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_security_lane"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=validation_command,
+            )
+        )
     return result
 
 
