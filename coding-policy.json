@@ -1,0 +1,188 @@
+{
+	"$schema": "./contracts/coding-policy.schema.json",
+	"schemaVersion": "harness-coding-policy/v1",
+	"authority": "canonical",
+	"entrypoints": {
+		"human": "CODESTYLE.md",
+		"machine": "coding-policy.json",
+		"modules": "codestyle/README.md"
+	},
+	"policyModules": [
+		{
+			"id": "foundations",
+			"path": "codestyle/01-foundations.md",
+			"changedFilePatterns": ["**/*"],
+			"sourceRules": ["boy-scout", "error-handling", "file-hygiene"],
+			"requiredGates": ["pnpm lint", "pnpm typecheck"]
+		},
+		{
+			"id": "docs-config-release",
+			"path": "codestyle/04-docs-config-and-release.md",
+			"changedFilePatterns": [
+				".markdownlint-cli2.yaml",
+				".vale.ini",
+				"**/*.md",
+				"coding-policy.json",
+				"docs/**",
+				"codestyle/**",
+				"contracts/**",
+				"src/templates/**"
+			],
+			"sourceRules": [
+				"commit-conventions",
+				"context-artifacts",
+				"context-writing-style",
+				"rule-frontmatter"
+			],
+			"requiredGates": [
+				"pnpm run coding-policy:validate",
+				"pnpm docs:lint",
+				"pnpm docs:lifecycle",
+				"bash scripts/run-harness-gate.sh docs-gate --mode required --json"
+			]
+		},
+		{
+			"id": "quality-security-ops",
+			"path": "codestyle/05-quality-security-ops.md",
+			"changedFilePatterns": [
+				".circleci/**",
+				".github/**",
+				"contracts/**",
+				"scripts/**",
+				"src/*.ts",
+				"src/commands/**",
+				"src/lib/**",
+				"src/templates/**/*.yml",
+				"src/templates/**/*.yaml"
+			],
+			"sourceRules": ["ci-safety", "script-delegation", "stateful-artifacts"],
+			"requiredGates": [
+				"pnpm check",
+				"pnpm run quality:debt",
+				"bash scripts/validate-codestyle.sh"
+			]
+		},
+		{
+			"id": "python",
+			"path": "codestyle/07-python.md",
+			"changedFilePatterns": ["**/*.py"],
+			"sourceRules": ["script-delegation", "testing-standards"],
+			"requiredGates": ["pnpm python:types"]
+		},
+		{
+			"id": "typescript",
+			"path": "codestyle/08-typescript.md",
+			"changedFilePatterns": [
+				"src/*.ts",
+				"src/commands/**/*.ts",
+				"src/lib/**/*.ts"
+			],
+			"sourceRules": ["code-formatting", "testing-standards"],
+			"requiredGates": [
+				"pnpm lint",
+				"pnpm typecheck",
+				"pnpm run quality:size",
+				"pnpm run quality:debt",
+				"pnpm run test:related"
+			]
+		},
+		{
+			"id": "shell",
+			"path": "codestyle/10-shell-bash-zsh.md",
+			"changedFilePatterns": [
+				".circleci/config.yml",
+				"Makefile",
+				"scripts/check",
+				"scripts/codex-enforced",
+				"scripts/replay",
+				"scripts/*.sh",
+				"scripts/**/*.sh",
+				"**/*.sh",
+				"*.sh"
+			],
+			"sourceRules": ["script-as-black-box", "script-delegation"],
+			"requiredGates": ["pnpm run quality:scripts"]
+		},
+		{
+			"id": "package-managers",
+			"path": "codestyle/11-package-managers-pnpm-npm.md",
+			"changedFilePatterns": [
+				".mise.toml",
+				".npmrc",
+				".pnpmrc",
+				"package.json",
+				"pnpm-workspace.yaml",
+				"pnpm-lock.yaml"
+			],
+			"sourceRules": ["dependency-management"],
+			"requiredGates": ["pnpm install --frozen-lockfile", "pnpm audit"]
+		},
+		{
+			"id": "git-workflow",
+			"path": "codestyle/13-git-workflow.md",
+			"changedFilePatterns": [
+				".github/**",
+				".gitignore",
+				"scripts/hook-*.sh",
+				"scripts/verify-work.sh"
+			],
+			"sourceRules": ["ci-safety", "commit-conventions", "sync-before-work"],
+			"requiredGates": ["git status --short --branch"]
+		},
+		{
+			"id": "security",
+			"path": "codestyle/16-security.md",
+			"changedFilePatterns": [
+				".gitleaks.toml",
+				".semgrep/**",
+				".trufflehog-exclude.txt",
+				"security/**",
+				"semgrep*.yml",
+				"scripts/check-*secret*.sh",
+				"scripts/check-semgrep*.sh",
+				"scripts/*security*",
+				"scripts/semgrep*",
+				"src/**/auth*",
+				"src/**/secret*"
+			],
+			"sourceRules": ["no-secrets"],
+			"requiredGates": ["pnpm audit"]
+		},
+		{
+			"id": "testing",
+			"path": "codestyle/17-testing.md",
+			"changedFilePatterns": [
+				"**/*.test.ts",
+				"**/*.spec.ts",
+				"e2e/**",
+				"test-fixtures/**",
+				"tests/**",
+				"vitest.config.ts"
+			],
+			"sourceRules": ["plugin-evals", "testing-standards"],
+			"requiredGates": [
+				"pnpm run quality:self-affirming",
+				"pnpm run test:related",
+				"pnpm test"
+			]
+		},
+		{
+			"id": "development-workflow",
+			"path": "codestyle/19-development-workflow.md",
+			"changedFilePatterns": [
+				"AGENTS.md",
+				"**/AGENTS.md",
+				"docs/agents/**",
+				"scripts/**",
+				"src/dev/**"
+			],
+			"sourceRules": ["boy-scout", "ci-safety", "sync-before-work"],
+			"requiredGates": ["bash scripts/validate-codestyle.sh --fast"]
+		}
+	],
+	"claimBoundaries": [
+		"coding-policy.json indexes policy authority; Markdown codestyle modules remain the prose authority.",
+		"A listed gate is required only when the changed-file routing rules or module text require it.",
+		"CI, PR, review, tracker, and merge-readiness truth remain separate evidence lanes."
+	]
+}
