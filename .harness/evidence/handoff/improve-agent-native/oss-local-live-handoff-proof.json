@@ -4,9 +4,9 @@
   "profile": "oss-local",
   "codex_profile": "oss-local",
   "codex_exec_invoked": true,
-  "case_count": 20,
-  "passed_count": 20,
-  "source_receipt": ".harness/evidence/handoff/improve-agent-native/qwen-oss-local-minimum-proof-set.json",
-  "what_this_proves": "oss-local minimum proof set has all selected cases passing with codex_exec_invoked=true.",
-  "what_this_does_not_prove": "This does not prove Tessl live score, publication, hosted CI, or merge readiness."
+  "case_count": 40,
+  "passed_count": 40,
+  "source_receipt": ".harness/evidence/handoff/improve-agent-native/qwen-oss-local-full-release-ledger.json",
+  "what_this_proves": "oss-local release ledger has 40 cases passing with codex_exec_invoked=true.",
+  "what_this_does_not_prove": "This does not prove Tessl live score, publication, hosted CI, merge readiness, or any Tessl scenario not listed in the source receipt."
 }

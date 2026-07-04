@@ -3314,6 +3314,112 @@ def _stage_tessl_live_private_source(
     return staged_root, copied
 
 
+def _tessl_live_staged_case_ids(staged_source: Path) -> list[str]:
+    """Return the exact scenario ids that would be submitted to Tessl live."""
+    case_ids: set[str] = set()
+    for dirname in ("evals", "scenarios"):
+        root = staged_source / dirname
+        if not root.is_dir():
+            continue
+        for child in root.iterdir():
+            if not child.is_dir():
+                continue
+            if (child / "task.md").is_file() and (child / "criteria.json").is_file():
+                case_ids.add(child.name)
+    return sorted(case_ids)
+
+
+def _case_ids_with_pass_status(payload: object) -> set[str]:
+    """Collect case ids that carry direct pass evidence in SDK OSS receipts."""
+    passed: set[str] = set()
+    if isinstance(payload, dict):
+        case_id = payload.get("case_id")
+        status = payload.get("status")
+        latest = payload.get("latest_evidence")
+        latest_status = latest.get("status") if isinstance(latest, dict) else None
+        if isinstance(case_id, str) and (status == "pass" or latest_status == "pass"):
+            passed.add(case_id)
+        for value in payload.values():
+            passed.update(_case_ids_with_pass_status(value))
+    elif isinstance(payload, list):
+        for item in payload:
+            passed.update(_case_ids_with_pass_status(item))
+    return passed
+
+
+def _tessl_live_readiness_lanes(repo_root: Path, source_path: str) -> dict[str, dict[str, object]]:
+    skill_name = Path(source_path).name
+    readiness_path = repo_root / ".harness" / "evidence" / "handoff" / skill_name / "eval-handoff-readiness.json"
+    readiness = _load_json_file(readiness_path)
+    lanes = readiness.get("lanes")
+    if not isinstance(lanes, list):
+        return {}
+    lane_map: dict[str, dict[str, object]] = {}
+    for lane in lanes:
+        if isinstance(lane, dict) and isinstance(lane.get("id"), str):
+            lane_map[str(lane["id"])] = lane
+    return lane_map
+
+
+def _resolve_tessl_live_evidence_path(repo_root: Path, raw_path: object) -> Path | None:
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        return None
+    path = Path(raw_path)
+    return path if path.is_absolute() else repo_root / path
+
+
+def _oss_pass_case_ids_for_live(repo_root: Path, receipt_path: Path | None, seen: set[Path] | None = None) -> set[str]:
+    if receipt_path is None:
+        return set()
+    resolved = receipt_path.resolve()
+    if seen is None:
+        seen = set()
+    if resolved in seen:
+        return set()
+    seen.add(resolved)
+
+    payload = _load_json_file(receipt_path)
+    passed = _case_ids_with_pass_status(payload)
+    source_receipt = payload.get("source_receipt") if isinstance(payload, dict) else None
+    source_path = _resolve_tessl_live_evidence_path(repo_root, source_receipt)
+    if source_path is not None and source_path.is_file():
+        passed.update(_oss_pass_case_ids_for_live(repo_root, source_path, seen))
+    return passed
+
+
+def _tessl_live_oss_scenario_parity(
+    repo_root: Path,
+    source_path: str,
+    staged_source: Path,
+) -> dict[str, object]:
+    """Block Tessl live when staged cases outrun OSS local/cloud pass evidence."""
+    staged_case_ids = _tessl_live_staged_case_ids(staged_source)
+    lanes = _tessl_live_readiness_lanes(repo_root, source_path)
+    lane_case_ids: dict[str, list[str]] = {}
+    missing_by_lane: dict[str, list[str]] = {}
+    for lane_id in ("oss-local", "oss-cloud"):
+        lane = lanes.get(lane_id) or {}
+        receipt_path = _resolve_tessl_live_evidence_path(repo_root, lane.get("receipt_path"))
+        passed = _oss_pass_case_ids_for_live(repo_root, receipt_path)
+        lane_case_ids[lane_id] = sorted(passed)
+        missing_by_lane[lane_id] = sorted(set(staged_case_ids) - passed)
+
+    unproven = sorted(set().union(*(set(items) for items in missing_by_lane.values())))
+    ok = bool(staged_case_ids) and not unproven
+    return {
+        "schema_version": "skills-sdk.tessl-live-oss-scenario-parity.v1",
+        "status": "pass" if ok else "blocked",
+        "staged_case_count": len(staged_case_ids),
+        "staged_case_ids": staged_case_ids,
+        "oss_local_pass_count": len(lane_case_ids.get("oss-local", [])),
+        "oss_cloud_pass_count": len(lane_case_ids.get("oss-cloud", [])),
+        "missing_by_lane": missing_by_lane,
+        "unproven_case_count": len(unproven),
+        "unproven_case_ids": unproven,
+        "rule": "Every Tessl live scenario must have pass evidence from both oss-local and oss-cloud.",
+    }
+
+
 def _stable_tessl_scenario_generation_parent(path: str) -> Path:
     safe_name = path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
@@ -3974,6 +4080,8 @@ def _run_tessl_live_private_eval(
         project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         dry_run=dry_run,
     )
+    parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
+    common["oss_scenario_parity"] = parity
     if dry_run:
         return {
             "status": "pass",
@@ -3983,6 +4091,18 @@ def _run_tessl_live_private_eval(
             "exit_code": 0,
             "blocker": None,
             "blocker_class": None,
+        }
+    if parity.get("status") != "pass":
+        return {
+            "status": "blocked",
+            **common,
+            "raw_output": "",
+            "raw_error": "",
+            "blocker": (
+                "Tessl live scenario set includes scenarios without both oss-local "
+                "and oss-cloud pass evidence."
+            ),
+            "blocker_class": "blocked_validation",
         }
 
     tessl_path = shutil.which("tessl")

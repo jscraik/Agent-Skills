@@ -1461,6 +1461,7 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
             receipt_payload["profile"] = lane_id
             receipt_payload["codex_profile"] = lane_id
             receipt_payload["codex_exec_invoked"] = True
+            receipt_payload["cases"] = [{"case_id": "smoke-example", "status": "pass"}]
         if lane_id == "tessl-local-proof":
             receipt_payload["receipt"] = {
                 "schema_version": "jscraik.tessl-local-proof.v1",
@@ -2345,6 +2346,64 @@ def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> 
     assert result.data["tessl_eval"]["status"] == "blocked"
     assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
     assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
+    run.assert_not_called()
+
+
+def test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: example skill behavioural proof\n"
+            "    given: A user asks for the proven example behavior.\n"
+            "    should: Produce the expected example behavior.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+            "  - id: unproven-live-only\n"
+            "    unit: unproven live upload guard\n"
+            "    given: A scenario lacks OSS local and cloud pass evidence.\n"
+            "    should: Block before Tessl live submission.\n"
+            "    prompt: Do another example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Blocks before Tessl live submission.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "without both oss-local and oss-cloud pass evidence" in tessl_eval["blocker"]
+    parity = tessl_eval["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["staged_case_count"] == 2
+    assert parity["unproven_case_ids"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-local"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-cloud"] == ["unproven-live-only"]
     run.assert_not_called()
 
 
