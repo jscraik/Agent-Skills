@@ -3,8 +3,8 @@ title: Codex live smoke closeout stabilization
 asset_family: skill authoring family live smoke evaluation
 owner: Agent Skills Team
 source_artifact: Docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md
-freshness_reviewed_on: 2026-04-04
-last_updated: 2026-04-04
+freshness_reviewed_on: 2026-07-04
+last_updated: 2026-07-04
 review_after_days: 90
 ---
 
@@ -78,5 +78,9 @@ Validated on 2026-04-04 with:
 
 ## Follow-up
 
+- 2026-07-04 freshness review: retained as a historical solution entry. The
+  core recovery order remains current for live Codex smoke closeout triage:
+  prove Codex home/login/rule-pack/timeout prerequisites before editing skill
+  prose or acceptance criteria.
 - Refresh rollout artifacts that still describe the pre-fix degraded state if they are needed as current readiness evidence.
 - If live Codex smoke regresses again, check effective `CODEX_HOME`, login state, rule-pack self-test validity, and resolved case timeout before changing skill prose or acceptance regexes.
