@@ -91,6 +91,12 @@ def _blocked_by_closeout_validation(status: str | None) -> bool:
     return status is not None and status != "pass"
 
 
+def _case_satisfies_gate(case: CaseEvidence) -> bool:
+    return case.status == "pass" and not _blocked_by_closeout_validation(
+        case.workflow_closeout_validation_status
+    )
+
+
 def collect_case_evidence(artifacts_root: Path, case_id: str, bucket: str) -> CaseEvidence:
     latest: CaseEvidence | None = None
     for scorecard_path in sorted(artifacts_root.glob("*/scorecard.json")):
@@ -175,7 +181,11 @@ def build_proof_set(
         "fail_count": sum(1 for case in cases if case.status == "fail"),
         "missing_count": sum(1 for case in cases if case.status == "missing"),
     }
-    gate_status = "pass" if summary["case_count"] > 0 and summary["pass_count"] == summary["case_count"] else "blocked"
+    gate_status = (
+        "pass"
+        if summary["case_count"] > 0 and all(_case_satisfies_gate(case) for case in cases)
+        else "blocked"
+    )
     later_lane_notes = {
         "oss-local": "It does not prove the full release lane, oss-cloud, Tessl dry-run, Tessl live, CI, merge, publish, or release readiness.",
         "oss-cloud": "It does not prove the full release lane, Tessl dry-run, Tessl live, CI, merge, publish, or release readiness.",
