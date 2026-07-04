@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -12,6 +14,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/run_oss_security_codex_exec_lane.py"
+sys.path.insert(0, str(SCRIPT.parent))
+SPEC = importlib.util.spec_from_file_location("run_oss_security_codex_exec_lane", SCRIPT)
+assert SPEC is not None
+MODULE = importlib.util.module_from_spec(SPEC)
+assert SPEC.loader is not None
+SPEC.loader.exec_module(MODULE)
 PASSING_RECEIPT_REVIEWER = textwrap.dedent(
     """
     import json
@@ -59,8 +67,7 @@ def _run(root: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
         cwd=REPO_ROOT,
         env=env,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
@@ -81,8 +88,7 @@ def _run_receipt_first(root: Path, env: dict[str, str]) -> subprocess.CompletedP
         cwd=REPO_ROOT,
         env=env,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
@@ -199,6 +205,31 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
         self.assertEqual(payload["status"], "blocked")
         self.assertEqual(payload["review_validation"]["status"], "blocked")
         self.assertIn("oss-security profile did not produce", payload["blockers"][0])
+
+    def test_prompt_shell_quotes_target_inside_json_encoded_exec_source(self) -> None:
+        target = "Skills/example with spaces/quote'\nnext"
+        quoted_target = shlex.quote(target)
+
+        prompt = MODULE._prompt(target)
+
+        self.assertIn(
+            json.dumps(
+                f"./bin/ask sdk security run-lane {quoted_target} --preview --profile oss-security --json --robot"
+            ),
+            prompt,
+        )
+
+    def test_codex_command_json_quotes_model_overrides(self) -> None:
+        command = MODULE._codex_command(
+            sandbox="read-only",
+            last_message_path=Path("/tmp/out.txt"),
+            model='local/model"withquote',
+            model_catalog_json='{"model":"x"}',
+        )
+
+        self.assertIn('-c', command)
+        self.assertIn('model="local/model\\"withquote"', command)
+        self.assertIn('model_catalog_json="{\\"model\\":\\"x\\"}"', command)
 
 
 if __name__ == "__main__":

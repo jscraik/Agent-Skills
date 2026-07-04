@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -21,29 +22,43 @@ DEFAULT_TARGET = "Skills/agent-ops/improve-agent-native"
 def _configs_root() -> Path:
     configured = os.environ.get("ASK_OSS_SECURITY_CONFIGS_ROOT")
     if configured:
-        return Path(configured).expanduser().resolve()
+        candidate = Path(configured).expanduser().resolve()
+        if candidate.exists():
+            return candidate
+        raise FileNotFoundError(
+            "ASK_OSS_SECURITY_CONFIGS_ROOT points to a missing Codex config directory: "
+            f"{candidate}"
+        )
     sibling = REPO_ROOT.parent / "configs" / "codex"
     if sibling.exists():
         return sibling
-    home_checkout = Path.home() / "dev" / "configs" / "codex"
-    if home_checkout.exists():
-        return home_checkout
-    return sibling
+    raise FileNotFoundError(
+        "oss-security Codex config directory not found. Set ASK_OSS_SECURITY_CONFIGS_ROOT "
+        f"or place configs at the sibling checkout path: {sibling}"
+    )
 
 
 def _copy_codex_home(codex_home: Path) -> None:
     codex_home.mkdir(parents=True, exist_ok=True)
     configs_root = _configs_root()
     for name in ("config.toml", "oss-security.config.toml"):
-        shutil.copy2(configs_root / name, codex_home / name)
+        source = configs_root / name
+        if not source.exists():
+            raise FileNotFoundError(
+                f"required oss-security Codex config file is missing: {source}. "
+                "Set ASK_OSS_SECURITY_CONFIGS_ROOT to a directory containing config.toml "
+                "and oss-security.config.toml."
+            )
+        shutil.copy2(source, codex_home / name)
 
 
 def _prompt(target: str) -> str:
+    command = f"./bin/ask sdk security run-lane {shlex.quote(target)} --preview --profile oss-security --json --robot"
     js_source = (
         '// @exec: {"yield_time_ms": 30000, "max_output_tokens": 4000}\n'
         "const r = await tools.exec_command({\n"
-        f'  cmd: "./bin/ask sdk security run-lane {target} --preview --profile oss-security --json --robot",\n'
-        f'  workdir: "{REPO_ROOT.as_posix()}",\n'
+        f"  cmd: {json.dumps(command)},\n"
+        f"  workdir: {json.dumps(REPO_ROOT.as_posix())},\n"
         "  yield_time_ms: 30000,\n"
         "  max_output_tokens: 4000\n"
         "});\n"
@@ -172,9 +187,9 @@ def _codex_command(
         str(last_message_path),
     ]
     if model:
-        command.extend(["-c", f'model="{model}"'])
+        command.extend(["-c", f"model={json.dumps(model)}"])
     if model_catalog_json:
-        command.extend(["-c", f'model_catalog_json="{model_catalog_json}"'])
+        command.extend(["-c", f"model_catalog_json={json.dumps(model_catalog_json)}"])
     return command
 
 

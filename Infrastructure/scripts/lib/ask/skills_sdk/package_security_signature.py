@@ -44,7 +44,7 @@ SUSPICIOUS_URL_RE = re.compile(
 )
 PIPE_TO_SHELL_RE = re.compile(r"\b(curl|wget)\b[^\n|]*\|\s*(sh|bash|zsh|python|node)\b", re.IGNORECASE)
 RUNTIME_FETCH_RE = re.compile(
-    r"\b(fetch|download|curl|wget|retrieve)\b[^\n]{0,80}\b(instruction|prompt|rule|skill|agent)\b|https?://[^\s]+",
+    r'\b(fetch|download|curl|wget|retrieve)\b[^\n]{0,80}(?:\b(instruction|prompt|rule|skill|agent)\b|https?://[^\s)\'"]+)',
     re.IGNORECASE,
 )
 INSECURE_CREDENTIAL_OUTPUT_RE = re.compile(

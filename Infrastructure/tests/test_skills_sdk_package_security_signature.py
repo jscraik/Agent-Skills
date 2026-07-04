@@ -123,6 +123,22 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
         self.assertIn("suspicious_download_url", indicator_ids)
         self.assertIn("runtime_instruction_fetch", indicator_ids)
 
+    def test_builder_does_not_flag_benign_docs_url_as_runtime_instruction_fetch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = _write_skill(Path(temp_dir), "Use preview mode.")
+            skill_root = skill_md.parent
+            (skill_root / "references").mkdir()
+            (skill_root / "references" / "docs.md").write_text(
+                "See https://example.com/docs for background information.",
+                encoding="utf-8",
+            )
+
+            receipt = build_package_security_signature_receipt(REPO_ROOT, source_path=skill_md, query=str(skill_md))
+
+        self.assert_schema_valid(receipt)
+        indicator_ids = {indicator["id"] for indicator in receipt["indicators"]}
+        self.assertNotIn("runtime_instruction_fetch", indicator_ids)
+
     def test_command_emits_preview_receipt_for_fixture_skill(self) -> None:
         process = _run_ask(
             "sdk",
