@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import shlex
@@ -9,6 +10,7 @@ import sys
 import tempfile
 import textwrap
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 
@@ -39,6 +41,18 @@ PASSING_RECEIPT_REVIEWER = textwrap.dedent(
         "reviewer_model_boundary": "static receipt review only"
     }), encoding="utf-8")
     print(json.dumps({"type": "turn.completed"}))
+    raise SystemExit(0)
+    """
+)
+PASSING_LANE_RUNNER = textwrap.dedent(
+    """
+    import json
+    import sys
+    sys.stdin.read()
+    print(json.dumps({
+        'status': 'success',
+        'data': {'skills_sdk_security_lane': {'status': 'pass'}}
+    }))
     raise SystemExit(0)
     """
 )
@@ -230,6 +244,34 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
         self.assertIn('-c', command)
         self.assertIn('model="local/model\\"withquote"', command)
         self.assertIn('model_catalog_json="{\\"model\\":\\"x\\"}"', command)
+
+    def test_auto_created_output_dir_is_cleaned_after_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            bin_dir = _fake_codex(root, PASSING_LANE_RUNNER)
+            env = _sandbox_env(root, bin_dir)
+            created_paths: list[Path] = []
+            original_mkdtemp = MODULE.tempfile.mkdtemp
+
+            def fake_mkdtemp(*, prefix: str) -> str:
+                path = Path(original_mkdtemp(prefix=prefix, dir=root))
+                created_paths.append(path)
+                return str(path)
+
+            MODULE.tempfile.mkdtemp = fake_mkdtemp
+            original_env = os.environ.copy()
+            os.environ.update(env)
+            try:
+                with redirect_stdout(io.StringIO()):
+                    exit_code = MODULE.main(["--target", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json"])
+            finally:
+                MODULE.tempfile.mkdtemp = original_mkdtemp
+                os.environ.clear()
+                os.environ.update(original_env)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(len(created_paths), 1)
+        self.assertFalse(created_paths[0].exists())
 
 
 if __name__ == "__main__":

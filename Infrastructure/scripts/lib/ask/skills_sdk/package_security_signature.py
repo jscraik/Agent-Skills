@@ -84,8 +84,12 @@ def _package_root(source_path: Path) -> Path:
     return source.parent
 
 
+def _is_script_context(path: Path) -> bool:
+    return "scripts" in path.parts
+
+
 def _read_text(path: Path) -> tuple[str | None, bool]:
-    if path.suffix.lower() not in TEXT_SUFFIXES and path.name != "SKILL.md":
+    if path.suffix.lower() not in TEXT_SUFFIXES and path.name != "SKILL.md" and not _is_script_context(path):
         return None, True
     try:
         return path.read_text(encoding="utf-8"), False
@@ -98,7 +102,7 @@ def _file_kind(path: Path, is_binary: bool) -> str:
         return "binary"
     if path.name == "SKILL.md":
         return "skill_md"
-    if path.suffix.lower() in SCRIPT_SUFFIXES:
+    if path.suffix.lower() in SCRIPT_SUFFIXES or _is_script_context(path):
         return "script"
     return "resource"
 

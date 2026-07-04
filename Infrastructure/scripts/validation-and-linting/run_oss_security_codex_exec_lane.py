@@ -516,38 +516,43 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    auto_output_root = args.output_dir is None
     output_dir = args.output_dir or Path(tempfile.mkdtemp(prefix="oss-security-codex-exec-"))
-    codex_home = args.codex_home or output_dir / "codex-home"
-    _copy_codex_home(codex_home)
-    if args.mode == "receipt-first":
-        receipt = _run_receipt_first_mode(
-            target=args.target,
+    try:
+        codex_home = args.codex_home or output_dir / "codex-home"
+        _copy_codex_home(codex_home)
+        if args.mode == "receipt-first":
+            receipt = _run_receipt_first_mode(
+                target=args.target,
+                codex_home=codex_home,
+                output_dir=output_dir,
+                model=args.model,
+                model_catalog_json=args.model_catalog_json,
+            )
+            return _emit(receipt, as_json=args.json)
+        exit_code, jsonl_path, last_message_path = _run_codex(
             codex_home=codex_home,
+            target=args.target,
             output_dir=output_dir,
             model=args.model,
             model_catalog_json=args.model_catalog_json,
         )
+        classification = classify(jsonl_path)
+        receipt = _receipt(
+            target=args.target,
+            codex_home=codex_home,
+            output_dir=output_dir,
+            exit_code=exit_code,
+            jsonl_path=jsonl_path,
+            last_message_path=last_message_path,
+            classification=classification,
+            model=args.model,
+            model_catalog_json=args.model_catalog_json,
+        )
         return _emit(receipt, as_json=args.json)
-    exit_code, jsonl_path, last_message_path = _run_codex(
-        codex_home=codex_home,
-        target=args.target,
-        output_dir=output_dir,
-        model=args.model,
-        model_catalog_json=args.model_catalog_json,
-    )
-    classification = classify(jsonl_path)
-    receipt = _receipt(
-        target=args.target,
-        codex_home=codex_home,
-        output_dir=output_dir,
-        exit_code=exit_code,
-        jsonl_path=jsonl_path,
-        last_message_path=last_message_path,
-        classification=classification,
-        model=args.model,
-        model_catalog_json=args.model_catalog_json,
-    )
-    return _emit(receipt, as_json=args.json)
+    finally:
+        if auto_output_root:
+            shutil.rmtree(output_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":
