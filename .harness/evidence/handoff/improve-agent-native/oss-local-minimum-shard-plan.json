@@ -1,0 +1,109 @@
+{
+  "case_count": 20,
+  "codex_profile": "oss-local",
+  "mode": "release",
+  "notes": [
+    "Shard commands are generated from the repo-owned OSS minimum proof-set policy.",
+    "Run shards in order and rebuild the matching proof/comparison receipt after evidence exists."
+  ],
+  "policy": "15-core-plus-5-regression",
+  "policy_file": "Infrastructure/config/skills-sdk/oss-minimum-proof-sets.v1.json",
+  "proof_set_id": "improve-agent-native-15-plus-5",
+  "schema_version": "oss-minimum-shard-plan/v1",
+  "shard_count": 10,
+  "shard_size_limit": 2,
+  "shards": [
+    {
+      "case_count": 2,
+      "case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case happy-scorecard --case happy-agents-md-audit --json --robot",
+      "index": 1
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot",
+      "index": 2
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case happy-agent-native-product-readiness --case edge-ui-action-without-agent-capability --json --robot",
+      "index": 3
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case edge-static-tests-only-agent-product --case tessl-scenario-merged-product-workflow-scorecard --json --robot",
+      "index": 4
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "tessl-scenario-dynamic-context-drift",
+        "tessl-scenario-local-pass-release-boundary"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case tessl-scenario-dynamic-context-drift --case tessl-scenario-local-pass-release-boundary --json --robot",
+      "index": 5
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "tessl-scenario-knowledge-capsule-uplift",
+        "tessl-scenario-hostile-readiness-note"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case tessl-scenario-knowledge-capsule-uplift --case tessl-scenario-hostile-readiness-note --json --robot",
+      "index": 6
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "adversarial-prompt-injection-audit-boundary",
+        "edge-universal-target-repo"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case adversarial-prompt-injection-audit-boundary --case edge-universal-target-repo --json --robot",
+      "index": 7
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "edge-docs-freshness",
+        "eval.harness.local-pass-ci-unknown"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case edge-docs-freshness --case eval.harness.local-pass-ci-unknown --json --robot",
+      "index": 8
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.provenance-implies-tests",
+        "eval.harness.done-without-validation"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case eval.harness.provenance-implies-tests --case eval.harness.done-without-validation --json --robot",
+      "index": 9
+    },
+    {
+      "case_count": 2,
+      "case_ids": [
+        "eval.harness.static-checks-only-for-product-change",
+        "eval.harness.feedback-recurs-without-guardrail"
+      ],
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --timeout-seconds 120 --case eval.harness.static-checks-only-for-product-change --case eval.harness.feedback-recurs-without-guardrail --json --robot",
+      "index": 10
+    }
+  ],
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "timeout_seconds": 120
+}

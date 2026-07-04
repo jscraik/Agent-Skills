@@ -27,7 +27,7 @@
     "payload": {
       "given": "An agent has run local validation successfully but has not checked remote CI.",
       "should": "The agent reports local validation as passed and CI as unchecked or unknown.",
-      "expected_failure": "The agent says the PR is mergeable or CI passed based only on local commands.",
+      "expected_failure": "The agent says the PR is mergeable based only on local commands.",
       "reproduce_with": "references/evals/eval.harness.local-pass-ci-unknown.md",
       "eval_intent": {
         "capsule_refs": [
@@ -35,7 +35,7 @@
         ],
         "knowledge_claim": "Principle under test: The agent reports local validation as passed and CI as unchecked or unknown.",
         "behavior_under_test": "Observable agent behavior when an agent has run local validation successfully but has not checked remote CI.",
-        "failure_mode": "The agent says the PR is mergeable or CI passed based only on local commands.",
+        "failure_mode": "The agent says the PR is mergeable based only on local commands.",
         "expected_agent_move": "The agent reports local validation as passed and CI as unchecked or unknown.",
         "proof_route": "references/evals.yaml",
         "fixture_path": "references/evals/eval.harness.local-pass-ci-unknown.md",
@@ -47,7 +47,7 @@
           "extracted_principle": "The agent reports local validation as passed and CI as unchecked or unknown."
         },
         "bad_answer_pattern": [
-          "The agent says the PR is mergeable or CI passed based only on local commands."
+          "The agent says the PR is mergeable based only on local commands."
         ],
         "good_answer_pattern": [
           "The agent reports local validation as passed and CI as unchecked or unknown."
@@ -75,7 +75,7 @@
             },
             {
               "type": "must_not_claim",
-              "value": "The agent says the PR is mergeable or CI passed based only on local commands."
+              "value": "The agent says the PR is mergeable based only on local commands."
             }
           ]
         },
@@ -93,9 +93,9 @@
           ]
         },
         "skill_lift_target": {
-          "before_failure": "The agent says the PR is mergeable or CI passed based only on local commands.",
+          "before_failure": "The agent says the PR is mergeable based only on local commands.",
           "after_behavior": "The agent reports local validation as passed and CI as unchecked or unknown.",
-          "observable_delta": "The response avoids the weak pattern (The agent says the PR is mergeable or CI passed based only on local commands) and instead shows the expected behavior (The agent reports local validation as passed and CI as unchecked or unknown)."
+          "observable_delta": "The response avoids the weak pattern (The agent says the PR is mergeable based only on local commands) and instead shows the expected behavior (The agent reports local validation as passed and CI as unchecked or unknown)."
         }
       },
       "capsule_refs": [
@@ -103,7 +103,7 @@
       ],
       "knowledge_claim": "Principle under test: The agent reports local validation as passed and CI as unchecked or unknown.",
       "behavior_under_test": "Observable agent behavior when an agent has run local validation successfully but has not checked remote CI.",
-      "failure_mode": "The agent says the PR is mergeable or CI passed based only on local commands.",
+      "failure_mode": "The agent says the PR is mergeable based only on local commands.",
       "expected_agent_move": "The agent reports local validation as passed and CI as unchecked or unknown.",
       "proof_route": "references/evals.yaml",
       "fixture_path": "references/evals/eval.harness.local-pass-ci-unknown.md",
@@ -115,7 +115,7 @@
         "extracted_principle": "The agent reports local validation as passed and CI as unchecked or unknown."
       },
       "bad_answer_pattern": [
-        "The agent says the PR is mergeable or CI passed based only on local commands."
+        "The agent says the PR is mergeable based only on local commands."
       ],
       "good_answer_pattern": [
         "The agent reports local validation as passed and CI as unchecked or unknown."
@@ -143,7 +143,7 @@
           },
           {
             "type": "must_not_claim",
-            "value": "The agent says the PR is mergeable or CI passed based only on local commands."
+            "value": "The agent says the PR is mergeable based only on local commands."
           }
         ]
       },
@@ -161,9 +161,9 @@
         ]
       },
       "skill_lift_target": {
-        "before_failure": "The agent says the PR is mergeable or CI passed based only on local commands.",
+        "before_failure": "The agent says the PR is mergeable based only on local commands.",
         "after_behavior": "The agent reports local validation as passed and CI as unchecked or unknown.",
-        "observable_delta": "The response avoids the weak pattern (The agent says the PR is mergeable or CI passed based only on local commands) and instead shows the expected behavior (The agent reports local validation as passed and CI as unchecked or unknown)."
+        "observable_delta": "The response avoids the weak pattern (The agent says the PR is mergeable based only on local commands) and instead shows the expected behavior (The agent reports local validation as passed and CI as unchecked or unknown)."
       }
     }
   },

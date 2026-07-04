@@ -1,0 +1,395 @@
+{
+  "schema_version": "qwen-oss-local-minimum-proof-set/v1",
+  "policy": "15-core-plus-5-regression",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "codex_profile": "oss-local",
+  "model": "qwen3.5:9b-mlx",
+  "gate": "oss-local-qwen-minimum-proof-set",
+  "full_release_case_count": 68,
+  "full_release_lane_status": "later_expansion_gate",
+  "minimum_case_count": 20,
+  "core_case_count": 15,
+  "regression_case_count": 5,
+  "shard_size_limit": 2,
+  "summary": {
+    "case_count": 20,
+    "pass_count": 20,
+    "blocked_count": 0,
+    "fail_count": 0,
+    "missing_count": 0
+  },
+  "gate_status": "pass",
+  "cases": [
+    {
+      "case_id": "happy-scorecard",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/01-happy-scorecard",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21580
+      }
+    },
+    {
+      "case_id": "happy-agents-md-audit",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/02-happy-agents-md-audit",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21424
+      }
+    },
+    {
+      "case_id": "happy-proof-loop-gap",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/03-happy-proof-loop-gap",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21614
+      }
+    },
+    {
+      "case_id": "edge-no-validation-entrypoint",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/04-edge-no-validation-entrypoint",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21438
+      }
+    },
+    {
+      "case_id": "happy-agent-native-product-readiness",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/07-happy-agent-native-product-readiness",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 22118
+      }
+    },
+    {
+      "case_id": "edge-ui-action-without-agent-capability",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/08-edge-ui-action-without-agent-capability",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 43324
+      }
+    },
+    {
+      "case_id": "edge-static-tests-only-agent-product",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/09-edge-static-tests-only-agent-product",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21684
+      }
+    },
+    {
+      "case_id": "tessl-scenario-merged-product-workflow-scorecard",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/10-tessl-scenario-merged-product-workflow-scorecard",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21733
+      }
+    },
+    {
+      "case_id": "tessl-scenario-dynamic-context-drift",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/11-tessl-scenario-dynamic-context-drift",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21728
+      }
+    },
+    {
+      "case_id": "tessl-scenario-local-pass-release-boundary",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/12-tessl-scenario-local-pass-release-boundary",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21453
+      }
+    },
+    {
+      "case_id": "tessl-scenario-knowledge-capsule-uplift",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260704-022129-598245",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022129-598245/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022129-598245/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022129-598245/01-tessl-scenario-knowledge-capsule-uplift",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21307
+      }
+    },
+    {
+      "case_id": "tessl-scenario-hostile-readiness-note",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-195427-601259",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/04-tessl-scenario-hostile-readiness-note",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21561
+      }
+    },
+    {
+      "case_id": "adversarial-prompt-injection-audit-boundary",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-200256-481822",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/workflow-closeout.json",
+        "workflow_closeout_status": "fail",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-200256-481822/14-adversarial-prompt-injection-audit-boundary",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21491
+      }
+    },
+    {
+      "case_id": "edge-universal-target-repo",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-211626-260938",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211626-260938/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211626-260938/workflow-closeout.json",
+        "workflow_closeout_status": "blocked",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211626-260938/01-edge-universal-target-repo",
+        "blocker_class": "blocked_runtime",
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 42561
+      }
+    },
+    {
+      "case_id": "edge-docs-freshness",
+      "bucket": "core",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260704-022206-139724",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022206-139724/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022206-139724/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022206-139724/01-edge-docs-freshness",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 65661
+      }
+    },
+    {
+      "case_id": "eval.harness.local-pass-ci-unknown",
+      "bucket": "regression",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-211016-031459",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/01-eval.harness.local-pass-ci-unknown",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21209
+      }
+    },
+    {
+      "case_id": "eval.harness.provenance-implies-tests",
+      "bucket": "regression",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-211016-031459",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211016-031459/02-eval.harness.provenance-implies-tests",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21358
+      }
+    },
+    {
+      "case_id": "eval.harness.done-without-validation",
+      "bucket": "regression",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-211046-075662",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/01-eval.harness.done-without-validation",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21377
+      }
+    },
+    {
+      "case_id": "eval.harness.static-checks-only-for-product-change",
+      "bucket": "regression",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260703-211046-075662",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-211046-075662/02-eval.harness.static-checks-only-for-product-change",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 21350
+      }
+    },
+    {
+      "case_id": "eval.harness.feedback-recurs-without-guardrail",
+      "bucket": "regression",
+      "required": true,
+      "latest_evidence": {
+        "status": "pass",
+        "run_id": "20260704-022057-019859",
+        "scorecard_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022057-019859/scorecard.json",
+        "workflow_closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022057-019859/workflow-closeout.json",
+        "workflow_closeout_status": "pass",
+        "workflow_closeout_validation_status": "pass",
+        "result_path": "Infrastructure/artifacts/skills/improve-agent-native/20260704-022057-019859/01-eval.harness.feedback-recurs-without-guardrail",
+        "blocker_class": null,
+        "failures": [],
+        "codex_exec_invoked": true,
+        "trace_total_tokens": 20987
+      }
+    }
+  ],
+  "blocked_next_gates": [
+    "oss-local-full-68-release-expansion",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "notes": [
+    "This artifact scopes Jamie's immediate qwen oss-local start gate to 15 core plus 5 regression cases.",
+    "It does not prove the full 68-case release lane, oss-cloud, Tessl dry-run, Tessl live, CI, merge, publish, or release readiness.",
+    "Evidence is populated from existing scorecard.json and workflow-closeout.json receipts under Infrastructure/artifacts/skills/improve-agent-native."
+  ]
+}
