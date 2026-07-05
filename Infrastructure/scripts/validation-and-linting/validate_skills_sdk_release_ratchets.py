@@ -25,8 +25,10 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     _scenario_cases_from_reference,
     read_structured_reference,
 )
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: E402
 
 from skills_sdk_release_receipts import REQUIRED_GATE_CHAIN, build_receipt_findings  # noqa: E402
+from release_ratchet_exceptions import release_ratchet_exception_paths  # noqa: E402
 
 
 CENTRAL_RUBRIC = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")
@@ -108,7 +110,8 @@ def _case_ids_from_refs(refs: Path) -> list[str]:
     evals = refs / "evals.yaml"
     loaded, _error = read_structured_reference(evals)
     cases = _scenario_cases_from_reference(evals, loaded if isinstance(loaded, dict) else {})
-    return [str(case.get("id")) for case in cases if isinstance(case, dict) and case.get("id")]
+    cases.extend(parse_generated_eval_fixtures(refs.parent))
+    return sorted(str(case.get("id")) for case in cases if isinstance(case, dict) and case.get("id"))
 
 
 def markdown_title(text: str) -> str:
@@ -307,30 +310,28 @@ def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
     accepted_legacy = _release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
     missing: list[str] = []
     ignored_legacy: list[str] = []
+
+    def _classify(rel_path: str) -> None:
+        if rel_path in accepted_legacy:
+            ignored_legacy.append(rel_path)
+        else:
+            missing.append(rel_path)
+
     for receipt in receipts:
         rel_path = _rel(receipt, root)
         try:
             payload = _json(receipt)
         except (OSError, ValueError):
-            if rel_path in accepted_legacy:
-                ignored_legacy.append(rel_path)
-            else:
-                missing.append(rel_path)
+            _classify(rel_path)
             continue
         if not isinstance(payload, dict):
-            if rel_path in accepted_legacy:
-                ignored_legacy.append(rel_path)
-            else:
-                missing.append(rel_path)
+            _classify(rel_path)
             continue
         tessl_payload = payload.get("tessl")
         tessl_lane = tessl_payload.get("lane") if isinstance(tessl_payload, dict) else None
         lane = payload.get("tessl_lane") or payload.get("lane") or tessl_lane
         if lane not in {"review", "dry_run", "live_eval", "score_receipt", "local_proof"}:
-            if rel_path in accepted_legacy:
-                ignored_legacy.append(rel_path)
-            else:
-                missing.append(rel_path)
+            _classify(rel_path)
     status = "pass" if not missing else "fail"
     return Finding(
         "tessl_lane_naming",
@@ -346,26 +347,7 @@ def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
 
 
 def _release_ratchet_exception_paths(handoff_dir: Path, check: str) -> set[str]:
-    path = handoff_dir / "release-ratchet-exceptions.json"
-    try:
-        payload = _json(path)
-    except (OSError, ValueError):
-        return set()
-    if not isinstance(payload, dict):
-        return set()
-    entries = payload.get("accepted_exceptions")
-    if not isinstance(entries, list):
-        return set()
-    paths: set[str] = set()
-    for entry in entries:
-        if (
-            isinstance(entry, dict)
-            and entry.get("check") == check
-            and isinstance(entry.get("path"), str)
-            and entry["path"].strip()
-        ):
-            paths.add(entry["path"].strip())
-    return paths
+    return release_ratchet_exception_paths(handoff_dir, check)
 
 
 def _check_scenario_parser_parity(root: Path, refs: Path) -> Finding:

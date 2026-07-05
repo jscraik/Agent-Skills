@@ -22,6 +22,7 @@ from ask.skills_sdk.tessl_eval_quality import (
     tessl_eval_quality_findings,
 )
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
+from ask.skills_sdk.handoff_readiness import default_handoff_readiness_path
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -3370,8 +3371,7 @@ def _case_ids_with_pass_status(payload: object) -> set[str]:
 
 
 def _tessl_live_readiness_lanes(repo_root: Path, source_path: str) -> dict[str, dict[str, object]]:
-    skill_name = Path(source_path).name
-    readiness_path = repo_root / ".harness" / "evidence" / "handoff" / skill_name / "eval-handoff-readiness.json"
+    readiness_path = default_handoff_readiness_path(repo_root, repo_root / source_path)
     readiness = _load_json_file(readiness_path)
     lanes = readiness.get("lanes")
     if not isinstance(lanes, list):
@@ -3420,11 +3420,17 @@ def _tessl_live_oss_scenario_parity(
     lane_case_ids: dict[str, list[str]] = {}
     missing_by_lane: dict[str, list[str]] = {}
     extra_by_lane: dict[str, list[str]] = {}
+    lane_receipts: dict[str, dict[str, object]] = {}
     staged_case_set = set(staged_case_ids)
     for lane_id in ("oss-local", "oss-cloud"):
         lane = lanes.get(lane_id) or {}
         receipt_path = _resolve_tessl_live_evidence_path(repo_root, lane.get("receipt_path"))
+        receipt_found = receipt_path is not None and receipt_path.is_file()
         passed = _oss_pass_case_ids_for_live(repo_root, receipt_path)
+        lane_receipts[lane_id] = {
+            "receipt_path": str(receipt_path.relative_to(repo_root)) if receipt_path and receipt_path.is_relative_to(repo_root) else str(receipt_path) if receipt_path else None,
+            "receipt_found": receipt_found,
+        }
         lane_case_ids[lane_id] = sorted(passed)
         missing_by_lane[lane_id] = sorted(staged_case_set - passed)
         extra_by_lane[lane_id] = sorted(passed - staged_case_set)
@@ -3441,6 +3447,7 @@ def _tessl_live_oss_scenario_parity(
         "oss_cloud_pass_count": len(lane_case_ids.get("oss-cloud", [])),
         "missing_by_lane": missing_by_lane,
         "extra_by_lane": extra_by_lane,
+        "lane_receipts": lane_receipts,
         "unproven_case_count": len(unproven),
         "unproven_case_ids": unproven,
         "extra_case_count": len(extra),

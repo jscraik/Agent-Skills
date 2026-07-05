@@ -2404,6 +2404,55 @@ def test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl(tmp_path:
     assert parity["unproven_case_ids"] == ["unproven-live-only"]
     assert parity["missing_by_lane"]["oss-local"] == ["unproven-live-only"]
     assert parity["missing_by_lane"]["oss-cloud"] == ["unproven-live-only"]
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
+    run.assert_not_called()
+
+
+def test_evals_live_private_proceeds_when_oss_lanes_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: proven live upload guard\n"
+            "    given: A scenario has OSS local and cloud pass evidence.\n"
+            "    should: Proceed to Tessl live submission.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="{}", stderr="")) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "pass"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
     run.assert_not_called()
 
 
@@ -2445,6 +2494,7 @@ def test_evals_live_private_requires_oss_lanes_to_match_tessl_case_set(tmp_path:
             "Skills/example-skill",
             mode="release",
             tessl_live_private=True,
+            tessl_live_dry_run=True,
             tessl_workspace="jscraik",
             dashboard=False,
         )
@@ -3134,7 +3184,7 @@ def test_evals_live_private_uses_default_workspace(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     _write_example_skill(tmp_path)
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
             tmp_path,
             "Skills/example-skill",

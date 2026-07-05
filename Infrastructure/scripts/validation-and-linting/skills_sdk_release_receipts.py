@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from release_ratchet_exceptions import release_ratchet_exception_paths
+
 
 FACTORY_GATE_REQUIRED_FIELDS = {
     "user_outcome",
@@ -159,22 +161,7 @@ def _has_carried_advisories(payload: dict[str, Any]) -> list[str]:
 
 
 def _release_ratchet_exception_paths(evidence_dir: Path, check: str) -> set[str]:
-    payload, _error = _load_json(evidence_dir / "release-ratchet-exceptions.json")
-    if payload is None:
-        return set()
-    entries = payload.get("accepted_exceptions")
-    if not isinstance(entries, list):
-        return set()
-    paths: set[str] = set()
-    for entry in entries:
-        if (
-            isinstance(entry, dict)
-            and entry.get("check") == check
-            and isinstance(entry.get("path"), str)
-            and entry["path"].strip()
-        ):
-            paths.add(entry["path"].strip())
-    return paths
+    return release_ratchet_exception_paths(evidence_dir, check)
 
 
 def _check_factory_gate(root: Path, path: Path) -> dict[str, Any]:
@@ -338,7 +325,7 @@ def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = 
         return _finding("ordered_gate_chain", "fail", "Gate-chain receipt must contain a gates list.", {"path": _rel(path, root)})
     required = _required_gate_chain(target_gate)
     evidence = _gate_chain_evidence(root, evidence_dir, gates, required, target_gate)
-    status = "pass" if all(not evidence[key] for key in ("missing_gates", "bad_status", "missing_receipts", "missing_claim_boundaries", "carried_advisories")) and evidence["order_ok"] else "fail"
+    status = "pass" if all(not evidence[key] for key in ("missing_gates", "bad_status", "missing_receipts", "missing_claim_boundaries", "missing_evidence_refs", "carried_advisories")) and evidence["order_ok"] else "fail"
     return _finding("ordered_gate_chain", status, "Gate receipts must exist, pass in order, and carry claim-boundary evidence.", {"path": _rel(path, root), **evidence})
 
 
@@ -360,6 +347,7 @@ def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any], requi
         "bad_status": _bad_gate_statuses(scoped_gates),
         "missing_receipts": _missing_gate_receipts(receipt_errors),
         "missing_claim_boundaries": _missing_claim_boundaries(scoped_gates),
+        "missing_evidence_refs": _missing_gate_evidence_refs(receipt_errors),
         "carried_advisories": _gate_carried_advisories(receipt_errors),
     }
 
@@ -392,12 +380,23 @@ def _gate_carried_advisories(receipt_errors: list[dict[str, Any]]) -> list[str]:
     return [item for error in receipt_errors for item in error["carried_advisories"]][:20]
 
 
+def _missing_gate_evidence_refs(receipt_errors: list[dict[str, Any]]) -> list[str]:
+    return [item["gate_id"] for item in receipt_errors if item["missing_evidence_refs"]]
+
+
 def _gate_receipt_error(root: Path, _evidence_dir: Path, gate: dict[str, Any]) -> dict[str, Any]:
     gate_id = str(gate.get("id"))
     receipt_path = _receipt_path(root, gate.get("receipt_path"))
     payload = _load_json(receipt_path)[0] if receipt_path is not None and receipt_path.is_file() else None
     carried = [f"{gate_id}:{item}" for item in _has_carried_advisories(payload)] if payload else []
-    return {"gate_id": gate_id, "missing_receipt": receipt_path is None or not receipt_path.is_file(), "carried_advisories": carried}
+    refs = payload.get("evidence_refs") if payload else None
+    missing_refs = gate_id in REQUIRED_GATE_CHAIN[REQUIRED_GATE_CHAIN.index("package_verify") :] and _blank(refs)
+    return {
+        "gate_id": gate_id,
+        "missing_receipt": receipt_path is None or not receipt_path.is_file(),
+        "missing_evidence_refs": missing_refs,
+        "carried_advisories": carried,
+    }
 
 
 def _receipt_path(root: Path, value: Any) -> Path | None:

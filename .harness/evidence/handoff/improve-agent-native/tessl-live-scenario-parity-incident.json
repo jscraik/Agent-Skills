@@ -1,5 +1,6 @@
 {
   "schema_version": "skills-sdk.tessl-live-scenario-parity-incident.v1",
+  "tessl_lane": "live_eval",
   "skill": "Skills/agent-ops/improve-agent-native",
   "incident": "Tessl live was allowed to upload scenarios that did not have both oss-local and oss-cloud pass evidence.",
   "root_operational_failure": "The live Tessl wrapper staged the full release Tessl scenario universe and checked handoff lane status, but did not compare staged Tessl scenario ids against OSS local and cloud passing case ids before submitting the run.",
