@@ -513,9 +513,32 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
 def _dispatch_sdk_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.score_action == "local":
         query = args.target.strip()
-        source_path = Path(query)
-        if not source_path.is_absolute():
+        target_info, _audit_target = skills_commands._resolve_doctor_target(repo_root, query)
+        source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+        source_path = Path(str(source_path_value)) if source_path_value else None
+        if source_path and not source_path.is_absolute():
             source_path = repo_root / source_path
+        if not source_path:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk score local"
+            result.data["skills_sdk_local_score"] = {
+                "schema_version": "skills-sdk-local-score-preview.v0",
+                "status": "blocked",
+                "query": query,
+                "gate": args.gate,
+                "canonical_source_path": source_path_value,
+                "receipt": None,
+                "receipt_paths": None,
+                "write_current": bool(args.write_current),
+                "validation_commands": [f"ask sdk score local {query} --gate {args.gate} --json --robot"],
+                "agent_summary": f"Local score is blocked for {query}: canonical source is missing.",
+            }
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK local score is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion="Use a valid skill handle or repo-relative skill source path.",
+            ))
+            return result
         quality_result = skills_commands.skills_package_verify(repo_root, target=query)
         impact_result = skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=query)
         security_result = skills_commands.skills_sdk_security_risk_modes_preview(repo_root, target=query)

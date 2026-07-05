@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +18,7 @@ from ask.skills_sdk.local_score import (  # noqa: E402
     build_local_score_receipt_from_lane_payloads,
     write_local_score_receipts,
 )
+from ask.commands import sdk as sdk_commands  # noqa: E402
 
 
 VALID_SKILL = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -202,6 +204,36 @@ class TestSkillsSdkLocalScore(unittest.TestCase):
         self.assertIn("quality", payload["lanes"])
         self.assertIn("impact", payload["lanes"])
         self.assertIn("security", payload["lanes"])
+
+    def test_dispatch_local_score_resolves_skill_handle_before_reading_source(self) -> None:
+        args = SimpleNamespace(
+            score_action="local",
+            target="skills-sdk-valid-fixture",
+            gate="creation",
+            ttl_seconds=3600,
+            write_current=False,
+        )
+
+        with (
+            mock.patch.object(
+                sdk_commands.skills_commands,
+                "_resolve_doctor_target",
+                return_value=(
+                    {"source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill"},
+                    "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+                ),
+            ) as resolve_mock,
+            mock.patch.object(sdk_commands.skills_commands, "skills_package_verify", return_value=_quality_payload(status="pass")),
+            mock.patch.object(sdk_commands.skills_commands, "skills_sdk_eval_scenario_quality", return_value=_impact_payload()),
+            mock.patch.object(sdk_commands.skills_commands, "skills_sdk_security_risk_modes_preview", return_value=_security_payload()),
+        ):
+            result = sdk_commands._dispatch_sdk_score(REPO_ROOT, args)
+
+        self.assertEqual(result.status, "success")
+        resolve_mock.assert_called_once_with(REPO_ROOT, "skills-sdk-valid-fixture")
+        payload = result.data["skills_sdk_local_score"]
+        self.assertEqual(payload["query"], "skills-sdk-valid-fixture")
+        self.assertEqual(payload["receipt"]["skill_path"], "Infrastructure/tests/fixtures/skills_sdk/valid_skill")
 
 
 if __name__ == "__main__":
