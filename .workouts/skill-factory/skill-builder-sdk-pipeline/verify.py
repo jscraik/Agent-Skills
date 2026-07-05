@@ -15,14 +15,18 @@ WORKOUT = "skill-factory/skill-builder-sdk-pipeline"
 
 
 def run_json(command: list[str]) -> dict:
-    result = subprocess.run(
-        command,
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=60,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        print(f"command_timed_out: {' '.join(command)}", file=sys.stderr)
+        raise SystemExit(1) from exc
     if result.returncode != 0:
         print(f"command_failed: {' '.join(command)}", file=sys.stderr)
         print(result.stdout, file=sys.stderr)
