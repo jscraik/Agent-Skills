@@ -166,6 +166,7 @@ def build_report(
             "status": "blocked",
             "blocker_class": "runtime_unavailable",
             "reason": str(exc),
+            "target_report": target_report,
             "first_action": "Fix the projection runtime lane and rerun the parity checker.",
             "validation_commands": [
                 f"Command: {ask_bin} skills sync --scope workspace --projection rooted --dry-run --json",

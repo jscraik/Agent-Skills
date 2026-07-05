@@ -6121,10 +6121,10 @@ def run_evals(
 
     selected_cases: list[str] = []
     for raw_case in cases or []:
-        for case in raw_case.split(","):
-            case = case.strip()
-            if case:
-                selected_cases.append(case)
+        for case_part in raw_case.split(","):
+            selected_case = case_part.strip()
+            if selected_case:
+                selected_cases.append(selected_case)
 
     qwen_batch_blocker = _qwen_oss_local_batch_blocker(
         mode=mode,

@@ -151,6 +151,27 @@ class TestSkillsSdkLocalScore(unittest.TestCase):
             self.assertTrue(history.is_file())
             self.assertEqual(json.loads(current.read_text(encoding="utf-8"))["schema_version"], "skills-sdk.local-score.v1")
 
+    def test_write_current_sanitizes_skill_name_path_segment(self) -> None:
+        receipt = build_local_score_receipt_from_lane_payloads(
+            REPO_ROOT,
+            source_path=VALID_SKILL,
+            query="Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+            gate="creation",
+            quality_result=_quality_payload(status="pass"),
+            impact_result=_impact_payload(ready=1, total=1, blocked=0),
+            security_result=_result({}),
+            generated_at="2026-07-04T12:00:00Z",
+        )
+        receipt["skill_name"] = "../../tmp/evil"
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            paths = write_local_score_receipts(Path(temp_dir), receipt)
+
+            base = Path(temp_dir) / ".harness" / "evidence" / "skills-sdk" / "local-score"
+            current = (Path(temp_dir) / paths["current"]).resolve()
+            self.assertTrue(current.is_relative_to(base.resolve()))
+            self.assertIn("tmp-evil", paths["current"])
+
     def test_command_emits_local_score_receipt_without_exit_code_scraping(self) -> None:
         process = subprocess.run(
             [

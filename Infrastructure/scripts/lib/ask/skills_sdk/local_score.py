@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,7 @@ SEVERITY_PENALTIES = {
     "medium": 10,
     "low": 5,
 }
+SAFE_SKILL_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 def utc_now_iso() -> str:
@@ -38,6 +40,11 @@ def repo_relative(repo_root: Path, path: Path) -> str:
         return resolved.relative_to(repo_root.resolve()).as_posix()
     except ValueError:
         return resolved.as_posix()
+
+
+def safe_skill_name_segment(skill_name: str) -> str:
+    segment = SAFE_SKILL_NAME_RE.sub("-", skill_name.strip()).strip(".-_")
+    return segment or "unnamed-skill"
 
 
 def _extract_data(envelope: Any, key: str) -> dict[str, Any] | None:
@@ -302,7 +309,7 @@ def _first_digest(envelope: Any, field: str) -> str | None:
 
 
 def write_local_score_receipts(repo_root: Path, receipt: dict[str, Any]) -> dict[str, str]:
-    skill_name = str(receipt["skill_name"])
+    skill_name = safe_skill_name_segment(str(receipt["skill_name"]))
     gate = str(receipt["gate"])
     generated_at = str(receipt["generated_at"]).replace(":", "").replace("-", "")
     root = repo_root / ".harness" / "evidence" / "skills-sdk" / "local-score" / skill_name

@@ -34,7 +34,11 @@ from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_execute import build_review_execution
 from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
-from ask.skills_sdk.local_score import LOCAL_SCORE_GATES
+from ask.skills_sdk.local_score import (
+    LOCAL_SCORE_GATES,
+    build_local_score_receipt_from_lane_payloads,
+    write_local_score_receipts,
+)
 
 
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -508,13 +512,40 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
 
 def _dispatch_sdk_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.score_action == "local":
-        return skills_commands.skills_sdk_local_score(
+        query = args.target.strip()
+        source_path = Path(query)
+        if not source_path.is_absolute():
+            source_path = repo_root / source_path
+        quality_result = skills_commands.skills_package_verify(repo_root, target=query)
+        impact_result = skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=query)
+        security_result = skills_commands.skills_sdk_security_risk_modes_preview(repo_root, target=query)
+        receipt = build_local_score_receipt_from_lane_payloads(
             repo_root,
-            target=args.target,
+            source_path=source_path,
+            query=query,
             gate=args.gate,
+            quality_result=quality_result,
+            impact_result=impact_result,
+            security_result=security_result,
             ttl_seconds=args.ttl_seconds,
-            write_current=args.write_current,
         )
+        paths = write_local_score_receipts(repo_root, receipt) if args.write_current else None
+        result = CallResult(status="success")
+        result.metadata["command"] = "sdk score local"
+        result.data["skills_sdk_local_score"] = {
+            "schema_version": "skills-sdk-local-score-preview.v0",
+            "status": receipt["score"]["status"],
+            "query": query,
+            "gate": args.gate,
+            "score": receipt["score"],
+            "lanes": receipt["lanes"],
+            "receipt": receipt,
+            "receipt_paths": paths,
+            "write_current": bool(args.write_current),
+            "validation_commands": [f"ask sdk score local {query} --gate {args.gate} --json --robot"],
+            "agent_summary": f"Local score for {receipt['skill_name']} is {receipt['score']['value']} ({receipt['score']['status']}).",
+        }
+        return result
     return build_unknown_action_result("sdk score", args.score_action)
 
 

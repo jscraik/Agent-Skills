@@ -402,7 +402,13 @@ def _primary_mode(mode_results: list[dict[str, Any]]) -> str:
     return "none_detected"
 
 
-def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:
+def build_risk_mode_taxonomy_receipt(
+    repo_root: Path,
+    *,
+    source_path: Path,
+    query: str,
+    package_security_receipt: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Generate a risk taxonomy receipt by analyzing a skill package for risk indicators across defined modes.
     
@@ -415,7 +421,8 @@ def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, quer
     body = body_without_frontmatter(text)
     classification = build_risk_classification(source, frontmatter, text)
     package_receipt = build_package_digest_receipt(repo_root, source_path=source, query=query)
-    package_security_receipt = build_package_security_signature_receipt(repo_root, source_path=source, query=query)
+    if package_security_receipt is None:
+        package_security_receipt = build_package_security_signature_receipt(repo_root, source_path=source, query=query)
     evidence_ref = _repo_relative(repo_root, source)
     mode_results = [
         _mode_result(

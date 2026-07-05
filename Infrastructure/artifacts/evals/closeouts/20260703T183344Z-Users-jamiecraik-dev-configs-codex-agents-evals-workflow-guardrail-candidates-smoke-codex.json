@@ -61,7 +61,7 @@
   "missing_suite_artifacts": true,
   "mode": "smoke",
   "mutation_allowed": false,
-  "next_reproduce_command": "./bin/ask evals run /Users/jamiecraik/dev/configs/codex/agents/evals/workflow-guardrail-candidates --mode smoke --runner codex --json --robot",
+  "next_reproduce_command": "./bin/ask evals run codex/agents/evals/workflow-guardrail-candidates --mode smoke --runner codex --json --robot",
   "path": "Infrastructure/artifacts/evals/closeouts/20260703T183344Z-Users-jamiecraik-dev-configs-codex-agents-evals-workflow-guardrail-candidates-smoke-codex.json",
   "raw_error_present": true,
   "raw_output_present": false,
@@ -69,6 +69,6 @@
   "report_dir": null,
   "runner": "codex",
   "schema_version": "skills-sdk.eval-closeout.v1",
-  "skill_path": "/Users/jamiecraik/dev/configs/codex/agents/evals/workflow-guardrail-candidates",
+  "skill_path": "codex/agents/evals/workflow-guardrail-candidates",
   "status": "blocked"
 }
