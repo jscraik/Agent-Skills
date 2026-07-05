@@ -38,8 +38,8 @@
       "items": {"$ref": "#/definitions/command_record"}
     },
     "profile_review": {"$ref": "#/definitions/profile_review"},
-    "package_security_signature_receipt": {"type": "object"},
-    "risk_mode_taxonomy_receipt": {"type": "object"},
+    "package_security_signature_receipt": {"$ref": "package-security-signature-receipt.v0.schema.json"},
+    "risk_mode_taxonomy_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
     "execution_performed": {"type": "boolean", "const": false},
     "scanner_execution_performed": {"type": "boolean", "const": false},
     "network_accessed": {"type": "boolean", "const": false},
