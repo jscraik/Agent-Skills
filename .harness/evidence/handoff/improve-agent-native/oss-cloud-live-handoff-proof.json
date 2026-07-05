@@ -4,9 +4,11 @@
   "profile": "oss-cloud",
   "codex_profile": "oss-cloud",
   "codex_exec_invoked": true,
+  "coverage_scope": "tessl_live_confirmation_set_only",
+  "full_release_lane_status": "not_claimed",
   "case_count": 40,
   "passed_count": 40,
   "source_receipt": ".harness/evidence/handoff/improve-agent-native/oss-cloud-release-ledger.json",
-  "what_this_proves": "oss-cloud release ledger has 40 cases passing with codex_exec_invoked=true.",
-  "what_this_does_not_prove": "This does not prove Tessl live score, publication, hosted CI, merge readiness, or any Tessl scenario not listed in the source receipt."
+  "what_this_proves": "oss-cloud has the 40-case Tessl live confirmation set passing with codex_exec_invoked=true.",
+  "what_this_does_not_prove": "This does not prove the full release lane, Tessl live score, publication, hosted CI, merge readiness, or any Tessl scenario not listed in the source receipt."
 }

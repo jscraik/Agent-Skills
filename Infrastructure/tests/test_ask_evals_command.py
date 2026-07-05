@@ -2094,6 +2094,58 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert any("Classifies the boundary as risky" in item for item in descriptions)
 
 
+def test_tessl_live_private_caps_yaml_set_before_generated_fixtures(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    cases_yaml = ["cases:"]
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        cases_yaml.extend([
+            f"  - id: yaml-case-{index:02d}",
+            f"    unit: YAML case {index:02d}",
+            "    given: A reviewed YAML scenario is ready for the default Tessl live confirmation set.",
+            "    should: Keep the default live upload inside the cost-bounded confirmation set.",
+            "    prompt: Check the handoff evidence.",
+            "    acceptance:",
+            "      - type: expected_signal",
+            "        value: Confirms the bounded handoff evidence.",
+        ])
+    (skill_root / "references" / "evals.yaml").write_text("\n".join(cases_yaml) + "\n", encoding="utf-8")
+    fixture_dir = skill_root / "references" / "evals"
+    fixture_dir.mkdir()
+    (fixture_dir / "eval.reviewed.generated-fixture.md").write_text(
+        (
+            "# eval.reviewed.generated-fixture: Generated Fixture\n\n"
+            "Knowledge claim: Generated fixtures need explicit budgeted live lanes.\n"
+            "Behavior under test: Default Tessl live budget selection.\n"
+            "Expected agent move: Excludes generated fixtures from the default live upload.\n"
+            "Failure mode: Uploads generated fixtures without explicit budget approval.\n"
+            "Given: A reviewed generated fixture exists next to enough YAML scenarios.\n"
+            "Should: Stage only the capped YAML confirmation set by default.\n"
+            "Expected failure: Uploads generated fixtures without explicit budget approval.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+
+    staged_case_ids = evals._tessl_live_staged_case_ids(staged_source)
+    manifest = json.loads((staged_source / "scenario-sources.json").read_text(encoding="utf-8"))
+    assert len(staged_case_ids) == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS
+    assert "generated-eval.reviewed.generated-fixture" not in staged_case_ids
+    assert "yaml-case-20" not in staged_case_ids
+    assert manifest["generated_fixture_cases"] == 1
+    assert manifest["default_live_selection"]["excluded_generated_fixture_case_ids"] == [
+        "generated-eval.reviewed.generated-fixture"
+    ]
+    assert manifest["default_live_selection"]["excluded_over_cap_case_ids"] == ["yaml-case-20"]
+    assert evals._tessl_live_budget_preflight(staged_source)["status"] == "pass"
+
+
 def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / ".DS_Store").write_text("finder metadata\n", encoding="utf-8")

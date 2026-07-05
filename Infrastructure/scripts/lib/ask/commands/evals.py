@@ -1556,6 +1556,39 @@ def _merge_tessl_cases_with_generated_fixtures(
     return merged, manifest
 
 
+def _select_default_tessl_live_cases(
+    base_cases: list[dict[str, object]],
+    merged_cases: list[dict[str, object]],
+    scenario_manifest: dict[str, object],
+) -> list[dict[str, object]]:
+    if scenario_manifest.get("structure_only_exception"):
+        scenario_manifest["default_live_selection"] = {
+            "policy": "structure_only_all_reviewed_scenarios",
+            "staged_case_count": len(merged_cases),
+            "excluded_generated_fixture_case_ids": [],
+            "excluded_over_cap_case_ids": [],
+        }
+        return merged_cases
+
+    base_by_id = {str(case.get("id")): case for case in base_cases}
+    generated_fixture_ids = [
+        str(case.get("id"))
+        for case in merged_cases
+        if str(case.get("id")) not in base_by_id
+    ]
+    selected = list(base_cases)
+    over_cap_cases = selected[TESSL_LIVE_PRIVATE_MAX_SCENARIOS:]
+    selected = selected[:TESSL_LIVE_PRIVATE_MAX_SCENARIOS]
+    scenario_manifest["default_live_selection"] = {
+        "policy": "yaml_confirmation_set_capped_before_live_budget",
+        "staged_case_count": len(selected),
+        "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+        "excluded_generated_fixture_case_ids": generated_fixture_ids,
+        "excluded_over_cap_case_ids": [str(case.get("id")) for case in over_cap_cases],
+    }
+    return selected
+
+
 BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "expected_signal",
     "skill_selected",
@@ -2218,6 +2251,7 @@ def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path
             f"Found {len(cases)}. Add bespoke generated scenarios, review/import them into references/evals.yaml "
             "or references/evals/*.md, then rerun the dry-run staging lane before using Tessl live runs."
         )
+    cases = _select_default_tessl_live_cases(base_cases, cases, scenario_manifest)
     scenario_manifest["min_scenarios_required"] = TESSL_LIVE_PRIVATE_MIN_SCENARIOS
     scenario_manifest["meets_min_scenarios"] = len(cases) >= TESSL_LIVE_PRIVATE_MIN_SCENARIOS
     scenario_manifest["run_limit_policy"] = {
