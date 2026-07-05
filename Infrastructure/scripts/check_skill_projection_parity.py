@@ -109,7 +109,7 @@ def _target_report(home: Path, repo_root: Path) -> dict[str, Any]:
 
 def _runtime_list_report(ask_bin: str, representative_skills: tuple[str, ...]) -> dict[str, Any]:
     payload = _read_json_command([ask_bin, "skills", "list", "--json", "--robot"])
-    skills = payload.get("data", {}).get("skills", [])
+    skills = (payload.get("data") or {}).get("skills", [])
     if not isinstance(skills, list):
         raise RuntimeError("skills list payload is missing data.skills")
     skill_names = {
