@@ -1,4 +1,4 @@
-# Agent Operating Model
+# Ryan Agent Operating Model
 
 Design long-horizon agent work around context seeking, paved workflows, hooks, compaction recovery, and continuous capability refresh.
 

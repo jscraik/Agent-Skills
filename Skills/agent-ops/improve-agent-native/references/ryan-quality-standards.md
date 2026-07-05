@@ -1,4 +1,4 @@
-# Quality Standards
+# Ryan Quality Standards
 
 Convert exemplary engineering practice, accessibility expectations, and full-loop evals into quality bars for generated work.
 

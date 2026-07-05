@@ -25,8 +25,10 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     _scenario_cases_from_reference,
     read_structured_reference,
 )
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: E402
 
 from skills_sdk_release_receipts import REQUIRED_GATE_CHAIN, build_receipt_findings  # noqa: E402
+from release_ratchet_exceptions import release_ratchet_exception_paths  # noqa: E402
 
 
 CENTRAL_RUBRIC = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")
@@ -108,7 +110,8 @@ def _case_ids_from_refs(refs: Path) -> list[str]:
     evals = refs / "evals.yaml"
     loaded, _error = read_structured_reference(evals)
     cases = _scenario_cases_from_reference(evals, loaded if isinstance(loaded, dict) else {})
-    return [str(case.get("id")) for case in cases if isinstance(case, dict) and case.get("id")]
+    cases.extend(parse_generated_eval_fixtures(refs.parent))
+    return sorted(str(case.get("id")) for case in cases if isinstance(case, dict) and case.get("id"))
 
 
 def markdown_title(text: str) -> str:
@@ -304,27 +307,42 @@ def _missing_capsule_routing(refs: Path, capsule_paths: list[str]) -> list[str]:
 def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
     handoff_dir = root / ".harness" / "evidence" / "handoff" / skill_dir.name
     receipts = sorted(handoff_dir.glob("tessl*.json")) if handoff_dir.is_dir() else []
+    accepted_legacy = release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
     missing: list[str] = []
+    ignored_legacy: list[str] = []
+
+    def _classify(rel_path: str) -> None:
+        if rel_path in accepted_legacy:
+            ignored_legacy.append(rel_path)
+        else:
+            missing.append(rel_path)
+
     for receipt in receipts:
+        rel_path = _rel(receipt, root)
         try:
             payload = _json(receipt)
         except (OSError, ValueError):
-            missing.append(_rel(receipt, root))
+            _classify(rel_path)
             continue
         if not isinstance(payload, dict):
-            missing.append(_rel(receipt, root))
+            _classify(rel_path)
             continue
         tessl_payload = payload.get("tessl")
         tessl_lane = tessl_payload.get("lane") if isinstance(tessl_payload, dict) else None
         lane = payload.get("tessl_lane") or payload.get("lane") or tessl_lane
         if lane not in {"review", "dry_run", "live_eval", "score_receipt", "local_proof"}:
-            missing.append(_rel(receipt, root))
+            _classify(rel_path)
     status = "pass" if not missing else "fail"
     return Finding(
         "tessl_lane_naming",
         status,
         "Tessl artifacts must name their lane so review, dry-run, live eval, and score receipts cannot be conflated.",
-        {"handoff_dir": _rel(handoff_dir, root), "receipt_count": len(receipts), "missing_lane": missing},
+        {
+            "handoff_dir": _rel(handoff_dir, root),
+            "receipt_count": len(receipts),
+            "missing_lane": missing,
+            "ignored_legacy": ignored_legacy,
+        },
     )
 
 
@@ -372,12 +390,14 @@ def _scenario_text_counts(text: str, case_text: str) -> tuple[int, int, list[str
 
 def _scenario_missing_fields(cases: list[Any]) -> list[dict[str, Any]]:
     missing_fields: list[dict[str, Any]] = []
-    required = ("id", "category", "task", "given", "should", "acceptance")
+    required = ("id", "category", "given", "should", "acceptance")
     for index, case in enumerate(cases):
         if not isinstance(case, dict):
             missing_fields.append({"index": index, "missing": ["mapping"]})
             continue
         missing = [field for field in required if not case.get(field)]
+        if not case.get("task") and not case.get("prompt"):
+            missing.append("task_or_prompt")
         if missing:
             missing_fields.append({"id": case.get("id", f"case[{index}]"), "missing": missing})
     return missing_fields

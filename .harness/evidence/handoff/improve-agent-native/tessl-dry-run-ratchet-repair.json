@@ -1,0 +1,36 @@
+{
+  "schema_version": "skills-sdk.tessl-dry-run-ratchet-repair.v1",
+  "status": "pass",
+  "tessl_lane": "dry_run",
+  "target": "Skills/agent-ops/improve-agent-native",
+  "workspace": "jscraik",
+  "dry_run": true,
+  "live_tessl_run_started": false,
+  "ratchet": {
+    "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/agent-ops/improve-agent-native --target-gate tessl_dry_run --json",
+    "status": "pass",
+    "target_gate": "tessl_dry_run",
+    "finding_count": 0
+  },
+  "scenario_quality": {
+    "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+    "status": "success",
+    "trace_id": "0c62a390-08c9-4cd4-80bd-e73df748ccaa",
+    "scenario_count": 71,
+    "promotion_ready_count": 71,
+    "blocked_count": 0
+  },
+  "tessl_dry_run": {
+    "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --runner codex --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --no-dashboard --json --robot",
+    "status": "success",
+    "trace_id": "69e2a881-9e97-43cb-b513-17b82abdfe51",
+    "eval_status": "pass",
+    "tessl_status": "pass",
+    "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+    "staged_file_count": 213
+  },
+  "proof_boundary": [
+    "Proves Tessl dry-run staging and SDK ratchets for the current temp-worktree candidate.",
+    "Does not prove Tessl live scoring, Tessl score, publication, release readiness, hosted CI, or merge readiness."
+  ]
+}

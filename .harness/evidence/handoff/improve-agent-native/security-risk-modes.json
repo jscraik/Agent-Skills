@@ -1,0 +1,38 @@
+{
+  "schema_version": "skills-sdk.security-risk-modes-preview.v1",
+  "status": "pass",
+  "preview": true,
+  "command": "./bin/ask sdk security risk-modes Skills/agent-ops/improve-agent-native --preview --json --robot",
+  "risk_modes": {
+    "prompt_injection": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "unsafe_command_escalation": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "secret_redaction": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "external_url_trust": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "local_path_leakage": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "permission_profile": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    },
+    "mcp_tool_side_effects": {
+      "status": "pass",
+      "evidence": "covered by release-ratchet package security preview contract"
+    }
+  },
+  "what_this_proves": "The package has non-mutating security risk-mode coverage before Tessl movement.",
+  "what_this_does_not_prove": "It does not prove live Tessl score, runtime installation, or registry release readiness."
+}

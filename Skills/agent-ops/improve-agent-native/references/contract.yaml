@@ -1,5 +1,6 @@
 schema_version: 1
 skill: improve-agent-native
+rubric_profile: skills-sdk.gold-standard.v1
 purpose: "Check whether a repository and any agent-facing product or workflow surface are ready for AI coding agents to follow guidance, use relevant capabilities, run checks, recover from failure, and leave useful proof."
 triggers:
   - "Use when a repo needs an AI coding agent readiness check, repo agent compatibility audit, AGENTS.md review, missing test/build command report, docs quality review, proof-loop gap report, or specific fixes."
@@ -37,6 +38,129 @@ validation:
   - package_verify
   - family_benchmark
   - command_surface_projection_check
+commands:
+  - "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot"
+  - "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
+  - "./bin/ask sdk security risk-modes Skills/agent-ops/improve-agent-native --preview --json --robot"
+  - "./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
+  - "./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot"
+package_reference_routes:
+  - path: references/agent-native-primitives.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/agents-md-best-practices.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/best-practices.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/discovery-interview.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/docs-structure-and-maintenance.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.architecture-drift-hidden-by-agent-velocity.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.autonomy-without-validation.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.brownfield-harness-without-boundaries.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.changed-files-without-behavior-proof.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.context-dump-instead-of-slice.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.done-without-validation.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.feedback-recurs-without-guardrail.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.local-pass-ci-unknown.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.pr-lifecycle-stops-before-main.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.provenance-implies-tests.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.review-agent-doubles-scope.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.skill-frontmatter-not-routed.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.slop-feedback-not-systematized.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.harness.static-checks-only-for-product-change.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.knowledge-os.capsule-design-without-relationships.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.knowledge-os.export-pass-overclaims-quality.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.adoption-budget-pattern-discovery.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.autonomy-gate-threshold.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.benchmark-laundering-quality-gate.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.compaction-context-recovery.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.long-term-coherence-governance.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.maintenance-economics-boundary.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.perception-lock-adoption-decision.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.policy-aware-approval.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/evals/eval.ryan.stakeholder-synthesis.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-brownfield-readiness.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-evidence-boundary.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-pr-lifecycle.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-readiness-rubric.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-review-feedback.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/harness-skill-routing.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/knowledge-capsule-routing.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/knowledge-capsule.manifest.yaml
+    route: 'Capsule manifest used by package validation and routing checks.'
+  - path: references/knowledge-demand.yaml
+    route: 'Package demand metadata for KnowledgeOS handoff; keep out of always-loaded SKILL.md.'
+  - path: references/knowledge-os-capsule-design.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/knowledge-os-export-readiness.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-adoption-economics.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-agent-operating-model.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-continuous-cleanup.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-environment-design.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-harness-principles.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-long-term-coherence.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-maintenance-supply-chain.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-mechanical-boundaries.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-quality-standards.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-repo-knowledge.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-safety-policy.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-sociotechnical-adoption.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/ryan-stakeholder-alignment.md
+    route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
+  - path: references/source-context.yaml
+    route: 'Package source provenance metadata for audit traceability; keep out of always-loaded SKILL.md.'
 quality_criteria:
   facet_selection:
     capsule_design: "Use for KnowledgeOS capsule source-model, relationship-map, downstream-integration, failure-mode, or eval-scenario quality gaps."

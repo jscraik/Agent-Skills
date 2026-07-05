@@ -1,4 +1,4 @@
-# Adoption Economics
+# Ryan Adoption Economics
 
 Treat token spend and uncapped expert use as pattern-discovery investment that becomes reusable practice while preserving human authority boundaries.
 

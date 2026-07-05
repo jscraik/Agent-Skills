@@ -1461,6 +1461,7 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
             receipt_payload["profile"] = lane_id
             receipt_payload["codex_profile"] = lane_id
             receipt_payload["codex_exec_invoked"] = True
+            receipt_payload["cases"] = [{"case_id": "smoke-example", "status": "pass"}]
         if lane_id == "tessl-local-proof":
             receipt_payload["receipt"] = {
                 "schema_version": "jscraik.tessl-local-proof.v1",
@@ -2093,6 +2094,58 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert any("Classifies the boundary as risky" in item for item in descriptions)
 
 
+def test_tessl_live_private_caps_yaml_set_before_generated_fixtures(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    cases_yaml = ["cases:"]
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        cases_yaml.extend([
+            f"  - id: yaml-case-{index:02d}",
+            f"    unit: YAML case {index:02d}",
+            "    given: A reviewed YAML scenario is ready for the default Tessl live confirmation set.",
+            "    should: Keep the default live upload inside the cost-bounded confirmation set.",
+            "    prompt: Check the handoff evidence.",
+            "    acceptance:",
+            "      - type: expected_signal",
+            "        value: Confirms the bounded handoff evidence.",
+        ])
+    (skill_root / "references" / "evals.yaml").write_text("\n".join(cases_yaml) + "\n", encoding="utf-8")
+    fixture_dir = skill_root / "references" / "evals"
+    fixture_dir.mkdir()
+    (fixture_dir / "eval.reviewed.generated-fixture.md").write_text(
+        (
+            "# eval.reviewed.generated-fixture: Generated Fixture\n\n"
+            "Knowledge claim: Generated fixtures need explicit budgeted live lanes.\n"
+            "Behavior under test: Default Tessl live budget selection.\n"
+            "Expected agent move: Excludes generated fixtures from the default live upload.\n"
+            "Failure mode: Uploads generated fixtures without explicit budget approval.\n"
+            "Given: A reviewed generated fixture exists next to enough YAML scenarios.\n"
+            "Should: Stage only the capped YAML confirmation set by default.\n"
+            "Expected failure: Uploads generated fixtures without explicit budget approval.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+
+    staged_case_ids = evals._tessl_live_staged_case_ids(staged_source)
+    manifest = json.loads((staged_source / "scenario-sources.json").read_text(encoding="utf-8"))
+    assert len(staged_case_ids) == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS
+    assert "generated-eval.reviewed.generated-fixture" not in staged_case_ids
+    assert "yaml-case-20" not in staged_case_ids
+    assert manifest["generated_fixture_cases"] == 1
+    assert manifest["default_live_selection"]["excluded_generated_fixture_case_ids"] == [
+        "generated-eval.reviewed.generated-fixture"
+    ]
+    assert manifest["default_live_selection"]["excluded_over_cap_case_ids"] == ["yaml-case-20"]
+    assert evals._tessl_live_budget_preflight(staged_source)["status"] == "pass"
+
+
 def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / ".DS_Store").write_text("finder metadata\n", encoding="utf-8")
@@ -2345,6 +2398,166 @@ def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> 
     assert result.data["tessl_eval"]["status"] == "blocked"
     assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
     assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
+    run.assert_not_called()
+
+
+def test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: example skill behavioural proof\n"
+            "    given: A user asks for the proven example behavior.\n"
+            "    should: Produce the expected example behavior.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+            "  - id: unproven-live-only\n"
+            "    unit: unproven live upload guard\n"
+            "    given: A scenario lacks OSS local and cloud pass evidence.\n"
+            "    should: Block before Tessl live submission.\n"
+            "    prompt: Do another example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Blocks before Tessl live submission.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "without both oss-local and oss-cloud pass evidence" in tessl_eval["blocker"]
+    parity = tessl_eval["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["staged_case_count"] == 2
+    assert parity["unproven_case_ids"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-local"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-cloud"] == ["unproven-live-only"]
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
+    run.assert_not_called()
+
+
+def test_evals_live_private_proceeds_when_oss_lanes_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: proven live upload guard\n"
+            "    given: A scenario has OSS local and cloud pass evidence.\n"
+            "    should: Proceed to Tessl live submission.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="{}", stderr="")) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "pass"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
+    run.assert_not_called()
+
+
+def test_evals_live_private_requires_oss_lanes_to_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: exact live case-set rehearsal\n"
+            "    given: A live Tessl candidate has one selected case.\n"
+            "    should: Block when oss-cloud evidence contains a different wider case set.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / "example-skill"
+    for lane_id in ("oss-local", "oss-cloud"):
+        receipt_path = evidence_root / f"{lane_id}.json"
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        payload["cases"].append({"case_id": "extra-not-in-live-upload", "status": "pass"})
+        receipt_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"]["oss-local"] == ["extra-not-in-live-upload"]
+    assert parity["extra_by_lane"]["oss-cloud"] == ["extra-not-in-live-upload"]
+    assert parity["extra_case_ids"] == ["extra-not-in-live-upload"]
     run.assert_not_called()
 
 
@@ -2978,11 +3191,52 @@ def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
     assert preflight["remaining_runs"] == evals.TESSL_WORKSPACE_RUN_RESERVE
 
 
+def test_tessl_live_budget_preflight_blocks_over_cap_and_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        case_id = f"case-{index:02d}"
+        case_root = evals_root / case_id
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+    generated_root = evals_root / "generated-eval.expensive-context-loop"
+    generated_root.mkdir(parents=True)
+    (generated_root / "task.md").write_text("Generated task.\n", encoding="utf-8")
+    (generated_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert preflight["scenario_count"] == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 2
+    assert preflight["expected_model_tasks"] == preflight["scenario_count"] * 4
+    assert preflight["generated_case_ids"] == ["generated-eval.expensive-context-loop"]
+    assert any("cost cap" in blocker for blocker in preflight["blockers"])
+    assert any("generated-eval" in blocker for blocker in preflight["blockers"])
+
+
+def test_tessl_live_budget_preflight_passes_twenty_non_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS):
+        case_root = evals_root / f"case-{index:02d}"
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "pass"
+    assert preflight["scenario_count"] == 20
+    assert preflight["expected_solution_runs"] == 40
+    assert preflight["expected_score_runs"] == 40
+    assert preflight["expected_model_tasks"] == 80
+
+
 def test_evals_live_private_uses_default_workspace(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     _write_example_skill(tmp_path)
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
             tmp_path,
             "Skills/example-skill",

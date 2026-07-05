@@ -1,10 +1,51 @@
 {
   "schema_version": "skills-sdk.oss-minimum-proof-sets.v1",
   "proof_sets": {
+    "improve-agent-native-oss-local-9-plus-3": {
+      "policy": "oss-local-9-core-plus-3-regression",
+      "skill": "Skills/agent-ops/improve-agent-native",
+      "lane": "oss-local",
+      "shard_size_limit": 2,
+      "core_case_count": 9,
+      "regression_case_count": 3,
+      "total_case_count": 12,
+      "purpose": "cheap local repair/canary proof before broader cloud rehearsal",
+      "core_cases": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability",
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard",
+        "tessl-scenario-dynamic-context-drift"
+      ],
+      "regression_cases": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.provenance-implies-tests",
+        "eval.harness.done-without-validation"
+      ],
+      "stage_maturity_expectations": {
+        "oss-local": "repair loop: prove a 9+3 cheap local canary before broadening to cloud",
+        "oss-cloud": "uplift loop: expand to the 15+5 Tessl rehearsal set and classify every delta",
+        "tessl": "confirmation loop: only the 15+5 cloud-proven set may proceed to live by default"
+      },
+      "blocked_next_gates": [
+        "oss-cloud-15-plus-5-rehearsal",
+        "tessl-dry-run",
+        "tessl-live"
+      ]
+    },
     "improve-agent-native-15-plus-5": {
       "policy": "15-core-plus-5-regression",
       "skill": "Skills/agent-ops/improve-agent-native",
+      "lane": "oss-cloud-and-tessl-live",
       "shard_size_limit": 2,
+      "core_case_count": 15,
+      "regression_case_count": 5,
+      "total_case_count": 20,
+      "purpose": "cloud rehearsal and Tessl live confirmation proof set",
       "core_cases": [
         "happy-scorecard",
         "happy-agents-md-audit",

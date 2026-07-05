@@ -1,4 +1,4 @@
-# Export Readiness
+# Knowledge OS Export Readiness
 
 Keep pack facets and exports action-oriented, smoke-tested, and explicit about what their proof does and does not establish.
 
