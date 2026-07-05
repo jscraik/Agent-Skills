@@ -151,10 +151,11 @@ def _preview_report(ask_bin: str) -> dict[str, Any]:
 def build_report(
     *,
     repo_root: Path = REPO_ROOT,
-    home: Path = Path.home(),
+    home: Path | None = None,
     ask_bin: str = str(REPO_ROOT / "bin" / "ask"),
     representative_skills: tuple[str, ...] = DEFAULT_REPRESENTATIVE_SKILLS,
 ) -> dict[str, Any]:
+    home = home if home is not None else Path.home()
     target_report = _target_report(home, repo_root)
     try:
         preview_report = _preview_report(ask_bin)
