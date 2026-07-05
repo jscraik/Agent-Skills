@@ -216,6 +216,15 @@
       "reason": "Harness coding-policy schema is the contract for the tracked machine-readable policy-routing surface.",
       "owner": "coding-harness canary",
       "review_after": "2026-10-04"
+    },
+    {
+      "id": "workflow-guardrail-candidates-eval-pack",
+      "match_type": "prefix",
+      "pattern": "codex/agents/evals/workflow-guardrail-candidates/",
+      "classification": "classification_required",
+      "reason": "Workflow guardrail candidates are a tracked Codex eval-pack source with tasks, criteria, scorer calibration, and Tessl project metadata used to test repeated workflow failure classes.",
+      "owner": "codex evals",
+      "review_after": "2026-10-05"
     }
   ]
 }
