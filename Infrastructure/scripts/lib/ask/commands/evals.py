@@ -127,6 +127,25 @@ def _qwen_oss_local_batch_blocker(
     """Block oversized qwen oss-local batches before runtime degrades into prompt-only artifacts."""
     if mode not in {"smoke", "release"} or runner != "codex" or codex_profile != "oss-local":
         return None
+    if not selected_cases:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_validation",
+            "failure_category": "runtime_mismatch",
+            "profile": codex_profile,
+            "given": f"unfiltered qwen oss-local {mode} run",
+            "should": f"run at most {QWEN_OSS_LOCAL_MAX_BATCH_CASES} cases per qwen oss-local shard",
+            "actual": "no --case filter supplied",
+            "expected": "split the selected cases into smaller --case batches before widening the qwen eval lane",
+            "evidence_refs": [
+                "Infrastructure/artifacts/skills/improve-agent-native/20260703-193025-822290/workflow-closeout.json",
+                ".harness/evidence/handoff/improve-agent-native/qwen-smoke-coverage-map.json",
+            ],
+            "reproduce_command": (
+                "./bin/ask sdk eval run <skill> --runner internal --mode smoke "
+                "--codex-profile oss-local --timeout-seconds 120 --case <up-to-two-cases> --json --robot"
+            ),
+        }
     if len(selected_cases) <= QWEN_OSS_LOCAL_MAX_BATCH_CASES:
         return None
 

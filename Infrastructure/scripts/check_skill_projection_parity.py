@@ -166,6 +166,8 @@ def build_report(
             "status": "blocked",
             "blocker_class": "runtime_unavailable",
             "reason": str(exc),
+            "repo_root": str(repo_root),
+            "home": str(home),
             "target_report": target_report,
             "first_action": "Fix the projection runtime lane and rerun the parity checker.",
             "validation_commands": [

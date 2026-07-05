@@ -120,10 +120,30 @@ def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> No
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
+            cases=["smoke-discovery"],
         )
 
     assert result.status == "success"
     assert run_mock.call_args.kwargs["timeout"] == evals.RELEASE_EVAL_TIMEOUT_SECONDS
+
+
+def test_codex_oss_local_blocks_unfiltered_batch(tmp_path: Path) -> None:
+    with mock.patch.object(evals.subprocess, "run") as run_mock:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            codex_profile="oss-local",
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["qwen_oss_local_smoke_batch"]["actual"] == "no --case filter supplied"
+    assert "no --case filter supplied" in result.data["raw_error"]
+    run_mock.assert_not_called()
 
 
 def test_eval_blocker_classifies_no_matching_eval_cases_as_validation() -> None:
