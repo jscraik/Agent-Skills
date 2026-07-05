@@ -11,6 +11,10 @@ from ask.skills_sdk.risk_modes import (
     RISK_MODE_TAXONOMY_SCHEMA_VERSION,
     build_risk_mode_taxonomy_receipt,
 )
+from ask.skills_sdk.package_security_signature import (
+    PACKAGE_SECURITY_SIGNATURE_SCHEMA_VERSION,
+    build_package_security_signature_receipt,
+)
 from ask.skills_sdk.skill_intake import build_skill_intake_receipt
 
 
@@ -404,9 +408,14 @@ def _blocked_receipt(repo_root: Path, source: str, intake_receipt: dict[str, Any
         "package_id": None,
         "package_digest": None,
         "intake_receipt": intake_receipt,
+        "package_security_signature_receipt": None,
         "risk_mode_receipt": None,
         "risk_mode_receipt_digest": None,
-        "required_receipts": [intake_receipt["schema_version"], RISK_MODE_TAXONOMY_SCHEMA_VERSION],
+        "required_receipts": [
+            intake_receipt["schema_version"],
+            PACKAGE_SECURITY_SIGNATURE_SCHEMA_VERSION,
+            RISK_MODE_TAXONOMY_SCHEMA_VERSION,
+        ],
         "review_decision": "blocked",
         "review_items": review_items,
         "residual_risk": ["intake_blocked"],
@@ -441,7 +450,17 @@ def build_skill_intake_review_receipt(
         raise ValueError(f"Resolved intake source does not contain SKILL.md: {source_root}")
     frontmatter = read_skill_frontmatter_fields(skill_file)
     body = body_without_frontmatter(skill_file.read_text(encoding="utf-8"))
-    risk_mode_receipt = build_risk_mode_taxonomy_receipt(repo_root, source_path=skill_file, query=intake_receipt["skill_id"])
+    package_security_receipt = build_package_security_signature_receipt(
+        repo_root,
+        source_path=skill_file,
+        query=intake_receipt["skill_id"],
+    )
+    risk_mode_receipt = build_risk_mode_taxonomy_receipt(
+        repo_root,
+        source_path=skill_file,
+        query=intake_receipt["skill_id"],
+        package_security_receipt=package_security_receipt,
+    )
     review_items = _review_items(
         frontmatter=frontmatter,
         body=body,
@@ -451,6 +470,7 @@ def build_skill_intake_review_receipt(
     decision = _decision(review_items)
     return _review_receipt(
         intake_receipt=intake_receipt,
+        package_security_receipt=package_security_receipt,
         risk_mode_receipt=risk_mode_receipt,
         review_items=review_items,
         decision=decision,
@@ -460,6 +480,7 @@ def build_skill_intake_review_receipt(
 def _review_receipt(
     *,
     intake_receipt: dict[str, Any],
+    package_security_receipt: dict[str, Any],
     risk_mode_receipt: dict[str, Any],
     review_items: list[dict[str, Any]],
     decision: str,
@@ -485,9 +506,14 @@ def _review_receipt(
         "package_id": risk_mode_receipt["package_id"],
         "package_digest": risk_mode_receipt["package_digest"],
         "intake_receipt": intake_receipt,
+        "package_security_signature_receipt": package_security_receipt,
         "risk_mode_receipt": risk_mode_receipt,
         "risk_mode_receipt_digest": _digest_json(risk_mode_receipt),
-        "required_receipts": [intake_receipt["schema_version"], risk_mode_receipt["schema_version"]],
+        "required_receipts": [
+            intake_receipt["schema_version"],
+            package_security_receipt["schema_version"],
+            risk_mode_receipt["schema_version"],
+        ],
         "review_decision": decision,
         "review_items": review_items,
         "residual_risk": _residual_risk(review_items, risk_mode_receipt),

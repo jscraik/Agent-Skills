@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "case_id": "linear-p0-blocking",
+  "criteria": [
+    "Hold out this case from training use.",
+    "Decide whether the candidate is enforceable and worth tracking.",
+    "Do not claim a score without calibration."
+  ]
+}

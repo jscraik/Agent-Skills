@@ -1,0 +1,92 @@
+{
+  "acceptance_trace": [
+    "PU-030",
+    "FR-008",
+    "SEC-001",
+    "VP-030"
+  ],
+  "completeness": {
+    "blocked_lanes": [
+      "impact",
+      "security"
+    ],
+    "complete": false,
+    "missing_lanes": []
+  },
+  "gate": "oss-local",
+  "generated_at": "2026-07-04T12:00:00Z",
+  "lanes": {
+    "impact": {
+      "absence_reason": null,
+      "command": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "details": {
+        "blocked_count": 38,
+        "ready_count": 33,
+        "total_count": 71
+      },
+      "evidence_usable": true,
+      "label": "Scenario quality",
+      "receipt_path": null,
+      "score": 46,
+      "status": "blocked",
+      "summary": "Scenario quality emitted blocked evidence."
+    },
+    "quality": {
+      "absence_reason": null,
+      "command": "./bin/ask skills package verify Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "details": {
+        "blocker_count": 0,
+        "source_status": "pass"
+      },
+      "evidence_usable": true,
+      "label": "Package verification",
+      "receipt_path": null,
+      "score": 100,
+      "status": "pass",
+      "summary": "Package verification passed."
+    },
+    "security": {
+      "absence_reason": null,
+      "command": "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "details": {
+        "risk_count": 3,
+        "severity_summary": "1 critical, 2 high"
+      },
+      "evidence_usable": true,
+      "label": "Risk modes",
+      "receipt_path": null,
+      "score": 35,
+      "status": "flagged",
+      "summary": "Risk modes emitted flagged evidence."
+    }
+  },
+  "next_action": {
+    "command": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+    "label": "Repair impact lane",
+    "reason": "The impact lane emitted usable evidence but is not passing."
+  },
+  "provenance": {
+    "freshness": "fresh",
+    "repo_root": ".",
+    "sdk_version": "skills-sdk.local-score.v1",
+    "source": "local",
+    "ttl_seconds": 300
+  },
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/local-score.v1.schema.json",
+  "schema_version": "skills-sdk.local-score.v1",
+  "score": {
+    "basis": "Q100 I46 S35",
+    "complete": false,
+    "status": "partial",
+    "value": 60
+  },
+  "skill_name": "skills-sdk-valid-fixture",
+  "skill_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+  "source_identity": {
+    "package_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "rubric_version": "skills-sdk.local-score.v1",
+    "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+  }
+}

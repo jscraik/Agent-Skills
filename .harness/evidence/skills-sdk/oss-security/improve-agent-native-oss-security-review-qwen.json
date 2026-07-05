@@ -1,0 +1,21 @@
+{
+  "evidence_digest_seen": "sha256:3fb7c6c410bd59a2fb76920f9915b2c5bce489abfde8d96d8f770f3adc",
+  "required_followups": [],
+  "review_status": "pass",
+  "reviewer_model_boundary": "static_analysis_only",
+  "risk_summary": {
+    "detected_modes": [
+      "malicious_supply_chain",
+      "negligent_instruction",
+      "vulnerable_operation"
+    ],
+    "indicators": {
+      "composed_capability_risk": 2,
+      "destructive_local_capability": 1,
+      "runtime_instruction_fetch": 1,
+      "untrusted_content_ingestion": 3
+    },
+    "primary_mode": "malicious_supply_chain"
+  },
+  "schema_version": "skills-sdk.oss-security-review-input.v0"
+}

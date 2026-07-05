@@ -11,6 +11,7 @@ review_after_days: 90
 # Codex Live Smoke Closeout Stabilization
 
 ## Table of Contents
+
 - [Problem](#problem)
 - [Resolution](#resolution)
 - [Evidence](#evidence)
@@ -21,6 +22,7 @@ review_after_days: 90
 Live `codex exec` smoke evals for the skill-authoring family were repeatedly failing in ways that looked like skill-contract regressions even when the repo-side rollout work was correct.
 
 The recurring failure pattern had three layers:
+
 - repo-local `CODEX_HOME` replacement dropped authenticated state and produced `401 Unauthorized` plus empty `final.txt` outputs;
 - the normal authenticated Codex home could fail before model execution when the global automation rule pack was invalid;
 - slow live smoke cases could hit the default 60-second timeout before returning a final response.
@@ -47,6 +49,7 @@ Stabilize live smoke closeout in this order:
    The builder metadata case now accepts readiness tokens with `[_-]` matching so live output using underscore enums still satisfies acceptance checks.
 
 The durable closeout pattern for future work is:
+
 - preflight the repo;
 - run live smoke with an authenticated Codex home;
 - rely on per-case `codex-heavy` timeouts for the slow family cases;
@@ -71,6 +74,7 @@ The durable closeout pattern for future work is:
   [automation.rules](/Users/jamiecraik/dev/configs/codex/rules/automation.rules)
 
 Validated on 2026-04-04 with:
+
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case builder-round-metadata-contract`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`

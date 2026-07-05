@@ -17,6 +17,9 @@ from extract_oss_security_review import validate_review
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_TARGET = "Skills/agent-ops/improve-agent-native"
+SECURITY_MODEL = "h4rithd/coder:14b"
+DETERMINISTIC_LANE_TIMEOUT_SECONDS = 600
+CODEX_EXEC_TIMEOUT_SECONDS = 1800
 
 
 def _configs_root() -> Path:
@@ -109,25 +112,29 @@ def _review_prompt(review_input: dict[str, Any]) -> str:
 
 
 def _run_deterministic_lane(target: str) -> tuple[int, dict[str, Any] | None, str]:
-    process = subprocess.run(
-        [
-            "./bin/ask",
-            "sdk",
-            "security",
-            "run-lane",
-            target,
-            "--preview",
-            "--profile",
-            "oss-security",
-            "--json",
-            "--robot",
-        ],
-        cwd=REPO_ROOT,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
+    try:
+        process = subprocess.run(
+            [
+                "./bin/ask",
+                "sdk",
+                "security",
+                "run-lane",
+                target,
+                "--preview",
+                "--profile",
+                "oss-security",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=DETERMINISTIC_LANE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return 124, None, _timeout_output(exc)
     try:
         payload = json.loads(process.stdout)
     except json.JSONDecodeError:
@@ -146,23 +153,30 @@ def _run_codex(
     output_dir.mkdir(parents=True, exist_ok=True)
     jsonl_path = output_dir / "oss-security-codex-exec-security-lane.jsonl"
     last_message_path = output_dir / "oss-security-codex-exec-security-lane-last.txt"
-    process = subprocess.run(
-        _codex_command(
-            sandbox="workspace-write",
-            last_message_path=last_message_path,
-            model=model,
-            model_catalog_json=model_catalog_json,
-        ),
-        input=_prompt(target),
-        cwd=REPO_ROOT,
-        env=_codex_env(codex_home),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
-    jsonl_path.write_text(process.stdout, encoding="utf-8")
-    return process.returncode, jsonl_path, last_message_path
+    try:
+        process = subprocess.run(
+            _codex_command(
+                sandbox="workspace-write",
+                last_message_path=last_message_path,
+                model=model,
+                model_catalog_json=model_catalog_json,
+            ),
+            input=_prompt(target),
+            cwd=REPO_ROOT,
+            env=_codex_env(codex_home),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=CODEX_EXEC_TIMEOUT_SECONDS,
+        )
+        output = process.stdout
+        returncode = process.returncode
+    except subprocess.TimeoutExpired as exc:
+        output = _timeout_output(exc)
+        returncode = 124
+    jsonl_path.write_text(output, encoding="utf-8")
+    return returncode, jsonl_path, last_message_path
 
 
 def _codex_command(
@@ -172,6 +186,8 @@ def _codex_command(
     model: str | None,
     model_catalog_json: str | None,
 ) -> list[str]:
+    model = _validate_model_override(model)
+    model_catalog_json = _validate_model_catalog_json(model_catalog_json)
     command = [
         "codex",
         "exec",
@@ -193,6 +209,37 @@ def _codex_command(
     return command
 
 
+def _validate_model_override(model: str | None) -> str | None:
+    if model is None:
+        return None
+    if model != SECURITY_MODEL:
+        raise ValueError(f"oss-security model override must be {SECURITY_MODEL!r}")
+    return model
+
+
+def _validate_model_catalog_json(model_catalog_json: str | None) -> str | None:
+    if model_catalog_json is None:
+        return None
+    try:
+        payload = json.loads(model_catalog_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError("model_catalog_json must be valid JSON") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("model_catalog_json must decode to a JSON object")
+    model = payload.get("model")
+    if model is not None and model != SECURITY_MODEL:
+        raise ValueError(f"model_catalog_json.model must be {SECURITY_MODEL!r}")
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True)
+
+
+def _timeout_output(exc: subprocess.TimeoutExpired) -> str:
+    output = exc.output if exc.output is not None else exc.stdout
+    if isinstance(output, bytes):
+        output = output.decode("utf-8", errors="replace")
+    output = output or ""
+    return f"{output}\noss-security subprocess timed out after {exc.timeout} seconds.\n"
+
+
 def _codex_env(codex_home: Path) -> dict[str, str]:
     env = os.environ.copy()
     env["CODEX_HOME"] = str(codex_home)
@@ -211,23 +258,30 @@ def _run_receipt_review(
     output_dir.mkdir(parents=True, exist_ok=True)
     jsonl_path = output_dir / "oss-security-codex-exec-receipt-review.jsonl"
     last_message_path = output_dir / "oss-security-codex-exec-receipt-review-last.txt"
-    process = subprocess.run(
-        _codex_command(
-            sandbox="read-only",
-            last_message_path=last_message_path,
-            model=model,
-            model_catalog_json=model_catalog_json,
-        ),
-        input=_review_prompt(review_input),
-        cwd=REPO_ROOT,
-        env=_codex_env(codex_home),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
-    jsonl_path.write_text(process.stdout, encoding="utf-8")
-    return process.returncode, jsonl_path, last_message_path
+    try:
+        process = subprocess.run(
+            _codex_command(
+                sandbox="read-only",
+                last_message_path=last_message_path,
+                model=model,
+                model_catalog_json=model_catalog_json,
+            ),
+            input=_review_prompt(review_input),
+            cwd=REPO_ROOT,
+            env=_codex_env(codex_home),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=CODEX_EXEC_TIMEOUT_SECONDS,
+        )
+        output = process.stdout
+        returncode = process.returncode
+    except subprocess.TimeoutExpired as exc:
+        output = _timeout_output(exc)
+        returncode = 124
+    jsonl_path.write_text(output, encoding="utf-8")
+    return returncode, jsonl_path, last_message_path
 
 
 def _receipt(

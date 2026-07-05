@@ -1,0 +1,859 @@
+{
+  "status": "success",
+  "trace_id": "78bafbc5-78fd-41fe-a601-62e9ab3d3d0c",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk security run-lane Skills/agent-ops/improve-agent-native --preview --profile oss-security --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_security_lane": {
+      "schema_version": "skills-sdk-security-lane-preview.v0",
+      "query": "Skills/agent-ops/improve-agent-native",
+      "status": "pass",
+      "canonical_source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+      "facade_command": "skills-sdk security run-lane",
+      "package_id": "improve-agent-native",
+      "package_digest": "sha256:a6922ee1d661d32bcdc0342fd45819306d0cd0f5d4850e0ea3c1194049f2b1c1",
+      "security_lane_digest": "sha256:3fb7c6c410bd59a2fb76920f9915b2c5bce489abfde8d96d8f770f3d102f3adc",
+      "package_security_signature_digest": "sha256:3271858c5640b70984b569834fd2209a1bdd5a9479fc6667fca84f9705160577",
+      "risk_mode_taxonomy_digest": "sha256:dc96bc9d79dde13291a6938846d7eb42f9157e56cf2e0f3203426c69e0a7f0d8",
+      "profile_review": {
+        "profile": "oss-security",
+        "status": "not_run",
+        "required": false,
+        "codex_exec_command": "codex exec --profile oss-security --sandbox read-only --ephemeral --json --output-last-message <path> -- '<receipt review prompt>'",
+        "blocker": "profile review is recorded as an optional external evidence lane; run the generated Codex command separately when model review evidence is needed."
+      },
+      "receipt": {
+        "schema_version": "skills-sdk.security-lane-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/security-lane-receipt.v0.schema.json",
+        "status": "pass",
+        "operation": "security_lane_preview",
+        "query": "Skills/agent-ops/improve-agent-native",
+        "package_id": "improve-agent-native",
+        "package_digest": "sha256:a6922ee1d661d32bcdc0342fd45819306d0cd0f5d4850e0ea3c1194049f2b1c1",
+        "source_digest": "sha256:1a058c4f534d381f3b4ff080f081254d50e62ea7691b4832bcb0ffe35c6a90f9",
+        "security_lane_digest": "sha256:3fb7c6c410bd59a2fb76920f9915b2c5bce489abfde8d96d8f770f3d102f3adc",
+        "package_security_signature_digest": "sha256:3271858c5640b70984b569834fd2209a1bdd5a9479fc6667fca84f9705160577",
+        "risk_mode_taxonomy_digest": "sha256:dc96bc9d79dde13291a6938846d7eb42f9157e56cf2e0f3203426c69e0a7f0d8",
+        "indicator_summary": {
+          "composed_capability_risk": 2,
+          "destructive_local_capability": 1,
+          "runtime_instruction_fetch": 1,
+          "untrusted_content_ingestion": 3
+        },
+        "primary_mode": "malicious_supply_chain",
+        "detected_modes": [
+          "malicious_supply_chain",
+          "negligent_instruction",
+          "vulnerable_operation"
+        ],
+        "commands": [
+          {
+            "command": "ask sdk security package-signature \"Skills/agent-ops/improve-agent-native\" --preview --json --robot",
+            "outcome": "pass",
+            "receipt_schema_version": "skills-sdk.package-security-signature-receipt.v0",
+            "receipt_digest": "sha256:3271858c5640b70984b569834fd2209a1bdd5a9479fc6667fca84f9705160577",
+            "execution_performed": false,
+            "scanner_execution_performed": false,
+            "network_accessed": false,
+            "credentials_accessed": false,
+            "mutation_performed": false
+          },
+          {
+            "command": "ask sdk security risk-modes \"Skills/agent-ops/improve-agent-native\" --preview --json --robot",
+            "outcome": "pass",
+            "receipt_schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+            "receipt_digest": "sha256:dc96bc9d79dde13291a6938846d7eb42f9157e56cf2e0f3203426c69e0a7f0d8",
+            "execution_performed": false,
+            "scanner_execution_performed": false,
+            "network_accessed": false,
+            "credentials_accessed": false,
+            "mutation_performed": false
+          }
+        ],
+        "profile_review": {
+          "profile": "oss-security",
+          "status": "not_run",
+          "required": false,
+          "codex_exec_command": "codex exec --profile oss-security --sandbox read-only --ephemeral --json --output-last-message <path> -- '<receipt review prompt>'",
+          "blocker": "profile review is recorded as an optional external evidence lane; run the generated Codex command separately when model review evidence is needed."
+        },
+        "package_security_signature_receipt": {
+          "schema_version": "skills-sdk.package-security-signature-receipt.v0",
+          "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-security-signature-receipt.v0.schema.json",
+          "status": "pass",
+          "operation": "package_security_signature_preview",
+          "query": "Skills/agent-ops/improve-agent-native",
+          "package_id": "improve-agent-native",
+          "package_digest": "sha256:a6922ee1d661d32bcdc0342fd45819306d0cd0f5d4850e0ea3c1194049f2b1c1",
+          "source_digest": "sha256:1a058c4f534d381f3b4ff080f081254d50e62ea7691b4832bcb0ffe35c6a90f9",
+          "package_security_signature_digest": "sha256:3271858c5640b70984b569834fd2209a1bdd5a9479fc6667fca84f9705160577",
+          "inspected_file_count": 72,
+          "text_file_count": 71,
+          "script_file_count": 0,
+          "resource_file_count": 70,
+          "binary_file_count": 1,
+          "redaction_performed": true,
+          "redacted_content_emitted": false,
+          "binary_content_embedded": false,
+          "indicator_summary": {
+            "composed_capability_risk": 2,
+            "destructive_local_capability": 1,
+            "runtime_instruction_fetch": 1,
+            "untrusted_content_ingestion": 3
+          },
+          "indicators": [
+            {
+              "id": "untrusted_content_ingestion",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+              "reason": "Consumes untrusted third-party content."
+            },
+            {
+              "id": "composed_capability_risk",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+              "reason": "Combines untrusted content with secret handling or external writes."
+            },
+            {
+              "id": "untrusted_content_ingestion",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+              "reason": "Consumes untrusted third-party content."
+            },
+            {
+              "id": "untrusted_content_ingestion",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+              "reason": "Consumes untrusted third-party content."
+            },
+            {
+              "id": "destructive_local_capability",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+              "reason": "Contains destructive local operation language."
+            },
+            {
+              "id": "composed_capability_risk",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+              "reason": "Combines untrusted content with secret handling or external writes."
+            },
+            {
+              "id": "runtime_instruction_fetch",
+              "evidence_ref": "Skills/agent-ops/improve-agent-native/references/source-context.yaml",
+              "reason": "Fetches remote content or instructions at runtime."
+            }
+          ],
+          "file_results": [
+            {
+              "path": "Skills/agent-ops/improve-agent-native/README.md",
+              "kind": "resource",
+              "sha256": "sha256:656861d2ef79e27e6aa0c11d971146778fbaeeff1cff771d55a7f25996620cde",
+              "size_bytes": 6301,
+              "indicators": [
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+                  "reason": "Consumes untrusted third-party content."
+                },
+                {
+                  "id": "composed_capability_risk",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+                  "reason": "Combines untrusted content with secret handling or external writes."
+                }
+              ]
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+              "kind": "skill_md",
+              "sha256": "sha256:30a1db059376406b016f57d76f3450b41d0bda505af32c0f920a9394613bfec1",
+              "size_bytes": 8116,
+              "indicators": [
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                  "reason": "Consumes untrusted third-party content."
+                }
+              ]
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/agent-native-primitives.md",
+              "kind": "resource",
+              "sha256": "sha256:f4a09404b6b79dee3164a3378e92ace80be39396118762021e3b7988d6c6f031",
+              "size_bytes": 3803,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/agents-md-best-practices.md",
+              "kind": "resource",
+              "sha256": "sha256:7165926c02fd9cdb604d923dd31ba9bdc60827fa2680c11c2d3db737d419968a",
+              "size_bytes": 1727,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/best-practices.md",
+              "kind": "resource",
+              "sha256": "sha256:8be05b8ec513703d2fbeac2c7812e340be7949d8ad1ddf476f378945a653e58e",
+              "size_bytes": 1889,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/contract.yaml",
+              "kind": "resource",
+              "sha256": "sha256:bb51b77bb046f27ee31a32c1844bda685e0692d7216256a9ad1b11633a139cc6",
+              "size_bytes": 5756,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/discovery-interview.md",
+              "kind": "resource",
+              "sha256": "sha256:f251d513d1dc3219ddbe6ef813908a202c3030dcfbad46394efeb19368a51239",
+              "size_bytes": 715,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/docs-structure-and-maintenance.md",
+              "kind": "resource",
+              "sha256": "sha256:192590dcdee74d18c9614ac52697706bd062734905decf885e7b2eed21a5e7c9",
+              "size_bytes": 1385,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/eval-scenarios.json",
+              "kind": "resource",
+              "sha256": "sha256:aa6db91686eb861650642520e57394d0c1a0fb98635b93733ef549b799d79eae",
+              "size_bytes": 262400,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+              "kind": "resource",
+              "sha256": "sha256:102b4909ad0b53e8d10bb4efc06eca0b250926ce1f0a91e601b421f89bbfd6df",
+              "size_bytes": 122042,
+              "indicators": [
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Consumes untrusted third-party content."
+                },
+                {
+                  "id": "destructive_local_capability",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Contains destructive local operation language."
+                },
+                {
+                  "id": "composed_capability_risk",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Combines untrusted content with secret handling or external writes."
+                }
+              ]
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.architecture-drift-hidden-by-agent-velocity.md",
+              "kind": "resource",
+              "sha256": "sha256:0f808bcd9e0efcba14f4504c669db2975685bbfbc101509e1c1a890276b338a5",
+              "size_bytes": 2023,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.autonomy-without-validation.md",
+              "kind": "resource",
+              "sha256": "sha256:59a0195934a065924d76a727179c29dcd875bca2edca9a536208212e1a6bee5b",
+              "size_bytes": 2332,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.brownfield-harness-without-boundaries.md",
+              "kind": "resource",
+              "sha256": "sha256:d7c84789c0ba96664317db165d9b829cf69f6ee3b1345c83a86caf3664c7192c",
+              "size_bytes": 2081,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.changed-files-without-behavior-proof.md",
+              "kind": "resource",
+              "sha256": "sha256:e518090caa50acb1823598a62aa4489341f1c9ed58c9cad65c5de09e978548db",
+              "size_bytes": 1907,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.context-dump-instead-of-slice.md",
+              "kind": "resource",
+              "sha256": "sha256:50b7c9c9bf1b46d83b4e0aee8a185478df5be886a68a8f49c635d798febc47ca",
+              "size_bytes": 2292,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.done-without-validation.md",
+              "kind": "resource",
+              "sha256": "sha256:c1c715f5df9bc3afacf32bf27687e520000ae5755062a49e559cdf818799e29b",
+              "size_bytes": 1970,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.feedback-recurs-without-guardrail.md",
+              "kind": "resource",
+              "sha256": "sha256:588eaae49aabd480020f3e55a3708359bc16d8eb095a977b9b567fa7fbd4a06a",
+              "size_bytes": 2046,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.local-pass-ci-unknown.md",
+              "kind": "resource",
+              "sha256": "sha256:bd691197817424961429220e5ee5ce22794c7b459b31229d9a1358c7b9f03b2f",
+              "size_bytes": 1759,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.pr-lifecycle-stops-before-main.md",
+              "kind": "resource",
+              "sha256": "sha256:3018d306d550fd73995feb724b6251134103232ee9723724f0bb1840bbb3491e",
+              "size_bytes": 1951,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.provenance-implies-tests.md",
+              "kind": "resource",
+              "sha256": "sha256:17f69b8aab1053b46f4195406307aa9c7b05f64394ae229048bfaae87679d06e",
+              "size_bytes": 1869,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.review-agent-doubles-scope.md",
+              "kind": "resource",
+              "sha256": "sha256:ed4e89d074bfb07bec99606ec057e7f60a0f2aa6427043d39d04eb7a48335751",
+              "size_bytes": 2172,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.skill-frontmatter-not-routed.md",
+              "kind": "resource",
+              "sha256": "sha256:dc36b71747b15d90aa916f0c98f5a5a8b3fd9b2c604d446bb90ce548eb5e7513",
+              "size_bytes": 2052,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.slop-feedback-not-systematized.md",
+              "kind": "resource",
+              "sha256": "sha256:543f27716d3dd776f43155840cf38b1f30c8755146dac2f445529d9e8f3b3bdf",
+              "size_bytes": 2107,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.harness.static-checks-only-for-product-change.md",
+              "kind": "resource",
+              "sha256": "sha256:cc2c6879e2abaab6b734715c638c6397ca525de8990b9b8ddd257a7c46f56e7a",
+              "size_bytes": 2092,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+              "kind": "resource",
+              "sha256": "sha256:e96b9c4bd16d1b9413eedb6df9a8401e651e8145fae3554a94d185563faa4f74",
+              "size_bytes": 1920,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+              "kind": "resource",
+              "sha256": "sha256:a079ee011ee7a2858108051fbca32171d677bb20eb5cfcbcb26057080278e2ef",
+              "size_bytes": 1706,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+              "kind": "resource",
+              "sha256": "sha256:c243425905f69ab976c4bf948b3f6f0ac94fbe96ece4d8a6bb55df64bc628597",
+              "size_bytes": 2668,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+              "kind": "resource",
+              "sha256": "sha256:e9ac409925c29b7c0c0b3dbddf2b052da20d93fb332e9bf8274e19afff4e76ff",
+              "size_bytes": 1939,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.adoption-budget-pattern-discovery.md",
+              "kind": "resource",
+              "sha256": "sha256:c56bba9fa3e8b03309f9d1acb7360d6de6ebcdb0c3aa35e036a935e0886c3ae7",
+              "size_bytes": 3343,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.autonomy-gate-threshold.md",
+              "kind": "resource",
+              "sha256": "sha256:ee8cbb0ccb0716f1ffd44f26eb4b976f69524ea628336e13d9d6cf023fcc1952",
+              "size_bytes": 2599,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.benchmark-laundering-quality-gate.md",
+              "kind": "resource",
+              "sha256": "sha256:c037887c59d342cbbc9845a7786a5feeb88b0c9721b3f1ae87423320a29162d1",
+              "size_bytes": 3312,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.compaction-context-recovery.md",
+              "kind": "resource",
+              "sha256": "sha256:17ed24b6c93249a27bc50a76c2e8f5b6006e4b34ff2cce8e5aa66d931665ea1f",
+              "size_bytes": 2327,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.long-term-coherence-governance.md",
+              "kind": "resource",
+              "sha256": "sha256:662260f751ede873c28d9e5a7084a860c8a25c987b0c31e4ef30598909e71f54",
+              "size_bytes": 3407,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.maintenance-economics-boundary.md",
+              "kind": "resource",
+              "sha256": "sha256:5e1b83a84ef2d8d7d5586496d702027ce20909dfe48fbe7fe443e13ccd959cff",
+              "size_bytes": 2582,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.perception-lock-adoption-decision.md",
+              "kind": "resource",
+              "sha256": "sha256:d38c50a2db8d1412c26c2f3d4fc596ce823dc40d5d7a6d90f81f4b05e758534d",
+              "size_bytes": 3371,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.policy-aware-approval.md",
+              "kind": "resource",
+              "sha256": "sha256:1c55af48b1f7eb246bc97a9f9aab1272f02bc480982db1f442a574a32cf75dca",
+              "size_bytes": 2318,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md",
+              "kind": "resource",
+              "sha256": "sha256:26f6555d9bb1d3548205e96b46a100fb1e7fe664b2b93daab22212fd7a1cf898",
+              "size_bytes": 2415,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/evals/eval.ryan.stakeholder-synthesis.md",
+              "kind": "resource",
+              "sha256": "sha256:82723f31442efaa534546560f82abe29e7944e9cc8983de6da9d03b0bbe96071",
+              "size_bytes": 2247,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-brownfield-readiness.md",
+              "kind": "resource",
+              "sha256": "sha256:a609ab5228f170f3974f433febfcdd0e6f86b972bff55fbb0a7e24b6e7807999",
+              "size_bytes": 19247,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-evidence-boundary.md",
+              "kind": "resource",
+              "sha256": "sha256:43ac8c664aaf17940f9ebf62b4c3d2531ca6864094c41399954eed4dcd091fb2",
+              "size_bytes": 17350,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-pr-lifecycle.md",
+              "kind": "resource",
+              "sha256": "sha256:1920795a147615256fa6d891035410ad6239bb52930922f80979db825cb1fa9e",
+              "size_bytes": 13444,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-readiness-rubric.md",
+              "kind": "resource",
+              "sha256": "sha256:6d49a8cb8fd07a85d69ea1dd1cfa7e990f785afb610dd1e6670f353b94fe0623",
+              "size_bytes": 4546,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-review-feedback.md",
+              "kind": "resource",
+              "sha256": "sha256:fd9f53fcd266d47d4fffa10de3059cad5cb6a318ba2d3a46cd4aa14a97449ede",
+              "size_bytes": 14720,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/harness-skill-routing.md",
+              "kind": "resource",
+              "sha256": "sha256:e9abf63e2fba77e749e9ae573fdb9337a02cc48602cdc596323157dcf5e5a7ea",
+              "size_bytes": 14950,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/knowledge-capsule-routing.md",
+              "kind": "resource",
+              "sha256": "sha256:d9def2b583da396ae7fdef64fa004c990cd02d71e13351bacda9add77803e22d",
+              "size_bytes": 4732,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/knowledge-capsule.manifest.yaml",
+              "kind": "resource",
+              "sha256": "sha256:6e55e347c1889cb8d47b1f3ae5fe2475b584bf2e96b7543af2cb7b61af83edd8",
+              "size_bytes": 34102,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/knowledge-demand.yaml",
+              "kind": "resource",
+              "sha256": "sha256:c44b845fa77c392c4d767a48294be299aca87aba36bc5439b9edcf7922103ab5",
+              "size_bytes": 1858,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/knowledge-os-capsule-design.md",
+              "kind": "resource",
+              "sha256": "sha256:0d82bba62398e55b351c03ff019b6c40049f8da8fd941424fa3914fa51fe42bc",
+              "size_bytes": 19029,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/knowledge-os-export-readiness.md",
+              "kind": "resource",
+              "sha256": "sha256:b145884fdcea33fabfa334221d87fecd5c7e7cc7be94adfa7fd2d3b4ad694a16",
+              "size_bytes": 14976,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-adoption-economics.md",
+              "kind": "resource",
+              "sha256": "sha256:1f2d550b870ec9e9da17117f5539a512426f5618d8eee5922776c092bf4a154b",
+              "size_bytes": 10392,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-agent-operating-model.md",
+              "kind": "resource",
+              "sha256": "sha256:e4eb365e61d404995f2962c27f15ab9fc34574f5bc7909c47427e3964707f977",
+              "size_bytes": 20283,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-continuous-cleanup.md",
+              "kind": "resource",
+              "sha256": "sha256:df9301025cc0305ac0f3d8a7cd9674ac692ac870f964411daf57e1a6ceb8c0fa",
+              "size_bytes": 7115,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-environment-design.md",
+              "kind": "resource",
+              "sha256": "sha256:75dcdefe0cc2703ba80695dc11875671ffc1e660a386463d14efde044980e26c",
+              "size_bytes": 13868,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-harness-principles.md",
+              "kind": "resource",
+              "sha256": "sha256:29b6e844b33bc2a91827b28a47f3acc87b920d07e7cabf36e2ed0b222fcce687",
+              "size_bytes": 2137,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-long-term-coherence.md",
+              "kind": "resource",
+              "sha256": "sha256:480d84b9365b21439512272ad45d4146eff1fc11a779b55c5eb9016c95af194b",
+              "size_bytes": 11851,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-maintenance-supply-chain.md",
+              "kind": "resource",
+              "sha256": "sha256:ac9c868b62780014e7040ccd9727be52587d281d433de57558f20384588dd845",
+              "size_bytes": 14176,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-mechanical-boundaries.md",
+              "kind": "resource",
+              "sha256": "sha256:022ca735311e62f5dcbc7bbb43874cfd883a0e07010168911d52f35a09620482",
+              "size_bytes": 7804,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-quality-standards.md",
+              "kind": "resource",
+              "sha256": "sha256:7fe162f602734ceb9384b6b2a4e5e1c235c251ac5443fe9ddfd448896c75cae1",
+              "size_bytes": 12370,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-repo-knowledge.md",
+              "kind": "resource",
+              "sha256": "sha256:6701ddfbc0e414a9f168decdc9830074f64cb6605ffe7fc2140431766a0f152b",
+              "size_bytes": 11228,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-safety-policy.md",
+              "kind": "resource",
+              "sha256": "sha256:3e3efd51ee464b6dcee922f3cebaba99aeb85c11dc98efdc21b2336b197a5a82",
+              "size_bytes": 6137,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-sociotechnical-adoption.md",
+              "kind": "resource",
+              "sha256": "sha256:702e9924ee7916252ae1f20701886d681e3da0650d4c7782cf780e73c5fa38fa",
+              "size_bytes": 7262,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/ryan-stakeholder-alignment.md",
+              "kind": "resource",
+              "sha256": "sha256:abe8ba2c5c08b0566de9a2a3567bb07a33ee4ce6036395f01a3fa8ac4a87097e",
+              "size_bytes": 7346,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/examples.jsonl",
+              "kind": "binary",
+              "sha256": "sha256:f8af6f91b7a3b890907dbe54e81f9fe85a56831cbd99643b9232a7dae5d375ae",
+              "size_bytes": 1265,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/manifest.json",
+              "kind": "resource",
+              "sha256": "sha256:09ea76b0bff49cb770f8dcee3cb979c1c42bdbb1420955ee6d5c6c98684fa12d",
+              "size_bytes": 609,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/concise-correct-beats-verbose-overclaim.json",
+              "kind": "resource",
+              "sha256": "sha256:351e0fdf4d495d2956e5be57623d5e742fcd03279d80837781f161c75604b8f9",
+              "size_bytes": 332,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/copied-rubric-without-repo-evidence.json",
+              "kind": "resource",
+              "sha256": "sha256:55e1a0855096d34ad89a66b22bba9162a0c2541ca31caca2bf8d9ef5e7729060",
+              "size_bytes": 321,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/local-proof-overclaims-ci-or-tessl.json",
+              "kind": "resource",
+              "sha256": "sha256:372e525507415647ef0cb45329b4d1dacfb6a25913ca8cea387c09b09d53512e",
+              "size_bytes": 330,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/obvious-correct-evidence-boundary.json",
+              "kind": "resource",
+              "sha256": "sha256:7f4a0407cd48582428afa9c4b634323312108df26ad3ef6eac2be8c9f8f41d5b",
+              "size_bytes": 266,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/obvious-wrong-readiness-overclaim.json",
+              "kind": "resource",
+              "sha256": "sha256:addfe99a2b30d99ae64facb2cd3a3580b3376b1225d0aaf6a41e238d74efd7b4",
+              "size_bytes": 310,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/skill-name-mentioned-without-scorecard-proof.json",
+              "kind": "resource",
+              "sha256": "sha256:2b07b730bf8f15b73ba581c4235e46c8427c8608e9fd4d94d84627102b3f50a4",
+              "size_bytes": 336,
+              "indicators": []
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/source-context.yaml",
+              "kind": "resource",
+              "sha256": "sha256:571992acc29a8b29339507cead968a2dea28a079cbdae9e71ea4c5d13a65cbc5",
+              "size_bytes": 20317,
+              "indicators": [
+                {
+                  "id": "runtime_instruction_fetch",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/source-context.yaml",
+                  "reason": "Fetches remote content or instructions at runtime."
+                }
+              ]
+            },
+            {
+              "path": "Skills/agent-ops/improve-agent-native/references/task-profile.json",
+              "kind": "resource",
+              "sha256": "sha256:3e2549a464f980a67b65045b76169e7dc36c69bbc888fd469dee3be23223230c",
+              "size_bytes": 1175,
+              "indicators": []
+            }
+          ],
+          "execution_performed": false,
+          "scanner_execution_performed": false,
+          "network_accessed": false,
+          "credentials_accessed": false,
+          "mutation_performed": false,
+          "acceptance_trace": [
+            "PU-033",
+            "FR-008",
+            "SA-004",
+            "SEC-001",
+            "VP-033"
+          ],
+          "agent_summary": "package security signature inspected improve-agent-native across 72 declared file(s) and found 7 indicator(s) without execution, scanners, network, credentials, raw content emission, or mutation."
+        },
+        "risk_mode_taxonomy_receipt": {
+          "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+          "schema_uri": "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+          "status": "pass",
+          "operation": "risk_mode_taxonomy_preview",
+          "query": "Skills/agent-ops/improve-agent-native",
+          "package_id": "improve-agent-native",
+          "package_digest": "sha256:a6922ee1d661d32bcdc0342fd45819306d0cd0f5d4850e0ea3c1194049f2b1c1",
+          "source_digest": "sha256:1a058c4f534d381f3b4ff080f081254d50e62ea7691b4832bcb0ffe35c6a90f9",
+          "package_security_signature_digest": "sha256:3271858c5640b70984b569834fd2209a1bdd5a9479fc6667fca84f9705160577",
+          "package_security_indicator_summary": {
+            "composed_capability_risk": 2,
+            "destructive_local_capability": 1,
+            "runtime_instruction_fetch": 1,
+            "untrusted_content_ingestion": 3
+          },
+          "source_kind": "scripted",
+          "risk_tier": "high",
+          "primary_mode": "malicious_supply_chain",
+          "detected_modes": [
+            "malicious_supply_chain",
+            "negligent_instruction",
+            "vulnerable_operation"
+          ],
+          "mode_results": [
+            {
+              "mode": "malicious_supply_chain",
+              "label": "Malicious supply-chain risk",
+              "status": "detected",
+              "severity": "critical",
+              "description": "The skill package includes indicators that it may intentionally cause harm, hide behavior, or bypass review.",
+              "indicators": [
+                {
+                  "id": "credential_exfiltration",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                  "reason": "Matched deterministic signal credential_exfiltration."
+                },
+                {
+                  "id": "runtime_instruction_fetch",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/source-context.yaml",
+                  "reason": "Package security signature detected runtime_instruction_fetch."
+                }
+              ]
+            },
+            {
+              "mode": "negligent_instruction",
+              "label": "Negligent instruction risk",
+              "status": "detected",
+              "severity": "high",
+              "description": "The skill urges impactful behavior without enough boundaries, review gates, or rollback language.",
+              "indicators": [
+                {
+                  "id": "impactful_write_without_review",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                  "reason": "Matched deterministic signal impactful_write_without_review."
+                },
+                {
+                  "id": "destructive_local_capability",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Package security signature detected destructive_local_capability."
+                }
+              ]
+            },
+            {
+              "mode": "vulnerable_operation",
+              "label": "Vulnerable operation risk",
+              "status": "detected",
+              "severity": "high",
+              "description": "The skill handles secrets, credentials, logs, external calls, or data exposure paths without clear safeguards.",
+              "indicators": [
+                {
+                  "id": "secret_handling",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                  "reason": "Matched deterministic signal secret_handling."
+                },
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+                  "reason": "Package security signature detected untrusted_content_ingestion."
+                },
+                {
+                  "id": "composed_capability_risk",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/README.md",
+                  "reason": "Package security signature detected composed_capability_risk."
+                },
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                  "reason": "Package security signature detected untrusted_content_ingestion."
+                },
+                {
+                  "id": "untrusted_content_ingestion",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Package security signature detected untrusted_content_ingestion."
+                },
+                {
+                  "id": "composed_capability_risk",
+                  "evidence_ref": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+                  "reason": "Package security signature detected composed_capability_risk."
+                }
+              ]
+            },
+            {
+              "mode": "unknown_insufficient_evidence",
+              "label": "Unknown or insufficient-evidence risk",
+              "status": "not_detected",
+              "severity": "medium",
+              "description": "The package lacks enough structured provenance, purpose, or review evidence to classify confidently.",
+              "indicators": []
+            }
+          ],
+          "taxonomy_digest": "sha256:dc96bc9d79dde13291a6938846d7eb42f9157e56cf2e0f3203426c69e0a7f0d8",
+          "execution_performed": false,
+          "scanner_execution_performed": false,
+          "network_accessed": false,
+          "credentials_accessed": false,
+          "mutation_performed": false,
+          "acceptance_trace": [
+            "PU-033",
+            "FR-008",
+            "SA-004",
+            "SEC-001",
+            "VP-033"
+          ],
+          "agent_summary": "risk-mode taxonomy inspected improve-agent-native and detected 3 risk mode(s) without execution, scanners, network, or mutation."
+        },
+        "execution_performed": false,
+        "scanner_execution_performed": false,
+        "network_accessed": false,
+        "credentials_accessed": false,
+        "mutation_performed": false,
+        "acceptance_trace": [
+          "PU-033",
+          "FR-008",
+          "SA-004",
+          "SEC-001",
+          "VP-033"
+        ],
+        "agent_summary": "security lane inspected improve-agent-native with 2 deterministic security command(s); profile review status is not_run."
+      },
+      "execution_performed": false,
+      "scanner_execution_performed": false,
+      "network_accessed": false,
+      "credentials_accessed": false,
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk security run-lane Skills/agent-ops/improve-agent-native --preview --profile oss-security --json --robot"
+      ],
+      "agent_summary": "security lane inspected improve-agent-native with 2 deterministic security command(s); profile review status is not_run."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 285
+  },
+  "errors": []
+}

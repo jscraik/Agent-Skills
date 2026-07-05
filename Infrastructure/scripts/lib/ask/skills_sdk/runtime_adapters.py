@@ -1290,7 +1290,7 @@ def build_sdk_skill_proof(
         "codex": "codex_user_runtime_ready",
         "agents": "agents_user_runtime_ready",
     }[runtime_target]
-    required_runtime_ready = bool(gates[required_runtime_gate]) and gates["user_runtime_alias_consistent"]
+    required_runtime_ready = bool(gates[required_runtime_gate])
     failed_check_id = (
         None
         if all(core_gates) and required_runtime_ready

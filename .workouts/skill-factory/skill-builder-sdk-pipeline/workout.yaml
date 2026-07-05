@@ -1,0 +1,27 @@
+id: skill-builder-sdk-pipeline
+skills:
+  - skill-builder
+handles:
+  - skill-builder
+target_skill_set: skill-factory
+target_module: skill-builder
+target_source_path: Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md
+level: molecule
+projection_mode: flat
+seed: seed.sh
+verify: verify.py
+max_attempts: 3
+max_skill_context_tokens: 2200
+goal: Verify skill-builder is reachable through the SDK pipeline and exposes an explicit outcome-proof workout candidate.
+constraints:
+  forbidden_shortcuts:
+    - modifying_verifier
+    - inventing_outcome_proof
+    - skipping_sdk_commands
+metrics:
+  - success
+  - wall_clock_seconds
+  - tool_steps
+  - retries
+  - flake_rate
+  - estimated_skill_context_tokens

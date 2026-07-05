@@ -171,11 +171,24 @@ def _plugin_scan_patterns() -> list[str]:
     ):
         if not raw_pattern:
             continue
-        patterns.add(raw_pattern)
-        if raw_pattern.endswith("/*/skills"):
-            nested_pattern = raw_pattern[: -len("/*/skills")] + "/*/*/skills"
+        pattern = raw_pattern.removeprefix("./")
+        patterns.add(pattern)
+        if pattern.endswith("/*/skills"):
+            nested_pattern = pattern[: -len("/*/skills")] + "/*/*/skills"
             patterns.add(nested_pattern)
     return sorted(patterns)
+
+
+def _iter_plugin_roots_for_pattern(root: Path, pattern: str) -> list[Path]:
+    if pattern.startswith("Plugins/"):
+        plugin_root = root / "Plugins"
+        if plugin_root.is_dir():
+            return sorted(plugin_root.glob(pattern.removeprefix("Plugins/")))
+    if pattern.startswith("plugins/"):
+        plugin_root = root / "plugins"
+        if plugin_root.is_dir():
+            return sorted(plugin_root.glob(pattern.removeprefix("plugins/")))
+    return sorted(root.glob(pattern))
 
 
 def _cache_plugin_source_root(plugin_root: Path, root: Path) -> str | None:
@@ -192,7 +205,7 @@ def _iter_plugin_skill_dirs(root: Path) -> list[tuple[str, Path]]:
     rows: list[tuple[str, Path]] = []
     seen_roots: set[str] = set()
     for pattern in _plugin_scan_patterns():
-        for plugin_root in sorted(root.glob(pattern)):
+        for plugin_root in _iter_plugin_roots_for_pattern(root, pattern):
             try:
                 plugin_root_key = plugin_root.resolve().as_posix()
             except OSError:

@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "ir", "docs", "evidence", "eval", "package", "sandbox", "intake", "trust", "observability", "emitter", "ci", "explorer", "security", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
+    "sdk": ["check", "score", "ir", "docs", "evidence", "eval", "package", "sandbox", "intake", "trust", "observability", "emitter", "ci", "explorer", "security", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -94,6 +94,8 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "sdk": [
         "ask sdk check Skills/agent-ops/autofix --json --robot",
+        "ask sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
+        "ask sdk score local Skills/agent-ops/autofix --gate oss-local --write-current --json --robot",
         "ask sdk ir build Skills/agent-ops/autofix --json --robot",
         "ask sdk docs verify --json --robot",
         "ask sdk evidence verify --scope capability-matrix --json --robot",
@@ -137,6 +139,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
         "ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
         "skills-sdk check Skills/agent-ops/autofix --json --robot",
+        "skills-sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
         "skills-sdk ir build Skills/agent-ops/autofix --json --robot",
         "skills-sdk docs verify --json --robot",
         "skills-sdk evidence verify --scope capability-matrix --json --robot",
@@ -272,6 +275,11 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("sdk", "check"): [
         "ask sdk check Skills/agent-ops/autofix --json --robot",
         "skills-sdk check Skills/agent-ops/autofix --json --robot",
+    ],
+    ("sdk", "score"): [
+        "ask sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
+        "ask sdk score local Skills/agent-ops/autofix --gate oss-local --write-current --json --robot",
+        "skills-sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
     ],
     ("sdk", "ir"): [
         "ask sdk ir build Skills/agent-ops/autofix --json --robot",

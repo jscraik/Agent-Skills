@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -76,6 +77,24 @@ class TestSkillsSdkSecurityLane(unittest.TestCase):
         self.assertFalse(receipt["network_accessed"])
         self.assertFalse(receipt["credentials_accessed"])
         self.assertFalse(receipt["mutation_performed"])
+
+    def test_builder_reuses_package_security_receipt_for_risk_modes(self) -> None:
+        source_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+
+        with mock.patch(
+            "ask.skills_sdk.risk_modes.build_package_security_signature_receipt",
+            side_effect=AssertionError("risk mode builder should reuse lane package receipt"),
+        ):
+            receipt = build_security_lane_receipt(
+                REPO_ROOT,
+                source_path=source_path,
+                query="Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+            )
+
+        self.assertEqual(
+            receipt["risk_mode_taxonomy_receipt"]["package_security_signature_digest"],
+            receipt["package_security_signature_digest"],
+        )
 
     def test_builder_blocks_when_profile_review_is_required_without_receipt(self) -> None:
         source_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"

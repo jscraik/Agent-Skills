@@ -1,0 +1,237 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f2c2b-a290-7533-b265-54aebae7c652",
+  "repo_head": "main-behind-origin-main-by-1",
+  "task_id": "skillsbar-local-score-receipt-pipeline-implementation",
+  "status": "pass",
+  "heartbeat_status": "implemented_with_focused_proof",
+  "current_gate": "local-score-command-implemented",
+  "next_gate_allowed": true,
+  "blocked_next_gates": [
+    "skillsbar-ui-consumption",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "allowed_next_gates": [
+    "skillsbar-ui-read-model-consumption",
+    "pipeline-gate-integration"
+  ],
+  "implementation_mode": "implemented",
+  "implementation_decision": {
+    "happened": true,
+    "reason": "Implemented the smallest SDK-owned local score command and schema while preserving existing qwen/risk-mode/scenario dirty work. The command is read-only by default and writes SkillsBar current/history receipts only when --write-current is passed.",
+    "dirty_overlap_files": [
+      "Infrastructure/scripts/lib/ask/command_metadata.py",
+      "Infrastructure/scripts/lib/ask/commands/evals.py",
+      "Infrastructure/scripts/lib/ask/commands/sdk_security.py",
+      "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+      "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+      "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+      "Infrastructure/tests/test_skills_sdk_scenario_quality.py"
+    ]
+  },
+  "files_inspected": [
+    "UBIQUITOUS_LANGUAGE.md",
+    "Docs/agents/19-high-signal-steering-feedback.md",
+    "Skills/agent-ops/testing/SKILL.md",
+    "Infrastructure/scripts/lib/ask/commands/sdk.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_eval.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_security.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py",
+    "Infrastructure/config/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+    "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+    "Infrastructure/scripts/validation-and-linting/validate_thread_report.py"
+  ],
+  "files_changed": [
+    ".harness/evidence/skills-sdk/local-score/skills-sdk-scenario-quality-fixture/current.json",
+    ".harness/evidence/skills-sdk/local-score/skills-sdk-scenario-quality-fixture/history/20260704T092250Z-oss-local.json",
+    ".harness/memory/LEARNINGS.md",
+    ".harness/reports/thread-replies/019f2c2b-a290-7533-b265-54aebae7c652/latest.json",
+    "Infrastructure/config/schemas/skills-sdk/local-score.v1.schema.json",
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/local_score.py",
+    "Infrastructure/tests/fixtures/skills_sdk/schema_spine/invalid/local-score-lane-missing-evidence-flag.json",
+    "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/local-score.json",
+    "Infrastructure/tests/test_skills_sdk_local_score.py",
+    "Infrastructure/tests/test_skills_sdk_schema_spine.py"
+  ],
+  "proposed_command_shape": {
+    "primary": "./bin/ask sdk score local <skill-path> --json --robot",
+    "future_all": "./bin/ask sdk score local Skills --all --json --robot",
+    "command_registration_files": [
+      "Infrastructure/scripts/lib/ask/commands/sdk.py",
+      "Infrastructure/scripts/lib/ask/command_metadata.py"
+    ],
+    "builder_module": "Infrastructure/scripts/lib/ask/skills_sdk/local_score.py",
+    "schema_file": "Infrastructure/config/schemas/skills-sdk/local-score.v1.schema.json",
+    "tests": [
+      "Infrastructure/tests/test_skills_sdk_local_score.py",
+      "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+      "Infrastructure/tests/test_ask_sdk_score_command.py"
+    ]
+  },
+  "receipt_schema_summary": {
+    "schema_version": "skills-sdk.local-score.v1",
+    "purpose": "One local evidence-first receipt for SkillsBar so the UI consumes quality, impact, and security lane evidence without scraping three command outputs.",
+    "required_top_level_fields": [
+      "schema_version",
+      "skill_path",
+      "skill_name",
+      "generated_at",
+      "score",
+      "lanes",
+      "provenance",
+      "completeness",
+      "next_action"
+    ],
+    "lane_contract": {
+      "evidence_usable": "Required boolean for every lane. A blocked lane can still be usable when a structured receipt exists.",
+      "receipt_path": "Required when durable evidence exists; absence_reason required when missing.",
+      "command": "Required reproducible command string for each lane.",
+      "status": "pass, blocked, fail, missing, or stale."
+    },
+    "absence_reason_values": [
+      "command_not_run",
+      "receipt_missing",
+      "receipt_malformed",
+      "unsupported_command",
+      "stale"
+    ],
+    "separation_rule": "Local Skills SDK score receipts must not be reused as Tessl registry score receipts. Tessl registry scores need a separate schema family."
+  },
+  "local_score_calculation_formula": {
+    "quality": {
+      "source": "./bin/ask skills package verify <skill-path> --json --robot",
+      "score": "100 when package verification status is pass/success; 0 when blocked/fail but structured blockers remain evidence_usable=true.",
+      "evidence_usable_rule": "true when data.skill_package_verification exists and includes status/blockers/agent_summary even if process exit is non-zero."
+    },
+    "impact": {
+      "source": "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot",
+      "score": "round(100 * promotion_ready_count / scenario_count), or 0 when scenario_count is 0.",
+      "evidence_usable_rule": "true when the scenario-quality receipt exists with scenario_count, promotion_ready_count, and blocked_count, even if receipt.status is blocked."
+    },
+    "security": {
+      "source": "./bin/ask sdk security risk-modes <skill-path> --preview --json --robot",
+      "score": "100 minus severity penalties from detected risk modes: critical=25, high=20, medium=10, low=5, floored at 0. none_detected gives 100.",
+      "evidence_usable_rule": "true when risk-mode taxonomy receipt exists with primary_mode, detected_modes, mode_results, and risk_tier."
+    },
+    "aggregate": "round((quality.score + impact.score + security.score) / 3) when all three lane scores are present. If a lane is missing, compute from usable lane scores and mark score.status=partial with completeness.missing_lanes populated.",
+    "example": "Q100 I46 S35 -> round((100 + 46 + 35) / 3) = 60"
+  },
+  "partial_blocked_stale_representation": {
+    "complete": "All required lanes are present, fresh, evidence_usable=true, and no lane status is blocked/fail/missing/stale.",
+    "partial": "At least one lane is blocked or missing but at least one numeric lane score is evidence-backed.",
+    "blocked": "No usable lane score exists, the skill path cannot resolve, or the local-score builder cannot parse the available lane receipts.",
+    "stale": "All otherwise usable lane receipts are older than provenance.ttl_seconds or generated_at cannot be trusted.",
+    "freshness": "generated_at plus ttl_seconds determines fresh/stale/expired; MVP emits fresh for same-run receipts."
+  },
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/reports/thread-replies/019f2c2b-a290-7533-b265-54aebae7c652/latest.json",
+      "assertion": "The SkillsBar score feed contract is implemented as a single SDK local-score receipt command with focused schema and command proof.",
+      "outcome": "pass",
+      "evidence": "Implementation evidence records the local-score builder, sdk score command registration, schema-spine fixture coverage, focused tests, and --write-current SkillsBar feed proof."
+    },
+    {
+      "artifact": "Infrastructure/config/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+      "assertion": "Scenario-quality already exposes numeric impact evidence independent of process success semantics.",
+      "outcome": "pass",
+      "evidence": "Schema requires scenario_count, promotion_ready_count, blocked_count, blockers, and status."
+    },
+    {
+      "artifact": "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+      "assertion": "Risk-mode taxonomy already exposes structured security evidence that can be mapped into a local security score.",
+      "outcome": "pass",
+      "evidence": "Schema requires primary_mode, detected_modes, mode_results, risk_tier, and non-execution safety booleans."
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+      "problem": "Current command lane status can be error while useful structured evidence is still present, so UI score availability must not depend only on process exit code.",
+      "owner": "Skills SDK local-score command builder"
+    },
+    {
+      "artifact": "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+      "problem": "Adding a new schema requires editing the schema-spine registry, but that file is already dirty in the current checkout.",
+      "owner": "clean implementation lane"
+    }
+  ],
+  "commands": [
+    {
+      "command": "pwd",
+      "outcome": "pass",
+      "evidence": "/Users/jamiecraik/dev/agent-skills"
+    },
+    {
+      "command": "git status --short --branch --untracked-files=no",
+      "outcome": "pass",
+      "evidence": "Branch main is behind origin/main by 1 and has dirty SDK command/schema/test files including command_metadata.py, sdk_security.py, skills_impl.py, risk-mode schema, and schema-spine tests."
+    },
+    {
+      "command": "sed -n '1,220p' Infrastructure/scripts/lib/ask/commands/sdk_eval.py",
+      "outcome": "pass",
+      "evidence": "sdk eval scenario-quality parser and dispatcher are explicit and preview-only."
+    },
+    {
+      "command": "sed -n '1,220p' Infrastructure/scripts/lib/ask/commands/sdk_security.py",
+      "outcome": "pass",
+      "evidence": "sdk security risk-modes parser and dispatcher are explicit and preview-only."
+    },
+    {
+      "command": "sed -n '5637,5728p' Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+      "outcome": "pass",
+      "evidence": "scenario-quality payload includes receipt counts and sets CallResult.status=error only when receipt.status is blocked."
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask skills package verify Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot > /private/tmp/skillsbar-package-verify.json; code=$?; echo EXIT:$code; jq '{status, data_keys:(.data|keys), errors}' /private/tmp/skillsbar-package-verify.json",
+      "outcome": "pass",
+      "evidence": "Wrapper command completed; recorded EXIT:2 with structured data.skill_package_verification and validation errors, proving process exit alone cannot decide score availability."
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot > /private/tmp/skillsbar-scenario-quality.json; code=$?; echo EXIT:$code; jq '{status, data_keys:(.data|keys), receipt_status:.data.skills_sdk_eval_scenario_quality.receipt.status, scenario_count:.data.skills_sdk_eval_scenario_quality.receipt.scenario_count, promotion_ready_count:.data.skills_sdk_eval_scenario_quality.receipt.promotion_ready_count, blocked_count:.data.skills_sdk_eval_scenario_quality.receipt.blocked_count, errors}' /private/tmp/skillsbar-scenario-quality.json",
+      "outcome": "pass",
+      "evidence": "Recorded EXIT:0, receipt_status=preview, scenario_count=1, promotion_ready_count=1, blocked_count=0."
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot > /private/tmp/skillsbar-risk-modes.json; code=$?; echo EXIT:$code; jq '{status, data_keys:(.data|keys), receipt_status:.data.skills_sdk_risk_mode_taxonomy.receipt.status, primary_mode:.data.skills_sdk_risk_mode_taxonomy.receipt.primary_mode, detected_modes:.data.skills_sdk_risk_mode_taxonomy.receipt.detected_modes, risk_tier:.data.skills_sdk_risk_mode_taxonomy.receipt.risk_tier, errors}' /private/tmp/skillsbar-risk-modes.json",
+      "outcome": "pass",
+      "evidence": "Recorded EXIT:0, receipt_status=pass, primary_mode=negligent_instruction, detected_modes=[negligent_instruction, unknown_insufficient_evidence], risk_tier=low."
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot > /private/tmp/skillsbar-ian-scenario-quality.json; code=$?; echo EXIT:$code; jq '{status, receipt_status:.data.skills_sdk_eval_scenario_quality.receipt.status, scenario_count:.data.skills_sdk_eval_scenario_quality.receipt.scenario_count, promotion_ready_count:.data.skills_sdk_eval_scenario_quality.receipt.promotion_ready_count, blocked_count:.data.skills_sdk_eval_scenario_quality.receipt.blocked_count, first_error:.errors[0], first_blocker:.data.skills_sdk_eval_scenario_quality.receipt.blockers[0]}' /private/tmp/skillsbar-ian-scenario-quality.json",
+      "outcome": "pass",
+      "evidence": "Current improve-agent-native scenario-quality reports EXIT:0, scenario_count=71, promotion_ready_count=71, blocked_count=0; prior blocked examples should not be treated as current truth."
+    }
+  ],
+  "lessons": [
+    {
+      "lesson": "SkillsBar needs an SDK-owned local score receipt that separates process exit from evidence usability.",
+      "failure_pattern": "UI scraping command outputs can hide scores when a lane exits non-zero despite emitting structured evidence.",
+      "carry_forward_target": "Infrastructure/scripts/lib/ask/skills_sdk/local_score.py plus local-score schema and command registration.",
+      "deterministic_guardrail": "Add tests where package verify or scenario-quality returns command error status but the local-score builder still emits a partial numeric score with evidence_usable=true.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "Focused local-score tests and CLI write-current proof pass; thread-report/v1 validation records the implemented command and feed contract."
+    }
+  ],
+  "next_action": "Wire the SkillsBar prototype to read the per-skill current local-score receipt under .harness/evidence/skills-sdk/local-score, then add per-gate pipeline calls that refresh the receipt after creation, oss-security, oss-local, oss-cloud, tessl-dry-run, and release proof lanes.",
+  "blockers": [
+    {
+      "blocker_class": "residual_dirty_worktree",
+      "evidence": "The local-score implementation is mixed into a checkout that also contains unrelated qwen, risk-mode, prototype, and evidence work.",
+      "next_step": "Triage and commit the local-score slice separately before starting the SkillsBar UI read-model or per-gate pipeline integration."
+    },
+    {
+      "blocker_class": "branch_stale",
+      "evidence": "git status shows main...origin/main [behind 1].",
+      "next_step": "Pull after dirty blockers are resolved or use a clean worktree."
+    }
+  ],
+  "boundary": "This report covers the implemented Skills SDK local score feed command and receipt contract for SkillsBar. It does not change the menubar UI, does not run oss-cloud, Tessl dry-run/live, publish, release, PR, or merge lanes, and does not claim those downstream gates."
+}

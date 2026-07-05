@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/local-score.v1.schema.json",
+  "title": "Skills SDK Local Score v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.local-score.v1"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/local-score.v1.schema.json"},
+    "skill_path": {"type": "string", "minLength": 1},
+    "skill_name": {"type": "string", "minLength": 1},
+    "gate": {"type": "string", "enum": ["creation", "oss-security", "oss-local", "oss-cloud", "tessl-dry-run", "release"]},
+    "generated_at": {"type": "string", "minLength": 1},
+    "source_identity": {"$ref": "#/definitions/sourceIdentity"},
+    "score": {"$ref": "#/definitions/score"},
+    "lanes": {"$ref": "#/definitions/lanes"},
+    "provenance": {"$ref": "#/definitions/provenance"},
+    "completeness": {"$ref": "#/definitions/completeness"},
+    "next_action": {"$ref": "#/definitions/nextAction"},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["PU-030", "FR-008", "SEC-001", "VP-030"]}
+    }
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "skill_path",
+    "skill_name",
+    "gate",
+    "generated_at",
+    "source_identity",
+    "score",
+    "lanes",
+    "provenance",
+    "completeness",
+    "next_action",
+    "acceptance_trace"
+  ],
+  "definitions": {
+    "sourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {"type": "string", "minLength": 1},
+        "source_path": {"type": "string", "minLength": 1},
+        "source_digest": {"type": ["string", "null"]},
+        "package_digest": {"type": ["string", "null"]},
+        "rubric_version": {"type": "string", "const": "skills-sdk.local-score.v1"}
+      },
+      "required": ["query", "source_path", "source_digest", "package_digest", "rubric_version"]
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {"type": "integer", "minimum": 0, "maximum": 100},
+        "status": {"type": "string", "enum": ["complete", "partial", "blocked", "stale"]},
+        "basis": {"type": "string", "minLength": 1},
+        "complete": {"type": "boolean"}
+      },
+      "required": ["value", "status", "basis", "complete"]
+    },
+    "lanes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "quality": {"$ref": "#/definitions/lane"},
+        "impact": {"$ref": "#/definitions/lane"},
+        "security": {"$ref": "#/definitions/lane"}
+      },
+      "required": ["quality", "impact", "security"]
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": {"type": ["integer", "null"], "minimum": 0, "maximum": 100},
+        "status": {"type": "string", "enum": ["pass", "blocked", "fail", "flagged", "missing", "stale"]},
+        "evidence_usable": {"type": "boolean"},
+        "label": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "receipt_path": {"type": ["string", "null"]},
+        "absence_reason": {"type": ["string", "null"], "enum": ["command_not_run", "receipt_missing", "receipt_malformed", "unsupported_command", "stale", null]},
+        "summary": {"type": "string", "minLength": 1},
+        "details": {"type": "object"}
+      },
+      "required": ["score", "status", "evidence_usable", "label", "command", "receipt_path", "absence_reason", "summary", "details"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "const": "local"},
+        "repo_root": {"type": "string", "minLength": 1},
+        "sdk_version": {"type": "string", "const": "skills-sdk.local-score.v1"},
+        "ttl_seconds": {"type": "integer", "minimum": 1},
+        "freshness": {"type": "string", "enum": ["fresh", "stale", "expired"]}
+      },
+      "required": ["source", "repo_root", "sdk_version", "ttl_seconds", "freshness"]
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "complete": {"type": "boolean"},
+        "missing_lanes": {"type": "array", "items": {"type": "string", "enum": ["quality", "impact", "security"]}},
+        "blocked_lanes": {"type": "array", "items": {"type": "string", "enum": ["quality", "impact", "security"]}}
+      },
+      "required": ["complete", "missing_lanes", "blocked_lanes"]
+    },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["label", "command", "reason"]
+    }
+  }
+}

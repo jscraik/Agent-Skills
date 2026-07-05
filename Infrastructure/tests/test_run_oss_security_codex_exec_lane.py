@@ -12,6 +12,7 @@ import textwrap
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -233,17 +234,40 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
             prompt,
         )
 
-    def test_codex_command_json_quotes_model_overrides(self) -> None:
+    def test_codex_command_accepts_only_security_model_overrides(self) -> None:
         command = MODULE._codex_command(
             sandbox="read-only",
             last_message_path=Path("/tmp/out.txt"),
-            model='local/model"withquote',
-            model_catalog_json='{"model":"x"}',
+            model=MODULE.SECURITY_MODEL,
+            model_catalog_json=json.dumps({"model": MODULE.SECURITY_MODEL}),
         )
 
-        self.assertIn('-c', command)
-        self.assertIn('model="local/model\\"withquote"', command)
-        self.assertIn('model_catalog_json="{\\"model\\":\\"x\\"}"', command)
+        expected_catalog = json.dumps(
+            json.dumps({"model": MODULE.SECURITY_MODEL}, separators=(",", ":"), sort_keys=True)
+        )
+
+        self.assertIn("-c", command)
+        self.assertIn(f'model={json.dumps(MODULE.SECURITY_MODEL)}', command)
+        self.assertIn(f"model_catalog_json={expected_catalog}", command)
+
+    def test_codex_command_rejects_non_security_model_catalog_override(self) -> None:
+        with self.assertRaises(ValueError):
+            MODULE._codex_command(
+                sandbox="read-only",
+                last_message_path=Path("/tmp/out.txt"),
+                model=MODULE.SECURITY_MODEL,
+                model_catalog_json=json.dumps({"model": "other/model"}),
+            )
+
+    def test_deterministic_lane_timeout_returns_blocked_payload(self) -> None:
+        timeout = subprocess.TimeoutExpired(cmd=["./bin/ask"], timeout=MODULE.DETERMINISTIC_LANE_TIMEOUT_SECONDS)
+
+        with mock.patch.object(MODULE.subprocess, "run", side_effect=timeout):
+            exit_code, payload, output = MODULE._run_deterministic_lane("Skills/example")
+
+        self.assertEqual(exit_code, 124)
+        self.assertIsNone(payload)
+        self.assertIn("timed out", output)
 
     def test_auto_created_output_dir_is_cleaned_after_run(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -19,6 +19,7 @@ WORKOUT_ID = "agent-ops/verification-before-completion"
 DIAGNOSTIC_WORKOUT_IDS = {
     WORKOUT_ID,
     "harness-engineering/he-spec",
+    "skill-factory/skill-builder-sdk-pipeline",
     "skill-factory/skill-refactor",
 }
 

@@ -1,0 +1,1 @@
+{"name":"request_permissions","parameters":{"environment_id":"","permissions":{"file_system":{"read":[],"write":[]},"network":{"enabled":false,"reason":""}}}}

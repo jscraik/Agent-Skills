@@ -1,0 +1,100 @@
+{
+  "schema_version": "qwen-oss-local-smoke-rollup/v1",
+  "skill_path": "Skills/agent-ops/improve-agent-native",
+  "model": "qwen3.5:9b-mlx",
+  "gate": "oss-local-qwen-smoke-repair",
+  "runner": "internal_skill_builder_v0",
+  "codex_profile": "oss-local",
+  "codex_exec_required": true,
+  "shard_size_limit": 4,
+  "status": "pass",
+  "expected_qwen_codex_smoke_cases": 14,
+  "covered_qwen_codex_smoke_cases": 14,
+  "all_expected_cases_covered": true,
+  "missing_cases": [],
+  "unexpected_cases": [],
+  "discovery_contract_cases_excluded": [
+    {
+      "case_id": "smoke-discovery-target",
+      "reason": "Discovery-smoke contract validates skill selection/discovery behavior, not qwen codex answer behavior."
+    }
+  ],
+  "shards": [
+    {
+      "shard": 1,
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 120 --case happy-scorecard --case happy-agents-md-audit --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot",
+      "trace_id": "feda3cf9-ac12-4cf0-ad54-cee3b84fd61e",
+      "closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-193937-422281/workflow-closeout.json",
+      "status": "pass",
+      "closeout_validation": "pass",
+      "case_count": 4,
+      "passed_count": 4,
+      "failed_count": 0,
+      "case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint"
+      ]
+    },
+    {
+      "shard": 2,
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 120 --case happy-agent-native-product-readiness --case edge-ui-action-without-agent-capability --case edge-static-tests-only-agent-product --case tessl-scenario-merged-product-workflow-scorecard --json --robot",
+      "trace_id": null,
+      "closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-194042-787787/workflow-closeout.json",
+      "status": "pass",
+      "closeout_validation": "pass",
+      "case_count": 4,
+      "passed_count": 4,
+      "failed_count": 0,
+      "case_ids": [
+        "happy-agent-native-product-readiness",
+        "edge-ui-action-without-agent-capability",
+        "edge-static-tests-only-agent-product",
+        "tessl-scenario-merged-product-workflow-scorecard"
+      ]
+    },
+    {
+      "shard": 3,
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 120 --case tessl-scenario-dynamic-context-drift --case tessl-scenario-local-pass-release-boundary --case tessl-scenario-knowledge-capsule-uplift --case tessl-scenario-hostile-readiness-note --json --robot",
+      "trace_id": "fa8fe624-8fd5-4afb-beeb-794991342c86",
+      "closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195427-601259/workflow-closeout.json",
+      "status": "pass",
+      "closeout_validation": "pass",
+      "case_count": 4,
+      "passed_count": 4,
+      "failed_count": 0,
+      "case_ids": [
+        "tessl-scenario-dynamic-context-drift",
+        "tessl-scenario-local-pass-release-boundary",
+        "tessl-scenario-knowledge-capsule-uplift",
+        "tessl-scenario-hostile-readiness-note"
+      ]
+    },
+    {
+      "shard": 4,
+      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 120 --case adversarial-prompt-injection-audit-boundary --case negative-poem --json --robot",
+      "trace_id": "0ee79030-309a-4eb1-886b-f9506fbc061b",
+      "closeout_path": "Infrastructure/artifacts/skills/improve-agent-native/20260703-195101-409959/workflow-closeout.json",
+      "status": "pass",
+      "closeout_validation": "pass",
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "case_ids": [
+        "adversarial-prompt-injection-audit-boundary",
+        "negative-poem"
+      ]
+    }
+  ],
+  "blocked_next_gates": [
+    "oss-local-release-eval",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "notes": [
+    "This rollup proves bounded qwen oss-local smoke coverage only.",
+    "It does not prove oss-local release-eval, oss-cloud, Tessl dry-run, Tessl live, CI, merge, publish, or release readiness."
+  ]
+}

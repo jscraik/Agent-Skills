@@ -1,162 +1,272 @@
 {
-  "schema_version": "skills-sdk.skill-intake-review-receipt.v0",
-  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
-  "status": "review",
-  "operation": "skill_intake_review_preview",
-  "source_kind": "directory",
-  "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
-  "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "skill_id": "skills-sdk-valid-fixture",
-  "package_id": "skills-sdk-valid-fixture",
-  "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "acceptance_trace": [
+    "PU-034",
+    "FR-008",
+    "FR-010",
+    "SA-004",
+    "SEC-001",
+    "VP-034"
+  ],
+  "agent_summary": "External skill intake review classified skills-sdk-valid-fixture as needs_human_review using intake and risk-mode receipts without execution, scanners, network, credentials, install, or mutation.",
+  "credentials_accessed": false,
+  "execution_performed": false,
+  "install_performed": false,
   "intake_receipt": {
-    "schema_version": "skills-sdk.skill-intake-receipt.v0",
-    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
-    "status": "preview",
-    "operation": "skill_intake_inspect",
-    "source_kind": "directory",
-    "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
-    "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "skill_id": "skills-sdk-valid-fixture",
+    "acceptance_trace": [
+      "PU-032",
+      "FR-008",
+      "FR-010",
+      "SA-004",
+      "SEC-001",
+      "VP-032"
+    ],
+    "agent_summary": "External skill intake inspected 1 file(s) for skills-sdk-valid-fixture without execution or install.",
+    "blockers": [],
+    "execution_performed": false,
     "file_count": 1,
-    "total_size_bytes": 64,
     "inspected_files": [
       {
-        "path": "SKILL.md",
         "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "path": "SKILL.md",
         "size_bytes": 64
       }
     ],
+    "install_performed": false,
     "intake_checks": [
       {
+        "evidence": [
+          "SKILL.md"
+        ],
         "id": "skill_md_present",
-        "status": "pass",
-        "severity": "pass",
         "message": "Source includes a regular SKILL.md file.",
-        "evidence": ["SKILL.md"]
+        "severity": "pass",
+        "status": "pass"
       },
       {
+        "evidence": [],
         "id": "execution_blocked",
-        "status": "pass",
-        "severity": "pass",
         "message": "Intake inspects files only and does not execute skill code.",
-        "evidence": []
+        "severity": "pass",
+        "status": "pass"
       }
     ],
-    "blockers": [],
-    "execution_performed": false,
-    "install_performed": false,
-    "projection_mutation_performed": false,
-    "network_accessed": false,
     "mutation_performed": false,
-    "acceptance_trace": ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"],
-    "agent_summary": "External skill intake inspected 1 file(s) for skills-sdk-valid-fixture without execution or install."
+    "network_accessed": false,
+    "operation": "skill_intake_inspect",
+    "projection_mutation_performed": false,
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+    "schema_version": "skills-sdk.skill-intake-receipt.v0",
+    "skill_id": "skills-sdk-valid-fixture",
+    "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_kind": "directory",
+    "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "status": "preview",
+    "total_size_bytes": 64
   },
-  "risk_mode_receipt": {
-    "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
-    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+  "mutation_performed": false,
+  "network_accessed": false,
+  "operation": "skill_intake_review_preview",
+  "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_security_signature_receipt": {
+    "schema_version": "skills-sdk.package-security-signature-receipt.v0",
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-security-signature-receipt.v0.schema.json",
     "status": "pass",
-    "operation": "risk_mode_taxonomy_preview",
+    "operation": "package_security_signature_preview",
     "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
     "package_id": "skills-sdk-valid-fixture",
     "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "source_kind": "scripted",
-    "risk_tier": "high",
-    "primary_mode": "vulnerable_operation",
-    "detected_modes": ["vulnerable_operation", "unknown_insufficient_evidence"],
-    "mode_results": [
+    "package_security_signature_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "inspected_file_count": 2,
+    "text_file_count": 2,
+    "script_file_count": 1,
+    "resource_file_count": 0,
+    "binary_file_count": 0,
+    "redaction_performed": true,
+    "redacted_content_emitted": false,
+    "binary_content_embedded": false,
+    "indicator_summary": {
+      "hardcoded_secret_literal": 1
+    },
+    "indicators": [
       {
-        "mode": "malicious_supply_chain",
-        "label": "Malicious supply-chain risk",
-        "status": "not_detected",
-        "severity": "critical",
-        "description": "The skill package includes indicators that it may intentionally cause harm, hide behavior, or bypass review.",
+        "id": "hardcoded_secret_literal",
+        "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/scripts/example.sh",
+        "reason": "Contains a secret-like assignment pattern."
+      }
+    ],
+    "file_results": [
+      {
+        "path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+        "kind": "skill_md",
+        "sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "size_bytes": 120,
         "indicators": []
       },
       {
-        "mode": "negligent_instruction",
-        "label": "Negligent instruction risk",
-        "status": "not_detected",
-        "severity": "high",
-        "description": "The skill urges impactful behavior without enough boundaries, review gates, or rollback language.",
-        "indicators": []
-      },
-      {
-        "mode": "vulnerable_operation",
-        "label": "Vulnerable operation risk",
-        "status": "detected",
-        "severity": "high",
-        "description": "The skill handles secrets, credentials, logs, external calls, or data exposure paths without clear safeguards.",
+        "path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/scripts/example.sh",
+        "kind": "script",
+        "sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "size_bytes": 48,
         "indicators": [
           {
-            "id": "secret_handling",
-            "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
-            "reason": "Matched deterministic signal secret_handling."
-          }
-        ]
-      },
-      {
-        "mode": "unknown_insufficient_evidence",
-        "label": "Unknown or insufficient-evidence risk",
-        "status": "detected",
-        "severity": "medium",
-        "description": "The package lacks enough structured provenance, purpose, or review evidence to classify confidently.",
-        "indicators": [
-          {
-            "id": "missing_provenance",
-            "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
-            "reason": "No provenance field was declared."
+            "id": "hardcoded_secret_literal",
+            "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/scripts/example.sh",
+            "reason": "Contains a secret-like assignment pattern."
           }
         ]
       }
     ],
-    "taxonomy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "execution_performed": false,
     "scanner_execution_performed": false,
     "network_accessed": false,
     "credentials_accessed": false,
     "mutation_performed": false,
-    "acceptance_trace": ["PU-033", "FR-008", "SA-004", "SEC-001", "VP-033"],
-    "agent_summary": "risk-mode taxonomy inspected skills-sdk-valid-fixture and detected 2 risk mode(s) without execution, scanners, network, or mutation."
+    "acceptance_trace": [
+      "PU-033",
+      "FR-008",
+      "SA-004",
+      "SEC-001",
+      "VP-033"
+    ],
+    "agent_summary": "package security signature inspected skills-sdk-valid-fixture across 2 declared file(s) without execution, scanners, network, credentials, raw content emission, or mutation."
   },
-  "risk_mode_receipt_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-  "required_receipts": ["skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"],
+  "projection_mutation_performed": false,
+  "required_receipts": [
+    "skills-sdk.skill-intake-receipt.v0",
+    "skills-sdk.package-security-signature-receipt.v0",
+    "skills-sdk.risk-mode-taxonomy-receipt.v0"
+  ],
+  "residual_risk": [
+    "risk_mode:vulnerable_operation",
+    "risk_mode:unknown_insufficient_evidence",
+    "review_item:provenance",
+    "review_item:risk_modes"
+  ],
   "review_decision": "needs_human_review",
   "review_items": [
     {
+      "evidence": [
+        "missing provenance or owner field"
+      ],
       "id": "provenance",
-      "status": "review",
       "question": "Does the skill declare an owner or provenance before adoption?",
-      "evidence": ["missing provenance or owner field"],
-      "verdict": "needs_human_review",
-      "reason": "External intake should not treat source identity as known."
-    },
-    {
-      "id": "isolation",
-      "status": "pass",
-      "question": "Did intake stay inside quarantine without execution, install, network, or projection mutation?",
-      "evidence": ["skills-sdk.skill-intake-receipt.v0", "execution_performed=false", "install_performed=false", "mutation_performed=false"],
-      "verdict": "quarantined",
-      "reason": "Directory intake already proved a non-mutating quarantine boundary."
-    },
-    {
-      "id": "risk_modes",
+      "reason": "External intake should not treat source identity as known.",
       "status": "review",
+      "verdict": "needs_human_review"
+    },
+    {
+      "evidence": [
+        "skills-sdk.skill-intake-receipt.v0",
+        "execution_performed=false",
+        "install_performed=false",
+        "mutation_performed=false"
+      ],
+      "id": "isolation",
+      "question": "Did intake stay inside quarantine without execution, install, network, or projection mutation?",
+      "reason": "Directory intake already proved a non-mutating quarantine boundary.",
+      "status": "pass",
+      "verdict": "quarantined"
+    },
+    {
+      "evidence": [
+        "vulnerable_operation:secret_handling",
+        "unknown_insufficient_evidence:missing_provenance"
+      ],
+      "id": "risk_modes",
       "question": "What Tal/Podjarny risk modes did the consumed risk-mode receipt detect?",
-      "evidence": ["vulnerable_operation:secret_handling", "unknown_insufficient_evidence:missing_provenance"],
-      "verdict": "needs_human_review",
-      "reason": "Detected risk modes must feed the adoption decision."
+      "reason": "Detected risk modes must feed the adoption decision.",
+      "status": "review",
+      "verdict": "needs_human_review"
     }
   ],
-  "residual_risk": ["risk_mode:vulnerable_operation", "risk_mode:unknown_insufficient_evidence", "review_item:provenance", "review_item:risk_modes"],
-  "execution_performed": false,
+  "risk_mode_receipt": {
+    "acceptance_trace": [
+      "PU-033",
+      "FR-008",
+      "SA-004",
+      "SEC-001",
+      "VP-033"
+    ],
+    "agent_summary": "risk-mode taxonomy inspected skills-sdk-valid-fixture and detected 2 risk mode(s) without execution, scanners, network, or mutation.",
+    "credentials_accessed": false,
+    "detected_modes": [
+      "vulnerable_operation",
+      "unknown_insufficient_evidence"
+    ],
+    "execution_performed": false,
+    "mode_results": [
+      {
+        "description": "The skill package includes indicators that it may intentionally cause harm, hide behavior, or bypass review.",
+        "indicators": [],
+        "label": "Malicious supply-chain risk",
+        "mode": "malicious_supply_chain",
+        "severity": "critical",
+        "status": "not_detected"
+      },
+      {
+        "description": "The skill urges impactful behavior without enough boundaries, review gates, or rollback language.",
+        "indicators": [],
+        "label": "Negligent instruction risk",
+        "mode": "negligent_instruction",
+        "severity": "high",
+        "status": "not_detected"
+      },
+      {
+        "description": "The skill handles secrets, credentials, logs, external calls, or data exposure paths without clear safeguards.",
+        "indicators": [
+          {
+            "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            "id": "secret_handling",
+            "reason": "Matched deterministic signal secret_handling."
+          }
+        ],
+        "label": "Vulnerable operation risk",
+        "mode": "vulnerable_operation",
+        "severity": "high",
+        "status": "detected"
+      },
+      {
+        "description": "The package lacks enough structured provenance, purpose, or review evidence to classify confidently.",
+        "indicators": [
+          {
+            "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            "id": "missing_provenance",
+            "reason": "No provenance field was declared."
+          }
+        ],
+        "label": "Unknown or insufficient-evidence risk",
+        "mode": "unknown_insufficient_evidence",
+        "severity": "medium",
+        "status": "detected"
+      }
+    ],
+    "mutation_performed": false,
+    "network_accessed": false,
+    "operation": "risk_mode_taxonomy_preview",
+    "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "package_id": "skills-sdk-valid-fixture",
+    "package_security_indicator_summary": {},
+    "package_security_signature_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "primary_mode": "vulnerable_operation",
+    "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "risk_tier": "high",
+    "scanner_execution_performed": false,
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+    "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+    "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_kind": "scripted",
+    "status": "pass",
+    "taxonomy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "risk_mode_receipt_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
   "scanner_execution_performed": false,
-  "install_performed": false,
-  "projection_mutation_performed": false,
-  "network_accessed": false,
-  "credentials_accessed": false,
-  "mutation_performed": false,
-  "acceptance_trace": ["PU-034", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-034"],
-  "agent_summary": "External skill intake review classified skills-sdk-valid-fixture as needs_human_review using intake and risk-mode receipts without execution, scanners, network, credentials, install, or mutation."
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+  "schema_version": "skills-sdk.skill-intake-review-receipt.v0",
+  "skill_id": "skills-sdk-valid-fixture",
+  "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_kind": "directory",
+  "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+  "status": "review"
 }

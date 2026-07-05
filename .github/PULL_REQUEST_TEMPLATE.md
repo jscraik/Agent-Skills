@@ -4,13 +4,13 @@ Write for human maintainers first. Use `n.a.` with a concrete reason when a
 field does not apply. Do not paste secrets, raw transcripts, bulky telemetry,
 or local absolute paths.
 
-## Motivation
+## What Problem This Solves
 
 - Motivation:
 - Reasoning:
 - Chosen approach:
 
-## Summary
+## Why This Change Was Made
 
 - Problem:
 - Why now:
@@ -27,6 +27,7 @@ docs, or any observable operator experience. Use `n.a.` with a concrete reason
 for docs-only, metadata-only, or evidence-only changes where no behavior path
 exists.
 
+- Behavior before fix:
 - Behavior or issue addressed:
 - Real environment tested:
 - Exact steps or command run after this patch:
@@ -34,7 +35,6 @@ exists.
 - Observed result after fix:
 - What was not tested:
 - Proof limitations or environment constraints:
-- Before evidence, if available:
 
 Behavior proof guidance: Behavior proof is separate from unit tests, lint,
 typecheck, and CI. Use it to show the actual production path or nearest
@@ -65,6 +65,20 @@ transcripts, bulky telemetry, or local absolute paths.
 - Validation evidence: See Testing.
 - Review artifacts: See Review artifacts.
 - Durable evidence map:
+<!-- For evidence-heavy PRs, include a compact index rather than bulky logs.
+Use repo-relative paths only. Do not paste raw transcripts, secrets, bulky
+telemetry, or local absolute paths. Mark each artifact as `source-of-truth`
+or `retained context`.
+
+| Artifact | Schema / version | Producer command | Digest | Replay command | Authority |
+| --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | `source-of-truth` / `retained context` |
+
+`source-of-truth` means the artifact is authoritative for a deterministic
+lane claim. `retained context` means the artifact supports review or
+traceability but does not prove behavior by itself. For large PRs, prefer
+splitting source/schema/CLI/validator changes from retained evidence fixtures
+or generated context instead of splitting only by feature area. -->
 - Runtime impact:
 - CodeRabbit mode coverage:
 - Closeout state:
@@ -76,26 +90,25 @@ transcripts, bulky telemetry, or local absolute paths.
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh` plus the repo, package, or surface-scoped validation commands listed in Testing.
+- [ ] Required local gates run: `bash scripts/validate-codestyle.sh` and `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
 - [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before delegated package scripts).
 - [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
+- [ ] This change is user-facing and I added a changelog entry.
+- [ ] This change is not user-facing.
 - [ ] Merge is blocked until all required checks pass.
 - [ ] I will delete branch/worktree after merge.
 
 ## Testing
 
+- regression_test_plan:
 - verification_commands:
 - verification_outcomes:
 - blocked_steps_reason:
-- Command: `bash scripts/validate-codestyle.sh` -> <replace with actual status and observed outcome or blocker>
-- Command: `./bin/ask repo validate --json --robot` -> <replace with actual status and observed outcome, or n.a. with reason>
-- Command: `./bin/ask repo closeout --changed --json --robot` -> <replace with actual status and observed outcome or blocker>
-- Command: `<package-root package-manager command>` -> <replace with actual status and observed outcome, or n.a. with reason>; run package-manager gates only inside verified package roots
-- Setup: `CHANGED_FILES="<comma-separated-changed-files>"` (set before running any file-scoped gates)
-- Command: `<file-scoped learning/review-context gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
-- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
-- Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> <replace with actual status and observed outcome, or n.a. with reason>
+<!-- Add one or more evidence lines such as:
+- Command: `bash scripts/validate-codestyle.sh` -> pass
+- Command: `bash scripts/run-harness-gate.sh tooling-audit --path . --json` -> n.a. (reason)
+-->
 - Any other command(s):
 
 ## Review artifacts

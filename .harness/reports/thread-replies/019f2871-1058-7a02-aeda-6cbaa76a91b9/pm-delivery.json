@@ -1,0 +1,12 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f2871-1058-7a02-aeda-6cbaa76a91b9",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-07-03T19:17:48Z",
+  "message_summary": "PM update delivered for PR 306 second review repair at head 5de2b741faa9adbbe60af25449028adfa73bf539.",
+  "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "delivered_repo_head": "5de2b741faa9adbbe60af25449028adfa73bf539"
+}

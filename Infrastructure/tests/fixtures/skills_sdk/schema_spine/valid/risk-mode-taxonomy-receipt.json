@@ -7,6 +7,8 @@
   "package_id": "skills-sdk-valid-fixture",
   "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "package_security_signature_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "package_security_indicator_summary": {},
   "source_kind": "scripted",
   "risk_tier": "high",
   "primary_mode": "vulnerable_operation",

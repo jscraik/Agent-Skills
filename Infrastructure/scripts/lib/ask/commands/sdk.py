@@ -34,6 +34,11 @@ from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_execute import build_review_execution
 from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
+from ask.skills_sdk.local_score import (
+    LOCAL_SCORE_GATES,
+    build_local_score_receipt_from_lane_payloads,
+    write_local_score_receipts,
+)
 
 
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -153,6 +158,19 @@ def _add_sdk_check_parser(
     parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
+
+
+def _add_sdk_score_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    parser = sdk_subparsers.add_parser("score", help="Build local Skills SDK score receipts", parents=[global_parser])
+    subparsers = parser.add_subparsers(dest="score_action", required=True)
+    local = subparsers.add_parser("local", help="Build a local Quality/Impact/Security score receipt", parents=[global_parser])
+    local.add_argument("target", help="Skill handle or repo-relative skill source path")
+    local.add_argument("--gate", choices=LOCAL_SCORE_GATES, default="creation")
+    local.add_argument("--ttl-seconds", type=int, default=300)
+    local.add_argument("--write-current", action="store_true", help="Write current.json plus immutable history for SkillsBar consumption")
 
 
 def _add_sdk_start_parser(
@@ -315,6 +333,7 @@ def add_sdk_parser(
     sdk_subparsers = sdk_parser.add_subparsers(dest="action")
     _add_sdk_start_parser(sdk_subparsers, global_parser)
     _add_sdk_check_parser(sdk_subparsers, global_parser)
+    _add_sdk_score_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
     add_sdk_evidence_parser(sdk_subparsers, global_parser)
@@ -458,6 +477,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers = {
         "start": _dispatch_sdk_start,
         "check": _dispatch_sdk_check,
+        "score": _dispatch_sdk_score,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
         "evidence": dispatch_sdk_evidence,
@@ -488,6 +508,68 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.action in dispatchers:
         return dispatchers[args.action](repo_root, args)
     return build_unknown_action_result("sdk", args.action)
+
+
+def _dispatch_sdk_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.score_action == "local":
+        query = args.target.strip()
+        target_info, _audit_target = skills_commands._resolve_doctor_target(repo_root, query)
+        source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+        source_path = Path(str(source_path_value)) if source_path_value else None
+        if source_path and not source_path.is_absolute():
+            source_path = repo_root / source_path
+        if not source_path:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk score local"
+            result.data["skills_sdk_local_score"] = {
+                "schema_version": "skills-sdk-local-score-preview.v0",
+                "status": "blocked",
+                "query": query,
+                "gate": args.gate,
+                "canonical_source_path": source_path_value,
+                "receipt": None,
+                "receipt_paths": None,
+                "write_current": bool(args.write_current),
+                "validation_commands": [f"ask sdk score local {query} --gate {args.gate} --json --robot"],
+                "agent_summary": f"Local score is blocked for {query}: canonical source is missing.",
+            }
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK local score is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion="Use a valid skill handle or repo-relative skill source path.",
+            ))
+            return result
+        quality_result = skills_commands.skills_package_verify(repo_root, target=query)
+        impact_result = skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=query)
+        security_result = skills_commands.skills_sdk_security_risk_modes_preview(repo_root, target=query)
+        receipt = build_local_score_receipt_from_lane_payloads(
+            repo_root,
+            source_path=source_path,
+            query=query,
+            gate=args.gate,
+            quality_result=quality_result,
+            impact_result=impact_result,
+            security_result=security_result,
+            ttl_seconds=args.ttl_seconds,
+        )
+        paths = write_local_score_receipts(repo_root, receipt) if args.write_current else None
+        result = CallResult(status="success")
+        result.metadata["command"] = "sdk score local"
+        result.data["skills_sdk_local_score"] = {
+            "schema_version": "skills-sdk-local-score-preview.v0",
+            "status": receipt["score"]["status"],
+            "query": query,
+            "gate": args.gate,
+            "score": receipt["score"],
+            "lanes": receipt["lanes"],
+            "receipt": receipt,
+            "receipt_paths": paths,
+            "write_current": bool(args.write_current),
+            "validation_commands": [f"ask sdk score local {query} --gate {args.gate} --json --robot"],
+            "agent_summary": f"Local score for {receipt['skill_name']} is {receipt['score']['value']} ({receipt['score']['status']}).",
+        }
+        return result
+    return build_unknown_action_result("sdk score", args.score_action)
 
 
 def _dispatch_sdk_ir(repo_root: Path, args: argparse.Namespace) -> CallResult:

@@ -90,7 +90,12 @@ def build_security_lane_receipt(
 ) -> dict[str, Any]:
     """Build the deterministic Skills SDK security lane without executing skill content."""
     package_receipt = build_package_security_signature_receipt(repo_root, source_path=source_path, query=query)
-    risk_receipt = build_risk_mode_taxonomy_receipt(repo_root, source_path=source_path, query=query)
+    risk_receipt = build_risk_mode_taxonomy_receipt(
+        repo_root,
+        source_path=source_path,
+        query=query,
+        package_security_receipt=package_receipt,
+    )
     command_records = [
         _command_record(
             action="package-signature",
