@@ -417,7 +417,7 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "directory source_kind only"):
                 build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix(), source_kind="archive")
 
-    def test_required_receipts_always_lists_both_schema_versions(self) -> None:
+    def test_required_receipts_always_lists_all_schema_versions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "external"
             _write_skill(
@@ -428,7 +428,12 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
             receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
 
         self.assertIn("skills-sdk.skill-intake-receipt.v0", receipt["required_receipts"])
+        self.assertIn("skills-sdk.package-security-signature-receipt.v0", receipt["required_receipts"])
         self.assertIn("skills-sdk.risk-mode-taxonomy-receipt.v0", receipt["required_receipts"])
+        self.assertEqual(
+            receipt["package_security_signature_receipt"]["schema_version"],
+            "skills-sdk.package-security-signature-receipt.v0",
+        )
 
 
 class TestDispatchSdkIntakeRouting(unittest.TestCase):
