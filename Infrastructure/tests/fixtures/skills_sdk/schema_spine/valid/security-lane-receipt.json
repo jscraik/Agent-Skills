@@ -1,0 +1,65 @@
+{
+  "schema_version": "skills-sdk.security-lane-receipt.v0",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/security-lane-receipt.v0.schema.json",
+  "status": "pass",
+  "operation": "security_lane_preview",
+  "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97",
+  "source_digest": "sha256:56b96f9feb5eeec0f1721c1af3a4282ee0579570f7cd4f86daf996dd1d35a1d0",
+  "security_lane_digest": "sha256:279ff1ed85b5e2589d11fba896deb544ade39d7bfa5b2146316ed5bd103e5cde",
+  "package_security_signature_digest": "sha256:f39d335745bb9e5a3ad001f355ddc3379a9a47dbd8e0a324a2a47360c63fa447",
+  "risk_mode_taxonomy_digest": "sha256:9e48bf1ad0a18631499c74aff329bd331f088f47e2f2a609b3ca54e3e05a0dbb",
+  "indicator_summary": {},
+  "primary_mode": "negligent_instruction",
+  "detected_modes": [
+    "negligent_instruction",
+    "unknown_insufficient_evidence"
+  ],
+  "commands": [
+    {
+      "command": "ask sdk security package-signature \"Infrastructure/tests/fixtures/skills_sdk/valid_skill\" --preview --json --robot",
+      "outcome": "pass",
+      "receipt_schema_version": "skills-sdk.package-security-signature-receipt.v0",
+      "receipt_digest": "sha256:f39d335745bb9e5a3ad001f355ddc3379a9a47dbd8e0a324a2a47360c63fa447",
+      "execution_performed": false,
+      "scanner_execution_performed": false,
+      "network_accessed": false,
+      "credentials_accessed": false,
+      "mutation_performed": false
+    },
+    {
+      "command": "ask sdk security risk-modes \"Infrastructure/tests/fixtures/skills_sdk/valid_skill\" --preview --json --robot",
+      "outcome": "pass",
+      "receipt_schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+      "receipt_digest": "sha256:9e48bf1ad0a18631499c74aff329bd331f088f47e2f2a609b3ca54e3e05a0dbb",
+      "execution_performed": false,
+      "scanner_execution_performed": false,
+      "network_accessed": false,
+      "credentials_accessed": false,
+      "mutation_performed": false
+    }
+  ],
+  "profile_review": {
+    "profile": "oss-security",
+    "status": "not_run",
+    "required": false,
+    "codex_exec_command": "codex exec --profile oss-security --sandbox read-only --ephemeral --json --output-last-message <path> -- '<receipt review prompt>'",
+    "blocker": "profile review is recorded as an optional external evidence lane; run the generated Codex command separately when model review evidence is needed."
+  },
+  "package_security_signature_receipt": {},
+  "risk_mode_taxonomy_receipt": {},
+  "execution_performed": false,
+  "scanner_execution_performed": false,
+  "network_accessed": false,
+  "credentials_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": [
+    "PU-033",
+    "FR-008",
+    "SA-004",
+    "SEC-001",
+    "VP-033"
+  ],
+  "agent_summary": "security lane inspected skills-sdk-valid-fixture with 2 deterministic security command(s); profile review status is not_run."
+}

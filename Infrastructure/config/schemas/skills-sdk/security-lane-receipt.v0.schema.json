@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/security-lane-receipt.v0.schema.json",
+  "title": "Skills SDK Security Lane Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.security-lane-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/security-lane-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["pass", "blocked"]},
+    "operation": {"type": "string", "const": "security_lane_preview"},
+    "query": {"type": "string", "minLength": 1},
+    "package_id": {"type": "string", "minLength": 1},
+    "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "security_lane_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "package_security_signature_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "risk_mode_taxonomy_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "indicator_summary": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}},
+    "primary_mode": {
+      "type": "string",
+      "enum": [
+        "malicious_supply_chain",
+        "negligent_instruction",
+        "vulnerable_operation",
+        "unknown_insufficient_evidence",
+        "none_detected"
+      ]
+    },
+    "detected_modes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/definitions/command_record"}
+    },
+    "profile_review": {"$ref": "#/definitions/profile_review"},
+    "package_security_signature_receipt": {"type": "object"},
+    "risk_mode_taxonomy_receipt": {"type": "object"},
+    "execution_performed": {"type": "boolean", "const": false},
+    "scanner_execution_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "credentials_accessed": {"type": "boolean", "const": false},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["PU-033", "FR-008", "SA-004", "SEC-001", "VP-033"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "query",
+    "package_id",
+    "package_digest",
+    "source_digest",
+    "security_lane_digest",
+    "package_security_signature_digest",
+    "risk_mode_taxonomy_digest",
+    "indicator_summary",
+    "primary_mode",
+    "detected_modes",
+    "commands",
+    "profile_review",
+    "package_security_signature_receipt",
+    "risk_mode_taxonomy_receipt",
+    "execution_performed",
+    "scanner_execution_performed",
+    "network_accessed",
+    "credentials_accessed",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "command_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command": {"type": "string", "minLength": 1},
+        "outcome": {"type": "string", "enum": ["pass", "blocked", "fail"]},
+        "receipt_schema_version": {"type": "string", "minLength": 1},
+        "receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "execution_performed": {"type": "boolean", "const": false},
+        "scanner_execution_performed": {"type": "boolean", "const": false},
+        "network_accessed": {"type": "boolean", "const": false},
+        "credentials_accessed": {"type": "boolean", "const": false},
+        "mutation_performed": {"type": "boolean", "const": false}
+      },
+      "required": [
+        "command",
+        "outcome",
+        "receipt_schema_version",
+        "receipt_digest",
+        "execution_performed",
+        "scanner_execution_performed",
+        "network_accessed",
+        "credentials_accessed",
+        "mutation_performed"
+      ]
+    },
+    "profile_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profile": {"type": ["string", "null"]},
+        "status": {"type": "string", "enum": ["not_requested", "not_run", "pass", "fail", "blocked"]},
+        "required": {"type": "boolean"},
+        "codex_exec_command": {"type": ["string", "null"]},
+        "blocker": {"type": ["string", "null"]}
+      },
+      "required": ["profile", "status", "required", "codex_exec_command", "blocker"]
+    }
+  }
+}
