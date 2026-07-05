@@ -21,6 +21,9 @@ VALID_SKILL = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json"
 INTAKE_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
 RISK_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json"
+PACKAGE_SECURITY_SCHEMA_PATH = (
+    REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/package-security-signature-receipt.v0.schema.json"
+)
 FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine"
 
 
@@ -105,12 +108,15 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         cls.schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         cls.intake_schema = json.loads(INTAKE_SCHEMA_PATH.read_text(encoding="utf-8"))
         cls.risk_schema = json.loads(RISK_SCHEMA_PATH.read_text(encoding="utf-8"))
+        cls.package_security_schema = json.loads(PACKAGE_SECURITY_SCHEMA_PATH.read_text(encoding="utf-8"))
         cls.schema_store = {
             "skill-intake-review-receipt.v0.schema.json": cls.schema,
             "skill-intake-receipt.v0.schema.json": cls.intake_schema,
+            "package-security-signature-receipt.v0.schema.json": cls.package_security_schema,
             "risk-mode-taxonomy-receipt.v0.schema.json": cls.risk_schema,
             "skill-intake-review-receipt": cls.schema,
             "skill-intake-receipt": cls.intake_schema,
+            "package-security-signature-receipt": cls.package_security_schema,
             "risk-mode-taxonomy-receipt": cls.risk_schema,
         }
 
@@ -233,7 +239,15 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         self.assertEqual(payload["risk_mode_receipt"]["schema_version"], "skills-sdk.risk-mode-taxonomy-receipt.v0")
         self.assertEqual(
             set(payload["required_receipts"]),
-            {"skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"},
+            {
+                "skills-sdk.skill-intake-receipt.v0",
+                "skills-sdk.package-security-signature-receipt.v0",
+                "skills-sdk.risk-mode-taxonomy-receipt.v0",
+            },
+        )
+        self.assertEqual(
+            payload["package_security_signature_receipt"]["schema_version"],
+            "skills-sdk.package-security-signature-receipt.v0",
         )
         self.assertFalse(payload["execution_performed"])
         self.assertFalse(payload["scanner_execution_performed"])

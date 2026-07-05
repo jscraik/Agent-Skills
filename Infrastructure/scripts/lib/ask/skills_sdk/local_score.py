@@ -88,13 +88,14 @@ def _impact_lane(envelope: Any, command: str) -> dict[str, Any]:
     if not isinstance(receipt, dict):
         return _missing_lane("impact", command, "receipt_malformed")
 
-    total = int(receipt.get("scenario_count") or 0)
-    ready = int(receipt.get("promotion_ready_count") or 0)
-    blocked = int(receipt.get("blocked_count") or 0)
+    total, ready, blocked = _impact_counts(receipt)
+    status = str(receipt.get("status") or "missing")
+    suite_blocker_count = _list_count(receipt.get("blockers"))
     score = round((ready / total) * 100) if total else 0
+    lane_passes = _impact_lane_passes(total, blocked, suite_blocker_count, status)
     return {
         "score": score,
-        "status": "pass" if total > 0 and blocked == 0 else "blocked",
+        "status": "pass" if lane_passes else "blocked",
         "evidence_usable": True,
         "label": "Scenario quality",
         "command": command,
@@ -105,8 +106,26 @@ def _impact_lane(envelope: Any, command: str) -> dict[str, Any]:
             "ready_count": ready,
             "total_count": total,
             "blocked_count": blocked,
+            "source_status": status,
+            "suite_blocker_count": suite_blocker_count,
         },
     }
+
+
+def _impact_counts(receipt: dict[str, Any]) -> tuple[int, int, int]:
+    return (
+        int(receipt.get("scenario_count") or 0),
+        int(receipt.get("promotion_ready_count") or 0),
+        int(receipt.get("blocked_count") or 0),
+    )
+
+
+def _list_count(value: Any) -> int:
+    return len(value) if isinstance(value, list) else 0
+
+
+def _impact_lane_passes(total: int, blocked: int, suite_blocker_count: int, status: str) -> bool:
+    return total > 0 and blocked == 0 and suite_blocker_count == 0 and status in {"pass", "preview", "success"}
 
 
 def _security_lane(envelope: Any, command: str) -> dict[str, Any]:

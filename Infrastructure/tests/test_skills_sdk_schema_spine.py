@@ -1038,6 +1038,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
+    def test_skill_intake_review_receipt_schema_rejects_review_without_package_signature(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "skill-intake-review-receipt.json")
+        payload["package_security_signature_receipt"] = None
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["skill-intake-review-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
