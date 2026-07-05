@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 
 
+from datetime import date
+
+
 def release_ratchet_exception_paths(handoff_dir: Path, check: str) -> set[str]:
     """Return accepted legacy exception paths for one release-ratchet check."""
     path = handoff_dir / "release-ratchet-exceptions.json"
@@ -25,6 +28,19 @@ def release_ratchet_exception_paths(handoff_dir: Path, check: str) -> set[str]:
             and entry.get("check") == check
             and isinstance(entry.get("path"), str)
             and entry["path"].strip()
+            and _not_expired(entry)
+            and isinstance(entry.get("ticket"), str)
+            and entry["ticket"].strip()
         ):
             paths.add(entry["path"].strip())
     return paths
+
+
+def _not_expired(entry: dict) -> bool:
+    expires = entry.get("expires")
+    if not isinstance(expires, str) or not expires.strip():
+        return entry.get("adr_reference") not in (None, "")
+    try:
+        return date.fromisoformat(expires.strip()) >= date.today()
+    except ValueError:
+        return False
