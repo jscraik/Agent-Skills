@@ -574,6 +574,58 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
             self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
+    def test_build_sdk_skill_proof_any_allows_split_alias_with_valid_agents_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source_handle.parent.mkdir(parents=True)
+            source_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+
+            workspace_runtime = repo_root / ".agents" / "skills"
+            workspace_handle_dir = workspace_runtime / "autofix"
+            workspace_handle_dir.parent.mkdir(parents=True)
+            workspace_handle_dir.symlink_to(source_handle.parent)
+
+            home_path = repo_root / ".tmp-home"
+            agents_runtime = home_path / ".agents" / "skills"
+            agents_runtime.parent.mkdir(parents=True, exist_ok=True)
+            agents_runtime.symlink_to(workspace_runtime)
+
+            foreign_runtime = Path(temp_dir) / "foreign" / "skills"
+            foreign_runtime.mkdir(parents=True)
+            codex_runtime = home_path / ".codex" / "skills"
+            codex_runtime.parent.mkdir(parents=True, exist_ok=True)
+            codex_runtime.symlink_to(foreign_runtime)
+
+            def resolve_skill_handle_fn(
+                _handle: str,
+                *,
+                repo_root_path: Path,
+            ) -> dict[str, object]:
+                del repo_root_path
+                return {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "runtime_visibility": "flat",
+                }
+
+            proof = runtime_adapters.build_sdk_skill_proof(
+                repo_root=repo_root,
+                handle="autofix",
+                runtime_target="any",
+                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                home_path=home_path,
+            )
+
+            self.assertEqual(proof["status"], "pass")
+            self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
+            self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
+            self.assertFalse(proof["gates"]["user_runtime_alias_consistent"])
+            self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
+            self.assertEqual(proof["runtime_diagnostics"]["failed_gate"], None)
+            self.assertEqual(proof["runtime_diagnostics"]["runtime_aliases"]["status"], "split_brain")
+
     def test_build_sdk_skill_proof_uses_canonical_source_under_user_runtime_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
