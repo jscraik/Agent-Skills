@@ -1,0 +1,84 @@
+{
+  "schema_version": "skills-sdk.gate-chain.v1",
+  "status": "pass",
+  "target_gate": "tessl_dry_run",
+  "gates": [
+    {
+      "id": "sdk_start",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-sdk_start.json",
+      "what_this_proves": "sdk_start gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "strict_audit",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-strict_audit.json",
+      "what_this_proves": "strict_audit gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "package_verify",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-package_verify.json",
+      "what_this_proves": "package_verify gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "security_risk_modes",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-security_risk_modes.json",
+      "what_this_proves": "security_risk_modes gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "scenario_quality",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-scenario_quality.json",
+      "what_this_proves": "scenario_quality gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "scorer_quality",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-scorer_quality.json",
+      "what_this_proves": "scorer_quality gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "scorer_calibration",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-scorer_calibration.json",
+      "what_this_proves": "scorer_calibration gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "oss_local",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-oss_local.json",
+      "what_this_proves": "oss_local gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "oss_cloud",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-oss_cloud.json",
+      "what_this_proves": "oss_cloud gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "tessl_local_proof",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-tessl_local_proof.json",
+      "what_this_proves": "tessl_local_proof gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    },
+    {
+      "id": "tessl_dry_run",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/release-gate-tessl_dry_run.json",
+      "what_this_proves": "tessl_dry_run gate has pass evidence for the current candidate.",
+      "what_this_does_not_prove": "It does not prove any later gate or live Tessl readiness."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "skills-sdk.live-handoff-lane-proof.v1",
+  "status": "pass",
+  "tessl_lane": "dry_run",
+  "trace_id": "69e2a881-9e97-43cb-b513-17b82abdfe51",
+  "tessl_eval": {
+    "status": "pass",
+    "dry_run": true,
+    "workspace": "jscraik",
+    "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+    "plugin_version": "0.2.0"
+  },
+  "source_receipt": "/private/tmp/improve-agent-native-tessl-dry-run-final2.json",
+  "what_this_proves": "Tessl live-private dry-run staging passed and did not start live Tessl scoring.",
+  "what_this_does_not_prove": "This does not prove Tessl live score, publication, hosted CI, or merge readiness."
+}

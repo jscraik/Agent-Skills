@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from release_ratchet_exceptions import release_ratchet_exception_paths
+
 
 FACTORY_GATE_REQUIRED_FIELDS = {
     "user_outcome",
@@ -278,7 +280,10 @@ RECEIPT_STEM_GATES = {
 
 def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
     carried = []
+    ignored = []
+    accepted = release_ratchet_exception_paths(evidence_dir, "no_carried_advisories")
     required_gates = set(_required_gate_chain(target_gate))
+    current_gate_receipts = _current_gate_receipt_paths(root, evidence_dir, target_gate)
     for path in sorted(evidence_dir.glob("*.json")) if evidence_dir.is_dir() else []:
         # Skip receipts for gates beyond the target gate
         if target_gate is not None:
@@ -286,8 +291,49 @@ def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: st
             if gate_id in REQUIRED_GATE_CHAIN and gate_id not in required_gates:
                 continue
         payload, error = _load_json(path)
-        carried.extend([f"{_rel(path, root)}:{error}"] if payload is None else [f"{_rel(path, root)}:{item}" for item in _has_carried_advisories(payload)])
-    return _finding("no_carried_advisories", "pass" if not carried else "fail", "Promotion gates must repair advisories or record accepted exceptions.", {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20]})
+        if payload is None:
+            item = f"{_rel(path, root)}:{error}"
+            _classify_carried_item(item, _rel(path, root), accepted, current_gate_receipts, ignored, carried)
+            continue
+        for advisory_path in _has_carried_advisories(payload):
+            item = f"{_rel(path, root)}:{advisory_path}"
+            _classify_carried_item(item, _rel(path, root), accepted, current_gate_receipts, ignored, carried)
+    return _finding(
+        "no_carried_advisories",
+        "pass" if not carried else "fail",
+        "Promotion gates must repair advisories or record accepted exceptions.",
+        {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20], "ignored_legacy": ignored[:20]},
+    )
+
+
+def _classify_carried_item(
+    item: str,
+    receipt_path: str,
+    accepted: set[str],
+    current_gate_receipts: set[str],
+    ignored: list[str],
+    carried: list[str],
+) -> None:
+    if item in accepted and receipt_path not in current_gate_receipts:
+        ignored.append(item)
+    else:
+        carried.append(item)
+
+
+def _current_gate_receipt_paths(root: Path, evidence_dir: Path, target_gate: str | None) -> set[str]:
+    payload, _error = _load_json(evidence_dir / "gate-chain.json")
+    gates = payload.get("gates") if payload else None
+    if not isinstance(gates, list):
+        return set()
+    required_gates = set(_required_gate_chain(target_gate))
+    paths: set[str] = set()
+    for gate in gates:
+        if not isinstance(gate, dict) or str(gate.get("id")) not in required_gates:
+            continue
+        receipt_path = _receipt_path(root, gate.get("receipt_path"))
+        if receipt_path is not None:
+            paths.add(_rel(receipt_path, root))
+    return paths
 
 
 def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
@@ -300,7 +346,7 @@ def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = 
         return _finding("ordered_gate_chain", "fail", "Gate-chain receipt must contain a gates list.", {"path": _rel(path, root)})
     required = _required_gate_chain(target_gate)
     evidence = _gate_chain_evidence(root, evidence_dir, gates, required, target_gate)
-    status = "pass" if all(not evidence[key] for key in ("missing_gates", "bad_status", "missing_receipts", "missing_claim_boundaries", "carried_advisories")) and evidence["order_ok"] else "fail"
+    status = "pass" if all(not evidence[key] for key in ("missing_gates", "bad_status", "missing_receipts", "missing_claim_boundaries", "missing_evidence_refs", "carried_advisories")) and evidence["order_ok"] else "fail"
     return _finding("ordered_gate_chain", status, "Gate receipts must exist, pass in order, and carry claim-boundary evidence.", {"path": _rel(path, root), **evidence})
 
 
@@ -322,6 +368,7 @@ def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any], requi
         "bad_status": _bad_gate_statuses(scoped_gates),
         "missing_receipts": _missing_gate_receipts(receipt_errors),
         "missing_claim_boundaries": _missing_claim_boundaries(scoped_gates),
+        "missing_evidence_refs": _missing_gate_evidence_refs(receipt_errors),
         "carried_advisories": _gate_carried_advisories(receipt_errors),
     }
 
@@ -354,12 +401,23 @@ def _gate_carried_advisories(receipt_errors: list[dict[str, Any]]) -> list[str]:
     return [item for error in receipt_errors for item in error["carried_advisories"]][:20]
 
 
+def _missing_gate_evidence_refs(receipt_errors: list[dict[str, Any]]) -> list[str]:
+    return [item["gate_id"] for item in receipt_errors if item["missing_evidence_refs"]]
+
+
 def _gate_receipt_error(root: Path, _evidence_dir: Path, gate: dict[str, Any]) -> dict[str, Any]:
     gate_id = str(gate.get("id"))
     receipt_path = _receipt_path(root, gate.get("receipt_path"))
     payload = _load_json(receipt_path)[0] if receipt_path is not None and receipt_path.is_file() else None
     carried = [f"{gate_id}:{item}" for item in _has_carried_advisories(payload)] if payload else []
-    return {"gate_id": gate_id, "missing_receipt": receipt_path is None or not receipt_path.is_file(), "carried_advisories": carried}
+    refs = payload.get("evidence_refs") if payload else None
+    missing_refs = gate_id in REQUIRED_GATE_CHAIN[REQUIRED_GATE_CHAIN.index("package_verify") :] and _blank(refs)
+    return {
+        "gate_id": gate_id,
+        "missing_receipt": receipt_path is None or not receipt_path.is_file(),
+        "missing_evidence_refs": missing_refs,
+        "carried_advisories": carried,
+    }
 
 
 def _receipt_path(root: Path, value: Any) -> Path | None:

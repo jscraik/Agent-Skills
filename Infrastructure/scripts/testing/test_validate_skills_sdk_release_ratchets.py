@@ -369,6 +369,40 @@ def test_release_ratchets_pass_for_valid_fixture() -> None:
     assert payload["finding_count"] == 0
 
 
+def test_release_ratchets_accept_prompt_as_task_body() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evals = root / "Skills" / "agent-ops" / "fixture-skill" / "references" / "evals.yaml"
+        evals.write_text(evals.read_text(encoding="utf-8").replace("  task: Run the fixture.\n", ""), encoding="utf-8")
+
+        payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    assert payload["status"] == "pass"
+    assert payload["finding_count"] == 0
+
+
+def test_release_ratchets_fail_without_task_or_prompt_body() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evals = root / "Skills" / "agent-ops" / "fixture-skill" / "references" / "evals.yaml"
+        evals.write_text(
+            evals.read_text(encoding="utf-8")
+            .replace("  prompt: Run the fixture.\n", "")
+            .replace("  task: Run the fixture.\n", ""),
+            encoding="utf-8",
+        )
+
+        payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    parser = next(check for check in payload["checks"] if check["code"] == "scenario_parser_parity")
+    assert parser["status"] == "fail"
+    assert parser["evidence"]["missing_fields"] == [{"id": "happy-main", "missing": ["task_or_prompt"]}]
+
+
 def test_release_ratchets_fail_tessl_list_receipt_without_crashing() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -404,6 +438,52 @@ def test_release_ratchets_fail_nested_malformed_tessl_receipt_without_crashing()
     assert lane["evidence"]["missing_lane"] == [
         ".harness/evidence/handoff/fixture-skill/tessl-malformed.json"
     ]
+
+
+def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
+        (evidence / "tessl-legacy.json").write_text("not json", encoding="utf-8")
+        (evidence / "package-verify-legacy.json").write_text(
+            json.dumps({"status": "pass", "advisories": [{"code": "legacy"}]}),
+            encoding="utf-8",
+        )
+        exception_payload = {
+            "schema_version": "skills-sdk.release-ratchet-exceptions.v1",
+            "accepted_exceptions": [
+                {
+                    "check": "tessl_lane_naming",
+                    "path": ".harness/evidence/handoff/fixture-skill/tessl-legacy.json",
+                    "reason": "Historical artifact predates lane field; current lane is covered by gate-chain receipts.",
+                },
+                {
+                    "check": "no_carried_advisories",
+                    "path": ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
+                    "reason": "Historical artifact predates JSON receipt contract; current lane is covered by gate-chain receipts.",
+                },
+                {
+                    "check": "no_carried_advisories",
+                    "path": ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
+                    "reason": "Historical package-verify advisory retained as legacy evidence; current package verify is covered by gate-chain receipts.",
+                },
+            ],
+        }
+        (evidence / "release-ratchet-exceptions.json").write_text(json.dumps(exception_payload), encoding="utf-8")
+
+        payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    assert payload["status"] == "pass"
+    lane = next(check for check in payload["checks"] if check["code"] == "tessl_lane_naming")
+    assert lane["evidence"]["ignored_legacy"] == [".harness/evidence/handoff/fixture-skill/tessl-legacy.json"]
+    advisories = next(check for check in payload["checks"] if check["code"] == "no_carried_advisories")
+    assert advisories["evidence"]["carried"] == []
+    assert set(advisories["evidence"]["ignored_legacy"]) == {
+        ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
+        ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
+    }
 
 
 def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> None:

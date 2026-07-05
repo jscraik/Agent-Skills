@@ -8,12 +8,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from helpers.schema_validator import _validate_schema_subset
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 from ask.skills_sdk.security_lane import build_security_lane_receipt  # noqa: E402
 
 

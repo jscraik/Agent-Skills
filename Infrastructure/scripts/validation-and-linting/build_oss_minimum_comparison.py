@@ -53,36 +53,6 @@ def _cases_by_id(proof_set: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return mapped
 
 
-def _proof_set_gate_status(proof_set: dict[str, Any] | None) -> str:
-    if not isinstance(proof_set, dict):
-        return "missing"
-    status = proof_set.get("gate_status")
-    return status if isinstance(status, str) and status else "missing"
-
-
-def _lane_score(proof_set: dict[str, Any] | None, *, lane: str) -> dict[str, Any]:
-    cases = list(_cases_by_id(proof_set or {}).values())
-    case_count = len(cases)
-    status_counts = {
-        "pass": sum(1 for case in cases if _case_status(case) == "pass"),
-        "blocked": sum(1 for case in cases if _case_status(case) == "blocked"),
-        "fail": sum(1 for case in cases if _case_status(case) == "fail"),
-        "missing": sum(1 for case in cases if _case_status(case) == "missing"),
-    }
-    pass_rate = status_counts["pass"] / case_count if case_count else 0.0
-    return {
-        "schema_version": "oss-lane-score/v1",
-        "lane": lane,
-        "case_count": case_count,
-        "pass_count": status_counts["pass"],
-        "blocked_count": status_counts["blocked"],
-        "fail_count": status_counts["fail"],
-        "missing_count": status_counts["missing"],
-        "pass_rate": round(pass_rate, 4),
-        "gate_status": _proof_set_gate_status(proof_set),
-    }
-
-
 def _owner_for_delta(case_id: str, delta_owners: dict[str, str], *, has_cloud: bool, local_status: str, cloud_status: str) -> str:
     if not has_cloud:
         return MISSING_CLOUD_EVIDENCE_OWNER
@@ -94,68 +64,6 @@ def _owner_for_delta(case_id: str, delta_owners: dict[str, str], *, has_cloud: b
     return UNCLASSIFIED_DELTA_OWNER
 
 
-def _evidence_path(case: dict[str, Any] | None) -> Any:
-    if not case:
-        return None
-    evidence = case.get("latest_evidence")
-    return evidence.get("scorecard_path") if isinstance(evidence, dict) else None
-
-
-def _comparison_row(
-    *,
-    case_id: str,
-    local_case: dict[str, Any],
-    cloud_case: dict[str, Any] | None,
-    delta_owners: dict[str, str],
-) -> dict[str, Any]:
-    local_status = _case_status(local_case)
-    cloud_status = _case_status(cloud_case) if cloud_case else "missing"
-    owner = _owner_for_delta(
-        case_id,
-        delta_owners,
-        has_cloud=cloud_case is not None,
-        local_status=local_status,
-        cloud_status=cloud_status,
-    )
-    return {
-        "case_id": case_id,
-        "bucket": local_case.get("bucket"),
-        "oss_local_status": local_status,
-        "oss_cloud_status": cloud_status,
-        "delta": local_status != cloud_status,
-        "owner_if_delta": owner,
-        "local_evidence_path": _evidence_path(local_case),
-        "cloud_evidence_path": _evidence_path(cloud_case),
-    }
-
-
-def _comparison_summary(comparisons: list[dict[str, Any]]) -> dict[str, int]:
-    return {
-        "case_count": len(comparisons),
-        "parity_count": sum(1 for item in comparisons if not item["delta"]),
-        "delta_count": sum(1 for item in comparisons if item["delta"]),
-        "missing_cloud_count": sum(1 for item in comparisons if item["oss_cloud_status"] == "missing"),
-        "missing_delta_owner_count": _missing_owner_count(comparisons),
-    }
-
-
-def _missing_owner_count(comparisons: list[dict[str, Any]]) -> int:
-    return sum(1 for item in comparisons if item["delta"] and item["owner_if_delta"] == UNCLASSIFIED_DELTA_OWNER)
-
-
-def _input_gate_status(local_proof_set: dict[str, Any], cloud_proof_set: dict[str, Any] | None) -> tuple[str, str, str]:
-    local_gate_status = _proof_set_gate_status(local_proof_set)
-    cloud_gate_status = _proof_set_gate_status(cloud_proof_set)
-    input_gate_status = "pass" if local_gate_status == "pass" and cloud_gate_status == "pass" else "blocked"
-    return input_gate_status, local_gate_status, cloud_gate_status
-
-
-def _comparison_status(summary: dict[str, int], input_gate_status: str) -> str:
-    if summary["case_count"] <= 0 or summary["delta_count"] or summary["missing_delta_owner_count"]:
-        return "blocked"
-    return "pass" if input_gate_status == "pass" else "blocked"
-
-
 def build_comparison(
     *,
     local_proof_set: dict[str, Any],
@@ -165,42 +73,55 @@ def build_comparison(
 ) -> dict[str, Any]:
     local_cases = _cases_by_id(local_proof_set)
     cloud_cases = _cases_by_id(cloud_proof_set or {})
-    comparisons: list[dict[str, Any]] = []
+    has_cloud = bool(cloud_cases)
+    local_gate_status = str(local_proof_set.get("gate_status") or "")
+    cloud_gate_status = str((cloud_proof_set or {}).get("gate_status") or "")
+    comparisons = []
     for case_id, local_case in local_cases.items():
-        comparisons.append(_comparison_row(
-            case_id=case_id,
-            local_case=local_case,
-            cloud_case=cloud_cases.get(case_id),
-            delta_owners=delta_owners,
-        ))
-    summary = _comparison_summary(comparisons)
-    input_gate_status, local_gate_status, cloud_gate_status = _input_gate_status(local_proof_set, cloud_proof_set)
-    status = _comparison_status(summary, input_gate_status)
-    return _comparison_receipt(
-        local_proof_set=local_proof_set,
-        cloud_proof_set=cloud_proof_set,
-        comparisons=comparisons,
-        summary=summary,
-        status=status,
-        input_gate_status=input_gate_status,
-        local_gate_status=local_gate_status,
-        cloud_gate_status=cloud_gate_status,
-        stage_maturity_expectations=stage_maturity_expectations,
+        cloud_case = cloud_cases.get(case_id)
+        local_status = _case_status(local_case)
+        cloud_status = _case_status(cloud_case) if cloud_case else "missing"
+        owner = _owner_for_delta(
+            case_id,
+            delta_owners,
+            has_cloud=has_cloud and cloud_case is not None,
+            local_status=local_status,
+            cloud_status=cloud_status,
+        )
+        comparisons.append(
+            {
+                "case_id": case_id,
+                "bucket": local_case.get("bucket"),
+                "oss_local_status": local_status,
+                "oss_cloud_status": cloud_status,
+                "delta": local_status != cloud_status,
+                "owner_if_delta": owner,
+                "local_evidence_path": (local_case.get("latest_evidence") or {}).get("scorecard_path")
+                if isinstance(local_case.get("latest_evidence"), dict)
+                else None,
+                "cloud_evidence_path": (cloud_case.get("latest_evidence") or {}).get("scorecard_path")
+                if cloud_case and isinstance(cloud_case.get("latest_evidence"), dict)
+                else None,
+            }
+        )
+    missing_owner_count = sum(
+        1 for item in comparisons if item["delta"] and item["owner_if_delta"] == UNCLASSIFIED_DELTA_OWNER
     )
-
-
-def _comparison_receipt(
-    *,
-    local_proof_set: dict[str, Any],
-    cloud_proof_set: dict[str, Any] | None,
-    comparisons: list[dict[str, Any]],
-    summary: dict[str, int],
-    status: str,
-    input_gate_status: str,
-    local_gate_status: str,
-    cloud_gate_status: str,
-    stage_maturity_expectations: dict[str, str] | None,
-) -> dict[str, Any]:
+    summary = {
+        "case_count": len(comparisons),
+        "parity_count": sum(1 for item in comparisons if not item["delta"]),
+        "delta_count": sum(1 for item in comparisons if item["delta"]),
+        "missing_cloud_count": sum(1 for item in comparisons if item["oss_cloud_status"] == "missing"),
+        "missing_delta_owner_count": missing_owner_count,
+    }
+    proof_sets_passed = local_gate_status == "pass" and cloud_gate_status == "pass"
+    status = (
+        "pass"
+        if summary["case_count"] > 0 and summary["delta_count"] == 0 and proof_sets_passed
+        else "blocked"
+    )
+    if missing_owner_count:
+        status = "blocked"
     return {
         "schema_version": "oss-minimum-comparison/v1",
         "status": status,
@@ -208,24 +129,18 @@ def _comparison_receipt(
         "skill": local_proof_set.get("skill"),
         "baseline_profile": local_proof_set.get("codex_profile"),
         "comparison_profile": (cloud_proof_set or {}).get("codex_profile", "oss-cloud"),
+        "proof_set_gate_statuses": {
+            "oss-local": local_gate_status or "missing",
+            "oss-cloud": cloud_gate_status or "missing",
+        },
         "shard_size_limit": local_proof_set.get("shard_size_limit"),
         "summary": summary,
-        "input_gate_status": input_gate_status,
-        "input_gate_evidence": {
-            "oss_local_gate_status": local_gate_status,
-            "oss_cloud_gate_status": cloud_gate_status,
-        },
-        "lane_scores": {
-            "oss-local": _lane_score(local_proof_set, lane="oss-local"),
-            "oss-cloud": _lane_score(cloud_proof_set, lane="oss-cloud"),
-        },
         "stage_maturity_expectations": stage_maturity_expectations or DEFAULT_STAGE_MATURITY_EXPECTATIONS,
         "comparisons": comparisons,
         "blocked_next_gates": BLOCKED_NEXT_GATES_AFTER_PASS if status == "pass" else BLOCKED_NEXT_GATES_WHEN_BLOCKED,
         "notes": [
             "This receipt compares the 15+5 oss-local minimum proof set against oss-cloud evidence.",
             "Missing cloud evidence blocks cloud eval promotion until the same selected cases have receipts.",
-            "Comparison promotion requires both input proof-set gates to pass; parity alone is not sufficient.",
             "Every non-parity case must carry an owner before Tessl dry-run or live evaluation.",
         ],
     }

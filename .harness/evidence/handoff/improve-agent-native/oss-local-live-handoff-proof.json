@@ -1,0 +1,14 @@
+{
+  "schema_version": "skills-sdk.live-handoff-lane-proof.v1",
+  "status": "pass",
+  "profile": "oss-local",
+  "codex_profile": "oss-local",
+  "codex_exec_invoked": true,
+  "coverage_scope": "tessl_live_confirmation_set_only",
+  "full_release_lane_status": "not_claimed",
+  "case_count": 40,
+  "passed_count": 40,
+  "source_receipt": ".harness/evidence/handoff/improve-agent-native/qwen-oss-local-full-release-ledger.json",
+  "what_this_proves": "oss-local has the 40-case Tessl live confirmation set passing with codex_exec_invoked=true.",
+  "what_this_does_not_prove": "This does not prove the full release lane, Tessl live score, publication, hosted CI, merge readiness, or any Tessl scenario not listed in the source receipt."
+}

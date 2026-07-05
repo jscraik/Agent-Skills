@@ -10,6 +10,29 @@ SEMANTIC_ACCEPTANCE_TYPES = {
     "text_field_in",
     "text_field_present",
 }
+BEHAVIOR_VERBS = {
+    "asks",
+    "avoids",
+    "blocks",
+    "cites",
+    "classifies",
+    "compares",
+    "distinguishes",
+    "explains",
+    "identifies",
+    "includes",
+    "maps",
+    "names",
+    "preserves",
+    "records",
+    "refuses",
+    "reports",
+    "returns",
+    "separates",
+    "states",
+    "uses",
+}
+
 
 NEGATED_BOUNDARY_PRONE_PHRASES = {
     "ci passed",
@@ -88,37 +111,22 @@ def _keyword_list_expected_signal_items(acceptance: list[Any], scenario_id: str)
     for index, item in enumerate(acceptance, start=1):
         if not isinstance(item, dict):
             continue
-        if _is_keyword_list_expected_signal(item):
+        item_type = str(item.get("type") or "").strip().lower()
+        if item_type != "expected_signal":
+            continue
+        value = str(item.get("value") or "").strip()
+        words = [word for word in value.replace(".", " ").replace(",", " ").split() if word]
+        if (value.count(",") >= 2 and len(words) <= 8) or _looks_like_keyword_fragment(value, words):
             evidence.append(f"{scenario_id}:acceptance[{index}]")
     return evidence
 
 
-def _is_keyword_list_expected_signal(item: dict[str, Any]) -> bool:
-    if _acceptance_type(item) != "expected_signal":
+def _looks_like_keyword_fragment(value: str, words: list[str]) -> bool:
+    if not 2 <= len(words) <= 8:
         return False
-    value = str(item.get("value") or "").strip()
-    words = _signal_words(value)
-    if len(words) < 2:
+    if any(separator in value for separator in [",", ";", ":", ".", "?", "!"]):
         return False
-    return not _has_behavioral_signal_shape(value, words)
-
-
-def _acceptance_type(item: dict[str, Any]) -> str:
-    return str(item.get("type") or "").strip().lower()
-
-
-def _signal_words(value: str) -> list[str]:
-    return [word for word in value.replace(".", " ").replace(",", " ").split() if word]
-
-
-def _has_behavioral_signal_shape(value: str, words: list[str]) -> bool:
-    if any(mark in value for mark in (";", ":")):
-        return True
-    if len(words) > 8 or (value.count(".") >= 1 and len(words) > 8):
-        return True
-    return _has_signal_connector(words)
-
-
-def _has_signal_connector(words: list[str]) -> bool:
-    connectors = {"and", "or", "when", "while", "before", "after", "because", "without"}
-    return any(word.lower() in connectors for word in words)
+    normalized_words = [word.strip("()[]{}").lower() for word in words]
+    if any(word in BEHAVIOR_VERBS for word in normalized_words):
+        return False
+    return value[:1].islower()

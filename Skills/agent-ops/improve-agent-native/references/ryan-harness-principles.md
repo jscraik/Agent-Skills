@@ -1,4 +1,4 @@
-# Harness Principles
+# Ryan Harness Principles
 
 Use this reference for the reasoning behind agent-native repository improvements. It distills the pinned upstream Ryan/OpenAI harness source bundle into the principles needed for everyday audits.
 

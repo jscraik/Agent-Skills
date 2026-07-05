@@ -1,0 +1,19 @@
+{
+  "schema_version": "skills-sdk.plugin-shape-parity.v1",
+  "status": "pass",
+  "target_kind": "standalone_skill",
+  "openai_skill_shape": "pass",
+  "tessl_plugin_shape": "pass",
+  "private": true,
+  "workspace": "jscraik",
+  "files": [
+    ".tessl-plugin/plugin.json",
+    "tessl.json",
+    "README.md",
+    "skills/improve-agent-native/SKILL.md",
+    "skills/improve-agent-native/references/evals.yaml",
+    "references/evals.yaml"
+  ],
+  "what_this_proves": "The dry-run candidate has OpenAI/Codex skill shape and private Tessl plugin staging metadata.",
+  "what_this_does_not_prove": "It does not prove Tessl live scoring, publication, or installability."
+}

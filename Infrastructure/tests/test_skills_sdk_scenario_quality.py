@@ -38,6 +38,235 @@ def _write_skill_with_evals(root: Path, evals_text: str) -> Path:
     return skill_dir
 
 
+def _registry_reference_evals_yaml(registry_id: str = "registry://shared/proof-boundary") -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants to reuse a proven registry seed without treating the registry as runtime authority.
+  should: Use the SDK-adapted local scenario and local criteria only when an adaptation receipt exists.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  scenario_registry_id: {registry_id}
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
+def _nested_registry_reference_evals_yaml(registry_id: str = "registry://shared/proof-boundary") -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants to preserve nested registry provenance after SDK adaptation.
+  should: Use the SDK-adapted local scenario and local criteria only when an adaptation receipt exists.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  metadata:
+    scenario_registry_id: "{registry_id}"
+    provenance: "Adapted from {registry_id} through the Skills SDK pipeline."
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
+def _registry_source_evals_yaml(
+    registry_id: str = "registry://shared/proof-boundary",
+    *,
+    version: str = "0.1.0",
+    digest: str = "sha256:fixture",
+) -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants to pin registry provenance after SDK adaptation.
+  should: Use the SDK-adapted local scenario only when id, version, and digest match the receipt.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  registry_source:
+    canonical_scenario_id: "{registry_id}"
+    version: "{version}"
+    digest: "{digest}"
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
+def _nested_registry_source_evals_yaml(
+    registry_id: str = "registry://shared/proof-boundary",
+    *,
+    version: str = "0.1.0",
+    digest: str = "sha256:fixture",
+) -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants to preserve nested registry source provenance after SDK adaptation.
+  should: Use the SDK-adapted local scenario only when nested id, version, and digest match the receipt.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  metadata:
+    registry_source:
+      canonical_scenario_id: "{registry_id}"
+      version: "{version}"
+      digest: "{digest}"
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
+def _mixed_pinned_and_text_registry_source_evals_yaml(
+    registry_id: str = "registry://shared/proof-boundary",
+    *,
+    version: str = "0.1.0",
+    digest: str = "sha256:fixture",
+) -> str:
+    return f"""schema_version: '2.0'
+skill_name: sample
+cases:
+- id: proof-boundary
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: scenario registry guardrail
+  given: A local skill wants pinned registry provenance plus human-readable text provenance.
+  should: Require the receipt to match the pinned registry_source version and digest, not the loose text URI.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  registry_source:
+    canonical_scenario_id: "{registry_id}"
+    version: "{version}"
+    digest: "{digest}"
+  metadata:
+    provenance: "Adapted from {registry_id} through the Skills SDK pipeline."
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior without treating the registry as runtime authority.
+"""
+
+
+def _plain_evals_yaml() -> str:
+    return """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: local-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: local scenario quality
+  given: A local sample skill needs a package-owned scenario without registry provenance.
+  should: Use local criteria and evidence without shared registry references.
+  prompt: Produce a proof-backed answer for the local sample skill.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns proof-backed local behavior.
+"""
+
+
+def _write_adaptation_receipt(
+    skill_dir: Path,
+    *,
+    case_id: str,
+    registry_id: str,
+    target_path: str | None = None,
+    package_id: str = "sample",
+    version: str = "0.1.0",
+    digest: str = "sha256:fixture",
+    validation_status: str = "pass",
+    include_full_schema_fields: bool = True,
+) -> Path:
+    receipt_dir = skill_dir / "references" / "scenario-adaptation-receipts"
+    receipt_dir.mkdir(parents=True, exist_ok=True)
+    receipt_path = receipt_dir / f"{case_id}.json"
+    payload = {
+            "schema_version": "skills-sdk.scenario-adaptation-receipt.v0",
+            "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json",
+            "status": "pass",
+            "registry_source": {
+                "canonical_scenario_id": registry_id,
+                "version": version,
+                "digest": digest,
+            },
+            "target_skill": {
+                "path": target_path or skill_dir.as_posix(),
+                "package_id": package_id,
+                "source_head": "960493d",
+            },
+            "target_case_id": case_id,
+            "criteria_ownership": {
+                "local_criteria_authoritative": True,
+                "criteria_path": f"{skill_dir.as_posix()}/references/evals.yaml#{case_id}",
+            },
+    }
+    if include_full_schema_fields:
+        payload.update({
+            "operation": "scenario_registry_adapt",
+            "authorized_stage": "scenario_generation",
+            "operator_context": {
+                "command": "./bin/ask sdk eval scenario-registry adapt sample --scenario registry --apply --json --robot",
+                "workspace": "jscraik",
+            },
+            "localization_summary": "Adapted the registry seed to a local sample skill case.",
+            "fixture_asset_plan": [],
+            "acceptance_mapping": ["expected_signal -> local expected_signal"],
+            "domain_fit": "The local skill needs proof-boundary behavior.",
+            "nonportable_assumptions_removed": ["Removed source skill path assumptions."],
+            "validation": [
+                {
+                    "command": "./bin/ask sdk eval scenario-quality sample --preview --json --robot",
+                    "status": validation_status,
+                    "evidence_ref": ".harness/evidence/example/scenario-quality.json",
+                }
+            ],
+            "mutation_manifest": [
+                f"{skill_dir.as_posix()}/references/evals.yaml",
+                receipt_path.as_posix(),
+            ],
+            "blockers": [],
+        })
+    receipt_path.write_text(json.dumps(payload), encoding="utf-8")
+    return receipt_path
 
 
 def test_minimal_yaml_comment_strip_ignores_plain_scalar_apostrophe() -> None:
@@ -241,6 +470,354 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["scenario_count"], 0)
         self.assertTrue(any(check["id"] == "evals_yaml_present" for check in receipt["blockers"]))
+
+    def test_builder_blocks_direct_registry_reference_in_evals_without_adaptation_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml())
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(
+            any(check["id"] == "registry_reference_requires_sdk_adaptation_receipt" for check in receipt["blockers"])
+        )
+
+    def test_builder_allows_registry_reference_after_sdk_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(skill_dir, case_id="proof-boundary", registry_id=registry_id)
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+        quality_check_ids = {check["id"]: check["status"] for check in receipt["quality_checks"]}
+        self.assertEqual(quality_check_ids["registry_reference_requires_sdk_adaptation_receipt"], "pass")
+
+    def test_builder_allows_repo_relative_target_skill_path_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            target_path = skill_dir.relative_to(REPO_ROOT).as_posix()
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                target_path=target_path,
+            )
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+
+    def test_builder_blocks_basename_only_target_skill_path_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                target_path=skill_dir.name,
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("target_skill_mismatch", evidence)
+
+    def test_builder_blocks_wrong_package_id_in_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                package_id="other-skill",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("target_skill_mismatch", evidence)
+
+    def test_builder_allows_nested_registry_reference_after_sdk_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _nested_registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(skill_dir, case_id="proof-boundary", registry_id=registry_id)
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+
+    def test_builder_allows_nested_registry_source_after_sdk_adaptation_receipt(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _nested_registry_source_evals_yaml(registry_id))
+            _write_adaptation_receipt(skill_dir, case_id="proof-boundary", registry_id=registry_id)
+
+            receipt = build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["blocked_count"], 0)
+
+    def test_builder_blocks_registry_source_digest_mismatch(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _registry_source_evals_yaml(registry_id, digest="sha256:expected"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                digest="sha256:stale",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
+    def test_builder_blocks_nested_registry_source_version_mismatch(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _nested_registry_source_evals_yaml(registry_id, version="0.2.0"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                version="0.1.0",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
+    def test_builder_blocks_nested_registry_source_digest_mismatch(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _nested_registry_source_evals_yaml(registry_id, digest="sha256:expected"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                digest="sha256:stale",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
+    def test_builder_blocks_pass_adaptation_receipt_with_failed_validation_row(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                validation_status="fail",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("schema_invalid", evidence)
+        self.assertIn("validation[0].status:const", evidence)
+
+    def test_builder_blocks_registry_source_id_prefix_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _nested_registry_reference_evals_yaml("registry://shared/proof-boundary-v2"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id="registry://shared/proof-boundary",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
+    def test_builder_blocks_partial_adaptation_receipt_missing_schema_required_fields(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                include_full_schema_fields=False,
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        evidence = "\n".join(
+            evidence
+            for check in receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("receipt_missing_required_fields", evidence)
+        self.assertIn("operation", evidence)
+
+    def test_builder_blocks_adaptation_receipt_missing_full_schema_fields(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml(registry_id))
+            receipt_path = _write_adaptation_receipt(skill_dir, case_id="proof-boundary", registry_id=registry_id)
+            payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+            payload.pop("validation")
+            payload.pop("mutation_manifest")
+            receipt_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        evidence = "\n".join(
+            evidence
+            for check in raised.exception.receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("receipt_missing_required_fields", evidence)
+        self.assertIn("validation", evidence)
+        self.assertIn("mutation_manifest", evidence)
+
+    def test_builder_blocks_text_duplicate_when_pinned_registry_source_digest_mismatches(self) -> None:
+        registry_id = "registry://shared/proof-boundary"
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(
+                Path(tmp),
+                _mixed_pinned_and_text_registry_source_evals_yaml(registry_id, digest="sha256:expected"),
+            )
+            _write_adaptation_receipt(
+                skill_dir,
+                case_id="proof-boundary",
+                registry_id=registry_id,
+                digest="sha256:stale",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        evidence = "\n".join(
+            evidence
+            for check in raised.exception.receipt["blockers"]
+            if check["id"] == "registry_reference_requires_sdk_adaptation_receipt"
+            for evidence in check["evidence"]
+        )
+        self.assertIn("registry_source_mismatch", evidence)
+
+    def test_builder_blocks_direct_registry_reference_in_skill_entrypoint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _plain_evals_yaml())
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: sample\n---\n# Sample\nLoad registry://shared/proof-boundary directly.\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(REPO_ROOT, source_path=skill_dir, query=skill_dir.as_posix())
+
+        receipt = raised.exception.receipt
+        self.assertTrue(
+            any(check["id"] == "registry_reference_not_in_skill_entrypoint" for check in receipt["blockers"])
+        )
+
+    def test_no_direct_registry_validator_blocks_unauthenticated_ad_hoc_usage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = _write_skill_with_evals(Path(tmp), _registry_reference_evals_yaml())
+            process = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/scripts/validation-and-linting/validate_no_direct_registry_scenario_use.py",
+                    skill_dir.as_posix(),
+                    "--json",
+                ],
+                cwd=REPO_ROOT,
+                env=_command_env(),
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+
+        self.assertEqual(process.returncode, 1)
+        payload = json.loads(process.stdout)
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(payload["blockers"][0]["id"], "registry_reference_requires_sdk_adaptation_receipt")
 
     def test_yaml_fallback_parses_fixture_without_subprocess(self) -> None:
         real_import = __import__
@@ -1052,50 +1629,9 @@ cases:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: refuse, blocked, destructive, evidence-first.
-  - type: expected_signal
-    value: Keeps evidence in place and proposes a read-only audit before any file removal.
-""",
-            )
-
-            with self.assertRaises(ScenarioQualityError) as raised:
-                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
-
-        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
-        self.assertIn("release_rubric_expected_signal_behavioral_sentence", blocker_ids)
-        self.assertNotIn("release_rubric_regex_not_primary", blocker_ids)
-        validate_scenario_quality_receipt(raised.exception.receipt)
-
-    def test_builder_blocks_whitespace_keyword_list_expected_signal_in_release_rubric(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            skill_dir = _write_skill_with_evals(
-                Path(temp_dir),
-                """schema_version: '2.0'
-skill_name: sample
-cases:
-- id: whitespace-keyword-list-release-signal
-  category: pressure
-  eval_modes:
-  - release
-  realistic: true
-  why_realistic: Maintainers need release rubrics that score observable behavior rather than short word hits.
-  unit: release scorer whitespace keyword list safety
-  given: A repository note asks for a release claim with missing evidence.
-  should: Block the release claim and ask for current evidence.
-  actual_artifact: artifacts/release-decision.md
-  expected_artifact: release decision note
-  reproduce: ./bin/ask sdk eval run sample
-  prompt: Review a release note that lacks current validation evidence.
-  claim_ids:
-  - sample.claim
-  deterministic_checks:
-    forbidden_commands:
-    - rm -rf
-  acceptance:
-  - type: expected_signal
     value: score gaps evidence
   - type: expected_signal
-    value: Blocks the release claim until current validation and hosted proof are present.
+    value: Keeps evidence in place and proposes a read-only audit before any file removal.
 """,
             )
 

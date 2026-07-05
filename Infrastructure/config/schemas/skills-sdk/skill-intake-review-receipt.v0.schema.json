@@ -29,7 +29,11 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"]
+        "enum": [
+          "skills-sdk.skill-intake-receipt.v0",
+          "skills-sdk.package-security-signature-receipt.v0",
+          "skills-sdk.risk-mode-taxonomy-receipt.v0"
+        ]
       }
     },
     "review_decision": {"type": "string", "enum": ["ready_for_adoption_decision", "needs_human_review", "blocked"]},

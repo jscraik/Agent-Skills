@@ -1,4 +1,4 @@
-# Mechanical Boundaries
+# Ryan Mechanical Boundaries
 
 Encode architecture and workflow invariants into enforceable repo mechanisms while leaving local implementation freedom.
 

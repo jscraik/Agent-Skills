@@ -1,0 +1,127 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://brainwav.dev/coding-harness/contracts/coding-policy.schema.json",
+	"title": "Coding Policy Index",
+	"type": "object",
+	"additionalProperties": false,
+	"required": [
+		"$schema",
+		"schemaVersion",
+		"authority",
+		"entrypoints",
+		"policyModules",
+		"claimBoundaries"
+	],
+	"properties": {
+		"$schema": { "const": "./contracts/coding-policy.schema.json" },
+		"schemaVersion": { "const": "harness-coding-policy/v1" },
+		"authority": { "const": "canonical" },
+		"entrypoints": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["human", "machine", "modules"],
+			"properties": {
+				"human": { "const": "CODESTYLE.md" },
+				"machine": { "const": "coding-policy.json" },
+				"modules": { "const": "codestyle/README.md" }
+			}
+		},
+		"policyModules": {
+			"type": "array",
+			"minItems": 1,
+			"items": { "$ref": "#/$defs/policyModule" }
+		},
+		"claimBoundaries": {
+			"type": "array",
+			"minItems": 1,
+			"items": { "type": "string", "minLength": 1 }
+		}
+	},
+	"$defs": {
+		"moduleId": {
+			"enum": [
+				"foundations",
+				"docs-config-release",
+				"quality-security-ops",
+				"python",
+				"typescript",
+				"shell",
+				"package-managers",
+				"git-workflow",
+				"security",
+				"testing",
+				"development-workflow"
+			]
+		},
+		"modulePath": {
+			"enum": [
+				"codestyle/01-foundations.md",
+				"codestyle/04-docs-config-and-release.md",
+				"codestyle/05-quality-security-ops.md",
+				"codestyle/07-python.md",
+				"codestyle/08-typescript.md",
+				"codestyle/10-shell-bash-zsh.md",
+				"codestyle/11-package-managers-pnpm-npm.md",
+				"codestyle/13-git-workflow.md",
+				"codestyle/16-security.md",
+				"codestyle/17-testing.md",
+				"codestyle/19-development-workflow.md"
+			]
+		},
+		"sourceRule": {
+			"enum": [
+				"boy-scout",
+				"ci-safety",
+				"code-formatting",
+				"commit-conventions",
+				"context-artifacts",
+				"context-writing-style",
+				"dependency-management",
+				"error-handling",
+				"file-hygiene",
+				"no-secrets",
+				"plugin-evals",
+				"rule-frontmatter",
+				"script-as-black-box",
+				"script-delegation",
+				"skill-authoring",
+				"stateful-artifacts",
+				"sync-before-work",
+				"testing-standards"
+			]
+		},
+		"policyModule": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"id",
+				"path",
+				"changedFilePatterns",
+				"sourceRules",
+				"requiredGates"
+			],
+			"properties": {
+				"id": { "$ref": "#/$defs/moduleId" },
+				"path": { "$ref": "#/$defs/modulePath" },
+				"changedFilePatterns": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "type": "string", "minLength": 1 },
+					"uniqueItems": true
+				},
+				"sourceRules": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "$ref": "#/$defs/sourceRule" },
+					"uniqueItems": true
+				},
+				"requiredGates": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "type": "string", "minLength": 1 },
+					"uniqueItems": true
+				}
+			}
+		}
+	}
+}

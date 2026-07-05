@@ -1,4 +1,4 @@
-# Brownfield Readiness
+# Harness Brownfield Readiness
 
 Make existing codebases agent-ready by tightening boundaries, vocabulary, issue states, validation loops, diagnostics, and shared decision memory.
 

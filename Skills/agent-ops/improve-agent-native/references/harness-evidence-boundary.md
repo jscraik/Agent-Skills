@@ -1,4 +1,4 @@
-# Evidence Boundary
+# Harness Evidence Boundary
 
 Distinguish local, PR, CI, tracker, review, merge, provenance, and product-facing truth before claiming readiness.
 

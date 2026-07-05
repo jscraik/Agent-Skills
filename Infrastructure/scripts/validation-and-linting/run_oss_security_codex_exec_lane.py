@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -15,25 +16,52 @@ from extract_oss_security_review import validate_review
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CONFIGS_ROOT = REPO_ROOT.parent / "configs" / "codex"
 DEFAULT_TARGET = "Skills/agent-ops/improve-agent-native"
 SECURITY_MODEL = "h4rithd/coder:14b"
-REVIEW_PROMPT_CONTRACT_VERSION = "skills-sdk.oss-security-review-prompt.v1"
-REVIEW_INPUT_COMPACT_LIMIT_BYTES = 24 * 1024
+DETERMINISTIC_LANE_TIMEOUT_SECONDS = 600
+CODEX_EXEC_TIMEOUT_SECONDS = 1800
+
+
+def _configs_root() -> Path:
+    configured = os.environ.get("ASK_OSS_SECURITY_CONFIGS_ROOT")
+    if configured:
+        candidate = Path(configured).expanduser().resolve()
+        if candidate.exists():
+            return candidate
+        raise FileNotFoundError(
+            "ASK_OSS_SECURITY_CONFIGS_ROOT points to a missing Codex config directory: "
+            f"{candidate}"
+        )
+    sibling = REPO_ROOT.parent / "configs" / "codex"
+    if sibling.exists():
+        return sibling
+    raise FileNotFoundError(
+        "oss-security Codex config directory not found. Set ASK_OSS_SECURITY_CONFIGS_ROOT "
+        f"or place configs at the sibling checkout path: {sibling}"
+    )
 
 
 def _copy_codex_home(codex_home: Path) -> None:
     codex_home.mkdir(parents=True, exist_ok=True)
+    configs_root = _configs_root()
     for name in ("config.toml", "oss-security.config.toml"):
-        shutil.copy2(CONFIGS_ROOT / name, codex_home / name)
+        source = configs_root / name
+        if not source.exists():
+            raise FileNotFoundError(
+                f"required oss-security Codex config file is missing: {source}. "
+                "Set ASK_OSS_SECURITY_CONFIGS_ROOT to a directory containing config.toml "
+                "and oss-security.config.toml."
+            )
+        shutil.copy2(source, codex_home / name)
 
 
 def _prompt(target: str) -> str:
+    command = f"./bin/ask sdk security run-lane {shlex.quote(target)} --preview --profile oss-security --json --robot"
     js_source = (
         '// @exec: {"yield_time_ms": 30000, "max_output_tokens": 4000}\n'
         "const r = await tools.exec_command({\n"
-        f'  cmd: "./bin/ask sdk security run-lane {target} --preview --profile oss-security --json --robot",\n'
-        f'  workdir: "{REPO_ROOT.as_posix()}",\n'
+        f"  cmd: {json.dumps(command)},\n"
+        f"  workdir: {json.dumps(REPO_ROOT.as_posix())},\n"
         "  yield_time_ms: 30000,\n"
         "  max_output_tokens: 4000\n"
         "});\n"
@@ -51,6 +79,7 @@ def _prompt(target: str) -> str:
 
 def _receipt_review_input(lane_receipt: dict[str, Any]) -> dict[str, Any]:
     lane = lane_receipt["data"]["skills_sdk_security_lane"]
+    receipt = lane.get("receipt", {})
     return {
         "schema_version": "skills-sdk.oss-security-review-input.v0",
         "package": lane.get("package_id"),
@@ -59,10 +88,10 @@ def _receipt_review_input(lane_receipt: dict[str, Any]) -> dict[str, Any]:
         "package_digest": lane.get("package_digest"),
         "package_security_signature_digest": lane.get("package_security_signature_digest"),
         "risk_mode_taxonomy_digest": lane.get("risk_mode_taxonomy_digest"),
-        "indicator_summary": lane.get("indicator_summary", {}),
-        "primary_mode": lane.get("primary_mode"),
-        "detected_modes": lane.get("detected_modes", []),
-        "commands": lane.get("commands", []),
+        "indicator_summary": receipt.get("indicator_summary", {}),
+        "primary_mode": receipt.get("primary_mode"),
+        "detected_modes": receipt.get("detected_modes", []),
+        "commands": receipt.get("commands", []),
         "profile_review": lane.get("profile_review", {}),
     }
 
@@ -75,41 +104,37 @@ def _review_prompt(review_input: dict[str, Any]) -> str:
         "evidence_digest_seen, reviewer_model_boundary. The evidence_digest_seen value "
         "must be the security_lane_digest from the receipt. The review_status value must "
         "be exactly one of: pass, warn, fail, blocked. The risk_summary value must be "
-        "a non-empty sentence under 320 characters. The required_followups value must "
-        "contain at most 5 compact strings. The reviewer_model_boundary value must explain "
-        "that you reviewed only the supplied receipt and did not run tools or commands. "
-        f"Prompt contract: {REVIEW_PROMPT_CONTRACT_VERSION}.\n\n"
+        "a non-empty sentence. The reviewer_model_boundary value must explain that you "
+        "reviewed only the supplied receipt and did not run tools or commands.\n\n"
         "Receipt summary JSON:\n"
         f"{json.dumps(review_input, sort_keys=True)}\n"
     )
 
 
-def _model_blocker(model: str | None) -> str | None:
-    if model is None or model == SECURITY_MODEL:
-        return None
-    return f"oss-security receipt review only allows {SECURITY_MODEL}; got {model}"
-
-
 def _run_deterministic_lane(target: str) -> tuple[int, dict[str, Any] | None, str]:
-    process = subprocess.run(
-        [
-            "./bin/ask",
-            "sdk",
-            "security",
-            "run-lane",
-            target,
-            "--preview",
-            "--profile",
-            "oss-security",
-            "--json",
-            "--robot",
-        ],
-        cwd=REPO_ROOT,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
+    try:
+        process = subprocess.run(
+            [
+                "./bin/ask",
+                "sdk",
+                "security",
+                "run-lane",
+                target,
+                "--preview",
+                "--profile",
+                "oss-security",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=DETERMINISTIC_LANE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return 124, None, _timeout_output(exc)
     try:
         payload = json.loads(process.stdout)
     except json.JSONDecodeError:
@@ -128,23 +153,30 @@ def _run_codex(
     output_dir.mkdir(parents=True, exist_ok=True)
     jsonl_path = output_dir / "oss-security-codex-exec-security-lane.jsonl"
     last_message_path = output_dir / "oss-security-codex-exec-security-lane-last.txt"
-    process = subprocess.run(
-        _codex_command(
-            sandbox="workspace-write",
-            last_message_path=last_message_path,
-            model=model,
-            model_catalog_json=model_catalog_json,
-        ),
-        input=_prompt(target),
-        cwd=REPO_ROOT,
-        env=_codex_env(codex_home),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
-    jsonl_path.write_text(process.stdout, encoding="utf-8")
-    return process.returncode, jsonl_path, last_message_path
+    try:
+        process = subprocess.run(
+            _codex_command(
+                sandbox="workspace-write",
+                last_message_path=last_message_path,
+                model=model,
+                model_catalog_json=model_catalog_json,
+            ),
+            input=_prompt(target),
+            cwd=REPO_ROOT,
+            env=_codex_env(codex_home),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=CODEX_EXEC_TIMEOUT_SECONDS,
+        )
+        output = process.stdout
+        returncode = process.returncode
+    except subprocess.TimeoutExpired as exc:
+        output = _timeout_output(exc)
+        returncode = 124
+    jsonl_path.write_text(output, encoding="utf-8")
+    return returncode, jsonl_path, last_message_path
 
 
 def _codex_command(
@@ -154,9 +186,8 @@ def _codex_command(
     model: str | None,
     model_catalog_json: str | None,
 ) -> list[str]:
-    blocker = _model_blocker(model)
-    if blocker:
-        raise ValueError(blocker)
+    model = _validate_model_override(model)
+    model_catalog_json = _validate_model_catalog_json(model_catalog_json)
     command = [
         "codex",
         "exec",
@@ -172,10 +203,41 @@ def _codex_command(
         str(last_message_path),
     ]
     if model:
-        command.extend(["-c", f'model="{model}"'])
+        command.extend(["-c", f"model={json.dumps(model)}"])
     if model_catalog_json:
-        command.extend(["-c", f'model_catalog_json="{model_catalog_json}"'])
+        command.extend(["-c", f"model_catalog_json={json.dumps(model_catalog_json)}"])
     return command
+
+
+def _validate_model_override(model: str | None) -> str | None:
+    if model is None:
+        return None
+    if model != SECURITY_MODEL:
+        raise ValueError(f"oss-security model override must be {SECURITY_MODEL!r}")
+    return model
+
+
+def _validate_model_catalog_json(model_catalog_json: str | None) -> str | None:
+    if model_catalog_json is None:
+        return None
+    try:
+        payload = json.loads(model_catalog_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError("model_catalog_json must be valid JSON") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("model_catalog_json must decode to a JSON object")
+    model = payload.get("model")
+    if model is not None and model != SECURITY_MODEL:
+        raise ValueError(f"model_catalog_json.model must be {SECURITY_MODEL!r}")
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True)
+
+
+def _timeout_output(exc: subprocess.TimeoutExpired) -> str:
+    output = exc.output if exc.output is not None else exc.stdout
+    if isinstance(output, bytes):
+        output = output.decode("utf-8", errors="replace")
+    output = output or ""
+    return f"{output}\noss-security subprocess timed out after {exc.timeout} seconds.\n"
 
 
 def _codex_env(codex_home: Path) -> dict[str, str]:
@@ -196,23 +258,30 @@ def _run_receipt_review(
     output_dir.mkdir(parents=True, exist_ok=True)
     jsonl_path = output_dir / "oss-security-codex-exec-receipt-review.jsonl"
     last_message_path = output_dir / "oss-security-codex-exec-receipt-review-last.txt"
-    process = subprocess.run(
-        _codex_command(
-            sandbox="read-only",
-            last_message_path=last_message_path,
-            model=model,
-            model_catalog_json=model_catalog_json,
-        ),
-        input=_review_prompt(review_input),
-        cwd=REPO_ROOT,
-        env=_codex_env(codex_home),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
-    jsonl_path.write_text(process.stdout, encoding="utf-8")
-    return process.returncode, jsonl_path, last_message_path
+    try:
+        process = subprocess.run(
+            _codex_command(
+                sandbox="read-only",
+                last_message_path=last_message_path,
+                model=model,
+                model_catalog_json=model_catalog_json,
+            ),
+            input=_review_prompt(review_input),
+            cwd=REPO_ROOT,
+            env=_codex_env(codex_home),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=CODEX_EXEC_TIMEOUT_SECONDS,
+        )
+        output = process.stdout
+        returncode = process.returncode
+    except subprocess.TimeoutExpired as exc:
+        output = _timeout_output(exc)
+        returncode = 124
+    jsonl_path.write_text(output, encoding="utf-8")
+    return returncode, jsonl_path, last_message_path
 
 
 def _receipt(
@@ -253,33 +322,6 @@ def _receipt(
     }
 
 
-def _model_policy_receipt(
-    *,
-    target: str,
-    codex_home: Path,
-    output_dir: Path,
-    model: str | None,
-    model_catalog_json: str | None,
-    blocker: str,
-) -> dict[str, Any]:
-    return {
-        "schema_version": "skills-sdk.oss-security-codex-exec-lane.v0",
-        "status": "blocked",
-        "process_status": "blocked",
-        "security_decision": "blocked",
-        "security_decision_source": "security_model_policy_violation",
-        "target": target,
-        "codex_profile": "oss-security",
-        "security_model": SECURITY_MODEL,
-        "model_override": model,
-        "model_catalog_json_override": model_catalog_json,
-        "codex_home": codex_home.as_posix(),
-        "output_dir": output_dir.as_posix(),
-        "blockers": [blocker],
-        "agent_summary": f"oss-security receipt-first lane is blocked: {blocker}",
-    }
-
-
 def _lane(deterministic_payload: dict[str, Any] | None) -> dict[str, Any] | None:
     if deterministic_payload is None:
         return None
@@ -302,30 +344,6 @@ def _review_pass(exit_code: int | None, validation: dict[str, Any] | None) -> bo
     return exit_code == 0 and validation is not None and validation.get("status") == "pass"
 
 
-def _model_review_status(review_validation: dict[str, Any] | None) -> str | None:
-    if not review_validation or review_validation.get("status") != "pass":
-        return None
-    review = review_validation.get("review")
-    if not isinstance(review, dict):
-        return None
-    value = str(review.get("review_status", "")).strip().lower()
-    return value.split(":", 1)[0] if value else None
-
-
-def _security_decision(model_review_status: str | None, process_status: str) -> tuple[str, str]:
-    if process_status != "pass":
-        return "blocked", "process_blocked_requires_valid_deterministic_and_review_receipts"
-    if model_review_status == "pass":
-        return "accepted_with_receipt", "model_review_pass"
-    if model_review_status == "warn":
-        return "needs_triage", "model_review_warn_requires_triage"
-    if model_review_status == "fail":
-        return "blocked", "model_review_fail_requires_triage"
-    if model_review_status == "blocked":
-        return "blocked", "model_review_blocked_requires_evidence"
-    return "blocked", "model_review_status_missing_or_unknown"
-
-
 def _receipt_first_blockers(deterministic_pass: bool, review_pass: bool) -> list[str]:
     blockers: list[str] = []
     if not deterministic_pass:
@@ -344,33 +362,16 @@ def _receipt_first_status(
     deterministic_payload: dict[str, Any] | None,
     review_exit_code: int | None,
     review_validation: dict[str, Any] | None,
-) -> tuple[str, str, str, str | None, str, str, list[str]]:
+) -> tuple[str, list[str]]:
     deterministic_pass = _deterministic_pass(deterministic_exit_code, deterministic_payload)
     review_pass = _review_pass(review_exit_code, review_validation)
-    process_status = _receipt_status(deterministic_pass, review_pass)
-    review_extraction_status = "pass" if review_pass else "blocked"
-    model_review_status = _model_review_status(review_validation)
-    security_decision, security_decision_source = _security_decision(model_review_status, process_status)
-    status = "pass" if security_decision == "accepted_with_receipt" else "blocked"
     blockers = _receipt_first_blockers(deterministic_pass, review_pass)
-    if process_status == "pass" and security_decision == "needs_triage":
-        blockers.append("oss-security model review produced warnings that require triage")
-    elif process_status == "pass" and security_decision == "blocked":
-        blockers.append("oss-security model review blocks security readiness until triaged")
-    return (
-        status,
-        process_status,
-        review_extraction_status,
-        model_review_status,
-        security_decision,
-        security_decision_source,
-        blockers,
-    )
+    return _receipt_status(deterministic_pass, review_pass), blockers
 
 
 def _reviewed_summary(status: str, blockers: list[str]) -> str:
     if status == "pass":
-        return "oss-security codex exec accepted a deterministic security lane receipt."
+        return "oss-security codex exec reviewed a deterministic security lane receipt."
     return f"oss-security receipt-first lane is blocked: {'; '.join(blockers)}"
 
 
@@ -416,90 +417,44 @@ def _receipt_first_details(
     lane: dict[str, Any] | None,
     blockers: list[str],
     status: str,
-    process_status: str,
-    review_extraction_status: str,
-    model_review_status: str | None,
-    security_decision: str,
-    security_decision_source: str,
 ) -> dict[str, Any]:
-    compact = (
-        state["review_input_bytes"] is not None
-        and state["review_input_bytes"] <= REVIEW_INPUT_COMPACT_LIMIT_BYTES
-    )
-    details = {
-        "process_status": process_status,
+    return {
         "deterministic_exit_code": state["deterministic_exit_code"],
         "deterministic_output_path": state["deterministic_output_path"].as_posix(),
         "deterministic_lane_status": lane.get("status") if lane else None,
-        "review_extraction_status": review_extraction_status,
-        "model_review_status": model_review_status,
-        "security_decision": security_decision,
-        "security_decision_source": security_decision_source,
-        "security_model": SECURITY_MODEL,
-        "review_prompt_contract_version": REVIEW_PROMPT_CONTRACT_VERSION,
-        "review_input_bytes": state["review_input_bytes"],
-        "review_input_compact_limit_bytes": REVIEW_INPUT_COMPACT_LIMIT_BYTES,
-        "review_input_compact": compact,
         "security_lane_digest": lane.get("security_lane_digest") if lane else None,
         "codex_exit_code": state["review_exit_code"],
         "model_override": state["model"],
         "model_catalog_json_override": state["model_catalog_json"],
         "review_validation": state["review_validation"],
         "blockers": blockers,
+        "command": (
+            "codex exec --profile oss-security -c skills.config=[] --sandbox read-only "
+            "--ephemeral --json --output-last-message <last-message> < <receipt-review-prompt>"
+        ),
         "agent_summary": _reviewed_summary(status, blockers),
     }
-    details["command"] = _receipt_first_command_summary()
-    return details
-
-
-def _receipt_first_command_summary() -> str:
-    return (
-        "codex exec --profile oss-security -c skills.config=[] --sandbox read-only "
-        "--ephemeral --json --output-last-message <last-message> < <receipt-review-prompt>"
-    )
-
-
-def _receipt_status_bundle(state: dict[str, Any]) -> tuple[dict[str, Any] | None, tuple[Any, ...]]:
-    lane = _lane(state["deterministic_payload"])
-    bundle = _receipt_first_status(
-        state["deterministic_exit_code"],
-        state["deterministic_payload"],
-        state["review_exit_code"],
-        state["review_validation"],
-    )
-    return lane, bundle
 
 
 def _receipt_first_receipt(state: dict[str, Any]) -> dict[str, Any]:
-    lane, status_bundle = _receipt_status_bundle(state)
-    (
-        status,
-        process_status,
-        review_extraction_status,
-        model_review_status,
-        security_decision,
-        security_decision_source,
-        blockers,
-    ) = status_bundle
+    deterministic_exit_code = state["deterministic_exit_code"]
+    deterministic_payload = state["deterministic_payload"]
+    review_exit_code = state["review_exit_code"]
+    review_validation = state["review_validation"]
+    lane = _lane(deterministic_payload)
+    status, blockers = _receipt_first_status(
+        deterministic_exit_code,
+        deterministic_payload,
+        review_exit_code,
+        review_validation,
+    )
     receipt = _receipt_first_core(
         target=state["target"],
         codex_home=state["codex_home"],
         output_dir=state["output_dir"],
         status=status,
     )
-    receipt.update(
-        _receipt_first_details(
-            state,
-            lane=lane,
-            blockers=blockers,
-            status=status,
-            process_status=process_status,
-            review_extraction_status=review_extraction_status,
-            model_review_status=model_review_status,
-            security_decision=security_decision,
-            security_decision_source=security_decision_source,
-        )
-    )
+    receipt.update(_receipt_first_details(state, lane=lane, blockers=blockers, status=status))
     receipt.update(
         _receipt_first_review_paths(
             review_input_path=state["review_input_path"],
@@ -508,71 +463,6 @@ def _receipt_first_receipt(state: dict[str, Any]) -> dict[str, Any]:
         )
     )
     return receipt
-
-
-def _receipt_first_state(
-    *,
-    target: str,
-    codex_home: Path,
-    output_dir: Path,
-    model: str | None,
-    model_catalog_json: str | None,
-) -> dict[str, Any]:
-    exit_code, payload, output = _run_deterministic_lane(target)
-    output_path = _write_deterministic_output(output_dir, output)
-    review_paths: tuple[Path | None, Path | None, Path | None] = (None, None, None)
-    review_exit_code: int | None = None
-    review_validation: dict[str, Any] | None = None
-    review_input_bytes: int | None = None
-    lane = _lane(payload)
-    if exit_code == 0 and lane is not None and lane.get("status") == "pass":
-        review_input = _receipt_review_input(payload)
-        review_paths, review_exit_code, review_validation, review_input_bytes = _review_receipt(
-            codex_home=codex_home,
-            output_dir=output_dir,
-            review_input=review_input,
-            model=model,
-            model_catalog_json=model_catalog_json,
-        )
-    return _receipt_first_state_payload(
-        target=target,
-        codex_home=codex_home,
-        output_dir=output_dir,
-        model=model,
-        model_catalog_json=model_catalog_json,
-        deterministic=(exit_code, payload, output_path),
-        review=(review_paths, review_exit_code, review_validation, review_input_bytes),
-    )
-
-
-def _receipt_first_state_payload(
-    *,
-    target: str,
-    codex_home: Path,
-    output_dir: Path,
-    model: str | None,
-    model_catalog_json: str | None,
-    deterministic: tuple[int, dict[str, Any] | None, Path],
-    review: tuple[tuple[Path | None, Path | None, Path | None], int | None, dict[str, Any] | None, int | None],
-) -> dict[str, Any]:
-    exit_code, payload, output_path = deterministic
-    review_paths, review_exit_code, review_validation, review_input_bytes = review
-    return {
-        "target": target,
-        "codex_home": codex_home,
-        "output_dir": output_dir,
-        "deterministic_exit_code": exit_code,
-        "deterministic_output_path": output_path,
-        "deterministic_payload": payload,
-        "review_input_path": review_paths[0],
-        "review_exit_code": review_exit_code,
-        "jsonl_path": review_paths[1],
-        "last_message_path": review_paths[2],
-        "review_validation": review_validation,
-        "review_input_bytes": review_input_bytes,
-        "model": model,
-        "model_catalog_json": model_catalog_json,
-    }
 
 
 def _write_deterministic_output(output_dir: Path, output: str) -> Path:
@@ -589,14 +479,38 @@ def _run_receipt_first_mode(
     model: str | None,
     model_catalog_json: str | None,
 ) -> dict[str, Any]:
-    state = _receipt_first_state(
-        target=target,
-        codex_home=codex_home,
-        output_dir=output_dir,
-        model=model,
-        model_catalog_json=model_catalog_json,
+    exit_code, payload, output = _run_deterministic_lane(target)
+    output_path = _write_deterministic_output(output_dir, output)
+    review_paths: tuple[Path | None, Path | None, Path | None] = (None, None, None)
+    review_exit_code: int | None = None
+    review_validation: dict[str, Any] | None = None
+    lane = _lane(payload)
+    if exit_code == 0 and lane is not None and lane.get("status") == "pass":
+        review_input = _receipt_review_input(payload)
+        review_paths, review_exit_code, review_validation = _review_receipt(
+            codex_home=codex_home,
+            output_dir=output_dir,
+            review_input=review_input,
+            model=model,
+            model_catalog_json=model_catalog_json,
+        )
+    return _receipt_first_receipt(
+        {
+            "target": target,
+            "codex_home": codex_home,
+            "output_dir": output_dir,
+            "deterministic_exit_code": exit_code,
+            "deterministic_output_path": output_path,
+            "deterministic_payload": payload,
+            "review_input_path": review_paths[0],
+            "review_exit_code": review_exit_code,
+            "jsonl_path": review_paths[1],
+            "last_message_path": review_paths[2],
+            "review_validation": review_validation,
+            "model": model,
+            "model_catalog_json": model_catalog_json,
+        }
     )
-    return _receipt_first_receipt(state)
 
 
 def _review_receipt(
@@ -606,10 +520,9 @@ def _review_receipt(
     review_input: dict[str, Any],
     model: str | None,
     model_catalog_json: str | None,
-) -> tuple[tuple[Path, Path, Path], int, dict[str, Any], int]:
+) -> tuple[tuple[Path, Path, Path], int, dict[str, Any]]:
     review_input_path = output_dir / "oss-security-review-input.json"
-    review_input_body = json.dumps(review_input, indent=2, sort_keys=True)
-    review_input_path.write_text(review_input_body, encoding="utf-8")
+    review_input_path.write_text(json.dumps(review_input, indent=2, sort_keys=True), encoding="utf-8")
     exit_code, jsonl_path, last_message_path = _run_receipt_review(
         codex_home=codex_home,
         review_input=review_input,
@@ -617,8 +530,17 @@ def _review_receipt(
         model=model,
         model_catalog_json=model_catalog_json,
     )
-    validation = validate_review(last_message_path, expected_digest=review_input["security_lane_digest"])
-    return (review_input_path, jsonl_path, last_message_path), exit_code, validation, len(review_input_body.encode("utf-8"))
+    if last_message_path.exists():
+        validation = validate_review(last_message_path, expected_digest=review_input["security_lane_digest"])
+    else:
+        validation = {
+            "status": "blocked",
+            "diagnostic": "oss-security review did not write an output-last-message file",
+            "review_status": None,
+            "evidence_digest_seen": None,
+            "review_path": last_message_path.as_posix(),
+        }
+    return (review_input_path, jsonl_path, last_message_path), exit_code, validation
 
 
 def _emit(receipt: dict[str, Any], *, as_json: bool) -> int:
@@ -626,52 +548,7 @@ def _emit(receipt: dict[str, Any], *, as_json: bool) -> int:
         print(json.dumps(receipt, indent=2, sort_keys=True))
     else:
         print(receipt["agent_summary"])
-    if receipt["status"] == "pass":
-        return 0
-    if "process_status" not in receipt:
-        return 2
-    if receipt.get("process_status") == "pass":
-        return 2
-    return 3
-
-
-def _blocked_model_policy_receipt(
-    args: argparse.Namespace,
-    *,
-    codex_home: Path,
-    output_dir: Path,
-    blocker: str,
-) -> dict[str, Any]:
-    return _model_policy_receipt(
-        target=args.target,
-        codex_home=codex_home,
-        output_dir=output_dir,
-        model=args.model,
-        model_catalog_json=args.model_catalog_json,
-        blocker=blocker,
-    )
-
-
-def _run_tool_mode(args: argparse.Namespace, *, codex_home: Path, output_dir: Path) -> dict[str, Any]:
-    exit_code, jsonl_path, last_message_path = _run_codex(
-        codex_home=codex_home,
-        target=args.target,
-        output_dir=output_dir,
-        model=args.model,
-        model_catalog_json=args.model_catalog_json,
-    )
-    classification = classify(jsonl_path)
-    return _receipt(
-        target=args.target,
-        codex_home=codex_home,
-        output_dir=output_dir,
-        exit_code=exit_code,
-        jsonl_path=jsonl_path,
-        last_message_path=last_message_path,
-        classification=classification,
-        model=args.model,
-        model_catalog_json=args.model_catalog_json,
-    )
+    return 0 if receipt["status"] == "pass" else 2
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
@@ -693,29 +570,43 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    auto_output_root = args.output_dir is None
     output_dir = args.output_dir or Path(tempfile.mkdtemp(prefix="oss-security-codex-exec-"))
-    codex_home = args.codex_home or output_dir / "codex-home"
-    model_blocker = _model_blocker(args.model)
-    if model_blocker:
-        receipt = _blocked_model_policy_receipt(
-            args,
+    try:
+        codex_home = args.codex_home or output_dir / "codex-home"
+        _copy_codex_home(codex_home)
+        if args.mode == "receipt-first":
+            receipt = _run_receipt_first_mode(
+                target=args.target,
+                codex_home=codex_home,
+                output_dir=output_dir,
+                model=args.model,
+                model_catalog_json=args.model_catalog_json,
+            )
+            return _emit(receipt, as_json=args.json)
+        exit_code, jsonl_path, last_message_path = _run_codex(
             codex_home=codex_home,
-            output_dir=output_dir,
-            blocker=model_blocker,
-        )
-        return _emit(receipt, as_json=args.json)
-    _copy_codex_home(codex_home)
-    if args.mode == "receipt-first":
-        receipt = _run_receipt_first_mode(
             target=args.target,
-            codex_home=codex_home,
             output_dir=output_dir,
             model=args.model,
             model_catalog_json=args.model_catalog_json,
         )
+        classification = classify(jsonl_path)
+        receipt = _receipt(
+            target=args.target,
+            codex_home=codex_home,
+            output_dir=output_dir,
+            exit_code=exit_code,
+            jsonl_path=jsonl_path,
+            last_message_path=last_message_path,
+            classification=classification,
+            model=args.model,
+            model_catalog_json=args.model_catalog_json,
+        )
         return _emit(receipt, as_json=args.json)
-    receipt = _run_tool_mode(args, codex_home=codex_home, output_dir=output_dir)
-    return _emit(receipt, as_json=args.json)
+    finally:
+        if auto_output_root:
+            shutil.rmtree(output_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

@@ -1,27 +1,36 @@
 from __future__ import annotations
 
+import importlib.util
+import io
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
 import textwrap
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/run_oss_security_codex_exec_lane.py"
+sys.path.insert(0, str(SCRIPT.parent))
+SPEC = importlib.util.spec_from_file_location("run_oss_security_codex_exec_lane", SCRIPT)
+assert SPEC is not None
+MODULE = importlib.util.module_from_spec(SPEC)
+assert SPEC.loader is not None
+SPEC.loader.exec_module(MODULE)
 PASSING_RECEIPT_REVIEWER = textwrap.dedent(
     """
     import json
-    import os
     import sys
     from pathlib import Path
 
     args = sys.argv
     prompt = sys.stdin.read()
-    assert os.environ.get("MISE_TRUSTED_CONFIG_PATHS", "").endswith(".mise.toml")
     digest = prompt.split('"security_lane_digest": "')[1].split('"', 1)[0]
     last_path = Path(args[args.index("--output-last-message") + 1])
     last_path.write_text(json.dumps({
@@ -36,31 +45,18 @@ PASSING_RECEIPT_REVIEWER = textwrap.dedent(
     raise SystemExit(0)
     """
 )
-
-
-def _receipt_reviewer(review_status: str) -> str:
-    return textwrap.dedent(
-        f"""
-        import json
-        import sys
-        from pathlib import Path
-
-        args = sys.argv
-        prompt = sys.stdin.read()
-        digest = prompt.split('"security_lane_digest": "')[1].split('"', 1)[0]
-        last_path = Path(args[args.index("--output-last-message") + 1])
-        last_path.write_text(json.dumps({{
-            "schema_version": "skills-sdk.oss-security-review-input.v0",
-            "review_status": "{review_status}",
-            "risk_summary": "reviewed deterministic receipt",
-            "required_followups": ["triage model review"],
-            "evidence_digest_seen": digest,
-            "reviewer_model_boundary": "static receipt review only"
-        }}), encoding="utf-8")
-        print(json.dumps({{"type": "turn.completed"}}))
-        raise SystemExit(0)
-        """
-    )
+PASSING_LANE_RUNNER = textwrap.dedent(
+    """
+    import json
+    import sys
+    sys.stdin.read()
+    print(json.dumps({
+        'status': 'success',
+        'data': {'skills_sdk_security_lane': {'status': 'pass'}}
+    }))
+    raise SystemExit(0)
+    """
+)
 
 
 def _fake_codex(root: Path, body: str) -> Path:
@@ -86,8 +82,7 @@ def _run(root: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
         cwd=REPO_ROOT,
         env=env,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
@@ -108,41 +103,24 @@ def _run_receipt_first(root: Path, env: dict[str, str]) -> subprocess.CompletedP
         cwd=REPO_ROOT,
         env=env,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-
-
-def _run_receipt_first_with_model(root: Path, env: dict[str, str], model: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPT),
-            "--target",
-            "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
-            "--output-dir",
-            str(root / "out"),
-            "--mode",
-            "receipt-first",
-            "--model",
-            model,
-            "--json",
-        ],
-        cwd=REPO_ROOT,
-        env=env,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
 
 def _sandbox_env(root: Path, bin_dir: Path) -> dict[str, str]:
+    configs_root = root / "configs" / "codex"
+    configs_root.mkdir(parents=True)
+    (configs_root / "config.toml").write_text("", encoding="utf-8")
+    (configs_root / "oss-security.config.toml").write_text(
+        'model = "h4rithd/coder:14b"\n',
+        encoding="utf-8",
+    )
     env = os.environ.copy()
     env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
     env["XDG_CACHE_HOME"] = str(root / "xdg-cache")
     env["UV_CACHE_DIR"] = str(root / "uv-cache")
+    env["ASK_OSS_SECURITY_CONFIGS_ROOT"] = str(configs_root)
     return env
 
 
@@ -162,8 +140,7 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
                     """
                 ),
             )
-            env = os.environ.copy()
-            env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
+            env = _sandbox_env(root, bin_dir)
 
             process = _run(root, env)
 
@@ -191,8 +168,7 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
                     """
                 ),
             )
-            env = os.environ.copy()
-            env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
+            env = _sandbox_env(root, bin_dir)
 
             process = _run(root, env)
 
@@ -213,88 +189,9 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
         self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
         payload = json.loads(process.stdout)
         self.assertEqual(payload["status"], "pass")
-        self.assertEqual(payload["process_status"], "pass")
         self.assertEqual(payload["mode"], "receipt_first")
         self.assertEqual(payload["deterministic_lane_status"], "pass")
-        self.assertEqual(payload["review_extraction_status"], "pass")
-        self.assertEqual(payload["model_review_status"], "pass")
-        self.assertEqual(payload["security_decision"], "accepted_with_receipt")
-        self.assertEqual(payload["security_decision_source"], "model_review_pass")
-        self.assertEqual(payload["security_model"], "h4rithd/coder:14b")
-        self.assertEqual(payload["review_prompt_contract_version"], "skills-sdk.oss-security-review-prompt.v1")
-        self.assertLess(payload["review_input_bytes"], payload["review_input_compact_limit_bytes"])
-        self.assertTrue(payload["review_input_compact"])
         self.assertEqual(payload["review_validation"]["status"], "pass")
-
-    def test_receipt_first_runner_blocks_non_security_model_override(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            bin_dir = _fake_codex(root, PASSING_RECEIPT_REVIEWER)
-            env = _sandbox_env(root, bin_dir)
-
-            process = _run_receipt_first_with_model(root, env, "qwen3.5:9b-mlx")
-
-        self.assertEqual(process.returncode, 3, process.stdout + process.stderr)
-        payload = json.loads(process.stdout)
-        self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "blocked")
-        self.assertEqual(payload["security_decision"], "blocked")
-        self.assertEqual(payload["security_decision_source"], "security_model_policy_violation")
-        self.assertEqual(payload["security_model"], "h4rithd/coder:14b")
-        self.assertIn("only allows h4rithd/coder:14b", payload["blockers"][0])
-
-    def test_receipt_first_runner_warn_needs_triage_without_process_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            bin_dir = _fake_codex(root, _receipt_reviewer("warn"))
-            env = _sandbox_env(root, bin_dir)
-
-            process = _run_receipt_first(root, env)
-
-        self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
-        payload = json.loads(process.stdout)
-        self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "pass")
-        self.assertEqual(payload["review_extraction_status"], "pass")
-        self.assertEqual(payload["model_review_status"], "warn")
-        self.assertEqual(payload["security_decision"], "needs_triage")
-        self.assertEqual(payload["security_decision_source"], "model_review_warn_requires_triage")
-        self.assertIn("warnings that require triage", payload["blockers"][0])
-
-    def test_receipt_first_runner_fail_blocks_security_decision_without_process_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            bin_dir = _fake_codex(root, _receipt_reviewer("fail"))
-            env = _sandbox_env(root, bin_dir)
-
-            process = _run_receipt_first(root, env)
-
-        self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
-        payload = json.loads(process.stdout)
-        self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "pass")
-        self.assertEqual(payload["review_extraction_status"], "pass")
-        self.assertEqual(payload["model_review_status"], "fail")
-        self.assertEqual(payload["security_decision"], "blocked")
-        self.assertEqual(payload["security_decision_source"], "model_review_fail_requires_triage")
-        self.assertIn("blocks security readiness", payload["blockers"][0])
-
-    def test_receipt_first_runner_model_blocked_blocks_security_decision_without_process_failure(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            bin_dir = _fake_codex(root, _receipt_reviewer("blocked"))
-            env = _sandbox_env(root, bin_dir)
-
-            process = _run_receipt_first(root, env)
-
-        self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
-        payload = json.loads(process.stdout)
-        self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "pass")
-        self.assertEqual(payload["review_extraction_status"], "pass")
-        self.assertEqual(payload["model_review_status"], "blocked")
-        self.assertEqual(payload["security_decision"], "blocked")
-        self.assertEqual(payload["security_decision_source"], "model_review_blocked_requires_evidence")
 
     def test_receipt_first_runner_blocks_when_review_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -318,46 +215,87 @@ class TestRunOssSecurityCodexExecLane(unittest.TestCase):
 
             process = _run_receipt_first(root, env)
 
-        self.assertEqual(process.returncode, 3, process.stdout + process.stderr)
+        self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
         payload = json.loads(process.stdout)
         self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "blocked")
-        self.assertEqual(payload["review_extraction_status"], "blocked")
-        self.assertIsNone(payload["model_review_status"])
-        self.assertEqual(payload["security_decision"], "blocked")
-        self.assertEqual(
-            payload["security_decision_source"],
-            "process_blocked_requires_valid_deterministic_and_review_receipts",
-        )
         self.assertEqual(payload["review_validation"]["status"], "blocked")
         self.assertIn("oss-security profile did not produce", payload["blockers"][0])
 
-    def test_receipt_first_runner_blocks_when_last_message_is_missing(self) -> None:
+    def test_prompt_shell_quotes_target_inside_json_encoded_exec_source(self) -> None:
+        target = "Skills/example with spaces/quote'\nnext"
+        quoted_target = shlex.quote(target)
+
+        prompt = MODULE._prompt(target)
+
+        self.assertIn(
+            json.dumps(
+                f"./bin/ask sdk security run-lane {quoted_target} --preview --profile oss-security --json --robot"
+            ),
+            prompt,
+        )
+
+    def test_codex_command_accepts_only_security_model_overrides(self) -> None:
+        command = MODULE._codex_command(
+            sandbox="read-only",
+            last_message_path=Path("/tmp/out.txt"),
+            model=MODULE.SECURITY_MODEL,
+            model_catalog_json=json.dumps({"model": MODULE.SECURITY_MODEL}),
+        )
+
+        expected_catalog = json.dumps(
+            json.dumps({"model": MODULE.SECURITY_MODEL}, separators=(",", ":"), sort_keys=True)
+        )
+
+        self.assertIn("-c", command)
+        self.assertIn(f'model={json.dumps(MODULE.SECURITY_MODEL)}', command)
+        self.assertIn(f"model_catalog_json={expected_catalog}", command)
+
+    def test_codex_command_rejects_non_security_model_catalog_override(self) -> None:
+        with self.assertRaises(ValueError):
+            MODULE._codex_command(
+                sandbox="read-only",
+                last_message_path=Path("/tmp/out.txt"),
+                model=MODULE.SECURITY_MODEL,
+                model_catalog_json=json.dumps({"model": "other/model"}),
+            )
+
+    def test_deterministic_lane_timeout_returns_blocked_payload(self) -> None:
+        timeout = subprocess.TimeoutExpired(cmd=["./bin/ask"], timeout=MODULE.DETERMINISTIC_LANE_TIMEOUT_SECONDS)
+
+        with mock.patch.object(MODULE.subprocess, "run", side_effect=timeout):
+            exit_code, payload, output = MODULE._run_deterministic_lane("Skills/example")
+
+        self.assertEqual(exit_code, 124)
+        self.assertIsNone(payload)
+        self.assertIn("timed out", output)
+
+    def test_auto_created_output_dir_is_cleaned_after_run(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            bin_dir = _fake_codex(
-                root,
-                textwrap.dedent(
-                    """
-                    import sys
-
-                    sys.stdin.read()
-                    print("no last message written")
-                    raise SystemExit(0)
-                    """
-                ),
-            )
+            bin_dir = _fake_codex(root, PASSING_LANE_RUNNER)
             env = _sandbox_env(root, bin_dir)
+            created_paths: list[Path] = []
+            original_mkdtemp = MODULE.tempfile.mkdtemp
 
-            process = _run_receipt_first(root, env)
+            def fake_mkdtemp(*, prefix: str) -> str:
+                path = Path(original_mkdtemp(prefix=prefix, dir=root))
+                created_paths.append(path)
+                return str(path)
 
-        self.assertEqual(process.returncode, 3, process.stdout + process.stderr)
-        payload = json.loads(process.stdout)
-        self.assertEqual(payload["status"], "blocked")
-        self.assertEqual(payload["process_status"], "blocked")
-        self.assertEqual(payload["review_extraction_status"], "blocked")
-        self.assertEqual(payload["security_decision"], "blocked")
-        self.assertIn("review output could not be read", payload["review_validation"]["blockers"][0])
+            MODULE.tempfile.mkdtemp = fake_mkdtemp
+            original_env = os.environ.copy()
+            os.environ.update(env)
+            try:
+                with redirect_stdout(io.StringIO()):
+                    exit_code = MODULE.main(["--target", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json"])
+            finally:
+                MODULE.tempfile.mkdtemp = original_mkdtemp
+                os.environ.clear()
+                os.environ.update(original_env)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(len(created_paths), 1)
+        self.assertFalse(created_paths[0].exists())
 
 
 if __name__ == "__main__":

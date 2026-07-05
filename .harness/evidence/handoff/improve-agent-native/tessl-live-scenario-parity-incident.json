@@ -1,0 +1,71 @@
+{
+  "schema_version": "skills-sdk.tessl-live-scenario-parity-incident.v1",
+  "tessl_lane": "live_eval",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "incident": "Tessl live was allowed to upload scenarios that did not have both oss-local and oss-cloud pass evidence.",
+  "root_operational_failure": "The live Tessl wrapper staged the full release Tessl scenario universe and checked handoff lane status, but did not compare staged Tessl scenario ids against OSS local and cloud passing case ids before submitting the run.",
+  "failure_categories": [
+    "weak validation",
+    "poor workflow design",
+    "lack of verification",
+    "missing guardrails",
+    "insufficient deterministic enforcement"
+  ],
+  "durable_guardrails": [
+    "Infrastructure/scripts/lib/ask/commands/evals.py::_tessl_live_oss_scenario_parity",
+    "Infrastructure/tests/test_ask_evals_command.py::test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl"
+  ],
+  "completed_live_run": {
+    "run_id": "019f2df0-fec3-72fa-a068-903061eebb78",
+    "status": "completed",
+    "scenario_count": 68,
+    "baseline_percent": 70.89403973509934,
+    "usage_spec_percent": 87.08609271523179,
+    "evidence_command": "tessl eval view 019f2df0-fec3-72fa-a068-903061eebb78 --json"
+  },
+  "post_patch_live_block": {
+    "command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --runner codex --tessl-live-private --tessl-workspace jscraik --no-dashboard --json --robot",
+    "exit_code": 1,
+    "status": "error",
+    "eval_status": "blocked_validation",
+    "tessl_eval_status": "blocked",
+    "blocker_class": "blocked_validation",
+    "staged_case_count": 68,
+    "oss_local_pass_count": 40,
+    "oss_cloud_pass_count": 40,
+    "unproven_case_count": 29,
+    "unproven_case_ids": [
+      "generated-eval.harness.architecture-drift-hidden-by-agent-velocity",
+      "generated-eval.harness.autonomy-without-validation",
+      "generated-eval.harness.brownfield-harness-without-boundaries",
+      "generated-eval.harness.changed-files-without-behavior-proof",
+      "generated-eval.harness.context-dump-instead-of-slice",
+      "generated-eval.harness.done-without-validation",
+      "generated-eval.harness.feedback-recurs-without-guardrail",
+      "generated-eval.harness.local-pass-ci-unknown",
+      "generated-eval.harness.pr-lifecycle-stops-before-main",
+      "generated-eval.harness.provenance-implies-tests",
+      "generated-eval.harness.review-agent-doubles-scope",
+      "generated-eval.harness.skill-frontmatter-not-routed",
+      "generated-eval.harness.slop-feedback-not-systematized",
+      "generated-eval.harness.static-checks-only-for-product-change",
+      "generated-eval.knowledge-os.capsule-design-without-relationships",
+      "generated-eval.knowledge-os.consumer-receipt-stale-digest",
+      "generated-eval.knowledge-os.export-pass-overclaims-quality",
+      "generated-eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+      "generated-eval.ryan.adoption-budget-pattern-discovery",
+      "generated-eval.ryan.autonomy-gate-threshold",
+      "generated-eval.ryan.benchmark-laundering-quality-gate",
+      "generated-eval.ryan.compaction-context-recovery",
+      "generated-eval.ryan.long-term-coherence-governance",
+      "generated-eval.ryan.maintenance-economics-boundary",
+      "generated-eval.ryan.perception-lock-adoption-decision",
+      "generated-eval.ryan.policy-aware-approval",
+      "generated-eval.ryan.repeated-steering-to-durable-mechanism",
+      "generated-eval.ryan.stakeholder-synthesis",
+      "tessl-scenario-hostile-readiness-note"
+    ]
+  },
+  "what_this_proves": "The patched live command blocks before Tessl submission when staged live scenarios lack both OSS local and cloud pass evidence.",
+  "what_this_does_not_prove": "This does not prove the unproven scenarios are bad, only that they cannot be sent to Tessl live until they have matching OSS local and cloud pass evidence."
+}

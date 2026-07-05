@@ -1,0 +1,43 @@
+{
+  "schema_version": "skills-sdk.scenario-adaptation-receipt.v0",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-adaptation-receipt.v0.schema.json",
+  "status": "pass",
+  "operation": "scenario_registry_adapt",
+  "authorized_stage": "scenario_generation",
+  "operator_context": {
+    "command": "./bin/ask sdk eval scenario-registry adapt Skills/agent-ops/sample --scenario docs.boundary.no-readiness-without-proof --apply --json --robot",
+    "workspace": "jscraik"
+  },
+  "registry_source": {
+    "canonical_scenario_id": "docs.boundary.no-readiness-without-proof",
+    "version": "0.1.0",
+    "digest": "sha256:example"
+  },
+  "target_skill": {
+    "path": "Skills/agent-ops/sample",
+    "package_id": "sample",
+    "source_head": "960493d"
+  },
+  "target_case_id": "proof-boundary",
+  "localization_summary": "Adapted the proof-boundary task to the sample skill domain.",
+  "criteria_ownership": {
+    "local_criteria_authoritative": true,
+    "criteria_path": "Skills/agent-ops/sample/references/evals.yaml#proof-boundary"
+  },
+  "fixture_asset_plan": [],
+  "acceptance_mapping": ["expected_signal -> local expected_signal", "not_contains -> local not_contains"],
+  "domain_fit": "The target skill makes readiness claims and needs proof-boundary coverage.",
+  "nonportable_assumptions_removed": ["Removed original technical-writer path assumptions."],
+  "validation": [
+    {
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/sample --preview --json --robot",
+      "status": "pass",
+      "evidence_ref": ".harness/evidence/example/scenario-quality.json"
+    }
+  ],
+  "mutation_manifest": [
+    "Skills/agent-ops/sample/references/evals.yaml",
+    "Skills/agent-ops/sample/references/scenario-adaptation-receipts/proof-boundary.json"
+  ],
+  "blockers": []
+}

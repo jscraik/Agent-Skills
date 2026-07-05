@@ -1,4 +1,4 @@
-# Skill Routing
+# Harness Skill Routing
 
 Keep skill entrypoints compact, prove routing by content shape, and put durable leverage in shared references and repo context.
 

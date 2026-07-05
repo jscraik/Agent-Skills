@@ -23,8 +23,7 @@ def _run(path: Path) -> subprocess.CompletedProcess[str]:
         [sys.executable, str(SCRIPT), str(path), "--json"],
         cwd=REPO_ROOT,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 

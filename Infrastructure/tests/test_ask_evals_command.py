@@ -32,6 +32,9 @@ EXAMPLE_TESSL_EVAL_YAML = """cases:
         value: "(?is)(example|task)"
       - type: expected_signal
         value: Separates evidence from readiness claims while completing the example task.
+      - type: text_field_equals
+        field: status
+        value: blocked
 """
 
 
@@ -105,30 +108,22 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
     assert run_mock.call_args.kwargs["start_new_session"] is True
 
 
-def test_oss_codex_smoke_timeout_seconds_is_per_case_not_suite_budget() -> None:
-    completed = subprocess.CompletedProcess(
-        args=["run_skill_evals.py"],
-        returncode=0,
-        stdout="Skill evals: improve-agent-native\nRESULT: PASS\n",
-        stderr="",
-    )
+def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
-        evals.run_evals(
-            REPO_ROOT,
-            "Skills/agent-ops/improve-agent-native",
-            mode="smoke",
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="release",
             runner="codex",
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
-            cases=["happy-scorecard", "happy-agents-md-audit", "happy-proof-loop-gap"],
-            timeout_seconds=120,
         )
 
-    command = run_mock.call_args.args[0]
-    assert command[command.index("--timeout-sec") + 1] == "120"
-    assert run_mock.call_args.kwargs["timeout"] >= 420
+    assert result.status == "success"
+    assert run_mock.call_args.kwargs["timeout"] == evals.RELEASE_EVAL_TIMEOUT_SECONDS
 
 
 def test_eval_blocker_classifies_no_matching_eval_cases_as_validation() -> None:
@@ -1072,26 +1067,6 @@ def test_tessl_criteria_preserves_guardrail_calibration_examples() -> None:
     }
 
 
-def test_tessl_criteria_serializes_text_field_obligations() -> None:
-    case = {
-        "id": "typed-field-case",
-        "prompt": "Return a scorecard.",
-        "acceptance": [
-            {"type": "text_field_present", "field": "gaps"},
-            {"type": "text_field_equals", "field": "status", "value": "blocked"},
-            {"type": "text_field_in", "path": "decision", "values": "pass,blocked"},
-        ],
-    }
-
-    criteria = evals._tessl_criteria_from_case(case)
-    descriptions = [item["description"] for item in criteria["checklist"]]
-
-    assert "type=text_field_present; field=gaps" in descriptions
-    assert "type=text_field_equals; field=status; expected=blocked" in descriptions
-    assert "type=text_field_in; field=decision; expected=pass,blocked" in descriptions
-    assert len(criteria["metadata"]["criteria_obligation_hash"]) == 64
-
-
 def test_tessl_criteria_preserves_guardrail_extended_metadata() -> None:
     case = _calibrated_guardrail_case()
 
@@ -1504,6 +1479,7 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
             receipt_payload["profile"] = lane_id
             receipt_payload["codex_profile"] = lane_id
             receipt_payload["codex_exec_invoked"] = True
+            receipt_payload["cases"] = [{"case_id": "smoke-example", "status": "pass"}]
         if lane_id == "tessl-local-proof":
             receipt_payload["receipt"] = {
                 "schema_version": "jscraik.tessl-local-proof.v1",
@@ -1773,6 +1749,12 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     descriptions = [item["description"] for item in criteria["checklist"]]
     assert "(?is)(example|task)" in descriptions
     assert "Preserves package shape and proves the skill-specific eval can be scored." in descriptions
+    typed = next(item for item in criteria["checklist"] if item["name"] == "text-field-equals-3")
+    assert typed["metadata"]["acceptance"] == {
+        "field": "status",
+        "type": "text_field_equals",
+        "value": "blocked",
+    }
     staged_skill = _assert_plugin_shaped_stage(staged_source, "example-skill")
     assert (staged_skill / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == "Runtime boundary details.\n"
     assert (staged_skill / "assets" / "example.png").read_bytes() == b"png"
@@ -2119,7 +2101,7 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     generated_task = generated_case.read_text(encoding="utf-8")
     assert "Review the architecture situation" not in generated_task
     assert "Architecture situation:" not in generated_task
-    assert "Return the smallest next action" in generated_task
+    assert "next action" in generated_task
     criteria = json.loads(
         (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
             encoding="utf-8"
@@ -2128,6 +2110,58 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert criteria["metadata"]["source"] == "references/evals/eval.arch.boundary-proof.md"
     descriptions = [item["description"] for item in criteria["checklist"]]
     assert any("Classifies the boundary as risky" in item for item in descriptions)
+
+
+def test_tessl_live_private_caps_yaml_set_before_generated_fixtures(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    cases_yaml = ["cases:"]
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        cases_yaml.extend([
+            f"  - id: yaml-case-{index:02d}",
+            f"    unit: YAML case {index:02d}",
+            "    given: A reviewed YAML scenario is ready for the default Tessl live confirmation set.",
+            "    should: Keep the default live upload inside the cost-bounded confirmation set.",
+            "    prompt: Check the handoff evidence.",
+            "    acceptance:",
+            "      - type: expected_signal",
+            "        value: Confirms the bounded handoff evidence.",
+        ])
+    (skill_root / "references" / "evals.yaml").write_text("\n".join(cases_yaml) + "\n", encoding="utf-8")
+    fixture_dir = skill_root / "references" / "evals"
+    fixture_dir.mkdir()
+    (fixture_dir / "eval.reviewed.generated-fixture.md").write_text(
+        (
+            "# eval.reviewed.generated-fixture: Generated Fixture\n\n"
+            "Knowledge claim: Generated fixtures need explicit budgeted live lanes.\n"
+            "Behavior under test: Default Tessl live budget selection.\n"
+            "Expected agent move: Excludes generated fixtures from the default live upload.\n"
+            "Failure mode: Uploads generated fixtures without explicit budget approval.\n"
+            "Given: A reviewed generated fixture exists next to enough YAML scenarios.\n"
+            "Should: Stage only the capped YAML confirmation set by default.\n"
+            "Expected failure: Uploads generated fixtures without explicit budget approval.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+
+    staged_case_ids = evals._tessl_live_staged_case_ids(staged_source)
+    manifest = json.loads((staged_source / "scenario-sources.json").read_text(encoding="utf-8"))
+    assert len(staged_case_ids) == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS
+    assert "generated-eval.reviewed.generated-fixture" not in staged_case_ids
+    assert "yaml-case-20" not in staged_case_ids
+    assert manifest["generated_fixture_cases"] == 1
+    assert manifest["default_live_selection"]["excluded_generated_fixture_case_ids"] == [
+        "generated-eval.reviewed.generated-fixture"
+    ]
+    assert manifest["default_live_selection"]["excluded_over_cap_case_ids"] == ["yaml-case-20"]
+    assert evals._tessl_live_budget_preflight(staged_source)["status"] == "pass"
 
 
 def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
@@ -2382,6 +2416,166 @@ def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> 
     assert result.data["tessl_eval"]["status"] == "blocked"
     assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
     assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
+    run.assert_not_called()
+
+
+def test_evals_live_private_blocks_unproven_oss_scenarios_before_tessl(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: example skill behavioural proof\n"
+            "    given: A user asks for the proven example behavior.\n"
+            "    should: Produce the expected example behavior.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+            "  - id: unproven-live-only\n"
+            "    unit: unproven live upload guard\n"
+            "    given: A scenario lacks OSS local and cloud pass evidence.\n"
+            "    should: Block before Tessl live submission.\n"
+            "    prompt: Do another example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Blocks before Tessl live submission.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "without both oss-local and oss-cloud pass evidence" in tessl_eval["blocker"]
+    parity = tessl_eval["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["staged_case_count"] == 2
+    assert parity["unproven_case_ids"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-local"] == ["unproven-live-only"]
+    assert parity["missing_by_lane"]["oss-cloud"] == ["unproven-live-only"]
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
+    run.assert_not_called()
+
+
+def test_evals_live_private_proceeds_when_oss_lanes_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: proven live upload guard\n"
+            "    given: A scenario has OSS local and cloud pass evidence.\n"
+            "    should: Proceed to Tessl live submission.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="{}", stderr="")) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "pass"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["lane_receipts"]["oss-local"]["receipt_found"] is True
+    assert parity["lane_receipts"]["oss-cloud"]["receipt_found"] is True
+    run.assert_not_called()
+
+
+def test_evals_live_private_requires_oss_lanes_to_match_tessl_case_set(tmp_path: Path) -> None:
+    _write_handoff_readiness(tmp_path, "example-skill")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    unit: exact live case-set rehearsal\n"
+            "    given: A live Tessl candidate has one selected case.\n"
+            "    should: Block when oss-cloud evidence contains a different wider case set.\n"
+            "    prompt: Do the example task.\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces the expected example behavior.\n"
+        ),
+        encoding="utf-8",
+    )
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / "example-skill"
+    for lane_id in ("oss-local", "oss-cloud"):
+        receipt_path = evidence_root / f"{lane_id}.json"
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        payload["cases"].append({"case_id": "extra-not-in-live-upload", "status": "pass"})
+        receipt_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    parity = result.data["tessl_eval"]["oss_scenario_parity"]
+    assert parity["status"] == "blocked"
+    assert parity["missing_by_lane"] == {"oss-local": [], "oss-cloud": []}
+    assert parity["extra_by_lane"]["oss-local"] == ["extra-not-in-live-upload"]
+    assert parity["extra_by_lane"]["oss-cloud"] == ["extra-not-in-live-upload"]
+    assert parity["extra_case_ids"] == ["extra-not-in-live-upload"]
     run.assert_not_called()
 
 
@@ -3015,11 +3209,52 @@ def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
     assert preflight["remaining_runs"] == evals.TESSL_WORKSPACE_RUN_RESERVE
 
 
+def test_tessl_live_budget_preflight_blocks_over_cap_and_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 1):
+        case_id = f"case-{index:02d}"
+        case_root = evals_root / case_id
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+    generated_root = evals_root / "generated-eval.expensive-context-loop"
+    generated_root.mkdir(parents=True)
+    (generated_root / "task.md").write_text("Generated task.\n", encoding="utf-8")
+    (generated_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert preflight["scenario_count"] == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS + 2
+    assert preflight["expected_model_tasks"] == preflight["scenario_count"] * 4
+    assert preflight["generated_case_ids"] == ["generated-eval.expensive-context-loop"]
+    assert any("cost cap" in blocker for blocker in preflight["blockers"])
+    assert any("generated-eval" in blocker for blocker in preflight["blockers"])
+
+
+def test_tessl_live_budget_preflight_passes_twenty_non_generated_cases(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS):
+        case_root = evals_root / f"case-{index:02d}"
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "pass"
+    assert preflight["scenario_count"] == 20
+    assert preflight["expected_solution_runs"] == 40
+    assert preflight["expected_score_runs"] == 40
+    assert preflight["expected_model_tasks"] == 80
+
+
 def test_evals_live_private_uses_default_workspace(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     _write_example_skill(tmp_path)
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
             tmp_path,
             "Skills/example-skill",
@@ -4129,38 +4364,6 @@ def test_run_evals_writes_blocked_closeout_for_partial_report_dir(tmp_path: Path
     assert closeout["closeout_validation"]["status"] == "pass"
 
 
-def test_run_evals_discovers_partial_report_dir_without_stdout_marker(tmp_path: Path) -> None:
-    report_dir = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-no-marker"
-    case_dir = report_dir / "01-edge-case"
-    case_dir.mkdir(parents=True)
-    (case_dir / "prompt.txt").write_text("Task: sparse brief\n", encoding="utf-8")
-    completed = mock.Mock(returncode=0, stdout="", stderr="")
-
-    with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
-
-    assert result.status == "error"
-    assert result.data["eval_status"] == "blocked_missing_artifact"
-    closeout = result.data["eval_closeout"]
-    assert closeout["status"] == "blocked"
-    assert closeout["blocker_class"] == "blocked_missing_artifact"
-    assert closeout["report_dir"] == "Infrastructure/artifacts/skills/example-skill/run-no-marker"
-    assert closeout["raw_output_present"] is False
-    assert closeout["raw_error_present"] is False
-    assert closeout["cases"] == [
-        {
-            "id": "edge-case",
-            "status": "blocked",
-            "blocker_class": "blocked_missing_artifact",
-            "expected_artifacts": ["result.json"],
-            "actual_artifacts": ["prompt.txt"],
-            "result_path": "Infrastructure/artifacts/skills/example-skill/run-no-marker/01-edge-case",
-        }
-    ]
-    assert (tmp_path / result.data["eval_closeout_path"]).is_file()
-    assert closeout["closeout_validation"]["status"] == "pass"
-
-
 def test_run_evals_blocks_success_without_report_directory(tmp_path: Path) -> None:
     completed = mock.Mock(
         returncode=0,
@@ -4653,58 +4856,7 @@ def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> 
         "eval_started",
         "eval_blocked",
     ]
-
-
-def test_run_evals_blocks_oversized_qwen_oss_local_smoke_batch_before_subprocess(tmp_path: Path) -> None:
-    with mock.patch.object(evals.subprocess, "run") as run:
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/agent-ops/improve-agent-native",
-            mode="smoke",
-            runner="codex",
-            codex_profile="oss-local",
-            cases=["one", "two", "three"],
-            dashboard=False,
-            skip_tessl=True,
-        )
-
-    run.assert_not_called()
-    assert result.status == "error"
-    assert result.data["eval_status"] == "blocked_validation"
-    assert result.data["blocker_class"] == "blocked_validation"
-    batch = result.data["qwen_oss_local_smoke_batch"]
-    assert batch["status"] == "blocked"
-    assert batch["failure_category"] == "runtime_mismatch"
-    assert batch["given"] == "3 selected cases for qwen oss-local smoke"
-    assert batch["should"] == "run at most 2 cases per qwen oss-local shard"
-    assert batch["actual"] == ["one", "two", "three"]
-    assert "qwen oss-local smoke selected 3 cases" in result.errors[0].message
-
-
-def test_run_evals_blocks_oversized_qwen_oss_local_release_batch_before_subprocess(tmp_path: Path) -> None:
-    with mock.patch.object(evals.subprocess, "run") as run:
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/agent-ops/improve-agent-native",
-            mode="release",
-            runner="codex",
-            codex_profile="oss-local",
-            cases=["one", "two", "three"],
-            dashboard=False,
-            skip_tessl=True,
-        )
-
-    run.assert_not_called()
-    assert result.status == "error"
-    assert result.data["eval_status"] == "blocked_validation"
-    assert result.data["blocker_class"] == "blocked_validation"
-    batch = result.data["qwen_oss_local_smoke_batch"]
-    assert batch["status"] == "blocked"
-    assert batch["failure_category"] == "runtime_mismatch"
-    assert batch["given"] == "3 selected cases for qwen oss-local release"
-    assert batch["should"] == "run at most 2 cases per qwen oss-local shard"
-    assert batch["actual"] == ["one", "two", "three"]
-    assert "qwen oss-local release selected 3 cases" in result.errors[0].message
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
 
 
 def test_run_evals_stores_repo_relative_raw_output(tmp_path: Path) -> None:

@@ -3,13 +3,13 @@ from __future__ import annotations
 import re
 
 
+# These types are accepted only when the Tessl criteria adapter preserves
+# their field/path and expected-value metadata.
+TEXT_FIELD_TESSL_ACCEPTANCE_TYPES = {"text_field_absent", "text_field_equals", "text_field_in", "text_field_present"}
 BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "expected_signal",
     "skill_selected",
-    "text_field_absent",
-    "text_field_equals",
-    "text_field_in",
-    "text_field_present",
+    *TEXT_FIELD_TESSL_ACCEPTANCE_TYPES,
     "artifact_exists",
     "artifact_contains",
     "command_success",
@@ -22,7 +22,6 @@ BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "output_schema",
 }
 KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_contains"}
-TEXT_FIELD_TESSL_ACCEPTANCE_TYPES = {"text_field_absent", "text_field_equals", "text_field_in", "text_field_present"}
 CONCRETE_OUTPUT_ARTIFACT_RE = re.compile(r"(?i)(?<![A-Za-z0-9_.-])[A-Za-z0-9_.-]+\.(?:md|json|txt|yaml|yml)(?![A-Za-z0-9_.-])")
 PROVENANCE_FIXTURE_PATH_RE = re.compile(r"(?i)\breferences/evals/[^\s]+\.md\b")
 PROVENANCE_ONLY_VERBS_RE = re.compile(r"(?i)\b(names?|cites?|references?|points?\s+to|lists?)\b")

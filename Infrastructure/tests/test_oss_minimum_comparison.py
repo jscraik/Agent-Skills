@@ -14,7 +14,8 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-an
 from build_oss_minimum_comparison import _parse_stage_maturity_expectations, build_comparison  # noqa: E402
 
 
-def _proof_set(profile: str, statuses: dict[str, str], *, gate_status: str = "pass") -> dict[str, object]:
+def _proof_set(profile: str, statuses: dict[str, str]) -> dict[str, object]:
+    gate_status = "pass" if statuses and all(status == "pass" for status in statuses.values()) else "blocked"
     return {
         "schema_version": "oss-minimum-proof-set/v1",
         "gate_status": gate_status,
@@ -62,10 +63,6 @@ class OssMinimumComparisonTests(unittest.TestCase):
         receipt = build_comparison(local_proof_set=local, cloud_proof_set=cloud, delta_owners={})
 
         self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["input_gate_status"], "pass")
-        self.assertEqual(receipt["lane_scores"]["oss-local"]["schema_version"], "oss-lane-score/v1")
-        self.assertEqual(receipt["lane_scores"]["oss-local"]["pass_rate"], 1.0)
-        self.assertEqual(receipt["lane_scores"]["oss-cloud"]["pass_count"], 2)
         self.assertEqual(receipt["summary"]["parity_count"], 2)
         self.assertEqual(receipt["summary"]["delta_count"], 0)
         self.assertEqual(receipt["summary"]["missing_delta_owner_count"], 0)
@@ -74,18 +71,17 @@ class OssMinimumComparisonTests(unittest.TestCase):
         self.assertIn("tessl-dry-run", receipt["blocked_next_gates"])
         self.assertIn("tessl-live", receipt["blocked_next_gates"])
 
-    def test_matching_blocked_inputs_do_not_pass_comparison_by_parity_only(self) -> None:
-        local = _proof_set("oss-local", {"case-a": "blocked"}, gate_status="blocked")
-        cloud = _proof_set("oss-cloud", {"case-a": "blocked"}, gate_status="blocked")
+    def test_matching_non_pass_proof_sets_still_block_comparison(self) -> None:
+        local = _proof_set("oss-local", {"case-a": "blocked"})
+        cloud = _proof_set("oss-cloud", {"case-a": "blocked"})
 
         receipt = build_comparison(local_proof_set=local, cloud_proof_set=cloud, delta_owners={})
 
         self.assertEqual(receipt["status"], "blocked")
-        self.assertEqual(receipt["input_gate_status"], "blocked")
         self.assertEqual(receipt["summary"]["delta_count"], 0)
-        self.assertEqual(receipt["input_gate_evidence"], {
-            "oss_local_gate_status": "blocked",
-            "oss_cloud_gate_status": "blocked",
+        self.assertEqual(receipt["proof_set_gate_statuses"], {
+            "oss-local": "blocked",
+            "oss-cloud": "blocked",
         })
         self.assertIn("oss-cloud-eval-run", receipt["blocked_next_gates"])
 

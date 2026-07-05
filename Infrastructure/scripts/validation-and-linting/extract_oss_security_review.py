@@ -28,7 +28,7 @@ def _extract_json(raw: str) -> dict[str, Any]:
     stripped = "".join(
         char
         for char in stripped
-        if char in "\n\r\t" or 32 <= ord(char) < 127
+        if char in "\n\r\t" or ord(char) >= 32
     )
     fenced_matches = FENCED_JSON_RE.findall(stripped)
     if fenced_matches:
@@ -59,7 +59,8 @@ def _review_shape_blockers(payload: dict[str, Any]) -> list[str]:
     if missing:
         blockers.append(f"missing required key(s): {', '.join(missing)}")
     for key in ("risk_summary", "reviewer_model_boundary"):
-        if not str(payload.get(key, "")).strip():
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
             blockers.append(f"{key} must be a non-empty string")
     if not isinstance(payload.get("required_followups"), list):
         blockers.append("required_followups must be a list")
@@ -68,17 +69,13 @@ def _review_shape_blockers(payload: dict[str, Any]) -> list[str]:
 
 def _digest_blockers(payload: dict[str, Any], expected_digest: str | None) -> list[str]:
     expected = expected_digest.strip() if expected_digest else None
-    observed = str(payload.get("evidence_digest_seen", "")).strip()
+    observed_value = payload.get("evidence_digest_seen", "")
+    observed = observed_value.strip() if isinstance(observed_value, str) else str(observed_value).strip()
     expected_match = DIGEST_RE.search(expected) if expected else None
     observed_match = DIGEST_RE.search(observed)
     expected_canonical = expected_match.group(0).lower() if expected_match else expected
     observed_canonical = observed_match.group(0).lower() if observed_match else observed
-    digest_matches = (
-        not expected_canonical
-        or observed_canonical == expected_canonical
-        or str(observed_canonical) in str(expected_canonical)
-        or str(expected_canonical) in str(observed_canonical)
-    )
+    digest_matches = not expected_canonical or observed_canonical == expected_canonical
     if digest_matches:
         return []
     return [
@@ -101,8 +98,6 @@ def _review_status_blockers(payload: dict[str, Any]) -> list[str]:
 def validate_review(path: Path, *, expected_digest: str | None = None) -> dict[str, Any]:
     try:
         payload = _extract_json(path.read_text(encoding="utf-8"))
-    except OSError as exc:
-        return _blocked([f"review output could not be read: {exc}"])
     except (JSONDecodeError, ValueError) as exc:
         return _blocked([f"review output is not valid JSON: {exc}"])
     blockers = [

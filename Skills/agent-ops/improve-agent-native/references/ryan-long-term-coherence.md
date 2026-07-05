@@ -1,4 +1,4 @@
-# Long-Term Coherence
+# Ryan Long-Term Coherence
 
 Convert repeated steering, latent prompt principles, self-observability, and artifact precedent into durable environment changes.
 
