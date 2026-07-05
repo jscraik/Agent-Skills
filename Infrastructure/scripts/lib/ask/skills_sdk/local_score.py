@@ -120,7 +120,7 @@ def _impact_counts(receipt: dict[str, Any]) -> tuple[int, int, int]:
     )
 
 
-def _list_count(value: Any) -> int:
+def _list_count(value: object) -> int:
     return len(value) if isinstance(value, list) else 0
 
 
