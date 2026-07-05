@@ -307,7 +307,7 @@ def _missing_capsule_routing(refs: Path, capsule_paths: list[str]) -> list[str]:
 def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
     handoff_dir = root / ".harness" / "evidence" / "handoff" / skill_dir.name
     receipts = sorted(handoff_dir.glob("tessl*.json")) if handoff_dir.is_dir() else []
-    accepted_legacy = _release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
+    accepted_legacy = release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
     missing: list[str] = []
     ignored_legacy: list[str] = []
 
@@ -344,10 +344,6 @@ def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
             "ignored_legacy": ignored_legacy,
         },
     )
-
-
-def _release_ratchet_exception_paths(handoff_dir: Path, check: str) -> set[str]:
-    return release_ratchet_exception_paths(handoff_dir, check)
 
 
 def _check_scenario_parser_parity(root: Path, refs: Path) -> Finding:
