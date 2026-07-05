@@ -4427,7 +4427,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "--eval-mode",
             args.eval_mode,
             "--runner",
-            args.runner,
+            ",".join(selected_runners),
         ]
     )
 
