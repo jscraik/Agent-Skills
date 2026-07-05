@@ -2733,6 +2733,45 @@ def _parse_csv_args(raw: Sequence[str]) -> List[str]:
     return expanded
 
 
+def _build_next_reproduce_command(
+    args: argparse.Namespace,
+    *,
+    selected_runners: Sequence[str],
+    capture_jsonl: bool,
+) -> str:
+    parts = [
+        "python3",
+        "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
+        args.path,
+        "--eval-mode",
+        args.eval_mode,
+    ]
+    if args.runners:
+        for raw_runners in args.runners:
+            parts.extend(["--runners", raw_runners])
+    elif args.dual_run:
+        parts.append("--dual-run")
+    elif args.smoke:
+        parts.append("--smoke")
+    else:
+        parts.extend(["--runner", ",".join(selected_runners)])
+    for case_filter in args.case:
+        parts.extend(["--case", case_filter])
+    for category_filter in args.category:
+        parts.extend(["--category", category_filter])
+    if args.timeout_sec is not None:
+        parts.extend(["--timeout-sec", str(args.timeout_sec)])
+    if args.timeout_profile != "default":
+        parts.extend(["--timeout-profile", args.timeout_profile])
+    if capture_jsonl:
+        parts.append("--capture-jsonl")
+    if args.model:
+        parts.extend(["--model", args.model])
+    if args.profile:
+        parts.extend(["--profile", args.profile])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def _filter_cases(
     cases: List[EvalCase],
     *,
@@ -4418,17 +4457,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     any_tier1_failed = False
     any_tier2_failed = False
     any_blocked = False
-    next_reproduce_command = " ".join(
-        shlex.quote(part)
-        for part in [
-            "python3",
-            "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
-            args.path,
-            "--eval-mode",
-            args.eval_mode,
-            "--runner",
-            ",".join(selected_runners),
-        ]
+    next_reproduce_command = _build_next_reproduce_command(
+        args,
+        selected_runners=selected_runners,
+        capture_jsonl=capture_jsonl,
     )
 
     for idx, c in enumerate(cases, 1):

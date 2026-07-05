@@ -191,6 +191,45 @@ def test_provisional_workflow_closeout_records_prompt_only_case_dir(tmp_path: Pa
     ]
 
 
+def test_next_reproduce_command_preserves_filters_and_runner_selection() -> None:
+    runner = _load_runner_module()
+    args = runner.build_arg_parser().parse_args([
+        "Skills/example-skill",
+        "--eval-mode",
+        "smoke",
+        "--runners",
+        "codex,codex-kimi",
+        "--case",
+        "case-one",
+        "--case",
+        "case-two,case-three",
+        "--category",
+        "safety",
+        "--timeout-sec",
+        "17",
+        "--timeout-profile",
+        "codex-heavy",
+        "--model",
+        "gpt-example",
+        "--profile",
+        "oss-local",
+    ])
+
+    command = runner._build_next_reproduce_command(
+        args,
+        selected_runners=["codex", "codex-kimi"],
+        capture_jsonl=True,
+    )
+
+    assert command == (
+        "python3 Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py "
+        "Skills/example-skill --eval-mode smoke --runners codex,codex-kimi "
+        "--case case-one --case case-two,case-three --category safety "
+        "--timeout-sec 17.0 --timeout-profile codex-heavy --capture-jsonl "
+        "--model gpt-example --profile oss-local"
+    )
+
+
 def test_discovery_question_assertion_accepts_scope_question_before_edits() -> None:
     runner = _load_runner_module()
 

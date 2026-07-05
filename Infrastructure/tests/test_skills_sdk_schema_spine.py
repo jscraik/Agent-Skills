@@ -993,6 +993,10 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
             },
         )
         self.assertEqual(payload["intake_receipt"]["schema_version"], "skills-sdk.skill-intake-receipt.v0")
+        self.assertEqual(
+            payload["package_security_signature_receipt"]["schema_version"],
+            "skills-sdk.package-security-signature-receipt.v0",
+        )
         self.assertEqual(payload["risk_mode_receipt"]["schema_version"], "skills-sdk.risk-mode-taxonomy-receipt.v0")
         self.assertFalse(payload["execution_performed"])
         self.assertFalse(payload["scanner_execution_performed"])
