@@ -1,0 +1,80 @@
+{
+  "schema_version": "pm-outbound-feedback/v1",
+  "thread": "Project PM - Skills SDK",
+  "pm_thread_id": "019f344f-cb22-7ac3-b31a-453f4e813faa",
+  "source_thread_id": "019f2f55-deee-7263-8ddf-331dcbd6e885",
+  "timestamp_utc": "2026-07-06T07:18:00Z",
+  "status": "outbound_feedback_recorded_after_blind_closeout",
+  "failure_classification": "PM completed local closeout without a durable Chief-facing outbound feedback artifact",
+  "suspected_system_fault": "PM treated final chat response plus local receipt as sufficient, leaving Chief blind if the response was not routed or consumed.",
+  "authorized_recovery_attempted": true,
+  "recovery_action": "Wrote this outbound Chief feedback receipt linking the implemented no-breadcrumbs check, validation evidence, remaining boundaries, and the PM workflow correction.",
+  "referenced_closeout": ".harness/reports/project-pm/agent-skills/no-breadcrumbs/no-breadcrumbs-check-20260706T071140Z.json",
+  "outbound_update": {
+    "recipient": "Chief",
+    "summary": "No-breadcrumbs changed-file check is implemented and locally validated. PM closeout should not be treated as complete in future lanes unless it includes either a Chief-facing outbound receipt/update or an outbound-escalation-blocked receipt.",
+    "check_status": "implemented",
+    "qa_or_pr_readiness_claim": false,
+    "remaining_unproven": [
+      "full repository readiness",
+      "PR readiness",
+      "hosted CI coverage",
+      "complete historical breadcrumb cleanup"
+    ]
+  },
+  "future_pm_rule": {
+    "rule": "Every PM lane closeout that Chief depends on must include a durable outbound update artifact or an explicit outbound-escalation-blocked artifact before the PM goal is marked complete.",
+    "minimum_fields": [
+      "recipient",
+      "artifact paths",
+      "exact validation commands and outcomes",
+      "what is proven",
+      "what remains unproven",
+      "next owner"
+    ],
+    "applies_to": [
+      "Worker dispatch closeout",
+      "QA/integration routing closeout",
+      "policy/check closeout",
+      "metadata/hosted-state closeout",
+      "blocked escalation closeout"
+    ]
+  },
+  "evidence": [
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && jq -r '.schema_version + \" \" + .status' .harness/reports/project-pm/agent-skills/no-breadcrumbs/no-breadcrumbs-check-20260706T071140Z.json",
+      "outcome": "pass",
+      "reason": "local PM no-breadcrumbs closeout receipt exists and reports implemented"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "reason": "steering uptake ledger validates with findings empty"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git status --short --branch --untracked-files=all",
+      "outcome": "pass",
+      "reason": "current local dirty state is visible; this receipt does not clean, stage, or claim broader readiness"
+    }
+  ],
+  "post_recovery_validation": {
+    "status": "pass",
+    "validation_command": "jq -r '.schema_version + \" \" + .status + \" recipient=\" + .outbound_update.recipient' .harness/reports/project-pm/agent-skills/no-breadcrumbs/outbound-chief-feedback-20260706T071800Z.json",
+    "expected_output": "pm-outbound-feedback/v1 outbound_feedback_recorded_after_blind_closeout recipient=Chief"
+  },
+  "remaining_blocker_if_any": "None for recording the missing outbound feedback artifact. Future enforcement still needs to be followed operationally in each PM closeout.",
+  "next_owner": "Project PM for future PM closeouts; Chief should reject PM closeout packets that lack outbound update or outbound-escalation-blocked evidence.",
+  "claims_boundary": {
+    "proven": [
+      "The prior blind-closeout failure is acknowledged as a PM workflow defect.",
+      "A Chief-facing outbound feedback receipt now exists for the no-breadcrumbs check lane.",
+      "The receipt names the future PM closeout rule."
+    ],
+    "not_proven": [
+      "Full repo readiness.",
+      "Hosted CI status.",
+      "PR readiness.",
+      "That future PM lanes will comply without further validation."
+    ]
+  }
+}
