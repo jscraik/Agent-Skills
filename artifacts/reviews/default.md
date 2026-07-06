@@ -1,75 +1,112 @@
-# PR #301 Green Sweep Review-Thread Repair
+# Agent Skills PR #313 Post-Merge Follow-Up QA Disproof
 
-STATUS: blocked_policy_or_approval
+schema_version: qa-proof/v1
+status: accepted_with_broader_suite_gap
+agent_id: 019f3468-2091-7bb2-bd5e-ecad35647e4d
+repo: /Users/jamiecraik/dev/agent-skills
+branch: codex/pr313-postmerge-review-followups
 
-PR: https://github.com/jscraik/Agent-Skills/pull/301
-Latest pushed head: 97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7
-Commit created: 97c4ba5f4 fix: preserve tessl fallback signals
+## Scope
 
-## What Changed
+Independent QA Disproof lane for the Project PM canary. I inspected the real branch output and tried to disprove the two Worker claims:
 
-- Patched `TesslRegistrySnapshot.impactMetric` so a Tessl registry payload with only `scenarioCount` and no `impactScore` returns nil, preserving the local impact signal.
-- Patched `TesslRegistrySnapshot.securitySignal` so clean strings such as `no issues`, `clean`, or `clear` classify as Passed before the issue/fail/flag substring branch.
+- schema blocks pass/review intake-review receipts when package-security-signature evidence is missing or null, while preserving the blocked null route.
+- local-score blocks the impact lane when scenario-quality emits suite-level blockers or blocked status even when row-level `blocked_count` is 0.
 
-## Evidence
+I did not edit implementation files.
 
-- Command: `PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m py_compile Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py` -> pass.
-- Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m pytest -q Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py Infrastructure/tests/test_oss_local_smoke_output_check.py` -> pass, 25 passed.
-- Command: `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` -> pass.
-- Command: `CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache xcrun swiftc -parse Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift` -> pass.
-- Command: `git diff --check` -> pass.
-- Command: `git commit -m "fix: preserve tessl fallback signals"` -> pass, created 97c4ba5f4.
-- Command: `GIT_TERMINAL_PROMPT=0 git push origin HEAD:codex/qwen-local-eval-guardrails` -> pass, pushed 497f4de21..97c4ba5f4.
-- Command: `gh pr checks 301 --repo jscraik/Agent-Skills --watch=false` -> blocked in latest poll only by pending Semgrep (SAST) and Semgrep OSS; no failure observed.
-- Command: `gh api graphql resolveReviewThread ...` -> blocked by tenant policy denying review-thread mutation without explicit user approval.
+## Repo Contract Read
 
-## Remaining Blockers
+- Read `AGENTS.md`.
+- Read `CODESTYLE.md`.
+- Read `Docs/agents/19-high-signal-steering-feedback.md`.
+- Read `Docs/agents/04-validation.md`.
+- Read `artifacts/AGENTS.md`.
 
-- GitHub review-thread mutation needs explicit PM/user approval or a supported resolver path.
-- PR #301 still had Semgrep (SAST) and Semgrep OSS pending in the latest hosted-check poll.
-- GraphQL still reported one live unresolved App.swift review thread after the source patch.
-- Primary checkout remains dirty and was not used or cleaned.
+Key applied constraints: use repo wrappers, keep local proof separate from hosted PR/review truth, treat review output as bounded evidence, and report exact command outcomes.
 
----
+## Branch And Dirty State
 
-# Qwen OSS-Local Case Repair Review
+Command: `git status --short --branch --untracked-files=all` -> pass (branch `codex/pr313-postmerge-review-followups`; five intended implementation/test files modified; two Worker handoff JSON files untracked)
 
-STATUS: blocked_runtime
+Changed files inspected:
 
-Thread report: `.harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json`
-Current gate: `oss-local-qwen-behavior-eval`
-Focused case: `happy-agents-md-audit`
+- `Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json`
+- `Infrastructure/scripts/lib/ask/skills_sdk/local_score.py`
+- `Infrastructure/tests/test_skills_sdk_schema_spine.py`
+- `Infrastructure/tests/test_skills_sdk_skill_intake_review.py`
+- `Infrastructure/tests/test_skills_sdk_local_score.py`
 
-## Owner Classification
+Worker handoffs inspected:
 
-The original completed failure was owned by scenario criteria, not skill behavior:
+- `.harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-01-skill-intake-review-receipt.json`
+- `.harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-02-local-score.json`
 
-- The prompt asked to audit AGENTS.md files in "a repo" without naming the current working repository as the target.
-- The qwen response therefore asked for the missing target repository.
-- Several `expected_signal` criteria scored boilerplate wording such as "Semantically covers the scenario-specific evidence and decision signals" instead of observable output obligations.
+## Findings
 
-The current blocker after the scenario repair is runtime/runner completion:
+### No Blocking Defect Found In Focused Patch
 
-- The focused qwen run now creates only `prompt.txt`.
-- No `scorecard.json`, Codex final answer, stdout, or stderr artifact was emitted for the latest run.
+The schema now has `package_security_signature_receipt` in top-level `required`, requires the package-security signature schema for `status: pass` and `status: review`, and permits only `null` for `status: blocked`.
 
-## Files Changed
+The local-score impact lane now combines row-level blocked count, suite-level blocker count, and receipt status before allowing impact to pass.
 
-- `Skills/agent-ops/improve-agent-native/references/evals.yaml`
-- `Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py`
-- `Infrastructure/tests/test_skills_sdk_tessl_eval_quality.py`
-- `.harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json`
+### P3: Focused Tests Are Narrower Than The Full Disproof Matrix
 
-## Evidence
+The checked-in regression tests cover the main review/null schema case and the suite-level local-score blocker. They do not explicitly encode every disproof probe I ran manually, especially missing signature for review, missing/null signature for pass, and positive acceptance for blocked/null.
 
-- Command: `sed -n '1,160p' Infrastructure/artifacts/skills/improve-agent-native/20260702-222317-856935/01-happy-agents-md-audit/codex/final.txt` -> pass. Evidence: qwen asked which target repository to audit.
-- Command: `apply_patch Skills/agent-ops/improve-agent-native/references/evals.yaml` -> pass. Evidence: scenario now names the current working repository and removes scorer-boilerplate expected-signal wording.
-- Command: `apply_patch Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py Infrastructure/tests/test_skills_sdk_tessl_eval_quality.py` -> pass. Evidence: added `scorer_boilerplate_expected_signal` rule and regression test.
-- Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache PYTHONPYCACHEPREFIX=/private/tmp/qwen-case-pycache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_tessl_eval_quality.py::test_expected_signal_rejects_scorer_boilerplate` -> pass, 1 passed.
-- Command: `PYTHONPYCACHEPREFIX=/private/tmp/qwen-case-pycache python3 -m py_compile Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py` -> pass.
-- Command: `XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 45 --case happy-agents-md-audit --json --robot; code=$?; echo ASK_EXIT:$code; exit $code` -> blocked. Evidence: artifact directory `Infrastructure/artifacts/skills/improve-agent-native/20260702-223706-917494` contains `prompt.txt` only; `scorecard.json` is missing.
-- Command: `python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json --json` -> pass.
+This is not a rejection because the current schema behavior passed those probes. It is an advisory: if this PR follow-up becomes the durable guardrail, the manual probes should be converted into unit tests so future changes cannot regress the matrix invisibly.
 
-## Next Step
+### Broader Suite Gap Remains
 
-Continue in the runner/runtime lane for this same focused case. Do not broaden to oss-local release eval, oss-cloud, Tessl dry-run, or Tessl live until `happy-agents-md-audit` produces a scorecard receipt.
+The full `tests.test_skills_sdk_skill_intake_review` suite still fails five tests because the current `valid_skill` fixture is blocked by an intake quarantine issue involving `README.md`. This matches the Worker handoff boundary that the full skill-intake review suite is not green.
+
+I did not prove this failure is pre-existing by checking out/running the base branch in this QA lane. The current diff does not modify the fixture or the production intake quarantine path that emits that blocker, but the evidence here only proves the broader suite is still failing on the current branch.
+
+## Deterministic Checks
+
+Command: `sed -n '1,220p' AGENTS.md` -> pass (repo operating contract read)
+Command: `sed -n '1,240p' CODESTYLE.md` -> pass (first codestyle section read)
+Command: `sed -n '241,520p' CODESTYLE.md` -> pass (remaining codestyle section read)
+Command: `sed -n '1,260p' Docs/agents/19-high-signal-steering-feedback.md` -> pass (steering uptake/systemic scope contract read)
+Command: `sed -n '1,260p' Docs/agents/04-validation.md` -> pass (repo validation contract read)
+Command: `git diff -- Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json` -> pass (schema diff inspected)
+Command: `git diff -- Infrastructure/scripts/lib/ask/skills_sdk/local_score.py` -> pass (local-score diff inspected)
+Command: `jq '.' .harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-01-skill-intake-review-receipt.json` -> pass (Worker 01 handoff inspected)
+Command: `jq '.' .harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-02-local-score.json` -> pass (Worker 02 handoff inspected)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine.TestSkillsSdkSchemaSpine.test_skill_intake_review_receipt_schema_rejects_review_without_package_signature` -> pass (1 test OK)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review.TestSkillsSdkSkillIntakeReview.test_schema_fixture_consumes_risk_mode_receipt` -> pass (1 test OK)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_local_score.TestSkillsSdkLocalScore.test_builder_honors_suite_level_scenario_quality_blockers` -> pass (1 test OK)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_local_score` -> pass (7 tests OK)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh - <<'PY' ... PY` -> pass (manual matrix rejected review missing signature, review null signature, pass missing signature, pass null signature; accepted blocked null signature; verified local-score suite blocker blocks impact)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine` -> pass (96 tests OK)
+Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review` -> fail (27 tests ran; 5 failures remain around `valid_skill` being blocked by intake quarantine, including `approved_top_level_paths` evidence for `README.md`)
+Command: `git diff --check` -> pass (no whitespace errors reported)
+
+## Decision
+
+accept_with_advisory
+
+I could not disprove the focused Worker fixes. The implementation satisfies the two review-thread concerns in local deterministic proof.
+
+Do not claim the broader skill-intake review suite is green. Do not claim hosted GitHub review threads are resolved. Do not claim PR readiness, mergeability, cleanup safety, release readiness, or project completion from this QA lane.
+
+## Claims Boundary
+
+Proves:
+
+- Current branch schema rejects pass/review receipts when `package_security_signature_receipt` is missing or null.
+- Current branch schema still accepts the blocked/null route.
+- Current branch local-score impact lane blocks suite-level scenario-quality blockers even when row-level `blocked_count` is 0.
+- Focused schema/local-score tests pass locally through the repo Infrastructure wrapper.
+- Full schema spine suite passes locally.
+
+Does not prove:
+
+- Hosted PR #313 review-thread resolution.
+- Any new PR is ready, green, mergeable, reviewed, or safe to clean up.
+- Full skill-intake review suite health.
+- Base-branch/pre-existing classification for the remaining skill-intake review failures.
+- Linear, CircleCI, CodeRabbit, or external tracker state.
+- Project completion.
+
+WROTE: artifacts/reviews/default.md

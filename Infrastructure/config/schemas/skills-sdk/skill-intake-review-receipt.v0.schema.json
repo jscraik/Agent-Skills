@@ -112,6 +112,7 @@
           "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "package_id": {"type": "string", "minLength": 1},
           "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "package_security_signature_receipt": {"$ref": "package-security-signature-receipt.v0.schema.json"},
           "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
           "risk_mode_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "review_items": {
@@ -135,6 +136,7 @@
           "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "package_id": {"type": "string", "minLength": 1},
           "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "package_security_signature_receipt": {"$ref": "package-security-signature-receipt.v0.schema.json"},
           "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
           "risk_mode_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "review_items": {
@@ -155,6 +157,7 @@
           "review_decision": {"const": "blocked"},
           "package_id": {"type": "null"},
           "package_digest": {"type": "null"},
+          "package_security_signature_receipt": {"type": "null"},
           "risk_mode_receipt": {"type": "null"},
           "risk_mode_receipt_digest": {"type": "null"},
           "review_items": {

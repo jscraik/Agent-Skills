@@ -1,0 +1,46 @@
+{
+  "schema_version": "worker-handoff/v1",
+  "worker_id": "pr313-postmerge-followup-worker-01",
+  "status": "completed_local_patch_with_focused_proof",
+  "source_pr": "https://github.com/jscraik/Agent-Skills/pull/313",
+  "review_thread": {
+    "id": "PRRT_kwDOQ6nR9s6Octgh",
+    "url": "https://github.com/jscraik/Agent-Skills/pull/313#discussion_r3525687847",
+    "title": "Require package signature evidence for pass reviews"
+  },
+  "target_paths": [
+    "Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+    "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+    "Infrastructure/tests/test_skills_sdk_skill_intake_review.py"
+  ],
+  "summary": "Pass and review intake-review receipts now require package_security_signature_receipt to match the package-security-signature receipt schema. Blocked receipts keep the explicit null route.",
+  "validation": [
+    {
+      "command": "PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine",
+      "outcome": "pass",
+      "reason": "Ran 96 tests; includes regression rejecting review receipts with null package signature evidence."
+    },
+    {
+      "command": "PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review.TestSkillsSdkSkillIntakeReview.test_schema_fixture_consumes_risk_mode_receipt",
+      "outcome": "pass",
+      "reason": "Focused changed fixture assertion validates the package-security receipt dependency in the intake review fixture."
+    },
+    {
+      "command": "PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review",
+      "outcome": "fail",
+      "reason": "Full suite has pre-existing fixture/blocker failures unrelated to this patch; focused changed test passed."
+    }
+  ],
+  "claims_boundary": {
+    "proves": [
+      "local schema and focused fixture checks cover the package-signature evidence requirement",
+      "blocked receipts retain a null schema route"
+    ],
+    "does_not_prove": [
+      "hosted review thread is resolved",
+      "a follow-up PR is ready",
+      "full skill-intake review suite passes",
+      "cleanup is safe"
+    ]
+  }
+}

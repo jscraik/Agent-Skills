@@ -42,15 +42,23 @@ def _quality_payload(status: str = "blocked") -> SimpleNamespace:
     )
 
 
-def _impact_payload(ready: int = 33, total: int = 71, blocked: int = 38) -> SimpleNamespace:
+def _impact_payload(
+    ready: int = 33,
+    total: int = 71,
+    blocked: int = 38,
+    status: str | None = None,
+    blockers: list[dict[str, str]] | None = None,
+) -> SimpleNamespace:
+    receipt_status = status if status is not None else ("blocked" if blocked else "preview")
     return _result(
         {
             "skills_sdk_eval_scenario_quality": {
                 "receipt": {
-                    "status": "blocked" if blocked else "preview",
+                    "status": receipt_status,
                     "scenario_count": total,
                     "promotion_ready_count": ready,
                     "blocked_count": blocked,
+                    "blockers": blockers or [],
                     "agent_summary": "Scenario quality emitted evidence.",
                 }
             }
@@ -132,6 +140,29 @@ class TestSkillsSdkLocalScore(unittest.TestCase):
         self.assertEqual(receipt["lanes"]["security"]["status"], "missing")
         self.assertIn("security", receipt["completeness"]["missing_lanes"])
         self.assertEqual(receipt["score"]["status"], "partial")
+
+    def test_builder_honors_suite_level_scenario_quality_blockers(self) -> None:
+        receipt = build_local_score_receipt_from_lane_payloads(
+            REPO_ROOT,
+            source_path=VALID_SKILL,
+            query="Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+            gate="oss-local",
+            quality_result=_quality_payload(status="pass"),
+            impact_result=_impact_payload(
+                ready=3,
+                total=3,
+                blocked=0,
+                status="blocked",
+                blockers=[{"rule_id": "release_minimum_scenario_count"}],
+            ),
+            security_result=_result({}),
+            generated_at="2026-07-04T12:00:00Z",
+        )
+
+        self.assertEqual(receipt["lanes"]["impact"]["status"], "blocked")
+        self.assertEqual(receipt["lanes"]["impact"]["details"]["blocked_count"], 0)
+        self.assertEqual(receipt["lanes"]["impact"]["details"]["suite_blocker_count"], 1)
+        self.assertIn("impact", receipt["completeness"]["blocked_lanes"])
 
     def test_write_current_creates_skillsbar_feed_and_history_receipt(self) -> None:
         receipt = build_local_score_receipt_from_lane_payloads(
