@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +15,15 @@ VALID_OUTCOMES = {"pass", "fail", "blocked"}
 BLOCKED_OSS_LOCAL_GATES = {"oss-cloud", "tessl-dry-run", "tessl-live"}
 LEARNING_LEDGER_PATH = ".harness/memory/LEARNINGS.md"
 REPO_ROOT = Path(__file__).resolve().parents[3]
+AGENT_PROFILE_MANIFEST_PATHS = (
+    Path.home() / ".codex" / "agents" / "manifest.json",
+    REPO_ROOT / ".codex" / "agents" / "manifest.json",
+)
+WAITING_STATE_PATTERN = re.compile(
+    r"(awaiting|authorization_required|ready_for_authorization|waiting|needs_(pm|chief|operator|worker|qa|integration))",
+    re.IGNORECASE,
+)
+ESCALATION_FIELDS = ("outbound_escalation", "escalation_blocked", "follow_up_triggered")
 
 
 def _finding(path: str, message: str) -> dict[str, str]:
@@ -72,6 +80,34 @@ def _repo_path_exists(value: str) -> bool:
     return True
 
 
+def _load_agent_profile_roles() -> set[str]:
+    for manifest_path in AGENT_PROFILE_MANIFEST_PATHS:
+        try:
+            raw = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(raw, list):
+            continue
+        roles = {item.get("role") for item in raw if isinstance(item, dict) and isinstance(item.get("role"), str)}
+        if roles:
+            return roles
+    return set()
+
+
+def _looks_waiting(value: Any) -> bool:
+    if isinstance(value, str):
+        return bool(WAITING_STATE_PATTERN.search(value))
+    if isinstance(value, list):
+        return any(_looks_waiting(item) for item in value)
+    if isinstance(value, dict):
+        return any(_looks_waiting(item) for item in value.values())
+    return False
+
+
+def _has_escalation_evidence(payload: dict[str, Any]) -> bool:
+    return any(isinstance(payload.get(field), dict) for field in ESCALATION_FIELDS)
+
+
 def _validate_repo_path(value: Any, finding_path: str) -> list[dict[str, str]]:
     if not _non_empty_string(value):
         return [_finding(finding_path, "must be a non-empty final string")]
@@ -83,6 +119,7 @@ def _validate_required_top(payload: dict[str, Any]) -> list[dict[str, str]]:
     required_top = {
         "schema_version",
         "thread_id",
+        "agent_profile_selection",
         "repo_head",
         "task_id",
         "status",
@@ -100,6 +137,46 @@ def _validate_required_top(payload: dict[str, Any]) -> list[dict[str, str]]:
     if missing:
         findings.append(_finding("$", f"missing required keys: {','.join(missing)}"))
     return findings
+
+
+def _validate_agent_profile_selection(payload: dict[str, Any]) -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
+    selection = payload.get("agent_profile_selection")
+    if not isinstance(selection, dict):
+        return [_finding("agent_profile_selection", "must be an object naming the selected agent profile or fallback reason")]
+    required = {"requested_role", "selected_profile_role", "profile_source", "reason_selected"}
+    missing = sorted(required - set(selection))
+    if missing:
+        findings.append(_finding("agent_profile_selection", f"missing required keys: {','.join(missing)}"))
+    for key in required:
+        if key in selection and not _non_empty_string(selection.get(key)):
+            findings.append(_finding(f"agent_profile_selection.{key}", "must be a non-empty final string"))
+    selected = selection.get("selected_profile_role")
+    fallback_reason = selection.get("fallback_reason")
+    roles = _load_agent_profile_roles()
+    if roles and isinstance(selected, str) and selected not in roles and not _non_empty_string(fallback_reason):
+        findings.append(
+            _finding(
+                "agent_profile_selection.selected_profile_role",
+                "must match a role in the agent profile manifest or provide fallback_reason",
+            )
+        )
+    if not roles and not _non_empty_string(fallback_reason):
+        findings.append(_finding("agent_profile_selection.fallback_reason", "must explain fallback when no agent profile manifest is available"))
+    return findings
+
+
+def _validate_waiting_state_escalation(payload: dict[str, Any]) -> list[dict[str, str]]:
+    if not _looks_waiting(payload):
+        return []
+    if _has_escalation_evidence(payload):
+        return []
+    return [
+        _finding(
+            "outbound_escalation",
+            "waiting or authorization states must include outbound_escalation, escalation_blocked, or follow_up_triggered evidence",
+        )
+    ]
 
 
 def _validate_scalar_fields(payload: dict[str, Any]) -> list[dict[str, str]]:
@@ -184,6 +261,8 @@ def validate_thread_report(payload: dict[str, Any]) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
     findings.extend(_validate_required_top(payload))
     findings.extend(_validate_scalar_fields(payload))
+    findings.extend(_validate_agent_profile_selection(payload))
+    findings.extend(_validate_waiting_state_escalation(payload))
     findings.extend(_validate_blocked_next_gates(payload))
     findings.extend(_validate_items(payload, "commands", {"command", "outcome", "evidence"}, "outcome"))
     findings.extend(_validate_items(payload, "artifact_assertions", {"artifact", "assertion", "outcome"}, "outcome"))

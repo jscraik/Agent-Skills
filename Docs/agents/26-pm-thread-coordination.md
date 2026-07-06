@@ -21,6 +21,9 @@ Every PM-to-execution instruction should name:
 
 - source PM thread id.
 - target execution thread id.
+- selected agent profile from `/Users/jamiecraik/.codex/agents/manifest.json`,
+  including requested role, selected profile role, profile output path or
+  source, reason selected, and fallback reason when no profile fits.
 - repository path and expected head, or a command to rediscover head.
 - current gate and explicitly blocked next gates.
 - authoritative artifacts to inspect.
@@ -59,6 +62,19 @@ Each lessons item must name the reusable lesson, failure pattern,
 carry-forward target, deterministic guardrail, recorded location, and validation
 evidence. A repair report that only says what changed, without naming what the
 SDK should learn, is not a valid PM decision input.
+
+Every Worker, QA, Integration, or specialist execution report must include
+`agent_profile_selection`. Generic `worker` is a fallback, not the default
+when a specialist profile fits. Use `testing-reviewer` for test proof,
+`correctness-reviewer` for behavioral disproof, `security-reviewer` or
+`security-sentinel` for security lanes, `git-project-triage` for
+branch/worktree state, `circleci` for CircleCI lanes, `coderabbit` for
+CodeRabbit follow-up, and `agent-native-reviewer` for agent-workflow quality.
+
+A report with an awaiting, authorization-required, or waiting state must also
+include `outbound_escalation`, `follow_up_triggered`, or
+`escalation_blocked`. Passive heartbeat text is not enough: the lane must
+trigger the next responsible lane or record the concrete blocker.
 
 At least one lesson in every report must be recorded in
 `.harness/memory/LEARNINGS.md`. Source, eval, validator, and evidence artifacts
