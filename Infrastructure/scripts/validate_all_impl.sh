@@ -323,8 +323,11 @@ should_run_check() {
     recursive-artifacts)
       [[ "$scope_has_skill_graph" -eq 1 || "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
-    docs-lint|ask-bootstrap-docs|no-breadcrumbs)
+    docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    no-breadcrumbs)
+      [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_python_quality" -eq 1 ]]
       ;;
     no-command-handles)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_skill_graph" -eq 1 || "$scope_has_validation_core" -eq 1 ]]

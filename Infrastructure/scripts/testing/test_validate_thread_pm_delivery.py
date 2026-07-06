@@ -28,6 +28,13 @@ def _valid_report() -> str:
         {
             "schema_version": "thread-report/v1",
             "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
+            "agent_profile_selection": {
+                "requested_role": "release-gate-reviewer",
+                "selected_profile_role": "release-gate-reviewer",
+                "profile_source": ".codex/agents/manifest.json",
+                "reason_selected": "Release gate validation owns oss-local handoff readiness.",
+                "fallback_reason": "Test fixture remains valid when no local agent manifest is available.",
+            },
             "repo_head": "842bda239",
             "task_id": "technical-writer-handoff-readiness-ratchet",
             "status": "blocked",

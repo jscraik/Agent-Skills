@@ -90,5 +90,10 @@
     "That every historical breadcrumb in the repository has been removed.",
     "That every possible natural-language breadcrumb phrase is detected."
   ],
+  "push_or_pr_needed": {
+    "needed": true,
+    "reason": "The no-breadcrumbs validator and validate_all scheduling changes must be reviewed and landed through PR #319 before this local PM check can affect hosted PR policy.",
+    "target_pr": "https://github.com/jscraik/Agent-Skills/pull/319"
+  },
   "claims_boundary": "This is an implemented local check with focused validation. It is not a claim of full repo readiness, hosted CI state, PR state, or complete historical cleanup."
 }
