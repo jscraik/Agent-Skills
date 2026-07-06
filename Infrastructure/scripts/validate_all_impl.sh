@@ -254,7 +254,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -323,7 +323,7 @@ should_run_check() {
     recursive-artifacts)
       [[ "$scope_has_skill_graph" -eq 1 || "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
-    docs-lint|ask-bootstrap-docs)
+    docs-lint|ask-bootstrap-docs|no-breadcrumbs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     no-command-handles)
@@ -679,6 +679,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   ask_cli_modularity_cmd+=(--changed-files "${changed_files[@]}")
 fi
 schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${ask_cli_modularity_cmd[@]}"
+
+no_breadcrumbs_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  no_breadcrumbs_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required no-breadcrumbs "🧹 Verifying changed docs/comments have no unresolved breadcrumbs..." "${no_breadcrumbs_cmd[@]}"
 
 runtime_artifact_targets=(
   "GOVERNANCE/runtime-separation/current.json"

@@ -1,0 +1,94 @@
+{
+  "schema_version": "pm-check-closeout/v1",
+  "thread": "Project PM - Skills SDK",
+  "pm_thread_id": "019f344f-cb22-7ac3-b31a-453f4e813faa",
+  "source_thread_id": "019f2f55-deee-7263-8ddf-331dcbd6e885",
+  "timestamp_utc": "2026-07-06T07:11:40Z",
+  "status": "implemented",
+  "feedback_signal": "Jamie said no human review or steering should be needed to achieve no breadcrumbs in docs and comments.",
+  "existing_enforcement_found": [
+    "CODESTYLE.md prohibits TODO/FIXME/HACK comments and placeholder stubs in production paths.",
+    "Existing fixture-specific tests reject TODO-like scaffold output in selected generators.",
+    "No repo-wide changed-file validator was found for obvious breadcrumbs in docs and code comments."
+  ],
+  "gap": "Human review or steering could still be required because docs/comment breadcrumb cleanup was policy text plus scattered tests, not a general changed-file validation gate.",
+  "chosen_mechanism": "Add a narrow changed-file validator and wire it into validate_all lint/check scheduling as no-breadcrumbs.",
+  "implementation": {
+    "check": "Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py",
+    "tests": "Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py",
+    "runner_wiring": "Infrastructure/scripts/validate_all_impl.sh",
+    "steering_uptake": ".harness/quality/steering-uptake.md"
+  },
+  "scope": {
+    "targets": [
+      "Changed Markdown/prose docs",
+      "Changed code-like files, comment lines only"
+    ],
+    "preserved": [
+      "Fenced examples",
+      "Blockquotes",
+      "Historical receipts and PM reports under .harness/reports",
+      "Implementation notes, plans, specs, reference docs, fixtures, artifacts",
+      "Explicit allow markers such as no-breadcrumbs: allow"
+    ],
+    "patterns": [
+      "TODO/FIXME/HACK/XXX/TBD markers",
+      "not implemented",
+      "wire later",
+      "coming soon",
+      "temporary placeholder and placeholder text/content/copy/value/stub"
+    ]
+  },
+  "commands": [
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && sed -n '1,240p' CODESTYLE.md",
+      "outcome": "pass",
+      "reason": "CODESTYLE.md contains hard prohibitions for TODO/FIXME/HACK comments and placeholder stubs in production paths."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && find Infrastructure/scripts scripts tests Infrastructure/tests -maxdepth 4 -type f | rg 'breadcrumb|todo|fixme|hack|placeholder|comment|doc|steering|lint|validate'",
+      "outcome": "pass",
+      "reason": "Discovery found related docs/style and fixture checks but no dedicated no-breadcrumbs changed-file validator."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 -m py_compile Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py",
+      "outcome": "pass",
+      "reason": "New validator and tests compile."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_no_breadcrumbs.py -q",
+      "outcome": "pass",
+      "reason": "Focused tests pass with 5 tests, covering positive detection, fenced and quoted examples, code comment scanning, allow markers, and historical receipt exclusions."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py --changed-files Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py Infrastructure/scripts/validate_all_impl.sh .harness/quality/steering-uptake.md --json",
+      "outcome": "pass",
+      "reason": "Direct no-breadcrumbs validation passes for the changed enforcement files; steering ledger is intentionally excluded as governance evidence."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "reason": "Steering uptake ledger validates with findings empty after recording this high-signal feedback."
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && bash Infrastructure/scripts/validate_all.sh --ephemeral --scope lint --changed-files Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py Infrastructure/scripts/validate_all_impl.sh .harness/quality/steering-uptake.md",
+      "outcome": "pass",
+      "reason": "Changed-file lint scope runs the new no-breadcrumbs gate and passes; unrelated scope checks are blocked as outside changed-files scope."
+    }
+  ],
+  "what_it_proves": [
+    "A repo-local no-breadcrumbs changed-file validator is implemented.",
+    "The validator is wired into validate_all lint/check scheduling.",
+    "The validator catches obvious breadcrumb markers in docs and code comments in focused tests.",
+    "The validator preserves examples, quoted text, historical receipts, fixtures, and explicit allow markers by design.",
+    "The changed enforcement files pass the focused validator and changed-file lint lane."
+  ],
+  "what_it_does_not_prove": [
+    "Full repository readiness.",
+    "PR readiness.",
+    "Full CI coverage on hosted runners.",
+    "That every historical breadcrumb in the repository has been removed.",
+    "That every possible natural-language breadcrumb phrase is detected."
+  ],
+  "claims_boundary": "This is an implemented local check with focused validation. It is not a claim of full repo readiness, hosted CI state, PR state, or complete historical cleanup."
+}
