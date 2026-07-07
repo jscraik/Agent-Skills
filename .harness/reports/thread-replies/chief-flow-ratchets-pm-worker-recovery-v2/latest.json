@@ -1,0 +1,95 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "chief-flow-ratchets-pm-worker-recovery-v2",
+  "agent_profile_selection": {
+    "requested_role": "tiny bounded PM-as-worker recovery implementation",
+    "selected_profile_role": "worker",
+    "profile_source": "/Users/jamiecraik/.codex/agents/manifest.json",
+    "reason_selected": "Chief explicitly authorized a tiny PM-as-worker exception after the subagent route failed; the implementation is a focused validator/test recovery slice.",
+    "fallback_reason": "PM-as-worker exception was explicitly authorized by Chief for this bounded recovery."
+  },
+  "repo_head": "codex/chief-flow-ratchets-recovery-v2 before final commit; final commit SHA is recorded in PM heartbeat after commit",
+  "task_id": "chief-flow-ratchets-pm-worker-recovery-v2",
+  "status": "pass",
+  "current_gate": "pm-worker-recovery",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "independent-qa",
+    "push",
+    "pull-request",
+    "cleanup",
+    "readiness",
+    "cost-saving-claim"
+  ],
+  "commands": [
+    {
+      "command": "git worktree add -b codex/chief-flow-ratchets-recovery-v2 /private/tmp/agent-skills-chief-flow-ratchets-recovery-v2 origin/main",
+      "outcome": "pass",
+      "evidence": "Created durable worktree on codex/chief-flow-ratchets-recovery-v2 at 5018db3642b718337c6abf9f882c9b888982d49d."
+    },
+    {
+      "command": "git -C /private/tmp/agent-skills-chief-flow-ratchets-recovery-v2 status --short --branch --untracked-files=all",
+      "outcome": "pass",
+      "evidence": "Worktree started clean on codex/chief-flow-ratchets-recovery-v2 tracking origin/main before source edits."
+    },
+    {
+      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_pm_qa_worktree_gate.py -q",
+      "outcome": "pass",
+      "evidence": "Focused validator tests passed: 5 passed in 0.02s."
+    },
+    {
+      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py /Users/jamiecraik/dev/agent-skills/.harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-dispatch-20260707T115643Z.json --json",
+      "outcome": "fail",
+      "evidence": "Expected negative proof: validator rejected the actual broken QA-03 dispatch with implementation_worktree_missing and missing_durable_preservation_strategy."
+    },
+    {
+      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py /Users/jamiecraik/dev/agent-skills/.harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-worktree-missing-20260707T122604Z.json --json",
+      "outcome": "pass",
+      "evidence": "Blocked missing-worktree receipt is accepted as an explicit blocker, not as QA dispatch success."
+    },
+    {
+      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache bash Infrastructure/scripts/validate_all.sh --ephemeral --scope lint --changed-files Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py Infrastructure/scripts/testing/test_validate_pm_qa_worktree_gate.py",
+      "outcome": "pass",
+      "evidence": "Changed-files lint scope completed with required_failures=0 and warn_only_issues=0."
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": "Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py",
+      "assertion": "Adds deterministic PM QA worktree gate validation for missing implementation worktrees and missing temp-worktree preservation strategy.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Infrastructure/scripts/testing/test_validate_pm_qa_worktree_gate.py",
+      "assertion": "Covers missing worktree rejection, temp worktree preservation rejection, accepted patch preservation, accepted blocked receipt, and CLI failure output.",
+      "outcome": "pass"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": ".harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-dispatch-20260707T115643Z.json",
+      "problem": "The dispatch receipt is intentionally rejected by the new validator because the target worktree disappeared and no durable preservation strategy was recorded.",
+      "owner": "Project PM"
+    }
+  ],
+  "files_changed": [
+    "Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py",
+    "Infrastructure/scripts/testing/test_validate_pm_qa_worktree_gate.py"
+  ],
+  "lessons": [
+    {
+      "lesson": "Permission-sensitive QA must not depend on an uncommitted volatile worktree as the only implementation proof surface.",
+      "failure_pattern": "QA was dispatched after the implementation worktree under /private/tmp disappeared.",
+      "carry_forward_target": "PM QA worktree gate validation and future PM packet validation lanes.",
+      "deterministic_guardrail": "validate_pm_qa_worktree_gate.py rejects active QA dispatch when the implementation worktree is missing or a temp worktree lacks durable preservation.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_pm_qa_worktree_gate.py -q"
+    }
+  ],
+  "next_action": "Commit the durable branch, then dispatch independent project-backed QA against the committed branch and final commit SHA.",
+  "claims_boundary": [
+    "This PM-as-worker report does not self-accept the recovery.",
+    "Independent QA remains required.",
+    "No PR creation, push, cleanup, merge, readiness, stale worktree cleanup, or cost/token saving claim is authorized."
+  ]
+}
