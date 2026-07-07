@@ -254,7 +254,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -326,8 +326,14 @@ should_run_check() {
     docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
+    no-breadcrumbs)
+      [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_python_quality" -eq 1 ]]
+      ;;
     no-command-handles)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_skill_graph" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    project-pm-receipts)
+      [[ "$scope_has_project_pm_reports" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     skills-sdk-typed-artifacts)
       [[ "$scope_has_skills_sdk" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
@@ -529,6 +535,7 @@ scope_has_validation_core=0
 scope_has_steering=0
 scope_has_skills_sdk=0
 scope_has_python_quality=0
+scope_has_project_pm_reports=0
 scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
@@ -541,6 +548,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     case "$changed_file" in
       .harness/quality/steering-uptake.md)
         scope_has_steering=1
+        ;;
+    esac
+
+    case "$changed_file" in
+      .harness/reports/project-pm/*|.harness/reports/project-pm/**)
+        scope_has_project_pm_reports=1
         ;;
     esac
 
@@ -608,7 +621,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     esac
   done
 
-  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 && "$scope_has_skills_sdk" -eq 0 && "$scope_has_python_quality" -eq 0 ]]; then
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 && "$scope_has_skills_sdk" -eq 0 && "$scope_has_python_quality" -eq 0 && "$scope_has_project_pm_reports" -eq 0 ]]; then
     echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
     scope_has_validation_core=1
     scope_forced_validation_fallback=1
@@ -679,6 +692,18 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   ask_cli_modularity_cmd+=(--changed-files "${changed_files[@]}")
 fi
 schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${ask_cli_modularity_cmd[@]}"
+
+no_breadcrumbs_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  no_breadcrumbs_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required no-breadcrumbs "🧹 Verifying changed docs/comments have no unresolved breadcrumbs..." "${no_breadcrumbs_cmd[@]}"
+
+project_pm_receipts_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_project_pm_receipts.py)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  project_pm_receipts_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required project-pm-receipts "📬 Verifying changed Project PM receipts have outbound closeout shape..." "${project_pm_receipts_cmd[@]}"
 
 runtime_artifact_targets=(
   "GOVERNANCE/runtime-separation/current.json"

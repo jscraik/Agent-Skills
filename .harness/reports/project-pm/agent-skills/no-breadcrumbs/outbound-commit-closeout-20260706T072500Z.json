@@ -1,0 +1,111 @@
+{
+  "schema_version": "pm-outbound-commit-closeout/v1",
+  "thread": "Project PM - Skills SDK",
+  "pm_thread_id": "019f344f-cb22-7ac3-b31a-453f4e813faa",
+  "source_thread_id": "019f2f55-deee-7263-8ddf-331dcbd6e885",
+  "timestamp_utc": "2026-07-06T07:25:00Z",
+  "status": "committed_not_pushed",
+  "commit": {
+    "sha": "3eb7196bd",
+    "subject": "fix(pm): enforce no-breadcrumb docs check",
+    "branch": "main",
+    "push_state": "not_checked_or_performed_in_this_closeout",
+    "local_ahead_state": "main...origin/main ahead 2"
+  },
+  "changed_files_committed": [
+    ".harness/quality/steering-uptake.md",
+    ".harness/reports/project-pm/agent-skills/no-breadcrumbs/no-breadcrumbs-check-20260706T071140Z.json",
+    ".harness/reports/project-pm/agent-skills/no-breadcrumbs/outbound-chief-feedback-20260706T071800Z.json",
+    "Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py",
+    "Infrastructure/scripts/validate_all_impl.sh",
+    "Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py"
+  ],
+  "excluded_unrelated_local_evidence": [
+    ".harness/reports/project-pm/agent-skills/pr315/**",
+    ".harness/reports/project-pm/agent-skills/skills-sdk-restructure/**",
+    ".harness/reports/thread-replies/pr315-*",
+    ".harness/reports/thread-replies/skills-sdk-restructure-canary-worker-*",
+    "artifacts/agent-runs/**",
+    ".harness/reports/project-pm/agent-skills/metadata/github-metadata-closeout-20260706T065834Z.json"
+  ],
+  "validation": [
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 -m py_compile Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py",
+      "outcome": "pass",
+      "reason": "new validator and tests compile"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_no_breadcrumbs.py -q",
+      "outcome": "pass",
+      "reason": "5 focused tests passed"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py --changed-files Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py Infrastructure/scripts/validate_all_impl.sh .harness/quality/steering-uptake.md --json",
+      "outcome": "pass",
+      "reason": "direct no-breadcrumbs validator passed with findings empty"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "reason": "steering uptake ledger passed with findings empty"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && bash Infrastructure/scripts/validate_all.sh --ephemeral --scope lint --changed-files Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py Infrastructure/scripts/validate_all_impl.sh .harness/quality/steering-uptake.md",
+      "outcome": "pass",
+      "reason": "changed-file lint scope passed and ran the no-breadcrumbs gate"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git add Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py Infrastructure/scripts/testing/test_validate_no_breadcrumbs.py Infrastructure/scripts/validate_all_impl.sh .harness/quality/steering-uptake.md .harness/reports/project-pm/agent-skills/no-breadcrumbs/no-breadcrumbs-check-20260706T071140Z.json .harness/reports/project-pm/agent-skills/no-breadcrumbs/outbound-chief-feedback-20260706T071800Z.json",
+      "outcome": "pass",
+      "reason": "only intended no-breadcrumbs lane files staged"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git diff --cached --name-only",
+      "outcome": "pass",
+      "reason": "staged set contained exactly six no-breadcrumbs lane files before commit"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git commit -m \"fix(pm): enforce no-breadcrumb docs check\"",
+      "outcome": "pass",
+      "reason": "commit landed as 3eb7196bd after pre-commit validation passed"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git log -3 --oneline --decorate",
+      "outcome": "pass",
+      "reason": "HEAD is 3eb7196bd fix(pm): enforce no-breadcrumb docs check"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git show --stat --oneline --name-status --decorate --no-renames HEAD",
+      "outcome": "pass",
+      "reason": "HEAD contains the intended no-breadcrumbs files"
+    },
+    {
+      "command": "cd /Users/jamiecraik/dev/agent-skills && git status --short --branch --untracked-files=all",
+      "outcome": "pass",
+      "reason": "branch is main ahead 2; unrelated retained local evidence remains untracked and unstaged"
+    }
+  ],
+  "what_is_proven": [
+    "The no-breadcrumbs implementation is committed locally.",
+    "The commit contains the intended validator, tests, validate_all wiring, steering uptake row, and two PM no-breadcrumbs receipts.",
+    "Focused validation passed before commit.",
+    "Pre-commit validation passed during commit.",
+    "Unrelated retained PR315, Skills SDK restructure, metadata, and artifact-run evidence was not staged for this commit."
+  ],
+  "what_remains_unproven": [
+    "Hosted CI status.",
+    "PR readiness.",
+    "Release readiness.",
+    "Push state or remote availability of commit 3eb7196bd.",
+    "Complete cleanup/disposition of unrelated retained evidence."
+  ],
+  "push_or_pr_needed": {
+    "needed": true,
+    "reason": "Local main is ahead of origin/main and commit 3eb7196bd is not claimed pushed in this closeout.",
+    "blocked": "not_authorized_or_not_checked_in_this_task"
+  },
+  "subagents": {
+    "consumed_or_open": "no active subagent lane was used for this commit closeout"
+  },
+  "claims_boundary": "This receipt proves local commit and focused validation only. It does not claim hosted CI, PR readiness, release readiness, or pushed state."
+}
