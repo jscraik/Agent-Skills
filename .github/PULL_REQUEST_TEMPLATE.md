@@ -10,6 +10,29 @@ or local absolute paths.
 - Reasoning:
 - Chosen approach:
 
+## Release Boundary
+
+Choose the release standard before listing proof. Use `n.a.` with a concrete
+reason only when the change has no release-stage meaning.
+
+- Release mode: <Prototype|Portfolio|Product|Harness|n.a. because concrete reason>
+- Done line:
+- Explicit non-goals:
+- Allowed polish:
+- Deferred polish / follow-up work:
+- Promotion rule:
+
+<!--
+Prototype: prove the idea has value. Core path works; known gaps are listed; no unsafe behavior.
+Portfolio: credible, coherent, navigable, and explainable. Demo, screenshots, and trade-offs matter more than infrastructure hardening.
+Product: reusable and maintained. Tests, docs, release path, versioning, and supportable architecture are expected.
+Harness: trust boundary or repeatable proof. Deterministic checks, receipts, failure behavior, and evidence boundaries are expected.
+
+Promotion rule should name what would force this PR into a more serious mode.
+If a new improvement does not fit the selected release mode or done line, defer
+it to follow-up work instead of absorbing it into this PR.
+-->
+
 ## Why This Change Was Made
 
 - Problem:
@@ -67,12 +90,11 @@ transcripts, bulky telemetry, or local absolute paths.
 - Durable evidence map:
 <!-- For evidence-heavy PRs, include a compact index rather than bulky logs.
 Use repo-relative paths only. Do not paste raw transcripts, secrets, bulky
-telemetry, or local absolute paths. Mark each artifact as `source-of-truth`
-or `retained context`.
+telemetry, or local absolute paths.
 
-| Artifact | Schema / version | Producer command | Digest | Replay command | Authority |
-| --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  | `source-of-truth` / `retained context` |
+| Artifact | Durable reference | Schema / version | Producer command | Digest | Replay command | Authority |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  | `source-of-truth` / `retained context` |
 
 `source-of-truth` means the artifact is authoritative for a deterministic
 lane claim. `retained context` means the artifact supports review or
@@ -90,8 +112,8 @@ or generated context instead of splitting only by feature area. -->
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh` and `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
-- [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before delegated package scripts).
+- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
+- [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before package-manager commands).
 - [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
 - [ ] This change is user-facing and I added a changelog entry.
@@ -107,6 +129,7 @@ or generated context instead of splitting only by feature area. -->
 - blocked_steps_reason:
 <!-- Add one or more evidence lines such as:
 - Command: `bash scripts/validate-codestyle.sh` -> pass
+- Command: `pnpm check` -> blocked (reason)
 - Command: `bash scripts/run-harness-gate.sh tooling-audit --path . --json` -> n.a. (reason)
 -->
 - Any other command(s):
