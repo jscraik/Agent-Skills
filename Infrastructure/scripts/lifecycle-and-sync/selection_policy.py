@@ -120,6 +120,25 @@ def _same_capability_plugin_cache_policy(
     }
 
 
+def _primary_runtime_plugin_cache_policy(*, name: str, plugin: str) -> dict[str, Any]:
+    primary_path = f".agents/skills/{name}"
+    curated_path = f"Plugins/cache/openai-curated/{plugin}/skills/{name}"
+    remote_path = f"Plugins/cache/openai-curated-remote/{plugin}/skills/{name}"
+    return {
+        "name": name,
+        "classification": "same_capability",
+        "display_strategy": "dedupe_to_primary_runtime",
+        "resolution": "suppress_duplicate",
+        "reason": (
+            f"{name} is already projected into the primary flat runtime; "
+            f"{plugin} plugin cache copies are source cache duplicates."
+        ),
+        "paths": (primary_path, curated_path, remote_path),
+        "canonical_path": primary_path,
+        "suppressed_paths": (curated_path, remote_path),
+    }
+
+
 PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
     {
         "name": "control-chrome",
@@ -320,6 +339,20 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
         for name in (
             "building-ai-agent-on-cloudflare",
             "building-mcp-server-on-cloudflare",
+            "cloudflare",
+            "durable-objects",
+            "sandbox-sdk",
+            "web-perf",
+            "workers-best-practices",
+            "wrangler",
+        )
+    ),
+    *(
+        _primary_runtime_plugin_cache_policy(
+            name=name,
+            plugin="cloudflare",
+        )
+        for name in (
             "cloudflare",
             "durable-objects",
             "sandbox-sdk",
