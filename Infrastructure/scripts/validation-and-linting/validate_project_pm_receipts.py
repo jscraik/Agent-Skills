@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import subprocess
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -11,6 +13,12 @@ from typing import Any, Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PM_REPORT_PREFIX = ".harness/reports/project-pm/"
+_QA_WORKTREE_GATE_PATH = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py"
+_QA_WORKTREE_GATE_SPEC = importlib.util.spec_from_file_location("validate_pm_qa_worktree_gate", _QA_WORKTREE_GATE_PATH)
+assert _QA_WORKTREE_GATE_SPEC is not None and _QA_WORKTREE_GATE_SPEC.loader is not None
+validate_pm_qa_worktree_gate = importlib.util.module_from_spec(_QA_WORKTREE_GATE_SPEC)
+sys.modules[_QA_WORKTREE_GATE_SPEC.name] = validate_pm_qa_worktree_gate
+_QA_WORKTREE_GATE_SPEC.loader.exec_module(validate_pm_qa_worktree_gate)
 
 
 @dataclass(frozen=True)
@@ -125,6 +133,8 @@ def scan_paths(paths: Iterable[str]) -> list[Finding]:
             findings.append(Finding(rel, "invalid_root", "PM receipt JSON root must be an object."))
             continue
         findings.extend(validate_payload(rel, payload))
+        for qa_finding in validate_pm_qa_worktree_gate.validate_payload(payload):
+            findings.append(Finding(rel, qa_finding.code, qa_finding.message))
     return findings
 
 

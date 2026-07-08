@@ -8,7 +8,7 @@
     "reason_selected": "Chief explicitly authorized a tiny PM-as-worker exception after the subagent route failed; the implementation is a focused validator/test recovery slice.",
     "fallback_reason": "PM-as-worker exception was explicitly authorized by Chief for this bounded recovery."
   },
-  "repo_head": "codex/chief-flow-ratchets-recovery-v2 before final commit; final commit SHA is recorded in PM heartbeat after commit",
+  "repo_head": "codex/chief-flow-ratchets-recovery-v2 at f3885aa228458eea4a1d77e8f53f4f1069794044 before later PR review follow-up commits",
   "task_id": "chief-flow-ratchets-pm-worker-recovery-v2",
   "status": "pass",
   "current_gate": "pm-worker-recovery",
