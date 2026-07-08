@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-OPAQUE_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+){2,}$")
+OPAQUE_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+){2,}$", re.IGNORECASE)
 HUMAN_TEXT_PATTERN = re.compile(r"[A-Za-z][A-Za-z]+(?:[ -][A-Za-z][A-Za-z]+)+")
 
 

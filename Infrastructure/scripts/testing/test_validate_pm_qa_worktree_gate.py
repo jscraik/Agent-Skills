@@ -35,6 +35,23 @@ def test_rejects_active_qa_dispatch_when_worktree_missing() -> None:
     assert any(finding.code == "implementation_worktree_missing" for finding in findings)
 
 
+def test_dispatch_schema_with_unknown_status_fails_closed_for_missing_worktree() -> None:
+    findings = validate_pm_qa_worktree_gate.validate_payload(
+        {
+            "schema_version": "qa-project-backed-dispatch/v1",
+            "status": "qa_dispatchd",
+            "qa_lane": {
+                "implementation_worktree": "/private/tmp/agent-skills-missing-worktree-for-test",
+            },
+            "durable_preservation": {
+                "strategy": "operator_approved_volatile_worktree_risk",
+            },
+        }
+    )
+
+    assert any(finding.code == "implementation_worktree_missing" for finding in findings)
+
+
 def test_rejects_temp_worktree_without_preservation_strategy(tmp_path: Path) -> None:
     worktree = tmp_path / "agent-skills-worktree"
     worktree.mkdir()

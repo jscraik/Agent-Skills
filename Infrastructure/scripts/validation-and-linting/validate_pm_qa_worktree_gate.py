@@ -70,6 +70,8 @@ def _is_active(payload: dict[str, Any]) -> bool:
         return False
     if status in ACTIVE_STATUSES:
         return True
+    if payload.get("schema_version") == "qa-project-backed-dispatch/v1":
+        return True
     if payload.get("qa_acceptance_status") == "not_proven" and "qa_lane" in payload:
         return True
     return False

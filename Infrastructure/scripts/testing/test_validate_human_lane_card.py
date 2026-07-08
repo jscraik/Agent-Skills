@@ -58,6 +58,28 @@ def test_rejects_opaque_worker_human_name() -> None:
     assert any(finding.path == "worker_packets.0.human_name" for finding in findings)
 
 
+def test_rejects_uppercase_opaque_lane_ids() -> None:
+    findings = validate_human_lane_card.validate_payload(
+        {
+            "schema_version": "worker-packet-set/v1",
+            "worker_packets": [
+                {"human_name": "JSC-worker-02"},
+                {"human_name": "codex-PR-123"},
+                {"human_name": "chief-flow-ratchets-worker-02A"},
+            ],
+        }
+    )
+
+    opaque_paths = {
+        finding.path
+        for finding in findings
+        if finding.code == "opaque_primary_display_name"
+    }
+    assert "worker_packets.0.human_name" in opaque_paths
+    assert "worker_packets.1.human_name" in opaque_paths
+    assert "worker_packets.2.human_name" in opaque_paths
+
+
 def test_accepts_worker_human_name() -> None:
     findings = validate_human_lane_card.validate_payload(
         {
