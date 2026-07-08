@@ -132,7 +132,7 @@ def _add_sdk_trust_parser(
 
 
 def _add_sdk_observability_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
-    parser = sdk_subparsers.add_parser("observability", help="Preview redacted runtime feedback candidates", parents=[global_parser])
+    parser = sdk_subparsers.add_parser("observability", help="Preview redacted runtime feedback and Phoenix evidence mirrors", parents=[global_parser])
     subparsers = parser.add_subparsers(dest="observability_action", required=True)
     feedback = subparsers.add_parser("feedback", help="Mine redacted event JSONL into blocked eval and skill-gap candidates", parents=[global_parser])
     feedback.add_argument("--skill", required=True, help="Skill handle or repo-relative skill source path")
@@ -144,6 +144,26 @@ def _add_sdk_observability_parser(sdk_subparsers: argparse._SubParsersAction, gl
     promote.add_argument("--package-receipt", required=True, help="Repo-relative or temporary package digest receipt JSON")
     promote.add_argument("--eval-run-receipt", required=True, help="Repo-relative or temporary eval run receipt JSON")
     promote.add_argument("--preview", action="store_true", help="Emit a non-mutating promotion receipt")
+
+    phoenix_status = subparsers.add_parser("phoenix-status", help="Check the Phoenix OSS service endpoint used for eval observability", parents=[global_parser])
+    phoenix_status.add_argument("--base-url", default="http://localhost:6006", help="Phoenix UI base URL")
+    phoenix_status.add_argument("--timeout-seconds", type=float, default=2.0, help="HTTP timeout for the Phoenix status check")
+
+    phoenix_smoke = subparsers.add_parser("phoenix-smoke", help="Emit a deterministic Phoenix OSS smoke trace", parents=[global_parser])
+    phoenix_smoke.add_argument("--base-url", default="http://localhost:6006", help="Phoenix UI base URL")
+    phoenix_smoke.add_argument("--profile", choices=["oss-local", "oss-cloud"], default="oss-local", help="OSS Codex profile to attach to the smoke span")
+    phoenix_smoke.add_argument("--otel-python", help="Python executable with opentelemetry-proto installed; defaults to ~/.agents/otel-collector/.venv/bin/python")
+    phoenix_smoke.add_argument("--model", help="Optional LLM model name to attach for Phoenix model metrics")
+    phoenix_smoke.add_argument("--provider", help="Optional LLM provider/system to attach with --model")
+    phoenix_smoke.add_argument("--prompt-tokens", type=int, default=0, help="Prompt/input token count for --model smoke traces")
+    phoenix_smoke.add_argument("--completion-tokens", type=int, default=0, help="Completion/output token count for --model smoke traces")
+    phoenix_smoke.add_argument("--timeout-seconds", type=float, default=10.0, help="HTTP timeout for the Phoenix OTLP export")
+
+    phoenix_mirror = subparsers.add_parser("phoenix-mirror", help="Mirror an eval or observability receipt into redacted Phoenix-ready JSONL", parents=[global_parser])
+    phoenix_mirror.add_argument("--receipt", required=True, help="Repo-relative or temporary eval/observability receipt JSON")
+    phoenix_mirror.add_argument("--out", help="Repo-relative or temporary JSONL output path")
+    phoenix_mirror.add_argument("--preview", action="store_true", help="Emit a non-mutating mirror receipt")
+    phoenix_mirror.add_argument("--write", action="store_true", help="Write the redacted JSONL mirror to --out")
 
 
 def _add_sdk_check_parser(
@@ -640,6 +660,37 @@ def _dispatch_sdk_observability(repo_root: Path, args: argparse.Namespace) -> Ca
             feedback_receipt=args.feedback_receipt,
             package_receipt=args.package_receipt,
             eval_run_receipt=args.eval_run_receipt,
+        )
+    if args.observability_action == "phoenix-status":
+        return skills_commands.skills_sdk_observability_phoenix_status(
+            repo_root,
+            base_url=args.base_url,
+            timeout_seconds=args.timeout_seconds,
+        )
+    if args.observability_action == "phoenix-smoke":
+        return skills_commands.skills_sdk_observability_phoenix_smoke(
+            repo_root,
+            base_url=args.base_url,
+            profile=args.profile,
+            timeout_seconds=args.timeout_seconds,
+            otel_python_path=args.otel_python,
+            model_name=args.model,
+            provider=args.provider,
+            prompt_tokens=args.prompt_tokens,
+            completion_tokens=args.completion_tokens,
+        )
+    if args.observability_action == "phoenix-mirror":
+        if args.preview == args.write:
+            return _validation_error(
+                "sdk observability phoenix-mirror",
+                "Phoenix mirror requires exactly one of --preview or --write.",
+                "ask sdk observability phoenix-mirror --receipt <receipt.json> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_observability_phoenix_mirror(
+            repo_root,
+            receipt_path=args.receipt,
+            out_path=args.out,
+            write=args.write,
         )
     return build_unknown_action_result("sdk observability", args.observability_action)
 

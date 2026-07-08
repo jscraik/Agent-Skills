@@ -68,7 +68,10 @@ from ask.commands.mcp import sync_mcp
 from ask.commands.memory import memory_list, memory_read, memory_search
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
 from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
+from ask.phoenix_auto_trace import maybe_emit_phoenix_trace
 from ask.rendering.plugins import render_plugins_human
+
+
 def main():
     start_time = time.time()
     prepared_args = prepare_args(sys.argv[1:])
@@ -1048,6 +1051,7 @@ def main():
     result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
+    maybe_emit_phoenix_trace(repo_root, args, result)
     if args.json:
         print(result.to_json(repo_root=str(repo_root)))
     else:
