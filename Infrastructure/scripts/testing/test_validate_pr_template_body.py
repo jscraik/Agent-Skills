@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -57,6 +58,44 @@ def test_accepts_filled_canonical_template_shape() -> None:
     errors = validator.validate_pr_body(_template(), _filled_template_body())
 
     assert errors == []
+
+
+def test_template_contract_tracks_release_boundary_section_and_fields() -> None:
+    validator = _load_validator()
+    contract = validator._template_contract(_template())
+
+    assert contract.sections == [
+        "What Problem This Solves",
+        "Release Boundary",
+        "Why This Change Was Made",
+        "Behavior Proof",
+        "Work performed",
+        "Checklist",
+        "Testing",
+        "Review artifacts",
+        "Notes",
+    ]
+    assert contract.fields_by_section["Release Boundary"] == [
+        "Release mode",
+        "Done line",
+        "Explicit non-goals",
+        "Allowed polish",
+        "Deferred polish / follow-up work",
+        "Promotion rule",
+    ]
+
+
+def test_rejects_missing_required_field_from_each_templated_section() -> None:
+    validator = _load_validator()
+    contract = validator._template_contract(_template())
+    body = _filled_template_body()
+
+    for section, fields in contract.fields_by_section.items():
+        for field in fields:
+            candidate = re.sub(rf"^- {re.escape(field)}:.*(?:\n|$)", "", body, count=1, flags=re.MULTILINE)
+            errors = validator.validate_pr_body(_template(), candidate)
+
+            assert f"Missing required field in ## {section}: {field}:" in errors
 
 
 def test_rejects_short_body_that_only_matches_legacy_required_sections() -> None:
