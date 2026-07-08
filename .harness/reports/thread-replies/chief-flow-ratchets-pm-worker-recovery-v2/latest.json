@@ -4,7 +4,7 @@
   "agent_profile_selection": {
     "requested_role": "tiny bounded PM-as-worker recovery implementation",
     "selected_profile_role": "worker",
-    "profile_source": "/Users/jamiecraik/.codex/agents/manifest.json",
+    "profile_source": "codex-agents-manifest",
     "reason_selected": "Chief explicitly authorized a tiny PM-as-worker exception after the subagent route failed; the implementation is a focused validator/test recovery slice.",
     "fallback_reason": "PM-as-worker exception was explicitly authorized by Chief for this bounded recovery."
   },
@@ -23,32 +23,32 @@
   ],
   "commands": [
     {
-      "command": "git worktree add -b codex/chief-flow-ratchets-recovery-v2 /private/tmp/agent-skills-chief-flow-ratchets-recovery-v2 origin/main",
+      "command": "git worktree add -b codex/chief-flow-ratchets-recovery-v2 ISOLATED_PR_WORKTREE origin/main",
       "outcome": "pass",
       "evidence": "Created durable worktree on codex/chief-flow-ratchets-recovery-v2 at 5018db3642b718337c6abf9f882c9b888982d49d."
     },
     {
-      "command": "git -C /private/tmp/agent-skills-chief-flow-ratchets-recovery-v2 status --short --branch --untracked-files=all",
+      "command": "git -C ISOLATED_PR_WORKTREE status --short --branch --untracked-files=all",
       "outcome": "pass",
       "evidence": "Worktree started clean on codex/chief-flow-ratchets-recovery-v2 tracking origin/main before source edits."
     },
     {
-      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_pm_qa_worktree_gate.py -q",
+      "command": "TMPDIR=LOCAL_TMPDIR XDG_CACHE_HOME=LOCAL_XDG_CACHE XDG_STATE_HOME=LOCAL_XDG_STATE MISE_CACHE_DIR=LOCAL_MISE_CACHE MISE_STATE_DIR=LOCAL_MISE_STATE MISE_TRUSTED_CONFIG_PATHS=ISOLATED_PR_WORKTREE/.mise.toml UV_CACHE_DIR=LOCAL_UV_CACHE bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_pm_qa_worktree_gate.py -q",
       "outcome": "pass",
       "evidence": "Focused validator tests passed: 5 passed in 0.02s."
     },
     {
-      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py /Users/jamiecraik/dev/agent-skills/.harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-dispatch-20260707T115643Z.json --json",
+      "command": "TMPDIR=LOCAL_TMPDIR XDG_CACHE_HOME=LOCAL_XDG_CACHE XDG_STATE_HOME=LOCAL_XDG_STATE MISE_CACHE_DIR=LOCAL_MISE_CACHE MISE_STATE_DIR=LOCAL_MISE_STATE MISE_TRUSTED_CONFIG_PATHS=ISOLATED_PR_WORKTREE/.mise.toml UV_CACHE_DIR=LOCAL_UV_CACHE python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py .harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-dispatch-20260707T115643Z.json --json",
       "outcome": "fail",
       "evidence": "Expected negative proof: validator rejected the actual broken QA-03 dispatch with implementation_worktree_missing and missing_durable_preservation_strategy."
     },
     {
-      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py /Users/jamiecraik/dev/agent-skills/.harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-worktree-missing-20260707T122604Z.json --json",
+      "command": "TMPDIR=LOCAL_TMPDIR XDG_CACHE_HOME=LOCAL_XDG_CACHE XDG_STATE_HOME=LOCAL_XDG_STATE MISE_CACHE_DIR=LOCAL_MISE_CACHE MISE_STATE_DIR=LOCAL_MISE_STATE MISE_TRUSTED_CONFIG_PATHS=ISOLATED_PR_WORKTREE/.mise.toml UV_CACHE_DIR=LOCAL_UV_CACHE python3 Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py .harness/reports/project-pm/agent-skills/chief-flow-ratchets/qa-03-project-backed-worktree-missing-20260707T122604Z.json --json",
       "outcome": "pass",
       "evidence": "Blocked missing-worktree receipt is accepted as an explicit blocker, not as QA dispatch success."
     },
     {
-      "command": "TMPDIR=/tmp/agent-skills-chief-flow-ratchets-v2-tmp XDG_CACHE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-cache XDG_STATE_HOME=/tmp/agent-skills-chief-flow-ratchets-v2-xdg-state MISE_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-cache MISE_STATE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-mise-state MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-chief-flow-ratchets-recovery-v2/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-chief-flow-ratchets-v2-uv-cache bash Infrastructure/scripts/validate_all.sh --ephemeral --scope lint --changed-files Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py Infrastructure/scripts/testing/test_validate_pm_qa_worktree_gate.py",
+      "command": "TMPDIR=LOCAL_TMPDIR XDG_CACHE_HOME=LOCAL_XDG_CACHE XDG_STATE_HOME=LOCAL_XDG_STATE MISE_CACHE_DIR=LOCAL_MISE_CACHE MISE_STATE_DIR=LOCAL_MISE_STATE MISE_TRUSTED_CONFIG_PATHS=ISOLATED_PR_WORKTREE/.mise.toml UV_CACHE_DIR=LOCAL_UV_CACHE bash Infrastructure/scripts/validate_all.sh --ephemeral --scope lint --changed-files Infrastructure/scripts/validation-and-linting/validate_pm_qa_worktree_gate.py Infrastructure/scripts/testing/test_validate_pm_qa_worktree_gate.py",
       "outcome": "pass",
       "evidence": "Changed-files lint scope completed with required_failures=0 and warn_only_issues=0."
     }
