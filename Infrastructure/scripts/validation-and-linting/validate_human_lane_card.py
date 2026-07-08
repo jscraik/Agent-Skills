@@ -10,7 +10,7 @@ from typing import Any, Iterable
 
 
 OPAQUE_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+){2,}$", re.IGNORECASE)
-HUMAN_TEXT_PATTERN = re.compile(r"[A-Za-z][A-Za-z]+(?:[ -][A-Za-z][A-Za-z]+)+")
+HUMAN_TEXT_PATTERN = re.compile(r"[A-Za-z]{2,}")
 
 
 @dataclass(frozen=True)
@@ -26,9 +26,7 @@ def _non_empty(value: Any) -> bool:
 
 def _looks_human_readable(value: str) -> bool:
     stripped = value.strip()
-    if not HUMAN_TEXT_PATTERN.search(stripped):
-        return False
-    return not OPAQUE_ID_PATTERN.fullmatch(stripped)
+    return bool(HUMAN_TEXT_PATTERN.search(stripped)) and not OPAQUE_ID_PATTERN.fullmatch(stripped)
 
 
 def _validate_human_text(path: str, value: Any, field_name: str) -> list[Finding]:
@@ -63,7 +61,10 @@ def _iter_lane_cards(payload: dict[str, Any]) -> Iterable[tuple[str, dict[str, A
 
 def validate_payload(payload: dict[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
-    if "human_task_name" in payload or "human_pr_title" in payload:
+    if (
+        payload.get("schema_version") != "human_lane_card/v1"
+        and ("human_task_name" in payload or "human_pr_title" in payload)
+    ):
         findings.extend(_validate_human_text("human_task_name", payload.get("human_task_name"), "human_task_name"))
         findings.extend(_validate_human_text("human_pr_title", payload.get("human_pr_title"), "human_pr_title"))
 

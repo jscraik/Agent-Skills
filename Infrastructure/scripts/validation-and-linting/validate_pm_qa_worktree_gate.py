@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -76,6 +77,15 @@ def _is_active(payload: dict[str, Any]) -> bool:
     return True
 
 
+def _is_temp_worktree(path: Path) -> bool:
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    try:
+        resolved = path.resolve()
+    except OSError:
+        resolved = path.absolute()
+    return resolved == temp_root or temp_root in resolved.parents
+
+
 def _validate_preservation(payload: dict[str, Any], path: str) -> list[Finding]:
     findings: list[Finding] = []
     preservation = _preservation(payload)
@@ -144,7 +154,7 @@ def validate_payload(payload: dict[str, Any]) -> list[Finding]:
             )
         )
 
-    if worktree.startswith("/private/tmp/") or worktree.startswith("/tmp/"):
+    if _is_temp_worktree(worktree_path):
         findings.extend(_validate_preservation(payload, "durable_preservation"))
     return findings
 

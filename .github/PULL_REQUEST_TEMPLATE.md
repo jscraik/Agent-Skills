@@ -15,7 +15,7 @@ or local absolute paths.
 Choose the release standard before listing proof. Use `n.a.` with a concrete
 reason only when the change has no release-stage meaning.
 
-- Release mode: Prototype / Portfolio / Product / Harness / n.a. because <reason>
+- Release mode: <Prototype|Portfolio|Product|Harness|n.a. because concrete reason>
 - Done line:
 - Explicit non-goals:
 - Allowed polish:
