@@ -52,3 +52,33 @@ def test_only_scans_project_pm_json_receipts() -> None:
     assert not validate_project_pm_receipts.should_scan_path(
         ".harness/reports/thread-replies/example/latest.json"
     )
+
+
+def test_project_pm_scan_runs_qa_worktree_gate(tmp_path: Path, monkeypatch) -> None:
+    receipt = tmp_path / ".harness" / "reports" / "project-pm" / "agent-skills" / "dispatch.json"
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text(
+        """{
+          "schema_version": "qa-project-backed-dispatch/v1",
+          "status": "project_backed_qa_dispatched_monitoring_required",
+          "commands": [{"command": "dispatch", "outcome": "pass"}],
+          "claims_boundary": {"not_proven": ["implementation worktree"]},
+          "next_action": "block QA",
+          "qa_lane": {
+            "implementation_worktree": "/private/tmp/agent-skills-missing-worktree-for-test"
+          },
+          "durable_preservation": {
+            "strategy": "committed_branch",
+            "branch": "codex/example",
+            "commit_sha": "abc123"
+          }
+        }""",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(validate_project_pm_receipts, "REPO_ROOT", tmp_path)
+
+    findings = validate_project_pm_receipts.scan_paths(
+        [".harness/reports/project-pm/agent-skills/dispatch.json"]
+    )
+
+    assert any(finding.code == "implementation_worktree_missing" for finding in findings)
