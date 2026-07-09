@@ -352,9 +352,56 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
 
         self.assertEqual(trace_receipt["status"], "pass")
-        self.assertEqual(trace_receipt["emitted_span_count"], 2)
+        self.assertEqual(trace_receipt["emitted_span_count"], 1)
+        self.assertFalse(trace_receipt["case_span_trace_enabled"])
+        self.assertEqual(trace_receipt["case_span_count"], 0)
         self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
-        self.assertEqual(payloads[1]["command_name"], "sdk eval run eval.case case-a")
+
+    def test_eval_trace_case_spans_are_opt_in_and_capped(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            calls = Path(temp_dir) / "calls.jsonl"
+            runtime.write_text(
+                "#!/usr/bin/env python3\n"
+                "import json\n"
+                "import pathlib\n"
+                "import sys\n"
+                "payload = json.loads(sys.stdin.read())\n"
+                f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
+                "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            receipt = {
+                "schema_version": "skills-sdk.eval-run-receipt.v0",
+                "status": "pass",
+                "operation": "eval_run",
+                "runner": "deterministic_jsonl_v0",
+                "codex_profile": "oss-local",
+                "case_count": 8,
+                "passed_count": 8,
+                "failed_count": 0,
+                "cases": [{"case_id": f"case-{index}", "status": "pass", "score": 1} for index in range(8)],
+            }
+
+            trace_receipt = build_phoenix_eval_trace_receipt(
+                REPO_ROOT,
+                eval_receipt=receipt,
+                base_url="http://127.0.0.1:6006",
+                otel_python_path=runtime.as_posix(),
+                enabled=True,
+                trace_case_spans=True,
+                case_span_limit=50,
+            )
+            payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
+
+        self.assertEqual(trace_receipt["status"], "pass")
+        self.assertEqual(trace_receipt["emitted_span_count"], 6)
+        self.assertTrue(trace_receipt["case_span_trace_enabled"])
+        self.assertEqual(trace_receipt["case_span_limit"], 5)
+        self.assertEqual(trace_receipt["case_span_count"], 5)
+        self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
+        self.assertEqual(payloads[-1]["command_name"], "sdk eval run eval.case case-4")
 
     def test_eval_trace_blocks_raw_eval_receipts(self) -> None:
         trace_receipt = build_phoenix_eval_trace_receipt(

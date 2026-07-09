@@ -22,6 +22,8 @@ PHOENIX_SMOKE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoeni
 PHOENIX_EVAL_TRACE_SCHEMA_VERSION = "skills-sdk.phoenix-eval-trace-receipt.v0"
 PHOENIX_EVAL_TRACE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v0.schema.json"
 PHOENIX_ACCEPTANCE_TRACE = ["phoenix-oss-eval-observability-workflow-2026-07-08", "PU-026"]
+PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT = 0
+PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT = 5
 SUPPORTED_SOURCE_KINDS = frozenset({"eval_closeout", "eval_run_receipt", "observability_receipt"})
 OSS_CODEX_PROFILES = frozenset({"oss-local", "oss-cloud"})
 ALLOWED_ROW_TYPES = frozenset(
@@ -630,6 +632,8 @@ def build_phoenix_eval_trace_receipt(
     otel_python_path: str | None = None,
     timeout_seconds: float = 2.0,
     enabled: bool | None = None,
+    trace_case_spans: bool = False,
+    case_span_limit: int = PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT,
 ) -> dict[str, Any]:
     source_digest = _sha256_json(eval_receipt)
     trace_seed = source_digest.removeprefix("sha256:")[:32]
@@ -654,6 +658,8 @@ def build_phoenix_eval_trace_receipt(
     if profile_value not in OSS_CODEX_PROFILES:
         profile_value = "oss-local"
     emitted_receipts: list[dict[str, Any]] = []
+    bounded_case_span_limit = max(0, min(int(case_span_limit), PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT))
+    selected_case_rows = case_rows[:bounded_case_span_limit] if trace_case_spans else []
     should_emit = _phoenix_enabled(repo_root) if enabled is None else enabled
     if not [check for check in checks if check["status"] == "blocker"] and should_emit:
         emitted_receipts.append(
@@ -667,7 +673,7 @@ def build_phoenix_eval_trace_receipt(
                 command_status=str(eval_receipt.get("status") or "unknown"),
             )
         )
-        for row in case_rows[:50]:
+        for row in selected_case_rows:
             emitted_receipts.append(
                 build_phoenix_smoke_receipt(
                     repo_root,
@@ -699,6 +705,9 @@ def build_phoenix_eval_trace_receipt(
         "passed_count": int(eval_receipt.get("passed_count") or 0),
         "failed_count": int(eval_receipt.get("failed_count") or 0),
         "emitted_span_count": len(emitted_receipts),
+        "case_span_trace_enabled": trace_case_spans,
+        "case_span_limit": bounded_case_span_limit,
+        "case_span_count": len(selected_case_rows),
         "enabled": should_emit,
         "emitted_spans": [
             {
