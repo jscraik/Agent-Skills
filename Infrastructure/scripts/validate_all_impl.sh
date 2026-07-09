@@ -153,7 +153,7 @@ use_mise_python_launcher() {
 }
 
 use_system_python_launcher() {
-  python3 -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python3 -c "import sys, tomllib, yaml" >/dev/null 2>&1 || return 1
   python_cmd=(python3)
   python_cmd_display="python3"
   return 0

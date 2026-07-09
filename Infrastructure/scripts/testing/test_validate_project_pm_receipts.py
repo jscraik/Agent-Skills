@@ -45,6 +45,28 @@ def test_accepts_outbound_commit_closeout_shape() -> None:
     assert findings == []
 
 
+def test_scan_does_not_apply_qa_worktree_gate_to_outbound_receipts(tmp_path: Path, monkeypatch) -> None:
+    receipt = tmp_path / ".harness" / "reports" / "project-pm" / "agent-skills" / "outbound.json"
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text(
+        """{
+          "schema_version": "pm-outbound-commit-closeout/v1",
+          "status": "committed_not_pushed",
+          "validation": [{"command": "python3 check.py", "outcome": "pass"}],
+          "what_remains_unproven": ["hosted CI"],
+          "push_or_pr_needed": {"needed": true, "reason": "local branch is ahead"}
+        }""",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(validate_project_pm_receipts, "REPO_ROOT", tmp_path)
+
+    findings = validate_project_pm_receipts.scan_paths(
+        [".harness/reports/project-pm/agent-skills/outbound.json"]
+    )
+
+    assert findings == []
+
+
 def test_only_scans_project_pm_json_receipts() -> None:
     assert validate_project_pm_receipts.should_scan_path(
         ".harness/reports/project-pm/agent-skills/no-breadcrumbs/outbound-commit-closeout-20260706T072500Z.json"
