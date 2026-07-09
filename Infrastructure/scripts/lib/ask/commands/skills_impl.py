@@ -8149,12 +8149,18 @@ def _attach_phoenix_eval_trace(
             "schema_version": schema_version,
             "status": "blocked",
             "checks": [],
-            "blockers": [f"{type(exc).__name__}: {exc}"],
+            "blockers": [
+                {
+                    "id": "phoenix_eval_trace_unexpected_error",
+                    "status": "blocker",
+                    "severity": "blocker",
+                    "message": "Phoenix eval trace emission raised an unexpected error.",
+                    "evidence": [f"{type(exc).__name__}: {exc}"],
+                }
+            ],
             "error": f"{type(exc).__name__}: {exc}",
             "mutation_performed": False,
         }
-
-
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
