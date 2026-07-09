@@ -524,6 +524,8 @@ except urllib.error.HTTPError as exc:
                 )
         except subprocess.TimeoutExpired as exc:
             export_error = f"timeout:{timeout_seconds + 1.0:.1f}s; stdout:{exc.stdout or ''}; stderr:{exc.stderr or ''}"
+        except OSError as exc:
+            export_error = f"{type(exc).__name__}: {exc}"
         checks.append(
             _check(
                 "phoenix_otlp_export",
