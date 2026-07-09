@@ -149,6 +149,18 @@ def skills_sdk_observability_promote(*args, **kwargs):
     return _call_impl("skills_sdk_observability_promote", *args, **kwargs)
 
 
+def skills_sdk_observability_phoenix_status(*args, **kwargs):
+    return _call_impl("skills_sdk_observability_phoenix_status", *args, **kwargs)
+
+
+def skills_sdk_observability_phoenix_smoke(*args, **kwargs):
+    return _call_impl("skills_sdk_observability_phoenix_smoke", *args, **kwargs)
+
+
+def skills_sdk_observability_phoenix_mirror(*args, **kwargs):
+    return _call_impl("skills_sdk_observability_phoenix_mirror", *args, **kwargs)
+
+
 def skills_sdk_eval_run(*args, **kwargs):
     return _call_impl("skills_sdk_eval_run", *args, **kwargs)
 
@@ -231,6 +243,9 @@ _FACADE_WRAPPERS.update(
         "skills_sdk_trust_decide": skills_sdk_trust_decide,
         "skills_sdk_observability_feedback": skills_sdk_observability_feedback,
         "skills_sdk_observability_promote": skills_sdk_observability_promote,
+        "skills_sdk_observability_phoenix_status": skills_sdk_observability_phoenix_status,
+        "skills_sdk_observability_phoenix_smoke": skills_sdk_observability_phoenix_smoke,
+        "skills_sdk_observability_phoenix_mirror": skills_sdk_observability_phoenix_mirror,
         "skills_sdk_eval_run": skills_sdk_eval_run,
         "skills_sdk_eval_profiles_preview": skills_sdk_eval_profiles_preview,
         "skills_sdk_eval_ab_rubric_preview": skills_sdk_eval_ab_rubric_preview,
@@ -291,6 +306,9 @@ skills_sdk_package_harden = _impl.skills_sdk_package_harden
 skills_sdk_trust_decide = _impl.skills_sdk_trust_decide
 skills_sdk_observability_feedback = _impl.skills_sdk_observability_feedback
 skills_sdk_observability_promote = _impl.skills_sdk_observability_promote
+skills_sdk_observability_phoenix_status = _impl.skills_sdk_observability_phoenix_status
+skills_sdk_observability_phoenix_smoke = _impl.skills_sdk_observability_phoenix_smoke
+skills_sdk_observability_phoenix_mirror = _impl.skills_sdk_observability_phoenix_mirror
 skills_sdk_eval_run = _impl.skills_sdk_eval_run
 skills_sdk_eval_profiles_preview = _impl.skills_sdk_eval_profiles_preview
 skills_sdk_eval_ab_rubric_preview = _impl.skills_sdk_eval_ab_rubric_preview
@@ -357,6 +375,9 @@ __all__ = [
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
     "skills_sdk_observability_promote",
+    "skills_sdk_observability_phoenix_status",
+    "skills_sdk_observability_phoenix_smoke",
+    "skills_sdk_observability_phoenix_mirror",
     "skills_sdk_eval_run",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",

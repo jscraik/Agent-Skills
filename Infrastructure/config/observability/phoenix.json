@@ -1,0 +1,11 @@
+{
+  "base_url": "http://localhost:6006",
+  "completion_tokens": 0,
+  "enabled": false,
+  "model": "qwen/qwen3-coder",
+  "otel_python": null,
+  "profile": "oss-local",
+  "prompt_tokens": 0,
+  "provider": "local-oss",
+  "timeout_seconds": 0.5
+}

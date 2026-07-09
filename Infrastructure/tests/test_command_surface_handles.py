@@ -210,6 +210,39 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         )
         self.assertNotIn("openai-curated-remote", payload["source_path"])
 
+    def test_primary_runtime_cloudflare_cache_collisions_are_policy_managed(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        duplicate_handles = (
+            "cloudflare",
+            "durable-objects",
+            "sandbox-sdk",
+            "web-perf",
+            "workers-best-practices",
+            "wrangler",
+        )
+        for handle in duplicate_handles:
+            source = _write_skill_source(repo_root, handle, root=".agents/skills")
+            _write_skill_source(
+                repo_root,
+                handle,
+                root="Plugins/cache/openai-curated/cloudflare/6fe38d4f/skills",
+            )
+            _write_skill_source(
+                repo_root,
+                handle,
+                root="Plugins/cache/openai-curated-remote/cloudflare/0.1.2/skills",
+            )
+            self.assertEqual(source, repo_root / ".agents" / "skills" / handle)
+
+        report = command_surface.handles_report(repo_root_path=repo_root)
+        result = skills_handles(repo_root, check=True)
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(result.status, "success")
+        handles = {entry["handle"]: entry for entry in report["handles"]}
+        for handle in duplicate_handles:
+            self.assertEqual(handles[handle]["source_path"], f".agents/skills/{handle}/SKILL.md")
+
     def test_reviewer_resolver_keeps_reviewers_out_of_skill_namespace(self) -> None:
         manifest = self.temp_dir / "agents.json"
         manifest.write_text(

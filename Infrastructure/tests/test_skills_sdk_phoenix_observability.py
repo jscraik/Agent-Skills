@@ -1,0 +1,647 @@
+from __future__ import annotations
+
+import http.server
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+import pytest
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.skills_sdk.phoenix_observability import (  # noqa: E402
+    PhoenixObservabilityError,
+    build_phoenix_eval_trace_receipt,
+    build_phoenix_mirror_receipt,
+    build_phoenix_smoke_receipt,
+    build_phoenix_status_receipt,
+)
+
+
+def _command_env() -> dict[str, str]:
+    env = os.environ.copy()
+    temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
+    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
+    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
+    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
+    env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
+    env.setdefault("ASK_PHOENIX_AUTO_TRACE", "0")
+    return env
+
+
+class _PhoenixHandler(http.server.BaseHTTPRequestHandler):
+    def do_HEAD(self) -> None:  # noqa: N802
+        self.send_response(200)
+        self.send_header("x-phoenix-server-version", "test-phoenix")
+        self.end_headers()
+
+    def log_message(self, format: str, *args: object) -> None:  # noqa: A002
+        return
+
+
+class TestSkillsSdkPhoenixObservability(unittest.TestCase):
+    def _serve_phoenix(self) -> tuple[http.server.HTTPServer, str]:
+        server = http.server.HTTPServer(("127.0.0.1", 0), _PhoenixHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        return server, f"http://127.0.0.1:{server.server_port}"
+
+    def _write_receipt(self, directory: Path, *, include_raw: bool = False, codex_exec_invoked: bool = True) -> Path:
+        receipt = {
+            "schema_version": "skills-sdk.eval-run-receipt.v0",
+            "status": "pass",
+            "operation": "eval_run",
+            "target_path": "Skills/example/SKILL.md",
+            "package_id": "example",
+            "package_digest": "sha256:" + ("a" * 64),
+            "runner": "codex",
+            "mode": "release",
+            "codex_profile": "oss-local",
+            "codex_exec_invoked": codex_exec_invoked,
+            "cases": [
+                {
+                    "case_id": "local-case",
+                    "status": "pass",
+                    "score": 1,
+                }
+            ],
+        }
+        if include_raw:
+            receipt["prompt"] = "raw prompt must never enter mirror rows"
+            receipt["cases"][0]["output"] = "raw output must never enter mirror rows"
+        path = directory / "eval-run.json"
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(receipt, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        return path
+
+    def test_status_receipt_checks_reachable_phoenix_endpoint(self) -> None:
+        server, base_url = self._serve_phoenix()
+        self.addCleanup(server.shutdown)
+
+        receipt = build_phoenix_status_receipt(REPO_ROOT, base_url=base_url, timeout_seconds=2)
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["server_version"], "test-phoenix")
+        self.assertEqual(receipt["otlp_http_endpoint"], f"{base_url}/v1/traces")
+        self.assertFalse(receipt["mutation_performed"])
+
+    def test_mirror_preview_whitelists_receipt_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = self._write_receipt(Path(temp_dir))
+
+            receipt = build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=receipt_path.as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["row_count"], 2)
+        serialized = json.dumps(receipt["preview_rows"], sort_keys=True)
+        self.assertIn("oss-local", serialized)
+        self.assertIn("codex_exec_invoked", serialized)
+        self.assertNotIn("raw prompt", serialized)
+        self.assertNotIn("raw output", serialized)
+        self.assertIn({"id": "mirror_redaction", "status": "pass", "severity": "info", "message": "Source receipts mirrored into Phoenix must not contain raw prompts, transcripts, messages, tool calls, stdout, stderr, or outputs.", "evidence": ["raw_keys_seen:0"]}, receipt["checks"])
+
+    def test_mirror_blocks_raw_source_receipt_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = self._write_receipt(Path(temp_dir), include_raw=True)
+
+            with pytest.raises(PhoenixObservabilityError) as raised:
+                build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=receipt_path.as_posix())
+
+        receipt = raised.value.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("mirror_redaction", {check["id"] for check in receipt["blockers"]})
+
+    def test_mirror_blocks_oss_profile_without_codex_exec_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = self._write_receipt(Path(temp_dir), codex_exec_invoked=False)
+
+            with pytest.raises(PhoenixObservabilityError) as raised:
+                build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=receipt_path.as_posix())
+
+        receipt = raised.value.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("oss_profile_execution_contract", {check["id"] for check in receipt["blockers"]})
+
+    def test_mirror_blocks_generic_json_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "generic.json"
+            with path.open("w", encoding="utf-8") as handle:
+                json.dump({"schema_version": "not-an-eval.v0", "status": "pass"}, handle)
+                handle.write("\n")
+
+            with pytest.raises(PhoenixObservabilityError) as raised:
+                build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=path.as_posix())
+
+        receipt = raised.value.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("source_kind_supported", {check["id"] for check in receipt["blockers"]})
+
+    def test_mirror_write_emits_jsonl_when_out_is_explicit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            receipt_path = self._write_receipt(root)
+            out_path = root / "phoenix.jsonl"
+
+            receipt = build_phoenix_mirror_receipt(
+                REPO_ROOT,
+                receipt_path=receipt_path.as_posix(),
+                out_path=out_path.as_posix(),
+                write=True,
+            )
+
+            lines = [json.loads(line) for line in out_path.read_text(encoding="utf-8").splitlines()]
+
+        self.assertEqual(receipt["status"], "written")
+        self.assertEqual(receipt["row_count"], 2)
+        self.assertEqual(lines[0]["event_type"], "phoenix_eval_receipt_mirror")
+        self.assertTrue(receipt["mutation_performed"])
+
+    def test_mirror_write_blocks_ambiguous_output_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            receipt_path = self._write_receipt(root)
+            out_path = root / "phoenix.json"
+
+            with pytest.raises(PhoenixObservabilityError) as raised:
+                build_phoenix_mirror_receipt(
+                    REPO_ROOT,
+                    receipt_path=receipt_path.as_posix(),
+                    out_path=out_path.as_posix(),
+                    write=True,
+                )
+
+        receipt = raised.value.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("output_path_allowed", {check["id"] for check in receipt["blockers"]})
+
+    def test_smoke_blocks_when_configured_otel_runtime_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_python = Path(temp_dir) / "missing-python"
+
+            receipt = build_phoenix_smoke_receipt(
+                REPO_ROOT,
+                base_url="http://127.0.0.1:6006",
+                otel_python_path=missing_python.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("otel_python_available", {check["id"] for check in receipt["blockers"]})
+        self.assertFalse(receipt["mutation_performed"])
+
+    def test_smoke_uses_configured_otel_runtime_for_protobuf_export(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+payload = json.loads(sys.stdin.read())
+assert payload["endpoint"] == "http://127.0.0.1:6006/v1/traces"
+assert payload["profile"] == "oss-cloud"
+print(json.dumps({"status": "pass", "http_status": 200}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+
+            receipt = build_phoenix_smoke_receipt(
+                REPO_ROOT,
+                base_url="http://127.0.0.1:6006",
+                profile="oss-cloud",
+                otel_python_path=runtime.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["span_name"], "agent-skills.phoenix.smoke")
+        self.assertEqual(receipt["profile"], "oss-cloud")
+        self.assertEqual(receipt["otel_python_path"], runtime.as_posix())
+        self.assertTrue(receipt["mutation_performed"])
+
+    def test_smoke_records_optional_llm_model_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+payload = json.loads(sys.stdin.read())
+assert payload["span_kind"] == "LLM"
+assert payload["model_name"] == "qwen/qwen3-coder"
+assert payload["provider"] == "local-oss"
+assert payload["prompt_tokens"] == 11
+assert payload["completion_tokens"] == 7
+print(json.dumps({"status": "pass", "http_status": 200}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+
+            receipt = build_phoenix_smoke_receipt(
+                REPO_ROOT,
+                base_url="http://127.0.0.1:6006",
+                profile="oss-local",
+                model_name="qwen/qwen3-coder",
+                provider="local-oss",
+                prompt_tokens=11,
+                completion_tokens=7,
+                otel_python_path=runtime.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["span_kind"], "LLM")
+        self.assertEqual(receipt["span_name"], "agent-skills.phoenix.qwen/qwen3-coder")
+        self.assertEqual(receipt["model_name"], "qwen/qwen3-coder")
+        self.assertEqual(receipt["provider"], "local-oss")
+        self.assertEqual(receipt["total_tokens"], 18)
+
+    def test_smoke_records_optional_ask_command_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+payload = json.loads(sys.stdin.read())
+assert payload["command_name"] == "repo status --json --robot"
+assert payload["command_status"] == "success"
+assert payload["latency_ms"] == 12
+print(json.dumps({"status": "pass", "http_status": 200}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+
+            receipt = build_phoenix_smoke_receipt(
+                REPO_ROOT,
+                base_url="http://127.0.0.1:6006",
+                command_name="repo status --json --robot",
+                command_status="success",
+                latency_ms=12,
+                otel_python_path=runtime.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["command_name"], "repo status --json --robot")
+        self.assertEqual(receipt["command_status"], "success")
+        self.assertEqual(receipt["latency_ms"], 12)
+
+    def test_smoke_blocks_negative_llm_token_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text("#!/usr/bin/env python3\nraise SystemExit(99)\n", encoding="utf-8")
+            runtime.chmod(0o755)
+
+            receipt = build_phoenix_smoke_receipt(
+                REPO_ROOT,
+                base_url="http://127.0.0.1:6006",
+                model_name="qwen/qwen3-coder",
+                prompt_tokens=-1,
+                otel_python_path=runtime.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("llm_token_counts_valid", {check["id"] for check in receipt["blockers"]})
+        self.assertFalse(receipt["mutation_performed"])
+
+    def test_eval_trace_receipt_emits_run_and_case_spans_from_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            calls = Path(temp_dir) / "calls.jsonl"
+            runtime.write_text(
+                "#!/usr/bin/env python3\n"
+                "import json\n"
+                "import pathlib\n"
+                "import sys\n"
+                "payload = json.loads(sys.stdin.read())\n"
+                f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
+                "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            receipt = {
+                "schema_version": "skills-sdk.eval-run-receipt.v0",
+                "status": "pass",
+                "operation": "eval_run",
+                "runner": "deterministic_jsonl_v0",
+                "codex_profile": "oss-local",
+                "case_count": 1,
+                "passed_count": 1,
+                "failed_count": 0,
+                "cases": [{"case_id": "case-a", "status": "pass", "score": 1}],
+            }
+
+            trace_receipt = build_phoenix_eval_trace_receipt(
+                REPO_ROOT,
+                eval_receipt=receipt,
+                base_url="http://127.0.0.1:6006",
+                otel_python_path=runtime.as_posix(),
+                enabled=True,
+            )
+            payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
+
+        self.assertEqual(trace_receipt["status"], "pass")
+        self.assertEqual(trace_receipt["emitted_span_count"], 1)
+        self.assertFalse(trace_receipt["case_span_trace_enabled"])
+        self.assertEqual(trace_receipt["case_span_count"], 0)
+        self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
+
+    def test_eval_trace_case_spans_are_opt_in_and_capped(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / "fake-otel-python"
+            calls = Path(temp_dir) / "calls.jsonl"
+            runtime.write_text(
+                "#!/usr/bin/env python3\n"
+                "import json\n"
+                "import pathlib\n"
+                "import sys\n"
+                "payload = json.loads(sys.stdin.read())\n"
+                f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
+                "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            receipt = {
+                "schema_version": "skills-sdk.eval-run-receipt.v0",
+                "status": "pass",
+                "operation": "eval_run",
+                "runner": "deterministic_jsonl_v0",
+                "codex_profile": "oss-local",
+                "case_count": 8,
+                "passed_count": 8,
+                "failed_count": 0,
+                "cases": [{"case_id": f"case-{index}", "status": "pass", "score": 1} for index in range(8)],
+            }
+
+            trace_receipt = build_phoenix_eval_trace_receipt(
+                REPO_ROOT,
+                eval_receipt=receipt,
+                base_url="http://127.0.0.1:6006",
+                otel_python_path=runtime.as_posix(),
+                enabled=True,
+                trace_case_spans=True,
+                case_span_limit=50,
+            )
+            payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
+
+        self.assertEqual(trace_receipt["status"], "pass")
+        self.assertEqual(trace_receipt["emitted_span_count"], 6)
+        self.assertTrue(trace_receipt["case_span_trace_enabled"])
+        self.assertEqual(trace_receipt["case_span_limit"], 5)
+        self.assertEqual(trace_receipt["case_span_count"], 5)
+        self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
+        self.assertEqual(payloads[-1]["command_name"], "sdk eval run eval.case case-4")
+
+    def test_eval_trace_blocks_raw_eval_receipts(self) -> None:
+        trace_receipt = build_phoenix_eval_trace_receipt(
+            REPO_ROOT,
+            eval_receipt={
+                "schema_version": "skills-sdk.eval-run-receipt.v0",
+                "status": "pass",
+                "operation": "eval_run",
+                "output": "raw output must not be traced",
+            },
+        )
+
+        self.assertEqual(trace_receipt["status"], "blocked")
+        self.assertIn("eval_trace_redaction", {check["id"] for check in trace_receipt["blockers"]})
+        self.assertFalse(trace_receipt["mutation_performed"])
+
+    def test_public_cli_previews_phoenix_mirror(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_path = self._write_receipt(Path(temp_dir))
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "sdk",
+                    "observability",
+                    "phoenix-mirror",
+                    "--receipt",
+                    receipt_path.as_posix(),
+                    "--preview",
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=_command_env(),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        envelope = json.loads(completed.stdout)
+        payload = envelope["data"]["skills_sdk_observability_phoenix_mirror"]
+        self.assertEqual(payload["status"], "preview")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_public_cli_checks_phoenix_status(self) -> None:
+        server, base_url = self._serve_phoenix()
+        self.addCleanup(server.shutdown)
+
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "observability",
+                "phoenix-status",
+                "--base-url",
+                base_url,
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            env=_command_env(),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        envelope = json.loads(completed.stdout)
+        payload = envelope["data"]["skills_sdk_observability_phoenix_status"]
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["receipt"]["server_version"], "test-phoenix")
+
+    def test_public_cli_blocks_phoenix_smoke_when_otel_runtime_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "sdk",
+                    "observability",
+                    "phoenix-smoke",
+                    "--base-url",
+                    "http://127.0.0.1:6006",
+                    "--otel-python",
+                    str(Path(temp_dir) / "missing-python"),
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=_command_env(),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertNotEqual(completed.returncode, 0)
+        envelope = json.loads(completed.stdout)
+        payload = envelope["data"]["skills_sdk_observability_phoenix_smoke"]
+        self.assertEqual(payload["status"], "blocked")
+        self.assertIn("otel_python_available", {check["id"] for check in payload["receipt"]["blockers"]})
+
+    def test_public_cli_auto_traces_normal_ask_commands_when_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker = Path(temp_dir) / "payload.json"
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                f"""#!/usr/bin/env python3
+import json
+import pathlib
+import sys
+
+payload = json.loads(sys.stdin.read())
+pathlib.Path({marker.as_posix()!r}).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+print(json.dumps({{"status": "pass", "http_status": 200}}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            env = _command_env()
+            env.update(
+                {
+                    "ASK_PHOENIX_AUTO_TRACE": "1",
+                    "ASK_PHOENIX_BASE_URL": "http://127.0.0.1:6006",
+                    "ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix(),
+                    "ASK_PHOENIX_MODEL": "qwen/qwen3-coder",
+                    "ASK_PHOENIX_PROVIDER": "local-oss",
+                    "ASK_PHOENIX_PROMPT_TOKENS": "3",
+                    "ASK_PHOENIX_COMPLETION_TOKENS": "2",
+                }
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "repo",
+                    "status",
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            envelope = json.loads(completed.stdout)
+            self.assertEqual(envelope["telemetry"]["phoenix_trace_status"], "pass")
+            payload = json.loads(marker.read_text(encoding="utf-8"))
+            self.assertEqual(payload["model_name"], "qwen/qwen3-coder")
+            self.assertEqual(payload["provider"], "local-oss")
+            self.assertIn("repo status", payload["command_name"])
+
+    def test_public_cli_auto_trace_skips_when_repo_config_is_disabled_without_env_flag(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker = Path(temp_dir) / "payload.json"
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                f"""#!/usr/bin/env python3
+import json
+import pathlib
+import sys
+
+payload = json.loads(sys.stdin.read())
+pathlib.Path({marker.as_posix()!r}).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+print(json.dumps({{"status": "pass", "http_status": 200}}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            env = _command_env()
+            env.update({"ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix()})
+            env.pop("ASK_PHOENIX_AUTO_TRACE", None)
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "repo",
+                    "status",
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            envelope = json.loads(completed.stdout)
+            self.assertNotIn("phoenix_trace_status", envelope["telemetry"])
+            self.assertFalse(marker.exists())
+
+    def test_public_cli_auto_trace_skips_phoenix_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            marker = Path(temp_dir) / "payload.json"
+            runtime = Path(temp_dir) / "fake-otel-python"
+            runtime.write_text(
+                f"""#!/usr/bin/env python3
+import pathlib
+pathlib.Path({marker.as_posix()!r}).write_text("called", encoding="utf-8")
+print('{{"status":"pass","http_status":200}}')
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            env = _command_env()
+            env.update(
+                {
+                    "ASK_PHOENIX_AUTO_TRACE": "1",
+                    "ASK_PHOENIX_BASE_URL": "http://127.0.0.1:6006",
+                    "ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix(),
+                }
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "sdk",
+                    "observability",
+                    "phoenix-status",
+                    "--base-url",
+                    "http://127.0.0.1:1",
+                    "--timeout-seconds",
+                    "0.01",
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertFalse(marker.exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

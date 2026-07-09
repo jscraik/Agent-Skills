@@ -56,6 +56,27 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing skills command extraction debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/lib/ask/commands/sdk.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PHOENIX-OBSERVABILITY",
+        "reason": "transitional SDK parser and dispatch extraction debt while Phoenix observability commands are stabilized",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/scripts/lib/ask/phoenix_auto_trace.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PHOENIX-OBSERVABILITY",
+        "reason": "transitional auto-trace extraction debt pending a smaller observability config object",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/scripts/lib/ask/skills_sdk/phoenix_observability.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PHOENIX-OBSERVABILITY",
+        "reason": "transitional Phoenix receipt and OTLP helper extraction debt pending provider-specific module split",
+        "expires": "2026-07-31",
+    },
     "Infrastructure/scripts/lib/ask/skill_review_dashboard.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
@@ -145,6 +166,13 @@ LEGACY_SHAPE_DEBT = {
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing schema spine regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_skills_sdk_phoenix_observability.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PHOENIX-OBSERVABILITY",
+        "reason": "transitional Phoenix CLI and receipt coverage pending fixture helper extraction",
         "expires": "2026-07-31",
     },
     "skills-system/skill-creator/scripts/init_skill.py": {

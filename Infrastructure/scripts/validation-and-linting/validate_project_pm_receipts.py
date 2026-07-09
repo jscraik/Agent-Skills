@@ -103,6 +103,22 @@ def _has_next_owner_or_outbound(payload: dict[str, Any]) -> bool:
     return isinstance(push_or_pr, dict) and _non_empty(push_or_pr.get("reason"))
 
 
+def _is_qa_worktree_receipt(payload: dict[str, Any]) -> bool:
+    schema_version = payload.get("schema_version")
+    if isinstance(schema_version, str) and schema_version.startswith("qa-project-backed-"):
+        return True
+    return any(
+        key in payload
+        for key in (
+            "qa_lane",
+            "durable_preservation",
+            "implementation_worktree",
+            "selected_strategy",
+            "missing_target",
+        )
+    )
+
+
 def validate_payload(path: str, payload: dict[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     if not _non_empty(payload.get("schema_version")):
@@ -133,8 +149,9 @@ def scan_paths(paths: Iterable[str]) -> list[Finding]:
             findings.append(Finding(rel, "invalid_root", "PM receipt JSON root must be an object."))
             continue
         findings.extend(validate_payload(rel, payload))
-        for qa_finding in validate_pm_qa_worktree_gate.validate_payload(payload):
-            findings.append(Finding(rel, qa_finding.code, qa_finding.message))
+        if _is_qa_worktree_receipt(payload):
+            for qa_finding in validate_pm_qa_worktree_gate.validate_payload(payload):
+                findings.append(Finding(rel, qa_finding.code, qa_finding.message))
     return findings
 
 

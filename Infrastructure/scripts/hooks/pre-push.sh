@@ -6,7 +6,9 @@ REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 
 cd "$REPO_ROOT"
 
-changed_files_file="$(mktemp)"
+source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"
+
+changed_files_file="$(mktemp "$TMPDIR/agent-skills-pre-push.XXXXXX")"
 trap 'rm -f "$changed_files_file"' EXIT
 
 if git rev-parse --verify @{upstream} >/dev/null 2>&1; then

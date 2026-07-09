@@ -290,6 +290,9 @@ __all__ = [
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
     "skills_sdk_observability_promote",
+    "skills_sdk_observability_phoenix_status",
+    "skills_sdk_observability_phoenix_smoke",
+    "skills_sdk_observability_phoenix_mirror",
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
     "skills_sdk_security_adapters_preview",
@@ -7010,6 +7013,175 @@ def skills_sdk_observability_promote(
     return result
 
 
+def skills_sdk_observability_phoenix_status(
+    repo_root: Path,
+    *,
+    base_url: str,
+    timeout_seconds: float,
+) -> CallResult:
+    """Check that the configured Phoenix OSS endpoint is reachable."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability phoenix-status"
+    from ask.skills_sdk.phoenix_observability import build_phoenix_status_receipt  # noqa: PLC0415
+
+    status_receipt = build_phoenix_status_receipt(
+        repo_root,
+        base_url=base_url,
+        timeout_seconds=timeout_seconds,
+    )
+    payload = {
+        "schema_version": "skills-sdk-observability-phoenix-status.v0",
+        "status": status_receipt["status"],
+        "facade_command": "skills-sdk observability phoenix-status",
+        "receipt": status_receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "observability",
+                "phoenix-status",
+                "--base-url",
+                base_url,
+            )
+        ],
+        "agent_summary": status_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_phoenix_status"] = payload
+    if status_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message=payload["agent_summary"],
+                fix_suggestion="Start Phoenix OSS with Docker and rerun the status check.",
+            )
+        )
+    return result
+
+
+def skills_sdk_observability_phoenix_smoke(
+    repo_root: Path,
+    *,
+    base_url: str,
+    profile: str,
+    timeout_seconds: float,
+    otel_python_path: str | None,
+    model_name: str | None,
+    provider: str | None,
+    prompt_tokens: int,
+    completion_tokens: int,
+) -> CallResult:
+    """Emit a deterministic smoke trace to the configured Phoenix OSS endpoint."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability phoenix-smoke"
+    from ask.skills_sdk.phoenix_observability import build_phoenix_smoke_receipt  # noqa: PLC0415
+
+    smoke_receipt = build_phoenix_smoke_receipt(
+        repo_root,
+        base_url=base_url,
+        profile=profile,
+        timeout_seconds=timeout_seconds,
+        otel_python_path=otel_python_path,
+        model_name=model_name,
+        provider=provider,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+    )
+    payload = {
+        "schema_version": "skills-sdk-observability-phoenix-smoke.v0",
+        "status": smoke_receipt["status"],
+        "facade_command": "skills-sdk observability phoenix-smoke",
+        "receipt": smoke_receipt,
+        "mutation_performed": smoke_receipt["mutation_performed"],
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "observability",
+                "phoenix-smoke",
+                "--base-url",
+                base_url,
+                "--profile",
+                profile,
+                *("--otel-python", otel_python_path) if otel_python_path else (),
+                *("--model", model_name) if model_name else (),
+                *("--provider", provider) if provider else (),
+                "--prompt-tokens",
+                str(prompt_tokens),
+                "--completion-tokens",
+                str(completion_tokens),
+            )
+        ],
+        "agent_summary": smoke_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_phoenix_smoke"] = payload
+    if smoke_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message=payload["agent_summary"],
+                fix_suggestion="Start Phoenix OSS and ensure ~/.agents/otel-collector has opentelemetry-proto available.",
+            )
+        )
+    return result
+
+
+def skills_sdk_observability_phoenix_mirror(
+    repo_root: Path,
+    *,
+    receipt_path: str,
+    out_path: str | None,
+    write: bool,
+) -> CallResult:
+    """Build or write a redacted Phoenix-ready JSONL mirror from a repo receipt."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability phoenix-mirror"
+    from ask.skills_sdk.phoenix_observability import (  # noqa: PLC0415
+        PhoenixObservabilityError,
+        build_phoenix_mirror_receipt,
+    )
+
+    try:
+        mirror_receipt = build_phoenix_mirror_receipt(
+            repo_root,
+            receipt_path=receipt_path,
+            out_path=out_path,
+            write=write,
+        )
+    except PhoenixObservabilityError as exc:
+        mirror_receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-observability-phoenix-mirror.v0",
+        "status": mirror_receipt["status"],
+        "facade_command": "skills-sdk observability phoenix-mirror",
+        "receipt": mirror_receipt,
+        "mutation_performed": mirror_receipt["mutation_performed"],
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "observability",
+                "phoenix-mirror",
+                "--receipt",
+                receipt_path,
+                *("--out", out_path) if out_path else (),
+                "--write" if write else "--preview",
+            )
+        ],
+        "agent_summary": mirror_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_phoenix_mirror"] = payload
+    if mirror_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Provide a JSON receipt in the repo or /tmp, and use --out when writing a mirror artifact.",
+            )
+        )
+    return result
+
+
 def skills_sdk_eval_profiles_preview(repo_root: Path) -> CallResult:
     """Emit the non-mutating Codex execution and judge profile contract."""
     del repo_root
@@ -7950,6 +8122,45 @@ def _skills_sdk_eval_codex_profile_proof(
     }
 
 
+def _attach_phoenix_eval_trace(
+    payload: dict[str, Any],
+    repo_root: Path,
+    receipt: dict[str, Any],
+    *,
+    command_name: str = "sdk eval run",
+    profile: str | None = None,
+) -> None:
+    schema_version = "skills-sdk.phoenix-eval-trace-receipt.v0"
+    try:
+        from ask.skills_sdk.phoenix_observability import (  # noqa: PLC0415
+            PHOENIX_EVAL_TRACE_SCHEMA_VERSION,
+            build_phoenix_eval_trace_receipt,
+        )
+
+        schema_version = PHOENIX_EVAL_TRACE_SCHEMA_VERSION
+        payload["phoenix_eval_trace"] = build_phoenix_eval_trace_receipt(
+            repo_root,
+            eval_receipt=receipt,
+            command_name=command_name,
+            profile=profile,
+        )
+    except Exception as exc:  # noqa: BLE001 - Phoenix is an inspection surface, not the eval gate.
+        payload["phoenix_eval_trace"] = {
+            "schema_version": schema_version,
+            "status": "blocked",
+            "checks": [],
+            "blockers": [
+                {
+                    "id": "phoenix_eval_trace_unexpected_error",
+                    "status": "blocker",
+                    "severity": "blocker",
+                    "message": "Phoenix eval trace emission raised an unexpected error.",
+                    "evidence": [f"{type(exc).__name__}: {exc}"],
+                }
+            ],
+            "error": f"{type(exc).__name__}: {exc}",
+            "mutation_performed": False,
+        }
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -8092,6 +8303,7 @@ def skills_sdk_eval_run(
             ],
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
         }
+        _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
         result.data["skills_sdk_eval_run"] = payload
         if status != "pass":
             result.status = "error"
@@ -8175,6 +8387,7 @@ def skills_sdk_eval_run(
             f"{receipt['passed_count']}/{receipt['case_count']} deterministic JSONL case(s) passing."
         ),
     }
+    _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
     if target:
         payload["validation_commands"] = [
             _ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", target)

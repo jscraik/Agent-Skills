@@ -153,7 +153,7 @@ use_mise_python_launcher() {
 }
 
 use_system_python_launcher() {
-  python3 -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python3 -c "import sys, tomllib, yaml" >/dev/null 2>&1 || return 1
   python_cmd=(python3)
   python_cmd_display="python3"
   return 0
@@ -242,6 +242,21 @@ mark_blocked_check() {
   echo "  ⏭️ Blocked (${reason})"
   : >"$log_file"
   record_check_result "$mode" "$slug" "blocked" "$log_file"
+}
+
+# mark_skipped_check records an intentionally out-of-scope check without
+# turning changed-files validation red.
+mark_skipped_check() {
+  local mode="$1"
+  local slug="$2"
+  local label="$3"
+  local reason="$4"
+  local log_file="$run_dir/${slug}.log"
+
+  echo "$label"
+  echo "  ⏭️ Skipped (${reason})"
+  : >"$log_file"
+  record_check_result "$mode" "$slug" "skipped" "$log_file"
 }
 
 # should_run_check determines whether a check should run in changed-files mode.
@@ -436,7 +451,7 @@ schedule_check() {
   fi
 
   if ! should_run_check "$slug"; then
-    mark_blocked_check "$mode" "$slug" "$label" "outside changed-files scope"
+    mark_skipped_check "$mode" "$slug" "$label" "outside changed-files scope"
     return 0
   fi
 

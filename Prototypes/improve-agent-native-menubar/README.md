@@ -25,6 +25,13 @@ and opens it with AGENT_SKILLS_ROOT pointed at this checkout. It intentionally
 avoids the default SwiftPM GUI launch path because swift run can fail on this
 workstation with an XCBuild property list initialization error.
 
+If LaunchServices is unavailable from the calling process, the launcher writes
+ImproveAgentNativeMenuBar.launch-receipt.json and exits without directly running
+the bundled executable. Direct executable fallback can abort while AppKit
+registers a SwiftUI menu-bar app outside a normal LaunchServices session, so the
+receipt includes the app path and the manual `open -n` command to run from a
+normal macOS Terminal or Finder session.
+
 Validation:
 
   HOME=/private/tmp/improve-agent-native-menubar-home XDG_CACHE_HOME=/private/tmp/improve-agent-native-menubar-xdg CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache swift build --build-system native --disable-sandbox --build-path /private/tmp/improve-agent-native-menubar-native-build

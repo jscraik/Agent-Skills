@@ -176,6 +176,27 @@ def test_committed_branch_requires_commit_sha(tmp_path: Path) -> None:
     assert any(finding.code == "missing_preservation_commit" for finding in findings)
 
 
+def test_committed_branch_requires_branch(tmp_path: Path) -> None:
+    worktree = tmp_path / "agent-skills-worktree"
+    worktree.mkdir()
+
+    findings = validate_pm_qa_worktree_gate.validate_payload(
+        {
+            "schema_version": "qa-project-backed-dispatch/v1",
+            "status": "project_backed_qa_dispatched_monitoring_required",
+            "qa_lane": {
+                "implementation_worktree": worktree.as_posix(),
+            },
+            "durable_preservation": {
+                "strategy": "committed_branch",
+                "commit_sha": "abc123",
+            },
+        }
+    )
+
+    assert any(finding.code == "missing_preservation_branch" for finding in findings)
+
+
 def test_prefers_qa_lane_implementation_worktree_over_target_worktree(tmp_path: Path) -> None:
     target_worktree = tmp_path / "qa-target"
     target_worktree.mkdir()
