@@ -84,7 +84,7 @@ fi
 
 use_pyyaml_venv_python() {
   [[ -x "$pyyaml_venv_python" ]] || return 1
-  "$pyyaml_venv_python" -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
+  "$pyyaml_venv_python" -c "import tomllib, yaml, jsonschema" >/dev/null 2>&1 || return 1
   python_cmd=("$pyyaml_venv_python")
   python_cmd_display="$pyyaml_venv_python"
   return 0
@@ -92,7 +92,7 @@ use_pyyaml_venv_python() {
 
 use_uv_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  "${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  "${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, tomllib, yaml, jsonschema" >/dev/null 2>&1 || return 1
   python_cmd=("${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python)
   python_cmd_display="${uv_tool_env[*]:+env UV_CACHE_DIR=<temp> }uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
@@ -101,7 +101,7 @@ use_uv_python_launcher() {
 use_mise_python_launcher() {
   command -v mise >/dev/null 2>&1 || return 1
   command -v uv >/dev/null 2>&1 || return 1
-  "${uv_tool_env[@]}" mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  "${uv_tool_env[@]}" mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, tomllib, yaml, jsonschema" >/dev/null 2>&1 || return 1
   python_cmd=("${uv_tool_env[@]}" mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python)
   python_cmd_display="${uv_tool_env[*]:+env UV_CACHE_DIR=<temp> }mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
@@ -193,8 +193,10 @@ run_skill_builder_script() {
   local script_name="$1"
   shift
   local script_python_cmd=("${python_cmd[@]}")
-  if ! "${script_python_cmd[@]}" -c "import yaml" >/dev/null 2>&1; then
-    if [[ -x "$pyyaml_venv_python" ]] && "$pyyaml_venv_python" -c "import yaml" >/dev/null 2>&1; then
+  if ! "${script_python_cmd[@]}" -c "import tomllib, yaml" >/dev/null 2>&1; then
+    if command -v uv >/dev/null 2>&1 && "${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pyyaml --with jsonschema python -c "import tomllib, yaml" >/dev/null 2>&1; then
+      script_python_cmd=("${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pyyaml --with jsonschema python)
+    elif [[ -x "$pyyaml_venv_python" ]] && "$pyyaml_venv_python" -c "import tomllib, yaml" >/dev/null 2>&1; then
       script_python_cmd=("$pyyaml_venv_python")
     fi
   fi

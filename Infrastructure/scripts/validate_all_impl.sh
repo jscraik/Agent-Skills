@@ -244,6 +244,21 @@ mark_blocked_check() {
   record_check_result "$mode" "$slug" "blocked" "$log_file"
 }
 
+# mark_skipped_check records an intentionally out-of-scope check without
+# turning changed-files validation red.
+mark_skipped_check() {
+  local mode="$1"
+  local slug="$2"
+  local label="$3"
+  local reason="$4"
+  local log_file="$run_dir/${slug}.log"
+
+  echo "$label"
+  echo "  ⏭️ Skipped (${reason})"
+  : >"$log_file"
+  record_check_result "$mode" "$slug" "pass" "$log_file"
+}
+
 # should_run_check determines whether a check should run in changed-files mode.
 check_matches_validation_scope() {
   local slug="$1"
@@ -436,7 +451,7 @@ schedule_check() {
   fi
 
   if ! should_run_check "$slug"; then
-    mark_blocked_check "$mode" "$slug" "$label" "outside changed-files scope"
+    mark_skipped_check "$mode" "$slug" "$label" "outside changed-files scope"
     return 0
   fi
 
