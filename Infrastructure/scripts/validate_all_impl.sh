@@ -256,7 +256,7 @@ mark_skipped_check() {
   echo "$label"
   echo "  ⏭️ Skipped (${reason})"
   : >"$log_file"
-  record_check_result "$mode" "$slug" "pass" "$log_file"
+  record_check_result "$mode" "$slug" "skipped" "$log_file"
 }
 
 # should_run_check determines whether a check should run in changed-files mode.

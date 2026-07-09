@@ -32,6 +32,10 @@ SIMPLE_GIT_HOOKS_EXPECTED = {
     "commit-msg": "bash scripts/hooks/commit-msg.sh $1",
     "pre-push": "bash scripts/hooks/pre-push.sh",
 }
+SIMPLE_GIT_HOOKS_JSON_EXPECTED = {
+    **SIMPLE_GIT_HOOKS_EXPECTED,
+    "commit-msg": 'bash scripts/hooks/commit-msg.sh \\"$1\\"',
+}
 
 
 def _local_prek_entries(path: Path) -> dict[str, list[str]]:
@@ -111,12 +115,10 @@ def test_simple_git_hooks_template_calls_leaf_adapters() -> None:
     ]:
         path = REPO_ROOT / rel_path
         text = path.read_text(encoding="utf-8")
-        for hook_name, command in SIMPLE_GIT_HOOKS_EXPECTED.items():
+        for hook_name, command in SIMPLE_GIT_HOOKS_JSON_EXPECTED.items():
             expected = f'"{hook_name}": "{command}"'
-            if hook_name == "commit-msg":
-                expected = '"commit-msg": "bash scripts/hooks/commit-msg.sh \\"$1\\""'
             assert expected in text
-            _assert_not_nested(command, path)
+            _assert_not_nested(command.replace('\\\"', '"'), path)
         assert "make hooks-pre-commit" not in text
         assert "make hooks-pre-push" not in text
 
@@ -193,6 +195,11 @@ def test_pre_push_adapter_keeps_upstream_diff_scope() -> None:
 
 
 def test_hook_adapters_use_sandbox_safe_temp_files() -> None:
+    helper = (REPO_ROOT / "Infrastructure/scripts/hooks/_sandbox_env.sh").read_text(encoding="utf-8")
+    assert "/private/tmp" in helper
+    assert "/tmp" in helper
+    assert "UV_CACHE_DIR" in helper
+
     for rel_path in [
         "scripts/hooks/pre-commit.sh",
         "scripts/hooks/pre-push.sh",
@@ -200,9 +207,8 @@ def test_hook_adapters_use_sandbox_safe_temp_files() -> None:
         "Infrastructure/scripts/hooks/pre-push.sh",
     ]:
         text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        assert "/private/tmp" in text
+        assert 'source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"' in text
         assert 'mktemp "$TMPDIR/agent-skills-' in text
-        assert "UV_CACHE_DIR" in text
 
 
 def test_hook_adapters_pass_bash_syntax() -> None:
