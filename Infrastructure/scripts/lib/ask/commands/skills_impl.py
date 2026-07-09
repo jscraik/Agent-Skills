@@ -8122,6 +8122,39 @@ def _skills_sdk_eval_codex_profile_proof(
     }
 
 
+def _attach_phoenix_eval_trace(
+    payload: dict[str, Any],
+    repo_root: Path,
+    receipt: dict[str, Any],
+    *,
+    command_name: str = "sdk eval run",
+    profile: str | None = None,
+) -> None:
+    schema_version = "skills-sdk.phoenix-eval-trace-receipt.v0"
+    try:
+        from ask.skills_sdk.phoenix_observability import (  # noqa: PLC0415
+            PHOENIX_EVAL_TRACE_SCHEMA_VERSION,
+            build_phoenix_eval_trace_receipt,
+        )
+
+        schema_version = PHOENIX_EVAL_TRACE_SCHEMA_VERSION
+        payload["phoenix_eval_trace"] = build_phoenix_eval_trace_receipt(
+            repo_root,
+            eval_receipt=receipt,
+            command_name=command_name,
+            profile=profile,
+        )
+    except Exception as exc:  # noqa: BLE001 - Phoenix is an inspection surface, not the eval gate.
+        payload["phoenix_eval_trace"] = {
+            "schema_version": schema_version,
+            "status": "blocked",
+            "checks": [],
+            "blockers": [f"{type(exc).__name__}: {exc}"],
+            "error": f"{type(exc).__name__}: {exc}",
+            "mutation_performed": False,
+        }
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -8264,21 +8297,7 @@ def skills_sdk_eval_run(
             ],
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
         }
-        try:
-            from ask.skills_sdk.phoenix_observability import build_phoenix_eval_trace_receipt  # noqa: PLC0415
-
-            payload["phoenix_eval_trace"] = build_phoenix_eval_trace_receipt(
-                repo_root,
-                eval_receipt=receipt,
-                command_name="sdk eval run",
-                profile=codex_profile,
-            )
-        except Exception as exc:  # noqa: BLE001 - Phoenix is an inspection surface, not the eval gate.
-            payload["phoenix_eval_trace"] = {
-                "status": "blocked",
-                "error": f"{type(exc).__name__}: {exc}",
-                "mutation_performed": False,
-            }
+        _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
         result.data["skills_sdk_eval_run"] = payload
         if status != "pass":
             result.status = "error"
@@ -8362,20 +8381,7 @@ def skills_sdk_eval_run(
             f"{receipt['passed_count']}/{receipt['case_count']} deterministic JSONL case(s) passing."
         ),
     }
-    try:
-        from ask.skills_sdk.phoenix_observability import build_phoenix_eval_trace_receipt  # noqa: PLC0415
-
-        payload["phoenix_eval_trace"] = build_phoenix_eval_trace_receipt(
-            repo_root,
-            eval_receipt=receipt,
-            command_name="sdk eval run",
-        )
-    except Exception as exc:  # noqa: BLE001 - Phoenix is an inspection surface, not the eval gate.
-        payload["phoenix_eval_trace"] = {
-            "status": "blocked",
-            "error": f"{type(exc).__name__}: {exc}",
-            "mutation_performed": False,
-        }
+    _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
     if target:
         payload["validation_commands"] = [
             _ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", target)

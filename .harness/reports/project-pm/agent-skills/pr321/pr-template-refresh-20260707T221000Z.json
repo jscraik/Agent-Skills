@@ -1,0 +1,29 @@
+{
+  "schema_version": "hosted-check-refresh/v1",
+  "status": "pr_template_body_corrected_requires_synchronize",
+  "created_at": "2026-07-07T22:10:00Z",
+  "pr": {
+    "number": 321,
+    "url": "https://github.com/jscraik/Agent-Skills/pull/321",
+    "head_branch": "codex/boundary-no-late-unknown-canary-admission",
+    "head_sha_before_refresh": "0cc00d4ad567399b2e08768d50560ceafe4f5413"
+  },
+  "diagnosis": {
+    "hosted_failure_class": "stale_or_base_template_transition",
+    "live_body_state": "corrected_to_current_base_template",
+    "reason": "The PR changes the template, but trusted-base validation uses the base branch template until the PR lands."
+  },
+  "validation": [
+    {
+      "command": "git show origin/main:.github/PULL_REQUEST_TEMPLATE.md > /private/tmp/agent-skills-base-template.md && python3 .github/scripts/validate_pr_template_body.py --template /private/tmp/agent-skills-base-template.md --body-file /private/tmp/agent-skills-pr321-base-template-body.md",
+      "outcome": "pass",
+      "reason": "Corrected PR body validates against the trusted base template."
+    }
+  ],
+  "next_action": "Push this receipt to create a synchronize event and refresh pr-template against the corrected PR body.",
+  "what_remains_unproven": [
+    "Hosted pr-template check result after the synchronize event.",
+    "Overall PR merge readiness and required-review policy state.",
+    "Hosted CI state for checks that start after this receipt commit."
+  ]
+}

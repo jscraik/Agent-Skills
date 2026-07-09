@@ -91,8 +91,19 @@ def test_rejects_missing_required_field_from_each_templated_section() -> None:
     body = _filled_template_body()
 
     for section, fields in contract.fields_by_section.items():
+        section_block = validator._section_blocks(body)[section]
         for field in fields:
-            candidate = re.sub(rf"^- {re.escape(field)}:.*(?:\n|$)", "", body, count=1, flags=re.MULTILINE)
+            candidate = body.replace(
+                section_block,
+                re.sub(
+                    rf"^- {re.escape(field)}:.*(?:\n|$)",
+                    "",
+                    section_block,
+                    count=1,
+                    flags=re.MULTILINE,
+                ),
+                1,
+            )
             errors = validator.validate_pr_body(_template(), candidate)
 
             assert f"Missing required field in ## {section}: {field}:" in errors

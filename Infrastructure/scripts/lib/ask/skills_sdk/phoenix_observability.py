@@ -379,13 +379,13 @@ def build_phoenix_smoke_receipt(
     span_name = f"agent-skills.phoenix.{model_name}" if model_name else "agent-skills.phoenix.smoke"
     emitted = False
     export_error: str | None = None
-    otel_python = Path(otel_python_path) if otel_python_path else Path.home() / ".agents" / "otel-collector" / ".venv" / "bin" / "python"
+    otel_python = Path(otel_python_path) if otel_python_path else None
     checks.append(
         _check(
             "otel_python_available",
-            "pass" if otel_python.is_file() else "blocker",
-            "Phoenix smoke emission uses the existing ~/.agents OpenTelemetry proto runtime.",
-            [otel_python.as_posix()],
+            "pass" if otel_python is not None and otel_python.is_file() else "blocker",
+            "Phoenix smoke emission requires an explicit --otel-python path, ASK_PHOENIX_OTEL_PYTHON, or phoenix.json otel_python.",
+            [otel_python.as_posix()] if otel_python is not None else ["missing_explicit_otel_python"],
         )
     )
     if not [check for check in checks if check["status"] == "blocker"]:
@@ -477,49 +477,53 @@ except urllib.error.HTTPError as exc:
     print(json.dumps({"status": "blocked", "http_status": exc.code, "error": body}))
     raise SystemExit(2)
 '''
-        process = subprocess.run(
-            [otel_python.as_posix(), "-c", smoke_script],
-            input=json.dumps(
-                {
-                    "endpoint": endpoint,
-                    "trace_id": trace_id,
-                    "span_id": span_id,
-                    "span_name": span_name,
-                    "span_kind": span_kind,
-                    "repo_name": repo_root.name,
-                    "profile": profile,
-                    "model_name": model_name,
-                    "provider": provider,
-                    "prompt_tokens": prompt_tokens,
-                    "completion_tokens": completion_tokens,
-                    "command_name": command_name,
-                    "command_status": command_status,
-                    "latency_ms": latency_ms,
-                    "timeout_seconds": timeout_seconds,
-                    "acceptance_trace": PHOENIX_ACCEPTANCE_TRACE,
-                },
-                sort_keys=True,
-            ),
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
+        assert otel_python is not None
         try:
-            export_result = json.loads(process.stdout.strip().splitlines()[-1])
-        except (IndexError, json.JSONDecodeError):
-            export_result = {"status": "blocked", "error": "missing_json_export_result"}
-        emitted = process.returncode == 0 and export_result.get("status") == "pass"
-        if not emitted:
-            export_error = "; ".join(
-                part
-                for part in (
-                    f"returncode:{process.returncode}",
-                    f"stdout:{process.stdout.strip()}",
-                    f"stderr:{process.stderr.strip()}",
-                )
-                if part
+            process = subprocess.run(
+                [otel_python.as_posix(), "-c", smoke_script],
+                input=json.dumps(
+                    {
+                        "endpoint": endpoint,
+                        "trace_id": trace_id,
+                        "span_id": span_id,
+                        "span_name": span_name,
+                        "span_kind": span_kind,
+                        "repo_name": repo_root.name,
+                        "profile": profile,
+                        "model_name": model_name,
+                        "provider": provider,
+                        "prompt_tokens": prompt_tokens,
+                        "completion_tokens": completion_tokens,
+                        "command_name": command_name,
+                        "command_status": command_status,
+                        "latency_ms": latency_ms,
+                        "timeout_seconds": timeout_seconds,
+                        "acceptance_trace": PHOENIX_ACCEPTANCE_TRACE,
+                    },
+                    sort_keys=True,
+                ),
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=timeout_seconds + 1.0,
             )
+            try:
+                export_result = json.loads(process.stdout.strip().splitlines()[-1])
+            except (IndexError, json.JSONDecodeError):
+                export_result = {"status": "blocked", "error": "missing_json_export_result"}
+            emitted = process.returncode == 0 and export_result.get("status") == "pass"
+            if not emitted:
+                export_error = "; ".join(
+                    part
+                    for part in (
+                        f"returncode:{process.returncode}",
+                        f"stdout:{process.stdout.strip()}",
+                        f"stderr:{process.stderr.strip()}",
+                    )
+                    if part
+                )
+        except subprocess.TimeoutExpired as exc:
+            export_error = f"timeout:{timeout_seconds + 1.0:.1f}s; stdout:{exc.stdout or ''}; stderr:{exc.stderr or ''}"
         checks.append(
             _check(
                 "phoenix_otlp_export",
@@ -550,7 +554,7 @@ except urllib.error.HTTPError as exc:
         "command_name": command_name,
         "command_status": command_status,
         "latency_ms": latency_ms,
-        "otel_python_path": otel_python.as_posix(),
+        "otel_python_path": otel_python.as_posix() if otel_python is not None else None,
         "timestamp_unix_seconds": int(time.time()),
         "checks": checks,
         "blockers": blockers,
@@ -595,6 +599,14 @@ def emit_ask_result_to_phoenix(
     )
 
 
+def _config_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return False
+
+
 def _phoenix_enabled(repo_root: Path) -> bool:
     config_path = repo_root / "Infrastructure" / "config" / "observability" / "phoenix.json"
     if not config_path.is_file():
@@ -603,7 +615,7 @@ def _phoenix_enabled(repo_root: Path) -> bool:
         payload = json.loads(config_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return False
-    return isinstance(payload, dict) and payload.get("enabled") is True
+    return isinstance(payload, dict) and _config_bool(payload.get("enabled"))
 
 
 def build_phoenix_eval_trace_receipt(

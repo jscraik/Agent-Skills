@@ -1,0 +1,81 @@
+{
+  "schema_version": "hosted-check-blocked/v1",
+  "status": "blocked_pr_template_requires_synchronize_event",
+  "created_at": "2026-07-06T08:07:00Z",
+  "pr": {
+    "number": 319,
+    "url": "https://github.com/jscraik/Agent-Skills/pull/319",
+    "title": "fix(pm): enforce no-breadcrumb guardrails",
+    "head_branch": "codex/pm-no-breadcrumbs-guards",
+    "head_sha_before_receipt": "e67fd428530cf24138f6124964ade1da851ddbbb",
+    "draft": true,
+    "mergeable": "MERGEABLE"
+  },
+  "diagnosis": {
+    "live_pr_body_content": "valid_checklist_markers_present",
+    "hosted_failure_class": "stale_pull_request_event_body",
+    "workflow_trigger": "pull_request_without_explicit_types",
+    "workflow_fresh_event_supported": "synchronize",
+    "pr_body_edit_event_supported_by_observed_runs": false,
+    "evidence_summary": [
+      "Live PR body includes **(Pending)** and **(N/A)** markers for unchecked checklist items.",
+      "The latest failed pr-template job log still reports the old unchecked items without markers.",
+      "Harness PR Pipeline has only the original pull_request run for head e67fd4285.",
+      "The workflow reads github.event.pull_request.body, so rerunning the same run reuses the stale event payload."
+    ]
+  },
+  "commands": [
+    {
+      "command": "sed -n '1,80p' .github/workflows/pr-pipeline.yml",
+      "outcome": "pass",
+      "reason": "Shows Harness PR Pipeline uses on: pull_request and pr-template reads github.event.pull_request.body."
+    },
+    {
+      "command": "gh run list --repo jscraik/Agent-Skills --workflow 'Harness PR Pipeline' --branch codex/pm-no-breadcrumbs-guards --limit 10 --json databaseId,event,status,conclusion,createdAt,updatedAt,headSha,displayTitle,url",
+      "outcome": "pass",
+      "reason": "Shows only the original failed pull_request workflow run for PR #319 head e67fd4285."
+    },
+    {
+      "command": "gh pr view 319 --repo jscraik/Agent-Skills --json body --jq '.body' | sed -n '/## Checklist/,/## Testing/p'",
+      "outcome": "pass",
+      "reason": "Shows live PR body now has required checklist status markers."
+    },
+    {
+      "command": "XDG_CACHE_HOME=/tmp/agent-skills-gh-cache gh run view 28775938426 --repo jscraik/Agent-Skills --job 85320328324 --log-failed",
+      "outcome": "pass",
+      "reason": "Shows rerun still evaluated stale unmarked checklist body."
+    },
+    {
+      "command": "git commit --allow-empty -m 'chore(pr): refresh template validation'",
+      "outcome": "blocked",
+      "reason": "Repeated attempts returned no usable output and no commit landed; empty commit path is not usable without further hook/tool diagnosis."
+    }
+  ],
+  "selected_fresh_event_path": {
+    "decision": "metadata_receipt_commit_if_hooks_allow",
+    "reason": "A PR #319 hosted-check blocker receipt is legitimate PM metadata for this lane and creates a synchronize event without meaningless source churn.",
+    "prohibited_paths": [
+      "no --no-verify",
+      "no force-push",
+      "no main mutation",
+      "no branch deletion",
+      "no stash drop",
+      "no meaningless file churn solely to poke CI"
+    ]
+  },
+  "what_remains_unproven": [
+    "PR #319 pr-template has not passed on a fresh synchronize event yet.",
+    "PR #319 is draft and not ready.",
+    "Required independent review and final hosted readiness are not proven.",
+    "Stash final disposition remains unresolved."
+  ],
+  "next_owner": "Project PM",
+  "next_action": "Validate and commit this legitimate hosted-check blocker receipt on PR #319 branch if hooks allow it, push, then refresh pr-template on the new head.",
+  "claims_boundary": [
+    "No PR green claim.",
+    "No PR readiness claim.",
+    "No merge readiness claim.",
+    "No release readiness claim.",
+    "No stash cleanup claim."
+  ]
+}

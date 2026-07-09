@@ -10,6 +10,8 @@ import threading
 import unittest
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
@@ -111,10 +113,10 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             receipt_path = self._write_receipt(Path(temp_dir), include_raw=True)
 
-            with self.assertRaises(PhoenixObservabilityError) as raised:
+            with pytest.raises(PhoenixObservabilityError) as raised:
                 build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=receipt_path.as_posix())
 
-        receipt = raised.exception.receipt
+        receipt = raised.value.receipt
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("mirror_redaction", {check["id"] for check in receipt["blockers"]})
 
@@ -122,10 +124,10 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             receipt_path = self._write_receipt(Path(temp_dir), codex_exec_invoked=False)
 
-            with self.assertRaises(PhoenixObservabilityError) as raised:
+            with pytest.raises(PhoenixObservabilityError) as raised:
                 build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=receipt_path.as_posix())
 
-        receipt = raised.exception.receipt
+        receipt = raised.value.receipt
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("oss_profile_execution_contract", {check["id"] for check in receipt["blockers"]})
 
@@ -136,10 +138,10 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
                 json.dump({"schema_version": "not-an-eval.v0", "status": "pass"}, handle)
                 handle.write("\n")
 
-            with self.assertRaises(PhoenixObservabilityError) as raised:
+            with pytest.raises(PhoenixObservabilityError) as raised:
                 build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=path.as_posix())
 
-        receipt = raised.exception.receipt
+        receipt = raised.value.receipt
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("source_kind_supported", {check["id"] for check in receipt["blockers"]})
 
@@ -169,7 +171,7 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
             receipt_path = self._write_receipt(root)
             out_path = root / "phoenix.json"
 
-            with self.assertRaises(PhoenixObservabilityError) as raised:
+            with pytest.raises(PhoenixObservabilityError) as raised:
                 build_phoenix_mirror_receipt(
                     REPO_ROOT,
                     receipt_path=receipt_path.as_posix(),
@@ -177,7 +179,7 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
                     write=True,
                 )
 
-        receipt = raised.exception.receipt
+        receipt = raised.value.receipt
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("output_path_allowed", {check["id"] for check in receipt["blockers"]})
 
@@ -388,8 +390,7 @@ print(json.dumps({"status": "pass", "http_status": 200}))
                 cwd=REPO_ROOT,
                 env=_command_env(),
                 text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=False,
             )
 
@@ -418,8 +419,7 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             cwd=REPO_ROOT,
             env=_command_env(),
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=False,
         )
 
@@ -448,8 +448,7 @@ print(json.dumps({"status": "pass", "http_status": 200}))
                 cwd=REPO_ROOT,
                 env=_command_env(),
                 text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=False,
             )
 
@@ -500,8 +499,7 @@ print(json.dumps({{"status": "pass", "http_status": 200}}))
                 cwd=REPO_ROOT,
                 env=env,
                 text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
@@ -512,7 +510,7 @@ print(json.dumps({{"status": "pass", "http_status": 200}}))
             self.assertEqual(payload["provider"], "local-oss")
             self.assertIn("repo status", payload["command_name"])
 
-    def test_public_cli_auto_traces_from_repo_config_without_env_flag(self) -> None:
+    def test_public_cli_auto_trace_skips_when_repo_config_is_disabled_without_env_flag(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             marker = Path(temp_dir) / "payload.json"
             runtime = Path(temp_dir) / "fake-otel-python"
@@ -544,17 +542,13 @@ print(json.dumps({{"status": "pass", "http_status": 200}}))
                 cwd=REPO_ROOT,
                 env=env,
                 text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             envelope = json.loads(completed.stdout)
-            self.assertEqual(envelope["telemetry"]["phoenix_trace_status"], "pass")
-            payload = json.loads(marker.read_text(encoding="utf-8"))
-            self.assertEqual(payload["model_name"], "qwen/qwen3-coder")
-            self.assertEqual(payload["profile"], "oss-local")
-            self.assertIn("repo status", payload["command_name"])
+            self.assertNotIn("phoenix_trace_status", envelope["telemetry"])
+            self.assertFalse(marker.exists())
 
     def test_public_cli_auto_trace_skips_phoenix_commands(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -594,8 +588,7 @@ print('{{"status":"pass","http_status":200}}')
                 cwd=REPO_ROOT,
                 env=env,
                 text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=False,
             )
 

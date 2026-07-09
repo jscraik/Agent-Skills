@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "chief-flow-ratchets-pm-worker-recovery-v2",
+  "pm_thread_id": "019f344f-cb22-7ac3-b31a-453f4e813faa",
+  "report_path": "latest.json",
+  "delivery_method": "manual_pm_update",
+  "delivery_status": "delivered",
+  "delivery_evidence": "PM wrote the report and delivery artifacts into the durable branch worktree for validation and commit before independent QA.",
+  "delivered_at": "2026-07-07T12:40:00Z",
+  "message_summary": "PM-as-worker recovery v2 report written on durable branch; independent QA remains blocked until commit and PM request."
+}
