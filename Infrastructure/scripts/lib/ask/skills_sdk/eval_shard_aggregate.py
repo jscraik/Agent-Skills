@@ -27,6 +27,8 @@ def _repo_path(repo_root: Path, raw_path: Path) -> tuple[Path | None, str]:
 
 def _load_receipt(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("receipt payload must be a JSON object")
     if payload.get("schema_version") == "skills-sdk.eval-run-receipt.v0":
         return payload
     data = payload.get("data")
@@ -37,48 +39,25 @@ def _load_receipt(path: Path) -> dict[str, Any]:
 
 def _expected_cases(skill_path: Path, scenario_set: str) -> list[str]:
     skill_dir = skill_path.parent if skill_path.name == "SKILL.md" else skill_path
-    lines = (skill_dir / "references" / "evals.yaml").read_text(encoding="utf-8").splitlines()
-    state: dict[str, Any] = {"in_sets": False, "selected": False, "case_indent": None, "case_ids": []}
-    for line in lines:
-        if _consume_release_set_line(state, line, scenario_set):
-            break
-    return list(state["case_ids"])
+    from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
 
-
-def _consume_release_set_line(state: dict[str, Any], line: str, scenario_set: str) -> bool:
-    stripped = line.strip()
-    indent = len(line) - len(line.lstrip(" "))
-    if stripped == "release_scenario_sets:":
-        state["in_sets"] = True
-        return False
-    if state["in_sets"] and indent == 0 and stripped == "cases:":
-        return True
-    if not state["in_sets"]:
-        return False
-    _update_release_set_state(state, stripped, indent, scenario_set)
-    return False
-
-
-def _update_release_set_state(state: dict[str, Any], stripped: str, indent: int, scenario_set: str) -> None:
-    if indent == 2 and stripped.startswith("- id:"):
-        state["selected"] = stripped.split(":", 1)[1].strip().strip("'\"") == scenario_set
-        state["case_indent"] = None
-        return
-    if not state["selected"]:
-        return
-    if indent == 4 and stripped in {"groups:", "cases:"}:
-        state["case_indent"] = 8 if stripped == "groups:" else 6
-        return
-    if indent == 4 and stripped.endswith(":"):
-        state["case_indent"] = None
-        return
-    if _is_release_case_item(state, stripped, indent):
-        state["case_ids"].append(stripped[2:].strip().strip("'\""))
-
-
-def _is_release_case_item(state: dict[str, Any], stripped: str, indent: int) -> bool:
-    case_indent = state["case_indent"]
-    return isinstance(case_indent, int) and indent >= case_indent and stripped.startswith("- ")
+    payload = _yaml_safe_load((skill_dir / "references" / "evals.yaml").read_text(encoding="utf-8"))
+    release_sets = payload.get("release_scenario_sets") if isinstance(payload, dict) else None
+    if not isinstance(release_sets, list):
+        raise ValueError("release_scenario_sets must be a list")
+    selected = next(
+        (item for item in release_sets if isinstance(item, dict) and item.get("id") == scenario_set),
+        None,
+    )
+    if not isinstance(selected, dict):
+        raise ValueError(f"release scenario set not found: {scenario_set}")
+    groups = selected.get("groups")
+    if isinstance(groups, dict):
+        return [str(case_id) for group in groups.values() if isinstance(group, list) for case_id in group]
+    cases = selected.get("cases")
+    if isinstance(cases, list):
+        return [str(case_id) for case_id in cases]
+    raise ValueError(f"release scenario set has no cases: {scenario_set}")
 
 
 def _check(check_id: str, passed: bool, evidence: list[str]) -> dict[str, Any]:
@@ -95,7 +74,7 @@ def _load_receipts(repo_root: Path, paths: list[Path]) -> tuple[list[tuple[str, 
             continue
         try:
             loaded.append((label, _load_receipt(resolved)))
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
             errors.append(f"invalid_json:{label}:{exc}")
     return loaded, errors
 
@@ -136,6 +115,11 @@ def _all_shards_are_bounded(receipts: list[dict[str, Any]]) -> bool:
 
 def _identities_match(receipts: list[dict[str, Any]], identities: dict[str, set[str]]) -> bool:
     return bool(receipts) and all(len(values) == 1 and "" not in values for values in identities.values())
+
+
+def _dataset_digest_check(receipts: list[dict[str, Any]]) -> dict[str, Any]:
+    digests = [str(receipt.get("dataset_digest") or "").strip() for receipt in receipts]
+    return _check("dataset_digests_present", bool(receipts) and all(digests), digests)
 
 
 def _shard_checks(
@@ -217,6 +201,8 @@ def build_eval_shard_aggregate_receipt(
     identities = _identity_sets(receipts)
     dataset_digests = sorted({str(receipt.get("dataset_digest") or "") for receipt in receipts})
     checks = _shard_checks(receipts, identities, path_errors, [label for label, _ in loaded], profile)
+    checks.append(_dataset_digest_check(receipts))
+    dataset_digests = [digest for digest in dataset_digests if digest]
     if expected_package_digest is not None:
         checks.append(
             _check(

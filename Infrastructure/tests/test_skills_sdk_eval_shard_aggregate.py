@@ -31,6 +31,8 @@ release_scenario_sets:
   - id: sample-release-8-v1
     default: true
     minimum_scenarios: 5
+    target_scenarios: 8
+    maximum_scenarios: 10
     groups:
       release:
 {selected}
@@ -93,6 +95,45 @@ def _execution_identity(profile: str) -> dict[str, str]:
 
 
 class TestEvalShardAggregate(unittest.TestCase):
+    def test_non_object_receipt_is_reported_as_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill = _write_skill(root)
+            path = root / "receipt.json"
+            path.write_text("[]", encoding="utf-8")
+
+            with self.assertRaises(EvalShardAggregateError) as raised:
+                build_eval_shard_aggregate_receipt(
+                    root,
+                    skill_path=skill,
+                    scenario_set="sample-release-8-v1",
+                    receipt_paths=[path.relative_to(root)],
+                )
+
+        evidence = [item for check in raised.exception.receipt["checks"] for item in check["evidence"]]
+        self.assertTrue(any("receipt payload must be a JSON object" in item for item in evidence))
+
+    def test_missing_dataset_digest_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill = _write_skill(root)
+            paths = _write_shards(root)
+            first = root / paths[0]
+            payload = json.loads(first.read_text(encoding="utf-8"))
+            payload["dataset_digest"] = ""
+            first.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaises(EvalShardAggregateError) as raised:
+                build_eval_shard_aggregate_receipt(
+                    root,
+                    skill_path=skill,
+                    scenario_set="sample-release-8-v1",
+                    receipt_paths=paths,
+                )
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("dataset_digests_present", blocker_ids)
+
     def test_exact_four_shard_coverage_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

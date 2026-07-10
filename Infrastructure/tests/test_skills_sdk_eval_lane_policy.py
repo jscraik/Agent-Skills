@@ -86,6 +86,15 @@ class EvalLanePolicyTests(unittest.TestCase):
         blocker = next(row for row in checks if row["id"] == "eval_lane_model_families_distinct")
         self.assertEqual(blocker["status"], "blocker")
 
+    def test_model_family_comparison_is_case_insensitive(self) -> None:
+        payload = _payload()
+        payload["evaluation_lane_policy"]["model_routing"]["oss-cloud"]["model_family"] = "QWEN"
+
+        checks = build_eval_lane_policy_checks(payload, _cases())
+
+        blocker = next(row for row in checks if row["id"] == "eval_lane_model_families_distinct")
+        self.assertEqual(blocker["status"], "blocker")
+
 
 if __name__ == "__main__":
     unittest.main()

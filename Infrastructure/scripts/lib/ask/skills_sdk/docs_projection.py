@@ -87,6 +87,8 @@ def _summary_count_blockers(
     summary_counts: list[dict[str, Any]],
     expected_status_counts: dict[str, int],
 ) -> list[dict[str, Any]]:
+    if not summary_counts:
+        return [{"code": "missing_summary_counts", "expected_statuses": sorted(expected_status_counts)}]
     blockers: list[dict[str, Any]] = []
     for summary in summary_counts:
         statuses = summary["statuses"]
@@ -108,7 +110,7 @@ def _summary_count_blockers(
 
 
 def _pipeline_step_blockers(pipeline_steps: list[str]) -> list[dict[str, Any]]:
-    if not pipeline_steps or tuple(pipeline_steps) == CANONICAL_ATLAS_PIPELINE_STEPS:
+    if tuple(pipeline_steps) == CANONICAL_ATLAS_PIPELINE_STEPS:
         return []
     return [
         {
@@ -117,6 +119,21 @@ def _pipeline_step_blockers(pipeline_steps: list[str]) -> list[dict[str, Any]]:
             "actual": pipeline_steps,
         }
     ]
+
+
+def _metadata_blockers(
+    html_path: Path,
+    summary_counts: list[dict[str, Any]],
+    pipeline_steps: list[str],
+    expected_status_counts: dict[str, int],
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    enforces_atlas_metadata = html_path.name == "skills-sdk-platform-atlas.html"
+    if enforces_atlas_metadata or summary_counts:
+        blockers.extend(_summary_count_blockers(summary_counts, expected_status_counts))
+    if enforces_atlas_metadata or pipeline_steps:
+        blockers.extend(_pipeline_step_blockers(pipeline_steps))
+    return blockers
 
 
 def _duplicate_ids(rows: list[dict[str, Any]]) -> list[str]:
@@ -198,8 +215,7 @@ def verify_capability_docs_projection(
         status: sum(1 for row in capabilities if row["status"] == status)
         for status in {row["status"] for row in capabilities}
     }
-    blockers.extend(_summary_count_blockers(summary_counts, expected_status_counts))
-    blockers.extend(_pipeline_step_blockers(pipeline_steps))
+    blockers.extend(_metadata_blockers(html_path, summary_counts, pipeline_steps, expected_status_counts))
     status = "pass" if not blockers else "blocked"
     return {
         "schema_version": "skills-sdk.docs-projection-verify.v0",

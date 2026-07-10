@@ -325,6 +325,8 @@ def _release_set_8_evals_yaml() -> str:
         "- id: sample-release-8-v1",
         "  default: true",
         "  minimum_scenarios: 5",
+        "  target_scenarios: 8",
+        "  maximum_scenarios: 10",
         "  groups:",
         "    foundation_smoke:",
         *[f"    - {case_id}" for case_id in foundation],
@@ -2026,6 +2028,16 @@ cases:
         self.assertEqual(receipt["scenario_count"], 8)
         validate_scenario_quality_receipt(receipt)
 
+    def test_release_scenario_set_requires_exact_integer_budget_contract(self) -> None:
+        payload = _release_set_8_evals_yaml().replace("  target_scenarios: 8", "  target_scenarios: '8'", 1)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_scenario_budget"]["status"], "blocker")
+
     def test_release_scenario_set_accepts_flat_case_lists(self) -> None:
         payload = _release_set_8_evals_yaml()
         flat_cases = "\n".join(
@@ -2034,6 +2046,8 @@ cases:
                 "- id: sample-release-8-v1",
                 "  default: true",
                 "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  cases:",
                 *[f"  - foundation-{index}" for index in range(1, 3)],
                 *[f"  - behavioral-{index}" for index in range(1, 7)],
@@ -2062,6 +2076,8 @@ cases:
                 "- id: sample-release-11-v1",
                 "  default: true",
                 "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  cases:",
                 *[f"  - foundation-{index}" for index in range(1, 3)],
                 *[f"  - behavioral-{index}" for index in range(1, 10)],
@@ -2090,6 +2106,8 @@ cases:
                 "- id: sample-release-8-v1",
                 "  default: false",
                 "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  groups:",
                 "    foundation_smoke:",
                 "    - foundation-1",

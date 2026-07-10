@@ -162,18 +162,16 @@ def _check_rationale(result: str) -> str:
 
 
 def _build_checks(rows: list[dict[str, str]]) -> list[dict[str, Any]]:
-    checks: list[dict[str, Any]] = []
-    for row in rows:
-        checks.append(
-            {
-                "name": row["name"],
-                "mode": row["mode"],
-                "result": row["result"],
-                "rationale": _check_rationale(row["result"]),
-                "log_file": row["log_file"],
-            }
-        )
-    return checks
+    return [
+        {
+            "name": row["name"],
+            "mode": row["mode"],
+            "result": row["result"],
+            "rationale": _check_rationale(row["result"]),
+            "log_file": row["log_file"],
+        }
+        for row in rows
+    ]
 
 
 def _build_payload(run_id: str, checks: list[dict[str, Any]]) -> dict[str, Any]:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -134,9 +135,12 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
         with tempfile.TemporaryDirectory() as tmpdir:
             drifted = Path(tmpdir) / "drifted-summary.html"
+            source_text = source.read_text(encoding="utf-8")
+            expected = 'data-capability-summary-statuses="preview_only" data-count="18"'
+            self.assertIn(expected, source_text, "Atlas summary fixture assumption is stale.")
             drifted.write_text(
-                source.read_text(encoding="utf-8").replace(
-                    'data-capability-summary-statuses="preview_only" data-count="18"',
+                source_text.replace(
+                    expected,
                     'data-capability-summary-statuses="preview_only" data-count="17"',
                     1,
                 ),
@@ -156,9 +160,12 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
         with tempfile.TemporaryDirectory() as tmpdir:
             drifted = Path(tmpdir) / "drifted-pipeline.html"
+            source_text = source.read_text(encoding="utf-8")
+            expected = 'data-pipeline-step="proof_oss_local"'
+            self.assertIn(expected, source_text, "Atlas pipeline fixture assumption is stale.")
             drifted.write_text(
-                source.read_text(encoding="utf-8").replace(
-                    'data-pipeline-step="proof_oss_local"',
+                source_text.replace(
+                    expected,
                     'data-pipeline-step="proof_oss_cloud"',
                     1,
                 ),
@@ -173,6 +180,21 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         )
         self.assertEqual(order_blocker["expected"], list(CANONICAL_ATLAS_PIPELINE_STEPS))
         self.assertNotEqual(order_blocker["actual"], order_blocker["expected"])
+
+    def test_atlas_verifier_blocks_missing_projection_metadata(self) -> None:
+        source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            drifted = Path(tmpdir) / "skills-sdk-platform-atlas.html"
+            source_text = source.read_text(encoding="utf-8")
+            source_text = re.sub(r'\sdata-pipeline-step="[^"]+"', "", source_text)
+            source_text = re.sub(r'\sdata-capability-summary-statuses="[^"]+"', "", source_text)
+            drifted.write_text(source_text, encoding="utf-8")
+
+            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
+
+        blocker_codes = {blocker["code"] for blocker in payload["blockers"]}
+        self.assertIn("missing_summary_counts", blocker_codes)
+        self.assertIn("pipeline_step_order_mismatch", blocker_codes)
 
     def test_verifier_returns_blocked_receipt_for_parse_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

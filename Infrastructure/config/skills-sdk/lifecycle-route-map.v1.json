@@ -1,6 +1,7 @@
 {
   "schema_version": "skills-sdk.lifecycle-route-map.v1",
   "status": "truth_surface",
+  "coverage": "executable_routes_only; canonical pipeline order is enforced by the Atlas projection validator",
   "routes": [
     {
       "id": "foundry_status",

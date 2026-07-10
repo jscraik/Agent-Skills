@@ -7823,7 +7823,7 @@ def _skills_sdk_eval_execution_identity(evals_path: Path, lane: str | None) -> d
         from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
 
         payload = _yaml_safe_load(evals_path.read_text(encoding="utf-8")) or {}
-    except Exception:
+    except (OSError, RuntimeError, TypeError, ValueError):
         return None
     return eval_lane_execution_identity(payload, lane)
 
@@ -7876,7 +7876,11 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
                 if case_id and case_id not in case_ids:
                     case_ids.append(case_id)
         minimum = raw_set.get("minimum_scenarios")
-        minimum_value = minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else RELEASE_SCENARIO_MINIMUM
+        minimum_value = (
+            max(RELEASE_SCENARIO_MINIMUM, minimum)
+            if isinstance(minimum, int) and not isinstance(minimum, bool)
+            else RELEASE_SCENARIO_MINIMUM
+        )
         sets.append(
             {
                 "id": set_id,
@@ -8367,19 +8371,24 @@ def skills_sdk_eval_run(
         )
         profile_proof = _skills_sdk_eval_codex_profile_proof(internal, codex_profile=codex_profile)
         identity_source_path = _skills_sdk_eval_source_path(repo_root, target)
+        eval_lane = _skills_sdk_eval_receipt_lane(mode, codex_profile)
         execution_identity = _skills_sdk_eval_execution_identity(
             identity_source_path.parent / "references" / "evals.yaml"
             if identity_source_path is not None
             else Path(""),
-            _skills_sdk_eval_receipt_lane(mode, codex_profile),
+            eval_lane,
         )
         profile_blockers: list[str] = []
         if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
             profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
+        identity_blockers: list[str] = []
+        if eval_lane in {"oss-local", "oss-cloud"} and execution_identity is None:
+            identity_blockers.append(f"blocked_missing_artifact:execution_identity_missing:{eval_lane}")
+        proof_blockers = [*profile_blockers, *identity_blockers]
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": "blocked" if profile_blockers and receipt_counts["status"] == "pass" else receipt_counts["status"],
+            "status": "blocked" if proof_blockers and receipt_counts["status"] == "pass" else receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
             "dataset_path": receipt_counts["dataset_path"],
             "dataset_digest": receipt_counts["dataset_digest"],
@@ -8389,7 +8398,7 @@ def skills_sdk_eval_run(
             "rubric_digest": _skills_sdk_digest_file(repo_root / "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json"),
             "target_path": target_path,
             "mode": mode,
-            "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
+            "lane": eval_lane,
             "lane_type": release_set_metadata["lane_type"] if release_set_metadata else mode,
             "profile": codex_profile,
             "codex_profile": profile_proof["codex_profile"],
@@ -8402,11 +8411,11 @@ def skills_sdk_eval_run(
             "release_set_minimum": release_set_metadata["release_set_minimum"] if release_set_metadata else None,
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
-            "failed_count": max(1, receipt_counts["failed_count"]) if profile_blockers else receipt_counts["failed_count"],
+            "failed_count": max(1, receipt_counts["failed_count"]) if proof_blockers else receipt_counts["failed_count"],
             "quality_gates": receipt_counts["quality_gates"],
             "closeout_validation": receipt_counts.get("closeout_validation"),
             "cases": receipt_counts["cases"],
-            "blockers": sorted(set([*receipt_counts["blockers"], *profile_blockers])),
+            "blockers": sorted(set([*receipt_counts["blockers"], *proof_blockers])),
             "mutation_performed": False,
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }

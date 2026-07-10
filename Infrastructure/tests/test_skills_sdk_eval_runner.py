@@ -189,7 +189,13 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["failed_count"], 1)
 
     def test_sdk_internal_runner_delegates_to_existing_eval_backend(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run:
+        with (
+            mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run,
+            mock.patch(
+                "ask.commands.skills_impl._skills_sdk_eval_execution_identity",
+                return_value={"model": "minimax", "model_family": "minimax", "provider": "cloud", "identity_source": "codex-profile-config"},
+            ),
+        ):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -239,7 +245,13 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("blocked_missing_artifact:no_scorecard_or_closeout", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_codex_profile_override(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run:
+        with (
+            mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run,
+            mock.patch(
+                "ask.commands.skills_impl._skills_sdk_eval_execution_identity",
+                return_value={"model": "minimax", "model_family": "minimax", "provider": "cloud", "identity_source": "codex-profile-config"},
+            ),
+        ):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -300,7 +312,13 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIn("blocked_missing_artifact:codex_profile_exec_receipt_missing:oss-local", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_timeout_override(self) -> None:
-        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
+        with (
+            mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run,
+            mock.patch(
+                "ask.commands.skills_impl._skills_sdk_eval_execution_identity",
+                return_value={"model": "qwen", "model_family": "qwen", "provider": "local", "identity_source": "codex-profile-config"},
+            ),
+        ):
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -382,6 +400,8 @@ release_scenario_sets:
   - id: flat-release-8-v1
     default: true
     minimum_scenarios: 5
+    target_scenarios: 8
+    maximum_scenarios: 10
     cases:
 {flat_cases}
 cases:

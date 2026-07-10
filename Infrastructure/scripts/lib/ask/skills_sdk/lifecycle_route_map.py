@@ -35,11 +35,12 @@ REQUIRED_STAGES = {
     "Tessl Distribution",
     "Local Runtime Truth",
 }
-ALLOWED_STAGES = REQUIRED_STAGES | {
+OPTIONAL_ROUTE_STAGES = {
     "SDK Middle Lifecycle",
     "Evals/Proof (oss-cloud)",
     "SDK Pre-release Lifecycle",
 }
+ALLOWED_STAGES = REQUIRED_STAGES | OPTIONAL_ROUTE_STAGES
 
 
 def build_lifecycle_route_map_receipt(repo_root: Path) -> dict[str, Any]:

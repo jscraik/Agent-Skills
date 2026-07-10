@@ -227,13 +227,7 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
 
 
 def _dispatch_shard_aggregate(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    error = _preview_required(
-        "sdk eval aggregate-shards",
-        "Shard aggregation requires --preview.",
-        "ask sdk eval aggregate-shards <skill> --scenario-set <set> --receipt <receipt.json> --preview --json --robot",
-        args,
-    )
-    return error or skills_commands.skills_sdk_eval_shard_aggregate(
+    return skills_commands.skills_sdk_eval_shard_aggregate(
         repo_root,
         target=args.target,
         scenario_set=args.scenario_set,
