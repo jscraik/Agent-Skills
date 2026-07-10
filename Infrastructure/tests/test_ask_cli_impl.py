@@ -2425,6 +2425,102 @@ class TestAskCLI(unittest.TestCase):
         self.assertFalse(source["manifest_declared"])
         self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
 
+    def test_skills_doctor_exposes_valid_manifest_state(self):
+        """Verify doctor projection_ownership surfaces a valid owner-manifest state."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_source = repo_root / ".agents" / "skills" / "local-demo" / "SKILL.md"
+            skill_source.parent.mkdir(parents=True)
+            skill_source.write_text(
+                "---\nname: local-demo\ndescription: Local owner skill\nversion: 0.1.0\n---\n# Local Demo\n",
+                encoding="utf-8",
+            )
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {
+                                "path": ".agents/skills",
+                                "classification": "canonical_project_source",
+                                "default_for_create": True,
+                                "default_for_install": True,
+                                "default_for_update": True,
+                            }
+                        ],
+                        "eval_suite": {"path": ".harness/evals/skills"},
+                        "evidence": {"output_path": ".harness/session-evidence/skills"},
+                        "trust_policy": "local_owner",
+                        "precedence_policy": "project_over_user_after_trust",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(
+                skills_commands, "audit_skill", return_value=CallResult()
+            ), mock.patch.object(
+                skills_commands, "_skill_workout_candidates", return_value=["local-demo proof"]
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/local-demo")
+
+        doctor = result.data["skill_doctor"]
+        manifest_state = doctor["checks"]["projection_ownership"]["owner_manifest_state"]
+        self.assertEqual(manifest_state["state"], "valid")
+        self.assertFalse(manifest_state["legacy_compat"])
+        self.assertEqual(manifest_state["blockers"], [])
+
+    def test_skills_doctor_blocks_invalid_manifest_and_exposes_state(self):
+        """Verify an invalid owner manifest is blocked, not silently treated as absent."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_source = repo_root / ".agents" / "skills" / "local-demo" / "SKILL.md"
+            skill_source.parent.mkdir(parents=True)
+            skill_source.write_text(
+                "---\nname: local-demo\ndescription: Local owner skill\nversion: 0.1.0\n---\n# Local Demo\n",
+                encoding="utf-8",
+            )
+            # Wrong schema version is a deterministic manifest blocker.
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v2",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {
+                                "path": ".agents/skills",
+                                "classification": "canonical_project_source",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(
+                skills_commands, "audit_skill", return_value=CallResult()
+            ), mock.patch.object(
+                skills_commands, "_skill_workout_candidates", return_value=["local-demo proof"]
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/local-demo")
+
+        doctor = result.data["skill_doctor"]
+        manifest_state = doctor["checks"]["projection_ownership"]["owner_manifest_state"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(manifest_state["state"], "invalid")
+        self.assertIn(
+            "manifest_schema_version_unsupported",
+            [blocker["class"] for blocker in manifest_state["blockers"]],
+        )
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
+
     def test_skills_doctor_human_output_exposes_lifecycle_event(self):
         """Verify ask skills doctor exposes the primary lifecycle event in human output."""
         cmd = [
