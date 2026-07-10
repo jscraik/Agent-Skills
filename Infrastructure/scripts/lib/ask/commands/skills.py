@@ -165,6 +165,10 @@ def skills_sdk_eval_run(*args, **kwargs):
     return _call_impl("skills_sdk_eval_run", *args, **kwargs)
 
 
+def skills_sdk_eval_shard_aggregate(*args, **kwargs):
+    return _call_impl("skills_sdk_eval_shard_aggregate", *args, **kwargs)
+
+
 def _impl_facade(command_name):
     def facade(*args, **kwargs):
         return _call_impl(command_name, *args, **kwargs)
@@ -247,6 +251,7 @@ _FACADE_WRAPPERS.update(
         "skills_sdk_observability_phoenix_smoke": skills_sdk_observability_phoenix_smoke,
         "skills_sdk_observability_phoenix_mirror": skills_sdk_observability_phoenix_mirror,
         "skills_sdk_eval_run": skills_sdk_eval_run,
+        "skills_sdk_eval_shard_aggregate": skills_sdk_eval_shard_aggregate,
         "skills_sdk_eval_profiles_preview": skills_sdk_eval_profiles_preview,
         "skills_sdk_eval_ab_rubric_preview": skills_sdk_eval_ab_rubric_preview,
         "skills_sdk_eval_ab_preview": skills_sdk_eval_ab_preview,
@@ -310,6 +315,7 @@ skills_sdk_observability_phoenix_status = _impl.skills_sdk_observability_phoenix
 skills_sdk_observability_phoenix_smoke = _impl.skills_sdk_observability_phoenix_smoke
 skills_sdk_observability_phoenix_mirror = _impl.skills_sdk_observability_phoenix_mirror
 skills_sdk_eval_run = _impl.skills_sdk_eval_run
+skills_sdk_eval_shard_aggregate = _impl.skills_sdk_eval_shard_aggregate
 skills_sdk_eval_profiles_preview = _impl.skills_sdk_eval_profiles_preview
 skills_sdk_eval_ab_rubric_preview = _impl.skills_sdk_eval_ab_rubric_preview
 skills_sdk_eval_ab_preview = _impl.skills_sdk_eval_ab_preview
@@ -379,6 +385,7 @@ __all__ = [
     "skills_sdk_observability_phoenix_smoke",
     "skills_sdk_observability_phoenix_mirror",
     "skills_sdk_eval_run",
+    "skills_sdk_eval_shard_aggregate",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",
     "skills_sdk_eval_ab_preview",

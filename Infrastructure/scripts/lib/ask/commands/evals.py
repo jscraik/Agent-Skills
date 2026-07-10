@@ -23,6 +23,11 @@ from ask.skills_sdk.tessl_eval_quality import (
 )
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
 from ask.skills_sdk.handoff_readiness import default_handoff_readiness_path
+from ask.skills_sdk.release_scenario_sets import (
+    RELEASE_SCENARIO_MAXIMUM,
+    RELEASE_SCENARIO_MINIMUM,
+    RELEASE_SCENARIO_TARGET,
+)
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -38,8 +43,9 @@ TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
 TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
 TESSL_DEFAULT_WORKSPACE = "jscraik"
 TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
-TESSL_LIVE_PRIVATE_MIN_SCENARIOS = 20
-TESSL_LIVE_PRIVATE_MAX_SCENARIOS = 20
+TESSL_LIVE_PRIVATE_MIN_SCENARIOS = RELEASE_SCENARIO_MINIMUM
+TESSL_LIVE_PRIVATE_TARGET_SCENARIOS = RELEASE_SCENARIO_TARGET
+TESSL_LIVE_PRIVATE_MAX_SCENARIOS = RELEASE_SCENARIO_MAXIMUM
 TESSL_LIVE_PRIVATE_VARIANT_COUNT = 2
 TESSL_LIVE_PRIVATE_MODEL_TASKS_PER_VARIANT = 2
 TESSL_WORKSPACE_RUN_LIMIT = 300
@@ -833,13 +839,14 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "evals/<case-id>/criteria.json",
         ],
         "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
-        "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
+        "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need 5 to 10 gold-standard scenarios with 8 as the target; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+        "target_scenarios": TESSL_LIVE_PRIVATE_TARGET_SCENARIOS,
         "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
         "scenario_count_policy": (
-            "oss-local uses a 12-case 9+3 repair canary; oss-cloud expands to "
-            "the 20-case 15+5 Tessl rehearsal set; Tessl live is capped to the "
-            "same 20-case 15+5 confirmation set by default."
+            "Declare one 5-to-10-case release set, targeting 8 distinct high-value scenarios. "
+            "oss-local authors and proves it first; oss-cloud must prove the same case ids; "
+            "Tessl dry-run and external evaluation must preserve that exact set."
         ),
         "oss_cloud_alignment_policy": (
             "oss-cloud is the Tessl rehearsal lane and must prove the same case "
@@ -2330,6 +2337,8 @@ def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path
         )
     cases = _select_default_tessl_live_cases(base_cases, cases, scenario_manifest)
     scenario_manifest["min_scenarios_required"] = TESSL_LIVE_PRIVATE_MIN_SCENARIOS
+    scenario_manifest["target_scenarios"] = TESSL_LIVE_PRIVATE_TARGET_SCENARIOS
+    scenario_manifest["max_scenarios_allowed"] = TESSL_LIVE_PRIVATE_MAX_SCENARIOS
     scenario_manifest["meets_min_scenarios"] = len(cases) >= TESSL_LIVE_PRIVATE_MIN_SCENARIOS
     scenario_manifest["run_limit_policy"] = {
         "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
@@ -3573,6 +3582,8 @@ def _tessl_live_oss_scenario_parity(
 def _tessl_live_budget_preflight(staged_source: Path) -> dict[str, object]:
     """Return the paid-live Tessl scenario/cost-shape gate for staged input."""
     staged_case_ids = _tessl_live_staged_case_ids(staged_source)
+    scenario_manifest = _load_json_file(staged_source / "scenario-sources.json")
+    structure_only = bool(scenario_manifest.get("structure_only_exception"))
     generated_case_ids = sorted(case_id for case_id in staged_case_ids if case_id.startswith("generated-eval."))
     scenario_count = len(staged_case_ids)
     expected_solution_runs = scenario_count * TESSL_LIVE_PRIVATE_VARIANT_COUNT
@@ -3582,6 +3593,10 @@ def _tessl_live_budget_preflight(staged_source: Path) -> dict[str, object]:
     if scenario_count > TESSL_LIVE_PRIVATE_MAX_SCENARIOS:
         blockers.append(
             f"scenario_count {scenario_count} exceeds the default {TESSL_LIVE_PRIVATE_MAX_SCENARIOS}-case Tessl live cost cap"
+        )
+    if not structure_only and scenario_count < TESSL_LIVE_PRIVATE_MIN_SCENARIOS:
+        blockers.append(
+            f"scenario_count {scenario_count} is below the {TESSL_LIVE_PRIVATE_MIN_SCENARIOS}-case Tessl live coverage floor"
         )
     if generated_case_ids:
         blockers.append("generated-eval.* scenarios require an explicit budgeted live lane before upload")
@@ -3593,7 +3608,9 @@ def _tessl_live_budget_preflight(staged_source: Path) -> dict[str, object]:
         "blockers": blockers,
         "scenario_count": scenario_count,
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+        "target_scenarios": TESSL_LIVE_PRIVATE_TARGET_SCENARIOS,
         "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+        "structure_only_exception": structure_only,
         "staged_case_ids": staged_case_ids,
         "generated_case_count": len(generated_case_ids),
         "generated_case_ids": generated_case_ids,
@@ -3603,9 +3620,9 @@ def _tessl_live_budget_preflight(staged_source: Path) -> dict[str, object]:
         "expected_score_runs": expected_score_runs,
         "expected_model_tasks": expected_model_tasks,
         "rule": (
-            "Tessl live is capped to the 20-case OSS-proven confirmation set by default; "
-            "use smaller internal canaries before live and require an explicit budgeted "
-            "lane for larger or generated scenario uploads."
+            "Tessl live accepts the same 5-to-10-case set proven by oss-local and oss-cloud, "
+            "targets 8 high-value scenarios, and requires an explicit policy change for "
+            "larger or generated scenario uploads."
         ),
     }
 

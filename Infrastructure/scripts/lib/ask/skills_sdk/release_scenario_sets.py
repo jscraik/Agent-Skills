@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import Any
 
 
+RELEASE_SCENARIO_MINIMUM = 5
+RELEASE_SCENARIO_TARGET = 8
+RELEASE_SCENARIO_MAXIMUM = 10
+
+
 def build_release_scenario_set_checks(evals_payload: dict[str, Any] | None, case_list: list[Any]) -> list[dict[str, Any]]:
     if not isinstance(evals_payload, dict):
         return []
@@ -144,22 +149,32 @@ def _release_scenario_set_case_checks(
     case_by_id: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     minimum = item.get("minimum_scenarios")
-    minimum_value = max(20, minimum) if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
+    minimum_value = minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else RELEASE_SCENARIO_MINIMUM
     return [
-        _release_scenario_set_minimum_check(set_id, case_ids, minimum_value),
+        _release_scenario_set_budget_check(set_id, case_ids, minimum_value),
         _release_scenario_set_missing_ids_check(set_id, case_ids, case_by_id),
         _release_scenario_set_release_mode_check(set_id, case_ids, case_by_id),
         _release_scenario_set_unique_ids_check(set_id, case_ids),
     ]
 
 
-def _release_scenario_set_minimum_check(set_id: str, case_ids: list[str], minimum_value: int) -> dict[str, Any]:
-    blocked = len(case_ids) < minimum_value or minimum_value < 20
+def _release_scenario_set_budget_check(set_id: str, case_ids: list[str], minimum_value: int) -> dict[str, Any]:
+    count = len(case_ids)
+    blocked = (
+        minimum_value < RELEASE_SCENARIO_MINIMUM
+        or minimum_value > RELEASE_SCENARIO_MAXIMUM
+        or count < minimum_value
+        or count < RELEASE_SCENARIO_MINIMUM
+        or count > RELEASE_SCENARIO_MAXIMUM
+    )
     return _check(
-        "release_scenario_set_minimum_count",
+        "release_scenario_set_scenario_budget",
         "blocker" if blocked else "pass",
-        "Default release scenario sets must contain at least the declared minimum and never fewer than 20 cases.",
-        [f"{set_id}:count:{len(case_ids)}:minimum:{minimum_value}"] if blocked else [],
+        (
+            "Release scenario sets must contain 5 to 10 distinct cases; 8 is the target. "
+            "The declared minimum must also remain inside that range."
+        ),
+        [f"{set_id}:count:{count}:minimum:{minimum_value}:target:{RELEASE_SCENARIO_TARGET}:maximum:{RELEASE_SCENARIO_MAXIMUM}"] if blocked else [],
     )
 
 

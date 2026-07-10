@@ -113,6 +113,10 @@ from ask.skills_sdk.package_build import build_package_digest_receipt as _build_
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.release_scenario_sets import (  # noqa: E402
+    RELEASE_SCENARIO_MAXIMUM,
+    RELEASE_SCENARIO_MINIMUM,
+)
 from ask.skills_sdk.eval_ab_rubric import build_ab_rubric_preview_receipt as _build_ab_rubric_preview_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt as _build_ab_preview_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt as _build_ab_plan_receipt  # noqa: E402
@@ -301,6 +305,7 @@ __all__ = [
     "skills_sdk_security_run_lane_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
+    "skills_sdk_eval_shard_aggregate",
     "skills_sdk_eval_scorer_quality",
     "skills_sdk_eval_scorer_calibration",
     "skills_sdk_eval_tessl_score",
@@ -5811,6 +5816,68 @@ def skills_sdk_eval_scenario_quality(
     return result
 
 
+def skills_sdk_eval_shard_aggregate(
+    repo_root: Path,
+    *,
+    target: str,
+    scenario_set: str,
+    receipts: list[str],
+    codex_profile: str = "oss-local",
+) -> CallResult:
+    """Aggregate bounded OSS release shards without running another model lane."""
+    from ask.skills_sdk.eval_shard_aggregate import (  # noqa: PLC0415
+        EvalShardAggregateError,
+        build_eval_shard_aggregate_receipt,
+    )
+
+    result = CallResult()
+    result.metadata["command"] = "sdk eval aggregate-shards"
+    target_path = Path(target) if Path(target).is_absolute() else repo_root / target
+    try:
+        package_identity = _skills_sdk_eval_package_identity(repo_root, target)
+        if package_identity is None:
+            raise ValueError(f"unable to compute current package identity for {target}")
+        receipt = build_eval_shard_aggregate_receipt(
+            repo_root,
+            skill_path=target_path,
+            scenario_set=scenario_set,
+            receipt_paths=[Path(path) for path in receipts],
+            profile=codex_profile,
+            expected_package_digest=package_identity["package_digest"],
+        )
+    except (EvalShardAggregateError, OSError, ValueError) as exc:
+        if isinstance(exc, EvalShardAggregateError):
+            receipt = exc.receipt
+        else:
+            receipt = {
+                "schema_version": "skills-sdk.eval-shard-aggregate-receipt.v0",
+                "status": "blocked",
+                "blockers": [{"id": "aggregate_input_invalid", "status": "blocker", "evidence": [str(exc)]}],
+                "agent_summary": f"{codex_profile} shard aggregation input is invalid: {exc}",
+            }
+    payload = {
+        "schema_version": "skills-sdk-eval-shard-aggregate.v0",
+        "status": receipt["status"],
+        "target": target,
+        "scenario_set": scenario_set,
+        "codex_profile": codex_profile,
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk", "eval", "aggregate-shards", target, "--scenario-set", scenario_set, "--codex-profile", codex_profile,
+                *[part for path in receipts for part in ("--receipt", path)], "--preview",
+            )
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_shard_aggregate"] = payload
+    if receipt["status"] != "pass":
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=receipt["agent_summary"]))
+    return result
+
+
 def skills_sdk_eval_scorer_quality(repo_root: Path, target: str) -> CallResult:
     """Preview scorer calibration quality without promoting or mutating eval sources."""
     result = CallResult()
@@ -7748,6 +7815,28 @@ def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
     return mode
 
 
+def _skills_sdk_eval_execution_identity(evals_path: Path, lane: str | None) -> dict[str, str] | None:
+    if not evals_path.is_file():
+        return None
+    try:
+        from ask.skills_sdk.eval_lane_policy import eval_lane_execution_identity  # noqa: PLC0415
+        from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
+
+        payload = _yaml_safe_load(evals_path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return None
+    return eval_lane_execution_identity(payload, lane)
+
+
+def _skills_sdk_eval_identity_fields(identity: dict[str, str] | None) -> dict[str, str | None]:
+    return {
+        "execution_model": identity.get("model") if identity else None,
+        "execution_model_family": identity.get("model_family") if identity else None,
+        "execution_model_provider": identity.get("provider") if identity else None,
+        "execution_identity_source": identity.get("identity_source") if identity else None,
+    }
+
+
 def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
     if not evals_path.is_file():
         return []
@@ -7787,7 +7876,7 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
                 if case_id and case_id not in case_ids:
                     case_ids.append(case_id)
         minimum = raw_set.get("minimum_scenarios")
-        minimum_value = max(20, minimum) if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
+        minimum_value = minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else RELEASE_SCENARIO_MINIMUM
         sets.append(
             {
                 "id": set_id,
@@ -7919,6 +8008,9 @@ def _skills_sdk_release_set_blocked_result(
 ) -> CallResult:
     result = CallResult(status="error")
     release_case_ids = list(release_set.get("case_ids") or []) if release_set else []
+    execution_identity = _skills_sdk_eval_execution_identity(
+        evals_path, _skills_sdk_eval_receipt_lane(mode, codex_profile)
+    )
     receipt = {
         "schema_version": "skills-sdk.eval-run-receipt.v0",
         "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
@@ -7937,10 +8029,11 @@ def _skills_sdk_release_set_blocked_result(
         "codex_profile": codex_profile,
         "codex_exec_invoked": False,
         "codex_exec_command_shape": None,
+        **_skills_sdk_eval_identity_fields(execution_identity),
         "scenario_set_id": release_set.get("id") if release_set else scenario_set,
         "scenario_set_case_ids": release_case_ids,
         "selected_case_ids": selected_case_ids,
-        "release_set_minimum": release_set.get("minimum_scenarios") if release_set else 20,
+        "release_set_minimum": release_set.get("minimum_scenarios") if release_set else RELEASE_SCENARIO_MINIMUM,
         "case_count": len(selected_case_ids),
         "passed_count": 0,
         "failed_count": 0,
@@ -8049,11 +8142,12 @@ def _skills_sdk_prepare_release_case_filters(
     if release_set is None:
         return cases, None, None
     release_case_ids = list(release_set["case_ids"])
-    minimum = int(release_set.get("minimum_scenarios") or 20)
+    minimum = int(release_set.get("minimum_scenarios") or RELEASE_SCENARIO_MINIMUM)
     release_metadata = {
         "scenario_set_id": release_set["id"],
         "scenario_set_case_ids": release_case_ids,
         "release_set_minimum": minimum,
+        "lane_type": "release",
     }
     if len(release_case_ids) < minimum:
         blocked = _skills_sdk_release_set_blocked_result(
@@ -8075,9 +8169,36 @@ def _skills_sdk_prepare_release_case_filters(
             ),
         )
         return cases, release_metadata, blocked
+    if len(release_case_ids) > RELEASE_SCENARIO_MAXIMUM:
+        blocked = _skills_sdk_release_set_blocked_result(
+            repo_root,
+            target=target,
+            target_path=target_path,
+            evals_path=evals_path,
+            package_identity=package_identity,
+            mode=mode,
+            codex_profile=codex_profile,
+            cases=cases,
+            scenario_set=scenario_set,
+            selected_case_ids=release_case_ids,
+            release_set=release_set,
+            blocker=(
+                f"release_scenario_set_over_maximum:{release_set['id']}:"
+                f"count:{len(release_case_ids)}:maximum:{RELEASE_SCENARIO_MAXIMUM}"
+            ),
+            message=(
+                "Skills SDK release eval run is blocked: the selected release scenario set "
+                f"exceeds the {RELEASE_SCENARIO_MAXIMUM}-scenario external-eval budget."
+            ),
+        )
+        return cases, release_metadata, blocked
     if not selected_case_ids:
         return release_case_ids, release_metadata, None
     if len(selected_case_ids) == len(release_case_ids) and set(selected_case_ids) == set(release_case_ids):
+        return selected_case_ids, release_metadata, None
+    selected_are_unique_members = len(selected_case_ids) == len(set(selected_case_ids)) and set(selected_case_ids) <= set(release_case_ids)
+    if codex_profile in {"oss-local", "oss-cloud"} and selected_are_unique_members and 0 < len(selected_case_ids) <= 2:
+        release_metadata["lane_type"] = "release-shard"
         return selected_case_ids, release_metadata, None
     blocked = _skills_sdk_release_set_blocked_result(
         repo_root,
@@ -8245,6 +8366,13 @@ def skills_sdk_eval_run(
             eval_commands=_eval_commands,
         )
         profile_proof = _skills_sdk_eval_codex_profile_proof(internal, codex_profile=codex_profile)
+        identity_source_path = _skills_sdk_eval_source_path(repo_root, target)
+        execution_identity = _skills_sdk_eval_execution_identity(
+            identity_source_path.parent / "references" / "evals.yaml"
+            if identity_source_path is not None
+            else Path(""),
+            _skills_sdk_eval_receipt_lane(mode, codex_profile),
+        )
         profile_blockers: list[str] = []
         if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
             profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
@@ -8258,14 +8386,16 @@ def skills_sdk_eval_run(
             "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
             "package_id": package_identity["package_id"] if package_identity else None,
             "package_digest": package_identity["package_digest"] if package_identity else None,
+            "rubric_digest": _skills_sdk_digest_file(repo_root / "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json"),
             "target_path": target_path,
             "mode": mode,
             "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
-            "lane_type": "release" if release_set_metadata else mode,
+            "lane_type": release_set_metadata["lane_type"] if release_set_metadata else mode,
             "profile": codex_profile,
             "codex_profile": profile_proof["codex_profile"],
             "codex_exec_invoked": profile_proof["codex_exec_invoked"],
             "codex_exec_command_shape": profile_proof["codex_exec_command_shape"],
+            **_skills_sdk_eval_identity_fields(execution_identity),
             "scenario_set_id": release_set_metadata["scenario_set_id"] if release_set_metadata else scenario_set,
             "scenario_set_case_ids": release_set_metadata["scenario_set_case_ids"] if release_set_metadata else None,
             "selected_case_ids": _flatten_case_filters(cases),

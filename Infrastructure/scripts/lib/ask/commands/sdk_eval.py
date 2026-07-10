@@ -23,6 +23,7 @@ def add_sdk_eval_parser(
     parser = sdk_subparsers.add_parser("eval", help="Run Skills SDK eval receipts", parents=[global_parser])
     subparsers = parser.add_subparsers(dest="eval_action", required=True)
     _add_run_parser(subparsers, global_parser)
+    _add_shard_aggregate_parser(subparsers, global_parser)
     _add_scenario_quality_parser(subparsers, global_parser)
     _add_scorer_quality_parser(subparsers, global_parser)
     _add_scorer_calibration_parser(subparsers, global_parser)
@@ -51,6 +52,15 @@ def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argpa
     run.add_argument("--codex-profile", help="Override the Codex config profile for the internal eval runner.")
     run.add_argument("--timeout-seconds", type=_positive_int, help="Override the internal eval runner timeout.")
     run.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
+
+
+def _add_shard_aggregate_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    aggregate = subparsers.add_parser("aggregate-shards", help="Aggregate bounded OSS release shard receipts", parents=[global_parser])
+    aggregate.add_argument("target", help="Repo-relative skill source path")
+    aggregate.add_argument("--scenario-set", required=True, help="Declared release scenario set id")
+    aggregate.add_argument("--receipt", action="append", required=True, dest="receipts", help="Repo-relative eval-run receipt or command envelope JSON")
+    aggregate.add_argument("--codex-profile", choices=["oss-local", "oss-cloud"], default="oss-local", help="Profile whose shard receipts must be aggregated")
+    aggregate.add_argument("--preview", action="store_true", help="Emit a non-mutating aggregate receipt")
 
 
 def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -179,6 +189,7 @@ def _positive_int(value: str) -> int:
 def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers: dict[str, Callable[[Path, argparse.Namespace], CallResult]] = {
         "run": _dispatch_run,
+        "aggregate-shards": _dispatch_shard_aggregate,
         "scenario-quality": _dispatch_scenario_quality,
         "scorer-quality": _dispatch_scorer_quality,
         "scorer-calibration": _dispatch_scorer_calibration,
@@ -212,6 +223,22 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
         cases=args.cases,
         scenario_set=args.scenario_set,
         timeout_seconds=args.timeout_seconds,
+    )
+
+
+def _dispatch_shard_aggregate(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required(
+        "sdk eval aggregate-shards",
+        "Shard aggregation requires --preview.",
+        "ask sdk eval aggregate-shards <skill> --scenario-set <set> --receipt <receipt.json> --preview --json --robot",
+        args,
+    )
+    return error or skills_commands.skills_sdk_eval_shard_aggregate(
+        repo_root,
+        target=args.target,
+        scenario_set=args.scenario_set,
+        receipts=args.receipts,
+        codex_profile=args.codex_profile,
     )
 
 

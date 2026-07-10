@@ -1884,6 +1884,24 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertTrue((isolated_home / "logs").is_dir())
         self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
+    def test_isolated_codex_home_uses_standalone_profile_without_cloud_base_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
+            (default_home / "oss-local.config.toml").write_text(
+                'model = "qwen3.5:9b-mlx"\nmodel_provider = "ollama"\n', encoding="utf-8"
+            )
+
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-local")
+
+        self.assertTrue((isolated_home / "oss-local.config.toml").is_file())
+        self.assertFalse((isolated_home / "config.toml").exists())
+
     def test_isolated_codex_config_drops_mcp_servers(self) -> None:
         source = textwrap.dedent(
             """

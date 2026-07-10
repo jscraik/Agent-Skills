@@ -64,6 +64,8 @@
       line-height: 1.45;
     }
     .mission strong { display: block; margin-bottom: 4px; color: var(--muted); text-transform: uppercase; font-size: 12px; letter-spacing: .06em; }
+    .mission-standard, .mission-rule { display: block; }
+    .mission-rule { margin-top: 7px; color: var(--muted); font-size: 12px; }
 
     .toolbar {
       position: sticky;
@@ -143,7 +145,7 @@
     .evidence-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     .next-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .boundary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .spine-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch; }
+    .spine-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch; }
     .loop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
     .card, .stat, .stage, .decision, .gap, .step, .thesis-card, .discipline, .evidence-lane, .next-item, .boundary-card, .spine-card, .loop-card {
@@ -174,9 +176,9 @@
     .boundary-card span, .spine-card span, .loop-card span { color: var(--muted); font-size: 12px; line-height: 1.36; }
     .spine-card { position: relative; min-height: 148px; border-top: 4px solid var(--source); }
     .spine-card::after { content: ""; position: absolute; top: 50%; right: -11px; width: 11px; border-top: 2px solid var(--line); }
-    .spine-card:last-child::after { display: none; }
-    .spine-card[data-stage="guardrails"] { border-top-color: var(--blocked); }
-    .spine-card[data-stage="proof"] { border-top-color: var(--pass); }
+    .spine-card:nth-child(5)::after, .spine-card:last-child::after { display: none; }
+    .spine-card[data-stage="guardrails-security"] { border-top-color: var(--blocked); }
+    .spine-card[data-stage="proof-local"], .spine-card[data-stage="proof-cloud"] { border-top-color: var(--pass); }
     .spine-card[data-stage="tessl"] { border-top-color: var(--emit); }
     .spine-card[data-stage="runtime"] { border-top-color: var(--runtime); }
     .loop-card { min-height: 110px; background: #fbfcfd; border-left: 4px solid var(--preview); }
@@ -262,7 +264,8 @@
 
     @media (max-width: 1120px) {
       header, .section-head, .split-grid { grid-template-columns: 1fr; }
-      .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid, .spine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .spine-card::after { display: none; }
     }
     @media (max-width: 720px) {
       main { width: min(100vw - 20px, 1240px); padding-top: 18px; }
@@ -283,7 +286,8 @@
       </div>
       <aside class="mission">
         <strong>Mission</strong>
-        Thin surface. Strong guardrails. Durable memory. Professional output.
+        <span class="mission-standard">Thin surface. Strong guardrails. Durable memory. Simple, value-efficient, self-improving, professional output.</span>
+        <span class="mission-rule">Understand the problem first. Choose the smallest high-value mechanism. Turn failures into upstream ratchets. Keep every claim inside its evidence boundary.</span>
       </aside>
     </header>
 
@@ -312,23 +316,27 @@
       <div class="section-head">
         <div>
           <h2>Canonical Pipeline</h2>
-          <p>Every SDK claim should land on this path. Each stage has one job, one proof boundary, and one loop that feeds the next improvement.</p>
+          <p>The SDK lifecycle is a repeated control cycle, not one early box. Each security or proof lane returns to the SDK before the package advances.</p>
         </div>
-        <div class="note">Backlog items belong on a stage. If a proposed slice cannot name its stage and loop, it is not ready for implementation.</div>
+        <div class="note">Order is a contract: security review precedes local proof, local proof precedes cloud proof, Tessl dry run precedes external Tessl evaluation, and runtime feedback returns to the Foundry. Behavioral release proof uses one 5-to-10-case scenario set, targets 8, and preserves the exact case ids across both OSS lanes and Tessl.</div>
       </div>
       <div class="spine-grid">
-        <div class="spine-card" data-status="implemented" data-stage="foundry"><span class="pill implemented">1</span><strong>Foundry</strong><span>agent-skills authors, dogfoods, records steering, and keeps fixtures/source packages. Output: source intent.</span></div>
-        <div class="spine-card" data-status="implemented" data-stage="sdk"><span class="pill implemented">2</span><strong>SDK Lifecycle</strong><span>Parse source, build SkillIR, package identity, schemas, and receipts. Output: professional package contract.</span></div>
-        <div class="spine-card" data-status="implemented" data-stage="guardrails"><span class="pill implemented">3</span><strong>Guardrails</strong><span>Intake, risk modes, hardening, trust, adoption, and human-review blockers. Output: bounded adoption decision.</span></div>
-        <div class="spine-card" data-status="preview" data-stage="proof"><span class="pill preview">4</span><strong>Evals / Proof</strong><span>Deterministic checks, scorer quality, calibration, A/B receipts, and command replay. Output: evidence, not vibes.</span></div>
-        <div class="spine-card" data-status="preview" data-stage="tessl"><span class="pill preview">5</span><strong>Tessl Distribution</strong><span>Private workspace, eval workspace, review runs, package inventory, and eventual public standard. Output: external proof/distribution.</span></div>
-        <div class="spine-card" data-status="preview" data-stage="runtime"><span class="pill preview">6</span><strong>Local Runtime Truth</strong><span>Project install preview, runtime links, installed behavior, observability, rollback, and feedback. Output: truth from use.</span></div>
+        <div class="spine-card" data-status="implemented" data-stage="foundry" data-pipeline-step="foundry"><span class="pill implemented">1</span><strong>Foundry</strong><span>Author, dogfood, capture intent and steering, and keep canonical source packages and fixtures.</span></div>
+        <div class="spine-card" data-status="implemented" data-stage="sdk-entry" data-pipeline-step="sdk_entry_lifecycle"><span class="pill implemented">2</span><strong>SDK Entry Lifecycle</strong><span>Understand the target, parse source, build SkillIR and package identity, and establish the initial receipt boundary.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="guardrails-security" data-pipeline-step="guardrails_oss_security"><span class="pill preview">3</span><strong>Guardrails / Sandbox Security Review</strong><span>Run bounded intake, risk, package-hardening, permission, and semantic review through <code>oss-security</code>.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="sdk-early" data-pipeline-step="sdk_early_lifecycle"><span class="pill preview">4</span><strong>SDK Early Lifecycle</strong><span>Apply security fixes, update package contracts, create evals, and preserve the findings as upstream ratchets.</span></div>
+        <div class="spine-card" data-status="implemented" data-stage="proof-local" data-pipeline-step="proof_oss_local"><span class="pill implemented">5</span><strong>Evals / Proof: oss-local</strong><span>The technical-writer target-eight set passed locally as four bounded qwen shards. Aggregation requires one package, rubric, profile, execution-model, and scenario-set identity plus exact duplicate-free case coverage; per-shard scorecard digests remain distinct evidence, and any set change restarts at oss-local.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="sdk-middle" data-pipeline-step="sdk_middle_lifecycle"><span class="pill preview">6</span><strong>SDK Middle Lifecycle</strong><span>Reconcile local proof, repair scenarios and scorers, and decide whether cloud proof is justified.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="proof-cloud" data-pipeline-step="proof_oss_cloud"><span class="pill preview">7</span><strong>Evals / Proof: oss-cloud</strong><span><code>oss-cloud</code> now declares <code>minimax-m2.7:cloud</code> as the independent challenger. Receipt identity and profile configuration are enforced; the current MiniMax runtime canary remains blocked in the nested Codex sandbox, so the archived DeepSeek shards are historical evidence only.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="sdk-prerelease" data-pipeline-step="sdk_prerelease_lifecycle"><span class="pill preview">8</span><strong>SDK Pre-release Lifecycle</strong><span>Reconcile cloud evidence, package proof, trust, and review, then dry-run the exact OSS-proven scenario set and package in Tessl.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="tessl" data-pipeline-step="tessl_distribution"><span class="pill preview">9</span><strong>Tessl Distribution</strong><span>Run the same 5-to-10-case set externally; every scenario consumes budget, so 8 is the default value-efficient target.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="runtime" data-pipeline-step="local_runtime"><span class="pill preview">10</span><strong>Local Runtime Truth</strong><span>Verify installed behavior, runtime links, observability, rollback, and feedback from real use.</span></div>
       </div>
       <div class="loop-grid" style="margin-top:12px">
-        <div class="loop-card"><span class="pill preview">Author loop</span><strong>Foundry -> SDK Lifecycle</strong><span>Improve source and package shape until the SDK can explain the skill in receipts.</span></div>
-        <div class="loop-card"><span class="pill preview">Proof loop</span><strong>SDK Lifecycle -> Evals/Proof</strong><span>Turn claims into deterministic checks, calibrated scorers, and replayable evidence.</span></div>
-        <div class="loop-card release"><span class="pill blocked">Release loop</span><strong>Guardrails -> Tessl</strong><span>Only release when intake, trust, review, package identity, and external proof line up.</span></div>
-        <div class="loop-card runtime"><span class="pill preview">Runtime loop</span><strong>Runtime Truth -> Foundry</strong><span>Feed installed behavior, observability, and regressions back into durable source memory.</span></div>
+        <div class="loop-card"><span class="pill preview">Entry cycle</span><strong>Intent -> Package Contract</strong><span>Problem understanding, source intent, SkillIR, package identity, and initial receipts.</span></div>
+        <div class="loop-card"><span class="pill preview">Early cycle</span><strong>Security Findings -> Fixes + Evals</strong><span>Turn <code>oss-security</code> findings into source fixes, fixtures, scenarios, and deterministic guardrails.</span></div>
+        <div class="loop-card release"><span class="pill implemented">Middle cycle</span><strong>Development Pool -> Fixed Baseline</strong><span>Use 20 local development cases and 10 cloud challenge cases to drive repairs, but preserve the fixed release eight for Tessl comparison. Changing cases, criteria, rubric, scorer, or package identity starts a new baseline version.</span></div>
+        <div class="loop-card runtime"><span class="pill preview">Pre-release + runtime</span><strong>Tessl Dry Run -> External Eval -> Use</strong><span>Reconcile proof before distribution, then feed installed behavior back into the Foundry.</span></div>
       </div>
     </section>
 
@@ -384,15 +392,15 @@
           <h2>Capability Truth Summary</h2>
           <p>This is the checkpointed product shape expressed as an operator-readable status layer. Green means implemented evidence exists. Blue means preview only. Amber means placeholder. Red means blocked. Grey means deferred or out of scope.</p>
         </div>
-        <div class="note">Projection checkpoint: generated from <code>./bin/ask sdk status --json --robot</code> on 2026-06-30T17:25:36Z at HEAD <code>7f5cceb30</code>; status digest <code>sha256:a312e492e01e6fabf7d08830a6d7f88164020c2df2156edcf6c36103c8b84b71</code>. Regenerate when HEAD or capability digest changes.</div>
+        <div class="note">Projection contract: <code>./bin/ask sdk status --json --robot</code> and the capability matrix own current executable truth. <code>./bin/ask sdk docs verify --artifact Docs/reference/skills-sdk-platform-atlas.html --json --robot</code> checks every projected capability row and declared summary count.</div>
       </div>
       <div class="summary-grid">
-        <div class="stat" data-status="implemented"><b>29</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>17</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
-        <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
-        <div class="stat" data-status="blocked"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
-        <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
-        <div class="stat" data-status="out"><b>3</b><strong>Out of scope</strong><span>Remote registry, marketplace service, and publish pipeline.</span></div>
+        <div class="stat" data-status="implemented" data-capability-summary-statuses="implemented" data-count="29"><b>29</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
+        <div class="stat" data-status="preview" data-capability-summary-statuses="preview_only" data-count="18"><b>18</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="placeholder" data-capability-summary-statuses="placeholder_blocked,placeholder_optional" data-count="0"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
+        <div class="stat" data-status="blocked" data-capability-summary-statuses="blocked_missing_adapter" data-count="0"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
+        <div class="stat" data-status="deferred" data-capability-summary-statuses="deferred" data-count="2"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
+        <div class="stat" data-status="out" data-capability-summary-statuses="out_of_scope" data-count="3"><b>3</b><strong>Out of scope</strong><span>Remote registry, marketplace service, and publish pipeline.</span></div>
       </div>
     </section>
 
@@ -400,7 +408,7 @@
       <div class="section-head">
         <div>
           <h2>Five-Discipline Coverage</h2>
-          <p>Podjarny's skills-as-code model is the clearest way to see current maturity without drowning in all 51 capability rows.</p>
+          <p>Podjarny's skills-as-code model is the clearest way to see current maturity without drowning in all 52 capability rows.</p>
         </div>
         <div class="note">Coverage describes local SDK evidence only. Hosted CI, remote registry, publish, cloud judge, and Tessl release confirmation remain separate proof lanes.</div>
       </div>
@@ -459,7 +467,7 @@
         <div class="note">Rule: a capability is implemented only when it has an owner surface, command or module, schema or receipt where relevant, and test evidence.</div>
       </div>
       <div>
-        <table hidden aria-hidden="true" data-capability-status="skills-sdk.capability-status.v1" data-generated-at="2026-06-30T17:25:36Z" data-generated-head="7f5cceb30" data-status-digest="sha256:a312e492e01e6fabf7d08830a6d7f88164020c2df2156edcf6c36103c8b84b71">
+        <table hidden aria-hidden="true" data-capability-status="skills-sdk.capability-status.v1">
           <tbody>
             <tr data-capability-id="authoring" data-status="implemented" data-pipeline-sections="author_golden_path,full_skill_lifecycle,public_sdk_surface"></tr>
             <tr data-capability-id="check" data-status="implemented" data-pipeline-sections="author_golden_path,public_sdk_surface,release_decision_matrix"></tr>
@@ -467,6 +475,7 @@
             <tr data-capability-id="receipt_schema" data-status="implemented" data-pipeline-sections="release_decision_matrix,ci_and_adoption"></tr>
             <tr data-capability-id="risk_classification" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
             <tr data-capability-id="risk_mode_taxonomy" data-status="preview_only" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
+            <tr data-capability-id="package_security_signature" data-status="preview_only" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
             <tr data-capability-id="skill_ir" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,domain_model_integrity,public_sdk_surface"></tr>
             <tr data-capability-id="package_identity" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,package_hardening,public_sdk_surface"></tr>
             <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"></tr>
@@ -526,6 +535,7 @@
             <tr data-status="implemented"><td><strong>Manifest and check receipt schemas</strong></td><td><span class="pill implemented">implemented</span></td><td><code>schemas/skills-sdk/*</code></td><td>Schema spine exists for current manifest and check receipt.</td><td>Add receipt families when install/publish lanes need them.</td></tr>
             <tr data-status="implemented"><td><strong>Risk classification</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/risk.py</code></td><td>Local read-only tiering exists.</td><td>Connect risk tiers to real adapters after adapters are approved.</td></tr>
             <tr data-status="preview"><td><strong>Risk mode taxonomy</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/risk_modes.py</code></td><td><code>ask sdk security risk-modes --preview</code> separates malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes without executing source content, scanners, network, credentials, or mutation.</td><td>Use this receipt as input to external intake review and adoption decisions.</td></tr>
+            <tr data-status="preview"><td><strong>Package security signature receipt</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/package_security_signature.py</code></td><td><code>ask sdk security package-signature --preview</code> hashes declared package files and emits a receipt without raw content, scanner execution, network, credentials, or mutation.</td><td>Use package signatures as external advisory input only after scanner execution receipts are approved.</td></tr>
             <tr data-status="preview"><td><strong>Install and lockfile preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/install_preview.py</code></td><td>Models target paths and lockfile delta without writes.</td><td>Keep preview honest; writes belong to explicit install.</td></tr>
             <tr data-status="preview"><td><strong>External skill intake quarantine</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/skill_intake.py</code></td><td><code>ask sdk intake inspect --preview</code> reads, hashes, and validates directory-form external skill candidates without execution, install, projection writes, network, or mutation.</td><td>Add archive unpack quarantine only after directory intake receipts and path-boundary checks stay schema-verified.</td></tr>
             <tr data-status="preview"><td><strong>External skill intake review</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/skill_intake_review.py</code></td><td><code>ask sdk intake review --preview</code> consumes the quarantine intake receipt and risk-mode taxonomy receipt to produce provenance, permission, data-exposure, action-surface, isolation, semantic, approval-friction, and residual-risk review items without execution, scanners, network, credentials, install, or mutation.</td><td>Bind this review result into an adoption decision receipt.</td></tr>
@@ -540,13 +550,13 @@
             <tr data-status="implemented"><td><strong>SDK skill and plugin lifecycle facade</strong></td><td><span class="pill implemented">implemented</span></td><td><code>ask sdk plugin</code></td><td>One SDK namespace now routes create, review, install, and save-registry for single skills and plugins through existing bounded factory and SDK commands.</td><td>Registry save is local registry or marketplace persistence; remote publish remains a separate out-of-scope authority lane.</td></tr>
             <tr data-status="implemented"><td><strong>Eval execution</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/eval_runner.py</code></td><td>Deterministic JSON/JSONL and internal scorecard-backed eval receipts run locally, with target-bound package identity and calibrated quality gates.</td><td>Keep deterministic eval receipts separate from Codex-backed A/B execution and judge scoring receipts.</td></tr>
             <tr data-status="preview"><td><strong>Eval runner and judge profiles</strong></td><td><span class="pill preview">wired preview</span></td><td><code>skills_sdk/eval_profiles.py</code></td><td><code>ask sdk eval profiles --preview</code> is wired and schema-backed: it declares Codex exec sandbox profiles plus isolated local, security-specialist, and authenticated Codex judge profiles while intentionally not invoking providers.</td><td>Drive A/B execution and advisory security review receipts without exposing judge secrets to skill execution.</td></tr>
-            <tr data-status="preview"><td><strong>Canonical A/B scoring rubric</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/eval_ab_rubric.py</code></td><td><code>ask sdk eval ab-rubric --preview</code> exposes one stable scorecard for local <code>qwen3.5:9b-mlx</code>, cloud <code>deepseek-v4-flash:cloud</code>, and later Tessl validation.</td><td>Invoke judges only after their receipts carry this rubric digest, dimension evidence refs, and advisory-until-calibrated status.</td></tr>
+            <tr data-status="preview"><td><strong>Canonical A/B scoring rubric</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/eval_ab_rubric.py</code></td><td><code>ask sdk eval ab-rubric --preview</code> exposes one stable scorecard for local <code>qwen3.5:9b-mlx</code>, cloud <code>minimax-m2.7:cloud</code>, and Tessl <code>deepseek-v4-flash</code> validation.</td><td>Invoke judges only after their receipts carry this rubric digest, execution-model identity, dimension evidence refs, and advisory-until-calibrated status.</td></tr>
             <tr data-status="preview"><td><strong>Codex-backed A/B eval preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/eval_ab_preview.py</code></td><td><code>ask sdk eval ab-preview --preview</code> binds skill A/B package identities, fixture digest, Codex execution profile, and judge profile without invoking Codex, Ollama, network, or mutation.</td><td>Run both variants through <code>codex exec</code> only after evidence directories and judge input redaction are receipt-verified.</td></tr>
             <tr data-status="preview"><td><strong>Codex-backed A/B eval execution plan</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/eval_ab_plan.py</code></td><td><code>ask sdk eval ab-plan --preview</code> records the exact <code>codex exec</code> argv, prompt digest, and evidence paths for both variants without invoking Codex.</td><td>Invoke Codex only after command-plan receipts are verified against real runner output.</td></tr>
             <tr data-status="implemented"><td><strong>Codex-backed A/B eval execution</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/eval_ab_run.py</code></td><td><code>ask sdk eval ab-run --execute</code> invokes Codex explicitly, writes bounded prompt/stdout/stderr/last-message evidence, and records one result per variant.</td><td>Feed completed run receipts into sanitized local judge scoring before cloud or Tessl confirmation.</td></tr>
             <tr data-status="preview"><td><strong>Codex-backed A/B judge input preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/eval_ab_judge.py</code></td><td><code>ask sdk eval ab-judge-preview --preview</code> derives sanitized judge input and prompt digest from a completed run receipt without invoking Codex judge state.</td><td>Use this sanitized payload as the only evidence sent to judge providers.</td></tr>
             <tr data-status="implemented"><td><strong>Local A/B judge scoring</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/eval_ab_judge.py</code></td><td><code>ask sdk eval ab-judge-score --execute</code> invokes <code>codex exec --profile oss-local</code>, validates the judge decision contract, and emits advisory score evidence.</td><td>Add <code>codex exec --profile oss-cloud</code> confirmation only after local scoring is calibrated against expected labels.</td></tr>
-            <tr data-status="preview"><td><strong>Scenario quality gate</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/scenario_quality.py</code></td><td>Eval scenarios can be screened for prompt, oracle, reproducibility, safety-check, and redaction readiness without running or promoting them.</td><td>Connect generated or observed eval candidates to this gate before release-mode eval promotion.</td></tr>
+            <tr data-status="preview"><td><strong>Scenario quality gate</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/scenario_quality.py</code></td><td>Eval scenarios can be screened for prompt, oracle, reproducibility, safety-check, redaction readiness, and the 5-to-10 scenario budget without running or promoting them.</td><td>Target 8 distinct cases, then require exact id parity across <code>oss-local</code>, <code>oss-cloud</code>, Tessl dry-run, and external Tessl evaluation.</td></tr>
             <tr data-status="implemented"><td><strong>Package signing intent</strong></td><td><span class="pill implemented">implemented</span></td><td><code>signing_intent.py</code></td><td>Policy and digest intent validation is local and non-mutating; no signature, key access, archive emission, or trust mutation is claimed.</td><td>Add real signing adapter only after key ownership, redaction, and archive authority are approved.</td></tr>
             <tr data-status="preview_only"><td><strong>Sandbox boundary validation</strong></td><td><span class="pill preview">preview</span></td><td><code>sandbox_profile.py</code> plus boundary checks</td><td>Keep sandbox-related work focused on two lanes: external skill intake quarantine and eval execution through Codex's own sandbox.</td><td>Add external skill intake quarantine receipts before broadening sandbox claims beyond Codex-backed eval execution.</td></tr>
             <tr data-status="implemented"><td><strong>Local trust ledger</strong></td><td><span class="pill implemented">implemented</span></td><td><code>trust_ledger.py</code></td><td>Local JSONL trust decisions can be previewed or appended with package digest binding.</td><td>Connect to release-mode policy only after revocation, expiry, and owner workflows have stronger evidence.</td></tr>
@@ -576,7 +586,7 @@
         <div class="card" data-status="implemented"><span class="pill implemented">keep</span><strong>Local SDK Control Plane</strong><span>Preserve <code>ask sdk</code> as the operator entrypoint. Keep status, check, install, cleanup, conformance, lenses, review, determinism, knowledge ingest, and package verify coherent.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">landed</span><strong>Tiny SkillIR.v0</strong><span>Identity, source paths, behavior, permissions, risk, and evidence now have a small read-only typed spine.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">landed</span><strong>Deterministic Eval Runner</strong><span>Local JSON/JSONL exact-match fixtures and internal scorecards now emit SDK eval receipts; target-bound receipts carry package identity and quality gates.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">wired preview</span><strong>Codex Eval Profiles</strong><span>Profile contracts are implemented and schema-backed: Codex exec sandbox execution, Codex <code>oss-local</code> with <code>qwen3.5:9b-mlx</code>, Codex <code>oss-local-code</code> with <code>qwen3-coder:30b</code>, Codex <code>oss-local-fallback</code> with <code>qwen3.5:latest</code>, Codex <code>oss-cloud</code> with <code>deepseek-v4-flash:cloud</code>, authenticated Codex <code>gpt-5.3-codex-spark</code>, and judge-secret isolation are declared without provider invocation.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">wired preview</span><strong>Codex Eval Profiles</strong><span>Profile contracts are implemented and schema-backed: Codex exec sandbox execution, Codex <code>oss-local</code> with <code>qwen3.5:9b-mlx</code>, Codex <code>oss-local-code</code> with <code>qwen3-coder:30b</code>, Codex <code>oss-local-fallback</code> with <code>qwen3.5:latest</code>, Codex <code>oss-cloud</code> with <code>minimax-m2.7:cloud</code>, Tessl external with operator-confirmed <code>deepseek-v4-flash</code>, authenticated Codex <code>gpt-5.3-codex-spark</code>, and judge-secret isolation. Configuration proof is separate from provider invocation proof.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">landed</span><strong>A/B Eval Contract</strong><span>The A/B lane now separates preview, command planning, explicit Codex execution, sanitized judge-input preview, and rubric digest contracts.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">landed</span><strong>Signing Intent</strong><span>Package digest and policy intent are validated before any registry, marketplace, or publish claim. Real signatures remain gated.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">done</span><strong>Sandbox Boundary Schema</strong><span>Deny-by-default profile validation remains useful where it protects external skill intake or eval runner setup.</span></div>
@@ -611,7 +621,7 @@
       </div>
       <div class="card-grid">
         <div class="gap" data-status="deferred"><span class="pill deferred">Foundry</span><strong>Atlas Can Outgrow Product Truth</strong><span>The HTML can describe an end-state platform faster than receipts prove it. Keep planning visuals visibly separate from SDK capability truth.</span></div>
-        <div class="gap" data-status="implemented"><span class="pill implemented">Evals/Proof</span><strong>Evidence Inventory Is Not Replay</strong><span>The capability matrix evidence refs are classified as file, command, schema, receipt, or external lane. Command/external refs now carry inventory-only proof mode and replay-required counts.</span></div>
+        <div class="gap" data-status="implemented"><span class="pill implemented">Evals/Proof</span><strong>Evidence Refs Need Verification</strong><span>The capability matrix evidence refs are classified as file, command, schema, receipt, or external lane. Command/external refs carry inventory-only proof mode and replay-required counts; inventory is not replay.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">spine landed</span><strong>Tiny IR Exists</strong><span><code>SkillIR.v0</code> is now the small read-only spine for package identity and receipt-producing SDK lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">quality lane</span><strong>Deterministic And A/B Evals Run</strong><span>Local deterministic eval receipts and internal scorecard-backed receipts run with package identity, while A/B run receipts invoke Codex explicitly and leave judge provider invocation as a separate gated lane.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">intent landed</span><strong>Signing Intent Exists</strong><span>Package identity can be checked against a pinned signing policy without signature requests, key access, archive emission, or trust mutation.</span></div>
@@ -758,6 +768,11 @@
     const statusLine = document.querySelector('.status-line');
     let activeFilter = 'all';
     let activeView = 'all';
+
+    document.querySelectorAll('[data-capability-summary-statuses][data-count]').forEach((summary) => {
+      const count = summary.querySelector('b');
+      if (count) count.textContent = summary.dataset.count;
+    });
 
     function applyFilters() {
       maturityButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.filter === activeFilter)));

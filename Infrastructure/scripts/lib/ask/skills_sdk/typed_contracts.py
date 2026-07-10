@@ -456,6 +456,7 @@ class EvalRunReceipt(_SdkContractModel):
     skill_ir_schema_version: str | None
     package_id: str | None = Field(default=None, min_length=1)
     package_digest: str | None = Field(default=None, min_length=71)
+    rubric_digest: str | None = Field(default=None, min_length=71)
     target_path: str | None
     mode: str | None
     lane: str | None = None
@@ -464,6 +465,10 @@ class EvalRunReceipt(_SdkContractModel):
     codex_profile: str | None = None
     codex_exec_invoked: bool | None = None
     codex_exec_command_shape: list[str] | None = None
+    execution_model: str | None = Field(default=None, min_length=1)
+    execution_model_family: str | None = Field(default=None, min_length=1)
+    execution_model_provider: str | None = Field(default=None, min_length=1)
+    execution_identity_source: str | None = Field(default=None, min_length=1)
     scenario_set_id: str | None = None
     scenario_set_case_ids: list[str] | None = None
     selected_case_ids: list[str] | None = None

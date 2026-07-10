@@ -1,0 +1,236 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+SCHEMA_VERSION = "skills-sdk.eval-shard-aggregate-receipt.v0"
+SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json"
+MAX_SHARD_CASES = 2
+
+
+class EvalShardAggregateError(ValueError):
+    def __init__(self, receipt: dict[str, Any]) -> None:
+        super().__init__(receipt["agent_summary"])
+        self.receipt = receipt
+
+
+def _repo_path(repo_root: Path, raw_path: Path) -> tuple[Path | None, str]:
+    path = raw_path if raw_path.is_absolute() else repo_root / raw_path
+    try:
+        resolved = path.resolve(strict=True)
+        label = resolved.relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return None, raw_path.as_posix()
+    return resolved, label
+
+
+def _load_receipt(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("schema_version") == "skills-sdk.eval-run-receipt.v0":
+        return payload
+    data = payload.get("data")
+    run = data.get("skills_sdk_eval_run") if isinstance(data, dict) else None
+    receipt = run.get("receipt") if isinstance(run, dict) else None
+    return receipt if isinstance(receipt, dict) else {}
+
+
+def _expected_cases(skill_path: Path, scenario_set: str) -> list[str]:
+    skill_dir = skill_path.parent if skill_path.name == "SKILL.md" else skill_path
+    lines = (skill_dir / "references" / "evals.yaml").read_text(encoding="utf-8").splitlines()
+    state: dict[str, Any] = {"in_sets": False, "selected": False, "case_indent": None, "case_ids": []}
+    for line in lines:
+        if _consume_release_set_line(state, line, scenario_set):
+            break
+    return list(state["case_ids"])
+
+
+def _consume_release_set_line(state: dict[str, Any], line: str, scenario_set: str) -> bool:
+    stripped = line.strip()
+    indent = len(line) - len(line.lstrip(" "))
+    if stripped == "release_scenario_sets:":
+        state["in_sets"] = True
+        return False
+    if state["in_sets"] and indent == 0 and stripped == "cases:":
+        return True
+    if not state["in_sets"]:
+        return False
+    _update_release_set_state(state, stripped, indent, scenario_set)
+    return False
+
+
+def _update_release_set_state(state: dict[str, Any], stripped: str, indent: int, scenario_set: str) -> None:
+    if indent == 2 and stripped.startswith("- id:"):
+        state["selected"] = stripped.split(":", 1)[1].strip().strip("'\"") == scenario_set
+        state["case_indent"] = None
+        return
+    if not state["selected"]:
+        return
+    if indent == 4 and stripped in {"groups:", "cases:"}:
+        state["case_indent"] = 8 if stripped == "groups:" else 6
+        return
+    if indent == 4 and stripped.endswith(":"):
+        state["case_indent"] = None
+        return
+    if _is_release_case_item(state, stripped, indent):
+        state["case_ids"].append(stripped[2:].strip().strip("'\""))
+
+
+def _is_release_case_item(state: dict[str, Any], stripped: str, indent: int) -> bool:
+    case_indent = state["case_indent"]
+    return isinstance(case_indent, int) and indent >= case_indent and stripped.startswith("- ")
+
+
+def _check(check_id: str, passed: bool, evidence: list[str]) -> dict[str, Any]:
+    return {"id": check_id, "status": "pass" if passed else "blocker", "evidence": evidence}
+
+
+def _load_receipts(repo_root: Path, paths: list[Path]) -> tuple[list[tuple[str, dict[str, Any]]], list[str]]:
+    loaded: list[tuple[str, dict[str, Any]]] = []
+    errors: list[str] = []
+    for raw_path in paths:
+        resolved, label = _repo_path(repo_root, raw_path)
+        if resolved is None:
+            errors.append(f"missing_or_external:{label}")
+            continue
+        try:
+            loaded.append((label, _load_receipt(resolved)))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"invalid_json:{label}:{exc}")
+    return loaded, errors
+
+
+def _identity_sets(receipts: list[dict[str, Any]]) -> dict[str, set[str]]:
+    fields = (
+        "package_id",
+        "package_digest",
+        "rubric_digest",
+        "scenario_set_id",
+        "execution_model",
+        "execution_model_family",
+        "execution_model_provider",
+        "execution_identity_source",
+    )
+    return {field: {str(receipt.get(field) or "") for receipt in receipts} for field in fields}
+
+
+def _all_shards_pass(receipts: list[dict[str, Any]]) -> bool:
+    return bool(receipts) and all(row.get("status") == "pass" for row in receipts)
+
+
+def _all_shards_are_profile_release(receipts: list[dict[str, Any]], profile: str) -> bool:
+    return bool(receipts) and all(
+        row.get("lane") == profile and row.get("lane_type") == "release-shard" and row.get("profile") == profile
+        for row in receipts
+    )
+
+
+def _all_shards_have_exec_proof(receipts: list[dict[str, Any]], profile: str) -> bool:
+    return bool(receipts) and all(row.get("codex_exec_invoked") is True and row.get("codex_profile") == profile for row in receipts)
+
+
+def _all_shards_are_bounded(receipts: list[dict[str, Any]]) -> bool:
+    sizes = [len(row.get("selected_case_ids") or []) for row in receipts]
+    return bool(receipts) and all(0 < size <= MAX_SHARD_CASES for size in sizes)
+
+
+def _identities_match(receipts: list[dict[str, Any]], identities: dict[str, set[str]]) -> bool:
+    return bool(receipts) and all(len(values) == 1 and "" not in values for values in identities.values())
+
+
+def _shard_checks(
+    receipts: list[dict[str, Any]], identities: dict[str, set[str]], path_errors: list[str], labels: list[str], profile: str
+) -> list[dict[str, Any]]:
+    return [
+        _check("receipt_paths_are_repo_owned", not path_errors and bool(receipts), path_errors or labels),
+        _check("shards_pass", _all_shards_pass(receipts), [str(row.get("status")) for row in receipts]),
+        _check("shards_match_requested_profile", _all_shards_are_profile_release(receipts, profile), [f"{row.get('lane')}:{row.get('lane_type')}:{row.get('profile')}" for row in receipts]),
+        _check("codex_exec_proof_present", _all_shards_have_exec_proof(receipts, profile), [f"{row.get('codex_exec_invoked')}:{row.get('codex_profile')}" for row in receipts]),
+        _check("shard_size_bounded", _all_shards_are_bounded(receipts), [str(len(row.get("selected_case_ids") or [])) for row in receipts]),
+        _check("identity_fields_match", _identities_match(receipts, identities), [f"{key}:{sorted(values)}" for key, values in identities.items()]),
+    ]
+
+
+def _selected_case_ids(receipts: list[dict[str, Any]]) -> list[str]:
+    return [str(case_id) for row in receipts for case_id in row.get("selected_case_ids") or []]
+
+
+def _result_cases(receipts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [case for row in receipts for case in row.get("cases") or [] if isinstance(case, dict)]
+
+
+def _coverage_checks(
+    receipts: list[dict[str, Any]], identities: dict[str, set[str]], scenario_set: str, expected: list[str]
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    selected = _selected_case_ids(receipts)
+    cases = _result_cases(receipts)
+    result_ids = [str(case.get("case_id") or "") for case in cases]
+    checks = [
+        _check("scenario_set_matches_request", bool(receipts) and identities["scenario_set_id"] == {scenario_set}, sorted(identities["scenario_set_id"])),
+        _check("selected_cases_exactly_cover_release_set", sorted(selected) == sorted(expected) and len(selected) == len(set(selected)), [f"expected:{','.join(expected)}", f"actual:{','.join(selected)}"]),
+        _check("case_results_match_selection", sorted(result_ids) == sorted(selected), [f"selected:{','.join(selected)}", f"results:{','.join(result_ids)}"]),
+        _check("all_case_results_pass", bool(cases) and all(case.get("status") == "pass" for case in cases), [f"{case.get('case_id')}:{case.get('status')}" for case in cases]),
+    ]
+    return checks, cases
+
+
+def _single_identity(identities: dict[str, set[str]], field: str) -> str | None:
+    return next(iter(identities[field]), None)
+
+
+def _receipt_payload(
+    loaded: list[tuple[str, dict[str, Any]]], identities: dict[str, set[str]], dataset_digests: list[str],
+    scenario_set: str, expected_ids: list[str], result_cases: list[dict[str, Any]], checks: list[dict[str, Any]], profile: str,
+) -> dict[str, Any]:
+    blockers = [check for check in checks if check["status"] == "blocker"]
+    return {
+        "schema_version": SCHEMA_VERSION, "schema_uri": SCHEMA_URI,
+        "status": "pass" if not blockers else "blocked", "lane": profile, "profile": profile,
+        "package_id": _single_identity(identities, "package_id"), "package_digest": _single_identity(identities, "package_digest"),
+        "execution_model": _single_identity(identities, "execution_model"),
+        "execution_model_family": _single_identity(identities, "execution_model_family"),
+        "execution_model_provider": _single_identity(identities, "execution_model_provider"),
+        "execution_identity_source": _single_identity(identities, "execution_identity_source"),
+        "shard_dataset_digests": dataset_digests, "rubric_digest": _single_identity(identities, "rubric_digest"),
+        "scenario_set_id": scenario_set, "scenario_set_case_ids": expected_ids,
+        "shard_receipts": [label for label, _ in loaded], "shard_count": len(loaded), "case_count": len(result_cases),
+        "passed_count": sum(case.get("status") == "pass" for case in result_cases),
+        "failed_count": sum(case.get("status") != "pass" for case in result_cases), "cases": result_cases,
+        "checks": checks, "blockers": blockers, "mutation_performed": False,
+        "claims_boundary": f"This receipt proves only aggregate {profile} release evidence. It does not prove Tessl, distribution, runtime, or release readiness.",
+        "agent_summary": f"{profile} shard aggregation passed." if not blockers else f"{profile} shard aggregation is blocked by {len(blockers)} check(s).",
+    }
+
+
+def build_eval_shard_aggregate_receipt(
+    repo_root: Path,
+    *,
+    skill_path: Path,
+    scenario_set: str,
+    receipt_paths: list[Path],
+    profile: str = "oss-local",
+    expected_package_digest: str | None = None,
+) -> dict[str, Any]:
+    expected_ids = _expected_cases(skill_path, scenario_set)
+    loaded, path_errors = _load_receipts(repo_root, receipt_paths)
+    receipts = [receipt for _, receipt in loaded]
+    identities = _identity_sets(receipts)
+    dataset_digests = sorted({str(receipt.get("dataset_digest") or "") for receipt in receipts})
+    checks = _shard_checks(receipts, identities, path_errors, [label for label, _ in loaded], profile)
+    if expected_package_digest is not None:
+        checks.append(
+            _check(
+                "shards_match_current_package",
+                identities["package_digest"] == {expected_package_digest},
+                [
+                    f"expected:{expected_package_digest}",
+                    f"actual:{','.join(sorted(identities['package_digest']))}",
+                ],
+            )
+        )
+    coverage_checks, result_cases = _coverage_checks(receipts, identities, scenario_set, expected_ids)
+    checks.extend(coverage_checks)
+    receipt = _receipt_payload(loaded, identities, dataset_digests, scenario_set, expected_ids, result_cases, checks, profile)
+    if receipt["blockers"]:
+        raise EvalShardAggregateError(receipt)
+    return receipt

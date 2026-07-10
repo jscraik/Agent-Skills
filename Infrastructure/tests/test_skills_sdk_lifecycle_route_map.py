@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.lifecycle_route_map import (  # noqa: E402
+    ALLOWED_STAGES,
     REQUIRED_LOOPS,
     REQUIRED_ROUTE_IDS,
     REQUIRED_STAGES,
@@ -36,7 +37,7 @@ class TestSkillsSdkLifecycleRouteMap(unittest.TestCase):
                 self.assertIn("loop", route, f"Route {route['id']} missing 'loop' property")
                 self.assertIn("pipeline_stage", route, f"Route {route['id']} missing 'pipeline_stage' property")
                 self.assertIn(route["loop"], REQUIRED_LOOPS, f"Route {route['id']} has invalid loop: {route['loop']}")
-                self.assertIn(route["pipeline_stage"], REQUIRED_STAGES, f"Route {route['id']} has invalid stage: {route['pipeline_stage']}")
+                self.assertIn(route["pipeline_stage"], ALLOWED_STAGES, f"Route {route['id']} has invalid stage: {route['pipeline_stage']}")
                 self.assertEqual(check_statuses[f"{route['id']}.capability_id_exists"], "pass")
 
 

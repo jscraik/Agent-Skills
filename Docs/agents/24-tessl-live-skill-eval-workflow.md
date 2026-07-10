@@ -18,10 +18,29 @@ When `SKILL.md`, core references, behavior claims, triggers, constraints, or
 output contracts change, review scenario drift before live scoring: classify
 existing scenarios as keep, update, remove, or add, then update canonical eval
 assets before staging Tessl.
-For behavioral skills, live Tessl scoring requires at least 20 gold-standard
-structured scenarios. Use generic SDK structure/layout scenarios for package
-shape and bespoke skill-specific scenarios for behavior; do not pad the count
-with duplicated, weak, or self-referential cases.
+For behavioral skills, declare 5 to 10 gold-standard structured scenarios and
+target 8. Use generic SDK structure/layout scenarios for package shape and
+bespoke skill-specific scenarios for behavior; do not pad the set with
+duplicated, weak, or self-referential cases. Author and repair that set through
+`oss-local`, run the same case ids through `oss-cloud`, and preserve those exact
+ids through Tessl dry-run and external evaluation. Any addition, removal, or
+substitution returns the candidate to `oss-local`.
+
+Use a separate development-pool policy to improve the skill without changing
+the Tessl comparison denominator. The default policy is 20 cases for the local
+development pool, the fixed release eight plus 2 rotating growth cases for the
+10-case cloud challenge pool, and the unchanged release eight for Tessl. The
+cloud challenge cases must come from the local pool. Changes to release case
+ids, criteria, rubric, scorer version, or package identity create a new
+baseline version; do not report that score as uplift against the prior set.
+
+Keep the model families independent across proof lanes: `oss-local` uses
+`qwen3.5:9b-mlx`, `oss-cloud` uses `minimax-m2.7:cloud`, and Tessl external uses
+`deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
+family, provider, and identity source. A model change starts a new baseline for
+that lane. Do not average scores across model families; compare each lane to its
+own prior baseline and use cross-lane agreement or disagreement as portability
+evidence. Configuration identity alone is not provider-invocation proof.
 
 Use `evals-router` for scenario quality review. The route must verify the
 assertion contract before changing the skill: each scenario needs a realistic
@@ -197,9 +216,10 @@ is blocked when reviewed generated scenarios are missing. Use the structure-only
 exception only for package-shape checks that are not claiming behavioral skill
 readiness.
 
-For behavioral skill readiness, the live-private staging gate also requires at
-least 20 gold-standard structured scenarios. A lower count can be used only as
-transition or diagnostic evidence, not as professional readiness evidence.
+For behavioral skill readiness, the live-private staging gate requires 5 to 10
+gold-standard structured scenarios, with 8 as the target. Counts outside that
+range are blocker evidence, and the staged ids must exactly match both OSS proof
+lanes.
 
 Before running live Tessl, check the workspace run budget. Treat any
 operator-provided cap as binding unless Tessl reports a different
@@ -320,9 +340,15 @@ Before claiming completion:
 - Generated scenarios were reviewed before canonical import.
 - The live staged `scenario-sources.json` shows both skill-owned eval cases and
   reviewed generated fixture cases for non-structure runs.
-- The live staged `scenario-sources.json` shows at least 20 gold-standard
-  structured scenarios for behavioral skill readiness, or the run is explicitly
-  recorded as transition/diagnostic evidence.
+- The live staged `scenario-sources.json` shows 5 to 10 gold-standard structured
+  scenarios, targets 8, and carries the same ids proven by `oss-local` and
+  `oss-cloud`.
+- OSS receipts name the execution model, family, provider, and identity source;
+  the Qwen, MiniMax, and Tessl DeepSeek families are distinct.
+- When `oss-local` uses bounded qwen shards, every shard contains at most two
+  cases and `ask sdk eval aggregate-shards` passes over repo-owned shard
+  receipts with one package, dataset, rubric, profile, and exact release-set
+  identity before `oss-cloud` or Tessl runs.
 - Tessl workspace run capacity was checked or explicitly estimated, with the
   operator-approved limit and 20-run remediation reserve preserved.
 - The staged `.tessl-plugin/plugin.json` version matches the canonical SKILL.md frontmatter

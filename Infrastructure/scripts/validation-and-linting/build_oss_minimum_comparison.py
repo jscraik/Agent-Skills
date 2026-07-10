@@ -139,7 +139,7 @@ def build_comparison(
         "comparisons": comparisons,
         "blocked_next_gates": BLOCKED_NEXT_GATES_AFTER_PASS if status == "pass" else BLOCKED_NEXT_GATES_WHEN_BLOCKED,
         "notes": [
-            "This receipt compares the 15+5 oss-local minimum proof set against oss-cloud evidence.",
+            "This receipt compares the same target-eight release scenario set across oss-local and oss-cloud evidence.",
             "Missing cloud evidence blocks cloud eval promotion until the same selected cases have receipts.",
             "Every non-parity case must carry an owner before Tessl dry-run or live evaluation.",
         ],

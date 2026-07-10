@@ -971,8 +971,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_cloud_codex_runner_wraps_codex_with_op_env_file(self) -> None:
         result, captured_command, captured_env, captured_profile_text, op_env_file = _run_codex_with_captured_subprocess(
             "oss-cloud",
-            'model = "deepseek-v4-flash:cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
-            {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+            'model = "minimax-m2.7:cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
             {"OPENAI_API_KEY": "other-token", "GITHUB_TOKEN": "repo-token"},
         )
 
@@ -982,7 +982,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         codex_segments = [captured_command[index:index + 4] for index in range(len(captured_command) - 3)]
         self.assertIn(["codex", "exec", "--profile", "oss-cloud"], codex_segments)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
-        self.assertIn('model = "deepseek-v4-flash:cloud"', captured_profile_text)
+        self.assertIn('model = "minimax-m2.7:cloud"', captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)
 
@@ -994,7 +994,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 command = _codex_judge_command(
-                    {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+                    {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
                     codex_judge._codex_judge_work_dir(output_file),
                     output_file,
                 )
@@ -1022,7 +1022,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             op_env_file = Path(profile_dir) / "codex.env"
             os.mkfifo(op_env_file)

@@ -8,17 +8,50 @@ from ask.skills_sdk.capability_status import load_capability_matrix
 
 
 DEFAULT_CAPABILITY_HTML = Path("artifacts/recommended-skills-sdk-pipeline.html")
+CANONICAL_ATLAS_PIPELINE_STEPS = (
+    "foundry",
+    "sdk_entry_lifecycle",
+    "guardrails_oss_security",
+    "sdk_early_lifecycle",
+    "proof_oss_local",
+    "sdk_middle_lifecycle",
+    "proof_oss_cloud",
+    "sdk_prerelease_lifecycle",
+    "tessl_distribution",
+    "local_runtime",
+)
+DOCS_PROJECTION_CHECKED_FIELDS = (
+    "id",
+    "status",
+    "pipeline_sections",
+    "declared_summary_counts",
+    "declared_pipeline_step_order",
+)
 
 
 class _CapabilityTableParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.rows: list[dict[str, Any]] = []
+        self.summary_counts: list[dict[str, Any]] = []
+        self.pipeline_steps: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = {key: value or "" for key, value in attrs}
+        summary_statuses = attributes.get("data-capability-summary-statuses", "").strip()
+        if summary_statuses:
+            self.summary_counts.append(
+                {
+                    "statuses": [item.strip() for item in summary_statuses.split(",") if item.strip()],
+                    "count": attributes.get("data-count", "").strip(),
+                }
+            )
+        pipeline_step = attributes.get("data-pipeline-step", "").strip()
+        if pipeline_step:
+            self.pipeline_steps.append(pipeline_step)
         if tag != "tr":
             return
-        row = {key: value or "" for key, value in attrs}
+        row = attributes
         capability_id = row.get("data-capability-id", "").strip()
         if not capability_id:
             return
@@ -35,13 +68,55 @@ class _CapabilityTableParser(HTMLParser):
         )
 
 
-def _load_projection_rows(path: Path) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+def _load_projection_rows(
+    path: Path,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str], dict[str, Any] | None]:
     parser = _CapabilityTableParser()
     try:
         parser.feed(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError) as exc:
-        return [], {"code": "projection_parse_failed", "path": path.as_posix(), "message": str(exc)}
-    return parser.rows, None
+        return [], [], [], {
+            "code": "projection_parse_failed",
+            "path": path.as_posix(),
+            "message": str(exc),
+        }
+    return parser.rows, parser.summary_counts, parser.pipeline_steps, None
+
+
+def _summary_count_blockers(
+    summary_counts: list[dict[str, Any]],
+    expected_status_counts: dict[str, int],
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    for summary in summary_counts:
+        statuses = summary["statuses"]
+        expected = sum(expected_status_counts.get(status, 0) for status in statuses)
+        try:
+            actual = int(summary["count"])
+        except ValueError:
+            actual = summary["count"]
+        if actual != expected:
+            blockers.append(
+                {
+                    "code": "summary_count_mismatch",
+                    "statuses": statuses,
+                    "expected": expected,
+                    "actual": actual,
+                }
+            )
+    return blockers
+
+
+def _pipeline_step_blockers(pipeline_steps: list[str]) -> list[dict[str, Any]]:
+    if not pipeline_steps or tuple(pipeline_steps) == CANONICAL_ATLAS_PIPELINE_STEPS:
+        return []
+    return [
+        {
+            "code": "pipeline_step_order_mismatch",
+            "expected": list(CANONICAL_ATLAS_PIPELINE_STEPS),
+            "actual": pipeline_steps,
+        }
+    ]
 
 
 def _duplicate_ids(rows: list[dict[str, Any]]) -> list[str]:
@@ -114,9 +189,17 @@ def verify_capability_docs_projection(
     matrix = load_capability_matrix(repo_root)
     capabilities = matrix["capabilities"]
     expected_by_id = {row["id"]: row for row in capabilities}
-    rows, parse_blocker = _load_projection_rows(html_path) if html_path.is_file() else ([], None)
+    rows, summary_counts, pipeline_steps, parse_blocker = (
+        _load_projection_rows(html_path) if html_path.is_file() else ([], [], [], None)
+    )
     actual_by_id = {row["id"]: row for row in rows}
     blockers = _blockers(html_path, expected_by_id, actual_by_id, _duplicate_ids(rows), parse_blocker)
+    expected_status_counts = {
+        status: sum(1 for row in capabilities if row["status"] == status)
+        for status in {row["status"] for row in capabilities}
+    }
+    blockers.extend(_summary_count_blockers(summary_counts, expected_status_counts))
+    blockers.extend(_pipeline_step_blockers(pipeline_steps))
     status = "pass" if not blockers else "blocked"
     return {
         "schema_version": "skills-sdk.docs-projection-verify.v0",
@@ -125,7 +208,7 @@ def verify_capability_docs_projection(
         "matrix_path": "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
         "capability_count": len(capabilities),
         "projection_row_count": len(rows),
-        "checked_fields": ["id", "status", "pipeline_sections"],
+        "checked_fields": list(DOCS_PROJECTION_CHECKED_FIELDS),
         "blockers": blockers,
         "mutation_performed": False,
         "agent_summary": (

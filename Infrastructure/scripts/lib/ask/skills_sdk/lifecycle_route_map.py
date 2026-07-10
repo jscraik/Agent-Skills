@@ -19,15 +19,26 @@ REQUIRED_ROUTE_IDS = {
     "tessl_confirmation_boundary",
     "knowledge_source_durability",
 }
-REQUIRED_LOOPS = {"Author loop", "Proof loop", "Release loop", "Runtime loop"}
+REQUIRED_LOOPS = {
+    "Entry Lifecycle Cycle",
+    "Early Lifecycle Cycle",
+    "Middle Lifecycle Cycle",
+    "Pre-release Lifecycle Cycle",
+    "Runtime Loop",
+}
 REQUIRED_STAGES = {
     "Foundry",
-    "SDK Lifecycle",
-    "Guardrails",
-    "Evals/Proof",
+    "SDK Entry Lifecycle",
+    "Guardrails/Sandbox Security Review",
+    "SDK Early Lifecycle",
+    "Evals/Proof (oss-local)",
     "Tessl Distribution",
     "Local Runtime Truth",
-    "Durable Memory",
+}
+ALLOWED_STAGES = REQUIRED_STAGES | {
+    "SDK Middle Lifecycle",
+    "Evals/Proof (oss-cloud)",
+    "SDK Pre-release Lifecycle",
 }
 
 
@@ -87,10 +98,10 @@ def _required_route_checks(routes: list[Any]) -> list[dict[str, Any]]:
     missing = sorted(REQUIRED_ROUTE_IDS - route_ids)
     missing_loops = sorted(REQUIRED_LOOPS - loops)
     missing_stages = sorted(REQUIRED_STAGES - stages)
-    unknown_stages = sorted(str(stage) for stage in stages if stage not in REQUIRED_STAGES)
+    unknown_stages = sorted(str(stage) for stage in stages if stage not in ALLOWED_STAGES)
     return [
         _required_routes_check(missing),
-        _check("required_loops_present", "blocker" if missing_loops else "pass", "Route map must name the four feedback loops.", missing_loops),
+        _check("required_loops_present", "blocker" if missing_loops else "pass", "Route map must name the lifecycle and runtime cycles.", missing_loops),
         _check("required_stages_present", "blocker" if missing_stages else "pass", "Route map must include all required pipeline stages.", missing_stages),
         _check("pipeline_stages_known", "blocker" if unknown_stages else "pass", "Route map stages must use canonical pipeline names.", unknown_stages),
     ]

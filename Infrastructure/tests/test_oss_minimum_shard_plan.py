@@ -58,7 +58,7 @@ class OssMinimumShardPlanTests(unittest.TestCase):
         policy_path = REPO_ROOT / "Infrastructure" / "config" / "skills-sdk" / "oss-minimum-proof-sets.v1.json"
         evals_path = REPO_ROOT / "Skills" / "agent-ops" / "improve-agent-native" / "references" / "evals.yaml"
         policy = json.loads(policy_path.read_text(encoding="utf-8"))
-        proof_set = policy["proof_sets"]["improve-agent-native-15-plus-5"]
+        proof_set = policy["proof_sets"]["improve-agent-native-release-8"]
         selected_case_ids = proof_set["core_cases"] + proof_set["regression_cases"]
         evals_payload = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
         cases_by_id = {case["id"]: case for case in evals_payload["cases"]}
