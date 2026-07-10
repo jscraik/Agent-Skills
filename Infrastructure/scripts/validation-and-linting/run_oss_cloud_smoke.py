@@ -79,6 +79,12 @@ def _approved_env_file(path: Path) -> Path | None:
     return None
 
 
+def _auth_source(path: Path) -> str:
+    if _approved_env_file(path) is None:
+        return "missing_or_invalid"
+    return "op_fifo" if stat.S_ISFIFO(path.stat().st_mode) else "op_reference"
+
+
 def _paths(output_dir: str | None) -> dict[str, Path]:
     root = Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="ask-oss-cloud-smoke."))
     root = root.expanduser().resolve()
@@ -161,7 +167,7 @@ def _receipt(
         "codex_profile": "oss-cloud",
         "model": _profile_value(profile, "model") if profile.is_file() else None,
         "model_provider": _profile_value(profile, "model_provider") if profile.is_file() else None,
-        "auth_source": "op_reference" if _approved_env_file(Path(args.op_env_file).expanduser()) else "missing_or_invalid",
+        "auth_source": _auth_source(Path(args.op_env_file).expanduser()),
         "provider_invoked": provider_invoked,
         "command": command,
         "duration_seconds": duration_seconds,

@@ -114,6 +114,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             os.mkfifo(env_file)
 
             self.assertEqual(self.runner._approved_env_file(env_file), env_file)
+            self.assertEqual(self.runner._auth_source(env_file), "op_fifo")
 
     def test_profile_findings_reject_wrong_model_and_provider(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

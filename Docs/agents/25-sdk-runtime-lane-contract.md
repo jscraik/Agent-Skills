@@ -105,7 +105,7 @@ For each lane, report:
 - If oss-cloud blocks on subscription or provider access, leave oss-cloud
   blocked and continue only with lanes that do not claim cloud confirmation.
 - Before a live oss-cloud retry, run
-  `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json` from a host context with 1Password desktop access. The runner accepts only the projected MiniMax/Ollama Cloud profile plus either a regular file containing an `OLLAMA_API_KEY=op://...` reference or the operator-approved FIFO that `op run --env-file` consumes. An empty, plaintext, malformed, or unavailable regular env source is a local preflight blocker: it must not start `codex exec` or be reported as a provider failure.
+  `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json` from a host context with 1Password desktop access. The runner accepts only the projected MiniMax/Ollama Cloud profile plus either a regular file containing an `OLLAMA_API_KEY=op://...` reference or the operator-approved FIFO that `op run --env-file` consumes. Its receipt records `auth_source=op_reference` or `auth_source=op_fifo` without reading the FIFO. An empty, plaintext, malformed, or unavailable regular env source is a local preflight blocker: it must not start `codex exec` or be reported as a provider failure.
 - If Tessl local blocks, preserve the `/tmp/ask-tessl-*` staged evidence and
   fix package shape, project-link setup, plugin pack output, or temp file-install
   setup before live scoring.
