@@ -158,17 +158,20 @@ class TestOssCloudSmoke(unittest.TestCase):
             root = Path(temp_dir)
             profile = root / "oss-cloud.config.toml"
             empty_env = root / "oss-cloud.env"
+            bin_dir = root / "bin"
+            bin_dir.mkdir()
             _write_profile(profile)
             empty_env.write_text("", encoding="utf-8")
+            op = _write_op(bin_dir)
+            env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}"}
 
-            proc = _run_cloud_smoke(root, profile, empty_env)
+            proc = _run_cloud_smoke(root, profile, empty_env, op_bin=op, env=env)
 
         self.assertEqual(proc.returncode, 1)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual({finding["code"] for finding in receipt["findings"]}, {"oss_cloud_credential_reference_missing"})
         self.assertFalse(receipt["provider_invoked"])
-
 
 if __name__ == "__main__":
     unittest.main()
