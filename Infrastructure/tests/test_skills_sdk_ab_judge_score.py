@@ -1019,6 +1019,17 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         )
         self.assertNotEqual(command[11], str(REPO_ROOT))
 
+    def test_cloud_op_env_file_requires_a_1password_reference(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as profile_dir:
+            env_file = Path(profile_dir) / "codex.env"
+            env_file.write_text("", encoding="utf-8")
+            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
+                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
+                self.assertEqual(codex_judge._codex_op_env_file_path(profile), env_file)
+
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
