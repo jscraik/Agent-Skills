@@ -107,6 +107,14 @@ class TestOssCloudSmoke(unittest.TestCase):
             valid.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
             self.assertEqual(self.runner._approved_env_file(valid), valid)
 
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
+    def test_approved_env_accepts_1password_fifo(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / "codex.env"
+            os.mkfifo(env_file)
+
+            self.assertEqual(self.runner._approved_env_file(env_file), env_file)
+
     def test_profile_findings_reject_wrong_model_and_provider(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "oss-cloud.config.toml"

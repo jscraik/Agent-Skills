@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -62,7 +63,15 @@ def _profile_findings(path: Path) -> list[dict[str, str]]:
 
 
 def _approved_env_file(path: Path) -> Path | None:
-    if path.is_symlink() or not path.is_file():
+    if path.is_symlink():
+        return None
+    try:
+        mode = path.stat().st_mode
+    except OSError:
+        return None
+    if stat.S_ISFIFO(mode):
+        return path
+    if not path.is_file():
         return None
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         if line.startswith("OLLAMA_API_KEY=op://") and len(line) > len("OLLAMA_API_KEY=op://"):
