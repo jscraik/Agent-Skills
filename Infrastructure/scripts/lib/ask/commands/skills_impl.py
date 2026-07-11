@@ -128,6 +128,11 @@ from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
     build_sandbox_profile_receipt as _build_sandbox_profile_receipt,
 )
+from ask.skills_sdk.project_manifest import (  # noqa: E402
+    ManifestEvaluation as _ManifestEvaluation,
+    evaluate_repo_manifest as _evaluate_repo_manifest,
+    evaluate_manifest_file as _evaluate_manifest_file,
+)
 from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
     install_project_skill as _install_project_skill,
@@ -2907,6 +2912,7 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
 
 PROJECT_SKILLS_SDK_MANIFEST = "skills-sdk.json"
 PROJECT_SKILLS_SDK_SCHEMA = "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json"
+PROJECT_SKILLS_SDK_SCHEMA_VERSION = "skills-sdk.project.v1"
 PROJECT_SKILL_ROOT_CLASSIFICATIONS = {
     "canonical_project_source",
     "generated_runtime_projection",
@@ -2925,32 +2931,34 @@ def _path_is_under_declared_skill_root(path: str, root: str) -> bool:
     return bool(root_parts) and path_parts[: len(root_parts)] == root_parts
 
 
+def _evaluate_project_skills_sdk_manifest(repo_root: Path | None) -> _ManifestEvaluation:
+    """Return the explicit absent/valid/invalid state for the owner-repo manifest.
+
+    An invalid manifest is never collapsed into ``absent``: it carries
+    deterministic, machine-readable blockers so ownership and lifecycle callers
+    can refuse to trust it instead of silently falling back to path heuristics.
+    """
+    return _evaluate_repo_manifest(repo_root)
+
+
 def _load_project_skills_sdk_manifest(repo_root: Path | None) -> dict[str, Any] | None:
-    if repo_root is None:
-        return None
-    manifest_path = repo_root / PROJECT_SKILLS_SDK_MANIFEST
-    if not manifest_path.is_file():
-        return None
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
-    if not isinstance(payload, dict):
-        return None
-    if payload.get("schema_version") != "skills-sdk.project.v1":
-        return None
-    seen_root_paths: set[str] = set()
-    for root in payload.get("skill_roots", []):
-        if not isinstance(root, dict):
-            continue
-        root_path = str(root.get("path") or "").strip().strip("/")
-        if not root_path:
-            continue
-        normalized_root = "/".join(_repo_relative_path_parts(root_path))
-        if normalized_root in seen_root_paths:
-            return None
-        seen_root_paths.add(normalized_root)
-    return payload
+    """Return the manifest payload only when it evaluates to a trusted valid state."""
+    evaluation = _evaluate_project_skills_sdk_manifest(repo_root)
+    return evaluation.manifest if evaluation.is_valid else None
+
+
+def _manifest_state_summary(evaluation: _ManifestEvaluation) -> dict[str, Any]:
+    """Expose owner-manifest state for machine-readable doctor/ownership output."""
+    return {
+        "state": evaluation.state,
+        "path": evaluation.path,
+        "schema": PROJECT_SKILLS_SDK_SCHEMA,
+        "schema_version": PROJECT_SKILLS_SDK_SCHEMA_VERSION,
+        "legacy_compat": evaluation.legacy_compat,
+        "missing_contract_fields": list(evaluation.missing_contract_fields),
+        "blockers": evaluation.blocker_dicts(),
+        "compatibility_note": evaluation.compatibility_note(),
+    }
 
 
 def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[str, Any] | None:
@@ -4007,8 +4015,22 @@ def skills_doctor(
         str(projection_path_value) if projection_path_value else None,
         repo_root=repo_root,
     )
+    manifest_evaluation = _evaluate_project_skills_sdk_manifest(repo_root)
+    manifest_state = _manifest_state_summary(manifest_evaluation)
     ownership_status = "pass"
-    if target_ownership.get("classification") in {
+    if manifest_evaluation.state == "invalid":
+        ownership_status = "fail"
+        first_blocker = manifest_evaluation.blockers[0]
+        blockers.append(
+            _doctor_blocker(
+                "blocked_validation",
+                (
+                    "Owner-repo skills-sdk.json is present but invalid and cannot be treated as absent: "
+                    f"{first_blocker.message} Resolve the manifest blockers before ownership is trusted."
+                ),
+            )
+        )
+    elif target_ownership.get("classification") in {
         "generated_runtime_projection",
         "client_runtime_config",
     }:
@@ -4035,6 +4057,7 @@ def skills_doctor(
         projection_path=projection_path_value,
         projection_editable=bool(projection_ownership.get("editable_source")),
         owner_manifest_schema=PROJECT_SKILLS_SDK_SCHEMA,
+        owner_manifest_state=manifest_state,
     )
 
     audit_level = "strict" if strict else "compat"
@@ -8611,13 +8634,10 @@ def _sdk_improve_project_root(project_root: str | None) -> Path | None:
         return None
 
 
-def _sdk_improve_load_manifest(project_root: Path) -> tuple[Path, dict[str, Any] | None]:
+def _sdk_improve_load_manifest(project_root: Path) -> tuple[Path, _ManifestEvaluation]:
     manifest_path = project_root / PROJECT_SKILLS_SDK_MANIFEST
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return manifest_path, None
-    return manifest_path, manifest if isinstance(manifest, dict) else None
+    evaluation = _evaluate_manifest_file(manifest_path, display_path=PROJECT_SKILLS_SDK_MANIFEST)
+    return manifest_path, evaluation
 
 
 def _sdk_improve_project_id(manifest: dict[str, Any] | None, project_root: Path) -> str:
@@ -8894,8 +8914,19 @@ def skills_sdk_project_improve(
             receipt=receipt,
         )
 
-    manifest_path, manifest = _sdk_improve_load_manifest(resolved_project_root)
-    if manifest is None:
+    manifest_path, manifest_evaluation = _sdk_improve_load_manifest(resolved_project_root)
+    if not manifest_evaluation.is_valid:
+        if manifest_evaluation.state == "absent":
+            blocker_codes = ["missing_skills_sdk_manifest"]
+            message = "Skills SDK improve requires an owner repo skills-sdk.json manifest that is absent."
+            fix_suggestion = "Create skills-sdk.json with a canonical_project_source skill_roots entry."
+        else:
+            blocker_codes = ["invalid_skills_sdk_manifest", *manifest_evaluation.blocker_codes()]
+            message = (
+                "Skills SDK improve found a skills-sdk.json manifest that is invalid and cannot be "
+                "treated as absent."
+            )
+            fix_suggestion = "Resolve the manifest blockers so it matches the skills-sdk.project.v1 contract."
         receipt = {
             "schema_version": "skills-sdk.project-improvement-receipt.v0",
             "status": "blocked",
@@ -8903,7 +8934,10 @@ def skills_sdk_project_improve(
             "target": query,
             "project_root": str(resolved_project_root),
             "manifest_path": _sdk_improve_project_relative(resolved_project_root, manifest_path),
-            "blockers": ["missing_or_invalid_skills_sdk_manifest"],
+            "manifest_state": manifest_evaluation.state,
+            "manifest_blockers": manifest_evaluation.blocker_dicts(),
+            "manifest_compatibility_note": manifest_evaluation.compatibility_note(),
+            "blockers": blocker_codes,
             "mutation_performed": False,
             "source_mutation_performed": False,
             "validation_commands": [
@@ -8914,10 +8948,11 @@ def skills_sdk_project_improve(
             result=result,
             query=query,
             status="blocked",
-            message="Skills SDK improve requires a valid owner repo skills-sdk.json manifest.",
-            fix_suggestion="Create skills-sdk.json with a canonical_project_source skill_roots entry.",
+            message=message,
+            fix_suggestion=fix_suggestion,
             receipt=receipt,
         )
+    manifest = manifest_evaluation.manifest
 
     target_info, _audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None

@@ -470,5 +470,66 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             self.assertEqual(registry["skills"][0]["lifecycle"]["state"], "blocked")
             self.assertEqual(registry["skills"][0]["evals"]["status"], "blocked")
 
+    def test_improve_blocks_absent_manifest_distinctly(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = Path(tmp) / "no-manifest"
+            skill_root = project_root / ".codex" / "skills" / "x-content-writer"
+            skill_root.mkdir(parents=True)
+            _write_codex_skill(skill_root)
+
+            result = skills_sdk_project_improve(
+                REPO_ROOT,
+                str(skill_root / "SKILL.md"),
+                project_root=str(project_root),
+            )
+
+        self.assertEqual(result.status, "error")
+        receipt = result.data["skills_sdk_project_improve"]["receipt"]
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["manifest_state"], "absent")
+        self.assertEqual(receipt["blockers"], ["missing_skills_sdk_manifest"])
+
+    def test_improve_blocks_invalid_manifest_with_manifest_blockers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            # Corrupt the manifest into invalid JSON; must not be treated as absent.
+            (project_root / "skills-sdk.json").write_text("{not-json", encoding="utf-8")
+
+            result = skills_sdk_project_improve(
+                REPO_ROOT,
+                str(skill_md),
+                project_root=str(project_root),
+            )
+
+        self.assertEqual(result.status, "error")
+        receipt = result.data["skills_sdk_project_improve"]["receipt"]
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["manifest_state"], "invalid")
+        self.assertIn("invalid_skills_sdk_manifest", receipt["blockers"])
+        self.assertIn("manifest_invalid_json", receipt["blockers"])
+        self.assertIn(
+            "manifest_invalid_json",
+            [blocker["class"] for blocker in receipt["manifest_blockers"]],
+        )
+
+    def test_improve_blocks_wrong_schema_version_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            manifest = _project_manifest_with_skill_roots()
+            manifest["schema_version"] = "skills-sdk.project.v2"
+            (project_root / "skills-sdk.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+            result = skills_sdk_project_improve(
+                REPO_ROOT,
+                str(skill_md),
+                project_root=str(project_root),
+            )
+
+        self.assertEqual(result.status, "error")
+        receipt = result.data["skills_sdk_project_improve"]["receipt"]
+        self.assertEqual(receipt["manifest_state"], "invalid")
+        self.assertIn("manifest_schema_version_unsupported", receipt["blockers"])
+
+
 if __name__ == "__main__":
     unittest.main()
