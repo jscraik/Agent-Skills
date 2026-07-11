@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -7,6 +8,7 @@ from typing import Any
 SCHEMA_VERSION = "skills-sdk.eval-shard-aggregate-receipt.v0"
 SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json"
 MAX_SHARD_CASES = 2
+GOLD_STANDARD_RUBRIC_PATH = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")
 
 
 class EvalShardAggregateError(ValueError):
@@ -93,6 +95,21 @@ def _identity_sets(receipts: list[dict[str, Any]]) -> dict[str, set[str]]:
     return {field: {str(receipt.get(field) or "") for receipt in receipts} for field in fields}
 
 
+def _digest_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _current_rubric_digest(repo_root: Path) -> str | None:
+    try:
+        return _digest_file(repo_root / GOLD_STANDARD_RUBRIC_PATH)
+    except OSError:
+        return None
+
+
 def _all_shards_pass(receipts: list[dict[str, Any]]) -> bool:
     return bool(receipts) and all(row.get("status") == "pass" for row in receipts)
 
@@ -120,6 +137,17 @@ def _identities_match(receipts: list[dict[str, Any]], identities: dict[str, set[
 def _dataset_digest_check(receipts: list[dict[str, Any]]) -> dict[str, Any]:
     digests = [str(receipt.get("dataset_digest") or "").strip() for receipt in receipts]
     return _check("dataset_digests_present", bool(receipts) and all(digests), digests)
+
+
+def _current_rubric_check(identities: dict[str, set[str]], expected_digest: str | None) -> dict[str, Any]:
+    return _check(
+        "shards_match_current_rubric",
+        expected_digest is not None and identities["rubric_digest"] == {expected_digest},
+        [
+            f"expected:{expected_digest or 'missing'}",
+            f"actual:{','.join(sorted(identities['rubric_digest']))}",
+        ],
+    )
 
 
 def _shard_checks(
@@ -209,6 +237,7 @@ def build_eval_shard_aggregate_receipt(
     dataset_digests = sorted({str(receipt.get("dataset_digest") or "") for receipt in receipts})
     checks = _shard_checks(receipts, identities, path_errors, [label for label, _ in loaded], profile)
     checks.append(_dataset_digest_check(receipts))
+    checks.append(_current_rubric_check(identities, _current_rubric_digest(repo_root)))
     dataset_digests = [digest for digest in dataset_digests if digest]
     if expected_package_digest is not None:
         checks.append(
