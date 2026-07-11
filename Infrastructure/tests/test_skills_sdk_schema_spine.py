@@ -454,7 +454,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["repeat_penalty"], 1.15)
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["top_k"], 40)
         self.assertEqual(judge_by_id["oss-cloud"]["provider"], "codex")
-        self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(judge_by_id["oss-cloud"]["model"], "minimax-m2.7:cloud")
         self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
         self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
         self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")

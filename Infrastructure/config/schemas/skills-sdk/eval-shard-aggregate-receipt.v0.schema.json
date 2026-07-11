@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json",
+  "title": "Skills SDK Eval Shard Aggregate Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "skills-sdk.eval-shard-aggregate-receipt.v0"},
+    "schema_uri": {"const": "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json"},
+    "status": {"enum": ["pass", "blocked"]},
+    "lane": {"enum": ["oss-local", "oss-cloud"]},
+    "profile": {"enum": ["oss-local", "oss-cloud"]},
+    "package_id": {"type": ["string", "null"]},
+    "package_digest": {"type": ["string", "null"]},
+    "execution_model": {"type": ["string", "null"]},
+    "execution_model_family": {"type": ["string", "null"]},
+    "execution_model_provider": {"type": ["string", "null"]},
+    "execution_identity_source": {"type": ["string", "null"]},
+    "codex_exec_invoked": {"type": "boolean"},
+    "codex_profile": {"type": ["string", "null"]},
+    "shard_dataset_digests": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "rubric_digest": {"type": ["string", "null"]},
+    "scenario_set_id": {"type": "string", "minLength": 1},
+    "scenario_set_case_ids": {"type": "array", "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "shard_receipts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "shard_count": {"type": "integer", "minimum": 0},
+    "case_count": {"type": "integer", "minimum": 0},
+    "passed_count": {"type": "integer", "minimum": 0},
+    "failed_count": {"type": "integer", "minimum": 0},
+    "cases": {"type": "array", "items": {"type": "object"}},
+    "checks": {"type": "array", "items": {"$ref": "#/$defs/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/$defs/check"}},
+    "mutation_performed": {"const": false},
+    "claims_boundary": {"type": "string", "minLength": 1},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": ["schema_version", "schema_uri", "status", "lane", "profile", "package_id", "package_digest", "execution_model", "execution_model_family", "execution_model_provider", "execution_identity_source", "codex_exec_invoked", "codex_profile", "shard_dataset_digests", "rubric_digest", "scenario_set_id", "scenario_set_case_ids", "shard_receipts", "shard_count", "case_count", "passed_count", "failed_count", "cases", "checks", "blockers", "mutation_performed", "claims_boundary", "agent_summary"],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "shard_dataset_digests": {"minItems": 1},
+          "shard_receipts": {"minItems": 1},
+          "shard_count": {"minimum": 1},
+          "scenario_set_case_ids": {"minItems": 5},
+          "codex_exec_invoked": {"const": true},
+          "codex_profile": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]},
+      "then": {"properties": {"blockers": {"minItems": 1}}}
+    }
+  ],
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["pass", "blocker"]},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "evidence"]
+    }
+  }
+}

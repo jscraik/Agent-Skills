@@ -131,8 +131,8 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list
                 issues.append(f"checks[{idx}].{field} must be a non-empty string")
         if check.get("mode") not in {"required", "warn"}:
             issues.append(f"checks[{idx}].mode must be required|warn")
-        if check.get("result") not in {"pass", "fail", "blocked"}:
-            issues.append(f"checks[{idx}].result must be pass|fail|blocked")
+        if check.get("result") not in {"pass", "fail", "blocked", "skipped"}:
+            issues.append(f"checks[{idx}].result must be pass|fail|blocked|skipped")
         log_file = check.get("log_file")
         if log_file is not None and (not isinstance(log_file, str) or not log_file.strip()):
             issues.append(f"checks[{idx}].log_file must be null or a non-empty string")
@@ -140,33 +140,9 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list
     return issues
 
 
-def main() -> int:
-    """
-    Run the CLI: read TSV check results, build a selection-gate-severity JSON artefact, validate it against the schema, write it to the output path and report any issues.
-    
-    The function:
-    - Loads check rows from the provided TSV; prints the error and returns 1 if loading fails.
-    - Ensures any specified required checks exist and have mode "required", collecting issues for missing or mismatched entries.
-    - Constructs per-check entries with `rationale` derived from the check `result`, computes `all_required_passed`, and assembles the payload.
-    - Performs structural validation against the provided schema path and aggregates any validation issues.
-    - Writes the JSON artefact to the output path (creating parent directories as needed).
-    - Prints the artefact path and either a summary of validation issues or a success message.
-    
-    Returns:
-        int: `0` on successful validation and write; `1` on TSV parse errors or if any validation issues are detected.
-    """
-    args = parse_args()
-
-    try:
-        rows = _load_check_rows(args.check_results)
-    except ValueError as exc:
-        print(str(exc))
-        return 1
-
-    required_checks = sorted(set(args.required_check))
+def _required_check_issues(rows: list[dict[str, str]], required_checks: list[str]) -> list[str]:
     by_name = {row["name"]: row for row in rows}
     issues: list[str] = []
-
     for required_name in required_checks:
         row = by_name.get(required_name)
         if row is None:
@@ -174,48 +150,68 @@ def main() -> int:
             continue
         if row["mode"] != "required":
             issues.append(f"required check must be mode=required: {required_name} (actual={row['mode']})")
+    return issues
 
-    checks: list[dict[str, Any]] = []
-    for row in rows:
-        result = row["result"]
-        rationale = "check passed"
-        if result == "fail":
-            rationale = "check failed; inspect log"
-        elif result == "blocked":
-            rationale = "check blocked; inspect log"
-        checks.append(
-            {
-                "name": row["name"],
-                "mode": row["mode"],
-                "result": result,
-                "rationale": rationale,
-                "log_file": row["log_file"],
-            }
-        )
 
-    all_required_passed = True
-    for check in checks:
-        if check["mode"] == "required" and check["result"] != "pass":
-            all_required_passed = False
-            break
+def _check_rationale(result: str) -> str:
+    return {
+        "fail": "check failed; inspect log",
+        "blocked": "check blocked; inspect log",
+        "skipped": "check skipped; outside validation scope",
+    }.get(result, "check passed")
 
-    payload = {
+
+def _build_checks(rows: list[dict[str, str]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": row["name"],
+            "mode": row["mode"],
+            "result": row["result"],
+            "rationale": _check_rationale(row["result"]),
+            "log_file": row["log_file"],
+        }
+        for row in rows
+    ]
+
+
+def _build_payload(run_id: str, checks: list[dict[str, Any]]) -> dict[str, Any]:
+    all_required_passed = all(
+        check["mode"] != "required" or check["result"] in {"pass", "skipped"}
+        for check in checks
+    )
+    return {
         "schema_version": "selection-gate-severity.v1",
-        "run_id": args.run_id,
+        "run_id": run_id,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "all_required_passed": all_required_passed,
         "checks": checks,
     }
 
-    structural_issues = _validate_against_schema(payload, args.schema)
-    issues.extend(structural_issues)
 
+def _report_issues(issues: list[str]) -> int:
     if issues:
         print("Selection gate severity validation failed:")
         for issue in issues:
             print(f"- {issue}")
         return 1
+    return 0
 
+
+def main() -> int:
+    """Build, validate, and write the selection-gate severity artifact."""
+    args = parse_args()
+    try:
+        rows = _load_check_rows(args.check_results)
+    except ValueError as exc:
+        print(str(exc))
+        return 1
+
+    checks = _build_checks(rows)
+    payload = _build_payload(args.run_id, checks)
+    issues = _required_check_issues(rows, sorted(set(args.required_check)))
+    issues.extend(_validate_against_schema(payload, args.schema))
+    if _report_issues(issues):
+        return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"selection-gate-severity artifact: {args.output}")

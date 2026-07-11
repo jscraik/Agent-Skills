@@ -75,7 +75,7 @@ Before Tessl dry-run or live scoring, require `scenario-sources.json` to show:
 
 - skill-owned `references/evals.yaml` cases;
 - reviewed generated fixtures from `references/evals/*.md` when present;
-- at least 20 gold-standard structured scenarios for behavioral readiness;
+- 5 to 10 gold-standard structured scenarios for behavioral readiness, targeting 8 and preserving the same case ids across `oss-local`, `oss-cloud`, Tessl dry-run, and external evaluation;
 - `structure_only: true` only when the package contract explicitly declares a
   package-shape exception.
 

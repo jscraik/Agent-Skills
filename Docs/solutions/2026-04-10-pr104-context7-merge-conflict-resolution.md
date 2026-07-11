@@ -3,7 +3,7 @@ title: PR merge conflict resolution with isolated worktree and hook-safe push fa
 asset_family: pull request conflict remediation
 owner: Agent Skills Team
 source_artifact: product/docs/context7/SKILL.md
-freshness_reviewed_on: 2026-04-10
+freshness_reviewed_on: 2026-07-10
 last_updated: 2026-04-10
 review_after_days: 90
 ---

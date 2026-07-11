@@ -2175,13 +2175,30 @@ def test_tessl_live_private_caps_yaml_set_before_generated_fixtures(tmp_path: Pa
     manifest = json.loads((staged_source / "scenario-sources.json").read_text(encoding="utf-8"))
     assert len(staged_case_ids) == evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS
     assert "generated-eval.reviewed.generated-fixture" not in staged_case_ids
-    assert "yaml-case-20" not in staged_case_ids
+    excluded_id = f"yaml-case-{evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS:02d}"
+    assert excluded_id not in staged_case_ids
     assert manifest["generated_fixture_cases"] == 1
     assert manifest["default_live_selection"]["excluded_generated_fixture_case_ids"] == [
         "generated-eval.reviewed.generated-fixture"
     ]
-    assert manifest["default_live_selection"]["excluded_over_cap_case_ids"] == ["yaml-case-20"]
+    assert manifest["default_live_selection"]["excluded_over_cap_case_ids"] == [excluded_id]
     assert evals._tessl_live_budget_preflight(staged_source)["status"] == "pass"
+
+
+def test_tessl_live_private_selects_declared_release_set_before_cap() -> None:
+    base_cases = [{"id": f"case-{index:02d}"} for index in range(12)]
+    release_ids = {f"case-{index:02d}" for index in range(4, 12)}
+    manifest: dict[str, object] = {}
+
+    selected = evals._select_default_tessl_live_cases(
+        base_cases,
+        list(base_cases),
+        manifest,
+        release_ids,
+    )
+
+    assert [case["id"] for case in selected] == [f"case-{index:02d}" for index in range(4, 12)]
+    assert manifest["default_live_selection"]["policy"] == "declared_release_set_capped_before_live_budget"
 
 
 def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
@@ -2294,7 +2311,7 @@ def test_tessl_local_proof_execute_uses_temp_install_workspace_and_no_publish(tm
         assert call.kwargs["env"]["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] == "0"
 
 
-def test_tessl_live_private_requires_twenty_behavioral_scenarios(tmp_path: Path) -> None:
+def test_tessl_live_private_requires_five_behavioral_scenarios(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
     fixture_dir = skill_root / "references" / "evals"
@@ -2319,9 +2336,9 @@ def test_tessl_live_private_requires_twenty_behavioral_scenarios(tmp_path: Path)
     except ValueError as exc:
         message = str(exc)
     else:
-        raise AssertionError("expected behavioral live staging to require 20 scenarios")
+        raise AssertionError("expected behavioral live staging to require 5 scenarios")
 
-    assert "require at least 20 gold-standard structured scenarios" in message
+    assert "require at least 5 gold-standard structured scenarios" in message
     assert "Found 2" in message
 
 
@@ -3253,9 +3270,9 @@ def test_tessl_live_budget_preflight_blocks_over_cap_and_generated_cases(tmp_pat
     assert any("generated-eval" in blocker for blocker in preflight["blockers"])
 
 
-def test_tessl_live_budget_preflight_passes_twenty_non_generated_cases(tmp_path: Path) -> None:
+def test_tessl_live_budget_preflight_passes_target_eight_non_generated_cases(tmp_path: Path) -> None:
     evals_root = tmp_path / "evals"
-    for index in range(evals.TESSL_LIVE_PRIVATE_MAX_SCENARIOS):
+    for index in range(evals.TESSL_LIVE_PRIVATE_TARGET_SCENARIOS):
         case_root = evals_root / f"case-{index:02d}"
         case_root.mkdir(parents=True)
         (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
@@ -3264,10 +3281,25 @@ def test_tessl_live_budget_preflight_passes_twenty_non_generated_cases(tmp_path:
     preflight = evals._tessl_live_budget_preflight(tmp_path)
 
     assert preflight["status"] == "pass"
-    assert preflight["scenario_count"] == 20
-    assert preflight["expected_solution_runs"] == 40
-    assert preflight["expected_score_runs"] == 40
-    assert preflight["expected_model_tasks"] == 80
+    assert preflight["scenario_count"] == 8
+    assert preflight["target_scenarios"] == 8
+    assert preflight["expected_solution_runs"] == 16
+    assert preflight["expected_score_runs"] == 16
+    assert preflight["expected_model_tasks"] == 32
+
+
+def test_tessl_live_budget_preflight_blocks_below_five(tmp_path: Path) -> None:
+    evals_root = tmp_path / "evals"
+    for index in range(evals.TESSL_LIVE_PRIVATE_MIN_SCENARIOS - 1):
+        case_root = evals_root / f"case-{index:02d}"
+        case_root.mkdir(parents=True)
+        (case_root / "task.md").write_text("Do the task.\n", encoding="utf-8")
+        (case_root / "criteria.json").write_text("[]\n", encoding="utf-8")
+
+    preflight = evals._tessl_live_budget_preflight(tmp_path)
+
+    assert preflight["status"] == "blocked"
+    assert any("coverage floor" in blocker for blocker in preflight["blockers"])
 
 
 def test_evals_live_private_uses_default_workspace(tmp_path: Path) -> None:

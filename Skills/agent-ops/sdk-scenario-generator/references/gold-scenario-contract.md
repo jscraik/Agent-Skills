@@ -77,8 +77,11 @@ the file-based harness shape instead of copying SDK-internal fields verbatim:
 - The visible task does not include the exact expected answer, scoring mechanics, hidden criteria, or fixture path.
 - Acceptance does not score skill-name mentions, provenance-only file paths, or generic quality language as the main proof.
 - Criteria are observable or judge-calibrated, with one assertion per criterion.
-- Each behavioral skill has at least 20 gold-standard scenarios before live Tessl readiness.
-- A behavioral set should include at least 4 generic SDK structure/layout cases, 8 bespoke happy or edge cases, 4 negative or should-not-trigger cases, and 4 pressure, adversarial, or regression cases.
+- Each behavioral skill declares 5 to 10 gold-standard scenarios before live Tessl readiness; target 8 distinct, high-value scenarios.
+- A target-eight set should normally include 2 foundation or layout cases, 3 bespoke happy or edge cases, 1 negative or should-not-trigger case, and 2 pressure, adversarial, or regression cases. Adjust the mix when the risk model justifies it, but do not add filler.
+- `oss-local` authors and repairs the set, `oss-cloud` checks the same case ids, and Tessl dry-run plus external evaluation preserve those exact ids. Any set change restarts at `oss-local`.
+- Declare `skills-sdk.evaluation-lane-policy.v1` when using development pools: 20 local cases, 10 cloud cases made from the release eight plus 2 rotating local growth cases, and the unchanged release eight for Tessl comparison.
+- Keep release case ids, criteria digest, rubric digest, scorer version, and package digest fixed for before/after Tessl comparison. Changing any identity field starts a new baseline version.
 - For tile exports, the task must be feasible with no extra files, no special
   accounts, no API keys, no proprietary software, no follow-up interaction, and
   a roughly 10-minute completion budget.

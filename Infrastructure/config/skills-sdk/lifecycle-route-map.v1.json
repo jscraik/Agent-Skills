@@ -1,11 +1,12 @@
 {
   "schema_version": "skills-sdk.lifecycle-route-map.v1",
   "status": "truth_surface",
+  "coverage": "executable_routes_only; canonical pipeline order is enforced by the Atlas projection validator",
   "routes": [
     {
       "id": "foundry_status",
       "pipeline_stage": "Foundry",
-      "loop": "Author loop",
+      "loop": "Entry Lifecycle Cycle",
       "command": "./bin/ask sdk status --json --robot",
       "owner_module": "ask.skills_sdk.capability_status",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/capability-status.v1.schema.json",
@@ -15,8 +16,8 @@
     },
     {
       "id": "adoption_decision",
-      "pipeline_stage": "Guardrails",
-      "loop": "Release loop",
+      "pipeline_stage": "Guardrails/Sandbox Security Review",
+      "loop": "Early Lifecycle Cycle",
       "command": "./bin/ask sdk intake adopt <skill-dir> --trust-receipt <trust.json> --preview --json --robot",
       "owner_module": "ask.skills_sdk.adoption_decision",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json",
@@ -26,8 +27,8 @@
     },
     {
       "id": "command_evidence_plan",
-      "pipeline_stage": "Evals/Proof",
-      "loop": "Proof loop",
+      "pipeline_stage": "Evals/Proof (oss-local)",
+      "loop": "Middle Lifecycle Cycle",
       "command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
       "owner_module": "ask.skills_sdk.command_evidence_plan",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json",
@@ -37,8 +38,8 @@
     },
     {
       "id": "lifecycle_route_map",
-      "pipeline_stage": "SDK Lifecycle",
-      "loop": "Author loop",
+      "pipeline_stage": "SDK Entry Lifecycle",
+      "loop": "Entry Lifecycle Cycle",
       "command": "./bin/ask sdk route-map --preview --json --robot",
       "owner_module": "ask.skills_sdk.lifecycle_route_map",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/lifecycle-route-map-receipt.v0.schema.json",
@@ -49,7 +50,7 @@
     {
       "id": "tessl_confirmation_boundary",
       "pipeline_stage": "Tessl Distribution",
-      "loop": "Release loop",
+      "loop": "Pre-release Lifecycle Cycle",
       "command": "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot",
       "owner_module": "ask.skills_sdk.tessl_score_receipt",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/tessl-score-receipt.v0.schema.json",
@@ -59,8 +60,8 @@
     },
     {
       "id": "knowledge_source_durability",
-      "pipeline_stage": "Durable Memory",
-      "loop": "Runtime loop",
+      "pipeline_stage": "SDK Early Lifecycle",
+      "loop": "Early Lifecycle Cycle",
       "command": "./bin/ask sdk knowledge durability --skill <skill-path> --preview --json --robot",
       "owner_module": "ask.skills_sdk.knowledge_durability",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json",
@@ -71,7 +72,7 @@
     {
       "id": "local_runtime_install_preview",
       "pipeline_stage": "Local Runtime Truth",
-      "loop": "Runtime loop",
+      "loop": "Runtime Loop",
       "command": "./bin/ask sdk install <skill> --preview --scope project --json --robot",
       "owner_module": "ask.skills_sdk.install_preview",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
