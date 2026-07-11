@@ -149,12 +149,12 @@ PY
 echo "[family-gate] Harness Engineering preserved-context alias passed"
 
 echo "[family-gate] validating Harness Engineering subagent routing"
-he_subagent_args=()
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
-  he_subagent_args+=(--changed-files "${changed_files[@]}")
+  "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py \
+    --changed-files "${changed_files[@]}"
+else
+  "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py
 fi
-"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py \
-  "${he_subagent_args[@]}"
 echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(
