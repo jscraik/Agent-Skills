@@ -5816,6 +5816,46 @@ def skills_sdk_eval_scenario_quality(
     return result
 
 
+def _blocked_eval_shard_aggregate_receipt(
+    *,
+    profile: str,
+    scenario_set: str,
+    message: str,
+) -> dict[str, Any]:
+    """Return a schema-complete blocked aggregate receipt for early input failures."""
+    blocker = {"id": "aggregate_input_invalid", "status": "blocker", "evidence": [message]}
+    return {
+        "schema_version": "skills-sdk.eval-shard-aggregate-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json",
+        "status": "blocked",
+        "lane": profile,
+        "profile": profile,
+        "package_id": None,
+        "package_digest": None,
+        "execution_model": None,
+        "execution_model_family": None,
+        "execution_model_provider": None,
+        "execution_identity_source": None,
+        "codex_exec_invoked": False,
+        "codex_profile": None,
+        "shard_dataset_digests": [],
+        "rubric_digest": None,
+        "scenario_set_id": scenario_set,
+        "scenario_set_case_ids": [],
+        "shard_receipts": [],
+        "shard_count": 0,
+        "case_count": 0,
+        "passed_count": 0,
+        "failed_count": 0,
+        "cases": [],
+        "checks": [blocker],
+        "blockers": [blocker],
+        "mutation_performed": False,
+        "claims_boundary": "This blocked receipt proves only that shard aggregation input validation failed before aggregation.",
+        "agent_summary": f"{profile} shard aggregation input is invalid: {message}",
+    }
+
+
 def skills_sdk_eval_shard_aggregate(
     repo_root: Path,
     *,
@@ -5849,12 +5889,11 @@ def skills_sdk_eval_shard_aggregate(
         if isinstance(exc, EvalShardAggregateError):
             receipt = exc.receipt
         else:
-            receipt = {
-                "schema_version": "skills-sdk.eval-shard-aggregate-receipt.v0",
-                "status": "blocked",
-                "blockers": [{"id": "aggregate_input_invalid", "status": "blocker", "evidence": [str(exc)]}],
-                "agent_summary": f"{codex_profile} shard aggregation input is invalid: {exc}",
-            }
+            receipt = _blocked_eval_shard_aggregate_receipt(
+                profile=codex_profile,
+                scenario_set=scenario_set,
+                message=str(exc),
+            )
     payload = {
         "schema_version": "skills-sdk-eval-shard-aggregate.v0",
         "status": receipt["status"],

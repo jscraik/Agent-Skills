@@ -27,6 +27,7 @@ from ask.skills_sdk.release_scenario_sets import (
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
     RELEASE_SCENARIO_TARGET,
+    release_scenario_set_case_ids,
 )
 
 
@@ -1620,6 +1621,7 @@ def _select_default_tessl_live_cases(
     base_cases: list[dict[str, object]],
     merged_cases: list[dict[str, object]],
     scenario_manifest: dict[str, object],
+    release_case_ids: set[str] | None = None,
 ) -> list[dict[str, object]]:
     if scenario_manifest.get("structure_only_exception"):
         scenario_manifest["default_live_selection"] = {
@@ -1636,11 +1638,19 @@ def _select_default_tessl_live_cases(
         for case in merged_cases
         if str(case.get("id")) not in base_by_id
     ]
-    selected = list(base_cases)
+    selected = (
+        [case for case in base_cases if str(case.get("id")) in release_case_ids]
+        if release_case_ids
+        else list(base_cases)
+    )
     over_cap_cases = selected[TESSL_LIVE_PRIVATE_MAX_SCENARIOS:]
     selected = selected[:TESSL_LIVE_PRIVATE_MAX_SCENARIOS]
     scenario_manifest["default_live_selection"] = {
-        "policy": "yaml_confirmation_set_capped_before_live_budget",
+        "policy": (
+            "declared_release_set_capped_before_live_budget"
+            if release_case_ids
+            else "yaml_confirmation_set_capped_before_live_budget"
+        ),
         "staged_case_count": len(selected),
         "max_scenarios_default": TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
         "excluded_generated_fixture_case_ids": generated_fixture_ids,
@@ -2335,7 +2345,16 @@ def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path
             f"Found {len(cases)}. Add bespoke generated scenarios, review/import them into references/evals.yaml "
             "or references/evals/*.md, then rerun the dry-run staging lane before using Tessl live runs."
         )
-    cases = _select_default_tessl_live_cases(base_cases, cases, scenario_manifest)
+    from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
+
+    evals_payload = _yaml_safe_load(evals_path.read_text(encoding="utf-8"))
+    release_case_ids = release_scenario_set_case_ids(evals_payload)
+    cases = _select_default_tessl_live_cases(
+        base_cases,
+        cases,
+        scenario_manifest,
+        release_case_ids,
+    )
     scenario_manifest["min_scenarios_required"] = TESSL_LIVE_PRIVATE_MIN_SCENARIOS
     scenario_manifest["target_scenarios"] = TESSL_LIVE_PRIVATE_TARGET_SCENARIOS
     scenario_manifest["max_scenarios_allowed"] = TESSL_LIVE_PRIVATE_MAX_SCENARIOS

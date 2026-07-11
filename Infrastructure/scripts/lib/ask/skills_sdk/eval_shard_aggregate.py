@@ -167,6 +167,11 @@ def _receipt_payload(
     scenario_set: str, expected_ids: list[str], result_cases: list[dict[str, Any]], checks: list[dict[str, Any]], profile: str,
 ) -> dict[str, Any]:
     blockers = [check for check in checks if check["status"] == "blocker"]
+    codex_exec_check = next(
+        (check for check in checks if check["id"] == "codex_exec_proof_present"),
+        None,
+    )
+    codex_exec_invoked = bool(codex_exec_check and codex_exec_check["status"] == "pass")
     return {
         "schema_version": SCHEMA_VERSION, "schema_uri": SCHEMA_URI,
         "status": "pass" if not blockers else "blocked", "lane": profile, "profile": profile,
@@ -175,6 +180,8 @@ def _receipt_payload(
         "execution_model_family": _single_identity(identities, "execution_model_family"),
         "execution_model_provider": _single_identity(identities, "execution_model_provider"),
         "execution_identity_source": _single_identity(identities, "execution_identity_source"),
+        "codex_exec_invoked": codex_exec_invoked,
+        "codex_profile": profile if codex_exec_invoked else None,
         "shard_dataset_digests": dataset_digests, "rubric_digest": _single_identity(identities, "rubric_digest"),
         "scenario_set_id": scenario_set, "scenario_set_case_ids": expected_ids,
         "shard_receipts": [label for label, _ in loaded], "shard_count": len(loaded), "case_count": len(result_cases),

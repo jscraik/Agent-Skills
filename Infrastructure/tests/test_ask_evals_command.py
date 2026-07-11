@@ -2185,6 +2185,22 @@ def test_tessl_live_private_caps_yaml_set_before_generated_fixtures(tmp_path: Pa
     assert evals._tessl_live_budget_preflight(staged_source)["status"] == "pass"
 
 
+def test_tessl_live_private_selects_declared_release_set_before_cap() -> None:
+    base_cases = [{"id": f"case-{index:02d}"} for index in range(12)]
+    release_ids = {f"case-{index:02d}" for index in range(4, 12)}
+    manifest: dict[str, object] = {}
+
+    selected = evals._select_default_tessl_live_cases(
+        base_cases,
+        list(base_cases),
+        manifest,
+        release_ids,
+    )
+
+    assert [case["id"] for case in selected] == [f"case-{index:02d}" for index in range(4, 12)]
+    assert manifest["default_live_selection"]["policy"] == "declared_release_set_capped_before_live_budget"
+
+
 def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / ".DS_Store").write_text("finder metadata\n", encoding="utf-8")

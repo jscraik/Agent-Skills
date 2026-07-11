@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -40,11 +41,12 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _profile_value(path: Path, key: str) -> str | None:
-    prefix = f"{key} = "
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        if line.startswith(prefix):
-            return line.removeprefix(prefix).strip().strip('"')
-    return None
+    try:
+        payload = tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    value = payload.get(key)
+    return value if isinstance(value, str) else None
 
 
 def _profile_findings(path: Path) -> list[dict[str, str]]:
@@ -104,6 +106,8 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "--env-file",
         str(env_file),
         "--",
+        "env",
+        f"CODEX_HOME={Path(args.profile_source).expanduser().resolve().parent}",
         "codex",
         "exec",
         "--profile",

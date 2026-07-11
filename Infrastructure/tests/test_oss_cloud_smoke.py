@@ -128,6 +128,32 @@ class TestOssCloudSmoke(unittest.TestCase):
             {"oss_cloud_model_mismatch", "oss_cloud_provider_mismatch"},
         )
 
+    def test_profile_parser_accepts_toml_spacing_and_comments(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "oss-cloud.config.toml"
+            path.write_text(
+                'model="minimax-m2.7:cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
+                encoding="utf-8",
+            )
+
+            findings = self.runner._profile_findings(path)
+
+        self.assertEqual(findings, [])
+
+    def test_command_binds_codex_home_to_validated_profile_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "profiles" / "oss-cloud.config.toml"
+            profile.parent.mkdir()
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+            paths = self.runner._paths(str(root / "out"))
+
+            command = self.runner._command(args, paths, root / "env")
+
+        self.assertIn("env", command)
+        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
+
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

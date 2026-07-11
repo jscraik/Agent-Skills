@@ -16,12 +16,14 @@
     "execution_model_family": {"type": ["string", "null"]},
     "execution_model_provider": {"type": ["string", "null"]},
     "execution_identity_source": {"type": ["string", "null"]},
-    "shard_dataset_digests": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "codex_exec_invoked": {"type": "boolean"},
+    "codex_profile": {"type": ["string", "null"]},
+    "shard_dataset_digests": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
     "rubric_digest": {"type": ["string", "null"]},
     "scenario_set_id": {"type": "string", "minLength": 1},
-    "scenario_set_case_ids": {"type": "array", "minItems": 5, "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "shard_receipts": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "shard_count": {"type": "integer", "minimum": 1},
+    "scenario_set_case_ids": {"type": "array", "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "shard_receipts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "shard_count": {"type": "integer", "minimum": 0},
     "case_count": {"type": "integer", "minimum": 0},
     "passed_count": {"type": "integer", "minimum": 0},
     "failed_count": {"type": "integer", "minimum": 0},
@@ -32,7 +34,26 @@
     "claims_boundary": {"type": "string", "minLength": 1},
     "agent_summary": {"type": "string", "minLength": 1}
   },
-  "required": ["schema_version", "schema_uri", "status", "lane", "profile", "package_id", "package_digest", "execution_model", "execution_model_family", "execution_model_provider", "execution_identity_source", "shard_dataset_digests", "rubric_digest", "scenario_set_id", "scenario_set_case_ids", "shard_receipts", "shard_count", "case_count", "passed_count", "failed_count", "cases", "checks", "blockers", "mutation_performed", "claims_boundary", "agent_summary"],
+  "required": ["schema_version", "schema_uri", "status", "lane", "profile", "package_id", "package_digest", "execution_model", "execution_model_family", "execution_model_provider", "execution_identity_source", "codex_exec_invoked", "codex_profile", "shard_dataset_digests", "rubric_digest", "scenario_set_id", "scenario_set_case_ids", "shard_receipts", "shard_count", "case_count", "passed_count", "failed_count", "cases", "checks", "blockers", "mutation_performed", "claims_boundary", "agent_summary"],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "shard_dataset_digests": {"minItems": 1},
+          "shard_receipts": {"minItems": 1},
+          "shard_count": {"minimum": 1},
+          "scenario_set_case_ids": {"minItems": 5},
+          "codex_exec_invoked": {"const": true},
+          "codex_profile": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]},
+      "then": {"properties": {"blockers": {"minItems": 1}}}
+    }
+  ],
   "$defs": {
     "check": {
       "type": "object",

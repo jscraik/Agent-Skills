@@ -122,7 +122,7 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
         stripped, indent = _minimal_line(raw_line)
         if not stripped:
             continue
-        if stripped == "cases:":
+        if stripped == "cases:" and indent == 0:
             state["in_cases"] = True
             state["current"] = None
             state["current_list"] = None

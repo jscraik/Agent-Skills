@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates, run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.scenario_quality import _load_minimal_evals_yaml  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt, validate_robot_envelope  # noqa: E402
 from ask.commands.skills_impl import _load_release_scenario_sets, skills_sdk_eval_run  # noqa: E402
 from eval_runner_helpers import (  # noqa: E402
@@ -414,6 +415,22 @@ cases:
 
         self.assertEqual(release_sets[0]["id"], "flat-release-8-v1")
         self.assertEqual(release_sets[0]["case_ids"], [f"case-{index}" for index in range(1, 9)])
+
+    def test_minimal_yaml_loader_ignores_nested_pool_cases_before_top_level_cases(self) -> None:
+        payload = _load_minimal_evals_yaml(
+            """release_scenario_sets:
+  - id: release-5
+    groups:
+      pool:
+        cases:
+          - nested-case
+cases:
+  - id: top-level-case
+    prompt: Run the top-level case.
+"""
+        )
+
+        self.assertEqual([case["id"] for case in payload["cases"]], ["top-level-case"])
 
     def test_oss_release_lanes_run_bounded_filtered_subset_as_release_shard(self) -> None:
         for profile in ("oss-local", "oss-cloud"):

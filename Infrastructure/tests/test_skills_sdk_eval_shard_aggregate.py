@@ -10,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_shard_aggregate import EvalShardAggregateError, build_eval_shard_aggregate_receipt  # noqa: E402
+from ask.commands.skills_impl import _blocked_eval_shard_aggregate_receipt  # noqa: E402
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 
 
@@ -150,8 +151,43 @@ class TestEvalShardAggregate(unittest.TestCase):
         self.assertEqual(receipt["case_count"], 8)
         self.assertEqual(receipt["scenario_set_case_ids"], CASE_IDS)
         self.assertEqual(len(receipt["shard_dataset_digests"]), 4)
+        self.assertTrue(receipt["codex_exec_invoked"])
+        self.assertEqual(receipt["codex_profile"], "oss-local")
         schema = json.loads((REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json").read_text(encoding="utf-8"))
         _validate_schema_subset(schema, receipt, {"eval-shard-aggregate-receipt": schema})
+
+    def test_missing_receipt_emits_schema_valid_blocked_aggregate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill = _write_skill(root)
+            with self.assertRaises(EvalShardAggregateError) as raised:
+                build_eval_shard_aggregate_receipt(
+                    root,
+                    skill_path=skill,
+                    scenario_set="sample-release-8-v1",
+                    receipt_paths=[Path("receipts/missing.json")],
+                )
+
+        receipt = raised.exception.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["shard_receipts"], [])
+        self.assertEqual(receipt["shard_count"], 0)
+        self.assertFalse(receipt["codex_exec_invoked"])
+        self.assertIsNone(receipt["codex_profile"])
+        schema = json.loads((REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json").read_text(encoding="utf-8"))
+        _validate_schema_subset(schema, receipt, {"eval-shard-aggregate-receipt": schema})
+
+    def test_early_input_failure_receipt_is_schema_complete(self) -> None:
+        receipt = _blocked_eval_shard_aggregate_receipt(
+            profile="oss-local",
+            scenario_set="missing-release-set",
+            message="target missing",
+        )
+
+        schema = json.loads((REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json").read_text(encoding="utf-8"))
+        _validate_schema_subset(schema, receipt, {"eval-shard-aggregate-receipt": schema})
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["shard_count"], 0)
 
     def test_duplicate_case_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
