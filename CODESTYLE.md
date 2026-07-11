@@ -60,8 +60,8 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - Fabricated data/entropy: `Math.random()` (or equivalent) used to fabricate data without injected seed
 - Hard-coded mock responses in production paths
 - `TODO`/`FIXME`/`HACK` comments in production paths
-- Placeholder stubs (“will be wired later”, “not implemented”, etc.)
-- Disabled features signaling gaps (`console.warn("not implemented")`, dead flags)
+- Placeholder stubs (future-only placeholders, “unimplemented”, etc.)
+- Disabled features signaling gaps (placeholder warnings, dead flags)
 - Fake metrics or synthetic telemetry presented as real
 
 **Production code path** = any code that:
@@ -85,6 +85,10 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - **Functional-first**: prefer pure, composable functions.
 - **Classes**: only when required by a framework or to encapsulate unavoidable state.
 - **Functions**: SHOULD be <= 40 LOC; split if readability suffers.
+- **Program design**: architecture diagrams describe component boundaries; every implementation change MUST also be reviewed for function responsibility, abstraction level, data flow, side effects, failure paths, and caller knowledge.
+- **Small interfaces**: public Python functions SHOULD keep at most five parameters. Group cohesive data in a named value object when the interface would otherwise grow; a temporary exception MUST be visible in the owning review with an owner, reason, ticket, and expiry.
+- **Flag arguments**: public functions MUST NOT add boolean default arguments to select materially different behavior. Split the commands or use an explicit policy/value object instead.
+- **State and errors**: changed Python production code MUST NOT add module-level mutable state, explicit `global` statements, or broad `except Exception`/bare handlers without a documented boundary reason and time-boxed waiver.
 - **Exports**: named exports only; no `export default`.
   - Exception: framework conventions that require default exports (e.g., certain Next.js special files).
 - **Determinism**: no ambient randomness/time in core logic; inject seeds/clocks/IDs.
@@ -383,6 +387,16 @@ PR merge gate MUST pass:
 * Mutation score >= 75% (env override allowed)
 
 Repo MAY enforce higher thresholds per workflow.
+
+### Program-design enforcement
+
+The repository's `program-design` gate is the executable ratchet for the
+Python rules above. In changed-files mode it compares the patch with `HEAD`
+and fails only on new or worsened public-interface, boolean-flag, broad-error,
+or mutable-global findings. Existing debt remains visible for a bounded
+refactoring slice rather than making unrelated changes fail. This is a
+low-noise baseline, not a claim that static analysis can decide every
+abstraction or responsibility boundary.
 
 ---
 

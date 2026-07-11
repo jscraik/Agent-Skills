@@ -196,6 +196,13 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing skills error regression suite debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
+        "owner": "validation",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PROGRAM-DESIGN-RATCHET",
+        "reason": "pre-existing validation integration fixture exceeds file budget; split in follow-up",
+        "expires": "2026-07-31",
+    },
 }
 LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
@@ -311,10 +318,16 @@ def _complexity(node: ast.AST) -> int:
     return score
 
 
-def _function_metrics(text: str, *, relpath: str, source: str, issues: list[str]) -> dict[str, tuple[int, int]]:
+def _function_metrics(
+    text: str,
+    *,
+    relpath: str = "",
+    source: str = "current",
+    issues: list[str] | None = None,
+) -> dict[str, tuple[int, int]]:
     try:
         tree = ast.parse(text)
-    except SyntaxError as exc:
+    except SyntaxError:
         if source == "baseline":
             return {}
         raise

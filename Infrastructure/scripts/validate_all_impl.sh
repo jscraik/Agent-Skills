@@ -269,7 +269,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|program-design|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -283,7 +283,7 @@ check_matches_validation_scope() {
       ;;
     typecheck)
       case "$slug" in
-        verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|selection-contract|router-schema|ask-cli-modularity)
+        verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|selection-contract|router-schema|ask-cli-modularity|program-design)
           return 0
           ;;
       esac
@@ -362,7 +362,7 @@ should_run_check() {
     repo-surface-inventory)
       return 0
       ;;
-    ask-cli-modularity)
+    ask-cli-modularity|program-design)
       [[ "$scope_has_validation_core" -eq 1 || "$scope_has_python_quality" -eq 1 ]]
       ;;
     skill-lifecycle-tests|skill-catalog|plugin-shadowing|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|skill-types|openai-format|progressive-disclosure|skill-graph-profiles|gotcha-store)
@@ -708,6 +708,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 fi
 schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${ask_cli_modularity_cmd[@]}"
 
+program_design_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_program_design.py)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  program_design_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required program-design "🧭 Verifying changed Python program design..." "${program_design_cmd[@]}"
+
 no_breadcrumbs_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py)
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   no_breadcrumbs_cmd+=(--changed-files "${changed_files[@]}")
@@ -795,7 +801,7 @@ schedule_check required runtime-separation-baseline-compare "🧭 Comparing runt
 schedule_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict
 schedule_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
 
-schedule_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
+schedule_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity --required-check program-design
 
 refresh_latest_dir
 
