@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Deterministic CI fixture for Harness Engineering subagent routing validation. Runtime stage skills still resolve live roles from ~/.codex/agents/manifest.json.",
+  "description": "Historical deterministic fixture retained for compatibility tests. Desktop runtime routing must not resolve roles from ~/.codex/agents/manifest.json.",
   "agents": [
     {"role": "adversarial-document-reviewer"},
     {"role": "adversarial-reviewer"},

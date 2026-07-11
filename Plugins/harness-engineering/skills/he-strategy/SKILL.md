@@ -52,15 +52,15 @@ Write only the selected cognition artifact under `.harness/features/`,
 mode, path, artifacts read, evidence/interpretation/assumption separation,
 confidence, authority limits, impact, and validation outcomes.
 
-Also include `he-strategy`, `subagent_policy`, `roles_used`,
-`roles_recommended`, and `roles_missing`.
+Also include `he-strategy`, `subagent_policy`, `capabilities_covered`, and
+`capabilities_not_covered`.
 
 ## Procedure
 
 1. Select exactly one mode unless the user explicitly asks for the full strategy
    pipeline; ask once only when ambiguity materially changes the artifact.
-2. Resolve `he-strategy` in `../../references/routing-map.json`, compare roles
-   with `~/.codex/agents/manifest.json`, and follow shared subagent policy.
+2. Resolve `he-strategy` in `../../references/routing-map.json`, build the
+   generic Desktop capability packet, and follow shared subagent policy.
 3. Choose the output path or `Do Not Create` before writing; do not overwrite
    artifacts without explicit authority.
 4. Start with 2-3 focused evidence surfaces; widen only when conclusions cannot

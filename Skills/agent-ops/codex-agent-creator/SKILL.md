@@ -94,8 +94,8 @@ Concrete commands for this skill package:
 
 - Strict audit: `./bin/ask skills audit Skills/agent-ops/codex-agent-creator --level strict --json --robot`.
 - Discovery smoke fallback: `./bin/ask evals run Skills/agent-ops/codex-agent-creator --mode smoke --runner discovery-smoke --skip-tessl --json --robot`.
-- Harness routing manifest check when routing maps or role discovery change: `python3 Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py --manifest ~/.codex/agents/manifest.json --routing-map Plugins/harness-engineering/references/routing-map.json`.
-- Single role TOML syntax check before install: `python3 -c 'import pathlib,tomllib; p=pathlib.Path("<role.toml>"); data=tomllib.loads(p.read_text()); assert data.get("developer_instructions") or data.get("description")'`.
+- Harness capability-routing check when routing maps or generic collaborator packets change: `python3 Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py --routing-map Plugins/harness-engineering/references/routing-map.json`.
+- Codex Desktop does not support installing a named-role TOML for collaborator selection. Preserve any old prompt as archived reference material, then route by task capability, authority, evidence requirements, and stop condition.
 
 ## Safety Boundaries
 

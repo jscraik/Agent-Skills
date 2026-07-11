@@ -1412,19 +1412,15 @@ references:
   rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
     rewritten before this can be treated as SynAIpse-native doctrine.
 - path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-call-contract.md
-  purpose: Copied Harness Engineering reference for subagent call contract.
-  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
-    context is needed for this stage
-  adoption_status: needs_synaipse_rewrite
+  purpose: SynAIpse capability-packet collaborator call contract.
+  load_when: SynAIpse collaborator routing, capability packets, evidence boundaries, or reference-specific context is needed for this stage
+  adoption_status: adopted
   stage_map:
   - execution-plan
   quality_notes:
-    stale_terms:
-    - Harness Engineering
+    stale_terms: []
     link_check: passed
-    accuracy_certification: not_certified
-  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
-    rewritten before this can be treated as SynAIpse-native doctrine.
+    accuracy_certification: structure_and_links_only
 - path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-routing.md
   purpose: Copied Harness Engineering reference for subagent routing.
   load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
