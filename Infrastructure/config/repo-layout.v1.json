@@ -2,7 +2,10 @@
   "schema_version": "repo-layout.v1",
   "status": "compatibility_target",
   "owner": "Agent Skills Kit",
-  "purpose": "Classify repository layout surfaces before migrating toward foundry/ and skills-sdk/ roots.",
+  "purpose": "Classify repository layout surfaces while source extraction and Skills SDK repository separation remain externally governed.",
+  "forbidden_top_level_paths": [
+    "foundry"
+  ],
   "target_layout": {
     "root_governance": {
       "purpose": "Repo bootstrap, governance, contribution, security, and instruction entrypoints.",
@@ -32,13 +35,8 @@
         "codestyle"
       ]
     },
-    "foundry": {
-      "purpose": "Future canonical source home for skills, plugins, and system-skill overlays.",
-      "future_paths": [
-        "foundry/skills",
-        "foundry/plugins",
-        "foundry/system-skills"
-      ],
+    "foundry_source_candidates": {
+      "purpose": "Legacy source candidates remain in this repository only until an authorized, history-preserving extraction into the external Skills Foundry. An in-repository foundry tree is forbidden.",
       "legacy_paths": [
         "Skills",
         "Plugins",
@@ -47,17 +45,12 @@
       ]
     },
     "skills_sdk": {
-      "purpose": "Future canonical home for Skills SDK lifecycle implementation, validators, schemas, docs, artifacts, and brand.",
-      "future_paths": [
-        "skills-sdk/Infrastructure",
-        "skills-sdk/docs",
-        "skills-sdk/artifacts",
-        "skills-sdk/brand"
-      ],
+      "purpose": "Current Skills SDK lifecycle implementation, validators, schemas, docs, and artifacts. The future Skills SDK is a separate repository, not an in-repository skills-sdk subtree.",
       "legacy_paths": [
         "Infrastructure",
         "Docs",
-        "artifacts"
+        "artifacts",
+        "skills-sdk"
       ]
     },
     "evidence_control": {
@@ -138,34 +131,31 @@
     "unknown_symlink_status": "error",
     "classes": [
       {
-        "id": "runtime_skill_projection",
-        "classification": "runtime_projection",
-        "status": "allowed",
+        "id": "legacy_runtime_skill_projection",
+        "classification": "legacy_runtime_projection",
+        "status": "forbidden",
         "path_patterns": [
           ".agents/skills/*"
         ],
         "target_patterns": [
-          "../../Skills/*",
-          "../../foundry/skills/*"
+          "*"
         ],
         "owner": "skills projection sync",
-        "reason": ".agents/skills exposes canonical skill source to the local runtime without becoming editable source."
+        "reason": "Runtime skill symlinks are forbidden. SDK-created and user-installed skills must be copied into ~/.codex/skills or <project>/.codex/skills."
       },
       {
-        "id": "runtime_plugin_projection",
-        "classification": "runtime_projection",
-        "status": "allowed",
+        "id": "legacy_runtime_plugin_projection",
+        "classification": "legacy_runtime_projection",
+        "status": "forbidden",
         "path_patterns": [
           ".agents/plugins",
           ".agents/plugins-runtime/*"
         ],
         "target_patterns": [
-          "../../plugins*",
-          "*/agent-skills/plugins*",
-          "../../foundry/plugins/*"
+          "*"
         ],
         "owner": "plugin runtime sync",
-        "reason": "Plugin runtime links are runtime-facing projection or compatibility surfaces."
+        "reason": "Runtime plugin projections are forbidden. Codex plugin cache and plugin roots remain runtime state, not source or installation targets."
       },
       {
         "id": "personal_plugin_runtime_links",
@@ -235,11 +225,10 @@
           "skills-system/plugin-creator"
         ],
         "target_patterns": [
-          "../Plugins/plugin-factory/skills/*",
-          "../foundry/plugins/plugin-factory/skills/*"
+          "../Plugins/plugin-factory/skills/*"
         ],
         "owner": "system skill overlays",
-        "reason": "Legacy system-skill entrypoints remain compatibility aliases until foundry/system-skills migration."
+        "reason": "Legacy system-skill entrypoints remain compatibility aliases until their projection and source ownership are separately classified."
       },
       {
         "id": "root_infrastructure_aliases",
@@ -251,8 +240,7 @@
           "docs-policy.json"
         ],
         "target_patterns": [
-          "Infrastructure/*",
-          "skills-sdk/Infrastructure/*"
+          "Infrastructure/*"
         ],
         "owner": "Skills SDK layout migration",
         "reason": "Root aliases preserve older command paths but should be retired or converted to explicit wrappers during layout migration."

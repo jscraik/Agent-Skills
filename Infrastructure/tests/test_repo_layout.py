@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -62,7 +63,7 @@ def test_tracked_phase_zero_roots_have_explicit_classifications() -> None:
     assert "*" not in entries
 
 
-def test_runtime_projection_symlink_is_allowed(tmp_path: Path) -> None:
+def test_runtime_projection_symlink_blocks_copy_only_install_contract(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / ".agents" / "skills").mkdir(parents=True)
     os.symlink("../../Skills/agent-ops/testing", root / ".agents" / "skills" / "testing")
@@ -71,12 +72,13 @@ def test_runtime_projection_symlink_is_allowed(tmp_path: Path) -> None:
         root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
     )
 
-    assert report["status"] == "pass"
+    assert report["status"] == "fail"
     symlink_findings = [
         finding for finding in report["findings"] if finding["path"] == ".agents/skills/testing"
     ]
     assert symlink_findings
-    assert symlink_findings[0]["classification"] == "runtime_projection"
+    assert symlink_findings[0]["code"] == "symlink_forbidden"
+    assert symlink_findings[0]["classification"] == "legacy_runtime_projection"
 
 
 def test_unknown_symlink_blocks_layout_validation(tmp_path: Path) -> None:
@@ -212,7 +214,7 @@ def test_capitalized_browser_use_runtime_link_is_allowed(tmp_path: Path) -> None
     assert browser_findings[0]["classification"] == "external_runtime_link"
 
 
-def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> None:
+def test_in_repo_foundry_root_blocks_external_foundry_contract(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "foundry" / "skills").mkdir(parents=True)
 
@@ -220,14 +222,31 @@ def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> 
         root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
     )
 
-    assert report["status"] == "pass"
-    assert not any(
-        finding["code"] == "top_level_unclassified" and finding["path"] == "foundry"
+    assert report["status"] == "fail"
+    assert any(
+        finding["code"] == "forbidden_top_level_root" and finding["path"] == "foundry"
         for finding in report["findings"]
     )
 
 
-def test_future_nested_skills_sdk_brand_path_classifies_top_level_root(tmp_path: Path) -> None:
+def test_untracked_in_repo_foundry_root_blocks_in_git_worktree(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+    subprocess.run(["git", "-C", str(root), "add", "Infrastructure", "README.md"], check=True)
+    (root / "foundry" / "skills").mkdir(parents=True)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "fail"
+    assert any(
+        finding["code"] == "forbidden_top_level_root" and finding["path"] == "foundry"
+        for finding in report["findings"]
+    )
+
+
+def test_in_repo_skills_sdk_root_is_legacy_until_repository_extraction(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "skills-sdk" / "brand").mkdir(parents=True)
 
@@ -236,8 +255,10 @@ def test_future_nested_skills_sdk_brand_path_classifies_top_level_root(tmp_path:
     )
 
     assert report["status"] == "pass"
-    assert not any(
-        finding["code"] == "top_level_unclassified" and finding["path"] == "skills-sdk"
+    assert any(
+        finding["code"] == "legacy_layout_path"
+        and finding["path"] == "skills-sdk"
+        and finding["classification"] == "skills_sdk"
         for finding in report["findings"]
     )
 

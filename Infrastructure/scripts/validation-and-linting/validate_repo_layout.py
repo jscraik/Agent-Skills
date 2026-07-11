@@ -128,8 +128,8 @@ def _legacy_layout_finding(name: str, entry: dict[str, Any]) -> Finding:
         severity="info",
         path=name,
         message=(
-            "Legacy path is allowed until the foundry/skills-sdk migration "
-            "moves it."
+            "Legacy path is allowed only until its external repository "
+            "separation or source-extraction disposition is accepted."
         ),
         classification=entry["section"],
         owner="repo-layout.v1",
@@ -155,10 +155,24 @@ def _unknown_top_level_finding(name: str) -> Finding:
 def _validate_top_level(root: Path, config: dict[str, Any]) -> list[Finding]:
     entries = _iter_layout_entries(config)
     tracked_names = _tracked_top_level_names(root)
+    forbidden_names = {str(name) for name in config.get("forbidden_top_level_paths", [])}
     findings: list[Finding] = []
     for child in _top_level_paths(root):
         name = child.name
         if name == ".git":
+            continue
+        if name in forbidden_names:
+            findings.append(
+                Finding(
+                    code="forbidden_top_level_root",
+                    status="violation",
+                    severity="error",
+                    path=name,
+                    message="Top-level path is forbidden by the external Foundry contract.",
+                    classification="forbidden",
+                    owner="repo-layout.v1",
+                )
+            )
             continue
         if tracked_names is not None and name not in tracked_names:
             continue
@@ -228,11 +242,23 @@ def _validate_symlinks(root: Path, config: dict[str, Any]) -> list[Finding]:
             continue
 
         entry_status = str(entry.get("status", "allowed"))
-        severity = "warning" if entry_status == "deprecated" else "info"
+        severity = (
+            "error"
+            if entry_status == "forbidden"
+            else "warning"
+            if entry_status == "deprecated"
+            else "info"
+        )
         findings.append(
             Finding(
                 code=f"symlink_{entry_status}",
-                status="warning" if entry_status == "deprecated" else "ok",
+                status=(
+                    "violation"
+                    if entry_status == "forbidden"
+                    else "warning"
+                    if entry_status == "deprecated"
+                    else "ok"
+                ),
                 severity=severity,
                 path=rel_path,
                 message=str(entry.get("reason", "Classified symlink.")),
