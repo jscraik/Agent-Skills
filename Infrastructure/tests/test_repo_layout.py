@@ -100,7 +100,7 @@ def test_known_swift_build_output_symlinks_are_ignored(tmp_path: Path) -> None:
     ):
         link = output_root / rel_path
         link.parent.mkdir(parents=True, exist_ok=True)
-        os.symlink("/private/tmp/swift-build/debug", link)
+        os.symlink("arm64-apple-macosx/debug", link)
 
     report = validate_repo_layout.validate_repo_layout(
         root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
@@ -116,6 +116,34 @@ def test_known_swift_build_output_symlinks_are_ignored(tmp_path: Path) -> None:
         "Prototypes/improve-agent-native-menubar/dist/swiftpm-build-nodebug/debug",
         "Prototypes/improve-agent-native-menubar/dist/swiftpm-build/debug",
     }
+
+
+def test_swift_output_policy_rejects_source_target_at_allowlisted_path(
+    tmp_path: Path,
+) -> None:
+    root = _minimal_repo(tmp_path)
+    link = (
+        root
+        / "Prototypes"
+        / "improve-agent-native-menubar"
+        / "dist"
+        / "swiftpm-build"
+        / "debug"
+    )
+    link.parent.mkdir(parents=True, exist_ok=True)
+    os.symlink("../../../../Sources/secret-source", link)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "fail"
+    assert any(
+        finding["code"] == "unknown_symlink"
+        and finding["path"]
+        == "Prototypes/improve-agent-native-menubar/dist/swiftpm-build/debug"
+        for finding in report["findings"]
+    )
 
 
 def test_swift_output_policy_does_not_mask_other_ignored_or_source_symlinks(
