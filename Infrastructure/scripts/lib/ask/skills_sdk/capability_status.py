@@ -42,6 +42,7 @@ REQUIRED_CAPABILITY_IDS = (
     "receipt_schema",
     "risk_classification",
     "risk_mode_taxonomy",
+    "package_security_signature",
     "skill_ir",
     "package_identity",
     "install_preview",

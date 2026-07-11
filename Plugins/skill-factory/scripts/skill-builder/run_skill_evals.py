@@ -2953,7 +2953,7 @@ def _scrub_mcp_servers_from_toml(text: str) -> str:
     return "".join(kept)
 
 
-def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
+def _isolated_codex_home_for_eval(profile: Optional[str] = None) -> Tuple[Path, List[str]]:
     """
     Build a temporary CODEX_HOME for live eval runs.
 
@@ -2971,7 +2971,11 @@ def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
         (target_home / child).mkdir(parents=True, exist_ok=True)
 
     if source_home.exists():
-        for name in ("auth.json", "config.toml", "oss-local.config.toml", "oss-cloud.config.toml"):
+        profile_config = f"{profile}.config.toml" if profile else None
+        names = ("auth.json", profile_config) if profile_config and (source_home / profile_config).is_file() else (
+            "auth.json", "config.toml", "oss-local.config.toml", "oss-cloud.config.toml"
+        )
+        for name in names:
             warning = _copy_codex_home_file(source_home, target_home, name)
             if warning:
                 warnings.append(warning)
@@ -4276,7 +4280,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     preflight_warnings: List[str] = []
 
     if "codex" in selected_runners and codex_home is None:
-        codex_home, isolation_warnings = _isolated_codex_home_for_eval()
+        codex_home, isolation_warnings = _isolated_codex_home_for_eval(args.profile)
         preflight_warnings.extend(isolation_warnings)
 
     # Smoke-profile routing:

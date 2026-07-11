@@ -314,17 +314,19 @@ cases:
 """
 
 
-def _release_set_20_evals_yaml() -> str:
-    foundation = [f"foundation-{index}" for index in range(1, 6)]
-    behavioral = [f"behavioral-{index}" for index in range(1, 16)]
+def _release_set_8_evals_yaml() -> str:
+    foundation = [f"foundation-{index}" for index in range(1, 3)]
+    behavioral = [f"behavioral-{index}" for index in range(1, 7)]
     case_ids = foundation + behavioral
     lines = [
         "schema_version: '2.0'",
         "skill_name: sample",
         "release_scenario_sets:",
-        "- id: sample-release-20-v1",
+        "- id: sample-release-8-v1",
         "  default: true",
-        "  minimum_scenarios: 20",
+        "  minimum_scenarios: 5",
+        "  target_scenarios: 8",
+        "  maximum_scenarios: 10",
         "  groups:",
         "    foundation_smoke:",
         *[f"    - {case_id}" for case_id in foundation],
@@ -1246,7 +1248,7 @@ cases:
 
     def test_builder_includes_reviewed_generated_fixtures_before_tessl_staging(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_8_evals_yaml())
             fixture_dir = skill_dir / "references" / "evals"
             fixture_dir.mkdir()
             (fixture_dir / "eval.harness.feedback-recurs-without-guardrail.md").write_text(
@@ -1266,7 +1268,7 @@ Expected failure: The agent applies another one-off fix without addressing recur
 
             receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        self.assertEqual(receipt["scenario_count"], 21)
+        self.assertEqual(receipt["scenario_count"], 9)
         self.assertIn(
             "generated-eval.harness.feedback-recurs-without-guardrail",
             {row["id"] for row in receipt["scenario_rows"]},
@@ -1275,7 +1277,7 @@ Expected failure: The agent applies another one-off fix without addressing recur
 
     def test_generated_fixtures_score_package_behavior_not_missing_response_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_8_evals_yaml())
             fixture_dir = skill_dir / "references" / "evals"
             fixture_dir.mkdir()
             (fixture_dir / "eval.harness.done-without-validation.md").write_text(
@@ -1973,7 +1975,7 @@ cases:
         self.assertNotIn("platform_tessl_quality:read_only_file_artifact_side_effect", blocker_ids)
         validate_scenario_quality_receipt(receipt)
 
-    def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
+    def test_release_mode_suite_requires_five_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -2014,29 +2016,41 @@ cases:
 
     def test_release_scenario_set_accepts_grouped_case_lists(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_8_evals_yaml())
 
             receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
         check_map = {check["id"]: check for check in receipt["quality_checks"]}
         self.assertEqual(check_map["release_scenario_set_default_unique"]["status"], "pass")
-        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_scenario_budget"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
-        self.assertEqual(receipt["scenario_count"], 20)
+        self.assertEqual(receipt["scenario_count"], 8)
         validate_scenario_quality_receipt(receipt)
 
+    def test_release_scenario_set_requires_exact_integer_budget_contract(self) -> None:
+        payload = _release_set_8_evals_yaml().replace("  target_scenarios: 8", "  target_scenarios: '8'", 1)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_scenario_budget"]["status"], "blocker")
+
     def test_release_scenario_set_accepts_flat_case_lists(self) -> None:
-        payload = _release_set_20_evals_yaml()
+        payload = _release_set_8_evals_yaml()
         flat_cases = "\n".join(
             [
                 "release_scenario_sets:",
-                "- id: sample-release-20-v1",
+                "- id: sample-release-8-v1",
                 "  default: true",
-                "  minimum_scenarios: 20",
+                "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  cases:",
-                *[f"  - foundation-{index}" for index in range(1, 6)],
-                *[f"  - behavioral-{index}" for index in range(1, 16)],
+                *[f"  - foundation-{index}" for index in range(1, 3)],
+                *[f"  - behavioral-{index}" for index in range(1, 7)],
                 "cases:",
             ]
         )
@@ -2049,22 +2063,24 @@ cases:
             receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
         check_map = {check["id"]: check for check in receipt["quality_checks"]}
-        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_scenario_budget"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
         validate_scenario_quality_receipt(receipt)
 
-    def test_release_scenario_set_cannot_lower_minimum_below_twenty(self) -> None:
-        payload = _release_set_20_evals_yaml()
+    def test_release_scenario_set_rejects_more_than_ten(self) -> None:
+        payload = _release_set_8_evals_yaml()
         flat_cases = "\n".join(
             [
                 "release_scenario_sets:",
-                "- id: sample-release-10-v1",
+                "- id: sample-release-11-v1",
                 "  default: true",
                 "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  cases:",
-                *[f"  - foundation-{index}" for index in range(1, 6)],
-                *[f"  - behavioral-{index}" for index in range(1, 6)],
+                *[f"  - foundation-{index}" for index in range(1, 3)],
+                *[f"  - behavioral-{index}" for index in range(1, 10)],
                 "cases:",
             ]
         )
@@ -2077,28 +2093,30 @@ cases:
                 build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
         check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
-        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "blocker")
-        self.assertIn("sample-release-10-v1:count:10:minimum:20", check_map["release_scenario_set_minimum_count"]["evidence"])
+        self.assertEqual(check_map["release_scenario_set_scenario_budget"]["status"], "blocker")
+        self.assertIn(
+            "sample-release-11-v1:count:11:minimum:5:target:8:maximum:10",
+            check_map["release_scenario_set_scenario_budget"]["evidence"],
+        )
         validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
         duplicate_set = "\n".join(
             [
-                "- id: sample-release-20-v1",
+                "- id: sample-release-8-v1",
                 "  default: false",
-                "  minimum_scenarios: 20",
+                "  minimum_scenarios: 5",
+                "  target_scenarios: 8",
+                "  maximum_scenarios: 10",
                 "  groups:",
                 "    foundation_smoke:",
                 "    - foundation-1",
                 "    - foundation-2",
-                "    - foundation-3",
-                "    - foundation-4",
-                "    - foundation-5",
                 "    behavioral_release:",
-                *[f"    - behavioral-{index}" for index in range(1, 16)],
+                *[f"    - behavioral-{index}" for index in range(1, 7)],
             ]
         )
-        payload = _release_set_20_evals_yaml().replace("cases:", f"{duplicate_set}\ncases:", 1)
+        payload = _release_set_8_evals_yaml().replace("cases:", f"{duplicate_set}\ncases:", 1)
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
             with self.assertRaises(ScenarioQualityError) as raised:
@@ -2272,7 +2290,7 @@ cases:
         validate_scenario_quality_receipt(receipt)
 
     def test_scenario_set_parity_uses_selected_release_set_universe(self) -> None:
-        payload = _release_set_20_evals_yaml() + """
+        payload = _release_set_8_evals_yaml() + """
 - id: non-release-doc-case
   category: happy
   eval_modes:
@@ -2291,7 +2309,7 @@ cases:
   - type: expected_signal
     value: Returns non-release-doc-case.md content with source-backed validation claims.
 """
-        release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+        release_ids = [f"foundation-{index}" for index in range(1, 3)] + [f"behavioral-{index}" for index in range(1, 7)]
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             skill_dir = _write_skill_with_evals(temp_path, payload)
@@ -2308,11 +2326,11 @@ cases:
                 query="sample_skill",
                 tessl_staged_json=staged_json,
                 tessl_score_json=score_json,
-                scenario_set="sample-release-20-v1",
+                scenario_set="sample-release-8-v1",
             )
 
-        self.assertEqual(receipt["scenario_count"], 21)
-        self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 20)
+        self.assertEqual(receipt["scenario_count"], 8)
+        self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 8)
         self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
         self.assertFalse(receipt["blockers"])
         validate_scenario_quality_receipt(receipt)
@@ -2320,8 +2338,8 @@ cases:
     def test_scenario_set_parity_blocks_unknown_selected_release_set(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            skill_dir = _write_skill_with_evals(temp_path, _release_set_20_evals_yaml())
-            release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+            skill_dir = _write_skill_with_evals(temp_path, _release_set_8_evals_yaml())
+            release_ids = [f"foundation-{index}" for index in range(1, 3)] + [f"behavioral-{index}" for index in range(1, 7)]
             staged_json = _write_staged_tessl_json(temp_path / "staged.json", release_ids)
 
             with self.assertRaises(ScenarioQualityError) as raised:

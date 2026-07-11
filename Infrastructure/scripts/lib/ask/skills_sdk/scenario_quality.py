@@ -1,11 +1,11 @@
 from __future__ import annotations
-
 import json
 import subprocess
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks, release_scenario_set_case_ids
+from ask.skills_sdk.release_scenario_sets import RELEASE_SCENARIO_MINIMUM, build_release_scenario_set_checks, release_scenario_set_case_ids
+from ask.skills_sdk.eval_lane_policy import build_eval_lane_policy_checks
 from ask.skills_sdk.scenario_registry_guardrails import no_direct_registry_use_checks
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
@@ -122,7 +122,7 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
         stripped, indent = _minimal_line(raw_line)
         if not stripped:
             continue
-        if stripped == "cases:":
+        if stripped == "cases:" and indent == 0:
             state["in_cases"] = True
             state["current"] = None
             state["current_list"] = None
@@ -310,7 +310,6 @@ def _load_evals(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     if not isinstance(loaded, dict):
         return None, "evals_yaml_not_object"
     return loaded, None
-
 def _scenario_id(case: dict[str, Any], index: int) -> str:
     raw = case.get("id")
     return raw if isinstance(raw, str) and raw.strip() else f"case-{index}"
@@ -606,6 +605,7 @@ def _quality_checks(
     case_list: list[Any],
     load_error: str | None,
     row_errors: list[str],
+    all_case_list: list[Any] | None = None,
 ) -> list[dict[str, Any]]:
     checks = [
         _check("evals_yaml_present", "pass" if evals_path.is_file() else "blocker", "Skill must carry references/evals.yaml.", [_repo_relative(repo_root, evals_path)]),
@@ -614,7 +614,8 @@ def _quality_checks(
         _check("cases_are_objects", "blocker" if row_errors else "pass", "Every eval case must be an object.", row_errors),
     ]
     checks.extend(_release_suite_checks(case_list))
-    checks.extend(build_release_scenario_set_checks(evals_payload, case_list))
+    checks.extend(build_release_scenario_set_checks(evals_payload, all_case_list or case_list))
+    checks.extend(build_eval_lane_policy_checks(evals_payload, all_case_list or case_list))
     checks.extend(no_direct_registry_use_checks(skill_dir, case_list))
     return checks
 
@@ -626,24 +627,24 @@ def _release_suite_checks(case_list: list[Any]) -> list[dict[str, Any]]:
             "release_minimum_scenario_count",
             has_release_cases,
             release_count,
-            20,
-            "Release-mode behavioral scenario suites must include at least 20 scenarios unless they are structure-only.",
+            RELEASE_SCENARIO_MINIMUM,
+            "Release-mode behavioral scenario suites must include at least 5 scenarios unless they are structure-only.",
             "release_cases",
         ),
         _release_requirement_check(
             "release_pressure_coverage",
             has_release_cases,
             pressure_count,
-            4,
-            "Release-mode scenario suites must include at least 4 pressure or regression cases.",
+            1,
+            "Release-mode scenario suites must include at least 1 pressure or regression case.",
             "pressure_or_regression",
         ),
         _release_requirement_check(
             "release_negative_edge_coverage",
             has_release_cases,
             negative_or_edge_count,
-            2,
-            "Release-mode scenario suites must include at least 2 negative or edge boundary cases.",
+            1,
+            "Release-mode scenario suites must include at least 1 negative or edge boundary case.",
             "negative_or_edge",
         ),
     ]
@@ -726,6 +727,18 @@ def _scenario_quality_inputs(
         ],
     ]
 
+
+def _scenario_quality_scope(evals_payload: dict[str, Any] | None, scenario_set: str | None, case_list: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if not scenario_set:
+        return case_list, []
+    selected_ids = release_scenario_set_case_ids(evals_payload, scenario_set)
+    if not selected_ids:
+        return [], [_check(
+            "release_scenario_set_selector_valid", "blocker",
+            "Scenario quality must use a declared release scenario set when --scenario-set is provided.",
+            [f"scenario_set:{scenario_set}:not_found_or_empty"],
+        )]
+    return [case for case in case_list if str(case.get("id")) in selected_ids], []
 def _scenario_quality_parity(
     repo_root: Path,
     skill_md: Path,
@@ -755,9 +768,20 @@ def build_scenario_quality_receipt(
     scenario_set: str | None = None,
 ) -> dict[str, Any]:
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
-    evals_path, evals_payload, load_error, case_list = _scenario_quality_inputs(skill_md)
+    evals_path, evals_payload, load_error, all_case_list = _scenario_quality_inputs(skill_md)
+    case_list, scope_checks = _scenario_quality_scope(evals_payload, scenario_set, all_case_list)
     scenario_rows, row_errors = _rows(case_list)
-    receipt_checks = _quality_checks(repo_root, skill_md.parent, evals_path, evals_payload, case_list, load_error, row_errors)
+    receipt_checks = _quality_checks(
+        repo_root,
+        skill_md.parent,
+        evals_path,
+        evals_payload,
+        case_list,
+        load_error,
+        row_errors,
+        all_case_list,
+    )
+    receipt_checks.extend(scope_checks)
     scenario_set_parity, parity_checks = _scenario_quality_parity(
         repo_root, skill_md, evals_payload, scenario_set, scenario_rows, tessl_staged_json, tessl_score_json
     )

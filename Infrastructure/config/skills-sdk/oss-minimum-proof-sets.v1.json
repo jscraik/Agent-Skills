@@ -1,80 +1,50 @@
 {
   "schema_version": "skills-sdk.oss-minimum-proof-sets.v1",
+  "scenario_budget": {
+    "minimum": 5,
+    "target": 8,
+    "maximum": 10,
+    "unit": "distinct_scenarios_per_external_eval"
+  },
   "proof_sets": {
-    "improve-agent-native-oss-local-9-plus-3": {
-      "policy": "oss-local-9-core-plus-3-regression",
+    "improve-agent-native-release-8": {
+      "policy": "same-eight-scenarios-across-proof-lanes",
       "skill": "Skills/agent-ops/improve-agent-native",
-      "lane": "oss-local",
+      "lanes": [
+        "oss-local",
+        "oss-cloud",
+        "tessl-dry-run",
+        "tessl-external"
+      ],
       "shard_size_limit": 2,
-      "core_case_count": 9,
-      "regression_case_count": 3,
-      "total_case_count": 12,
-      "purpose": "cheap local repair/canary proof before broader cloud rehearsal",
+      "core_case_count": 6,
+      "regression_case_count": 2,
+      "total_case_count": 8,
+      "purpose": "value-efficient release proof using one stable scenario identity set",
       "core_cases": [
         "happy-scorecard",
         "happy-agents-md-audit",
         "happy-proof-loop-gap",
         "edge-no-validation-entrypoint",
-        "happy-agent-native-product-readiness",
         "edge-ui-action-without-agent-capability",
-        "edge-static-tests-only-agent-product",
-        "tessl-scenario-merged-product-workflow-scorecard",
-        "tessl-scenario-dynamic-context-drift"
+        "pressure-prompt-injection"
       ],
       "regression_cases": [
         "eval.harness.local-pass-ci-unknown",
-        "eval.harness.provenance-implies-tests",
         "eval.harness.done-without-validation"
       ],
       "stage_maturity_expectations": {
-        "oss-local": "repair loop: prove a 9+3 cheap local canary before broadening to cloud",
-        "oss-cloud": "uplift loop: expand to the 15+5 Tessl rehearsal set and classify every delta",
-        "tessl": "confirmation loop: only the 15+5 cloud-proven set may proceed to live by default"
+        "oss-local": "author and repair the declared eight-scenario set until focused local proof passes",
+        "oss-cloud": "run the same eight case ids and classify every local-to-cloud delta",
+        "tessl-dry-run": "stage the same eight case ids without paid external execution",
+        "tessl-external": "run the same OSS-proven eight case ids as external confirmation"
       },
+      "identity_rule": "Every downstream lane must use exactly the same scenario ids; additions, removals, or substitutions return the candidate to oss-local.",
       "blocked_next_gates": [
-        "oss-cloud-15-plus-5-rehearsal",
+        "oss-cloud-same-set-proof",
         "tessl-dry-run",
-        "tessl-live"
+        "tessl-external"
       ]
-    },
-    "improve-agent-native-15-plus-5": {
-      "policy": "15-core-plus-5-regression",
-      "skill": "Skills/agent-ops/improve-agent-native",
-      "lane": "oss-cloud-and-tessl-live",
-      "shard_size_limit": 2,
-      "core_case_count": 15,
-      "regression_case_count": 5,
-      "total_case_count": 20,
-      "purpose": "cloud rehearsal and Tessl live confirmation proof set",
-      "core_cases": [
-        "happy-scorecard",
-        "happy-agents-md-audit",
-        "happy-proof-loop-gap",
-        "edge-no-validation-entrypoint",
-        "happy-agent-native-product-readiness",
-        "edge-ui-action-without-agent-capability",
-        "edge-static-tests-only-agent-product",
-        "tessl-scenario-merged-product-workflow-scorecard",
-        "tessl-scenario-dynamic-context-drift",
-        "tessl-scenario-local-pass-release-boundary",
-        "tessl-scenario-knowledge-capsule-uplift",
-        "pressure-prompt-injection",
-        "adversarial-prompt-injection-audit-boundary",
-        "edge-universal-target-repo",
-        "edge-docs-freshness"
-      ],
-      "regression_cases": [
-        "eval.harness.local-pass-ci-unknown",
-        "eval.harness.provenance-implies-tests",
-        "eval.harness.done-without-validation",
-        "eval.harness.static-checks-only-for-product-change",
-        "eval.harness.feedback-recurs-without-guardrail"
-      ],
-      "stage_maturity_expectations": {
-        "oss-local": "repair loop: improve skill, scenarios, runner receipts, and rubrics until the selected local minimum proof set passes",
-        "oss-cloud": "uplift loop: compare against oss-local, classify every delta, and patch skill/scenario/rubric/runner owners until the skill is near production quality",
-        "tessl": "confirmation loop: use Tessl dry-run/live as external validation after internal deltas are owned and closed"
-      }
     }
   }
 }

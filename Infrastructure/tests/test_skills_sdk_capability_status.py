@@ -67,6 +67,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         self.assertEqual(capability_ids, list(REQUIRED_CAPABILITY_IDS))
         self.assertEqual(len(capability_ids), len(set(capability_ids)))
+        self.assertIn("package_security_signature", REQUIRED_CAPABILITY_IDS)
 
     def test_status_payload_is_schema_valid(self) -> None:
         payload = build_capability_status(REPO_ROOT)

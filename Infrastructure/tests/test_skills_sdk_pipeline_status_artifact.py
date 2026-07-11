@@ -150,6 +150,12 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
                 self.assertEqual(html_row["status"], runtime_row["status"])
                 self.assertIn(runtime_row["title"], html_row["text"])
 
+    def test_atlas_exposes_oss_local_release_shard_aggregation_boundary(self) -> None:
+        self.assertIn('data-stage="proof-local" data-pipeline-step="proof_oss_local"', self.simple_atlas_html)
+        self.assertIn("four bounded qwen shards", self.simple_atlas_html)
+        self.assertIn("per-shard scorecard digests remain distinct evidence", self.simple_atlas_html)
+        self.assertIn("any set change restarts at oss-local", self.simple_atlas_html)
+
     def test_public_wrappers_emit_same_sdk_status_payload(self) -> None:
         wrapper_commands = [
             [sys.executable, "bin/ask", "sdk", "status", "--json", "--robot"],

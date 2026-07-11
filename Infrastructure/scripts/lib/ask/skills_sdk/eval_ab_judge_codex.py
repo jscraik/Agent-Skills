@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 from dataclasses import dataclass
@@ -160,9 +161,30 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
     candidate = Path(configured).expanduser() if configured else Path.home() / ".codex" / ".env"
     try:
-        return _safe_existing_env_file(candidate, candidate.parent)
+        safe_candidate = _safe_existing_env_file(candidate, candidate.parent)
     except OSError:
         return None
+    if safe_candidate is None:
+        return None
+    return safe_candidate if _has_required_op_references(safe_candidate, judge_profile) else None
+
+
+def _has_required_op_references(path: Path, judge_profile: dict[str, Any]) -> bool:
+    if stat.S_ISFIFO(path.stat().st_mode):
+        return True
+    required_names = {
+        name
+        for name in judge_profile.get("secret_env_names", [])
+        if isinstance(name, str) and name
+    }
+    if not required_names or not path.is_file():
+        return False
+    references = {
+        line.split("=", 1)[0]
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if "=" in line and line.split("=", 1)[1].startswith("op://")
+    }
+    return required_names.issubset(references)
 
 
 def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) -> Path:

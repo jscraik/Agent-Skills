@@ -279,26 +279,19 @@ class OssMinimumProofSetTests(unittest.TestCase):
         self.assertEqual(regression_cases, ["regression-one"])
         self.assertEqual(shard_size_limit, 2)
 
-    def test_improve_agent_native_policy_has_lane_specific_case_counts(self) -> None:
+    def test_improve_agent_native_policy_uses_same_target_eight_across_lanes(self) -> None:
         policy_path = REPO_ROOT / "Infrastructure" / "config" / "skills-sdk" / "oss-minimum-proof-sets.v1.json"
         payload = json.loads(policy_path.read_text(encoding="utf-8"))
         proof_sets = payload["proof_sets"]
 
-        local = proof_sets["improve-agent-native-oss-local-9-plus-3"]
-        cloud = proof_sets["improve-agent-native-15-plus-5"]
+        release_set = proof_sets["improve-agent-native-release-8"]
 
-        self.assertEqual(local["lane"], "oss-local")
-        self.assertEqual(len(local["core_cases"]), 9)
-        self.assertEqual(len(local["regression_cases"]), 3)
-        self.assertEqual(local["total_case_count"], 12)
-        self.assertEqual(local["policy"], "oss-local-9-core-plus-3-regression")
-        self.assertIn("oss-cloud-15-plus-5-rehearsal", local["blocked_next_gates"])
-
-        self.assertEqual(cloud["lane"], "oss-cloud-and-tessl-live")
-        self.assertEqual(len(cloud["core_cases"]), 15)
-        self.assertEqual(len(cloud["regression_cases"]), 5)
-        self.assertEqual(cloud["total_case_count"], 20)
-        self.assertEqual(cloud["policy"], "15-core-plus-5-regression")
+        self.assertEqual(payload["scenario_budget"], {"minimum": 5, "target": 8, "maximum": 10, "unit": "distinct_scenarios_per_external_eval"})
+        self.assertEqual(len(release_set["core_cases"]), 6)
+        self.assertEqual(len(release_set["regression_cases"]), 2)
+        self.assertEqual(release_set["total_case_count"], 8)
+        self.assertEqual(release_set["policy"], "same-eight-scenarios-across-proof-lanes")
+        self.assertEqual(release_set["lanes"], ["oss-local", "oss-cloud", "tessl-dry-run", "tessl-external"])
 
     def test_missing_result_path_stays_null(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

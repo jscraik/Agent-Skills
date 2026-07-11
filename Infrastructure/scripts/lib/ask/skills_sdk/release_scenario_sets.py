@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import Any
 
 
+RELEASE_SCENARIO_MINIMUM = 5
+RELEASE_SCENARIO_TARGET = 8
+RELEASE_SCENARIO_MAXIMUM = 10
+
+
 def build_release_scenario_set_checks(evals_payload: dict[str, Any] | None, case_list: list[Any]) -> list[dict[str, Any]]:
     if not isinstance(evals_payload, dict):
         return []
@@ -143,23 +148,55 @@ def _release_scenario_set_case_checks(
     case_ids: list[str],
     case_by_id: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    minimum = item.get("minimum_scenarios")
-    minimum_value = max(20, minimum) if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
     return [
-        _release_scenario_set_minimum_check(set_id, case_ids, minimum_value),
+        _release_scenario_set_budget_check(
+            set_id,
+            case_ids,
+            item.get("minimum_scenarios"),
+            item.get("target_scenarios"),
+            item.get("maximum_scenarios"),
+        ),
         _release_scenario_set_missing_ids_check(set_id, case_ids, case_by_id),
         _release_scenario_set_release_mode_check(set_id, case_ids, case_by_id),
         _release_scenario_set_unique_ids_check(set_id, case_ids),
     ]
 
 
-def _release_scenario_set_minimum_check(set_id: str, case_ids: list[str], minimum_value: int) -> dict[str, Any]:
-    blocked = len(case_ids) < minimum_value or minimum_value < 20
+def _release_scenario_set_budget_check(
+    set_id: str,
+    case_ids: list[str],
+    minimum: object,
+    target: object,
+    maximum: object,
+) -> dict[str, Any]:
+    count = len(case_ids)
+    values = _budget_values(minimum, target, maximum)
+    blocked = values is None or not _budget_and_count_valid(values, count)
+    minimum_value, target_value, maximum_value = values or (None, None, None)
     return _check(
-        "release_scenario_set_minimum_count",
+        "release_scenario_set_scenario_budget",
         "blocker" if blocked else "pass",
-        "Default release scenario sets must contain at least the declared minimum and never fewer than 20 cases.",
-        [f"{set_id}:count:{len(case_ids)}:minimum:{minimum_value}"] if blocked else [],
+        (
+            "Release scenario sets must contain 5 to 10 distinct cases; 8 is the target. "
+            "The declared minimum, target, and maximum must be integer values matching the 5/8/10 contract."
+        ),
+        [f"{set_id}:count:{count}:minimum:{minimum_value}:target:{target_value}:maximum:{maximum_value}"] if blocked else [],
+    )
+
+
+def _budget_values(minimum: object, target: object, maximum: object) -> tuple[int, int, int] | None:
+    values = (minimum, target, maximum)
+    if not all(isinstance(value, int) and not isinstance(value, bool) for value in values):
+        return None
+    return int(minimum), int(target), int(maximum)
+
+
+def _budget_and_count_valid(values: tuple[int, int, int], count: int) -> bool:
+    minimum, target, maximum = values
+    return (
+        values == (RELEASE_SCENARIO_MINIMUM, RELEASE_SCENARIO_TARGET, RELEASE_SCENARIO_MAXIMUM)
+        and minimum <= target <= maximum
+        and minimum <= count <= maximum
     )
 
 

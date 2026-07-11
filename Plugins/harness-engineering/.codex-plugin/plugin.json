@@ -24,7 +24,7 @@
     "maturity": "canonical",
     "owner": "Agent Skills Team",
     "review_cadence": "quarterly",
-    "last_reviewed": "2026-04-09",
+    "last_reviewed": "2026-07-11",
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",
