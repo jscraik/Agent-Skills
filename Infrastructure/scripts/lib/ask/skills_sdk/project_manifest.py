@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 MANIFEST_FILENAME = "skills-sdk.json"
@@ -152,7 +152,17 @@ def normalize_root_path(raw: object) -> str:
     """Return the case-folded, slash-normalized comparison key for a root path."""
     if not isinstance(raw, str):
         return ""
-    parts = Path(raw.strip().strip("/")).parts
+    parts: list[str] = []
+    for part in PurePosixPath(raw.strip().strip("/")).parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if parts and parts[-1] != "..":
+                parts.pop()
+            else:
+                parts.append(part)
+            continue
+        parts.append(part)
     return "/".join(part.casefold() for part in parts)
 
 

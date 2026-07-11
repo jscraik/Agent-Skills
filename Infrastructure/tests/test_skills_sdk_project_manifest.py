@@ -15,6 +15,7 @@ from ask.skills_sdk.project_manifest import (  # noqa: E402
     evaluate_manifest_file,
     evaluate_manifest_payload,
     evaluate_repo_manifest,
+    normalize_root_path,
 )
 
 
@@ -95,6 +96,12 @@ class TestProjectManifestStates(unittest.TestCase):
         evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
         self.assertEqual(evaluation.state, "invalid")
         self.assertIn("manifest_duplicate_skill_root", evaluation.blocker_codes())
+
+    def test_normalize_root_path_collapses_lexical_parent_segments(self) -> None:
+        self.assertEqual(
+            normalize_root_path(".agents/skills"),
+            normalize_root_path(".agents/skills/../skills"),
+        )
 
     def test_unsupported_classification_is_blocked(self) -> None:
         manifest = _full_manifest()
