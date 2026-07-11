@@ -38,6 +38,36 @@ The gate is wired into `Infrastructure/scripts/validate_all_impl.sh` as a
 required `program-design` check for `all`, `lint`, and `typecheck` scopes and
 as a required input to the selection-gate-severity artifact.
 
+### Examples
+
+An explicit value object keeps a public boundary small and makes the
+behavioral choice visible to the caller:
+
+```python
+def publish(request: PublishRequest, *, clock: Clock) -> Receipt:
+    """Publish one validated request and return its receipt."""
+    return Publisher(clock=clock).publish(request)
+```
+
+The changed-file ratchet rejects new versions of these shapes unless the
+owner records a time-boxed waiver:
+
+```python
+def publish(name, version, workspace, token, dry_run=False, force=False):
+    ...
+
+
+try:
+    publish_request()
+except Exception:
+    return None
+```
+
+The first example is positive evidence for a narrow interface and explicit
+policy. The second combines a six-parameter public function, a boolean
+behavior switch, and a broad error boundary; the focused fixtures exercise
+each negative signal independently and together.
+
 ## Review checklist
 
 For each non-trivial implementation change, reviewers should answer these
