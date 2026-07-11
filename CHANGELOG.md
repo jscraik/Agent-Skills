@@ -17,6 +17,8 @@ All notable changes for this repository are documented in this file.
 
 ### Changed
 
+- `2026-07-11` Stabilize Skills SDK intake, capability replay, and plugin projection safety with revision-bound evidence and fail-closed package symlink handling.
+
 - `2026-02-23` [27c812c] ci(github): drop go from CodeQL language matrix
 - `2026-02-23` [7d509f4] ci: restore CodeQL language matrix
 - `2026-02-23` [df4209b] ci: remove go from CodeQL matrix

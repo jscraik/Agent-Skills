@@ -11,7 +11,9 @@ SKILL_INTAKE_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
 )
 SKILL_INTAKE_ACCEPTANCE_TRACE = ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"]
-ALLOWED_TOP_LEVELS = frozenset({"SKILL.md", "agents", "references", "scripts", "assets", "evals"})
+# README.md carries registry presentation while SKILL.md remains the runtime
+# instruction source. Intake, hardening, and installation share this boundary.
+ALLOWED_TOP_LEVELS = frozenset({"SKILL.md", "README.md", "agents", "references", "scripts", "assets", "evals"})
 REQUIRED_SKILL_FILE = "SKILL.md"
 
 

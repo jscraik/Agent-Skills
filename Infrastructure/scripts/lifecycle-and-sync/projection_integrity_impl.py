@@ -5,16 +5,33 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import shutil
-import contextlib
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
+
+
+def _load_projection_mirror_module():
+    """Load the focused mirror module when this file is imported by path."""
+    module_name = "projection_mirror_runtime"
+    module_path = Path(__file__).with_name("projection_mirror.py")
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load projection mirror module: {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_projection_mirror = _load_projection_mirror_module()
 
 SCHEMA_VERSION = "projection-parity.v1"
 HEADER_TOKEN = "GENERATED PROJECTION:"
@@ -609,186 +626,14 @@ def verify_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object
     }
 
 
+def _unsafe_package_symlinks(package_root: Path) -> list[dict[str, str]]:
+    """Compatibility wrapper for focused package symlink preflight."""
+    return _projection_mirror.unsafe_package_symlinks(package_root)
+
+
 def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
-    """
-    Synchronises a source directory into its projection directory and applies generated projection headers to stampable files.
-
-    Parameters:
-        repo_root (Path): Repository root path used to resolve spec paths.
-        spec (MirrorProjection): Mirror projection specification containing `name`, `source_path`, `projection_path` and `tags`.
-
-    Returns:
-        result (dict[str, object]): Operation result including:
-            - `name`: projection name from the spec.
-            - `type`: the literal `"mirror"`.
-            - `status`: `"synced"` on success or `"error"` when the source is missing.
-            - `reason`: present when `status` is `"error"` (e.g. `"source_missing"`).
-            - `source`: the spec's source_path.
-            - `projection`: the spec's projection_path.
-            - `sync_engine`: `"rsync"` when rsync was used, otherwise `"python"`.
-            - `changed_files`: number of files created/updated (or `-1` when rsync was used and precise count is not computed).
-            - `deleted_files`: number of files removed from the projection because they were absent from the source.
-            - `stamped_files`: number of stampable files inspected (and rewritten when their projection header changed).
-    """
-    source_abs = repo_root / spec.source_path
-    projection_abs = repo_root / spec.projection_path
-    if not source_abs.is_dir():
-        if spec.optional_when_missing:
-            return {
-                "name": spec.name,
-                "type": "mirror",
-                "status": "ok",
-                "reason": "source_missing_optional",
-                "source": spec.source_path,
-                "projection": spec.projection_path,
-                "changed": False,
-            }
-        return {
-            "name": spec.name,
-            "type": "mirror",
-            "status": "error",
-            "reason": "source_missing",
-            "source": spec.source_path,
-            "projection": spec.projection_path,
-        }
-
-    projection_abs.parent.mkdir(parents=True, exist_ok=True)
-    sync_engine = "python"
-    changed_files = 0
-    deleted_files = 0
-    if spec.replace_before_sync and (projection_abs.exists() or projection_abs.is_symlink()):
-        if projection_abs.is_dir() and not projection_abs.is_symlink():
-            shutil.rmtree(projection_abs)
-        else:
-            projection_abs.unlink()
-    elif projection_abs.is_symlink():
-        projection_abs.unlink()
-    elif projection_abs.exists() and not projection_abs.is_dir():
-        projection_abs.unlink()
-    projection_abs.mkdir(parents=True, exist_ok=True)
-
-    if spec.plugin_cache_package:
-        changed_files, deleted_files, package_logs = _replace_plugin_cache_package_copy(
-            source_abs,
-            projection_abs,
-            follow_symlinks=spec.follow_symlinks,
-            excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
-            keep_duplicates=True,
-        )
-        return {
-            "name": spec.name,
-            "type": "mirror",
-            "status": "synced",
-            "source": spec.source_path,
-            "projection": spec.projection_path,
-            "sync_engine": "plugin-cache-package",
-            "changed_files": changed_files,
-            "deleted_files": deleted_files,
-            "stamped_files": 0,
-            "logs": package_logs,
-        }
-
-    excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
-
-    def _prune_excluded_dirs(root: Path, excluded: tuple[str, ...]) -> int:
-        """
-        Remove excluded directories from a projection tree.
-
-        Returns:
-            int: Number of pruned directories.
-        """
-        if not excluded:
-            return 0
-        excluded_set = set(excluded)
-        pruned = 0
-        for path in sorted(root.rglob("*"), reverse=True):
-            if not path.is_dir():
-                continue
-            if path.name.lower() not in excluded_set:
-                continue
-            shutil.rmtree(path, ignore_errors=True)
-            pruned += 1
-        return pruned
-
-    rsync_bin = shutil.which("rsync")
-    if rsync_bin:
-        before_files = {rel.as_posix() for rel in iter_files(projection_abs, excluded_dirs)}
-        try:
-            rsync_args = [
-                rsync_bin,
-                "-a",
-                "--delete",
-                "--exclude",
-                "__pycache__/",
-                "--exclude",
-                "*.pyc",
-                "--exclude",
-                ".DS_Store",
-            ]
-            if spec.follow_symlinks:
-                rsync_args.append("-L")
-            for excluded in excluded_dirs:
-                rsync_args.extend(["--exclude", f"{excluded}/"])
-            rsync_args.extend([f"{source_abs}/", f"{projection_abs}/"])
-            subprocess.run(  # noqa: S603
-                rsync_args,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            pruned_dirs = _prune_excluded_dirs(projection_abs, excluded_dirs)
-            sync_engine = "rsync"
-            after_files = {rel.as_posix() for rel in iter_files(projection_abs, excluded_dirs)}
-            deleted_files = len(before_files - after_files) + pruned_dirs
-            changed_files = -1
-        except subprocess.CalledProcessError as error:
-            if spec.replace_before_sync or _is_rsync_permission_failure(error):
-                changed_files, deleted_files = _sync_mirror_python(
-                    source_abs,
-                    projection_abs,
-                    follow_symlinks=spec.follow_symlinks,
-                    excluded_dir_names=excluded_dirs,
-                )
-                deleted_files += _prune_excluded_dirs(projection_abs, excluded_dirs)
-            else:
-                raise
-    else:
-        changed_files, deleted_files = _sync_mirror_python(
-            source_abs,
-            projection_abs,
-            follow_symlinks=spec.follow_symlinks,
-            excluded_dir_names=excluded_dirs,
-        )
-        deleted_files += _prune_excluded_dirs(projection_abs, excluded_dirs)
-
-    stamped_files = 0
-    for rel in iter_files(projection_abs, excluded_dirs):
-        if rel.suffix not in STAMPABLE_SUFFIXES:
-            continue
-        projection_file = projection_abs / rel
-        if projection_file.is_symlink():
-            continue
-        source_rel = (Path(spec.source_path) / rel).as_posix()
-        try:
-            original = read_text(projection_file)
-        except UnicodeDecodeError:
-            continue
-        updated = apply_projection_header(original, source_rel, rel.suffix)
-        if updated != original:
-            write_text(projection_file, updated)
-        stamped_files += 1
-
-    return {
-        "name": spec.name,
-        "type": "mirror",
-        "status": "synced",
-        "source": spec.source_path,
-        "projection": spec.projection_path,
-        "sync_engine": sync_engine,
-        "changed_files": changed_files,
-        "deleted_files": deleted_files,
-        "stamped_files": stamped_files,
-    }
+    """Synchronize a mirror through the focused projection implementation."""
+    return _projection_mirror.sync_mirror(repo_root, spec, sys.modules[__name__])
 
 
 def normalize_stamped_content(content: bytes, path: Path) -> bytes:
@@ -824,152 +669,25 @@ def _sync_mirror_python(
     follow_symlinks: bool = False,
     excluded_dir_names: Iterable[str] = (),
 ) -> tuple[int, int]:
-    """
-    Synchronise a projection directory to match a source directory using pure-Python file operations.
-
-    Performs file-by-file sync: deletes projection files that are absent from source, copies regular files, replicates symlinks, treats files with stampable suffixes as equal when their contents match after stripping a generated projection header, preserves permission bits on a best-effort basis, and removes now-empty directories in the projection.
-
-    Parameters:
-        source_abs (Path): Absolute path to the source directory to mirror.
-        projection_abs (Path): Absolute path to the projection directory to update.
-
-    Returns:
-        tuple[int, int]: A pair `(changed_files, deleted_files)` where `changed_files` is the number of files created or updated in the projection and `deleted_files` is the number of projection files removed because they no longer exist in the source.
-    """
-    changed_files = 0
-    deleted_files = 0
-    source_files = {
-        rel.as_posix(): rel
-        for rel in iter_files(
-            source_abs,
-            excluded_dir_names,
-            follow_symlinks=follow_symlinks,
-        )
-    }
-    projection_files = {
-        rel.as_posix(): rel for rel in iter_files(projection_abs, excluded_dir_names)
-    }
-
-    for rel_key in sorted(set(projection_files) - set(source_files)):
-        stale = projection_abs / projection_files[rel_key]
-        stale.unlink()
-        deleted_files += 1
-
-    def _normalize_stamped_text(content: bytes, path: Path) -> str | None:
-        """
-        Return UTF-8 decoded text with any projection header removed for stampable files.
-
-        Parameters:
-            content (bytes): Raw file bytes to decode and normalise.
-            path (Path): File path used to determine stampable suffix.
-
-        Returns:
-            str | None: The decoded text with a projection header stripped when the file
-            suffix is in STAMPABLE_SUFFIXES and decoding succeeds; `None` otherwise.
-        """
-        if path.suffix not in STAMPABLE_SUFFIXES:
-            return None
-        try:
-            text = content.decode("utf-8")
-        except UnicodeDecodeError:
-            return None
-        normalized, _ = strip_projection_header(text, path.suffix)
-        return normalized
-
-    for rel in source_files.values():
-        source_file = source_abs / rel
-        projection_file = projection_abs / rel
-        projection_file.parent.mkdir(parents=True, exist_ok=True)
-        if source_file.is_symlink() and not follow_symlinks:
-            source_target = os.readlink(source_file)
-            if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
-                continue
-            if projection_file.exists() or projection_file.is_symlink():
-                if projection_file.is_symlink():
-                    projection_file.unlink()
-                elif projection_file.is_dir():
-                    shutil.rmtree(projection_file)
-                else:
-                    projection_file.unlink()
-            projection_file.symlink_to(source_target)
-            changed_files += 1
-            continue
-
-        try:
-            source_bytes = source_file.read_bytes()
-        except OSError:
-            # Broken source symlink or unreadable file: do not mirror stale content.
-            if projection_file.exists() or projection_file.is_symlink():
-                if projection_file.is_symlink():
-                    projection_file.unlink()
-                elif projection_file.is_dir():
-                    shutil.rmtree(projection_file)
-                else:
-                    projection_file.unlink()
-                deleted_files += 1
-            continue
-        normalized_source = _normalize_stamped_text(source_bytes, source_file)
-        if projection_file.exists() and projection_file.is_file() and not projection_file.is_symlink():
-            try:
-                projection_bytes = projection_file.read_bytes()
-            except OSError:
-                # Unreadable projection file: will be recreated below
-                pass
-            else:
-                if normalized_source is not None:
-                    normalized_projection = _normalize_stamped_text(projection_bytes, projection_file)
-                    if normalized_projection is not None and normalized_projection == normalized_source:
-                        continue
-                elif projection_bytes == source_bytes:
-                    continue
-        if projection_file.exists() or projection_file.is_symlink():
-            if projection_file.is_symlink():
-                projection_file.unlink()
-            elif projection_file.is_dir():
-                shutil.rmtree(projection_file)
-            else:
-                projection_file.unlink()
-        projection_file.write_bytes(source_bytes)
-        with contextlib.suppress(OSError):
-            # Best-effort permission copy: content sync remains valid if chmod is denied.
-            os.chmod(projection_file, source_file.stat().st_mode & 0o777)
-        changed_files += 1
-
-    for path in sorted(projection_abs.rglob("*"), reverse=True):
-        if path.is_dir() and not path.is_symlink():
-            try:
-                path.rmdir()
-            except OSError:
-                continue
-    return changed_files, deleted_files
+    """Compatibility wrapper for the focused Python mirror engine."""
+    return _projection_mirror.sync_mirror_python(
+        source_abs, projection_abs, follow_symlinks, excluded_dir_names, sys.modules[__name__]
+    )
 
 
 def _prune_nested_duplicate_skill_identities(skills_root: Path) -> tuple[list[str], int]:
-    logs: list[str] = []
-    deletes = 0
-    direct_skill_names = {
-        child.name
-        for child in skills_root.iterdir()
-        if child.is_dir() and (child / "SKILL.md").is_file()
-    }
-    if not direct_skill_names:
-        return logs, deletes
+    """Compatibility wrapper for whole-package duplicate pruning."""
+    return _projection_mirror.prune_nested_duplicate_skill_identities(skills_root)
 
-    duplicate_skill_dirs = {
-        skill_md.parent
-        for skill_md in skills_root.rglob("SKILL.md")
-        if skill_md.parent.parent != skills_root and skill_md.parent.name in direct_skill_names
-    }
-    for target in sorted(duplicate_skill_dirs, key=lambda path: len(path.parts), reverse=True):
-        if not (target.exists() or target.is_symlink()):
-            continue
-        if target.is_symlink() or target.is_file():
-            target.unlink()
-        else:
-            shutil.rmtree(target)
-        deletes += 1
-        logs.append(f"Removed nested duplicate plugin skill identity: {target}")
-    return logs, deletes
+
+def _skill_identity(skill_md: Path) -> str | None:
+    """Compatibility wrapper for canonical frontmatter identity parsing."""
+    return _projection_mirror.skill_identity(skill_md)
+
+
+def _package_tree_sha256(package_root: Path) -> str:
+    """Compatibility wrapper for complete package-tree identity."""
+    return _projection_mirror.package_tree_sha256(package_root)
 
 
 def _replace_plugin_cache_package_copy(
@@ -980,41 +698,17 @@ def _replace_plugin_cache_package_copy(
     excluded_dir_names: Iterable[str],
     keep_duplicates: bool = False,
 ) -> tuple[int, int, list[str]]:
-    changed_files, deleted_files = _sync_mirror_python(
-        source_abs,
-        projection_abs,
-        follow_symlinks=follow_symlinks,
-        excluded_dir_names=excluded_dir_names,
+    """Compatibility wrapper for plugin cache package projection."""
+    del follow_symlinks
+    return _projection_mirror.replace_plugin_cache_package_copy(
+        source_abs, projection_abs, excluded_dir_names=excluded_dir_names,
+        api=sys.modules[__name__], keep_duplicates=keep_duplicates,
     )
-    logs: list[str] = []
-    skills_root = projection_abs / "skills"
-    if not keep_duplicates and skills_root.is_dir():
-        nested_logs, nested_deletes = _prune_nested_duplicate_skill_identities(skills_root)
-        logs.extend(nested_logs)
-        deleted_files += nested_deletes
-    logs.append(f"Replaced plugin cache package projection: {projection_abs} <- {source_abs}")
-    return changed_files, deleted_files, logs
 
 
 def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
-    """
-    Detect whether an rsync CalledProcessError indicates a permission-style failure appropriate for falling back to a Python sync.
-
-    Parameters:
-        error (subprocess.CalledProcessError): The exception raised by a failed rsync invocation; its stdout/stderr will be inspected.
-
-    Returns:
-        bool: `True` if the combined stdout/stderr contains permission-related messages such as "operation not permitted" or "permission denied", `False` otherwise.
-    """
-    output = "\n".join(
-        part for part in (error.stderr, error.stdout) if isinstance(part, str) and part
-    ).lower()
-    if not output:
-        return False
-    return any(
-        marker in output
-        for marker in ("operation not permitted", "permission denied")
-    )
+    """Compatibility wrapper for rsync fallback classification."""
+    return _projection_mirror.is_rsync_permission_failure(error)
 
 
 def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
@@ -1085,7 +779,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             transformed_source,
             follow_symlinks=spec.follow_symlinks,
             excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
-            keep_duplicates=True,
+            keep_duplicates=False,
         )
         source_abs = transformed_source
 
