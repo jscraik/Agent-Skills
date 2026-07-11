@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "score", "ir", "docs", "evidence", "eval", "package", "sandbox", "intake", "trust", "observability", "emitter", "ci", "explorer", "security", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
+    "sdk": ["start", "check", "score", "ir", "docs", "evidence", "route-map", "eval", "package", "sandbox", "intake", "trust", "observability", "emitter", "ci", "explorer", "security", "plugin", "improve", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -93,12 +93,14 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills external-review Skills/backend-platform/cli-spec --json",
     ],
     "sdk": [
+        "ask sdk start Skills/agent-ops/testing --json --robot",
         "ask sdk check Skills/agent-ops/autofix --json --robot",
         "ask sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
         "ask sdk score local Skills/agent-ops/autofix --gate oss-local --write-current --json --robot",
         "ask sdk ir build Skills/agent-ops/autofix --json --robot",
         "ask sdk docs verify --json --robot",
         "ask sdk evidence verify --scope capability-matrix --json --robot",
+        "ask sdk route-map --preview --json --robot",
         "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --json --robot",
         "ask sdk eval profiles --preview --json --robot",
@@ -122,6 +124,8 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk security package-signature Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
         "ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
         "ask sdk security run-lane Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --profile oss-security --json --robot",
+        "ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --preview --json --robot",
+        "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
         "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
         "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "ask sdk rollback --receipt /tmp/sample-project/.harness/receipts/skills-sdk/install/autofix.json --preview --json --robot",
@@ -275,6 +279,18 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("sdk", "check"): [
         "ask sdk check Skills/agent-ops/autofix --json --robot",
         "skills-sdk check Skills/agent-ops/autofix --json --robot",
+    ],
+    ("sdk", "start"): [
+        "ask sdk start Skills/agent-ops/testing --json --robot",
+    ],
+    ("sdk", "route-map"): [
+        "ask sdk route-map --preview --json --robot",
+    ],
+    ("sdk", "plugin"): [
+        "ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --preview --json --robot",
+    ],
+    ("sdk", "improve"): [
+        "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
     ],
     ("sdk", "score"): [
         "ask sdk score local Skills/agent-ops/autofix --gate creation --json --robot",

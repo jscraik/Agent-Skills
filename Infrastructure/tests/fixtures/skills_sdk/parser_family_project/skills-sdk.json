@@ -1,0 +1,21 @@
+{
+  "schema_version": "skills-sdk.project.v1",
+  "project": {
+    "id": "parser-family-example",
+    "name": "Parser Family Example"
+  },
+  "skill_sources": [
+    {
+      "root": "skills",
+      "kind": "canonical_project_source",
+      "standard": "agent-skills",
+      "client": "codex",
+      "write_policy": "sdk_managed"
+    }
+  ],
+  "evidence": {
+    "registry": ".harness/skills/registry.json",
+    "events": ".harness/skills/events.jsonl",
+    "receipts": ".harness/skills/receipts"
+  }
+}
