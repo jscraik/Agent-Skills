@@ -1,6 +1,7 @@
 # Phase 1 First Migration Bucket Selection
 
 Date: 2026-07-01
+Last reconciled: 2026-07-11
 
 ## Purpose
 
@@ -14,6 +15,9 @@ another physical move.
 - Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_repo_layout.py` -> baseline fail before Phase 0 repair because the current-repository policy test exposed those five blockers.
 - Phase 0 repair explicitly classifies those roots and only the two known ignored Swift build-output links. A source symlink or an arbitrary ignored output remains blocking.
 - Command: `python3 Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py --actionable-only --output-json .harness/refactors/root-layout/caller-inventory.current.json --output-md .harness/refactors/root-layout/caller-inventory.current.md` -> pass.
+- The generated inventory records `repo_root` as `.` and excludes generated and
+  evidence paths before scanning. Two consecutive generation runs produced
+  identical JSON and Markdown hashes.
 - Command: `git diff --check -- Infrastructure/config/repo-layout.v1.json Infrastructure/tests/test_repo_layout.py .harness/refactors/root-layout/phase-1-first-bucket-selection.md` -> required after the repair.
 
 ## Inventory Snapshot
@@ -22,16 +26,17 @@ The actionable inventory reports these legacy-root counts:
 
 | Root | References | Initial disposition |
 | --- | ---: | --- |
-| Infrastructure/ | 4905 | Too broad for first physical move. Requires SDK lifecycle wrapper planning. |
-| scripts | 3376 | First compatibility-alias retirement candidate, not first physical root move. |
-| Skills/ | 2596 | Foundry source move; too runtime-entangled for first bucket. |
-| Plugins/ | 2230 | Foundry/plugin move; too route/runtime-entangled for first bucket. |
-| Docs/ | 738 | SDK docs move; many atlas/plan/doc-link call sites. |
-| GOVERNANCE | 214 | Compatibility alias retirement candidate after scripts. |
-| plugins/ | 124 | Runtime/plugin compatibility surface; depends on plugin-root policy. |
-| skills-system/ | 122 | Foundry/system-skills move; depends on Skill Factory overlays. |
-| docs-policy.json | 63 | Compatibility alias retirement candidate after scripts/GOVERNANCE analysis. |
-| brand/ | 38 | First physical migration bucket. |
+| Infrastructure/ | 5990 | Too broad for first physical move. Requires SDK lifecycle wrapper planning. |
+| scripts | 3799 | First compatibility-alias retirement candidate, not first physical root move. |
+| Skills/ | 2805 | Foundry source move; too runtime-entangled for first bucket. |
+| Plugins/ | 2342 | Foundry/plugin move; too route/runtime-entangled for first bucket. |
+| artifacts/ | 1284 | SDK lifecycle root; requires artifact and receipt ownership proof. |
+| Docs/ | 847 | SDK docs move; many atlas/plan/doc-link call sites. |
+| GOVERNANCE | 272 | Compatibility alias retirement candidate after scripts. |
+| plugins/ | 118 | Runtime/plugin compatibility surface; depends on plugin-root policy. |
+| skills-system/ | 135 | Foundry/system-skills move; depends on Skill Factory overlays. |
+| docs-policy.json | 65 | Compatibility alias retirement candidate after scripts/GOVERNANCE analysis. |
+| brand/ | 21 | Historical completed physical migration bucket. |
 
 ## Completed First Physical Migration Bucket
 
@@ -66,8 +71,8 @@ The completed bucket established the following evidence:
 2. `phase-2-brand-migration-report.md` is the authoritative bucket receipt.
 3. The caller inventory is historical evidence for selecting later work; it
    does not reopen the completed brand move.
-4. A future migration bucket requires a separate PM selection after the Phase 0
-   repair gate passes.
+4. A future migration bucket requires a separate owner selection from this
+   current inventory; the Phase 0 repair alone does not select one.
 
 ## Non-Goals
 

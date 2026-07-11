@@ -371,6 +371,57 @@ def test_caller_inventory_scans_nested_extensionless_scripts(
     assert report["summary"]["category_counts"]["ask_cli_route"] >= 1
 
 
+def test_caller_inventory_uses_portable_root_marker(
+    tmp_path: Path, monkeypatch
+) -> None:
+    rel_path = "README.md"
+    roots = [tmp_path / "first-worktree", tmp_path / "second-worktree"]
+    for root in roots:
+        root.mkdir()
+        (root / rel_path).write_text("Use Skills/agent-ops/testing.\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        generate_repo_layout_caller_inventory,
+        "_tracked_files",
+        lambda _root: [rel_path],
+    )
+
+    reports = [
+        generate_repo_layout_caller_inventory.generate_inventory(root) for root in roots
+    ]
+
+    assert reports[0]["repo_root"] == "."
+    assert reports[0] == reports[1]
+
+
+def test_actionable_caller_inventory_excludes_generated_inputs_before_scanning(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    source_path = "README.md"
+    generated_path = ".harness/refactors/root-layout/caller-inventory.current.json"
+    (root / source_path).write_text("Use Skills/agent-ops/testing.\n", encoding="utf-8")
+    artifact = root / generated_path
+    artifact.parent.mkdir(parents=True)
+    artifact.write_text("Historical Skills/agent-ops/testing reference.\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        generate_repo_layout_caller_inventory,
+        "_tracked_files",
+        lambda _root: [source_path, generated_path],
+    )
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(
+        root, actionable_only=True
+    )
+
+    assert report["mode"] == "actionable_only"
+    assert report["summary"]["scanned_files"] == 1
+    assert report["summary"]["root_counts"] == {"Skills/": 1}
+    assert [item["path"] for item in report["occurrences"]] == [source_path]
+
+
 def test_actionable_inventory_keeps_generated_command_callers(
     tmp_path: Path, monkeypatch
 ) -> None:

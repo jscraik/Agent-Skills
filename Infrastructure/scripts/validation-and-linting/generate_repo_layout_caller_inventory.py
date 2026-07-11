@@ -195,12 +195,24 @@ def _line_root_occurrences(
     ]
 
 
-def generate_inventory(root: Path) -> dict[str, Any]:
+def _is_actionable_inventory_path(path: str) -> bool:
+    return not (
+        path.startswith(".harness/")
+        or path.startswith("Infrastructure/artifacts/")
+        or path.startswith("artifacts/")
+    )
+
+
+def generate_inventory(root: Path, *, actionable_only: bool = False) -> dict[str, Any]:
     occurrences: list[Occurrence] = []
     scanned_files = 0
     skipped_files = 0
 
-    for rel_path in _tracked_files(root):
+    tracked_files = _tracked_files(root)
+    if actionable_only:
+        tracked_files = [path for path in tracked_files if _is_actionable_inventory_path(path)]
+
+    for rel_path in tracked_files:
         scanned, file_occurrences = _scan_file(root, rel_path)
         scanned_files += int(scanned)
         skipped_files += int(not scanned)
@@ -209,9 +221,9 @@ def generate_inventory(root: Path) -> dict[str, Any]:
     root_counts = Counter(item.legacy_root for item in occurrences)
     category_counts = Counter(category for item in occurrences for category in item.categories)
     file_counts = Counter(item.path for item in occurrences)
-    return {
+    report = {
         "schema_version": "repo-layout-caller-inventory.v1",
-        "repo_root": root.as_posix(),
+        "repo_root": ".",
         "legacy_roots": list(ROOT_PATTERNS),
         "summary": {
             "scanned_files": scanned_files,
@@ -227,6 +239,9 @@ def generate_inventory(root: Path) -> dict[str, Any]:
         ],
         "occurrences": [item.to_json() for item in occurrences],
     }
+    if actionable_only:
+        report["mode"] = "actionable_only"
+    return report
 
 
 def _is_actionable_occurrence(item: dict[str, Any]) -> bool:
@@ -234,11 +249,7 @@ def _is_actionable_occurrence(item: dict[str, Any]) -> bool:
     categories = set(item.get("categories", []))
     if "generated_artifact_input" in categories:
         return False
-    return not (
-        path.startswith(".harness/")
-        or path.startswith("Infrastructure/artifacts/")
-        or path.startswith("artifacts/")
-    )
+    return _is_actionable_inventory_path(path)
 
 
 def filter_actionable(report: dict[str, Any]) -> dict[str, Any]:
@@ -347,9 +358,7 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    report = generate_inventory(root)
-    if args.actionable_only:
-        report = filter_actionable(report)
+    report = generate_inventory(root, actionable_only=args.actionable_only)
     if args.output_json:
         args.output_json.parent.mkdir(parents=True, exist_ok=True)
         args.output_json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
