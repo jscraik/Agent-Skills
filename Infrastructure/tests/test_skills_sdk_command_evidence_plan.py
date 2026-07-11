@@ -20,6 +20,43 @@ class TestSkillsSdkCommandEvidencePlan(unittest.TestCase):
         self.assertFalse(receipt["command_execution_performed"])
         self.assertTrue(all(command["receipt_required"] for command in receipt["commands"]))
         self.assertTrue(all(command["status"] == "planned" for command in receipt["commands"]))
+        self.assertTrue(all(command["replay_disposition"] for command in receipt["commands"]))
+        self.assertTrue(all(command["caller_consequence"] for command in receipt["commands"]))
+        self.assertEqual(
+            {command["replay_disposition"] for command in receipt["commands"]},
+            {
+                "authority_bound_mutation",
+                "explicit_run_receipt",
+                "preview_replay",
+                "template_requires_concrete_fixture",
+            },
+        )
+
+    def test_includes_service_dispositions_with_caller_consequences(self) -> None:
+        receipt = build_command_evidence_plan_receipt(REPO_ROOT)
+
+        services = {service["path"]: service for service in receipt["services"]}
+        self.assertEqual(receipt["service_count"], 3)
+        self.assertEqual(
+            services["Infrastructure/scripts/lib/ask/services/plugin_cache.py"]["disposition"],
+            "generated_projection_adapter",
+        )
+        self.assertEqual(
+            services["Infrastructure/scripts/lib/ask/services/plugin_sources.py"]["disposition"],
+            "compatibility_adapter",
+        )
+        self.assertEqual(
+            services["Infrastructure/scripts/lib/ask/services/codex_preview.py"]["disposition"],
+            "runtime_model_adapter",
+        )
+        self.assertTrue(all((REPO_ROOT / service["path"]).is_file() for service in services.values()))
+        self.assertTrue(
+            all(
+                all((REPO_ROOT / caller).is_file() for caller in service["caller_modules"])
+                for service in services.values()
+            )
+        )
+        self.assertTrue(all(service["caller_consequence"] for service in services.values()))
 
     def test_blocks_unparseable_command_evidence_refs(self) -> None:
         capability_receipt = {
