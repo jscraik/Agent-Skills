@@ -152,7 +152,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             command = self.runner._command(args, paths, root / "env")
 
         self.assertIn("env", command)
-        self.assertIn(f"CODEX_HOME={profile.parent}", command)
+        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
 
     def test_command_keeps_codex_home_at_projected_profile_parent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -168,8 +168,35 @@ class TestOssCloudSmoke(unittest.TestCase):
 
             command = self.runner._command(args, paths, root / "env")
 
-        self.assertIn(f"CODEX_HOME={projected.parent}", command)
-        self.assertNotIn(f"CODEX_HOME={source.parent}", command)
+        self.assertIn(f"CODEX_HOME={projected.parent.resolve()}", command)
+        self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
+
+    def test_command_resolves_relative_profile_before_work_dir_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "profiles" / "oss-cloud.config.toml"
+            work_dir = root / "different-work-dir"
+            profile.parent.mkdir()
+            work_dir.mkdir()
+            _write_profile(profile)
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(root)
+                args = self.runner._parser().parse_args(
+                    [
+                        "--profile-source",
+                        "profiles/oss-cloud.config.toml",
+                        "--work-dir",
+                        str(work_dir),
+                    ]
+                )
+                paths = self.runner._paths(str(root / "out"))
+                command = self.runner._command(args, paths, root / "env")
+            finally:
+                os.chdir(previous_cwd)
+
+        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
+        self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
 
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

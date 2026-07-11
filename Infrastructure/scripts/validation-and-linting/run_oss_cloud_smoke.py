@@ -107,7 +107,7 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         str(env_file),
         "--",
         "env",
-        f"CODEX_HOME={Path(args.profile_source).expanduser().parent}",
+        f"CODEX_HOME={Path(args.profile_source).expanduser().parent.resolve(strict=False)}",
         "codex",
         "exec",
         "--profile",
