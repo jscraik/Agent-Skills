@@ -149,8 +149,7 @@ PY
 echo "[family-gate] Harness Engineering preserved-context alias passed"
 
 echo "[family-gate] validating Harness Engineering subagent routing"
-he_subagent_manifest="Plugins/harness-engineering/fixtures/subagent-routing-manifest.fixture.json"
-he_subagent_args=(--manifest "$he_subagent_manifest")
+he_subagent_args=()
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   he_subagent_args+=(--changed-files "${changed_files[@]}")
 fi

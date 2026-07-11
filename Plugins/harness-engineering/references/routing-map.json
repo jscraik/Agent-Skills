@@ -402,14 +402,13 @@
     "he-fix-bugs": "$harness-engineering:he-fix-bugs <bug-or-qa-report>",
     "he-improve": "$harness-engineering:he-improve <measurement-goal>",
     "he-code-review": "$harness-engineering:he-code-review <review-target>",
-    "he-phase-work": "$harness-engineering:he-phase-work <target-and-cadence>",
+    "he-phase-work": "$harness-engineering:he-phase-work <approved-phase-plan-and-cadence>",
     "he-reconcile": "$harness-engineering:he-reconcile <state-or-resume-request>",
     "he-reinforce": "$harness-engineering:he-reinforce <solved-problem-or-learning-refresh>",
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
     "he-strategy": "$harness-engineering:he-strategy <strategy-or-review-request>",
     "he-reframe": "$harness-engineering:he-reframe <migration-candidate>",
-    "he-linear-plan": "$harness-engineering:he-linear-plan <harness-artifacts>",
-    "he-phase-work": "$harness-engineering:he-phase-work <approved-phase-plan-and-cadence>"
+    "he-linear-plan": "$harness-engineering:he-linear-plan <harness-artifacts>"
   },
   "routes": [
     {
@@ -496,70 +495,14 @@
       "output": "phase work status with selected active phase, collector evidence state, review gates, validation, git staging status, Linear update status, slack policy, blockers, and next wakeup"
     }
   ],
-  "subagent_inventory_policy": {
-    "he_relevant_roles": [
-      "adversarial-document-reviewer",
-      "data-migrations-reviewer",
-      "bug-reproduction-validator",
-      "git-history-analyzer",
-      "pattern-recognition-specialist",
-      "project-standards-reviewer",
-      "previous-comments-reviewer",
-      "cli-agent-readiness-reviewer",
-      "dhh-rails-reviewer",
-      "swift-ios-reviewer"
-    ],
-    "global_non_he_roles": [
-      "adversarial-reviewer",
-      "ankane-readme-writer",
-      "autoresearch-validator",
-      "circleci",
-      "coderabbit",
-      "data-migration-expert",
-      "design-iterator",
-      "design-lens-reviewer",
-      "git-project-triage",
-      "guardian_subagent",
-      "issue-intelligence-analyst",
-      "llm-wiki-validator",
-      "maintainability-reviewer",
-      "monitor",
-      "plugin-inspector",
-      "pr-comment-resolver",
-      "security-sentinel",
-      "skill-inspector",
-      "web-researcher"
-    ],
-    "retired_roles": [
-      "arscontexta-knowledge-guide",
-      "arscontexta-pipeline-worker",
-      "diagram-cli",
-      "every-style-editor",
-      "explorer",
-      "figma-design-sync",
-      "lint",
-      "performance-oracle",
-      "reviewer",
-      "slack-researcher",
-      "ui-ux-design"
-    ]
-  },
   "subagent_stage_map": {
     "he-reconcile": {
-      "policy": "manual-only",
-      "baseline_roles": [],
-      "conditional_roles": [
-        "repo-research-analyst",
-        "learnings-researcher"
-      ]
-    },
-    "he-reconcile": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "session-historian",
         "spec-flow-analyzer",
         "worker"
@@ -567,11 +510,11 @@
     },
     "he-reinforce": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "session-historian",
         "git-history-analyzer",
         "project-standards-reviewer"
@@ -579,21 +522,21 @@
     },
     "he-brainstorm": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "best-practices-researcher"
       ]
     },
     "he-spec": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "best-practices-researcher",
         "framework-docs-researcher",
         "spec-flow-analyzer",
@@ -602,11 +545,11 @@
     },
     "he-plan": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "best-practices-researcher",
         "framework-docs-researcher",
         "spec-flow-analyzer",
@@ -618,10 +561,10 @@
     },
     "he-work": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "worker"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "correctness-reviewer",
         "testing-reviewer",
         "security-reviewer",
@@ -639,11 +582,11 @@
     },
     "he-fix-bugs": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "worker",
         "testing-reviewer",
         "correctness-reviewer",
@@ -656,11 +599,11 @@
     },
     "he-improve": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "best-practices-researcher",
         "framework-docs-researcher",
         "worker",
@@ -673,12 +616,12 @@
     },
     "he-code-review": {
       "policy": "always",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "agent-native-reviewer",
         "learnings-researcher",
         "code-simplicity-reviewer"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "jamie-rails-reviewer",
         "jamie-typescript-reviewer",
         "jamie-python-reviewer",
@@ -704,24 +647,25 @@
     },
     "he-phase-work": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "worker",
         "testing-reviewer",
         "correctness-reviewer",
         "reliability-reviewer",
+        "project-standards-reviewer",
         "deployment-verification-agent"
       ]
     },
     "he-eval-report": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "agent-native-reviewer",
         "architecture-strategist",
         "security-reviewer",
@@ -732,11 +676,11 @@
     },
     "he-strategy": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "architecture-strategist",
         "product-lens-reviewer",
         "scope-guardian-reviewer",
@@ -745,11 +689,11 @@
     },
     "he-reframe": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "architecture-strategist",
         "feasibility-reviewer",
         "scope-guardian-reviewer",
@@ -758,30 +702,25 @@
     },
     "he-linear-plan": {
       "policy": "conditional",
-      "baseline_roles": [
+      "baseline_capabilities": [
         "repo-research-analyst",
         "learnings-researcher"
       ],
-      "conditional_roles": [
+      "conditional_capabilities": [
         "product-lens-reviewer",
         "scope-guardian-reviewer",
         "project-standards-reviewer"
       ]
-    },
-    "he-phase-work": {
-      "policy": "conditional",
-      "baseline_roles": [
-        "repo-research-analyst",
-        "learnings-researcher"
-      ],
-      "conditional_roles": [
-        "worker",
-        "testing-reviewer",
-        "correctness-reviewer",
-        "reliability-reviewer",
-        "project-standards-reviewer",
-        "deployment-verification-agent"
-      ]
     }
+  },
+  "desktop_collaboration_contract": {
+    "selection": "task_capability",
+    "named_role_selection": "unsupported",
+    "required_packet_fields": [
+      "task_capability",
+      "authority",
+      "evidence_requirements",
+      "stop_condition"
+    ]
   }
 }

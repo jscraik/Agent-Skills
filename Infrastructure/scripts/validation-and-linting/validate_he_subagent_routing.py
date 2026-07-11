@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Harness Engineering subagent routing against runtime roles."""
+"""Validate Harness Engineering capability routing for generic Desktop collaborators."""
 
 from __future__ import annotations
 
@@ -17,7 +17,6 @@ ROUTING_MAP = PLUGIN_ROOT / "references/routing-map.json"
 SUBAGENT_ROUTING = PLUGIN_ROOT / "references/subagent-routing.md"
 SUBAGENT_CALL_CONTRACT = PLUGIN_ROOT / "references/subagent-call-contract.md"
 SKILLS_ROOT = PLUGIN_ROOT / "skills"
-DEFAULT_MANIFEST = Path("~/.codex/agents/manifest.json").expanduser()
 
 
 @dataclass(frozen=True)
@@ -42,26 +41,7 @@ def load_json(path: Path) -> Any:
         raise RuntimeError(f"invalid JSON in {path}: {exc}") from exc
 
 
-def manifest_roles(path: Path) -> set[str]:
-    data = load_json(path)
-    records: Any
-    if isinstance(data, list):
-        records = data
-    elif isinstance(data, dict) and isinstance(data.get("agents"), list):
-        records = data["agents"]
-    else:
-        raise RuntimeError(
-            f"{path} must be a top-level array or an object with an agents array"
-        )
-
-    roles: set[str] = set()
-    for record in records:
-        if isinstance(record, dict) and isinstance(record.get("role"), str):
-            roles.add(record["role"])
-    return roles
-
-
-def mapped_stage_roles(routing_map: dict[str, Any]) -> dict[str, set[str]]:
+def mapped_stage_capabilities(routing_map: dict[str, Any]) -> dict[str, set[str]]:
     stage_map = routing_map.get("subagent_stage_map")
     if not isinstance(stage_map, dict):
         raise RuntimeError(f"{ROUTING_MAP} missing subagent_stage_map object")
@@ -70,79 +50,37 @@ def mapped_stage_roles(routing_map: dict[str, Any]) -> dict[str, set[str]]:
     for stage, policy in stage_map.items():
         if not isinstance(policy, dict):
             raise RuntimeError(f"{stage} policy must be an object")
-        roles: set[str] = set()
-        for key in ("baseline_roles", "conditional_roles"):
+        capabilities: set[str] = set()
+        for key in ("baseline_capabilities", "conditional_capabilities"):
             value = policy.get(key, [])
-            if not isinstance(value, list) or not all(isinstance(role, str) for role in value):
+            if not isinstance(value, list) or not all(isinstance(capability, str) and capability.strip() for capability in value):
                 raise RuntimeError(f"{stage}.{key} must be a list of strings")
-            roles.update(value)
-        mapped[stage] = roles
+            capabilities.update(value)
+        if not capabilities:
+            raise RuntimeError(f"{stage} must declare at least one task capability")
+        mapped[stage] = capabilities
     return mapped
 
 
-def validate_roles(
-    routing_map: dict[str, Any],
-    mapped_roles_by_stage: dict[str, set[str]],
-    available_roles: set[str],
-) -> list[ValidationError]:
+def validate_capability_contract(routing_map: dict[str, Any]) -> list[ValidationError]:
     errors: list[ValidationError] = []
-    mapped_roles = set().union(*mapped_roles_by_stage.values()) if mapped_roles_by_stage else set()
-
-    for stage, roles in sorted(mapped_roles_by_stage.items()):
-        missing = sorted(roles - available_roles)
-        if missing:
-            errors.append(
-                ValidationError(
-                    ROUTING_MAP,
-                    f"{stage} maps roles missing from manifest: {', '.join(missing)}",
-                )
-            )
-
-    inventory_policy = routing_map.get("subagent_inventory_policy")
-    if not isinstance(inventory_policy, dict):
+    contract = routing_map.get("desktop_collaboration_contract")
+    if not isinstance(contract, dict):
         errors.append(
             ValidationError(
                 ROUTING_MAP,
-                "missing subagent_inventory_policy object for HE-relevant role governance",
+                "missing desktop_collaboration_contract object",
             )
         )
         return errors
-
-    he_relevant_roles = inventory_policy.get("he_relevant_roles", [])
-    if not isinstance(he_relevant_roles, list) or not all(
-        isinstance(role, str) for role in he_relevant_roles
-    ):
-        errors.append(
-            ValidationError(ROUTING_MAP, "subagent_inventory_policy.he_relevant_roles must be strings")
-        )
-    else:
-        unmapped_relevant = sorted((set(he_relevant_roles) & available_roles) - mapped_roles)
-        if unmapped_relevant:
-            errors.append(
-                ValidationError(
-                    ROUTING_MAP,
-                    "HE-relevant manifest roles are not mapped to any stage: "
-                    + ", ".join(unmapped_relevant),
-                )
-            )
-
-    retired_roles = inventory_policy.get("retired_roles", [])
-    if not isinstance(retired_roles, list) or not all(
-        isinstance(role, str) for role in retired_roles
-    ):
-        errors.append(
-            ValidationError(ROUTING_MAP, "subagent_inventory_policy.retired_roles must be strings")
-        )
-    else:
-        present_retired = sorted(set(retired_roles) & available_roles)
-        if present_retired:
-            errors.append(
-                ValidationError(
-                    ROUTING_MAP,
-                    "retired roles are still present in manifest: "
-                    + ", ".join(present_retired),
-                )
-            )
+    if contract.get("selection") != "task_capability":
+        errors.append(ValidationError(ROUTING_MAP, "desktop_collaboration_contract.selection must be task_capability"))
+    if contract.get("named_role_selection") != "unsupported":
+        errors.append(ValidationError(ROUTING_MAP, "desktop_collaboration_contract.named_role_selection must be unsupported"))
+    packet_fields = contract.get("required_packet_fields")
+    required_fields = {"task_capability", "authority", "evidence_requirements", "stop_condition"}
+    if not isinstance(packet_fields, list) or not required_fields.issubset(set(packet_fields)):
+        errors.append(ValidationError(ROUTING_MAP, "desktop_collaboration_contract.required_packet_fields must include task_capability, authority, evidence_requirements, and stop_condition"))
 
     return errors
 
@@ -154,8 +92,8 @@ def validate_reference_docs() -> list[ValidationError]:
 
     required_routing_phrases = (
         "Use [routing-map.json](routing-map.json) as the machine-readable source of truth",
-        "Do not invent or prefer `he-*` role aliases",
-        "Route missing role creation or installation to `[[codex-agent-creator]]`",
+        "Route by task capability, authority, evidence requirements, and stop condition",
+        "Do not use `~/.codex/agents/manifest.json` as a runtime availability source",
     )
     for phrase in required_routing_phrases:
         if phrase not in routing_text:
@@ -174,9 +112,9 @@ def validate_reference_docs() -> list[ValidationError]:
             errors.append(ValidationError(SUBAGENT_ROUTING, f"stale alias phrase: {phrase}"))
 
     required_contract_phrases = (
-        "Use the exact role names from `routing-map.json`",
-        "Call `spawn_agent(agent_type=<role>)` only for roles present in the manifest",
-        "`roles_missing`",
+        "Use the capability packet declared by `routing-map.json`",
+        "Do not pass `agent_type`",
+        "`capabilities_not_covered`",
     )
     for phrase in required_contract_phrases:
         if phrase not in contract_text:
@@ -218,13 +156,7 @@ def validate_router_fragments() -> list[ValidationError]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Harness Engineering subagent role routing."
-    )
-    parser.add_argument(
-        "--manifest",
-        type=Path,
-        default=DEFAULT_MANIFEST,
-        help="Path to codex agents manifest; defaults to ~/.codex/agents/manifest.json.",
+        description="Validate Harness Engineering generic Desktop collaborator routing."
     )
     parser.add_argument(
         "--routing-map",
@@ -247,10 +179,9 @@ def main() -> int:
             else None
         )
         routing_map = load_json(args.routing_map)
-        mapped_roles = mapped_stage_roles(routing_map)
-        available_roles = manifest_roles(args.manifest.expanduser())
+        mapped_capabilities = mapped_stage_capabilities(routing_map)
         errors = [
-            *validate_roles(routing_map, mapped_roles, available_roles),
+            *validate_capability_contract(routing_map),
             *validate_reference_docs(),
             *validate_stage_entrypoints(changed_files),
             *validate_router_fragments(),
@@ -267,7 +198,7 @@ def main() -> int:
 
     print(
         "[he-subagent-routing] ok: "
-        f"{len(mapped_roles)} stages, {len(available_roles)} manifest roles"
+        f"{len(mapped_capabilities)} stages, generic Desktop capability routing"
     )
     return 0
 

@@ -66,9 +66,9 @@ phases, rollback, Linear mapping, eval proof, future-agent guardrails,
    and route formal `.harness/strategy/**` authoring to `he-strategy`.
    Confirm the finding is structural and high leverage.
 2. Resolve the `he-reframe` subagent stage map from
-   `../../references/routing-map.json`, compare mapped roles with
-   `~/.codex/agents/manifest.json`, and follow the shared subagent call policy
-   before calling or recommending helper roles.
+   `../../references/routing-map.json`, build the generic Desktop capability
+   packet, and follow the shared subagent call policy before calling or
+   recommending a collaborator.
 3. Reject low-value findings as `Do Not Create`.
 4. Start with 2-3 focused evidence surfaces; widen only when risk cannot be
    proven.
