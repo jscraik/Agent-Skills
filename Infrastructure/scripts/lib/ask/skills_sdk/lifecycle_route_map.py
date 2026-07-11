@@ -31,15 +31,14 @@ REQUIRED_STAGES = {
     "SDK Entry Lifecycle",
     "Guardrails/Sandbox Security Review",
     "SDK Early Lifecycle",
+    "SDK Middle Lifecycle",
     "Evals/Proof (oss-local)",
+    "Evals/Proof (oss-cloud)",
+    "SDK Pre-release Lifecycle",
     "Tessl Distribution",
     "Local Runtime Truth",
 }
-OPTIONAL_ROUTE_STAGES = {
-    "SDK Middle Lifecycle",
-    "Evals/Proof (oss-cloud)",
-    "SDK Pre-release Lifecycle",
-}
+OPTIONAL_ROUTE_STAGES: set[str] = set()
 ALLOWED_STAGES = REQUIRED_STAGES | OPTIONAL_ROUTE_STAGES
 
 
