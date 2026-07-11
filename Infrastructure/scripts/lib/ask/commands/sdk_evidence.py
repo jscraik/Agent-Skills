@@ -9,6 +9,7 @@ from ask.envelope import CallResult, ErrorObject
 from ask.commands.sdk_receipts import receipt_result
 from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_receipt
 from ask.skills_sdk.lifecycle_route_map import build_lifecycle_route_map_receipt
+from ask.skills_sdk.parser_family_inventory import build_parser_family_inventory_receipt
 
 
 def add_sdk_evidence_parser(
@@ -34,6 +35,12 @@ def add_sdk_evidence_parser(
     )
     command_plan.add_argument("--scope", choices=["capability-matrix"], default="capability-matrix")
     command_plan.add_argument("--preview", action="store_true", help="Emit a non-mutating command evidence plan receipt")
+    parser_families = subparsers.add_parser(
+        "parser-families",
+        help="Classify public SDK parser registrations and command-metadata compatibility examples against the replay receipt policy",
+        parents=[global_parser],
+    )
+    parser_families.add_argument("--preview", action="store_true", help="Emit a non-mutating parser family inventory receipt")
 
 
 def add_sdk_route_map_parser(
@@ -53,6 +60,8 @@ def dispatch_sdk_evidence(repo_root: Path, args: argparse.Namespace) -> CallResu
         return skills_commands.skills_sdk_capability_evidence(repo_root, scope=args.scope)
     if args.evidence_action == "command-plan":
         return _dispatch_command_plan(repo_root, args)
+    if args.evidence_action == "parser-families":
+        return _dispatch_parser_families(repo_root, args)
     return build_unknown_action_result("sdk evidence", args.evidence_action)
 
 
@@ -85,6 +94,22 @@ def _dispatch_command_plan(repo_root: Path, args: argparse.Namespace) -> CallRes
         build_command_evidence_plan_receipt(repo_root, scope=args.scope),
         blocked_statuses={"blocked"},
         fix_suggestion="Inspect receipt.commands and run the listed command refs through their own proof lane.",
+    )
+
+
+def _dispatch_parser_families(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if not args.preview:
+        return _validation_error(
+            "sdk evidence parser-families",
+            "Skills SDK parser family inventory is preview-only.",
+            "ask sdk evidence parser-families --preview --json --robot",
+        )
+    return receipt_result(
+        "sdk evidence parser-families --preview",
+        "skills_sdk_parser_family_inventory",
+        build_parser_family_inventory_receipt(repo_root),
+        blocked_statuses={"blocked"},
+        fix_suggestion="Inspect receipt.checks and add concrete command-metadata compatibility examples before claiming replay coverage.",
     )
 
 
