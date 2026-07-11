@@ -1,25 +1,30 @@
-# Subagent Call Contract
+# Generic Desktop Collaborator Call Contract
 
-Harness Engineering stages must resolve helper roles through the same path before calling or recommending subagents.
+SynAIpse Harness stages must use the same Desktop-safe path before calling or
+recommending a collaborator.
 
 ## Required Flow
-1. Load the selected stage policy from `Plugins/synaipse-harness/references/routing-map.json`.
-2. Read available roles from `~/.codex/agents/manifest.json`, supporting both a top-level array and an object with `.agents[]`.
-3. Use the exact role names from `routing-map.json`; do not add `he-*` aliases or rename roles before lookup.
-4. Call `spawn_agent(agent_type=<role>)` only for roles present in the manifest and allowed by the selected stage policy.
-5. If spawning is unavailable, unsafe, or roles are missing, continue inline and tell the user which roles were mapped, available, and missing.
-6. Route missing role creation or installation to `[[codex-agent-creator]]` before rerunning delegated coverage.
+
+1. Load the selected stage and `desktop_collaboration_contract` from
+   `Plugins/synaipse-harness/references/routing-map.json`.
+2. Use the capability packet declared by `routing-map.json`. Build it with
+   task capability, authority, evidence requirements, and stop condition.
+3. Spawn only a generic Desktop collaborator, with the packet in its message.
+   Do not pass `agent_type`.
+4. If spawning is unavailable or unsafe, continue inline and identify the
+   capabilities covered and capabilities not covered.
+5. Do not create or install named roles as a workaround.
 
 ## Trigger Rules
-- `always`: call available baseline roles when spawning is safe.
-- `conditional`: call available mapped roles only when the user requested delegation or risk signals justify specialist coverage.
-- `manual-only`: do not call helpers automatically; recommend exact roles when delegation would help.
+
+- `always`: call baseline capability packets when spawning is safe.
+- `conditional`: call only when user-requested delegation or risk signals
+  justify a bounded supporting lane.
+- `manual-only`: do not call helpers automatically; report the capability
+  packet that would make delegation useful.
 
 ## Traceability Fields
-Each stage closeout should include these fields or equivalent prose:
 
-- `subagent_policy`
-- `roles_used`
-- `roles_recommended`
-- `roles_missing`
-- `git_staging_status` when the stage wrote artifacts
+Each stage closeout includes `subagent_policy`, `capabilities_covered`,
+`capabilities_not_covered`, and `git_staging_status` when the stage wrote
+artifacts.

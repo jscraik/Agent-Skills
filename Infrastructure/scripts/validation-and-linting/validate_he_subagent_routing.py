@@ -21,6 +21,7 @@ ACTIVE_CONTRACTS = (
     PLUGIN_ROOT / "skills/he-strategy/references/strategy-output-contract.md",
     PLUGIN_ROOT / "references/skills/he-linear-plan/linear-plan-output-contract.md",
     PLUGIN_ROOT / "skills/he-improve/references/contract.yaml",
+    ROOT / "Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-call-contract.md",
 )
 
 
