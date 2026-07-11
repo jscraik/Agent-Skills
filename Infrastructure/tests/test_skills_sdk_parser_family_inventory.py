@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shlex
@@ -82,6 +83,30 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
             check for check in receipt["checks"] if check["id"] == "missing_compatibility_examples"
         )
         self.assertEqual(compatibility_check["status"], "pass")
+
+    def test_authority_replay_selection_is_separate_from_inventory_status(self) -> None:
+        selection = build_parser_family_inventory_receipt(REPO_ROOT)["authority_replay_selection"]
+        self.assertEqual(selection["status"], "blocked")
+        self.assertEqual(selection["authority_family_count"], 8)
+        self.assertEqual(selection["selected_count"], 5)
+        self.assertEqual(selection["blocked_count"], 3)
+        selected = {
+            row["id"]: row
+            for row in selection["families"]
+            if row["status"] == "selected_preview"
+        }
+        blocked = {
+            row["id"]: row
+            for row in selection["families"]
+            if row["status"] == "blocked_fixture"
+        }
+        self.assertEqual(set(selected), {"eval", "trust", "plugin", "improve", "install"})
+        self.assertEqual(set(blocked), {"rollback", "uninstall", "knowledge"})
+        self.assertTrue(all(row["command"].startswith("ask sdk ") for row in selected.values()))
+        self.assertTrue(all("--preview" in row["command"] for row in selected.values()))
+        self.assertTrue(all(row["command"] is None for row in blocked.values()))
+        blocker_ids = {item["id"] for item in selection["blockers"]}
+        self.assertTrue(all(f"{row['id']}_replay_fixture_missing" in blocker_ids for row in blocked.values()))
 
     def test_registered_edge_families_have_concrete_command_metadata_examples(self) -> None:
         edge_families = {"start", "route-map", "plugin", "improve"}
@@ -177,6 +202,36 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
 
         _validate_schema_subset(schema, receipt, {schema_path.name: schema})
 
+    def test_retained_authority_replay_artifact_matches_current_selection(self) -> None:
+        artifact_path = REPO_ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-selection.json"
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        selection = build_parser_family_inventory_receipt(REPO_ROOT)["authority_replay_selection"]
+
+        self.assertEqual(artifact["schema_version"], "skills-sdk.parser-family-authority-replay-selection.v1")
+        self.assertEqual(
+            artifact["source_tree_digest"],
+            _source_tree_digest(artifact["source_files"]),
+        )
+        self.assertEqual(artifact["authority_family_count"], selection["authority_family_count"])
+        self.assertEqual(artifact["selected_count"], selection["selected_count"])
+        self.assertEqual(artifact["blocked_count"], selection["blocked_count"])
+        self.assertEqual(
+            {row["family"] for row in artifact["selected_preview_commands"]},
+            {row["id"] for row in selection["families"] if row["status"] == "selected_preview"},
+        )
+        self.assertEqual(
+            {row["family"]: row["command"] for row in artifact["selected_preview_commands"]},
+            {
+                row["id"]: row["command"]
+                for row in selection["families"]
+                if row["status"] == "selected_preview"
+            },
+        )
+        self.assertEqual(
+            {row["family"] for row in artifact["blocked_fixture_families"]},
+            {row["id"] for row in selection["families"] if row["status"] == "blocked_fixture"},
+        )
+
 
 def _isolated_runtime_env(runtime_root: Path) -> dict[str, str]:
     env = _command_env()
@@ -233,6 +288,16 @@ def _git_status() -> str:
         stdout=subprocess.PIPE,
         check=True,
     ).stdout
+
+
+def _source_tree_digest(paths: list[str]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        digest.update(path.encode())
+        digest.update(b"\0")
+        digest.update((REPO_ROOT / path).read_bytes())
+        digest.update(b"\0")
+    return f"sha256:{digest.hexdigest()}"
 
 
 if __name__ == "__main__":

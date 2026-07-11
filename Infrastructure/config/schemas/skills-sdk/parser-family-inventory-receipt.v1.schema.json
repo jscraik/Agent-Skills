@@ -13,12 +13,13 @@
     "family_count": {"type": "integer", "minimum": 0},
     "families": {"type": "array", "items": {"$ref": "#/definitions/family"}},
     "checks": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "authority_replay_selection": {"$ref": "#/definitions/authority_replay_selection"},
     "mutation_performed": {"type": "boolean", "const": false},
     "command_execution_performed": {"type": "boolean", "const": false},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-008", "SA-003", "VP-032"]}},
     "agent_summary": {"type": "string", "minLength": 1}
   },
-  "required": ["schema_version", "schema_uri", "status", "operation", "source_surface", "family_count", "families", "checks", "mutation_performed", "command_execution_performed", "acceptance_trace", "agent_summary"],
+  "required": ["schema_version", "schema_uri", "status", "operation", "source_surface", "family_count", "families", "checks", "authority_replay_selection", "mutation_performed", "command_execution_performed", "acceptance_trace", "agent_summary"],
   "definitions": {
     "owner": {
       "type": "object",
@@ -65,6 +66,35 @@
         "evidence": {"type": "array", "items": {"type": "string"}}
       },
       "required": ["id", "status", "severity", "message", "evidence"]
+    },
+    "authority_replay_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string", "enum": ["planned", "blocked"]},
+        "operation": {"type": "string", "const": "authority_parser_replay_selection"},
+        "authority_family_count": {"type": "integer", "minimum": 0},
+        "selected_count": {"type": "integer", "minimum": 0},
+        "blocked_count": {"type": "integer", "minimum": 0},
+        "families": {"type": "array", "items": {"$ref": "#/definitions/authority_replay_family"}},
+        "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+        "selection_policy": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "mutation_performed": {"type": "boolean", "const": false},
+        "command_execution_performed": {"type": "boolean", "const": false}
+      },
+      "required": ["status", "operation", "authority_family_count", "selected_count", "blocked_count", "families", "blockers", "selection_policy", "mutation_performed", "command_execution_performed"]
+    },
+    "authority_replay_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["selected_preview", "blocked_fixture"]},
+        "command": {"type": ["string", "null"]},
+        "replay_disposition": {"type": "string", "enum": ["authority_bound_mutation", "template_requires_concrete_fixture"]},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["id", "status", "command", "replay_disposition", "reason"]
     }
   }
 }

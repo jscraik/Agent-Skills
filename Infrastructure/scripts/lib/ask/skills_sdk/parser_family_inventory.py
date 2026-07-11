@@ -57,6 +57,13 @@ _AUTHORITY_BOUND_FAMILIES = {
     "uninstall",
     "knowledge",
 }
+_AUTHORITY_REPLAY_SELECTION_POLICY = (
+    "Select at most one canonical ask sdk command per authority-bound family.",
+    "Prefer a concrete --preview command over mutation or template examples.",
+    "Reject template tokens and known placeholder roots until repository-owned fixtures exist.",
+    "Keep authority-bound selection separate from parser inventory pass/fail status.",
+)
+_PLACEHOLDER_ROOTS = ("/tmp/sample-project", "/path/to/")
 
 _DISPATCH_MODULES = {
     "evidence": ("Infrastructure/scripts/lib/ask/commands/sdk_evidence.py", "dispatch_sdk_evidence"),
@@ -76,9 +83,10 @@ def build_parser_family_inventory_receipt(repo_root: Path) -> dict[str, Any]:
     registered, dispatched, compatibility_examples = _discover_inventory_inputs(repo_root)
     checks = _build_inventory_checks(registered, dispatched, compatibility_examples)
     families = _build_family_rows(registered, dispatched, compatibility_examples)
+    authority_replay_selection = _build_authority_replay_selection(families)
     blockers = _blocker_checks(checks)
     status = "blocked" if blockers else "pass"
-    return _receipt_payload(status, families, checks, len(blockers))
+    return _receipt_payload(status, families, checks, len(blockers), authority_replay_selection)
 
 
 def _discover_inventory_inputs(repo_root: Path) -> tuple[dict[str, dict[str, str]], dict[str, dict[str, str]], dict[str, list[str]]]:
@@ -171,6 +179,7 @@ def _receipt_payload(
     families: list[dict[str, Any]],
     checks: list[dict[str, Any]],
     blocker_count: int,
+    authority_replay_selection: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "schema_version": PARSER_FAMILY_INVENTORY_SCHEMA_VERSION,
@@ -181,6 +190,7 @@ def _receipt_payload(
         "family_count": len(families),
         "families": families,
         "checks": checks,
+        "authority_replay_selection": authority_replay_selection,
         "mutation_performed": False,
         "command_execution_performed": False,
         "acceptance_trace": PARSER_FAMILY_ACCEPTANCE_TRACE,
@@ -189,6 +199,84 @@ def _receipt_payload(
             "against the receipt replay policy without executing or mutating a command; "
             f"{blocker_count} blocker check(s) remain."
         ),
+    }
+
+
+def _build_authority_replay_selection(families: list[dict[str, Any]]) -> dict[str, Any]:
+    authority_families = [
+        family for family in families if family["receipt_policy"]["disposition"] == "authority_bound_mutation"
+    ]
+    rows = [_authority_replay_row(family) for family in authority_families]
+    blockers = [
+        _selection_blocker(row)
+        for row in rows
+        if row["status"] == "blocked_fixture"
+    ]
+    selected_count = sum(row["status"] == "selected_preview" for row in rows)
+    return {
+        "status": "blocked" if blockers else "planned",
+        "operation": "authority_parser_replay_selection",
+        "authority_family_count": len(rows),
+        "selected_count": selected_count,
+        "blocked_count": len(blockers),
+        "families": rows,
+        "blockers": blockers,
+        "selection_policy": list(_AUTHORITY_REPLAY_SELECTION_POLICY),
+        "mutation_performed": False,
+        "command_execution_performed": False,
+    }
+
+
+def _authority_replay_row(family: dict[str, Any]) -> dict[str, Any]:
+    family_id = family["id"]
+    command = _select_preview_example(family["compatibility_examples"])
+    if command is not None:
+        return {
+            "id": family_id,
+            "status": "selected_preview",
+            "command": command,
+            "replay_disposition": "authority_bound_mutation",
+            "reason": "Concrete preview candidate selected; a family-specific receipt is still required before behavior is claimed.",
+        }
+    return {
+        "id": family_id,
+        "status": "blocked_fixture",
+        "command": None,
+        "replay_disposition": "template_requires_concrete_fixture",
+        "reason": "No concrete preview candidate is available; replace placeholder roots or add an owned fixture before replay.",
+    }
+
+
+def _select_preview_example(examples: list[str]) -> str | None:
+    candidates = [example for example in examples if _is_concrete_preview(example)]
+    return min(candidates, key=_preview_selection_key) if candidates else None
+
+
+def _preview_selection_key(command: str) -> tuple[int, int, str]:
+    return (0 if command.startswith("ask sdk ") else 1, len(command), command)
+
+
+def _is_concrete_preview(command: str) -> bool:
+    try:
+        argv = shlex.split(command)
+    except ValueError:
+        return False
+    return "--preview" in argv and not any(_is_placeholder_argument(argument) for argument in argv)
+
+
+def _is_placeholder_argument(argument: str) -> bool:
+    if re.search(r"<[^>]+>", argument):
+        return True
+    return any(argument.startswith(root) for root in _PLACEHOLDER_ROOTS)
+
+
+def _selection_blocker(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": f"{row['id']}_replay_fixture_missing",
+        "status": "blocker",
+        "severity": "blocker",
+        "message": row["reason"],
+        "evidence": [row["id"], row["replay_disposition"]],
     }
 
 

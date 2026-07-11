@@ -1,0 +1,96 @@
+{
+  "schema_version": "skills-sdk.parser-family-authority-replay-selection.v1",
+  "status": "blocked",
+  "operation": "authority_parser_replay_selection",
+  "source_files": [
+    "Infrastructure/config/schemas/skills-sdk/parser-family-inventory-receipt.v1.schema.json",
+    "Infrastructure/scripts/lib/ask/skills_sdk/parser_family_inventory.py",
+    "Infrastructure/tests/test_skills_sdk_parser_family_inventory.py"
+  ],
+  "source_tree_digest": "sha256:15ba7d35be5a89ca82d6e6a5cbc5772334f282b6220443a1874a28ceee822078",
+  "source_surface": "Infrastructure/scripts/lib/ask/commands/sdk*.py",
+  "inventory_command": "./bin/ask sdk evidence parser-families --preview --json --robot",
+  "command_plan_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
+  "command_plan_summary": {
+    "status": "planned",
+    "command_count": 43,
+    "authority_bound_mutation_count": 2,
+    "command_execution_performed": false,
+    "mutation_performed": false
+  },
+  "authority_family_count": 8,
+  "selected_count": 5,
+  "blocked_count": 3,
+  "selection_policy": [
+    "Select at most one canonical ask sdk command per authority-bound family.",
+    "Prefer a concrete --preview command over mutation or template examples.",
+    "Reject template tokens and known placeholder roots until repository-owned fixtures exist.",
+    "Keep authority-bound selection separate from parser inventory pass/fail status."
+  ],
+  "selected_preview_commands": [
+    {
+      "family": "eval",
+      "command": "ask sdk eval ab-rubric --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "trust",
+      "command": "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "plugin",
+      "command": "ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "improve",
+      "command": "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "install",
+      "command": "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    }
+  ],
+  "blocked_fixture_families": [
+    {
+      "family": "rollback",
+      "replay_disposition": "template_requires_concrete_fixture",
+      "candidate_examples": [
+        "ask sdk rollback --receipt /tmp/sample-project/.harness/receipts/skills-sdk/install/autofix.json --preview --json --robot"
+      ],
+      "blocker": "Replace the placeholder /tmp/sample-project receipt and project root with an owned install fixture before replay."
+    },
+    {
+      "family": "uninstall",
+      "replay_disposition": "template_requires_concrete_fixture",
+      "candidate_examples": [
+        "ask sdk uninstall Skills/agent-ops/autofix --project-root /tmp/sample-project --preview --json --robot"
+      ],
+      "blocker": "Replace the placeholder /tmp/sample-project root with an owned marked project fixture before replay."
+    },
+    {
+      "family": "knowledge",
+      "replay_disposition": "template_requires_concrete_fixture",
+      "candidate_examples": [
+        "ask sdk knowledge ingest --extraction /path/to/extraction --skill Skills/agent-ops/example --preview --json --robot"
+      ],
+      "blocker": "Replace /path/to/extraction with an owned extraction fixture before replay."
+    }
+  ],
+  "mutation_performed": false,
+  "command_execution_performed": false,
+  "does_not_prove": [
+    "authority-bound mutation receipts",
+    "install, rollback, uninstall, or knowledge-ingest behavior",
+    "Foundry extraction or source admission",
+    "Tessl, registry, hosted CI, installed-runtime, or release readiness"
+  ]
+}
