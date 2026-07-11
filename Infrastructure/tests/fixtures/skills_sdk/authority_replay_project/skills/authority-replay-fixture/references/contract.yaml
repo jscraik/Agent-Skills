@@ -1,0 +1,19 @@
+schema_version: 1
+purpose: Validate portable Skills SDK authority receipts without mutation.
+triggers:
+  - receipt replay
+  - parser family compatibility
+  - preview cleanup
+inputs:
+  - repository-owned receipt or extraction fixture
+  - explicit preview command
+outputs:
+  - receipt with mutation_performed false
+  - bounded path and identity findings
+non_goals:
+  - source admission
+  - registry publication
+  - hosted readiness
+risks:
+  - placeholder paths can hide missing fixture ownership
+  - preview output can be mistaken for apply proof

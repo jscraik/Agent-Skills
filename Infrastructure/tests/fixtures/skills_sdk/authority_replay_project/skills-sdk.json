@@ -1,0 +1,5 @@
+{
+  "schema_version": "skills-sdk.project.v1",
+  "project_name": "authority-replay-fixture",
+  "purpose": "Receipt-backed parser family replay fixture"
+}

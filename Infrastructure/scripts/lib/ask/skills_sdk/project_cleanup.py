@@ -21,24 +21,13 @@ from ask.skills_sdk.project_install import (
     _sha256_file,
     _sha256_json,
 )
-
-
-CLEANUP_RECEIPT_SCHEMA_VERSION = "skills-sdk.project-cleanup-receipt.v1"
-CLEANUP_RECEIPT_SCHEMA_URI = (
-    "https://agent-skills.local/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"
+from ask.skills_sdk.project_cleanup_receipts import (
+    CLEANUP_JOURNAL_DIR,
+    CLEANUP_RECEIPT_DIR,
+    _block_all,
+    _blocked_receipt,
+    _cleanup_receipt,
 )
-CLEANUP_RECEIPT_DIR = Path(".harness/receipts/skills-sdk/cleanup")
-CLEANUP_JOURNAL_DIR = Path(".harness/state/skills-sdk/cleanup")
-CLEANUP_ACCEPTANCE_TRACE = [
-    "PU-010-TR-001",
-    "PU-010-TR-002",
-    "PU-010-TR-005",
-    "PU-010-TR-007",
-    "PU-010-TR-009",
-    "PU-010-TR-010",
-    "PU-010-TR-016",
-    "PU-010-TR-017",
-]
 
 
 @dataclass(frozen=True)
@@ -101,27 +90,9 @@ def uninstall_project_skill(
     project_root: str | None,
     apply: bool,
 ) -> dict[str, Any]:
-    resolved_project_root = _resolve_project_root_for_cleanup(repo_root, project_root, "uninstall")
-    lockfile_path = resolved_project_root / DEFAULT_LOCKFILE_PATH
-    lockfile = _load_lockfile(lockfile_path, operation="uninstall")
-    entry = _lockfile_entry(lockfile, skill_id, resolved_project_root)
-    receipt_ref = entry.get("receipt_ref")
-    source_receipt_path = (resolved_project_root / str(receipt_ref)).resolve()
-    try:
-        _relative_to(source_receipt_path, resolved_project_root)
-    except ProjectInstallError as exc:
-        conflicts = [str(conflict) for conflict in exc.receipt.get("conflicts", [])] or ["unsafe_receipt_ref"]
-        raise ProjectCleanupError(
-            code=exc.code,
-            message=exc.message,
-            fix_suggestion=exc.fix_suggestion,
-            receipt=_blocked_receipt("uninstall", str(source_receipt_path), str(resolved_project_root), conflicts),
-        ) from exc
-    source_receipt, source_digest = _load_install_receipt(source_receipt_path, operation="uninstall")
-    _validate_receipt_root(source_receipt, resolved_project_root)
-    plan = _uninstall_plan(entry, source_receipt, source_receipt_path, source_digest, resolved_project_root)
-    _validate_plan_paths(plan, resolved_project_root)
-    _classify_current_files(plan, resolved_project_root)
+    resolved_project_root, source_receipt_path, source_digest, plan = _prepare_uninstall(
+        repo_root, skill_id, project_root, allow_relative=not apply
+    )
     receipt = _cleanup_receipt(
         operation="uninstall",
         status="preview",
@@ -144,6 +115,37 @@ def uninstall_project_skill(
         files_planned=plan,
         skill_id=skill_id,
     )
+
+
+def _prepare_uninstall(
+    repo_root: Path,
+    skill_id: str,
+    project_root: str | None,
+    *,
+    allow_relative: bool,
+) -> tuple[Path, Path, str, list[dict[str, Any]]]:
+    resolved_project_root = _resolve_project_root_for_cleanup(
+        repo_root, project_root, "uninstall", allow_relative=allow_relative
+    )
+    lockfile = _load_lockfile(resolved_project_root / DEFAULT_LOCKFILE_PATH, operation="uninstall")
+    entry = _lockfile_entry(lockfile, skill_id, resolved_project_root)
+    source_receipt_path = (resolved_project_root / str(entry.get("receipt_ref"))).resolve()
+    try:
+        _relative_to(source_receipt_path, resolved_project_root)
+    except ProjectInstallError as exc:
+        conflicts = [str(conflict) for conflict in exc.receipt.get("conflicts", [])] or ["unsafe_receipt_ref"]
+        raise ProjectCleanupError(
+            code=exc.code,
+            message=exc.message,
+            fix_suggestion=exc.fix_suggestion,
+            receipt=_blocked_receipt("uninstall", str(source_receipt_path), str(resolved_project_root), conflicts),
+        ) from exc
+    source_receipt, source_digest = _load_install_receipt(source_receipt_path, operation="uninstall")
+    _validate_receipt_root(source_receipt, resolved_project_root)
+    plan = _uninstall_plan(entry, source_receipt, source_receipt_path, source_digest, resolved_project_root)
+    _validate_plan_paths(plan, resolved_project_root)
+    _classify_current_files(plan, resolved_project_root)
+    return resolved_project_root, source_receipt_path, source_digest, plan
 
 
 def _resolve_receipt_path(value: str) -> Path:
@@ -243,8 +245,31 @@ def _resolve_cleanup_root(
     return root
 
 
-def _resolve_project_root_for_cleanup(repo_root: Path, project_root: str | None, operation: str) -> Path:
+def _resolve_project_root_for_cleanup(
+    repo_root: Path,
+    project_root: str | None,
+    operation: str,
+    *,
+    allow_relative: bool = False,
+) -> Path:
     try:
+        if allow_relative and project_root and not Path(project_root).expanduser().is_absolute():
+            candidate = (repo_root / Path(project_root).expanduser()).resolve()
+            try:
+                candidate.relative_to(repo_root.resolve())
+            except ValueError as exc:
+                raise ProjectCleanupError(
+                    code="ERR_VALIDATION",
+                    message="Preview project roots must stay inside the repository-owned fixture tree.",
+                    fix_suggestion="Pass a repository-relative fixture path or an absolute marked project root.",
+                    receipt=_blocked_receipt(
+                        operation,
+                        "unknown",
+                        str(candidate),
+                        ["preview_project_root_outside_repo"],
+                    ),
+                ) from exc
+            project_root = str(candidate)
         return _resolve_project_root(project_root, repo_root)
     except ProjectInstallError as exc:
         target_root = str(exc.receipt.get("target_root") or project_root or "missing")
@@ -730,89 +755,3 @@ def _skill_id_from_receipt(receipt: dict[str, Any]) -> str | None:
     if len(parts) >= 3 and parts[0] == ".agents" and parts[1] == "skills":
         return parts[2]
     return None
-
-
-def _cleanup_receipt(
-    *,
-    operation: str,
-    status: str,
-    target_root: str,
-    source_receipt_path: str,
-    source_receipt_digest: str,
-    files_planned: list[dict[str, Any]],
-    mutation_performed: bool,
-    live_project_validation: bool,
-    skill_id: str | None = None,
-    journal_path: str | None = None,
-    lockfile_changes: list[dict[str, Any]] | None = None,
-    directory_prune_results: list[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    removed = [item for item in files_planned if item["status"] == "removed"]
-    skipped = [item for item in files_planned if item["status"] == "skipped"]
-    blocked = [item for item in files_planned if item["status"] == "blocked"]
-    restored: list[dict[str, Any]] = []
-    manual_actions = [
-        {"path": item["target_path"], "reason": item["reason"]}
-        for item in [*skipped, *blocked]
-        if item["reason"] not in {"already_absent"}
-    ]
-    return {
-        "schema_version": CLEANUP_RECEIPT_SCHEMA_VERSION,
-        "schema_uri": CLEANUP_RECEIPT_SCHEMA_URI,
-        "operation": operation,
-        "status": status,
-        "target_root": target_root,
-        "skill_id": skill_id,
-        "source_receipt_path": source_receipt_path,
-        "source_receipt_digest": source_receipt_digest,
-        "install_receipt_identity": source_receipt_digest,
-        "target_root_identity": _sha256_json({"target_root": target_root}),
-        "live_project_validation": live_project_validation,
-        "files_planned": files_planned,
-        "files_removed": removed,
-        "files_restored": restored,
-        "files_skipped": skipped,
-        "files_blocked": blocked,
-        "lockfile_changes": lockfile_changes or [],
-        "directory_prune_results": directory_prune_results or [],
-        "cleanup_journal_name": Path(journal_path).name if journal_path else None,
-        "journal_path": journal_path,
-        "manual_actions": manual_actions,
-        "mutation_performed": mutation_performed,
-        "acceptance_trace": CLEANUP_ACCEPTANCE_TRACE,
-    }
-
-
-def _blocked_receipt(
-    operation: str,
-    source_receipt_path: str,
-    target_root: str,
-    conflicts: list[str],
-    *,
-    source_digest: str = "sha256:blocked",
-) -> dict[str, Any]:
-    blocked = [
-        {
-            "target_path": conflict,
-            "expected_digest": "sha256:blocked",
-            "action": "block",
-            "status": "blocked",
-            "reason": conflict,
-        }
-        for conflict in conflicts
-    ]
-    return _cleanup_receipt(
-        operation=operation,
-        status="blocked",
-        target_root=target_root,
-        source_receipt_path=source_receipt_path,
-        source_receipt_digest=source_digest,
-        files_planned=blocked,
-        mutation_performed=False,
-        live_project_validation=False,
-        lockfile_changes=[],
-    )
-
-
-def _block_all(files: list[dict[str, Any]], reason: str) -> list[dict[str, Any]]:
-    return [{**item, "status": "blocked", "reason": reason} for item in files]

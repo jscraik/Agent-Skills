@@ -1,0 +1,11 @@
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: authority-replay-fixture
+  declared_name: authority-replay-fixture
+  writable_root: Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+needed_facets:
+  - receipt_policy

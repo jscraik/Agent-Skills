@@ -1,0 +1,44 @@
+{
+  "schema_version": "skills-sdk.install-receipt.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json",
+  "status": "success",
+  "operation": "install",
+  "scope": "project",
+  "source_path": "skills/authority-replay-fixture",
+  "source_digest": "sha256:f96414c81abc3a28f6641e757ea3c3df4e2d95d88224a21f643a4d34380265c6",
+  "target_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
+  "target_paths": [
+    ".agents/skills/authority-replay-fixture/SKILL.md",
+    "skills.lock.json",
+    ".harness/receipts/skills-sdk/install/authority-replay-fixture.json"
+  ],
+  "files_written": [
+    {
+      "source_path": "SKILL.md",
+      "target_path": ".agents/skills/authority-replay-fixture/SKILL.md",
+      "digest": "sha256:4c1689c0ee13e9a9c118254f0bb46e507940d0bdbf6a451f0e4847b6fd36ad6a"
+    }
+  ],
+  "files_skipped": [],
+  "files_overwritten": [],
+  "conflicts": [],
+  "lockfile_path": "skills.lock.json",
+  "lockfile_before_digest": null,
+  "lockfile_after_digest": "sha256:0897a4a946ecded9f7945cd48d9c6aa364710eba882943c98d8442a89392f257",
+  "rollback_metadata": {
+    "status": "seed_only",
+    "reason": "Owned fixture authority for preview cleanup replay.",
+    "installed_files": [
+      ".agents/skills/authority-replay-fixture/SKILL.md"
+    ]
+  },
+  "mutation_performed": true,
+  "acceptance_trace": [
+    "PU-009-FR-001",
+    "PU-009-FR-002",
+    "PU-009-FR-003",
+    "PU-009-SA-001",
+    "PU-009-SA-002",
+    "PU-009-VP-001"
+  ]
+}

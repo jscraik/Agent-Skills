@@ -27,6 +27,14 @@ from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 
 
+_AUTHORITY_FAMILY_IDS = ("eval", "trust", "plugin", "improve", "install", "rollback", "uninstall", "knowledge")
+_OWNED_REPLAY_CASES = (
+    ("rollback", "skills_sdk_project_rollback"),
+    ("uninstall", "skills_sdk_project_uninstall"),
+    ("knowledge", "knowledge_ingest"),
+)
+
+
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-parser-family-test"
@@ -86,27 +94,48 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
 
     def test_authority_replay_selection_is_separate_from_inventory_status(self) -> None:
         selection = build_parser_family_inventory_receipt(REPO_ROOT)["authority_replay_selection"]
-        self.assertEqual(selection["status"], "blocked")
+        self.assertEqual(selection["status"], "planned")
         self.assertEqual(selection["authority_family_count"], 8)
-        self.assertEqual(selection["selected_count"], 5)
-        self.assertEqual(selection["blocked_count"], 3)
+        self.assertEqual(selection["selected_count"], 8)
+        self.assertEqual(selection["blocked_count"], 0)
         selected = {
             row["id"]: row
             for row in selection["families"]
             if row["status"] == "selected_preview"
         }
-        blocked = {
-            row["id"]: row
-            for row in selection["families"]
-            if row["status"] == "blocked_fixture"
-        }
-        self.assertEqual(set(selected), {"eval", "trust", "plugin", "improve", "install"})
-        self.assertEqual(set(blocked), {"rollback", "uninstall", "knowledge"})
+        self.assertEqual(set(selected), set(_AUTHORITY_FAMILY_IDS))
         self.assertTrue(all(row["command"].startswith("ask sdk ") for row in selected.values()))
         self.assertTrue(all("--preview" in row["command"] for row in selected.values()))
-        self.assertTrue(all(row["command"] is None for row in blocked.values()))
-        blocker_ids = {item["id"] for item in selection["blockers"]}
-        self.assertTrue(all(f"{row['id']}_replay_fixture_missing" in blocker_ids for row in blocked.values()))
+        self.assertEqual(selection["blockers"], [])
+
+    def test_owned_authority_replay_previews_emit_receipts_without_mutation(self) -> None:
+        for family_id, receipt_key in _OWNED_REPLAY_CASES:
+            preview_commands = [
+                command for command in COMMAND_EXAMPLES[("sdk", family_id)] if "--preview" in shlex.split(command)
+            ]
+            for command in preview_commands:
+                with self.subTest(family_id=family_id, command=command):
+                    _assert_owned_replay_preview(self, command, receipt_key)
+
+    def test_owned_cleanup_fixture_receipts_match_install_and_lockfile_schemas(self) -> None:
+        fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project"
+        install_schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/install-receipt.v1.schema.json"
+        lockfile_schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/lockfile.v1.schema.json"
+        install_schema = json.loads(install_schema_path.read_text(encoding="utf-8"))
+        lockfile_schema = json.loads(lockfile_schema_path.read_text(encoding="utf-8"))
+        install_receipt = json.loads(
+            (fixture_root / ".harness/receipts/skills-sdk/install/authority-replay-fixture.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        lockfile = json.loads((fixture_root / "skills.lock.json").read_text(encoding="utf-8"))
+
+        _validate_schema_subset(install_schema, install_receipt, {install_schema_path.name: install_schema})
+        _validate_schema_subset(
+            lockfile_schema,
+            lockfile,
+            {lockfile_schema_path.name: lockfile_schema, install_schema_path.name: install_schema},
+        )
 
     def test_registered_edge_families_have_concrete_command_metadata_examples(self) -> None:
         edge_families = {"start", "route-map", "plugin", "improve"}
@@ -231,6 +260,14 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
             {row["family"] for row in artifact["blocked_fixture_families"]},
             {row["id"] for row in selection["families"] if row["status"] == "blocked_fixture"},
         )
+        self.assertEqual(artifact["receipt_backed_replay_status"], "pass")
+        self.assertEqual(
+            {row["family"] for row in artifact["receipt_backed_replays"]},
+            {"rollback", "uninstall", "knowledge"},
+        )
+        self.assertTrue(
+            all(row["expected_receipt_status"] == "preview" for row in artifact["receipt_backed_replays"])
+        )
 
 
 def _isolated_runtime_env(runtime_root: Path) -> dict[str, str]:
@@ -244,6 +281,26 @@ def _isolated_runtime_env(runtime_root: Path) -> dict[str, str]:
     }.items():
         env[key] = str(runtime_root / suffix)
     return env
+
+
+def _assert_owned_replay_preview(testcase: unittest.TestCase, command: str, receipt_key: str) -> None:
+    fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project"
+    before = _snapshot_files(fixture_root)
+    process = _run_metadata_example(command)
+    after = _snapshot_files(fixture_root)
+
+    testcase.assertEqual(process.returncode, 0, process.stderr)
+    testcase.assertEqual(after, before)
+    payload = json.loads(process.stdout)
+    result = payload["data"][receipt_key]
+    receipt = result.get("receipt", result)
+    testcase.assertEqual(receipt["status"], "preview")
+    if receipt_key in {"skills_sdk_project_rollback", "skills_sdk_project_uninstall"}:
+        testcase.assertFalse(receipt["mutation_performed"])
+        testcase.assertTrue(receipt["files_planned"])
+    else:
+        testcase.assertEqual(receipt["staged_preflight"]["status"], "pass")
+        testcase.assertTrue(all(item["action"] == "preview" for item in receipt["copied_files"]))
 
 
 def _run_parser_family_cli(env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -269,8 +326,9 @@ def _run_parser_family_cli(env: dict[str, str]) -> subprocess.CompletedProcess[s
 
 def _run_metadata_example(command: str) -> subprocess.CompletedProcess[str]:
     argv = shlex.split(command)
+    wrapper = "bin/skills-sdk" if argv[0] == "skills-sdk" else "Infrastructure/bin/ask"
     return subprocess.run(
-        [sys.executable, "Infrastructure/bin/ask", *argv[1:]],
+        [sys.executable, wrapper, *argv[1:]],
         cwd=REPO_ROOT,
         env=_command_env(),
         text=True,

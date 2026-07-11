@@ -1,0 +1,8 @@
+schema_version: knowledge-os.extraction-plan.v1
+skill:
+  skill_id: authority-replay-fixture
+  declared_name: authority-replay-fixture
+  writable_root: Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture
+upstream_packs:
+  - pack_id: pack.skills-sdk-fixture
+    snapshot_digest: sha256:fixture-knowledge
