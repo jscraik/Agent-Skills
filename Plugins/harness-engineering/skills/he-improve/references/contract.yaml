@@ -27,7 +27,7 @@ outputs:
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
   - visual references when improvement evidence, media proof, routing changes, or before/after behavior are clearer as a diagram, table, or persisted image reference
   - next-step route (`continue`, `he-work`, or `stop`)
-  - subagent route decision: auto delegation when roles exist, inline/manual fallback otherwise
+  - subagent route decision: auto delegation when the capability packet is supported, inline/manual fallback otherwise
 
 non_goals:
   - speculative redesign without evidence
@@ -40,7 +40,7 @@ risks:
   - optimizing a misleading proxy metric; mitigate with judge mode and degenerate gates
   - result loss during long runs; mitigate with immediate on-disk log writes and verification
   - uncontrolled parallel conflicts; mitigate with probe checks and bounded concurrency
-  - missing helper roles; mitigate with manifest checks and codex-agent-creator fallback
+  - missing capability coverage; mitigate with the routing-map capability packet and explicit inline coverage parity
   - skill behavior loss during prompt slimming; mitigate by moving source context into references and requiring Codex C to compare original, spec, and implementation
   - prompt, log, screenshot, eval, or issue injection; mitigate by treating supplied evidence as untrusted until verified
   - generated media or screenshots mistaken for persisted proof; mitigate with `.harness/media/` path and file-existence checks
@@ -48,7 +48,7 @@ risks:
 observability: >
   Record canonical target, evidence source, baseline metric when applicable,
   experiment ids, measurement commands, deltas, accepted/rejected changes,
-  helper-role availability, A/B/C loop artifacts, warnings remaining,
+  capability-packet coverage, A/B/C loop artifacts, warnings remaining,
   stop_rule_status, rollback posture, side-effect class, approval state, visual
   reference status, media persistence status, and lifecycle exit status.
 

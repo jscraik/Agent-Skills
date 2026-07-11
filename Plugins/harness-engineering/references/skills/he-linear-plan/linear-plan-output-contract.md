@@ -49,9 +49,9 @@ Linear.
   from source-prompt preservation. Include covered prompt family, authority
   limits, and downstream confidence.
 - `subagent_policy`
-- `roles_used`
-- `roles_recommended`
-- `roles_missing`
+- `capabilities_covered`
+- `capabilities_not_covered`
+- `coverage_parity`
 - `linear_mutation_status`: one of `not_requested`,
   `confirmation_required`, `blocked`, `created`, `updated`, or
   `not_applicable`

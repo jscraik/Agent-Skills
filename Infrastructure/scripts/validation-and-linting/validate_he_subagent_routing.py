@@ -17,6 +17,11 @@ ROUTING_MAP = PLUGIN_ROOT / "references/routing-map.json"
 SUBAGENT_ROUTING = PLUGIN_ROOT / "references/subagent-routing.md"
 SUBAGENT_CALL_CONTRACT = PLUGIN_ROOT / "references/subagent-call-contract.md"
 SKILLS_ROOT = PLUGIN_ROOT / "skills"
+ACTIVE_CONTRACTS = (
+    PLUGIN_ROOT / "skills/he-strategy/references/strategy-output-contract.md",
+    PLUGIN_ROOT / "references/skills/he-linear-plan/linear-plan-output-contract.md",
+    PLUGIN_ROOT / "skills/he-improve/references/contract.yaml",
+)
 
 
 @dataclass(frozen=True)
@@ -154,7 +159,32 @@ def validate_router_fragments() -> list[ValidationError]:
     return errors
 
 
-def main() -> int:
+def validate_active_contracts() -> list[ValidationError]:
+    """Reject retired named-role fields in active HE contracts."""
+    errors: list[ValidationError] = []
+    stale_phrases = (
+        "roles_used",
+        "roles_recommended",
+        "roles_missing",
+        "manifest checks",
+        "codex-agent-creator fallback",
+        "when roles exist",
+        "helper-role availability",
+    )
+    for path in ACTIVE_CONTRACTS:
+        text = path.read_text(encoding="utf-8")
+        for phrase in stale_phrases:
+            if phrase in text:
+                errors.append(
+                    ValidationError(
+                        path,
+                        f"stale named-role contract phrase: {phrase}",
+                    )
+                )
+    return errors
+
+
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate Harness Engineering generic Desktop collaborator routing."
     )
@@ -170,22 +200,32 @@ def main() -> int:
         default=None,
         help="Optional repo-relative file list used to scope stage entrypoint checks.",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def validate_inputs(args: argparse.Namespace) -> tuple[dict[str, set[str]], list[ValidationError]]:
+    changed_files = (
+        {Path(path.lstrip("./")) for path in args.changed_files}
+        if args.changed_files is not None
+        else None
+    )
+    routing_map = load_json(args.routing_map)
+    mapped_capabilities = mapped_stage_capabilities(routing_map)
+    errors = [
+        *validate_capability_contract(routing_map),
+        *validate_reference_docs(),
+        *validate_stage_entrypoints(changed_files),
+        *validate_router_fragments(),
+        *validate_active_contracts(),
+    ]
+    return mapped_capabilities, errors
+
+
+def main() -> int:
+    args = parse_args()
 
     try:
-        changed_files = (
-            {Path(path.lstrip("./")) for path in args.changed_files}
-            if args.changed_files is not None
-            else None
-        )
-        routing_map = load_json(args.routing_map)
-        mapped_capabilities = mapped_stage_capabilities(routing_map)
-        errors = [
-            *validate_capability_contract(routing_map),
-            *validate_reference_docs(),
-            *validate_stage_entrypoints(changed_files),
-            *validate_router_fragments(),
-        ]
+        mapped_capabilities, errors = validate_inputs(args)
     except RuntimeError as exc:
         print(f"[he-subagent-routing] ERROR: {exc}", file=sys.stderr)
         return 1

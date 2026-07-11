@@ -70,7 +70,7 @@ Every output must include:
 - evidence and traceability matrix
 - `he-strategy`
 - `subagent_policy`
-- `roles_used`, `roles_recommended`, and `roles_missing`
+- `capabilities_covered`, `capabilities_not_covered`, and `coverage_parity`
 
 Repo intent outputs must additionally include:
 
@@ -106,7 +106,7 @@ Architecture-review outputs must additionally include:
 - Whole-repo inspection coverage across source, configs, scripts, CI/CD, tests,
   docs, prompts, skills, workflows, hooks, harness files, architecture
   boundaries, validation loops, memory/context systems, MCP integrations,
-  observability, dependency graph, dead code, TODO clusters, repeated
+  observability, dependency graph, dead code, deferred-work clusters, repeated
   abstractions, hidden coupling, and naming conventions. Record sampling limits
   rather than implying full coverage when only sampled.
 - Lens-specific findings for pragmatic engineering, deep versus shallow
