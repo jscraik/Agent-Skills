@@ -40,6 +40,28 @@ def test_current_repository_layout_policy_passes_without_unknown_symlinks() -> N
     assert report["summary"]["blocking_count"] == 0
 
 
+def test_tracked_phase_zero_roots_have_explicit_classifications() -> None:
+    root = Path(__file__).resolve().parents[2]
+    config = json.loads(
+        (root / "Infrastructure" / "config" / "repo-layout.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    entries = validate_repo_layout._iter_layout_entries(config)
+
+    assert {
+        path: entries[path]["section"]
+        for path in ("AI", "codestyle", "codex", "coding-policy.json", "contracts")
+    } == {
+        "AI": "supporting_reference",
+        "codestyle": "root_governance",
+        "codex": "repo_automation",
+        "coding-policy.json": "repo_automation",
+        "contracts": "repo_automation",
+    }
+    assert "*" not in entries
+
+
 def test_runtime_projection_symlink_is_allowed(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / ".agents" / "skills").mkdir(parents=True)
@@ -67,6 +89,59 @@ def test_unknown_symlink_blocks_layout_validation(tmp_path: Path) -> None:
 
     assert report["status"] == "fail"
     assert any(finding["code"] == "unknown_symlink" for finding in report["findings"])
+
+
+def test_known_swift_build_output_symlinks_are_ignored(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    output_root = root / "Prototypes" / "improve-agent-native-menubar" / "dist"
+    for rel_path in (
+        "swiftpm-build-nodebug/debug",
+        "swiftpm-build/debug",
+    ):
+        link = output_root / rel_path
+        link.parent.mkdir(parents=True, exist_ok=True)
+        os.symlink("/private/tmp/swift-build/debug", link)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "pass"
+    ignored_paths = {
+        finding["path"]
+        for finding in report["findings"]
+        if finding["code"] == "symlink_ignored"
+    }
+    assert ignored_paths == {
+        "Prototypes/improve-agent-native-menubar/dist/swiftpm-build-nodebug/debug",
+        "Prototypes/improve-agent-native-menubar/dist/swiftpm-build/debug",
+    }
+
+
+def test_swift_output_policy_does_not_mask_other_ignored_or_source_symlinks(
+    tmp_path: Path,
+) -> None:
+    root = _minimal_repo(tmp_path)
+    prototype = root / "Prototypes" / "improve-agent-native-menubar"
+    for rel_path in ("dist/other/debug", "Sources/debug"):
+        link = prototype / rel_path
+        link.parent.mkdir(parents=True, exist_ok=True)
+        os.symlink("/private/tmp/unowned-link", link)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "fail"
+    unknown_paths = {
+        finding["path"]
+        for finding in report["findings"]
+        if finding["code"] == "unknown_symlink"
+    }
+    assert unknown_paths == {
+        "Prototypes/improve-agent-native-menubar/dist/other/debug",
+        "Prototypes/improve-agent-native-menubar/Sources/debug",
+    }
 
 
 def test_capitalized_plugin_internal_alias_is_allowed(tmp_path: Path) -> None:

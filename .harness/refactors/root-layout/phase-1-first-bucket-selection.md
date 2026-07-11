@@ -4,16 +4,17 @@ Date: 2026-07-01
 
 ## Purpose
 
-Choose the first layout-migration bucket from the Phase 1 caller inventory,
-after proving the current layout policy passes. This artifact selects the next
-bounded migration target; it does not authorize moving files in this slice.
+Record the first layout-migration bucket selected from the Phase 1 caller
+inventory. The brand bucket is complete; this artifact does not authorize
+another physical move.
 
-## Current Gate Evidence
+## Reconciled Gate Evidence
 
-- Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_repo_layout.py` -> pass, 12 passed.
-- Command: `python3 Infrastructure/scripts/validation-and-linting/validate_repo_layout.py --json | jq '{status, summary, blockers: [.findings[] | select(.blocking) | {code,path,message}], warnings: [.findings[] | select(.severity=="warning") | {code,path,classification}]}'` -> pass, status=pass, blocking_count=0, warning_count=3.
+- Command: `python3 Infrastructure/scripts/validation-and-linting/validate_repo_layout.py --json` -> baseline fail before Phase 0 repair with five tracked unclassified roots: `AI`, `codestyle`, `codex`, `coding-policy.json`, and `contracts`.
+- Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_repo_layout.py` -> baseline fail before Phase 0 repair because the current-repository policy test exposed those five blockers.
+- Phase 0 repair explicitly classifies those roots and only the two known ignored Swift build-output links. A source symlink or an arbitrary ignored output remains blocking.
 - Command: `python3 Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py --actionable-only --output-json .harness/refactors/root-layout/caller-inventory.current.json --output-md .harness/refactors/root-layout/caller-inventory.current.md` -> pass.
-- Command: `git diff --check -- Infrastructure/config/repo-layout.v1.json Infrastructure/tests/test_repo_layout.py Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py .harness/refactors/root-layout/compatibility-wrapper-policy.md .harness/refactors/root-layout/caller-inventory.current.md .harness/refactors/root-layout/caller-inventory.current.json` -> pass.
+- Command: `git diff --check -- Infrastructure/config/repo-layout.v1.json Infrastructure/tests/test_repo_layout.py .harness/refactors/root-layout/phase-1-first-bucket-selection.md` -> required after the repair.
 
 ## Inventory Snapshot
 
@@ -32,9 +33,9 @@ The actionable inventory reports these legacy-root counts:
 | docs-policy.json | 63 | Compatibility alias retirement candidate after scripts/GOVERNANCE analysis. |
 | brand/ | 38 | First physical migration bucket. |
 
-## Selected First Physical Migration Bucket
+## Completed First Physical Migration Bucket
 
-Move `brand/` to `skills-sdk/brand/` first.
+`brand/` moved to `skills-sdk/brand/` in commit `ed9d3fd840e540b2e1a5b625bfaf5e8993b6c16f`.
 
 Why:
 
@@ -56,24 +57,17 @@ Why:
 - It is not a source-root move, so it should be tracked as wrapper retirement,
   not mixed into the `brand/` physical migration.
 
-## Required Next Bucket Plan
+## Brand Completion Record
 
-Before moving `brand/`:
+The completed bucket established the following evidence:
 
-1. Confirm whether all `brand/` references should become `skills-sdk/brand/`
-   or whether external examples intentionally describe target repositories that
-   still use `brand/`.
-2. Move `brand/` with git history preservation.
-3. Update `Infrastructure/config/repo-layout.v1.json` so `brand` no longer
-   appears as a legacy root once the move is complete.
-4. Add or update tests proving `skills-sdk/brand` classifies under
-   `skills_sdk` and a revived root `brand/` blocks unless explicitly
-   reintroduced by ADR.
-5. Regenerate the caller inventory after the move.
-6. Run the pre/post migration gate:
-   `python3 Infrastructure/scripts/validation-and-linting/validate_repo_layout.py --json`
-   and
-   `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_repo_layout.py`.
+1. `skills-sdk/brand` is the canonical Skills SDK brand path; a revived root
+   `brand/` blocks unless an ADR explicitly reintroduces it.
+2. `phase-2-brand-migration-report.md` is the authoritative bucket receipt.
+3. The caller inventory is historical evidence for selecting later work; it
+   does not reopen the completed brand move.
+4. A future migration bucket requires a separate PM selection after the Phase 0
+   repair gate passes.
 
 ## Non-Goals
 

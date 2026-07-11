@@ -132,9 +132,11 @@ Phase 1 checkpoint artifacts:
 - .harness/refactors/root-layout/compatibility-wrapper-policy.md
 - .harness/refactors/root-layout/phase-1-first-bucket-selection.md
 
-Current first-bucket decision:
+Completed first-bucket decision:
 
-- First physical migration bucket: brand/ -> skills-sdk/brand/.
+- First physical migration bucket: `brand/` -> `skills-sdk/brand/`, completed
+  by `ed9d3fd840e540b2e1a5b625bfaf5e8993b6c16f` with receipt
+  `.harness/refactors/root-layout/phase-2-brand-migration-report.md`.
 - First compatibility-alias retirement candidate: scripts.
 
 ## Phase 2: Foundry Source Migration
@@ -166,14 +168,17 @@ Exit criteria per bucket:
   or documented compatibility alias.
 - No unclassified symlink exists.
 
-## Phase 3: Skills SDK Lifecycle Migration
+## Phase 3: Remaining Skills SDK Lifecycle Migration
 
 Move SDK lifecycle surfaces one bucket at a time:
 
 1. Infrastructure/ -> skills-sdk/Infrastructure/
 2. Docs/ -> skills-sdk/docs/
 3. artifacts/ -> skills-sdk/artifacts/
-4. brand/ -> skills-sdk/brand/
+
+The `brand/` bucket is already complete and must not be selected again. The
+Phase 0 layout baseline remains a prerequisite for selecting any remaining
+bucket.
 
 For each bucket:
 

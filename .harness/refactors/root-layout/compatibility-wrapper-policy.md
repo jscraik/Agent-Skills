@@ -10,6 +10,14 @@ skills-sdk/ layout migration, and what proof is required before removing them.
 This policy supports Phase 1 of the root-layout migration plan. It does not
 authorize moving files.
 
+## Phase 1 Reconciliation
+
+The selected `brand/` bucket is complete: commit
+`ed9d3fd840e540b2e1a5b625bfaf5e8993b6c16f` moved it to
+`skills-sdk/brand/`. Its receipt is
+`phase-2-brand-migration-report.md`. `brand/` is therefore neither a current
+legacy root nor a candidate for a repeat move.
+
 ## Wrapper Classes
 
 ### Public Operator Entrypoints
