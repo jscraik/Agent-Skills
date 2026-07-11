@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -17,7 +18,10 @@ from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 CASE_IDS = [f"case-{index}" for index in range(1, 9)]
 DIGEST_A = "sha256:" + ("a" * 64)
 DIGEST_B = "sha256:" + ("b" * 64)
-DIGEST_C = "sha256:" + ("c" * 64)
+
+
+def _digest_file(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _write_skill(root: Path) -> Path:
@@ -42,6 +46,9 @@ cases:
 """,
         encoding="utf-8",
     )
+    rubric = root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+    rubric.parent.mkdir(parents=True)
+    rubric.write_text('{"rubric":"canonical"}\n', encoding="utf-8")
     return skill
 
 
@@ -69,7 +76,7 @@ def _write_shards(root: Path, *, profile: str = "oss-local", duplicate: bool = F
             "package_id": "sample",
             "package_digest": DIGEST_A if not mismatch_digest or shard_index != 3 else DIGEST_B,
             "dataset_digest": f"sha256:{shard_index:064x}",
-            "rubric_digest": DIGEST_C,
+            "rubric_digest": _digest_file(root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"),
             "scenario_set_id": "sample-release-8-v1",
             "selected_case_ids": selected,
             "cases": cases,
@@ -234,6 +241,24 @@ class TestEvalShardAggregate(unittest.TestCase):
                 )
 
         self.assertIn("shards_match_current_package", {row["id"] for row in raised.exception.receipt["blockers"]})
+
+    def test_stale_shards_are_blocked_against_current_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill = _write_skill(root)
+            paths = _write_shards(root)
+            rubric = root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+            rubric.write_text('{"rubric":"updated"}\n', encoding="utf-8")
+
+            with self.assertRaises(EvalShardAggregateError) as raised:
+                build_eval_shard_aggregate_receipt(
+                    root,
+                    skill_path=skill,
+                    scenario_set="sample-release-8-v1",
+                    receipt_paths=paths,
+                )
+
+        self.assertIn("shards_match_current_rubric", {row["id"] for row in raised.exception.receipt["blockers"]})
 
     def test_failed_shard_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
