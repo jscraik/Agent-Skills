@@ -140,7 +140,7 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
-    def test_command_binds_codex_home_to_validated_profile_parent(self) -> None:
+    def test_command_binds_codex_home_to_profile_projection_parent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "profiles" / "oss-cloud.config.toml"
@@ -152,7 +152,24 @@ class TestOssCloudSmoke(unittest.TestCase):
             command = self.runner._command(args, paths, root / "env")
 
         self.assertIn("env", command)
-        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
+        self.assertIn(f"CODEX_HOME={profile.parent}", command)
+
+    def test_command_keeps_codex_home_at_projected_profile_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source" / "profile.toml"
+            projected = root / "projection" / "oss-cloud.config.toml"
+            source.parent.mkdir()
+            projected.parent.mkdir()
+            _write_profile(source)
+            projected.symlink_to(source)
+            args = self.runner._parser().parse_args(["--profile-source", str(projected)])
+            paths = self.runner._paths(str(root / "out"))
+
+            command = self.runner._command(args, paths, root / "env")
+
+        self.assertIn(f"CODEX_HOME={projected.parent}", command)
+        self.assertNotIn(f"CODEX_HOME={source.parent}", command)
 
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
