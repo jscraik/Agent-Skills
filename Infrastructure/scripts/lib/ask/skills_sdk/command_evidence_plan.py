@@ -86,7 +86,7 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
         "command_count": len(command_rows),
         "commands": command_rows,
         "service_count": len(SERVICE_RATIONALIZATION_ROWS),
-        "services": list(SERVICE_RATIONALIZATION_ROWS),
+        "services": _service_receipt_rows(),
         "blockers": blockers,
         "mutation_performed": False,
         "command_execution_performed": False,
@@ -96,6 +96,13 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
             "without executing them; each command still needs its own run receipt before it can prove behavior."
         ),
     }
+
+
+def _service_receipt_rows() -> list[dict[str, Any]]:
+    return [
+        {**service, "caller_modules": list(service["caller_modules"])}
+        for service in SERVICE_RATIONALIZATION_ROWS
+    ]
 
 
 def _command_plan_row(row: dict[str, Any]) -> dict[str, Any]:

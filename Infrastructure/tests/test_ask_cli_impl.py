@@ -2274,6 +2274,38 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(ownership["classification"], "canonical_project_source")
         self.assertTrue(ownership["manifest_declared"])
 
+    def test_full_manifest_does_not_trust_stale_legacy_skill_sources(self):
+        from ask.commands import skills_impl as skills_commands
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {"path": ".agents/skills", "classification": "generated_runtime_projection"}
+                        ],
+                        "skill_sources": [
+                            {"root": ".agents/skills/local", "kind": "canonical_project_source"}
+                        ],
+                        "eval_suite": {"path": "references/evals.yaml"},
+                        "evidence": {"output_path": ".harness/evidence"},
+                        "trust_policy": "local_owner",
+                        "precedence_policy": "project_over_user_after_trust",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            ownership = skills_commands._skill_root_ownership_for_path(
+                ".agents/skills/local/demo", repo_root=repo_root
+            )
+
+        self.assertEqual(ownership["classification"], "generated_runtime_projection")
+        self.assertFalse(ownership["editable_source"])
+
     def test_skills_doctor_allows_manifest_declared_project_skill_source(self):
         """Verify owner repo manifests can declare .agents/skills as canonical project source."""
         from ask.commands import skills_impl as skills_commands
