@@ -192,12 +192,15 @@
       "capability_id": "skill_intake_review",
       "command": "./bin/ask sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_intake_review"
       ],
       "execution_id": "sha256:04de66f4f28e01297f02876ca321fcd133c8c384da510b81187c91e32a537e12",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [
