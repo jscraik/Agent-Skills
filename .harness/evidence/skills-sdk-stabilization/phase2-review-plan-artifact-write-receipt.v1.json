@@ -1,0 +1,135 @@
+{
+  "schema_version": "skills-sdk.phase2-review-plan-artifact-write-receipt.v1",
+  "artifact_type": "explicit_artifact_write_policy_receipt",
+  "status": "bounded_artifact_write_pass_with_handoff_observation",
+  "captured_at": "2026-07-12T20:50:27Z",
+  "revision": {
+    "head_sha": "b70b2f1d758abd0e1dbadaf59aca9c25a54addaa",
+    "branch": "codex/skills-sdk-command-service-callers",
+    "identity_command": "git rev-parse HEAD",
+    "draft_pr": "https://github.com/jscraik/Agent-Skills/pull/330"
+  },
+  "artifact_write_policy": {
+    "policy_id": "skills-sdk.phase2.review-plan-receipt-write.v1",
+    "authorization": "Jamie explicitly authorized same-head plan-artifact generation under an explicit artifact-writing policy.",
+    "mutation_class": "repo_local_evidence_artifact_write",
+    "same_head_required": true,
+    "read_only_replay_allowlist_impact": "none; receipt-out remains excluded from the private read-only allowlist",
+    "allowed_command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
+    "allowed_output_roots": [
+      ".harness/artifacts/sdk-review-plan/",
+      ".harness/artifacts/sdk-review-plan/traces/"
+    ],
+    "disallowed_effects": [
+      "source edits",
+      "review execution",
+      "required review artifact materialization",
+      "network or provider invocation",
+      "Tessl or CircleCI mutation",
+      "publication, installation, merge, or release action"
+    ]
+  },
+  "plan_write": {
+    "command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
+    "status": "pass",
+    "exit_code": 0,
+    "receipt_schema": "skills-sdk.review-plan-receipt.v1",
+    "receipt_status": "pass",
+    "mutation_performed": false,
+    "receipt_written": true,
+    "receipt_path": ".harness/artifacts/sdk-review-plan/simplify.json",
+    "receipt_instance_id": "d62d78c6-fa05-44e2-b3e6-c73369761f64",
+    "source_context_head_sha": "b70b2f1d758abd0e1dbadaf59aca9c25a54addaa",
+    "target_identity": "path:Skills/agent-ops/simplify",
+    "target_content_digest": "7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
+    "plan_file_sha256": "9b9e112e282ac88628c2ba51b4942b1ec995ddc1e4f99c716b7d8533986d4bba",
+    "trace_path": ".harness/artifacts/sdk-review-plan/traces/b7cfd9ebf83256255438ab2ad7b18a4476e9c0286e02eaaa32f877f320e77206.trace.json",
+    "trace_file_sha256": "47b3d41421fc23ad8e78acbdfb5a6d7da9fa6c5ef23ccab6eba3f9ec8b4d17eb",
+    "generated_paths_are": "local generated evidence; excluded from the stabilization commit unless separately admitted"
+  },
+  "handoff_observation": {
+    "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "status": "pass",
+    "exit_code": 0,
+    "receipt_schema": "skills-sdk.review-handoff-receipt.v1",
+    "receipt_status": "pass",
+    "source_plan_receipt_sha256": "b7cfd9ebf83256255438ab2ad7b18a4476e9c0286e02eaaa32f877f320e77206",
+    "source_plan_receipt_instance_id": "d62d78c6-fa05-44e2-b3e6-c73369761f64",
+    "source_context_head_sha": "b70b2f1d758abd0e1dbadaf59aca9c25a54addaa",
+    "selected_lenses": [
+      "lens.testing-confidence",
+      "lens.operator-evidence"
+    ],
+    "reviewer_roles": [
+      "correctness-reviewer",
+      "testing-reviewer"
+    ],
+    "required_artifacts": [
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/review-summary.md",
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/reviewer-findings.json",
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/validation-evidence.json"
+    ],
+    "mutation_performed": false,
+    "receipt_written": false,
+    "not_proven": [
+      "reviewers_completed",
+      "ci_passed",
+      "pr_mergeable",
+      "review_threads_resolved",
+      "tracker_updated"
+    ]
+  },
+  "validation": [
+    {
+      "command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
+      "status": "pass",
+      "evidence": "REVIEW_PLAN_RECEIPT_OUT_EXIT:0; receipt_written=true; same-head source_context.head_sha=b70b2f1d758abd0e1dbadaf59aca9c25a54addaa; plan_changed=true."
+    },
+    {
+      "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+      "status": "pass",
+      "evidence": "REVIEW_HANDOFF_CURRENT_EXIT:0; source plan digest and source_context head matched; mutation_performed=false; receipt_written=false."
+    },
+    {
+      "command": "jq -e '.data.review_plan.schema_version == \"skills-sdk.review-plan-receipt.v1\" and .data.review_plan.status == \"pass\" and .data.review_plan.receipt_written == true and .data.review_plan.source_context.head_sha == \"b70b2f1d758abd0e1dbadaf59aca9c25a54addaa\"' /tmp/agent-skills-review-plan-receipt-out.json >/dev/null",
+      "status": "pass",
+      "evidence": "plan receipt schema and same-head assertions passed."
+    },
+    {
+      "command": "jq -e '.data.review_handoff.schema_version == \"skills-sdk.review-handoff-receipt.v1\" and .data.review_handoff.status == \"pass\" and .data.review_handoff.mutation_performed == false and .data.review_handoff.receipt_written == false and .data.review_handoff.source_context.head_sha == \"b70b2f1d758abd0e1dbadaf59aca9c25a54addaa\"' /tmp/agent-skills-review-handoff-current.json >/dev/null",
+      "status": "pass",
+      "evidence": "handoff receipt schema, same-head, and no-write assertions passed."
+    }
+  ],
+  "claims_boundary": [
+    "The explicitly authorized plan receipt write succeeded at head b70b2f1d7 and produced a same-head plan plus trace sidecar.",
+    "The handoff command consumed that plan and returned a schema-valid no-write handoff receipt.",
+    "The handoff names reviewer roles and required artifacts but does not prove reviewer execution or artifact collection.",
+    "No claim is made about hosted CI, mergeability, registry publication, installed-runtime readiness, Foundry extraction, source admission, Tessl, CircleCI, publication, or host process-table cleanup."
+  ],
+  "independent_review_sequence": {
+    "required_order": [
+      "Worker",
+      "fresh QA",
+      "adversarial review"
+    ],
+    "worker": {
+      "status": "pass_with_advisories",
+      "evidence_ref": "/tmp/agent-skills-review-handoff-receipt-worker.json",
+      "scope": "same-head plan provenance and read-only handoff behavior",
+      "advisory": "pre-existing generated review artifacts are stale from head 7c65e5f9341be0091f7cf63f5b5df707196d388d and excluded"
+    },
+    "fresh_qa": {
+      "status": "blocked_runtime",
+      "evidence_ref": null,
+      "reason": "The fresh QA subagent did not emit its required report within the bounded wait; no QA verdict is promoted."
+    },
+    "adversarial_review": {
+      "status": "blocked_runtime",
+      "evidence_ref": null,
+      "reason": "The adversarial subagent did not emit its required report within the bounded wait; no adversarial verdict is promoted."
+    },
+    "claims_boundary": "Worker evidence is preserved as local inspection only. Fresh QA and adversarial review remain unresolved; reviewers_completed and independent approval are not proven."
+  },
+  "next_gate": "Run the bounded correctness-reviewer and testing-reviewer evidence sequence through Worker, fresh QA, and adversarial review; do not invoke sdk review execute or materialize required review artifacts without separate authorization."
+}
