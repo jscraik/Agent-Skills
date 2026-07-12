@@ -118,7 +118,7 @@ def _row_findings(row: Any, artifact_path: Path) -> list[dict[str, Any]]:
     if row.get("mutation_performed") is not False:
         findings.append({"severity": "blocker", "family": family, "message": "candidate row is not explicitly no-write", "evidence": [str(artifact_path)]})
     command = str(row.get("command", ""))
-    if "<" in command or ">" in command:
+    if any(token.startswith("<") and token.endswith(">") for token in command.split()):
         findings.append({"severity": "blocker", "family": family, "message": "candidate command contains a template token", "evidence": [command]})
     fixture = str(row.get("source_fixture", ""))
     if fixture.startswith("/"):
