@@ -1,9 +1,9 @@
 {
   "schema_version": "skills-sdk.phase2-read-only-replay-receipt.v1",
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json",
-  "status": "selected",
+  "status": "bounded_local_pass",
   "operation": "phase2_read_only_parser_replay",
-  "base_commit": "550674a5bb1277e0b875f1270ae9bd08c9f2b436",
+  "base_commit": "f9157369a7fce36abb61d25351524fe8d169d7f9",
   "branch": "codex/skills-sdk-command-service-callers",
   "source_files": [
     "Infrastructure/scripts/lib/ask/command_metadata.py",
@@ -13,7 +13,7 @@
     "Infrastructure/tests/test_skills_sdk_determinism.py",
     "Infrastructure/tests/test_skills_sdk_stabilization_replay.py"
   ],
-  "source_tree_digest": "sha256:c3ba0afdb253b092b93c296f8d21f92b8427fa9119be6f33af88f8e2c9d162fe",
+  "source_tree_digest": "sha256:e5e8b2c58b4c73c5c76e35d42c8bbf1047933f24461b7f21aa88d21f9d2bcc46",
   "private_replay_row": 19,
   "remaining_deny_by_default_count": 24,
   "selected": {
@@ -45,7 +45,7 @@
     "the command emits a receipt only and does not accept --apply or a write target",
     "private replay row status=executed_pass with robot_receipt:valid_envelope and robot_status:success"
   ],
-  "next_gate": "Commit the bounded replay implementation, then refresh this receipt against the immutable implementation commit before claiming local replay pass. Do not begin Foundry extraction, source admission, or authority-bound apply-mode replay.",
+  "next_gate": "Use this immutable receipt as the current revision-bound read-only parser-family checkpoint. The next candidate remains the first unreceipted row after this command; do not begin Foundry extraction, source admission, or authority-bound apply-mode replay.",
   "claims_boundary": [
     "This proves one local determinism-audit replay and its exact registration/dispatch callers only.",
     "It does not prove installed-runtime behavior, hosted CI, Tessl, registry publication, or release readiness.",
