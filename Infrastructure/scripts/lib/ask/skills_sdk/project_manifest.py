@@ -239,7 +239,7 @@ def _validate_manifest_contract(
     blockers = _validate_skill_roots(
         payload.get("skill_roots"), require_full_contract=has_full_contract
     )
-    blockers.extend(_validate_present_contract_fields(payload))
+    blockers.extend(_validate_present_contract_fields(payload, has_full_contract=has_full_contract))
     return blockers
 
 
@@ -268,7 +268,9 @@ def _validate_skill_roots(
     return blockers
 
 
-def _validate_present_contract_fields(payload: dict[str, Any]) -> list[ManifestBlocker]:
+def _validate_present_contract_fields(
+    payload: dict[str, Any], *, has_full_contract: bool
+) -> list[ManifestBlocker]:
     blockers: list[ManifestBlocker] = []
     if "project_id" in payload:
         blockers.extend(_validate_non_empty_string_field(payload, "project_id", "manifest_project_id_invalid"))
@@ -277,6 +279,8 @@ def _validate_present_contract_fields(payload: dict[str, Any]) -> list[ManifestB
         ("evidence", "output_path", "manifest_evidence_invalid"),
     ):
         if field_name in payload:
+            if field_name == "evidence" and not has_full_contract and _is_legacy_evidence(payload[field_name]):
+                continue
             blockers.extend(_validate_nested_path_field(payload, field_name, path_key, blocker_code))
     for field_name, allowed, blocker_code in (
         ("trust_policy", TRUST_POLICIES, "manifest_unsupported_trust_policy"),
@@ -285,6 +289,10 @@ def _validate_present_contract_fields(payload: dict[str, Any]) -> list[ManifestB
         if field_name in payload:
             blockers.extend(_validate_policy_field(payload, field_name, allowed, blocker_code))
     return blockers
+
+
+def _is_legacy_evidence(value: object) -> bool:
+    return isinstance(value, dict) and any(key in value for key in ("registry", "events", "receipts"))
 
 
 def _blocker(code: str, message: str | None = None) -> ManifestBlocker:
@@ -339,7 +347,9 @@ def _validate_root_classification(
     classification = root.get("classification")
     if classification is None and require_full_contract:
         return [_blocker("manifest_skill_root_field_missing", f"skill_roots[{index}] must declare classification in the full v1 contract.")]
-    if classification is not None and classification not in SKILL_ROOT_CLASSIFICATIONS:
+    if classification is not None and (
+        not isinstance(classification, str) or classification not in SKILL_ROOT_CLASSIFICATIONS
+    ):
         return [_blocker("manifest_unsupported_classification", f"skill_roots[{index}] classification {classification!r} is not one of {sorted(SKILL_ROOT_CLASSIFICATIONS)}.")]
     return []
 
@@ -404,8 +414,14 @@ def _validate_policy_field(
 def evaluate_manifest_file(manifest_path: Path, *, display_path: str | None = None) -> ManifestEvaluation:
     """Load and validate the manifest at ``manifest_path`` into an explicit evaluation."""
     path_label = display_path if display_path is not None else str(manifest_path)
-    if not manifest_path.is_file():
+    if not manifest_path.exists():
         return ManifestEvaluation(state="absent", path=path_label)
+    if not manifest_path.is_file():
+        return ManifestEvaluation(
+            state="invalid",
+            path=path_label,
+            blockers=(ManifestBlocker("manifest_unreadable", f"Could not read {path_label}: path is not a regular file."),),
+        )
     try:
         text = manifest_path.read_text(encoding="utf-8")
     except OSError as exc:
