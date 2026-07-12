@@ -278,12 +278,15 @@
       "capability_id": "review_plan",
       "command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:review_plan"
       ],
       "execution_id": "sha256:a612cbb6cdbd8ce2765cedaeb3717c2289edc2f4f67ce4224235f88e9f92ad8d",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

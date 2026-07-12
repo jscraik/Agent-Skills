@@ -193,6 +193,42 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
         self.assertIn("robot_receipt:valid_envelope", receipt["rows"][0]["evidence"])
         run.assert_called_once()
 
+    def test_read_only_sdk_review_plan_is_allowlisted_for_command_receipt(self) -> None:
+        command = "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "review_plan",
+                    "command": command,
+                    "argv": [
+                        "./bin/ask",
+                        "sdk",
+                        "review",
+                        "plan",
+                        "--target",
+                        "Skills/agent-ops/simplify",
+                        "--intent",
+                        "validation_review",
+                        "--json",
+                        "--robot",
+                    ],
+                }
+            ]
+        }
+        completed = mock.Mock(
+            returncode=0,
+            stdout='{"status":"success","metadata":{},"data":{"review_plan":{"status":"pass","mutation_performed":false}}}',
+            stderr="",
+        )
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        self.assertIn("robot_receipt:valid_envelope", receipt["rows"][0]["evidence"])
+        run.assert_called_once()
+
     def test_read_only_ab_rubric_is_allowlisted_for_command_receipt(self) -> None:
         command = "./bin/ask sdk eval ab-rubric --preview --json --robot"
         plan = {

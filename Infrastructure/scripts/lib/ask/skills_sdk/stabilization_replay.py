@@ -29,6 +29,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "ir", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "install", "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "lenses", "select", "--prompt", "review a skill for validation confidence", "--intent", "validation_review", "--json", "--robot"),
+    ("./bin/ask", "sdk", "review", "plan", "--target", "Skills/agent-ops/simplify", "--intent", "validation_review", "--json", "--robot"),
     ("./bin/ask", "sdk", "eval", "scenario-quality", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "adapters", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "--help"),
