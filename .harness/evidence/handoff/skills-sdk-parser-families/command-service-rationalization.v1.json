@@ -1,0 +1,99 @@
+{
+  "schema_version": "skills-sdk.command-service-rationalization.v1",
+  "artifact_type": "read_only_command_service_inventory",
+  "status": "planned",
+  "scope": "capability-matrix",
+  "base_commit": "01faafe3d612c2f958983471c31df881907502d3",
+  "base_source_files": [
+    "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+    "Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json",
+    "Infrastructure/config/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json",
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/commands/plugins.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_evidence.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+    "Infrastructure/scripts/lib/ask/services/codex_preview.py",
+    "Infrastructure/scripts/lib/ask/services/plugin_cache.py",
+    "Infrastructure/scripts/lib/ask/services/plugin_sources.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/capability_evidence.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/command_evidence_plan.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py",
+    "Infrastructure/tests/test_skills_sdk_capability_evidence.py",
+    "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py"
+  ],
+  "base_source_tree_digest": "sha256:eefef13cef213a6096618c4d6ea33f70507cbb2a54167e74957e1751d7f39773",
+  "source_delta": [
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/command_evidence_plan.py",
+      "reason": "Normalize nested caller_modules tuples to JSON arrays so the v0 receipt schema validates."
+    }
+  ],
+  "source_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
+  "source_receipt_path": ".harness/evidence/handoff/skills-sdk-parser-families/command-evidence-plan.v0.json",
+  "source_receipt_schema": "skills-sdk.command-evidence-plan-receipt.v0",
+  "command_count": 43,
+  "service_count": 3,
+  "command_disposition_counts": {
+    "authority_bound_mutation": 2,
+    "explicit_run_receipt": 20,
+    "preview_replay": 20,
+    "template_requires_concrete_fixture": 1
+  },
+  "service_dispositions": [
+    {
+      "path": "Infrastructure/scripts/lib/ask/services/codex_preview.py",
+      "disposition": "runtime_model_adapter",
+      "caller_modules": [
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
+      ]
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/services/plugin_cache.py",
+      "disposition": "generated_projection_adapter",
+      "caller_modules": [
+        "Infrastructure/scripts/lib/ask/commands/plugins.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      ]
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/services/plugin_sources.py",
+      "disposition": "compatibility_adapter",
+      "caller_modules": [
+        "Infrastructure/scripts/lib/ask/commands/plugins.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        "Infrastructure/scripts/lib/ask/services/plugin_cache.py"
+      ]
+    }
+  ],
+  "source_files": [
+    "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+    "Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json",
+    "Infrastructure/config/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/command-service-rationalization.v1.schema.json",
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/commands/plugins.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_evidence.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+    "Infrastructure/scripts/lib/ask/services/codex_preview.py",
+    "Infrastructure/scripts/lib/ask/services/plugin_cache.py",
+    "Infrastructure/scripts/lib/ask/services/plugin_sources.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/capability_evidence.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/command_evidence_plan.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py",
+    "Infrastructure/tests/test_skills_sdk_capability_evidence.py",
+    "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py",
+    "Infrastructure/tests/test_skills_sdk_command_service_rationalization.py"
+  ],
+  "source_tree_digest": "sha256:d62ff2762e93a7ff72e5fdf253446c82ca57e3d4751154103dd58da77f4a9dbd",
+  "blockers": [],
+  "mutation_performed": false,
+  "command_execution_performed": false,
+  "does_not_prove": [
+    "command behavior or command-specific run receipts",
+    "authority-bound apply mutation receipts",
+    "Foundry extraction or source admission",
+    "Tessl, registry, hosted CI, installed-runtime, or release readiness"
+  ],
+  "next_gate": "Create a revision-bound stabilization baseline receipt and obtain independent QA before refactoring, deleting, extracting, or admitting any source root."
+}
