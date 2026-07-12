@@ -422,12 +422,15 @@
       "capability_id": "determinism_audit",
       "command": "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:determinism_audit"
       ],
       "execution_id": "sha256:8df29ca7696eba64fe4a4e8d6788298c1a2a7cd0e46b0b8b91d25f6494164b4c",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import subprocess
 import sys
 import tempfile
@@ -10,14 +12,38 @@ from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.stabilization_replay import (  # noqa: E402
     _safe_output_path,
     build_private_stabilization_replay,
 )
+from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 
 
 class TestPrivateStabilizationReplay(unittest.TestCase):
+    def test_determinism_selection_receipt_is_schema_valid_and_revision_bound(self) -> None:
+        artifact_path = REPO_ROOT / ".harness/evidence/skills-sdk-stabilization/phase2-determinism-audit-replay-receipt.v1.json"
+        schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json"
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        _validate_schema_subset(schema, artifact, {schema_path.name: schema})
+
+        self.assertTrue(_is_ancestor(artifact["base_commit"], _git_head()))
+        self.assertEqual(artifact["selected"]["command"], "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot")
+        self.assertEqual(artifact["selected"]["registration_owner"], "Infrastructure/scripts/lib/ask/commands/sdk.py")
+        if artifact["status"] != "bounded_local_pass":
+            self.assertEqual(artifact["status"], "selected")
+            return
+
+        self.assertEqual(artifact["execution"]["candidate_count"], 10)
+        self.assertEqual(artifact["remaining_deny_by_default_count"], 24)
+        self.assertFalse(_source_files_dirty(artifact["source_files"]))
+        self.assertEqual(
+            artifact["source_tree_digest"],
+            _immutable_source_tree_digest(artifact["base_commit"], artifact["source_files"]),
+        )
+
     def test_read_only_plugin_help_accepts_bounded_text_receipt(self) -> None:
         command = "./bin/ask sdk plugin --help"
         plan = {
@@ -329,6 +355,27 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
         self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
         run.assert_called_once()
 
+    def test_read_only_determinism_audit_is_allowlisted_for_command_receipt(self) -> None:
+        command = "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "determinism_audit",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        completed = mock.Mock(returncode=0, stdout='{"status":"success","metadata":{},"data":{}}', stderr="")
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        self.assertIn("robot_receipt:valid_envelope", receipt["rows"][0]["evidence"])
+        run.assert_called_once()
+
     def test_replay_is_terminal_and_deny_by_default(self) -> None:
         plan = {
             "commands": [
@@ -425,6 +472,54 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
         self.assertEqual([row["status"] for row in receipt["rows"]], ["executed_fail", "executed_fail"])
         self.assertIn("timed out", receipt["rows"][0]["reason"])
         self.assertIn("FileNotFoundError", receipt["rows"][1]["reason"])
+
+
+def _git_head() -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def _is_ancestor(base: str, head: str) -> bool:
+    return subprocess.run(
+        ["git", "merge-base", "--is-ancestor", base, head], cwd=REPO_ROOT, check=False
+    ).returncode == 0
+
+
+def _source_tree_digest(paths: list[str]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        digest.update(path.encode())
+        digest.update(b"\0")
+        digest.update((REPO_ROOT / path).read_bytes())
+        digest.update(b"\0")
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _source_files_dirty(paths: list[str]) -> bool:
+    result = subprocess.run(
+        ["git", "diff", "--quiet", "HEAD", "--", *paths], cwd=REPO_ROOT, check=False
+    )
+    staged = subprocess.run(
+        ["git", "diff", "--cached", "--quiet", "HEAD", "--", *paths], cwd=REPO_ROOT, check=False
+    )
+    return result.returncode != 0 or staged.returncode != 0
+
+
+def _immutable_source_tree_digest(base_commit: str, paths: list[str]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        content = subprocess.run(
+            ["git", "show", f"{base_commit}:{path}"],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+        ).stdout
+        digest.update(path.encode())
+        digest.update(b"\0")
+        digest.update(content)
+        digest.update(b"\0")
+    return f"sha256:{digest.hexdigest()}"
 
 
 if __name__ == "__main__":
