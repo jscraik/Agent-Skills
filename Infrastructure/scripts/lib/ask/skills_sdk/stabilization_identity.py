@@ -14,8 +14,13 @@ def build_patch_identity(repo_root: Path, relative_paths: list[str]) -> dict[str
     normalized = sorted(set(relative_paths), key=lambda value: value.encode("utf-8"))
     records: list[bytes] = []
     files: dict[str, str] = {}
+    resolved_root = repo_root.resolve()
     for relative in normalized:
-        path = repo_root / relative
+        candidate = Path(relative)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise ValueError(f"path must be repo-relative and not escape repo root: {relative}")
+        path = (resolved_root / candidate).resolve()
+        path.relative_to(resolved_root)
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         files[relative] = f"sha256:{digest}"
         records.append(relative.encode("utf-8") + b"\0" + digest.encode("ascii") + b"\n")
