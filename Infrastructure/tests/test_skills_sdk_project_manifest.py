@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import sys
 import tempfile
 import unittest
@@ -110,6 +109,13 @@ class TestProjectManifestStates(unittest.TestCase):
         self.assertEqual(evaluation.state, "invalid")
         self.assertIn("manifest_unsupported_classification", evaluation.blocker_codes())
 
+    def test_non_string_classification_is_blocked_without_type_error(self) -> None:
+        manifest = _full_manifest()
+        manifest["skill_roots"][0]["classification"] = []
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_unsupported_classification", evaluation.blocker_codes())
+
     def test_ambiguous_lifecycle_default_is_blocked(self) -> None:
         manifest = _full_manifest()
         manifest["skill_roots"] = [
@@ -146,6 +152,54 @@ class TestProjectManifestStates(unittest.TestCase):
         self.assertEqual(evaluation.state, "invalid")
         self.assertIn("manifest_skill_roots_not_array", evaluation.blocker_codes())
 
+    def test_full_contract_validates_evidence_and_policy_values(self) -> None:
+        manifest = _full_manifest()
+        manifest["evidence"] = {"output_path": 42}
+        manifest["trust_policy"] = "not-a-policy"
+        manifest["precedence_policy"] = "not-a-policy"
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_evidence_invalid", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_trust_policy", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_precedence_policy", evaluation.blocker_codes())
+
+    def test_full_contract_requires_root_defaults_and_non_empty_roots(self) -> None:
+        manifest = _full_manifest()
+        manifest["skill_roots"] = []
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_skill_roots_empty", evaluation.blocker_codes())
+
+        manifest["skill_roots"] = [{"path": ".agents/skills", "classification": "canonical_project_source"}]
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertEqual(evaluation.blocker_codes().count("manifest_skill_root_field_missing"), 3)
+
+    def test_legacy_manifest_rejects_malformed_present_contract_fields(self) -> None:
+        manifest = {
+            "schema_version": MANIFEST_SCHEMA_VERSION,
+            "project_id": "owner-repo",
+            "skill_roots": [{"path": ".agents/skills"}],
+            "evidence": "not-an-object",
+            "trust_policy": "not-a-policy",
+        }
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertTrue(evaluation.legacy_compat)
+        self.assertIn("manifest_evidence_invalid", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_trust_policy", evaluation.blocker_codes())
+
+    def test_legacy_evidence_shape_remains_compatible(self) -> None:
+        legacy = {
+            "schema_version": MANIFEST_SCHEMA_VERSION,
+            "project": {"id": "owner-repo"},
+            "skill_sources": [{"root": ".agents/skills", "kind": "canonical_project_source"}],
+            "evidence": {"registry": ".harness/evidence/registry", "events": ".harness/evidence/events", "receipts": ".harness/evidence/receipts"},
+        }
+        evaluation = evaluate_manifest_payload(legacy, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "valid")
+        self.assertTrue(evaluation.legacy_compat)
+
     def test_legacy_partial_manifest_is_valid_but_flagged(self) -> None:
         """A correct schema_version with legacy skill_sources stays valid, never absent."""
         legacy = {
@@ -177,6 +231,14 @@ class TestProjectManifestStates(unittest.TestCase):
         evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
         self.assertEqual(evaluation.state, "valid")
         self.assertTrue(evaluation.legacy_compat)
+
+    def test_existing_non_file_manifest_is_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest_path = Path(tmp) / "skills-sdk.json"
+            manifest_path.mkdir()
+            evaluation = evaluate_manifest_file(manifest_path)
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_unreadable", evaluation.blocker_codes())
 
     def test_blocker_dicts_carry_class_and_definition(self) -> None:
         manifest = _full_manifest()

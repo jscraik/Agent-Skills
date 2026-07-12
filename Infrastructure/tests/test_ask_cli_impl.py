@@ -2251,6 +2251,29 @@ class TestAskCLI(unittest.TestCase):
         self.assertFalse(codex_ownership["editable_source"])
         self.assertTrue(codex_ownership["owner_manifest_required_for_edit"])
 
+    def test_skill_root_ownership_maps_legacy_skill_sources(self):
+        from ask.commands import skills_impl as skills_commands
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "skill_sources": [
+                            {"root": ".agents/skills", "kind": "canonical_project_source"}
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            ownership = skills_commands._skill_root_ownership_for_path(
+                ".agents/skills/local-demo", repo_root=repo_root
+            )
+
+        self.assertEqual(ownership["classification"], "canonical_project_source")
+        self.assertTrue(ownership["manifest_declared"])
+
     def test_skills_doctor_allows_manifest_declared_project_skill_source(self):
         """Verify owner repo manifests can declare .agents/skills as canonical project source."""
         from ask.commands import skills_impl as skills_commands
