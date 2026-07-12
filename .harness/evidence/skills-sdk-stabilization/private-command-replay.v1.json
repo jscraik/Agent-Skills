@@ -156,12 +156,15 @@
       "capability_id": "install_preview",
       "command": "./bin/ask sdk install Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_install_preview"
       ],
       "execution_id": "sha256:6dd1351b137ce112d939c5fb266bd60f0453874ae6626b7529468495f233b373",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [
