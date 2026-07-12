@@ -4,7 +4,7 @@
   "status": "bounded_local_pass_adversarial_pass_with_advisories",
   "captured_at": "2026-07-12T18:30:24Z",
   "revision": {
-    "base_head_sha": "75820173d606ad4f8558e3a415574a0597755dee",
+    "base_head_sha": "6b2914eeeb5bfb2590fbfda0e094fff5c52e7947",
     "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
     "identity_command": "git rev-parse HEAD"
   },
@@ -30,7 +30,7 @@
     "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
     "allowlisted_argv": "./bin/ask sdk check Skills/agent-ops/simplify --json --robot",
     "source_digest": "sha256:89117d422ccbd0d695e433b33fc1e64b891935663fd8b14d2ad7153d5c314660",
-    "test_digest": "sha256:b94bc2ae09039fc39437b5ca3b9df721b38f2cd0a287a103f6ca807424201e00",
+    "test_digest": "sha256:099fb938e6c0d05bff07396da83edeb82f64e3152c9a98e7986aad3b47d9d4b2",
     "direct_payload": {
       "top_level_status": "success",
       "nested_schema": "skill-doctor.v1",
@@ -94,13 +94,13 @@
     },
     "qa": {
       "status": "pass_with_advisories",
-      "artifact": "local:/tmp/agent-skills-sdk-check-qa.json",
-      "finding": "Fresh QA independently passed envelope assertions, warning preservation, no-mutation behavior, tests, lint, modularity, repo validation, and replay binding. Advisory: warning payload is not readiness; generated artifacts stay excluded."
+      "artifact": "local:/tmp/agent-skills-sdk-check-rebased-qa.json",
+      "finding": "Fresh post-rebase QA independently passed envelope assertions, warning preservation, no-mutation behavior, tests, lint, modularity, repo validation, and parent/source/test/replay binding. Advisory: warning payload is not readiness; generated artifacts stay excluded."
     },
     "adversarial": {
       "status": "pass_with_advisories",
-      "artifact": "local:/tmp/agent-skills-sdk-check-adversarial.json",
-      "finding": "Fresh adversarial review found no blocking defect across allowlist, envelope, warning-not-readiness, negative sibling, replay, source/test/HEAD binding, and claims boundaries."
+      "artifact": "local:/tmp/agent-skills-sdk-check-rebased-adversarial.json",
+      "finding": "Fresh post-rebase adversarial review found no blocking defect across allowlist, envelope, warning-not-readiness, negative sibling, replay, parent/source/test binding, and claims boundaries."
     }
   },
   "replay_receipt": {
