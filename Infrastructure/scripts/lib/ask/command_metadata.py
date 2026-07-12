@@ -287,10 +287,12 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk route-map --preview --json --robot",
     ],
     ("sdk", "plugin"): [
-        "ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --preview --json --robot",
+        "ask sdk plugin review Infrastructure/tests/fixtures/skills_sdk/valid_skill --kind skill --preview --json --robot",
+        "skills-sdk plugin review Infrastructure/tests/fixtures/skills_sdk/valid_skill --kind skill --preview --json --robot",
     ],
     ("sdk", "improve"): [
         "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
+        "skills-sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
     ],
     ("sdk", "score"): [
         "ask sdk score local Skills/agent-ops/autofix --gate creation --json --robot",
@@ -311,6 +313,8 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "skills-sdk evidence verify --scope capability-matrix --json --robot",
     ],
     ("sdk", "eval"): [
+        "ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+        "skills-sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
         "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
@@ -339,9 +343,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "skills-sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
     ],
     ("sdk", "install"): [
-        "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
+        "ask sdk install Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
         "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
-        "skills-sdk install Skills/agent-ops/autofix --preview --json --robot",
+        "skills-sdk install Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
         "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
     ],
     ("sdk", "rollback"): [
@@ -390,6 +394,7 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("sdk", "trust"): [
         "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+        "skills-sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
     ],
     ("sdk", "project"): [
         "ask sdk project status --project-root /tmp/sample-project --json --robot",

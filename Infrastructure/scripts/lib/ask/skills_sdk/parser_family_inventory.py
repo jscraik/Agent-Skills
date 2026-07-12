@@ -59,7 +59,7 @@ _AUTHORITY_BOUND_FAMILIES = {
 }
 _AUTHORITY_REPLAY_SELECTION_POLICY = (
     "Select at most one canonical ask sdk command per authority-bound family.",
-    "Prefer a concrete --preview command over mutation or template examples.",
+    "Prefer a concrete repository-owned fixture --preview command over generic, mutation, or template examples.",
     "Reject template tokens and known placeholder roots until repository-owned fixtures exist.",
     "Keep authority-bound selection separate from parser inventory pass/fail status.",
 )
@@ -252,8 +252,14 @@ def _select_preview_example(examples: list[str]) -> str | None:
     return min(candidates, key=_preview_selection_key) if candidates else None
 
 
-def _preview_selection_key(command: str) -> tuple[int, int, str]:
-    return (0 if command.startswith("ask sdk ") else 1, len(command), command)
+def _preview_selection_key(command: str) -> tuple[int, int, int, int, str]:
+    return (
+        0 if "Infrastructure/tests/fixtures/skills_sdk/" in command else 1,
+        0 if "--fixture" in command else 1,
+        0 if command.startswith("ask sdk ") else 1,
+        len(command),
+        command,
+    )
 
 
 def _is_concrete_preview(command: str) -> bool:
