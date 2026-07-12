@@ -44,5 +44,15 @@
     "sy-reinforce": "sy-reinforce <solved-problem-or-learning-refresh>"
   },
   "selection_rule": "Select exactly one next stage; when authority or freshness is unclear, choose sy-reconcile or return a blocked handoff.",
-  "evidence_rule": "Report local validation, PR/CI, review, tracker, artifact, and rollout evidence as separate lanes."
+  "evidence_rule": "Report local validation, PR/CI, review, tracker, artifact, and rollout evidence as separate lanes.",
+  "desktop_collaboration_contract": {
+    "selection": "task_capability",
+    "named_role_selection": "unsupported",
+    "required_packet_fields": [
+      "task_capability",
+      "authority",
+      "evidence_requirements",
+      "stop_condition"
+    ]
+  }
 }
