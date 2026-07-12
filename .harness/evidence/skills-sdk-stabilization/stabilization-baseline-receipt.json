@@ -1,0 +1,38 @@
+{
+  "schema_version": "skills-sdk.stabilization-baseline-receipt.v1",
+  "status": "accepted_for_qa",
+  "base_revision": "fc5e330d721db2e15b148a9af1621e032899c5bc",
+  "patch_identity": {
+    "algorithm": "skills-sdk.stabilization-patch-identity.v1",
+    "serialization": "UTF-8 relative_path NUL sha256hex LF; paths unique and sorted bytewise",
+    "identity": "sha256:13bb9ced63c819c7d12953de4d5c367721f3c0636620932594b57005ef2d3b29",
+    "recompute_command": "PYTHONPATH=Infrastructure/scripts/lib Infrastructure/.venv/bin/python3 Infrastructure/scripts/lib/ask/skills_sdk/stabilization_identity.py --repo-root . Infrastructure/config/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json Infrastructure/config/skills-sdk/capability-matrix.v1.json Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py Infrastructure/scripts/lib/ask/skills_sdk/stabilization_identity.py Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/scripts/lifecycle-and-sync/projection_integrity_impl.py Infrastructure/scripts/lifecycle-and-sync/projection_mirror.py Infrastructure/tests/test_projection_integrity_plugin_cache.py Infrastructure/tests/test_skills_sdk_skill_intake.py Infrastructure/tests/test_skills_sdk_stabilization_identity.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/command-service-rationalization-inventory.md",
+    "files": {
+      ".harness/evidence/skills-sdk-stabilization/command-service-rationalization-inventory.md": "sha256:faeac73ac21b0e1c62a856a2697c482bc88c4ee4e3762e6745027f4575ddb8d8",
+      "Infrastructure/config/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json": "sha256:2776e5df70f2fb0128bf810177a7f65538ae91a0d4e6e8a087d5bcd44c79806f",
+      "Infrastructure/config/skills-sdk/capability-matrix.v1.json": "sha256:67d9e6bd38fd8c2c92bea973a854abbc923338a83a95da11c8f2e92b019b14b8",
+      "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py": "sha256:c17c469949f6d4f2222eb4ea231f8bb7aeda921c88598b6370195e53e13a91f8",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_identity.py": "sha256:a72edcd767d0d1c61c13485dd3e0fe8c768f7a8dd21ed5b320fab6aa0a564b03",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:10963015cd1893b4d5b6cfa075e62d639307c9018f9856ca9aa8b5b9738836be",
+      "Infrastructure/scripts/lifecycle-and-sync/projection_integrity_impl.py": "sha256:436912af83449483c71ccd5bce894db2132108ba448f347cace93752f55bc783",
+      "Infrastructure/scripts/lifecycle-and-sync/projection_mirror.py": "sha256:faa5c3bec87281857a01c732391dd926e6fdbfa99861a7d78830f6bee73e6e2d",
+      "Infrastructure/tests/test_projection_integrity_plugin_cache.py": "sha256:869037a69f1e3814b2a9a24e3664e22631dfe32bb5159d3b35830997c3382cba",
+      "Infrastructure/tests/test_skills_sdk_skill_intake.py": "sha256:e54c9bf4fdb9aa6d0726c514c83956d0737718b18447ca4bf94f311fa6053867",
+      "Infrastructure/tests/test_skills_sdk_stabilization_identity.py": "sha256:0889a34a2cc96daeb56f0cefbc105b0f6db3dcb197009b77464f70c0ade0bf10",
+      "Infrastructure/tests/test_skills_sdk_stabilization_replay.py": "sha256:ab1178fdf278134c513dc56ba4c06a717351e870b6fbfc97fded35ed6b3de999"
+    }
+  },
+  "generated_evidence": {
+    ".harness/evidence/skills-sdk-stabilization/private-command-replay.json": "sha256:3b41c984b64b876280adb028661a1766dbd400f9cd33fbf655e2b28ac798515c"
+  },
+  "excluded_mutable_outputs": [
+    ".harness/reports/qa-skills-sdk-stabilization.md",
+    ".harness/reports/worker-skills-sdk-stabilization.md",
+    "artifacts/reviews/default.md",
+    "artifacts/agent-runs/default-20260711T120000Z/manifest.json"
+  ],
+  "capability_evidence": {"capability_count": 52, "evidence_ref_count": 176, "pass_count": 133, "not_run_count": 43, "unknown_count": 0, "proof_mode": "inventory_only"},
+  "private_replay": {"command_ref_count": 43, "terminal_count": 43, "unique_execution_count": 43, "executed_pass": 5, "blocked_unsafe": 38, "unclassified_count": 0},
+  "diagnostic_debt": ["Raw full Infrastructure pytest collection is blocked by obsolete command-surface metadata with no handle source_revision values; unchanged in this slice."],
+  "not_proven": ["observed absence of network or filesystem mutation inside allowlisted command implementations", "raw full-suite collection", "independent QA acceptance", "external/runtime/extraction/publication readiness"]
+}

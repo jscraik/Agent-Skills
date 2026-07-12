@@ -112,6 +112,22 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["mutation_performed"])
 
+    def test_builder_accepts_readme_as_registry_presentation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "SKILL.md").write_text(
+                "---\nname: external\ndescription: external\n---\n\n# External\n",
+                encoding="utf-8",
+            )
+            (source / "README.md").write_text("# External registry presentation\n", encoding="utf-8")
+
+            receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "preview")
+        self.assertIn("README.md", {item["path"] for item in receipt["inspected_files"]})
+
     def test_builder_does_not_walk_rejected_top_level_subtrees(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "external"

@@ -109,7 +109,6 @@ def _current_rubric_digest(repo_root: Path) -> str | None:
     except OSError:
         return None
 
-
 def _all_shards_pass(receipts: list[dict[str, Any]]) -> bool:
     return bool(receipts) and all(row.get("status") == "pass" for row in receipts)
 
@@ -148,7 +147,6 @@ def _current_rubric_check(identities: dict[str, set[str]], expected_digest: str 
             f"actual:{','.join(sorted(identities['rubric_digest']))}",
         ],
     )
-
 
 def _shard_checks(
     receipts: list[dict[str, Any]], identities: dict[str, set[str]], path_errors: list[str], labels: list[str], profile: str
