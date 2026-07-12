@@ -3,14 +3,13 @@ import json
 import subprocess
 from pathlib import Path
 from typing import Any
-
 from ask.skills_sdk.release_scenario_sets import RELEASE_SCENARIO_MINIMUM, build_release_scenario_set_checks, release_scenario_set_case_ids
 from ask.skills_sdk.eval_lane_policy import build_eval_lane_policy_checks
 from ask.skills_sdk.scenario_registry_guardrails import no_direct_registry_use_checks
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
 from ask.skills_sdk.release_rubric_checks import release_rubric_regex_checks
-
+from ask.skills_sdk.evals_yaml_fallback import load_minimal_metadata
 SCENARIO_QUALITY_SCHEMA_VERSION = "skills-sdk.scenario-quality-receipt.v0"
 SCENARIO_QUALITY_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"
@@ -136,8 +135,9 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
             continue
         else:
             raise ValueError("minimal_yaml_parse_unsupported")
-    return {"cases": state["cases"]}
-
+    payload: dict[str, Any] = {"cases": state["cases"]}
+    payload.update(load_minimal_metadata(text))
+    return payload
 def _minimal_line(raw_line: str) -> tuple[str, int]:
     line = _strip_yaml_comment(raw_line).rstrip()
     return line.strip(), len(line) - len(line.lstrip(" "))

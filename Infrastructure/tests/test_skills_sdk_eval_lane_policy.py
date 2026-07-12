@@ -26,8 +26,8 @@ def _payload(*, cloud_cases: list[str] | None = None, baseline_fields: list[str]
             "baseline_identity_fields": baseline_fields
             or ["case_ids", "criteria_digest", "rubric_digest", "scorer_version", "package_digest", "execution_model_family"],
             "model_routing": {
-                "oss-local": {"model": "qwen", "model_family": "qwen", "provider": "ollama", "identity_source": "profile-config"},
-                "oss-cloud": {"model": "minimax", "model_family": "minimax", "provider": "ollama-cloud", "identity_source": "profile-config"},
+                "oss-local": {"model": "qwen", "model_family": "qwen", "provider": "ollama", "identity_source": "codex-profile-config"},
+                "oss-cloud": {"model": "minimax", "model_family": "minimax", "provider": "ollama-cloud", "identity_source": "codex-profile-config"},
                 "tessl-external": {"model": "deepseek", "model_family": "deepseek", "provider": "tessl", "identity_source": "operator-confirmed"},
             },
             "pools": {
@@ -93,6 +93,15 @@ class EvalLanePolicyTests(unittest.TestCase):
         checks = build_eval_lane_policy_checks(payload, _cases())
 
         blocker = next(row for row in checks if row["id"] == "eval_lane_model_families_distinct")
+        self.assertEqual(blocker["status"], "blocker")
+
+    def test_identity_source_must_use_receipt_enum(self) -> None:
+        payload = _payload()
+        payload["evaluation_lane_policy"]["model_routing"]["oss-local"]["identity_source"] = "profile-config"
+
+        checks = build_eval_lane_policy_checks(payload, _cases())
+
+        blocker = next(row for row in checks if row["id"] == "eval_lane_oss-local_identity_source")
         self.assertEqual(blocker["status"], "blocker")
 
 

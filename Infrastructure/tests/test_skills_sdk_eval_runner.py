@@ -310,6 +310,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         payload = result.data["skills_sdk_eval_run"]
         self.assertEqual(result.status, "error")
         self.assertEqual(payload["receipt"]["status"], "blocked")
+        self.assertEqual(payload["receipt"]["failed_count"], 0)
         self.assertIn("blocked_missing_artifact:codex_profile_exec_receipt_missing:oss-local", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_timeout_override(self) -> None:
@@ -431,6 +432,45 @@ cases:
         )
 
         self.assertEqual([case["id"] for case in payload["cases"]], ["top-level-case"])
+
+    def test_minimal_yaml_loader_preserves_release_sets_and_lane_policy(self) -> None:
+        payload = _load_minimal_evals_yaml(
+            """release_scenario_sets:
+  - id: release-8
+    default: true
+    minimum_scenarios: 5
+    target_scenarios: 8
+    maximum_scenarios: 10
+    groups:
+      release:
+        - case-1
+evaluation_lane_policy:
+  schema_version: skills-sdk.evaluation-lane-policy.v1
+  release_scenario_set_id: release-8
+  baseline_identity_fields:
+    - case_ids
+  model_routing:
+    oss-local:
+      model: qwen
+      model_family: qwen
+      provider: ollama
+      identity_source: codex-profile-config
+  pools:
+    oss-local-development:
+      target_scenarios: 1
+      cases:
+        - case-1
+cases:
+  - id: case-1
+"""
+        )
+
+        self.assertEqual(payload["release_scenario_sets"][0]["groups"]["release"], ["case-1"])
+        self.assertEqual(
+            payload["evaluation_lane_policy"]["model_routing"]["oss-local"]["identity_source"],
+            "codex-profile-config",
+        )
+        self.assertEqual(payload["evaluation_lane_policy"]["pools"]["oss-local-development"]["cases"], ["case-1"])
 
     def test_oss_release_lanes_run_bounded_filtered_subset_as_release_shard(self) -> None:
         for profile in ("oss-local", "oss-cloud"):
