@@ -88,7 +88,7 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - **Program design**: architecture diagrams describe component boundaries; every implementation change MUST also be reviewed for function responsibility, abstraction level, data flow, side effects, failure paths, and caller knowledge.
 - **Small interfaces**: public Python functions SHOULD keep at most five parameters. Group cohesive data in a named value object when the interface would otherwise grow; a temporary exception MUST be visible in the owning review with an owner, reason, ticket, and expiry.
 - **Flag arguments**: public functions MUST NOT add boolean default arguments to select materially different behavior. Split the commands or use an explicit policy/value object instead.
-- **State and errors**: changed Python production code MUST NOT add module-level mutable state, explicit `global` statements, or broad `except Exception`/bare handlers without a documented boundary reason and time-boxed waiver.
+- **State and errors**: changed Python production code MUST NOT add module-level mutable state, explicit `global` statements, or broad `except Exception`/`except BaseException`/bare handlers without a documented boundary reason and time-boxed waiver.
 - **Exports**: named exports only; no `export default`.
   - Exception: framework conventions that require default exports (e.g., certain Next.js special files).
 - **Determinism**: no ambient randomness/time in core logic; inject seeds/clocks/IDs.

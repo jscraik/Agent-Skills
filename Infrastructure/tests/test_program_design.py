@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 import unittest
+from datetime import date
 from pathlib import Path
 from types import ModuleType
 
@@ -75,7 +76,8 @@ class TestProgramDesign(unittest.TestCase):
                         "reason": "fixture",
                         "expires": "2099-01-01",
                     }
-                }
+                },
+                validation_date=date(2026, 7, 12),
             )[0],
         )
         self.assertIn(
@@ -89,7 +91,8 @@ class TestProgramDesign(unittest.TestCase):
                         "reason": "fixture",
                         "expires": "2020-01-01",
                     }
-                }
+                },
+                validation_date=date(2026, 7, 12),
             )[0],
         )
 
@@ -114,10 +117,70 @@ class TestProgramDesign(unittest.TestCase):
         validator = _load_validator()
         self.assertEqual(
             validator._changed_paths(
-                ("Infrastructure/tests/example.py", "Docs/example.py", "Plugins/cache/example.py")
+                (
+                    "Infrastructure/tests/example.py",
+                    "Docs/example.py",
+                    "Plugins/cache/example.py",
+                    "Infrastructure/scripts/../../outside.py",
+                )
             ),
             [],
         )
+
+    def test_nested_module_mutable_state_and_constructors_are_rejected(self) -> None:
+        validator = _load_validator()
+        source = """
+if True:
+    cache = dict()
+try:
+    items = list()
+except Exception:
+    seen = set()
+"""
+        issues = validator._check_source("Infrastructure/scripts/example.py", source, "")
+        rendered = "\n".join(issues)
+        self.assertIn("module mutable state cache", rendered)
+        self.assertIn("module mutable state items", rendered)
+        self.assertIn("module mutable state seen", rendered)
+
+    def test_private_helpers_are_skipped_and_public_methods_are_qualified(self) -> None:
+        validator = _load_validator()
+        source = """
+class A:
+    def run(self, enabled=False):
+        return enabled
+
+class B:
+    def run(self, enabled=False):
+        return enabled
+
+def outer():
+    def helper(enabled=False):
+        return enabled
+    return helper()
+"""
+        metrics = validator._metrics(source)
+        self.assertEqual(set(metrics.public_parameters), {"A.run", "B.run", "outer"})
+        issues = validator._check_source("Infrastructure/scripts/example.py", source, "")
+        rendered = "\n".join(issues)
+        self.assertIn("A.run(enabled=bool)", rendered)
+        self.assertIn("B.run(enabled=bool)", rendered)
+        self.assertNotIn("helper(enabled=bool)", rendered)
+
+    def test_invalid_baseline_is_a_controlled_validation_result(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "def run(value):\n    return value\n",
+            "def run(:\n",
+        )
+        self.assertIn("baseline could not parse pre-change Python", "\n".join(issues))
+
+    def test_extensionless_python_entrypoint_is_selected(self) -> None:
+        validator = _load_validator()
+        with self.subTest("python shebang"):
+            path = REPO_ROOT / "Infrastructure" / "bin" / "ask"
+            self.assertTrue(validator._is_production_python("Infrastructure/bin/ask", path=path))
 
 
 if __name__ == "__main__":

@@ -16,9 +16,9 @@ pretending that a syntax tree can judge every abstraction.
 ## Enforced baseline
 
 `Infrastructure/scripts/validation-and-linting/verify_program_design.py` is a
-changed-file ratchet for Python production code under `Infrastructure/`,
-`Plugins/`, and `skills-system/` (generated `Plugins/cache/` projections are
-excluded). It rejects new or worsened:
+changed-file ratchet for Python production code under `Infrastructure/bin/`,
+`Infrastructure/scripts/`, `Plugins/`, and `skills-system/` (generated
+`Plugins/cache/` projections are excluded). It rejects new or worsened:
 
 - public functions with more than five parameters;
 - boolean default arguments used as behavior switches;
@@ -92,12 +92,10 @@ not another reminder in prose.
 
 ## Source and evidence boundary
 
-The heuristics were cross-checked against the attached *Clean Code: A
-Handbook of Agile Software Craftsmanship* PDF at
-`/Users/jamiecraik/dev/knowledge-OS/sources/books/Software Architecture & Design/Clean Code A Handbook of Agile Software Craftsmanship.pdf`.
-That book is a design lens, not a contemporary universal threshold; the
-five-parameter and ratchet limits are repository policy chosen for low-noise
-change detection.
+The heuristics were cross-checked against Robert C. Martin, *Clean Code: A
+Handbook of Agile Software Craftsmanship* (Prentice Hall, 2008). That book is
+a design lens, not a contemporary universal threshold; the five-parameter and
+ratchet limits are repository policy chosen for low-noise change detection.
 
 The KnowledgeOS `scripts/plan-source-extraction.sh` wrapper was inspected but
 not run for this change because it writes a source slice and extraction

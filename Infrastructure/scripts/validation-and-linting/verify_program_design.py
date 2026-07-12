@@ -21,11 +21,14 @@ from __future__ import annotations
 
 import argparse
 import ast
+import os
 import subprocess
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from types import MappingProxyType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -36,8 +39,8 @@ PRODUCTION_PREFIXES = (
     "Plugins/",
     "skills-system/",
 )
-EXCLUDED_PARTS = {".venv", "__pycache__", "references", "tests", "test"}
-BROAD_EXCEPTION_NAMES = {"Exception", "BaseException"}
+EXCLUDED_PARTS: frozenset[str] = frozenset({".venv", "__pycache__", "references", "tests", "test"})
+BROAD_EXCEPTION_NAMES: frozenset[str] = frozenset({"Exception", "BaseException"})
 MUTABLE_VALUE_NODES = (
     ast.Dict,
     ast.DictComp,
@@ -46,7 +49,8 @@ MUTABLE_VALUE_NODES = (
     ast.Set,
     ast.SetComp,
 )
-PROGRAM_DESIGN_WAIVERS: dict[str, dict[str, str]] = {}
+MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "dict", "list", "set"})
+PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
 WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
 
 
@@ -84,15 +88,26 @@ def parse_args() -> argparse.Namespace:
         default=MAX_PUBLIC_PARAMETERS,
         help="Maximum public function parameters before a new/worsened design finding.",
     )
+    parser.add_argument(
+        "--baseline-ref",
+        default=None,
+        help="Git revision used as the pre-change baseline; defaults to the merge-base with the PR base.",
+    )
     return parser.parse_args()
 
 
-def _is_production_python(relpath: str) -> bool:
-    if (
-        not relpath.endswith(".py")
-        or not relpath.startswith(PRODUCTION_PREFIXES)
-        or relpath.startswith("Plugins/cache/")
-    ):
+def _is_python_entrypoint(path: Path) -> bool:
+    try:
+        first_line = path.read_text(encoding="utf-8").splitlines()[0]
+    except (OSError, IndexError):
+        return False
+    return first_line.startswith("#!") and "python" in first_line.lower()
+
+
+def _is_production_python(relpath: str, *, path: Path | None = None) -> bool:
+    if not relpath.startswith(PRODUCTION_PREFIXES) or relpath.startswith("Plugins/cache/"):
+        return False
+    if not relpath.endswith(".py") and (path is None or not _is_python_entrypoint(path)):
         return False
     parts = set(Path(relpath).parts)
     if parts & EXCLUDED_PARTS:
@@ -127,16 +142,32 @@ def _parameter_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
     return count
 
 
-def _boolean_flags(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[Finding]:
+def _boolean_flag_findings(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, qualified_name: str
+) -> list[Finding]:
     findings: list[Finding] = []
     positional = list(node.args.posonlyargs) + list(node.args.args)
     positional_defaults = [None] * (len(positional) - len(node.args.defaults)) + list(node.args.defaults)
-    for argument, default in zip(positional, positional_defaults):
+    findings.extend(_boolean_default_findings(qualified_name, positional, positional_defaults))
+    findings.extend(_boolean_default_findings(qualified_name, node.args.kwonlyargs, node.args.kw_defaults))
+    return findings
+
+
+def _boolean_default_findings(
+    qualified_name: str,
+    arguments: list[ast.arg],
+    defaults: list[ast.expr | None],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for argument, default in zip(arguments, defaults, strict=True):
         if isinstance(default, ast.Constant) and isinstance(default.value, bool):
-            findings.append(Finding(argument.lineno, f"{node.name}:{argument.arg}", f"{node.name}({argument.arg}=bool)"))
-    for argument, default in zip(node.args.kwonlyargs, node.args.kw_defaults):
-        if isinstance(default, ast.Constant) and isinstance(default.value, bool):
-            findings.append(Finding(argument.lineno, f"{node.name}:{argument.arg}", f"{node.name}({argument.arg}=bool)"))
+            findings.append(
+                Finding(
+                    argument.lineno,
+                    f"{qualified_name}:{argument.arg}",
+                    f"{qualified_name}({argument.arg}=bool)",
+                )
+            )
     return findings
 
 
@@ -171,38 +202,91 @@ def _target_names(node: ast.AST) -> list[str]:
     return []
 
 
-def _mutable_module_state(tree: ast.Module) -> list[Finding]:
-    findings: list[Finding] = []
-    for node in tree.body:
-        value: ast.expr | None = None
-        targets: list[ast.expr] = []
-        if isinstance(node, ast.Assign):
-            value = node.value
-            targets = node.targets
-        elif isinstance(node, ast.AnnAssign):
-            value = node.value
-            targets = [node.target]
-        if value is None or not isinstance(value, MUTABLE_VALUE_NODES):
-            continue
+def _is_mutable_value(value: ast.expr | None) -> bool:
+    if isinstance(value, MUTABLE_VALUE_NODES):
+        return True
+    return (
+        isinstance(value, ast.Call)
+        and isinstance(value.func, ast.Name)
+        and value.func.id in MUTABLE_CONSTRUCTOR_NAMES
+    )
+
+
+class _ModuleMutableStateVisitor(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.findings: list[Finding] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        return
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        return
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        return
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        self._record(node, node.targets, node.value)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        self._record(node, [node.target], node.value)
+        self.generic_visit(node)
+
+    def _record(self, node: ast.AST, targets: list[ast.expr], value: ast.expr | None) -> None:
+        if not _is_mutable_value(value):
+            return
         for target in targets:
             for name in _target_names(target):
-                # Uppercase constants and __all__ are intentionally excluded;
-                # a newly added lower-case mutable binding is the useful signal.
                 if name.isupper() or name == "__all__":
                     continue
-                findings.append(Finding(node.lineno, name, f"module mutable state {name}"))
-    return findings
+                self.findings.append(Finding(node.lineno, name, f"module mutable state {name}"))
+
+
+def _mutable_module_state(tree: ast.Module) -> list[Finding]:
+    visitor = _ModuleMutableStateVisitor()
+    visitor.visit(tree)
+    return visitor.findings
+
+
+class _PublicFunctionCollector(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.scope: tuple[str, ...] = ()
+        self.functions: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        previous_scope = self.scope
+        self.scope = (*previous_scope, node.name)
+        for statement in node.body:
+            self.visit(statement)
+        self.scope = previous_scope
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._record(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._record(node)
+
+    def _record(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        if node.name.startswith("_"):
+            return
+        qualified_name = ".".join((*self.scope, node.name))
+        self.functions.append((qualified_name, node))
+
+
+def _public_functions(tree: ast.Module) -> list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]]:
+    collector = _PublicFunctionCollector()
+    collector.visit(tree)
+    return collector.functions
 
 
 def _metrics(text: str) -> DesignMetrics:
     tree = ast.parse(text)
     public_parameters: dict[str, tuple[int, int]] = {}
     boolean_flags: list[Finding] = []
-    for node in ast.walk(tree):
-        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) or node.name.startswith("_"):
-            continue
-        public_parameters[node.name] = (_parameter_count(node), node.lineno)
-        boolean_flags.extend(_boolean_flags(node))
+    for qualified_name, node in _public_functions(tree):
+        public_parameters[qualified_name] = (_parameter_count(node), node.lineno)
+        boolean_flags.extend(_boolean_flag_findings(node, qualified_name))
     return DesignMetrics(
         public_parameters=public_parameters,
         boolean_flags=tuple(boolean_flags),
@@ -212,10 +296,10 @@ def _metrics(text: str) -> DesignMetrics:
     )
 
 
-def _git_head_text(path: Path) -> str | None:
+def _git_revision_text(path: Path, revision: str) -> str | None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
     result = subprocess.run(
-        ["git", "show", f"HEAD:{relpath}"],
+        ["git", "show", f"{revision}:{relpath}"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -224,7 +308,11 @@ def _git_head_text(path: Path) -> str | None:
     return result.stdout if result.returncode == 0 else None
 
 
-def _check_waiver_metadata(waivers: dict[str, dict[str, str]] | None = None) -> list[str]:
+def _check_waiver_metadata(
+    waivers: Mapping[str, Mapping[str, str]] | None,
+    *,
+    validation_date: date,
+) -> list[str]:
     issues: list[str] = []
     for key, metadata in sorted((waivers or PROGRAM_DESIGN_WAIVERS).items()):
         missing = [field for field in WAIVER_FIELDS if not metadata.get(field)]
@@ -236,12 +324,14 @@ def _check_waiver_metadata(waivers: dict[str, dict[str, str]] | None = None) -> 
         except ValueError:
             issues.append(f"{key} program-design waiver has invalid expires date: {metadata['expires']}")
             continue
-        if expires < date.today():
+        if expires < validation_date:
             issues.append(f"{key} program-design waiver expired on {metadata['expires']}")
     return issues
 
 
-def _is_waived(relpath: str, rule_id: str, waivers: dict[str, dict[str, str]] | None) -> bool:
+def _is_waived(
+    relpath: str, rule_id: str, waivers: Mapping[str, Mapping[str, str]] | None
+) -> bool:
     return f"{relpath}:{rule_id}" in (waivers or PROGRAM_DESIGN_WAIVERS)
 
 
@@ -261,7 +351,7 @@ def _check_smells(
     relpath: str,
     current: DesignMetrics,
     baseline: DesignMetrics,
-    waivers: dict[str, dict[str, str]] | None,
+    waivers: Mapping[str, Mapping[str, str]] | None,
 ) -> list[str]:
     checks = (
         ("boolean flag argument", "boolean-flag", current.boolean_flags, baseline.boolean_flags),
@@ -284,13 +374,21 @@ def _check_source(
     baseline_text: str | None,
     *,
     max_public_parameters: int = MAX_PUBLIC_PARAMETERS,
-    waivers: dict[str, dict[str, str]] | None = None,
+    waivers: Mapping[str, Mapping[str, str]] | None = None,
 ) -> list[str]:
     try:
         current = _metrics(current_text)
     except SyntaxError as exc:
         return [f"{relpath}:{exc.lineno}: program-design could not parse changed Python ({exc.msg})"]
-    baseline = _metrics(baseline_text) if baseline_text else DesignMetrics({}, (), (), (), ())
+    if not baseline_text:
+        baseline = DesignMetrics({}, (), (), (), ())
+    else:
+        try:
+            baseline = _metrics(baseline_text)
+        except SyntaxError as exc:
+            return [
+                f"{relpath}:{exc.lineno}: program-design baseline could not parse pre-change Python ({exc.msg})"
+            ]
     issues: list[str] = []
 
     for name, (count, line) in sorted(current.public_parameters.items()):
@@ -312,16 +410,41 @@ def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
     paths: list[Path] = []
     for relpath in changed_files:
         normalized = relpath.removeprefix("./")
-        path = (REPO_ROOT / normalized).resolve()
-        if path.is_file() and _is_production_python(normalized):
+        candidate = REPO_ROOT / normalized
+        path = candidate.resolve()
+        try:
+            path.relative_to(REPO_ROOT)
+        except ValueError:
+            continue
+        if path.is_file() and _is_production_python(normalized, path=path):
             paths.append(path)
     return sorted(set(paths))
+
+
+def _default_baseline_ref() -> str | None:
+    base_branch = os.environ.get("GITHUB_BASE_REF")
+    candidates = [f"origin/{base_branch}"] if base_branch else []
+    candidates.extend(("origin/main", "HEAD^"))
+    for candidate in candidates:
+        result = subprocess.run(
+            ["git", "merge-base", "HEAD", candidate],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return None
 
 
 def main() -> int:
     args = parse_args()
     changed_files = tuple(args.changed_files)
-    metadata_issues = _check_waiver_metadata()
+    metadata_issues = _check_waiver_metadata(
+        None,
+        validation_date=date.today(),
+    )
     if metadata_issues:
         print("Program design waiver metadata failed:")
         for issue in metadata_issues:
@@ -333,6 +456,7 @@ def main() -> int:
 
     issues: list[str] = []
     scanned = 0
+    baseline_ref = args.baseline_ref or _default_baseline_ref()
     for path in _changed_paths(changed_files):
         scanned += 1
         relpath = path.relative_to(REPO_ROOT).as_posix()
@@ -340,7 +464,7 @@ def main() -> int:
             _check_source(
                 relpath,
                 path.read_text(encoding="utf-8"),
-                _git_head_text(path),
+                _git_revision_text(path, baseline_ref) if baseline_ref else None,
                 max_public_parameters=max(1, int(args.max_public_parameters)),
             )
         )
