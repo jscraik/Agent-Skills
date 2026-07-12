@@ -4,7 +4,7 @@
   "status": "pass",
   "captured_at": "2026-07-12T15:51:03Z",
   "revision": {
-    "head_sha": "f90997f5960cc9e2349d170f037c60710a2a4360",
+    "head_sha": "26b061b74",
     "branch": "codex/skills-sdk-command-service-callers",
     "worktree_state": "source tree unchanged; generated review artifacts excluded",
     "identity_command": "git rev-parse HEAD"
@@ -94,5 +94,5 @@
     "The private replay receipt classifies all 43 references, but its five executed passes do not prove behavior for the 38 deny-by-default rows.",
     "This receipt does not prove command/service rationalization, authority-bound apply behavior, installed-runtime behavior, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, installation, or release readiness."
   ],
-  "next_gate": "Complete fresh QA and adversarial review for this receipt, then collect command-specific receipts for the 43 replay-required references; only after that consider a separate compatibility-preserving command/service slice."
+  "next_gate": "Collect command-specific receipts for the 43 replay-required references; this gate has fresh QA and adversarial review evidence, and only after the receipt set is complete consider a separate compatibility-preserving command/service slice."
 }

@@ -13,6 +13,7 @@ from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_rec
 
 SCHEMA_VERSION = "skills-sdk.private-stabilization-replay.v1"
 ALLOWLIST = {
+    ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "risk-modes", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "intake", "inspect", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "lenses", "validate", "--json", "--robot"),

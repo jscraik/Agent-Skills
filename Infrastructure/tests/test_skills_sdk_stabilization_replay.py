@@ -18,6 +18,26 @@ from ask.skills_sdk.stabilization_replay import (  # noqa: E402
 
 
 class TestPrivateStabilizationReplay(unittest.TestCase):
+    def test_read_only_package_build_is_allowlisted_for_command_receipt(self) -> None:
+        command = "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "package_identity",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        completed = mock.Mock(returncode=0, stdout='{"status":"success","metadata":{},"data":{}}', stderr="")
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        run.assert_called_once()
+
     def test_replay_is_terminal_and_deny_by_default(self) -> None:
         plan = {
             "commands": [

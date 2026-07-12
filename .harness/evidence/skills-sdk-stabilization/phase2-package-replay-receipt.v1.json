@@ -1,0 +1,101 @@
+{
+  "schema_version": "skills-sdk.phase2-package-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_independent_review_blocked",
+  "captured_at": "2026-07-12T16:11:13Z",
+  "revision": {
+    "base_head_sha": "26b061b74",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the already-proven package-build command into the exact read-only replay allowlist",
+      "TDD positive receipt coverage",
+      "refresh the 43-row private replay receipt and its digest-bound gate artifact"
+    ],
+    "excluded": [
+      "authority-bound apply commands",
+      "runtime installation",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "source_digest": "sha256:ca67243868b81ece6449d73ccac2fdeccf9aafc509e51adc28b33e09a6f2da96",
+    "test_digest": "sha256:8092a23f738b55be2db981ecb53db57e61799e967044c1edbf32c8f39c991a07"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_package_build",
+      "status": "fail",
+      "evidence": "TDD red phase: 1 failed; package-build argv was blocked before allowlist change."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "14 passed, 8 subtests passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 6 executed_pass; 37 blocked_unsafe; 0 unclassified; receipt sha256:816a148123d94e14c7e482f06c9d9dc5cafbb7cc402143ddb28986933673ed52"
+    },
+    {
+      "command": "codex review --uncommitted",
+      "status": "blocked",
+      "evidence": "failed to initialize in-process app-server client: Operation not permitted (os error 1)"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_runtime",
+      "artifact": "not emitted",
+      "reason": "The bounded child Worker did not emit its artifact; direct focused tests and replay output are retained as the nearest safe proof."
+    },
+    "qa": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-package-replay-qa.json",
+      "finding": "Replay and package receipts passed; the advisory that the README gate receipt was stale was corrected by rebinding it to HEAD 26b061b74."
+    },
+    "adversarial": {
+      "status": "waived_by_explicit_user_authorization",
+      "artifact": "codex review --uncommitted blocked before review process start",
+      "reason": "The user-authorized independent-review waiver applies to this bounded, locally proven stabilization slice; no independent pass is claimed."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 6,
+    "blocked_unsafe_count": 37,
+    "unclassified_count": 0,
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The package-build command is now covered by the exact read-only replay allowlist and emits a valid success envelope in the replay harness.",
+    "The 43-row receipt is terminally classified; 37 rows remain intentionally denied and have no behavior proof.",
+    "The Worker artifact is absent; fresh QA exists as a local pass_with_advisory report, and codex review was blocked before process start. The explicit waiver permits this bounded local commit but does not convert the result into an independent review pass.",
+    "No claim is made about apply-mode mutation, installed runtime, command/service rationalization, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Preserve this bounded replay-policy change as an immutable local commit under the explicit review waiver, then select the next smallest concrete read-only command receipt; keep authority-bound and template commands denied until separately authorized and fixture-backed."
+}
