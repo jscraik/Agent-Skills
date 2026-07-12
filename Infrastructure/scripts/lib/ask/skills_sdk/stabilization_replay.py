@@ -20,6 +20,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "intake", "review", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "lenses", "validate", "--json", "--robot"),
     ("./bin/ask", "sdk", "eval", "profiles", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "ab-rubric", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "eval", "scenario-quality", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "adapters", "--preview", "--json", "--robot"),
 }
