@@ -3,7 +3,7 @@
   "artifact_type": "read_only_command_service_inventory",
   "status": "planned",
   "scope": "capability-matrix",
-  "base_commit": "01faafe3d612c2f958983471c31df881907502d3",
+  "base_commit": "977890bd8076004e811f8a5bca77bc9046172634",
   "base_source_files": [
     "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
     "Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json",
@@ -21,7 +21,7 @@
     "Infrastructure/tests/test_skills_sdk_capability_evidence.py",
     "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py"
   ],
-  "base_source_tree_digest": "sha256:eefef13cef213a6096618c4d6ea33f70507cbb2a54167e74957e1751d7f39773",
+  "base_source_tree_digest": "sha256:50a3e971a8d24e19f8e073c83644fcb396db296ee5fa5e6b43dc0a1e1b7a4a55",
   "source_delta": [
     {
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/command_evidence_plan.py",
@@ -95,5 +95,5 @@
     "Foundry extraction or source admission",
     "Tessl, registry, hosted CI, installed-runtime, or release readiness"
   ],
-  "next_gate": "Create a revision-bound stabilization baseline receipt and obtain independent QA before refactoring, deleting, extracting, or admitting any source root."
+  "next_gate": "Use this revision-bound caller inventory to assess concrete command/service rationalization. No deletion or refactor is justified: all retained services have active callers with compatibility consequences. Foundry extraction and source admission remain separate later gates."
 }
