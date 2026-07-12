@@ -577,12 +577,15 @@
       "capability_id": "ab_preview",
       "command": "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_ab_preview"
       ],
       "execution_id": "sha256:1c088483023ca46a83737b9e465ce26e95c5296aa7f1757a6f6b7be3c9062a25",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [
