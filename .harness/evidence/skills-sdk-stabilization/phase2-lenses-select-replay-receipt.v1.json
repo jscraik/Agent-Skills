@@ -1,0 +1,120 @@
+{
+  "schema_version": "skills-sdk.phase2-lenses-select-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_with_fallback_review",
+  "captured_at": "2026-07-12T20:12:59Z",
+  "revision": {
+    "base_head_sha": "faa6bb59e4b44b23d6f4ae94329c40f2d668eb59",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the exact ./bin/ask sdk lenses select --prompt review-a-skill --intent validation_review --json --robot argv into the private read-only replay allowlist",
+      "capture the skill-lens-selection.v1 local selection envelope and no-mutation evidence",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "lens execution or skill mutation",
+      "package, install, runtime, registry, or release readiness",
+      "provider invocation or cloud execution",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
+    "source_digest": "sha256:38abadafe2e7a9e73af09820b151fd49f579c0cc8a16c5ca096d83d80afdd678",
+    "test_digest": "sha256:1b9d51013a383d18fb4404462b92b3fcea196995964de51ef46a487e4475c8c7",
+    "direct_payload": {
+      "top_level_status": "success",
+      "nested_schema": "skill-lens-selection.v1",
+      "nested_status": "pass",
+      "selected_lenses_max": 4,
+      "mutation_performed": false
+    }
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_sdk_lenses_select",
+      "status": "fail",
+      "evidence": "TDD red phase: focused test observed blocked_unsafe before the exact argv was allowlisted."
+    },
+    {
+      "command": "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
+      "status": "pass",
+      "evidence": "status=success; skill-lens-selection.v1 status=pass; selected_lenses length=2; max_lenses=4; no writes observed."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_sdk_lenses_select",
+      "status": "pass",
+      "evidence": "1 passed, 18 deselected."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "26 passed, 8 subtests passed."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900."
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; executed_pass=17; blocked_unsafe=26; unclassified=0; receipt sha256:0f2b87f5b3078ec7152e5bec1259ee2b11f547e9aa9e2987c818d83067114151."
+    },
+    {
+      "command": "git diff --check -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "No targeted whitespace errors."
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_missing_artifact",
+      "artifact": null,
+      "finding": "Worker did not write its required artifact after one follow-up; documented inspection-worktree fallback is required."
+    },
+    "qa": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-lenses-select-fallback-qa.json",
+      "finding": "Independent inspection-worktree QA found no functional findings; mise tracking-symlink warning is advisory only."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-lenses-select-fallback-adversarial.json",
+      "finding": "Fresh adversarial disproof found no findings: unsafe argv remained blocked, receipt digests matched, and direct execution was non-mutating; mise warning is advisory only."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 17,
+    "blocked_unsafe_count": 26,
+    "unclassified_count": 0,
+    "digest": "sha256:0f2b87f5b3078ec7152e5bec1259ee2b11f547e9aa9e2987c818d83067114151",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The exact SDK lens-selection command is covered by the private replay allowlist and emits a local schema-valid selection receipt without mutation.",
+    "The selection receipt does not prove lens execution, skill quality, package, install, runtime, registry, or release readiness.",
+    "The 43-row receipt is terminally classified; 26 rows remain intentionally denied and have no behavior proof.",
+    "No claim is made about provider/cloud execution, command/service rationalization, Foundry extraction, source admission, Tessl, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Stage only the four intended paths, create the immutable local commit, push through the 1Password wrapper to draft PR #330, reconcile its head, then classify the next deny-by-default row."
+}
