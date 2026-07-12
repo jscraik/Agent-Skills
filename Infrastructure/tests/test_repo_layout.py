@@ -464,6 +464,25 @@ def test_actionable_inventory_keeps_generated_command_callers(
     assert "generated_artifact_input" not in actionable["occurrences"][0]["categories"]
 
 
+def test_actionable_inventory_filters_generated_occurrences_in_source_files(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "README.md"
+    path = root / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "Use Skills/agent-ops/testing.\n"
+        "Historical .harness/evidence/receipt.json mentions Skills/agent-ops/testing.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(generate_repo_layout_caller_inventory, "_tracked_files", lambda _root: [rel_path])
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root, actionable_only=True)
+
+    assert [item["line"] for item in report["occurrences"]] == [1]
+
+
 def test_caller_inventory_markdown_summary_is_written(tmp_path: Path, monkeypatch) -> None:
     root = _minimal_repo(tmp_path)
     rel_path = "README.md"

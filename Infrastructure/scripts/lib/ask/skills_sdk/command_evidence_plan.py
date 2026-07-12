@@ -20,10 +20,10 @@ SERVICE_RATIONALIZATION_ROWS = (
     {
         "path": "Infrastructure/scripts/lib/ask/services/codex_preview.py",
         "disposition": "runtime_model_adapter",
-        "caller_modules": (
+        "caller_modules": [
             "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
             "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py",
-        ),
+        ],
         "caller_consequence": (
             "Retain behind the read-only conformance surface; callers must not treat its Codex-source model "
             "as installed-runtime proof."
@@ -32,10 +32,10 @@ SERVICE_RATIONALIZATION_ROWS = (
     {
         "path": "Infrastructure/scripts/lib/ask/services/plugin_cache.py",
         "disposition": "generated_projection_adapter",
-        "caller_modules": (
+        "caller_modules": [
             "Infrastructure/scripts/lib/ask/commands/plugins.py",
             "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
-        ),
+        ],
         "caller_consequence": (
             "Retain behind sync commands only; callers require an explicit write-authorized projection refresh "
             "and must not edit the cache as canonical source."
@@ -44,11 +44,11 @@ SERVICE_RATIONALIZATION_ROWS = (
     {
         "path": "Infrastructure/scripts/lib/ask/services/plugin_sources.py",
         "disposition": "compatibility_adapter",
-        "caller_modules": (
+        "caller_modules": [
             "Infrastructure/scripts/lib/ask/commands/plugins.py",
             "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
             "Infrastructure/scripts/lib/ask/services/plugin_cache.py",
-        ),
+        ],
         "caller_consequence": (
             "Retain as the shared plugin-source boundary; callers must preserve its symlink-safety checks "
             "until a separately proven source migration replaces them."

@@ -57,6 +57,7 @@ class TestSkillsSdkCommandEvidencePlan(unittest.TestCase):
             )
         )
         self.assertTrue(all(service["caller_consequence"] for service in services.values()))
+        self.assertTrue(all(isinstance(service["caller_modules"], list) for service in services.values()))
 
     def test_blocks_unparseable_command_evidence_refs(self) -> None:
         capability_receipt = {

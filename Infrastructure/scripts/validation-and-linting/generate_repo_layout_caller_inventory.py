@@ -216,7 +216,7 @@ def generate_inventory(root: Path, *, actionable_only: bool = False) -> dict[str
         scanned, file_occurrences = _scan_file(root, rel_path)
         scanned_files += int(scanned)
         skipped_files += int(not scanned)
-        occurrences.extend(file_occurrences)
+        occurrences.extend(_select_occurrences(file_occurrences, actionable_only))
 
     root_counts = Counter(item.legacy_root for item in occurrences)
     category_counts = Counter(category for item in occurrences for category in item.categories)
@@ -242,6 +242,14 @@ def generate_inventory(root: Path, *, actionable_only: bool = False) -> dict[str
     if actionable_only:
         report["mode"] = "actionable_only"
     return report
+
+
+def _select_occurrences(
+    occurrences: list[Occurrence], actionable_only: bool
+) -> list[Occurrence]:
+    if not actionable_only:
+        return occurrences
+    return [item for item in occurrences if _is_actionable_occurrence(item.to_json())]
 
 
 def _is_actionable_occurrence(item: dict[str, Any]) -> bool:

@@ -146,6 +146,29 @@ class TestProjectManifestStates(unittest.TestCase):
         self.assertEqual(evaluation.state, "invalid")
         self.assertIn("manifest_skill_roots_not_array", evaluation.blocker_codes())
 
+    def test_full_contract_validates_evidence_and_policy_values(self) -> None:
+        manifest = _full_manifest()
+        manifest["evidence"] = {"output_path": 42}
+        manifest["trust_policy"] = "not-a-policy"
+        manifest["precedence_policy"] = "not-a-policy"
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_evidence_invalid", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_trust_policy", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_precedence_policy", evaluation.blocker_codes())
+
+    def test_full_contract_requires_root_defaults_and_non_empty_roots(self) -> None:
+        manifest = _full_manifest()
+        manifest["skill_roots"] = []
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertIn("manifest_skill_roots_empty", evaluation.blocker_codes())
+
+        manifest["skill_roots"] = [{"path": ".agents/skills", "classification": "canonical_project_source"}]
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertEqual(evaluation.blocker_codes().count("manifest_skill_root_field_missing"), 3)
+
     def test_legacy_partial_manifest_is_valid_but_flagged(self) -> None:
         """A correct schema_version with legacy skill_sources stays valid, never absent."""
         legacy = {
