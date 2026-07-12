@@ -141,7 +141,7 @@ def _artifact_shape_findings(artifact: dict[str, Any], selection: dict[str, Any]
         commands = [row.get("command") for row in rows if isinstance(row, dict)]
         if set(families) != set(FAMILIES):
             findings.append({"severity": "blocker", "message": "candidate family set does not match the selected authority families", "evidence": [str(artifact_path)]})
-        if len(set(commands)) != len(rows):
+        if len(set(commands)) != len(commands):
             findings.append({"severity": "blocker", "message": "candidate contains duplicate commands", "evidence": [str(artifact_path)]})
         for row in rows:
             findings.extend(_row_findings(row, artifact_path))
