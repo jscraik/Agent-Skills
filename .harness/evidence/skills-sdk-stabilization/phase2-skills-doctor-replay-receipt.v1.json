@@ -1,0 +1,125 @@
+{
+  "schema_version": "skills-sdk.phase2-skills-doctor-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_adversarial_pass_with_advisories",
+  "captured_at": "2026-07-12T19:10:55Z",
+  "revision": {
+    "base_head_sha": "593b5e410440db1320499e717baa93ea24cf73d4",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the exact ./bin/ask skills doctor Skills/agent-ops/simplify --json --robot argv into the private read-only replay allowlist",
+      "capture its schema-valid success envelope and nested skill-doctor.v1 warning payload",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "promotion or readiness changes for Skills/agent-ops/simplify",
+      "package, install, runtime, registry, or release readiness",
+      "provider invocation or cloud execution",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask skills doctor Skills/agent-ops/simplify --json --robot",
+    "source_digest": "sha256:a4ab5785e665792899d40bf7afdfaa30243b1d4d7047671222c225bd6ae82d2a",
+    "test_digest": "sha256:e531a09ceb22eab982d7219f4d397c039aa0d68ff0e74b4c37c1a77d778249f8",
+    "direct_payload": {
+      "top_level_status": "success",
+      "nested_schema": "skill-doctor.v1",
+      "nested_status": "warning",
+      "warning_classes": [
+        "capability_contract_incomplete",
+        "outcome_proof_missing"
+      ],
+      "blockers": [],
+      "errors": []
+    }
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_skills_doctor",
+      "status": "fail",
+      "evidence": "TDD red phase: exact skills-doctor argv was denied before allowlisting."
+    },
+    {
+      "command": "./bin/ask skills doctor Skills/agent-ops/simplify --json --robot",
+      "status": "pass",
+      "evidence": "exit 0; top-level status=success; nested skill-doctor.v1 status=warning; warning classes capability_contract_incomplete and outcome_proof_missing; blockers=[]; top-level errors=[]."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "23 passed, 8 subtests passed."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900."
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 14 executed_pass; 29 blocked_unsafe; 0 unclassified; receipt sha256:d276484ac54627931fecbaecc46a473a2d8677a4fe1d6fe2f65ffbcf2f0d414e."
+    },
+    {
+      "command": "./bin/ask repo validate --scope skills-sdk --ephemeral --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json --json --robot",
+      "status": "pass",
+      "evidence": "required_failures=0; warn_only_issues=0."
+    },
+    {
+      "command": "git diff --check -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "No targeted whitespace errors; unrelated generated review paths remain outside the slice."
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-skills-doctor-worker.json",
+      "finding": "TDD, exact allowlist, direct envelope and warning capture, replay refresh, and narrow validation passed."
+    },
+    "qa": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-skills-doctor-qa.json",
+      "finding": "Fresh QA independently passed envelope assertions, warning preservation, no-mutation behavior, tests, lint, modularity, repo validation, and replay binding. Advisory: warning payload is not readiness; generated artifacts stay excluded."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-skills-doctor-adversarial.json",
+      "finding": "Fresh adversarial review found no blocking defect across allowlist, warning-not-readiness, negative sibling, replay, source/test/HEAD binding, and claims boundaries."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 14,
+    "blocked_unsafe_count": 29,
+    "unclassified_count": 0,
+    "digest": "sha256:d276484ac54627931fecbaecc46a473a2d8677a4fe1d6fe2f65ffbcf2f0d414e",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The exact skills-doctor command is covered by the private replay allowlist and emits a schema-valid local success envelope.",
+    "The nested skill-doctor warning payload is preserved as evidence and does not prove package, install, runtime, registry, or release readiness.",
+    "The 43-row receipt is terminally classified; 29 rows remain intentionally denied and have no behavior proof.",
+    "Worker, fresh QA, and fresh adversarial review artifacts are reconciled with advisories only and remain local evidence.",
+    "No claim is made about provider/cloud execution, mutation, command/service rationalization, Foundry extraction, source admission, Tessl, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Stage only the source/test files, refreshed private replay receipt, and this durable slice receipt; create the immutable local commit, push draft PR #330, then select the next smallest deny-by-default read-only command."
+}
