@@ -239,8 +239,7 @@ def _validate_manifest_contract(
     blockers = _validate_skill_roots(
         payload.get("skill_roots"), require_full_contract=has_full_contract
     )
-    if has_full_contract:
-        blockers.extend(_validate_full_contract_fields(payload))
+    blockers.extend(_validate_present_contract_fields(payload))
     return blockers
 
 
@@ -269,16 +268,22 @@ def _validate_skill_roots(
     return blockers
 
 
-def _validate_full_contract_fields(payload: dict[str, Any]) -> list[ManifestBlocker]:
-    blockers = _validate_non_empty_string_field(payload, "project_id", "manifest_project_id_invalid")
-    blockers.extend(_validate_nested_path_field(payload, "eval_suite", "path", "manifest_eval_suite_invalid"))
-    blockers.extend(_validate_nested_path_field(payload, "evidence", "output_path", "manifest_evidence_invalid"))
-    blockers.extend(_validate_policy_field(payload, "trust_policy", TRUST_POLICIES, "manifest_unsupported_trust_policy"))
-    blockers.extend(
-        _validate_policy_field(
-            payload, "precedence_policy", PRECEDENCE_POLICIES, "manifest_unsupported_precedence_policy"
-        )
-    )
+def _validate_present_contract_fields(payload: dict[str, Any]) -> list[ManifestBlocker]:
+    blockers: list[ManifestBlocker] = []
+    if "project_id" in payload:
+        blockers.extend(_validate_non_empty_string_field(payload, "project_id", "manifest_project_id_invalid"))
+    for field_name, path_key, blocker_code in (
+        ("eval_suite", "path", "manifest_eval_suite_invalid"),
+        ("evidence", "output_path", "manifest_evidence_invalid"),
+    ):
+        if field_name in payload:
+            blockers.extend(_validate_nested_path_field(payload, field_name, path_key, blocker_code))
+    for field_name, allowed, blocker_code in (
+        ("trust_policy", TRUST_POLICIES, "manifest_unsupported_trust_policy"),
+        ("precedence_policy", PRECEDENCE_POLICIES, "manifest_unsupported_precedence_policy"),
+    ):
+        if field_name in payload:
+            blockers.extend(_validate_policy_field(payload, field_name, allowed, blocker_code))
     return blockers
 
 
@@ -376,6 +381,8 @@ def _ambiguous_lifecycle_default_blockers(
 def _validate_non_empty_string_field(
     payload: dict[str, Any], field_name: str, blocker_code: str
 ) -> list[ManifestBlocker]:
+    if field_name not in payload:
+        return []
     value = payload.get(field_name)
     return [] if isinstance(value, str) and value.strip() else [_blocker(blocker_code)]
 

@@ -169,6 +169,20 @@ class TestProjectManifestStates(unittest.TestCase):
         self.assertEqual(evaluation.state, "invalid")
         self.assertEqual(evaluation.blocker_codes().count("manifest_skill_root_field_missing"), 3)
 
+    def test_legacy_manifest_rejects_malformed_present_contract_fields(self) -> None:
+        manifest = {
+            "schema_version": MANIFEST_SCHEMA_VERSION,
+            "project_id": "owner-repo",
+            "skill_roots": [{"path": ".agents/skills"}],
+            "evidence": "not-an-object",
+            "trust_policy": "not-a-policy",
+        }
+        evaluation = evaluate_manifest_payload(manifest, path="skills-sdk.json")
+        self.assertEqual(evaluation.state, "invalid")
+        self.assertTrue(evaluation.legacy_compat)
+        self.assertIn("manifest_evidence_invalid", evaluation.blocker_codes())
+        self.assertIn("manifest_unsupported_trust_policy", evaluation.blocker_codes())
+
     def test_legacy_partial_manifest_is_valid_but_flagged(self) -> None:
         """A correct schema_version with legacy skill_sources stays valid, never absent."""
         legacy = {
