@@ -50,6 +50,15 @@ class TestProgramDesign(unittest.TestCase):
         self.assertIn("global statement", rendered)
         self.assertIn("module mutable state", rendered)
 
+    def test_uppercase_mutable_state_is_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "CACHE = {}\n",
+            "",
+        )
+        self.assertIn("module mutable state CACHE", "\n".join(issues))
+
     def test_broad_exception_inside_tuple_is_rejected(self) -> None:
         validator = _load_validator()
         issues = validator._check_source(
@@ -167,6 +176,15 @@ def outer():
         self.assertIn("B.run(enabled=bool)", rendered)
         self.assertNotIn("helper(enabled=bool)", rendered)
 
+    def test_public_constructor_is_checked(self) -> None:
+        validator = _load_validator()
+        source = "class Service:\n    def __init__(self, enabled=False):\n        self.enabled = enabled\n"
+        metrics = validator._metrics(source)
+        self.assertEqual(set(metrics.public_parameters), {"Service.__init__"})
+        self.assertIn("Service.__init__(enabled=bool)", "\n".join(validator._check_source(
+            "Infrastructure/scripts/example.py", source, ""
+        )))
+
     def test_invalid_baseline_is_a_controlled_validation_result(self) -> None:
         validator = _load_validator()
         issues = validator._check_source(
@@ -175,6 +193,11 @@ def outer():
             "def run(:\n",
         )
         self.assertIn("baseline could not parse pre-change Python", "\n".join(issues))
+
+    def test_invalid_git_baseline_is_rejected_before_file_scan(self) -> None:
+        validator = _load_validator()
+        with self.assertRaises(validator.BaselineUnavailable):
+            validator._validate_baseline_ref("not-a-real-revision")
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()

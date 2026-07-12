@@ -619,11 +619,10 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
 
-    case "$changed_file" in
-      *.py|Infrastructure/bin/ask)
+    if [[ "$changed_file" == *.py || "$changed_file" == Infrastructure/bin/ask ]] || \
+      { [[ -f "$changed_file" ]] && head -n 1 "$changed_file" | grep -Eiq '^#!.*python'; }; then
         scope_has_python_quality=1
-        ;;
-    esac
+    fi
 
     case "$changed_file" in
       Infrastructure/scripts/validate_all.sh|\

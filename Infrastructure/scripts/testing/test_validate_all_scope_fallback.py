@@ -94,3 +94,23 @@ def test_lint_changed_python_files_run_program_design() -> None:
         assert args is not None
         assert "--changed-files" in args
         assert changed_file in args
+
+
+def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run.pyw"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        rows = repo.check_results()
+        by_slug = {row["slug"]: row for row in rows}
+        assert by_slug["program-design"]["outcome"] == "pass"
+        args = repo.recorded_args_for("Infrastructure/scripts/validation-and-linting/verify_program_design.py")
+        assert args is not None
+        assert "--changed-files" in args
+        assert changed_file in args

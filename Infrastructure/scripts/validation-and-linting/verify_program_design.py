@@ -52,6 +52,7 @@ MUTABLE_VALUE_NODES = (
 MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "dict", "list", "set"})
 PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
 WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
+PUBLIC_DUNDER_NAMES = frozenset({"__init__", "__new__"})
 
 
 @dataclass(frozen=True)
@@ -74,13 +75,17 @@ class DesignMetrics:
     mutable_module_state: tuple[Finding, ...]
 
 
+class BaselineUnavailable(RuntimeError):
+    """Raised when the requested Git baseline cannot be inspected."""
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate changed Python program design.")
     parser.add_argument(
         "--changed-files",
         nargs="*",
         default=(),
-        help="Repo-relative changed files to inspect; omitted means no-op baseline mode.",
+        help="Repo-relative changed files to inspect; omitted means all tracked production Python files.",
     )
     parser.add_argument(
         "--max-public-parameters",
@@ -99,7 +104,7 @@ def parse_args() -> argparse.Namespace:
 def _is_python_entrypoint(path: Path) -> bool:
     try:
         first_line = path.read_text(encoding="utf-8").splitlines()[0]
-    except (OSError, IndexError):
+    except (OSError, IndexError, UnicodeError):
         return False
     return first_line.startswith("#!") and "python" in first_line.lower()
 
@@ -216,14 +221,14 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.findings: list[Finding] = []
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        return
+    def visit_FunctionDef(self, _node: ast.FunctionDef) -> None:
+        return None
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        return
+    def visit_AsyncFunctionDef(self, _node: ast.AsyncFunctionDef) -> None:
+        return None
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        return
+    def visit_ClassDef(self, _node: ast.ClassDef) -> None:
+        return None
 
     def visit_Assign(self, node: ast.Assign) -> None:
         self._record(node, node.targets, node.value)
@@ -238,7 +243,7 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
             return
         for target in targets:
             for name in _target_names(target):
-                if name.isupper() or name == "__all__":
+                if name == "__all__":
                     continue
                 self.findings.append(Finding(node.lineno, name, f"module mutable state {name}"))
 
@@ -268,7 +273,7 @@ class _PublicFunctionCollector(ast.NodeVisitor):
         self._record(node)
 
     def _record(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
-        if node.name.startswith("_"):
+        if node.name.startswith("_") and node.name not in PUBLIC_DUNDER_NAMES:
             return
         qualified_name = ".".join((*self.scope, node.name))
         self.functions.append((qualified_name, node))
@@ -296,16 +301,60 @@ def _metrics(text: str) -> DesignMetrics:
     )
 
 
-def _git_revision_text(path: Path, revision: str) -> str | None:
-    relpath = path.relative_to(REPO_ROOT).as_posix()
+def _validate_baseline_ref(revision: str) -> None:
     result = subprocess.run(
-        ["git", "show", f"{revision}:{relpath}"],
+        ["git", "rev-parse", "--verify", f"{revision}^{{commit}}"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
-    return result.stdout if result.returncode == 0 else None
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "revision could not be resolved"
+        raise BaselineUnavailable(f"baseline revision {revision!r} is unavailable: {detail}")
+
+
+def _baseline_path(relpath: str, revision: str) -> str:
+    result = subprocess.run(
+        ["git", "diff", "--find-renames", "--name-status", revision, "HEAD"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "rename map could not be inspected"
+        raise BaselineUnavailable(f"baseline rename lookup failed: {detail}")
+    for line in result.stdout.splitlines():
+        fields = line.split("\t")
+        if len(fields) >= 3 and fields[0].startswith("R") and fields[2] == relpath:
+            return fields[1]
+    return relpath
+
+
+def _git_revision_text(path: Path, revision: str) -> str | None:
+    relpath = path.relative_to(REPO_ROOT).as_posix()
+    baseline_path = _baseline_path(relpath, revision)
+    exists = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}:{baseline_path}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if exists.returncode != 0:
+        return None
+    result = subprocess.run(
+        ["git", "show", f"{revision}:{baseline_path}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "baseline file could not be read"
+        raise BaselineUnavailable(f"baseline file lookup failed for {baseline_path}: {detail}")
+    return result.stdout
 
 
 def _check_waiver_metadata(
@@ -336,14 +385,18 @@ def _is_waived(
 
 
 def _new_findings(current: tuple[Finding, ...], baseline: tuple[Finding, ...]) -> list[Finding]:
-    current_counts = Counter(item.key for item in current)
-    baseline_counts = Counter(item.key for item in baseline)
+    def identity(item: Finding) -> tuple[str, int, str]:
+        return item.key, item.line, item.detail
+
+    current_counts = Counter(identity(item) for item in current)
+    baseline_counts = Counter(identity(item) for item in baseline)
     remaining = {key: max(0, count - baseline_counts[key]) for key, count in current_counts.items()}
     findings: list[Finding] = []
     for item in sorted(current, key=lambda finding: (finding.line, finding.key)):
-        if remaining.get(item.key, 0) > 0:
+        item_identity = identity(item)
+        if remaining.get(item_identity, 0) > 0:
             findings.append(item)
-            remaining[item.key] -= 1
+            remaining[item_identity] -= 1
     return findings
 
 
@@ -407,6 +460,18 @@ def _check_source(
 
 
 def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
+    if not changed_files:
+        tracked = subprocess.run(
+            ["git", "ls-files"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if tracked.returncode != 0:
+            detail = tracked.stderr.strip() or "tracked file list could not be read"
+            raise BaselineUnavailable(f"production file discovery failed: {detail}")
+        changed_files = tuple(line for line in tracked.stdout.splitlines() if line)
     paths: list[Path] = []
     for relpath in changed_files:
         normalized = relpath.removeprefix("./")
@@ -438,6 +503,25 @@ def _default_baseline_ref() -> str | None:
     return None
 
 
+def _scan_paths(
+    changed_files: tuple[str, ...], baseline_ref: str, max_public_parameters: int
+) -> tuple[int, list[str]]:
+    issues: list[str] = []
+    paths = _changed_paths(changed_files)
+    for path in paths:
+        relpath = path.relative_to(REPO_ROOT).as_posix()
+        baseline_text = _git_revision_text(path, baseline_ref)
+        issues.extend(
+            _check_source(
+                relpath,
+                path.read_text(encoding="utf-8"),
+                baseline_text,
+                max_public_parameters=max_public_parameters,
+            )
+        )
+    return len(paths), issues
+
+
 def main() -> int:
     args = parse_args()
     changed_files = tuple(args.changed_files)
@@ -450,24 +534,24 @@ def main() -> int:
         for issue in metadata_issues:
             print(f"- {issue}")
         return 1
-    if not changed_files:
-        print("program_design: no changed production Python files supplied; baseline ratchet pass")
-        return 0
-
-    issues: list[str] = []
-    scanned = 0
     baseline_ref = args.baseline_ref or _default_baseline_ref()
-    for path in _changed_paths(changed_files):
-        scanned += 1
-        relpath = path.relative_to(REPO_ROOT).as_posix()
-        issues.extend(
-            _check_source(
-                relpath,
-                path.read_text(encoding="utf-8"),
-                _git_revision_text(path, baseline_ref) if baseline_ref else None,
-                max_public_parameters=max(1, int(args.max_public_parameters)),
-            )
+    if not baseline_ref:
+        print("Program design verification blocked: baseline revision could not be determined")
+        return 1
+    try:
+        _validate_baseline_ref(baseline_ref)
+    except BaselineUnavailable as exc:
+        print(f"Program design verification blocked: {exc}")
+        return 1
+    try:
+        scanned, issues = _scan_paths(
+            changed_files,
+            baseline_ref,
+            max(1, int(args.max_public_parameters)),
         )
+    except BaselineUnavailable as exc:
+        print(f"Program design verification blocked: {exc}")
+        return 1
     print(f"program_design: scanned={scanned}")
     if issues:
         print("Program design verification failed:")
