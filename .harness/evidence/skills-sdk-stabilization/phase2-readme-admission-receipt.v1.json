@@ -1,0 +1,98 @@
+{
+  "schema_version": "skills-sdk.phase2-readme-admission-receipt.v1",
+  "artifact_type": "read_only_phase2_gate_receipt",
+  "status": "pass",
+  "captured_at": "2026-07-12T15:51:03Z",
+  "revision": {
+    "head_sha": "f90997f5960cc9e2349d170f037c60710a2a4360",
+    "branch": "codex/skills-sdk-command-service-callers",
+    "worktree_state": "source tree unchanged; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "README.md package-admission consistency",
+      "canonical package-build and intake-preview receipts",
+      "focused regression coverage",
+      "private deny-by-default classification of all 43 replay-required references"
+    ],
+    "excluded": [
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "runtime cutover",
+      "Tessl or CircleCI mutation",
+      "publish, install, push, pull request, merge, or release readiness"
+    ]
+  },
+  "readme_admission": {
+    "status": "aligned",
+    "policy": "README.md is approved registry presentation; SKILL.md remains the required runtime instruction source.",
+    "implementation_commit": "977890bd8076004e811f8a5bca77bc9046172634",
+    "source_files": {
+      "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py": "sha256:c17c469949f6d4f2222eb4ea231f8bb7aeda921c88598b6370195e53e13a91f8",
+      "Infrastructure/scripts/lib/ask/skills_sdk/package_build.py": "sha256:8ccd7c59e88e74b60db0a399f0cc54f0c87600a67c23a0e5d2ce57becc1694c1",
+      "Infrastructure/tests/test_skills_sdk_skill_intake.py": "sha256:6ef873153a9bed27538176117144cf80fe59c92e74e167fd6d5ef998ba460384",
+      "Infrastructure/tests/test_skills_sdk_package_build.py": "sha256:9d4a5e5eaaceff14975050b358de760cb9d5f4dd9d69fdc864b781f6ee834764"
+    },
+    "positive_fixture": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "negative_fixture": "temporary source with an unexpected top-level path and rejected subtree",
+    "package_build": "pass; README.md and SKILL.md included; mutation_performed=false",
+    "intake_inspect": "pass; README.md accepted; file_count=2; blockers=[]; execution_performed=false; install_performed=false; mutation_performed=false"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_skill_intake.py tests/test_skills_sdk_package_build.py",
+      "status": "pass",
+      "evidence": "18 passed"
+    },
+    {
+      "command": "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "status": "pass",
+      "evidence": "status=success; package_id=skills-sdk-valid-fixture; README.md and SKILL.md included; mutation_performed=false"
+    },
+    {
+      "command": "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=success; file_count=2; README.md admitted; blockers=[]; execution_performed=false; install_performed=false; mutation_performed=false"
+    },
+    {
+      "command": "PYTHONPATH=Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root . --output .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 5 allowlisted executions passed; 38 rows denied by the exact read-only allowlist; receipt digest sha256:deaa68a8155b8286730f0c32571d99c3ea377f3c06d5e393d936dc5ed32dee03"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "status": "pass",
+      "evidence": "status=pass; findings=[]"
+    },
+    {
+      "command": "./bin/ask repo validate --scope skills-sdk --ephemeral --changed-files .harness/quality/steering-uptake.md .harness/evidence/skills-sdk-stabilization/phase2-readme-admission-receipt.v1.json --json --robot",
+      "status": "pass",
+      "evidence": "required_failures=0; warn_only_issues=0; ephemeral validation"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-readme-worker.json",
+      "finding": "The historical README blocker is stale at current HEAD; no source edit is required."
+    },
+    "qa": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-readme-qa.json",
+      "finding": "README admission, negative top-level rejection, focused tests, and non-mutation claims were independently confirmed."
+    },
+    "adversarial": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-readme-adversarial.json",
+      "finding": "No stale revision, policy drift, missing negative coverage, generated-artifact contamination, or unsupported claim was found."
+    }
+  },
+  "claims_boundary": [
+    "This receipt proves the local README admission gate and non-mutating preview paths at the recorded commit.",
+    "The private replay receipt classifies all 43 references, but its five executed passes do not prove behavior for the 38 deny-by-default rows.",
+    "This receipt does not prove command/service rationalization, authority-bound apply behavior, installed-runtime behavior, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, installation, or release readiness."
+  ],
+  "next_gate": "Complete fresh QA and adversarial review for this receipt, then collect command-specific receipts for the 43 replay-required references; only after that consider a separate compatibility-preserving command/service slice."
+}
