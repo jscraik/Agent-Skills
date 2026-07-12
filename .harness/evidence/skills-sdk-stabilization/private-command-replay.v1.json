@@ -688,12 +688,15 @@
       "capability_id": "scenario_quality_gate",
       "command": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_scenario_quality"
       ],
       "execution_id": "sha256:17c29f48a55042a1c142537a5b126c910419fce6a36aed9e4bffd84441cedafa",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

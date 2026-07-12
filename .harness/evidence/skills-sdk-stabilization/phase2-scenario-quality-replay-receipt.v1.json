@@ -1,0 +1,102 @@
+{
+  "schema_version": "skills-sdk.phase2-scenario-quality-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_worker_blocked_adversarial_pass_with_advisory",
+  "captured_at": "2026-07-12T16:29:54Z",
+  "revision": {
+    "base_head_sha": "baf6d4636a5aa3c14d1c77fdf3c2d211e9f41f92",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the already-proven scenario-quality preview command into the exact read-only replay allowlist",
+      "TDD positive receipt coverage",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "authority-bound apply commands",
+      "runtime installation",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+    "source_digest": "sha256:4fc5d1fb60df5b0ace393213e20905ce9f62be41ebabbcd353c916bfb0dc68ff",
+    "test_digest": "sha256:8dfc4193f74330319d8c0cfc80586b238f919bb7056525db3f5c60cfa75d3864"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_scenario_quality",
+      "status": "fail",
+      "evidence": "TDD red phase: 1 failed; scenario-quality argv was blocked before allowlist change."
+    },
+    {
+      "command": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=preview; scenario_count=1; promotion_ready_count=1; blocked_count=0; mutation_performed=false; promotion_performed=false"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "16 passed, 8 subtests passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 8 executed_pass; 35 blocked_unsafe; 0 unclassified; receipt sha256:68b73af3913923df206c27e4b0e1a19f18a61c469c4a8825cc43c9c53266e880"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_runtime",
+      "artifact": "not emitted",
+      "reason": "The child Worker was interrupted after the app-server runtime produced no artifact; no Worker verdict is claimed."
+    },
+    "qa": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-scenario-quality-qa.json",
+      "finding": "Dedicated scenario-quality tests, exact preview, replay counts, receipt digest, and no-mutation/worktree evidence passed. Diagnostics remain limited to the unrelated generated review file whitespace and the Worker coverage gap."
+    },
+    "adversarial": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-scenario-quality-adversarial.json",
+      "finding": "Exact argv, schema/receipt consistency, revision binding, replay counts/digest, no-mutation evidence, artifact exclusion, and claims boundaries passed. Advisory: unrelated generated review-file whitespace remains outside the targeted slice."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 8,
+    "blocked_unsafe_count": 35,
+    "unclassified_count": 0,
+    "digest": "sha256:68b73af3913923df206c27e4b0e1a19f18a61c469c4a8825cc43c9c53266e880",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The scenario-quality preview command is covered by the exact read-only replay allowlist and emits a valid success envelope in the replay harness.",
+    "The 43-row receipt is terminally classified; 35 rows remain intentionally denied and have no behavior proof.",
+    "The Worker artifact remains unavailable because of the child-runtime boundary; fresh QA and adversarial review both passed with the unrelated generated-file whitespace advisory recorded. No Worker pass is claimed.",
+    "No claim is made about apply-mode mutation, installed runtime, command/service rationalization, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Preserve this bounded replay-policy change as an immutable local commit under the recorded Worker-runtime coverage gap, push it to draft PR #330, and select the next smallest concrete read-only command receipt."
+}
