@@ -36,12 +36,15 @@
       "capability_id": "check",
       "command": "./bin/ask sdk check Skills/agent-ops/simplify --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skill_doctor,skills_sdk_check"
       ],
       "execution_id": "sha256:e358059faa46cac8be9f7d366c523d8e124ba87177042d7a0ee131c1d563f21b",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [
