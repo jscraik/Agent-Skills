@@ -259,7 +259,6 @@ class TestEvalShardAggregate(unittest.TestCase):
                 )
 
         self.assertIn("shards_match_current_rubric", {row["id"] for row in raised.exception.receipt["blockers"]})
-
     def test_failed_shard_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

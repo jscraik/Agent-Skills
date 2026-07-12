@@ -197,7 +197,6 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
         self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
-
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
