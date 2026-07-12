@@ -824,12 +824,13 @@
       "capability_id": "sdk_plugin_lifecycle",
       "command": "./bin/ask sdk plugin --help",
       "evidence": [
-        "deny_by_default"
+        "help_receipt:valid_text",
+        "help_nonempty_line_count:18"
       ],
       "execution_id": "sha256:bfe23fa19a28d59a250364382117633bdde03453ce00e463380afa95657031b4",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted help command returned bounded non-empty argparse text.",
+      "status": "executed_pass"
     },
     {
       "argv": [

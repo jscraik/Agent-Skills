@@ -18,6 +18,48 @@ from ask.skills_sdk.stabilization_replay import (  # noqa: E402
 
 
 class TestPrivateStabilizationReplay(unittest.TestCase):
+    def test_read_only_plugin_help_accepts_bounded_text_receipt(self) -> None:
+        command = "./bin/ask sdk plugin --help"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "sdk_plugin_lifecycle",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        completed = mock.Mock(returncode=0, stdout="usage: ask sdk plugin [-h]\noptions:\n  -h, --help  show this help message and exit\n", stderr="")
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        self.assertIn("help_receipt:valid_text", receipt["rows"][0]["evidence"])
+        self.assertIn("help_nonempty_line_count:3", receipt["rows"][0]["evidence"])
+        run.assert_called_once()
+
+    def test_plugin_help_rejects_oversized_text_receipt(self) -> None:
+        command = "./bin/ask sdk plugin --help"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "sdk_plugin_lifecycle",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        completed = mock.Mock(returncode=0, stdout="usage: ask sdk plugin\n" + ("x" * 4096), stderr="")
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ):
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_fail")
+        self.assertIn("help_receipt:oversize", receipt["rows"][0]["evidence"])
+
     def test_read_only_ab_preview_is_allowlisted_for_command_receipt(self) -> None:
         command = "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot"
         plan = {

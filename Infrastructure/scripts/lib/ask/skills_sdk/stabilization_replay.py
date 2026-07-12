@@ -12,6 +12,8 @@ from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_rec
 
 
 SCHEMA_VERSION = "skills-sdk.private-stabilization-replay.v1"
+MAX_HELP_OUTPUT_BYTES = 4096
+MAX_HELP_OUTPUT_LINES = 64
 ALLOWLIST = {
     ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
@@ -24,6 +26,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "eval", "ab-preview", "--skill-a", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--skill-b", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--fixture", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "eval", "scenario-quality", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "adapters", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "plugin", "--help"),
 }
 
 
@@ -79,7 +82,7 @@ def _execute_argv(repo_root: Path, argv: tuple[str, ...]) -> dict[str, Any]:
             f"Allowlisted command could not execute: {type(exc).__name__}.",
             [f"os_error:{exc.errno}"],
         )
-    return _classify_completed(execution_id, completed)
+    return _classify_completed(execution_id, argv, completed)
 
 
 def _blocked_execution(execution_id: str) -> dict[str, Any]:
@@ -108,11 +111,21 @@ def _run_allowlisted(repo_root: Path, argv: tuple[str, ...]) -> subprocess.Compl
     )
 
 
-def _classify_completed(execution_id: str, completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     receipt_status, receipt_evidence = _observe_robot_receipt(completed.stdout)
     if completed.returncode != 0:
         status = "executed_fail"
         reason = "Exact allowlisted local read-only command returned a non-zero exit code."
+    elif argv[-1:] == ("--help",):
+        help_status, help_evidence = _observe_help_receipt(completed.stdout)
+        if help_status == "success":
+            status = "executed_pass"
+            reason = "Exact allowlisted help command returned bounded non-empty argparse text."
+            receipt_evidence = help_evidence
+        else:
+            status = "executed_fail"
+            reason = "Allowlisted help command returned zero but not bounded argparse help text."
+            receipt_evidence = help_evidence
     elif receipt_status == "success":
         status = "executed_pass"
         reason = "Exact allowlisted local read-only command returned a valid success receipt."
@@ -126,6 +139,17 @@ def _classify_completed(execution_id: str, completed: subprocess.CompletedProces
         "reason": reason,
         "evidence": receipt_evidence,
     }
+
+
+def _observe_help_receipt(stdout: str) -> tuple[str | None, list[str]]:
+    """Record bounded argparse help evidence without persisting help text."""
+    output_bytes = len(stdout.encode("utf-8"))
+    lines = [line for line in stdout.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["help_receipt:oversize"]
+    if not lines or not lines[0].startswith("usage:"):
+        return None, ["help_receipt:invalid_text"]
+    return "success", ["help_receipt:valid_text", f"help_nonempty_line_count:{len(lines)}"]
 
 
 def _observe_robot_receipt(stdout: str) -> tuple[str | None, list[str]]:
