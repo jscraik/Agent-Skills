@@ -2967,11 +2967,12 @@ def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[st
         return None
     matches: list[tuple[int, str, str]] = []
     declared_roots = list(manifest.get("skill_roots", []))
-    declared_roots.extend(
-        {"path": item.get("root"), "classification": item.get("kind")}
-        for item in manifest.get("skill_sources", [])
-        if isinstance(item, dict)
-    )
+    if "skill_roots" not in manifest:
+        declared_roots.extend(
+            {"path": item.get("root"), "classification": item.get("kind")}
+            for item in manifest.get("skill_sources", [])
+            if isinstance(item, dict)
+        )
     for root in declared_roots:
         if not isinstance(root, dict):
             continue
