@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/branded-id.v1.schema.json",
+  "title": "Skills SDK branded identifier v1",
+  "type": "string",
+  "pattern": "^[a-z][a-z0-9]{0,15}_[a-z0-9]{12,32}$",
+  "description": "A lowercase kind prefix followed by a lowercase alphanumeric token."
+}

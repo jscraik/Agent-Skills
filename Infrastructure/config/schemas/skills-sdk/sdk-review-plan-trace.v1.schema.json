@@ -27,7 +27,7 @@
       "const": "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json"
     },
     "receipt_path": {"type": "string", "minLength": 1},
-    "receipt_instance_id": {"type": "string", "minLength": 1},
+    "receipt_instance_id": {"type": "string", "pattern": "^rp_[a-z0-9]{12,32}$"},
     "receipt_sha256": {"type": "string", "minLength": 64},
     "repo_root": {"type": "string", "minLength": 1},
     "head_sha": {"type": "string", "minLength": 1},

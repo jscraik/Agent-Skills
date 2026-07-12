@@ -11,7 +11,7 @@
     "operation": {"type": "string", "const": "ab_judge_preview"},
     "run_receipt_path": {"type": ["string", "null"], "minLength": 1},
     "run_receipt_digest": {"type": ["string", "null"], "minLength": 71},
-    "experiment_id": {"type": ["string", "null"], "minLength": 16, "maxLength": 16},
+    "experiment_id": {"type": ["string", "null"], "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"},
     "judge_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"}]},
     "rubric_id": {"oneOf": [{"type": "null"}, {"type": "string", "const": "skills-sdk.ab-rubric.v0"}]},
     "rubric_digest": {"type": ["string", "null"], "minLength": 71},
@@ -20,7 +20,7 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {"type": "string", "const": "skills-sdk.ab-judge-decision.v0"},
-        "experiment_id": {"type": "string", "minLength": 16, "maxLength": 16},
+        "experiment_id": {"type": "string", "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"},
         "rubric": {"$ref": "ab-rubric-receipt.v0.schema.json#/definitions/ab_rubric"},
         "rubric_digest": {"type": "string", "minLength": 71},
         "skill_a": {"$ref": "#/definitions/package_identity"},

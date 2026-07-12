@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt
+from ask.skills_sdk.id_types import branded_id_from_digest
 
 
 AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v0"
@@ -45,7 +46,7 @@ def _experiment_id(preview_receipt: dict[str, Any], execution_profile_id: str, j
         execution_profile_id,
         judge_profile_id,
     ]
-    return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:16]
+    return branded_id_from_digest("ex", "\n".join(parts), length=16)
 
 
 def _variant_command(

@@ -60,7 +60,7 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - Fabricated data/entropy: `Math.random()` (or equivalent) used to fabricate data without injected seed
 - Hard-coded mock responses in production paths
 - `TODO`/`FIXME`/`HACK` comments in production paths
-- Placeholder stubs (“will be wired later”, “not implemented”, etc.)
+- Placeholder stubs that defer implementation or claim missing behavior
 - Disabled features signaling gaps (`console.warn("not implemented")`, dead flags)
 - Fake metrics or synthetic telemetry presented as real
 
@@ -511,5 +511,33 @@ expires: 2026-02-01
 ### Architectural Boundaries
 
 <!-- Define project-specific import restrictions or layer rules -->
+
+### Skills SDK Contract Types
+
+For new or touched public Skills SDK contracts and emitters, JSON Schema is
+the compatibility authority. Python models and adapters MUST select or
+validate from the owning schema; they MUST NOT introduce a competing manual
+`NewType`/primitive alias for an SDK value. Identity fields such as
+`receipt_instance_id`, `trace_id`, `request_id`, and `experiment_id` MUST use
+the schema-backed pattern from
+`Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json` and the
+kind prefixes declared in
+`Infrastructure/config/schemas/skills-sdk/type-policy.v1.json`.
+
+New duration or budget APIs MUST use the schema-backed duration object from
+`Infrastructure/config/schemas/skills-sdk/duration.v1.schema.json` with an
+explicit unit and a non-negative value. Existing `*_seconds` fields are
+legacy compatibility surfaces; migrate them only in their recorded owner
+slice, and do not add new unitless numeric duration fields.
+
+This is a semantic contract rule, not a blanket ban on every `str`, `int`,
+`float`, or JSON `number`. Free text, paths, digests, counters, and schema
+numeric values remain valid when their owning schema gives them that meaning;
+the prohibition applies to unbranded identity values and unitless duration or
+budget APIs on new or touched public surfaces.
+
+The machine-enforced gate is
+`python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_type_policy.py`.
+Run it with the changed contract/emitter paths before widening validation.
 
 <!-- PROJECT-SPECIFIC: END -->
