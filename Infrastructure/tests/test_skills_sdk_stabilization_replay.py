@@ -254,13 +254,13 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
 
             link = REPO_ROOT / ".harness" / "evidence" / "skills-sdk-stabilization" / "test-output-link.json"
             link.parent.mkdir(parents=True, exist_ok=True)
+            link.unlink(missing_ok=True)
             link.symlink_to(outside)
             try:
                 with self.assertRaisesRegex(ValueError, "must not be symlinks"):
                     _safe_output_path(REPO_ROOT, link)
             finally:
                 link.unlink()
-
     def test_timeout_and_os_error_are_terminal_and_replay_continues(self) -> None:
         commands = [
             {"capability_id": "timeout", "command": "./bin/ask sdk lenses validate --json --robot", "argv": ["./bin/ask", "sdk", "lenses", "validate", "--json", "--robot"]},
