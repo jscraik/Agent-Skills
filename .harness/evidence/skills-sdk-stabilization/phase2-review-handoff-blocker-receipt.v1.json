@@ -1,0 +1,48 @@
+{
+  "schema_version": "skills-sdk.phase2-review-handoff-blocker-receipt.v1",
+  "artifact_type": "blocked_read_only_command_receipt",
+  "status": "blocked_stale_plan_context",
+  "captured_at": "2026-07-12T20:31:00Z",
+  "revision": {
+    "current_head_sha": "efc0944a12fc11ec9b352297eb19e176ed48b2ed",
+    "identity_command": "git rev-parse HEAD",
+    "draft_pr": "https://github.com/jscraik/Agent-Skills/pull/330"
+  },
+  "blocked_command": {
+    "argv": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "status": "blocked",
+    "exit_code": 2,
+    "error_code": "ERR_VALIDATION",
+    "error_message": "source_context head_sha is stale.",
+    "fix_suggestion": "Run ask sdk review plan --target <path> --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/<name>.json --json --robot, then retry ask sdk review handoff with matching --plan, --target, and --intent."
+  },
+  "stale_input": {
+    "path": ".harness/artifacts/sdk-review-plan/simplify.json",
+    "recorded_head_sha": "7c65e5f9341be0091f7cf63f5b5df707196d388d",
+    "current_head_sha": "efc0944a12fc11ec9b352297eb19e176ed48b2ed",
+    "identity_check": "mismatch"
+  },
+  "nearest_safe_proof": [
+    {
+      "command": "before=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json); ./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot >/tmp/agent-skills-review-plan-current-head.json; code=$?; after=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk/stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json); test \"$code\" -eq 0 && test \"$before\" = \"$after\" && jq -e '.data.review_plan.status == \"pass\" and .data.review_plan.mutation_performed == false and .data.review_plan.receipt_written == false and .data.review_plan.source_context.head_sha == \"efc0944a12fc11ec9b352297eb19e176ed48b2ed\"' /tmp/agent-skills-review-plan-current-head.json >/dev/null",
+      "status": "pass",
+      "evidence": "REVIEW_PLAN_CURRENT_HEAD_EXIT:0; current-head plan receipt is schema-valid and non-mutating, but it is not persisted as a handoff input."
+    },
+    {
+      "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+      "status": "blocked",
+      "evidence": "exit_code=2; ERR_VALIDATION; source_context head_sha is stale."
+    }
+  ],
+  "policy_boundary": {
+    "receipt_out_refresh": "out_of_scope",
+    "reason": "--receipt-out writes a plan receipt and trace sidecar; the current Phase 2 slice admits only read-only preview or validation commands.",
+    "replay_policy": "exact_argv_allowlist_deny_by_default"
+  },
+  "claims_boundary": [
+    "The review-handoff row is blocked by stale plan provenance, not by an implementation failure in the handoff logic.",
+    "The current-head review-plan probe is locally schema-valid and non-mutating.",
+    "No claim is made about review handoff execution, hosted CI, mergeability, registry publication, installed-runtime readiness, Foundry extraction, source admission, or host process-table cleanup."
+  ],
+  "next_gate": "Stop Phase 2 replay promotion at review_handoff until a same-head plan receipt can be safely admitted under a separately authorized artifact-writing policy."
+}
