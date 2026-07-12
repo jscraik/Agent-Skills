@@ -619,7 +619,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
 
-    if [[ "$changed_file" == *.py || "$changed_file" == Infrastructure/bin/ask ]] || \
+    if [[ "$changed_file" == *.py || "$changed_file" == *.pyw || "$changed_file" == Infrastructure/bin/ask ]] || \
       { [[ -f "$changed_file" ]] && head -n 1 "$changed_file" | grep -Eiq '^#!.*python'; }; then
         scope_has_python_quality=1
     fi

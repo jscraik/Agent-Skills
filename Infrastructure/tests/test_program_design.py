@@ -109,7 +109,7 @@ class TestProgramDesign(unittest.TestCase):
         validator = _load_validator()
         source = "def run(value, enabled=False):\n    try:\n        return value\n    except Exception:\n        return None\n"
         waivers = {
-            "Infrastructure/scripts/example.py:boolean-flag": {
+            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
                 "owner": "tests",
                 "rule_id": "program-design",
                 "ticket": "TEST-2",
@@ -121,6 +121,30 @@ class TestProgramDesign(unittest.TestCase):
         rendered = "\n".join(issues)
         self.assertNotIn("boolean flag argument", rendered)
         self.assertIn("broad exception handler", rendered)
+
+    def test_finding_identity_ignores_line_shifts(self) -> None:
+        validator = _load_validator()
+        source = "def run(value):\n    try:\n        return value\n    except Exception:\n        return None\n"
+
+        self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", "\n" + source, source), [])
+
+    def test_waiver_is_scoped_to_one_finding(self) -> None:
+        validator = _load_validator()
+        source = "def run(value, enabled=False, verbose=False):\n    return value\n"
+        waivers = {
+            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
+                "owner": "tests",
+                "rule_id": "program-design",
+                "ticket": "TEST-3",
+                "reason": "fixture",
+                "expires": "2099-01-01",
+            }
+        }
+
+        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
+
+        self.assertNotIn("run(enabled=bool)", "\n".join(issues))
+        self.assertIn("run(verbose=bool)", "\n".join(issues))
 
     def test_non_production_paths_are_not_selected(self) -> None:
         validator = _load_validator()

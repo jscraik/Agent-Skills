@@ -379,14 +379,14 @@ def _check_waiver_metadata(
 
 
 def _is_waived(
-    relpath: str, rule_id: str, waivers: Mapping[str, Mapping[str, str]] | None
+    relpath: str, rule_id: str, finding_key: str, waivers: Mapping[str, Mapping[str, str]] | None
 ) -> bool:
-    return f"{relpath}:{rule_id}" in (waivers or PROGRAM_DESIGN_WAIVERS)
+    return f"{relpath}:{rule_id}:{finding_key}" in (waivers or PROGRAM_DESIGN_WAIVERS)
 
 
 def _new_findings(current: tuple[Finding, ...], baseline: tuple[Finding, ...]) -> list[Finding]:
-    def identity(item: Finding) -> tuple[str, int, str]:
-        return item.key, item.line, item.detail
+    def identity(item: Finding) -> tuple[str, str]:
+        return item.key, item.detail
 
     current_counts = Counter(identity(item) for item in current)
     baseline_counts = Counter(identity(item) for item in baseline)
@@ -414,9 +414,9 @@ def _check_smells(
     )
     issues: list[str] = []
     for label, rule_id, current_findings, baseline_findings in checks:
-        if _is_waived(relpath, rule_id, waivers):
-            continue
         for finding in _new_findings(current_findings, baseline_findings):
+            if _is_waived(relpath, rule_id, finding.key, waivers):
+                continue
             issues.append(f"{relpath}:{finding.line}:{label}: {finding.detail}")
     return issues
 
@@ -449,7 +449,7 @@ def _check_source(
         if (
             count > max_public_parameters
             and count > baseline_count
-            and not _is_waived(relpath, "public-interface", waivers)
+            and not _is_waived(relpath, "public-interface", name, waivers)
         ):
             issues.append(
                 f"{relpath}:{line}:{name} public interface is too wide ({count} parameters > {max_public_parameters})"
