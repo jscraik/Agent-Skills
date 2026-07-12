@@ -8479,7 +8479,7 @@ def skills_sdk_eval_run(
             "release_set_minimum": release_set_metadata["release_set_minimum"] if release_set_metadata else None,
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
-            "failed_count": max(1, receipt_counts["failed_count"]) if proof_blockers else receipt_counts["failed_count"],
+            "failed_count": receipt_counts["failed_count"],
             "quality_gates": receipt_counts["quality_gates"],
             "closeout_validation": receipt_counts.get("closeout_validation"),
             "cases": receipt_counts["cases"],
