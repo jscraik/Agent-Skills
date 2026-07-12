@@ -88,6 +88,7 @@
     "executed_pass_count": 6,
     "blocked_unsafe_count": 37,
     "unclassified_count": 0,
+    "digest": "sha256:816a148123d94e14c7e482f06c9d9dc5cafbb7cc402143ddb28986933673ed52",
     "execution_policy": "exact_argv_allowlist_deny_by_default",
     "mutation_policy": "read_only_preview_or_validation_commands_only"
   },
