@@ -1,0 +1,104 @@
+{
+  "schema_version": "skills-sdk.phase2-review-recovery-receipt.v1",
+  "status": "bounded_local_pass_with_fallback_review",
+  "revision": {
+    "base_head_sha": "db06444e0c61f2c4b66edfedf9cdd7a95b7b2f9f",
+    "branch": "codex/skills-sdk-command-service-callers",
+    "inspection_worktree": "/private/tmp/agent-skills-type-policy-inspection",
+    "generated_review_paths_excluded": true
+  },
+  "feedback_loop": {
+    "signal": "Missing adversarial child artifacts plus an unavailable in-process review client caused the coordinator to pause instead of invoking the documented fallback.",
+    "root_operational_failure": "Review-loop recovery did not join child artifact verification, app-server blockers, independent fallback evidence, and claims boundaries into a deterministic continuation path.",
+    "category": [
+      "poor_workflow_design",
+      "runtime_ambiguity",
+      "weak_observability",
+      "missing_guardrails",
+      "lack_of_verification",
+      "insufficient_deterministic_enforcement"
+    ],
+    "durable_improvement": [
+      "steering-uptake ledger row",
+      "blocked_missing_artifact worker state",
+      "separate inspection-worktree QA and adversarial artifacts",
+      "revision-bound recovery receipt",
+      "explicit app-server blocker evidence"
+    ]
+  },
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_missing_artifact",
+      "artifact": null,
+      "finding": "The requested child review did not produce its required artifact; no child verdict is claimed."
+    },
+    "qa": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-type-policy-fallback-qa.json",
+      "finding": "Fresh QA passed in the separate inspection worktree after the legacy-duration validator fix; mise tracking symlink warning remained advisory."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-type-policy-fallback-adversarial.json",
+      "finding": "Fresh disproof checks found no blocking finding across schema shape, NewType absence, new raw duration annotations, validator wiring, focused regressions, aggregate scope, diff hygiene, and no-mutation assertions."
+    }
+  },
+  "validation": [
+    {
+      "command": "codex review --uncommitted",
+      "status": "blocked",
+      "evidence": "failed to initialize in-process app-server client: Operation not permitted (os error 1)."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "status": "pass",
+      "evidence": "status=pass; findings=[]."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_type_policy.py --repo-root . --changed-files <explicit schema, validator, emitter, contract, and test paths> --json",
+      "status": "pass",
+      "evidence": "status=pass; issues=[]."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_id_types.py tests/test_skills_sdk_type_policy.py tests/test_skills_sdk_validation_scope.py",
+      "status": "pass",
+      "evidence": "18 passed, 15 subtests passed."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_review_plan.py tests/test_skills_sdk_ab_plan.py tests/test_skills_sdk_ab_judge.py tests/test_skills_sdk_ab_judge_score.py tests/test_skills_sdk_id_types.py tests/test_skills_sdk_type_policy.py",
+      "status": "pass",
+      "evidence": "83 passed, 15 subtests passed."
+    },
+    {
+      "command": "bash Infrastructure/scripts/validate_all.sh --ephemeral --scope skills-sdk --changed-files <explicit schema, validator, emitter, contract, test, steering, and CODESTYLE paths>",
+      "status": "pass",
+      "evidence": "required_failures=0; warn_only_issues=0."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/validate_skills_sdk_type_policy.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity: lines=1873 max=1900; modularity verification passed."
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "evidence": "No whitespace errors."
+    },
+    {
+      "command": "jq -e '.schema_version == \"skills-sdk.type-policy-adversarial-review.v1\" and .status == \"pass_with_advisories\" and (.findings | length) == 0 and (.validation | map(select(.status == \"pass\")) | length) >= 7 and (.validation | map(select(.status == \"blocked\")) | length) == 1' /tmp/agent-skills-type-policy-fallback-adversarial.json",
+      "status": "pass",
+      "evidence": "true."
+    },
+    {
+      "command": "jq -e '.schema_version == \"skills-sdk.type-policy-qa.v1\" and .status == \"pass_with_advisories\" and (.checks | map(select(.status == \"pass\")) | length) == 6' /tmp/agent-skills-type-policy-fallback-qa.json",
+      "status": "pass",
+      "evidence": "true."
+    }
+  ],
+  "claims_boundary": [
+    "This receipt proves only the bounded local schema-first type-policy slice and its fallback review recovery.",
+    "It does not prove hosted CI, Tessl, registry, installation, runtime readiness, Foundry extraction, source admission, push, PR, merge, publication, or release readiness.",
+    "Generated review output under artifacts/ remains excluded from the intended commit."
+  ],
+  "next_gate": "Preserve this bounded local type-policy slice as an immutable commit, then continue from the revision-bound Phase 2 parser-family checkpoint by selecting the next smallest read-only deny-by-default command."
+}

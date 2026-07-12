@@ -1,0 +1,48 @@
+{
+  "schema_version": "skills-sdk.type-policy.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/type-policy.v1.json",
+  "status": "enforced_on_touched_surfaces",
+  "id_contract": {
+    "schema_path": "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json",
+    "token_alphabet": "lowercase_ascii_alphanumeric",
+    "minimum_token_length": 12,
+    "maximum_token_length": 32,
+    "new_values_must_not_use_uuid": true,
+    "legacy_compatibility_patterns": {
+      "experiment_id": [
+        "^[0-9a-f]{16}$",
+        "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
+      ]
+    },
+    "brands": {
+      "receipt_instance_id": "rp",
+      "trace_id": "tr",
+      "request_id": "rq",
+      "experiment_id": "ex"
+    }
+  },
+  "duration_contract": {
+    "schema_path": "Infrastructure/config/schemas/skills-sdk/duration.v1.schema.json",
+    "representation": "object",
+    "value_minimum": 0,
+    "units": ["ms", "s", "min", "h"],
+    "unitless_numeric_duration_fields_are_forbidden_on_new_surfaces": true,
+    "legacy_compatibility_fields": [
+      "timeout_seconds",
+      "ttl_seconds",
+      "duration_seconds",
+      "stability_seconds",
+      "cooldown_seconds"
+    ]
+  },
+  "manual_contract_policy": {
+    "newtype_aliases_for_public_sdk_values": "forbidden",
+    "schema_derived_adapter_required": true,
+    "scope": "changed_public_contracts_and_emitters"
+  },
+  "enforcement": {
+    "validator": "Infrastructure/scripts/validation-and-linting/validate_skills_sdk_type_policy.py",
+    "negative_fixtures": "Infrastructure/tests/test_skills_sdk_type_policy.py",
+    "legacy_migration_mode": "allow_existing_fields_until_owner_slice"
+  }
+}

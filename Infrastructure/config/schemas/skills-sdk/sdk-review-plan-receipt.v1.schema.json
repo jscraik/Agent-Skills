@@ -164,7 +164,7 @@
         "head_sha": {"type": "string", "minLength": 1},
         "branch": {"type": "string", "minLength": 1},
         "branch_policy": {"const": "same_head_required"},
-        "receipt_instance_id": {"type": "string", "minLength": 1},
+        "receipt_instance_id": {"type": "string", "pattern": "^rp_[a-z0-9]{12,32}$"},
         "receipt_created_at": {"type": "string", "minLength": 1},
         "target_input": {"type": "string", "minLength": 1},
         "target_kind": {"enum": ["repo_path", "skill_source", "unresolved_handle"]},

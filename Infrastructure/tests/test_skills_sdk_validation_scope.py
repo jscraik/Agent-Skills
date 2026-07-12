@@ -38,10 +38,13 @@ class TestSkillsSdkValidationScope(unittest.TestCase):
         self.assertIn("check|skills-sdk|consistency-advisory", self.impl_text)
         self.assertIn("skills-sdk)", self.impl_text)
         self.assertIn("skills-sdk-typed-artifacts)", self.impl_text)
+        self.assertIn("skills-sdk-type-policy)", self.impl_text)
 
     def test_validate_all_schedules_skills_sdk_typed_artifact_check(self) -> None:
         self.assertIn("schedule_check required skills-sdk-typed-artifacts", self.impl_text)
         self.assertIn("validate_skills_sdk_typed_artifacts.py --repo-root .", self.impl_text)
+        self.assertIn("schedule_check required skills-sdk-type-policy", self.impl_text)
+        self.assertIn("validate_skills_sdk_type_policy.py --repo-root .", self.impl_text)
 
     def test_changed_file_classifier_matches_required_sdk_surfaces(self) -> None:
         expected_matches = (

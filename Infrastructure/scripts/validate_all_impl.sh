@@ -269,14 +269,14 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts|skills-sdk-type-policy)
           return 0
           ;;
       esac
       ;;
     skills-sdk)
       case "$slug" in
-        skills-sdk-typed-artifacts)
+        skills-sdk-typed-artifacts|skills-sdk-type-policy)
           return 0
           ;;
       esac
@@ -351,6 +351,9 @@ should_run_check() {
       [[ "$scope_has_project_pm_reports" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     skills-sdk-typed-artifacts)
+      [[ "$scope_has_skills_sdk" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    skills-sdk-type-policy)
       [[ "$scope_has_skills_sdk" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     steering-uptake)
@@ -655,6 +658,11 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   skill_family_changed_files_args=(--changed-files "${changed_files[@]}")
 fi
 
+skills_sdk_type_policy_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_type_policy.py --repo-root .)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  skills_sdk_type_policy_cmd+=(--changed-files "${changed_files[@]}")
+fi
+
 repo_surface_inventory_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --strict)
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   repo_surface_inventory_cmd+=(--changed-files "${changed_files[@]}")
@@ -666,6 +674,7 @@ schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..
 schedule_check required no-command-handles "🧭 Verifying command-handle guidance is retired..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_command_handles.py
 schedule_check required repo-surface-inventory "🧭 Enforcing repo surface ownership..." "${repo_surface_inventory_cmd[@]}"
 schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .
+schedule_check required skills-sdk-type-policy "🧭 Enforcing Skills SDK schema-first type policy..." "${skills_sdk_type_policy_cmd[@]}"
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py

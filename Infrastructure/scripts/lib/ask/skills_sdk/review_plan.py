@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
 from ask.skills_sdk.lenses import select_lenses
+from ask.skills_sdk.id_types import new_branded_id
 
 
 REVIEW_PLAN_SCHEMA_VERSION = "skills-sdk.review-plan-receipt.v1"
@@ -111,7 +111,7 @@ def build_review_plan(
 
 
 def _default_id_provider() -> str:
-    return str(uuid.uuid4())
+    return new_branded_id("rp")
 
 
 def _default_clock_provider() -> datetime:
