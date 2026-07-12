@@ -67,7 +67,7 @@ class TestSkillsSdkCommandServiceRationalization(unittest.TestCase):
         )
         self.assertTrue(all((REPO_ROOT / path).is_file() for path in artifact["source_files"]))
         self.assertTrue(_git_commit_exists(artifact["base_commit"]))
-        self.assertIn(artifact["base_commit"], _git_head_and_parents())
+        self.assertTrue(_git_commit_is_ancestor(artifact["base_commit"]))
         self.assertIn("Foundry extraction or source admission", artifact["does_not_prove"])
         self.assertIn("Tessl, registry, hosted CI, installed-runtime, or release readiness", artifact["does_not_prove"])
 
@@ -120,16 +120,15 @@ def _git_commit_exists(commit: str) -> bool:
     return result.returncode == 0
 
 
-def _git_head_and_parents() -> set[str]:
+def _git_commit_is_ancestor(commit: str) -> bool:
     result = subprocess.run(
-        ["git", "rev-list", "--parents", "-n", "1", "HEAD"],
+        ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
         cwd=REPO_ROOT,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        check=True,
-        text=True,
+        check=False,
     )
-    return set(result.stdout.split())
+    return result.returncode == 0
 
 
 if __name__ == "__main__":
