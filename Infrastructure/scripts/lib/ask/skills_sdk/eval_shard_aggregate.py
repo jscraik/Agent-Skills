@@ -5,6 +5,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.release_scenario_sets import RELEASE_SCENARIO_MAXIMUM, RELEASE_SCENARIO_MINIMUM
+from ask.skills_sdk.typed_contracts import validate_eval_run_receipt
+
 SCHEMA_VERSION = "skills-sdk.eval-shard-aggregate-receipt.v0"
 SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-shard-aggregate-receipt.v0.schema.json"
 MAX_SHARD_CASES = 2
@@ -31,12 +34,14 @@ def _load_receipt(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("receipt payload must be a JSON object")
-    if payload.get("schema_version") == "skills-sdk.eval-run-receipt.v0":
-        return payload
-    data = payload.get("data")
-    run = data.get("skills_sdk_eval_run") if isinstance(data, dict) else None
-    receipt = run.get("receipt") if isinstance(run, dict) else None
-    return receipt if isinstance(receipt, dict) else {}
+    receipt = payload
+    if payload.get("schema_version") != "skills-sdk.eval-run-receipt.v0":
+        data = payload.get("data")
+        run = data.get("skills_sdk_eval_run") if isinstance(data, dict) else None
+        nested_receipt = run.get("receipt") if isinstance(run, dict) else None
+        receipt = nested_receipt if isinstance(nested_receipt, dict) else {}
+    validated = validate_eval_run_receipt(receipt)
+    return validated.model_dump(mode="python")
 
 
 def _expected_cases(skill_path: Path, scenario_set: str) -> list[str]:
@@ -179,6 +184,11 @@ def _coverage_checks(
         _check("scenario_set_matches_request", bool(receipts) and identities["scenario_set_id"] == {scenario_set}, sorted(identities["scenario_set_id"])),
         _check("selected_cases_exactly_cover_release_set", sorted(selected) == sorted(expected) and len(selected) == len(set(selected)), [f"expected:{','.join(expected)}", f"actual:{','.join(selected)}"]),
         _check("case_results_match_selection", sorted(result_ids) == sorted(selected), [f"selected:{','.join(selected)}", f"results:{','.join(result_ids)}"]),
+        _check(
+            "aggregate_scenario_budget",
+            RELEASE_SCENARIO_MINIMUM <= len(cases) <= RELEASE_SCENARIO_MAXIMUM,
+            [f"count:{len(cases)}", f"minimum:{RELEASE_SCENARIO_MINIMUM}", f"maximum:{RELEASE_SCENARIO_MAXIMUM}"],
+        ),
         _check("all_case_results_pass", bool(cases) and all(case.get("status") == "pass" for case in cases), [f"{case.get('case_id')}:{case.get('status')}" for case in cases]),
     ]
     return checks, cases

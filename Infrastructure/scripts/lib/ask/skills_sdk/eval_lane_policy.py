@@ -17,6 +17,7 @@ BASELINE_IDENTITY_FIELDS = {
     "execution_model_family",
 }
 MODEL_LANES = ("oss-local", "oss-cloud", "tessl-external")
+ALLOWED_IDENTITY_SOURCES = frozenset({"codex-profile-config", "operator-confirmed"})
 
 
 def _check(check_id: str, *, passed: bool, message: str, evidence: list[str] | None = None) -> dict[str, Any]:
@@ -82,13 +83,19 @@ def _model_routing_checks(policy: dict[str, Any]) -> list[dict[str, Any]]:
         row = rows.get(lane)
         identity = row if isinstance(row, dict) else {}
         family = str(identity.get("model_family") or "").strip()
+        identity_source = str(identity.get("identity_source") or "").strip()
         families.append(family.casefold())
         checks.extend([
             _check(f"eval_lane_{lane}_model_identity", passed=bool(identity), message=f"{lane} must declare a model identity."),
             _check(f"eval_lane_{lane}_model", passed=bool(str(identity.get("model") or "").strip()), message=f"{lane} must declare a model."),
             _check(f"eval_lane_{lane}_provider", passed=bool(str(identity.get("provider") or "").strip()), message=f"{lane} must declare a provider."),
             _check(f"eval_lane_{lane}_model_family", passed=bool(family), message=f"{lane} must declare a model family."),
-            _check(f"eval_lane_{lane}_identity_source", passed=bool(str(identity.get("identity_source") or "").strip()), message=f"{lane} must declare its identity source."),
+            _check(
+                f"eval_lane_{lane}_identity_source",
+                passed=identity_source in ALLOWED_IDENTITY_SOURCES,
+                message=f"{lane} identity source must be one of: {', '.join(sorted(ALLOWED_IDENTITY_SOURCES))}.",
+                evidence=[identity_source],
+            ),
         ])
     checks.append(
         _check(
@@ -110,7 +117,7 @@ def eval_lane_execution_identity(evals_payload: dict[str, Any] | None, lane: str
     if not isinstance(row, dict):
         return None
     identity = {key: str(row.get(key) or "").strip() for key in ("model", "model_family", "provider", "identity_source")}
-    return identity if all(identity.values()) else None
+    return identity if all(identity.values()) and identity["identity_source"] in ALLOWED_IDENTITY_SOURCES else None
 
 
 def build_eval_lane_policy_checks(evals_payload: dict[str, Any] | None, case_list: list[Any]) -> list[dict[str, Any]]:
