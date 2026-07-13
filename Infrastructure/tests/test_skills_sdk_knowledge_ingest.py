@@ -568,6 +568,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
                 payload["findings"],
             )
             self.assertIn("references/knowledge-demand:differs_from_root_knowledge-demand", payload["findings"])
+            self.assertFalse(payload["mutation_performed"])
 
     def test_preflight_resolves_canonical_plugins_skill_gate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
