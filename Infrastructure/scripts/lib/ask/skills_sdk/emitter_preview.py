@@ -77,15 +77,26 @@ def _hardening_check(hardening_receipt: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def _projection_file_order(file_records: object) -> list[dict[str, Any]]:
+    """Keep the runtime instruction file first without changing package order."""
+    if not isinstance(file_records, list):
+        return []
+    records = [record for record in file_records if isinstance(record, dict)]
+    return sorted(
+        records,
+        key=lambda record: 0 if Path(str(record.get("path") or "")).name == "SKILL.md" else 1,
+    )
+
+
 def _write_plan(repo_root: Path, package_receipt: dict[str, Any], target_root: str) -> list[dict[str, Any]]:
     manifest = package_receipt.get("manifest")
     source = manifest.get("source") if isinstance(manifest, dict) else {}
     source_root = str(source.get("root") or "").strip() if isinstance(source, dict) else ""
     package_id = str(package_receipt["package_id"])
     actions: list[dict[str, Any]] = []
-    for file_record in package_receipt.get("manifest", {}).get("files", []):
-        if not isinstance(file_record, dict):
-            continue
+    file_records = package_receipt.get("manifest", {}).get("files", [])
+    ordered_file_records = _projection_file_order(file_records)
+    for file_record in ordered_file_records:
         source_path = str(file_record.get("path") or "").strip()
         if not source_path:
             continue

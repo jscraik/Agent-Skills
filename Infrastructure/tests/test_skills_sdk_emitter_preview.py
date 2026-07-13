@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_preview import build_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt  # noqa: E402
+from ask.skills_sdk.package_build import build_package_digest_receipt  # noqa: E402
 
 
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -89,6 +90,24 @@ class TestSkillsSdkEmitterPreview(unittest.TestCase):
         envelope = json.loads(process.stdout)
         self.assertEqual(envelope["status"], "error")
         self.assertIn("requires --preview", envelope["errors"][0]["message"])
+
+    def test_emitter_preview_keeps_skill_instructions_first_when_manifest_is_reversed(self) -> None:
+        package_receipt = build_package_digest_receipt(
+            REPO_ROOT,
+            source_path=REPO_ROOT / FIXTURE_SKILL / "SKILL.md",
+            query=FIXTURE_SKILL,
+        )
+        package_receipt["manifest"]["files"] = list(reversed(package_receipt["manifest"]["files"]))
+        hardening_receipt = build_package_hardening_receipt(package_receipt)
+
+        receipt = build_emitter_preview_receipt(
+            REPO_ROOT,
+            package_receipt=package_receipt,
+            hardening_receipt=hardening_receipt,
+        )
+
+        self.assertTrue(receipt["write_plan"][0]["source_path"].endswith("/SKILL.md"))
+        self.assertFalse(receipt["mutation_performed"])
 
     def test_emitter_preview_blocks_non_local_projection_roots(self) -> None:
         process = _run_ask(
