@@ -14,6 +14,11 @@ from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_rec
 SCHEMA_VERSION = "skills-sdk.private-stabilization-replay.v1"
 MAX_HELP_OUTPUT_BYTES = 4096
 MAX_HELP_OUTPUT_LINES = 64
+STAGE_SHAPE_VALIDATOR_ARGV = (
+    "bash",
+    "Infrastructure/scripts/run-infrastructure-python.sh",
+    "scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+)
 ALLOWLIST = {
     ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
@@ -48,6 +53,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "plugin", "create", "demo-skill", "--kind", "skill", "--category", "agent-ops", "--description", "Demo skill", "--with-registry", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "create", "demo-plugin", "--kind", "plugin", "--category", "third-party", "--with-registry", "--with-references", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "save-registry", "--kind", "plugin", "--target", "Plugins/plugin-factory", "--preview", "--json", "--robot"),
+    STAGE_SHAPE_VALIDATOR_ARGV,
 }
 MUTATION_KEYS = frozenset(
     {
@@ -147,16 +153,10 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
     if completed.returncode != 0:
         status = "executed_fail"
         reason = "Exact allowlisted local read-only command returned a non-zero exit code."
+    elif argv == STAGE_SHAPE_VALIDATOR_ARGV:
+        status, reason, receipt_evidence = _classify_stage_shape(completed.stdout)
     elif argv[-1:] == ("--help",):
-        help_status, help_evidence = _observe_help_receipt(completed.stdout)
-        if help_status == "success":
-            status = "executed_pass"
-            reason = "Exact allowlisted help command returned bounded non-empty argparse text."
-            receipt_evidence = help_evidence
-        else:
-            status = "executed_fail"
-            reason = "Allowlisted help command returned zero but not bounded argparse help text."
-            receipt_evidence = help_evidence
+        status, reason, receipt_evidence = _classify_help(completed.stdout)
     elif receipt_status == "success":
         mutation_flags = _mutation_flag_findings(completed.stdout)
         if mutation_flags:
@@ -176,6 +176,20 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
         "reason": reason,
         "evidence": receipt_evidence,
     }
+
+
+def _classify_stage_shape(stdout: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_stage_shape_receipt(stdout)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted SDK stage shape validator returned a bounded success marker.", evidence
+    return "executed_fail", "Allowlisted SDK stage shape validator returned zero but not its bounded success marker.", evidence
+
+
+def _classify_help(stdout: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_help_receipt(stdout)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted help command returned bounded non-empty argparse text.", evidence
+    return "executed_fail", "Allowlisted help command returned zero but not bounded argparse help text.", evidence
 
 
 def _mutation_flag_findings(stdout: str) -> list[str]:
@@ -209,6 +223,23 @@ def _observe_help_receipt(stdout: str) -> tuple[str | None, list[str]]:
     if not lines or not lines[0].startswith("usage:"):
         return None, ["help_receipt:invalid_text"]
     return "success", ["help_receipt:valid_text", f"help_nonempty_line_count:{len(lines)}"]
+
+
+def _observe_stage_shape_receipt(stdout: str) -> tuple[str | None, list[str]]:
+    """Record the validator's bounded plain-text success marker."""
+    output_bytes = len(stdout.encode("utf-8"))
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    prefix = "[sdk-stage-shape] SDK stage skill shape passed ("
+    suffix = " skill(s))"
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) != 1:
+        return None, ["stage_shape_receipt:invalid_marker"]
+    line = lines[0]
+    if not line.startswith(prefix) or not line.endswith(suffix):
+        return None, ["stage_shape_receipt:invalid_marker"]
+    count = line[len(prefix) : -len(suffix)]
+    if not count.isascii() or not count.isdigit() or int(count) < 1:
+        return None, ["stage_shape_receipt:invalid_marker"]
+    return "success", ["stage_shape_receipt:valid_marker", f"stage_shape_skill_count:{count}"]
 
 
 def _observe_robot_receipt(stdout: str) -> tuple[str | None, list[str]]:
