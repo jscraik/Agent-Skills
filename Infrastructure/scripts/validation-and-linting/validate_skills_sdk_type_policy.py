@@ -310,7 +310,11 @@ def _duration_annotation_issue(
 
 
 def _contains_raw_numeric(annotation: ast.AST) -> bool:
-    return any(isinstance(node, ast.Name) and node.id in {"int", "float"} for node in ast.walk(annotation))
+    return any(
+        (isinstance(node, ast.Name) and node.id in {"int", "float"})
+        or (isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.strip() in {"int", "float"})
+        for node in ast.walk(annotation)
+    )
 
 
 def _annotation_keys(tree: ast.AST) -> set[tuple[str, str]]:

@@ -222,8 +222,6 @@ def _command_argv(command: Any) -> list[str] | None:
 
 
 def _normalized_command(command: Any) -> list[str] | None:
-    if isinstance(command, str):
-        command = command.replace("'", "").replace('"', "")
     argv = _command_argv(command)
     if argv and argv[0] == "./bin/ask":
         return argv[1:]
@@ -267,7 +265,15 @@ def _compare_worker_command(
     expected_command = expected_row.get("command") if isinstance(expected_row, dict) else None
     if not isinstance(expected_command, str) or not expected_command.strip():
         return [{"severity": "blocker", "family": family, "message": f"{label} command is missing for worker binding", "evidence": [str(source_path)]}]
-    if _normalized_command(actual_command) == _normalized_command(expected_command):
+    actual_normalized = _normalized_command(actual_command)
+    expected_normalized = _normalized_command(expected_command)
+    legacy_normalized = (
+        _normalized_command(actual_command.replace("'", "").replace('"', ""))
+        == _normalized_command(expected_command.replace("'", "").replace('"', ""))
+        if isinstance(actual_command, str)
+        else False
+    )
+    if actual_normalized == expected_normalized or legacy_normalized:
         return []
     return [{"severity": "blocker", "family": family, "message": f"worker capture command does not match the {label} command", "evidence": [actual_command, expected_command, str(output_path)]}]
 

@@ -364,6 +364,15 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(row["owner_surface"], "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake_review.py")
         self.assertTrue(any("skill-intake-review-receipt.v0.schema.json" in ref for ref in row["evidence_refs"]))
 
+    def test_refs_ingestion_capability_is_preview_only_without_apply_proof(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        row = next(row for row in matrix["capabilities"] if row["id"] == "refs_ingestion")
+
+        self.assertEqual(row["status"], "preview_only")
+        self.assertTrue(row["feature_executed"])
+        self.assertFalse(row["mutation_performed"])
+        self.assertTrue(any("--preview" in ref for ref in row["evidence_refs"]))
+
     def test_matrix_rejects_missing_risk_mode_taxonomy_id(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
         bad_matrix = json.loads(json.dumps(matrix))

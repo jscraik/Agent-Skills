@@ -201,6 +201,15 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
             path.unlink()
         self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
 
+    def test_stringized_duration_annotations_are_checked(self) -> None:
+        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-stringized.py"
+        path.write_text('def run(timeout_seconds: "int") -> None: ...\n', encoding="utf-8")
+        try:
+            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-stringized.py",))
+        finally:
+            path.unlink()
+        self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
+
     def test_changed_policy_validates_policy_object(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
