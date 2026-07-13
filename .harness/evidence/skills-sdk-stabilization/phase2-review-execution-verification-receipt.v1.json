@@ -1,13 +1,14 @@
 {
   "schema_version": "skills-sdk.phase2-review-execution-verification-receipt.v1",
   "status": "bounded_local_execution_verification_pass_with_current_head_guard_and_artifact_ignore",
-  "captured_at": "2026-07-13T10:54:36Z",
+  "captured_at": "2026-07-13T11:12:03Z",
   "revision": {
-    "source_head_sha": "79248c15d97a4ac42993dfab9713261507aa1aec",
+    "source_head_sha": "dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
     "identity_command": "git rev-parse HEAD",
-    "branch_state": "detached; guard and modularity changes are uncommitted in the working tree",
+    "branch_state": "detached; guard and modularity changes are committed in dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
     "same_head_required": true,
-    "immutable_commit_pending": true
+    "immutable_commit_pending": false,
+    "source_commit": "dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df"
   },
   "guard": {
     "implementation": "validate_handoff_current_head",
@@ -57,31 +58,31 @@
     {
       "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-execute/simplify.json --json --robot",
       "status": "pass",
-      "evidence": "local governed artifact materialization; receipt_written=true; mutation_performed=true; failed_artifacts=[]"
+      "evidence": "local governed artifact materialization at source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df; receipt_written=true; mutation_performed=true; failed_artifacts=[]"
     },
     {
       "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-verify/simplify.json --json --robot",
       "status": "pass",
-      "evidence": "local artifact verification; receipt_written=true; mutation_performed=false; review_artifacts_verified=true; missing_or_invalid_artifacts=[]"
+      "evidence": "local artifact verification at source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df; receipt_written=true; mutation_performed=false; review_artifacts_verified=true; missing_or_invalid_artifacts=[]"
     }
   ],
   "generated_receipts": {
     "plan": {
       "path": ".harness/artifacts/sdk-review-plan/simplify.json",
-      "sha256": "3a64f4d2d1e8865769e0a38a3de0594c125f99818d1a8d0904154eab17d524d5"
+      "sha256": "79879d309e1b87347ad7e0aa15748a42420ee0211b2f039c67cf364b3a3a41fc"
     },
     "handoff": {
       "path": ".harness/artifacts/sdk-review-handoff/simplify.json",
-      "sha256": "868ef3d921f011dc3b3b4bb6716fe0dce7a950a6dd30cda24c984a5190095ada",
-      "canonical_receipt_sha256": "055283384ecaf1d5f26ddb774b925502b662aa943d8b97d76e60356b7db87d60"
+      "sha256": "bccf7b81ae4b1e0c51d4f010ed8a9fb1d67bff0c4058b6f812cbc46c513dd7e2",
+      "canonical_receipt_sha256": "aec09baf0d7db10f9de233e6665528b9f4e029f19158880d327ec0eba921aca7"
     },
     "execution": {
       "path": ".harness/artifacts/sdk-review-execute/simplify.json",
-      "sha256": "9b2803e2743320ab0564e846edb43c9922036a82d9c16362b4f294808206c731"
+      "sha256": "c861fe10b45018efafabca335f0f2d00c2670608106b1fdd0e2ebae394728d93"
     },
     "verification": {
       "path": ".harness/artifacts/sdk-review-verify/simplify.json",
-      "sha256": "5f89a82aeacca50659fa6335cfee6586f92b1b43f57b5b95d6673ea45582658b"
+      "sha256": "b155197f78e6d9fb953ef3cf82d37adbe526576351dc6c463f8796ffc00e376a"
     }
   },
   "review_artifacts": {
@@ -117,10 +118,10 @@
     }
   },
   "claims_boundary": [
-    "This receipt proves only local same-head guard behavior and local execute/verify artifact materialization and verification for source HEAD 79248c15d97a4ac42993dfab9713261507aa1aec.",
+    "This receipt proves only local same-head guard behavior and local execute/verify artifact materialization and verification for source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df.",
     "Execute mutation is limited to generated local review artifacts and its receipt; verify reports no mutation.",
     "It does not prove independent reviewer approval, substantive human review, CI, PR mergeability, review-thread resolution, tracker state, publication, installation, Foundry extraction, source admission, Tessl or CircleCI mutation, or release readiness.",
     "Generated plan, handoff, execution, verification, review, and agent-run paths are excluded runtime artifacts by .gitignore."
   ],
-  "next_gate": "Create the immutable guard commit, regenerate the plan and handoff at that new HEAD, replay execute and verify again, then refresh this receipt and queue row before considering the next deny-by-default parser family."
+  "next_gate": "Refresh the queue and push the immutable source/evidence commit to the existing draft branch; then select the next deny-by-default parser family."
 }
