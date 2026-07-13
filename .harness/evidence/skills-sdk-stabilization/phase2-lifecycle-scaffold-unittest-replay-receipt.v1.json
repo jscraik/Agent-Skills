@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.phase2-lifecycle-scaffold-unittest-replay-receipt.v1",
   "status": "bounded_local_pass",
   "captured_at": "2026-07-13T08:48:00Z",
-  "base_head_sha": "53a924bb719057619426d45441291d8ad4d8edbf",
+  "base_head_sha": "8c448faf53b2ac9eb3c8976d222f4f2c81ab1732",
   "scope": "read-only Skills SDK lifecycle-scaffold unittest command admission with repo-native review fallback",
   "allowlisted_argv": "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
   "changed_files": [
