@@ -5,7 +5,7 @@
   "signer_id": "skills-sdk-local-fixture-signer",
   "allowed_algorithms": ["cosign-keyless"],
   "allowed_package_ids": ["skills-sdk-valid-fixture"],
-  "allowed_package_digests": ["sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6"],
+  "allowed_package_digests": ["sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97"],
   "requires_hardening_pass": true,
   "key_material_policy": "keyless_required",
   "redaction_policy": "manifest_only",

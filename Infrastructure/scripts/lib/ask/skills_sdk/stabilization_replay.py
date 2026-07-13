@@ -35,6 +35,17 @@ LIFECYCLE_SCAFFOLD_UNITTEST_ARGV = (
 )
 ALLOWLIST = {
     ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
+    (
+        "./bin/ask",
+        "sdk",
+        "package",
+        "signing-intent",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--policy",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
+        "--json",
+        "--robot",
+    ),
     ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "risk-modes", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "intake", "inspect", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
