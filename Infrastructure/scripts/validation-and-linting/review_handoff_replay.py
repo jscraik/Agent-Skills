@@ -138,8 +138,11 @@ def _handoff_receipt_findings(handoff: dict[str, Any]) -> list[dict[str, Any]]:
     return findings
 
 
-def _cleanup(before_plan: bool, before_traces: set[Path], trace_after: set[Path]) -> None:
-    if not before_plan and PLAN_PATH.exists():
+def _cleanup(before_plan: bool, before_plan_contents: bytes | None, before_traces: set[Path], trace_after: set[Path]) -> None:
+    if before_plan:
+        PLAN_PATH.parent.mkdir(parents=True, exist_ok=True)
+        PLAN_PATH.write_bytes(before_plan_contents or b"")
+    elif PLAN_PATH.exists():
         PLAN_PATH.unlink()
     for trace_path in trace_after - before_traces:
         if trace_path.exists():
@@ -154,6 +157,7 @@ def _worker_findings() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     findings: list[dict[str, Any]] = []
     evidence: list[dict[str, Any]] = []
     before_plan = PLAN_PATH.exists()
+    before_plan_contents = PLAN_PATH.read_bytes() if before_plan else None
     before_traces = set(TRACE_DIR.glob("*.trace.json")) if TRACE_DIR.exists() else set()
     before_status = _tracked_status()
     before_target_digest = _target_digest()
@@ -178,7 +182,7 @@ def _worker_findings() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
             findings.append({"severity": "blocker", "message": "handoff replay changed target content", "evidence": ["Skills/agent-ops/simplify"]})
     finally:
         trace_after = set(TRACE_DIR.glob("*.trace.json")) if TRACE_DIR.exists() else set()
-        _cleanup(before_plan, before_traces, trace_after)
+        _cleanup(before_plan, before_plan_contents, before_traces, trace_after)
     return findings, evidence
 
 

@@ -201,6 +201,15 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
             path.unlink()
         self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
 
+    def test_stringized_duration_annotations_are_checked(self) -> None:
+        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-stringized.py"
+        path.write_text('def run(timeout_seconds: "int") -> None: ...\n', encoding="utf-8")
+        try:
+            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-stringized.py",))
+        finally:
+            path.unlink()
+        self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
+
     def test_changed_policy_validates_policy_object(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
@@ -226,14 +235,89 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
         matching_base = mock.Mock(returncode=0, stdout="def f(timeout_seconds: int): ...\n")
         with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, matching_base]):
-            self.assertTrue(self.validator._legacy_annotation_exists_in_parent(REPO_ROOT, "fixture.py", "timeout_seconds", annotation))
+            self.assertTrue(
+                self.validator._legacy_annotation_exists_in_parent(
+                    REPO_ROOT, "fixture.py", "timeout_seconds", annotation, owner_path=("f",)
+                )
+            )
 
     def test_legacy_duration_fields_ignore_non_base_parent(self) -> None:
         annotation = ast.parse("def f(timeout_seconds: int): ...").body[0].args.args[0].annotation
         merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
         non_matching_base = mock.Mock(returncode=0, stdout="def f(timeout_seconds: str): ...\n")
         with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, non_matching_base]):
-            self.assertFalse(self.validator._legacy_annotation_exists_in_parent(REPO_ROOT, "fixture.py", "timeout_seconds", annotation))
+            self.assertFalse(
+                self.validator._legacy_annotation_exists_in_parent(
+                    REPO_ROOT, "fixture.py", "timeout_seconds", annotation, owner_path=("f",)
+                )
+            )
+
+    def test_legacy_duration_exemption_is_scoped_to_owner(self) -> None:
+        annotation = ast.parse("def run(timeout_seconds: int): ...").body[0].args.args[0].annotation
+        merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
+        matching_base = mock.Mock(returncode=0, stdout="class Existing:\n    def run(timeout_seconds: int): ...\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, matching_base]):
+            self.assertTrue(
+                self.validator._legacy_annotation_exists_in_parent(
+                    REPO_ROOT, "fixture.py", "timeout_seconds", annotation, owner_path=("Existing", "run")
+                )
+            )
+        merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
+        matching_base = mock.Mock(returncode=0, stdout="class Existing:\n    def run(timeout_seconds: int): ...\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, matching_base]):
+            self.assertFalse(
+                self.validator._legacy_annotation_exists_in_parent(
+                    REPO_ROOT, "fixture.py", "timeout_seconds", annotation, owner_path=("New", "run")
+                )
+            )
+
+    def test_new_numeric_duration_schema_property_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            for filename in ("branded-id.v1.schema.json", "duration.v1.schema.json"):
+                target = temp_root / "Infrastructure/config/schemas/skills-sdk" / filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/new-duration.schema.json"
+            schema_path.write_text(json.dumps({"type": "object", "properties": {"timeout_seconds": {"type": "number"}}}), encoding="utf-8")
+            issues = self.validator.validate_paths(temp_root, (str(schema_path.relative_to(temp_root)),))
+        self.assertIn("unitless_duration_schema_property", {issue.code for issue in issues})
+
+    def test_duration_schema_contract_is_validated(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            for filename in ("branded-id.v1.schema.json", "duration.v1.schema.json"):
+                target = temp_root / "Infrastructure/config/schemas/skills-sdk" / filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                source = json.loads((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"))
+                if filename == "duration.v1.schema.json":
+                    source["properties"]["unit"]["enum"] = ["seconds"]
+                target.write_text(json.dumps(source), encoding="utf-8")
+            issues = self.validator.validate_paths(temp_root, (self.validator.POLICY_PATH,))
+        self.assertIn("duration_schema_units", {issue.code for issue in issues})
+
+    def test_identity_fields_are_derived_from_policy_brands(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy = json.loads((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"))
+            policy["id_contract"]["brands"]["session_id"] = "ss"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            for filename in ("branded-id.v1.schema.json", "duration.v1.schema.json"):
+                target = temp_root / "Infrastructure/config/schemas/skills-sdk" / filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/session.schema.json"
+            schema_path.write_text(json.dumps({"type": "object", "properties": {"session_id": {"type": "string", "pattern": "^anything$"}}}), encoding="utf-8")
+            issues = self.validator.validate_paths(temp_root, (str(schema_path.relative_to(temp_root)),))
+        self.assertIn("unbranded_identity_schema", {issue.code for issue in issues})
 
     def test_new_legacy_named_duration_field_is_not_allowlisted_by_name(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-new-legacy.py"

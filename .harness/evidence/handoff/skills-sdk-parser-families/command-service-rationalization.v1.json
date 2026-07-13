@@ -85,7 +85,7 @@
     "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py",
     "Infrastructure/tests/test_skills_sdk_command_service_rationalization.py"
   ],
-  "source_tree_digest": "sha256:1a194d868c38f5015ec76a52b2ae60e3602a969919d9cf04752e6b4b16c29d18",
+  "source_tree_digest": "sha256:b106fec4b1f6cbd0c734fab75158096749b0d77661c16cf3238f273a7cafbbd6",
   "blockers": [],
   "mutation_performed": false,
   "command_execution_performed": false,

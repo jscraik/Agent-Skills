@@ -144,8 +144,26 @@ class TestReviewHandoffReplay(unittest.TestCase):
             plan_path.write_text("{}\n", encoding="utf-8")
             trace_path.write_text("{}\n", encoding="utf-8")
             with mock.patch.object(replay, "PLAN_PATH", plan_path), mock.patch.object(replay, "TRACE_DIR", trace_dir):
-                _cleanup(False, set(), {trace_path})
+                _cleanup(False, None, set(), {trace_path})
             self.assertFalse(plan_path.exists())
+            self.assertFalse(trace_path.exists())
+            self.assertFalse(trace_dir.exists())
+
+    def test_cleanup_restores_preexisting_plan_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            plan_path = root / "artifacts" / "sdk-review-plan" / "simplify.json"
+            trace_dir = root / "artifacts" / "sdk-review-plan" / "traces"
+            trace_path = trace_dir / ("b" * 64 + ".trace.json")
+            plan_path.parent.mkdir(parents=True)
+            trace_dir.mkdir()
+            original = b'{"before":"preserve"}\n'
+            plan_path.write_bytes(original)
+            trace_path.write_text("{}\n", encoding="utf-8")
+            plan_path.write_text('{"after":"overwritten"}\n', encoding="utf-8")
+            with mock.patch.object(replay, "PLAN_PATH", plan_path), mock.patch.object(replay, "TRACE_DIR", trace_dir):
+                _cleanup(True, original, set(), {trace_path})
+            self.assertEqual(plan_path.read_bytes(), original)
             self.assertFalse(trace_path.exists())
             self.assertFalse(trace_dir.exists())
 

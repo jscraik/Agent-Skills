@@ -98,9 +98,27 @@ def _worker_findings() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     evidence: list[dict[str, Any]] = []
     before = _status_snapshot()
     code, stdout, stderr = _run(list(EXPECTED_ARGV))
-    evidence.append({"command": " ".join(EXPECTED_ARGV), "status": "pass" if code == 0 else "fail", "stdout_tail": stdout[-1000:], "stderr_tail": stderr[-1000:]})
+    transcript_status, transcript_evidence = _observe_transcript("\n".join(part for part in (stdout, stderr) if part))
+    evidence.append(
+        {
+            "command": " ".join(EXPECTED_ARGV),
+            "status": "pass" if code == 0 and transcript_status == "pass" else "fail",
+            "transcript_status": transcript_status,
+            "transcript_evidence": transcript_evidence,
+            "stdout_tail": stdout[-1000:],
+            "stderr_tail": stderr[-1000:],
+        }
+    )
     if code != 0:
         findings.append({"severity": "blocker", "message": "direct lifecycle scaffold unittest failed", "evidence": [stdout[-1000:], stderr[-1000:]]})
+    elif transcript_status != "pass":
+        findings.append(
+            {
+                "severity": "blocker",
+                "message": "direct lifecycle scaffold unittest transcript did not contain the required bounded marker",
+                "evidence": transcript_evidence + [stdout[-1000:], stderr[-1000:]],
+            }
+        )
     if _status_snapshot() != before:
         findings.append({"severity": "blocker", "message": "direct unittest mutated the intended source/test paths", "evidence": [str(SOURCE_PATH), str(TEST_PATH)]})
     return findings, evidence

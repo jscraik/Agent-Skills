@@ -57,7 +57,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload = {
                 "status": "success",
                 "metadata": {
-                    "command": selected_commands[family].removeprefix("./bin/ask ").replace("'", "").replace('"', "")
+                    "command": selected_commands[family].removeprefix("./bin/ask ")
                 },
                 "data": {key: body},
             }
@@ -75,16 +75,28 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             capture_dir = Path(temp_dir)
             self._write_capture_dir(capture_dir)
-            payload_path = capture_dir / "eval.json"
-            payload = json.loads(payload_path.read_text(encoding="utf-8"))
             selected_command = next(
-                row["command"] for row in json.loads(SELECTION.read_text(encoding="utf-8"))["selected_preview_commands"] if row["family"] == "eval"
+                row["command"] for row in json.loads(SELECTION.read_text(encoding="utf-8"))["selected_preview_commands"] if row["family"] == "trust"
             )
-            payload["metadata"]["command"] = "sdk eval ab-preview --preview"
+            payload_path = capture_dir / "trust.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["metadata"]["command"] = "sdk trust decide --preview"
             payload["metadata"]["command_argv"] = shlex.split(selected_command)
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
 
             self.assertEqual(_worker_findings(capture_dir, ARTIFACT, SELECTION), [])
+
+    def test_worker_review_rejects_unquoted_legacy_capture_for_quoted_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "trust.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["metadata"]["command"] = payload["metadata"]["command"].replace("'", "")
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
+            self.assertTrue(any("worker capture command does not match" in finding["message"] for finding in findings))
 
     def test_worker_review_rejects_mutation_and_missing_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

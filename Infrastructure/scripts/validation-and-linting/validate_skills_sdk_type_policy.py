@@ -23,7 +23,6 @@ from typing import Iterable
 
 
 POLICY_PATH = "Infrastructure/config/schemas/skills-sdk/type-policy.v1.json"
-ID_FIELD_NAMES = frozenset({"receipt_instance_id", "trace_id", "request_id", "experiment_id"})
 DURATION_FIELD_NAMES = frozenset(
     {
         "timeout_seconds",
@@ -86,7 +85,10 @@ def _schema_identity_issues(repo_root: Path, path: str, policy: dict[str, object
     if isinstance(details, list):
         return details
     expected_pattern, brands, legacy_patterns = details
-    return _walk_schema_identity(payload, path, "$", expected_pattern, brands, legacy_patterns)
+    return [
+        *_walk_schema_identity(payload, path, "$", expected_pattern, brands, legacy_patterns),
+        *_schema_duration_issues(repo_root, path, payload, policy),
+    ]
 
 
 def _identity_contract_details(
@@ -151,7 +153,7 @@ def _walk_schema_identity(
     properties = node.get("properties")
     if isinstance(properties, dict):
         for name, child in properties.items():
-            if isinstance(name, str) and name in ID_FIELD_NAMES and isinstance(child, dict):
+            if isinstance(name, str) and name in brands and isinstance(child, dict):
                 issues.extend(_identity_property_issues(path, node_path, name, child, expected_pattern, brands, legacy_patterns))
             issues.extend(_walk_schema_identity(child, path, f"{node_path}.{name}", expected_pattern, brands, legacy_patterns))
     issues.extend(_walk_schema_children(node, path, node_path, expected_pattern, brands, legacy_patterns))
@@ -249,6 +251,7 @@ def _python_tree_issues(
 ) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
     newtype_aliases = _newtype_aliases(tree)
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and (
             (isinstance(node.func, ast.Name) and node.func.id in newtype_aliases)
@@ -262,7 +265,7 @@ def _python_tree_issues(
                 )
             )
         if isinstance(node, (ast.AnnAssign, ast.arg)):
-            issues.extend(_duration_annotation_issue(node, path, legacy_duration_fields, repo_root))
+            issues.extend(_duration_annotation_issue(node, path, legacy_duration_fields, repo_root, _annotation_owner(node, parents)))
     return issues
 
 
@@ -282,6 +285,7 @@ def _duration_annotation_issue(
     path: str,
     legacy_duration_fields: set[str],
     repo_root: Path,
+    owner_path: tuple[str, ...],
 ) -> list[PolicyIssue]:
     if isinstance(node, ast.AnnAssign):
         if isinstance(node.target, ast.Name):
@@ -297,7 +301,7 @@ def _duration_annotation_issue(
     annotation = node.annotation
     if annotation is None or not _contains_raw_numeric(annotation):
         return []
-    if name in legacy_duration_fields and _legacy_annotation_exists_in_parent(repo_root, path, name, annotation):
+    if name in legacy_duration_fields and _legacy_annotation_exists_in_parent(repo_root, path, name, annotation, owner_path=owner_path):
         return []
     rendered_annotation = ast.unparse(annotation)
     return [
@@ -310,21 +314,48 @@ def _duration_annotation_issue(
 
 
 def _contains_raw_numeric(annotation: ast.AST) -> bool:
-    return any(isinstance(node, ast.Name) and node.id in {"int", "float"} for node in ast.walk(annotation))
+    return any(
+        (isinstance(node, ast.Name) and node.id in {"int", "float"})
+        or (isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.strip() in {"int", "float"})
+        for node in ast.walk(annotation)
+    )
 
 
-def _annotation_keys(tree: ast.AST) -> set[tuple[str, str]]:
-    keys: set[tuple[str, str]] = set()
+def _annotation_owner(node: ast.AST, parents: dict[ast.AST, ast.AST]) -> tuple[str, ...]:
+    owners: list[str] = []
+    current = parents.get(node)
+    while current is not None:
+        if isinstance(current, (ast.AsyncFunctionDef, ast.ClassDef, ast.FunctionDef)):
+            owners.append(current.name)
+        current = parents.get(current)
+    return tuple(reversed(owners))
+
+
+def _annotation_keys(tree: ast.AST) -> set[tuple[tuple[str, ...], str, str]]:
+    keys: set[tuple[tuple[str, ...], str, str]] = set()
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     for node in ast.walk(tree):
         if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.annotation is not None:
-            keys.add((node.target.id, ast.unparse(node.annotation)))
+            keys.add((_annotation_owner(node, parents), node.target.id, ast.unparse(node.annotation)))
         elif isinstance(node, ast.arg) and node.annotation is not None:
-            keys.add((node.arg, ast.unparse(node.annotation)))
+            keys.add((_annotation_owner(node, parents), node.arg, ast.unparse(node.annotation)))
     return keys
 
 
-def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, annotation: ast.AST) -> bool:
+def _legacy_annotation_exists_in_parent(
+    repo_root: Path,
+    path: str,
+    name: str,
+    annotation: ast.AST,
+    *,
+    owner_path: tuple[str, ...] = (),
+) -> bool:
     """Allow a legacy annotation only when it exists in the PR base baseline."""
+    baseline = _baseline_source_tree(repo_root, path)
+    return baseline is not None and (owner_path, name, ast.unparse(annotation)) in _annotation_keys(baseline)
+
+
+def _baseline_revision(repo_root: Path) -> str:
     merge_base = subprocess.run(
         ["git", "merge-base", "HEAD", "origin/main"],
         cwd=repo_root,
@@ -332,32 +363,167 @@ def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, a
         capture_output=True,
         check=False,
     )
-    baseline_revision = merge_base.stdout.strip() if merge_base.returncode == 0 else ""
-    if not baseline_revision:
-        first_parent = subprocess.run(
-            ["git", "rev-parse", "HEAD^1"],
-            cwd=repo_root,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        baseline_revision = first_parent.stdout.strip() if first_parent.returncode == 0 else ""
-    if not baseline_revision:
-        return False
-    baseline_result = subprocess.run(
-        ["git", "show", f"{baseline_revision}:{path}"],
+    if merge_base.returncode == 0 and merge_base.stdout.strip():
+        return merge_base.stdout.strip()
+    first_parent = subprocess.run(
+        ["git", "rev-parse", "HEAD^1"],
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
     )
-    if baseline_result.returncode != 0:
-        return False
+    return first_parent.stdout.strip() if first_parent.returncode == 0 else ""
+
+
+def _baseline_source_tree(repo_root: Path, path: str) -> ast.AST | None:
+    revision = _baseline_revision(repo_root)
+    if not revision:
+        return None
+    result = subprocess.run(
+        ["git", "show", f"{revision}:{path}"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
     try:
-        baseline = ast.parse(baseline_result.stdout, filename=path)
+        return ast.parse(result.stdout, filename=path)
     except SyntaxError:
+        return None
+
+
+def _schema_has_numeric_type(node: object) -> bool:
+    if not isinstance(node, dict):
         return False
-    return (name, ast.unparse(annotation)) in _annotation_keys(baseline)
+    declared_type = node.get("type")
+    if isinstance(declared_type, str) and declared_type in {"integer", "number"}:
+        return True
+    if isinstance(declared_type, list) and any(item in {"integer", "number"} for item in declared_type):
+        return True
+    return any(
+        _schema_has_numeric_type(item)
+        for key in ("oneOf", "anyOf", "allOf")
+        for item in (node.get(key) if isinstance(node.get(key), list) else ())
+    )
+
+
+def _schema_duration_property_entries(properties: object, node_path: str) -> dict[str, dict[str, object]]:
+    result: dict[str, dict[str, object]] = {}
+    if not isinstance(properties, dict):
+        return result
+    for name, child in properties.items():
+        child_path = f"{node_path}.properties.{name}"
+        if isinstance(name, str) and name.endswith("_seconds") and isinstance(child, dict) and _schema_has_numeric_type(child):
+            result[child_path] = child
+        result.update(_schema_duration_properties(child, child_path))
+    return result
+
+
+def _schema_duration_branch_entries(child: object, key: str, node_path: str) -> dict[str, dict[str, object]]:
+    result: dict[str, dict[str, object]] = {}
+    if isinstance(child, dict):
+        entries = child.items() if key in {"definitions", "$defs"} else ((key, child),)
+        for name, definition in entries:
+            branch_path = f"{node_path}.{key}.{name}" if key in {"definitions", "$defs"} else f"{node_path}.{key}"
+            result.update(_schema_duration_properties(definition, branch_path))
+    elif isinstance(child, list):
+        for index, item in enumerate(child):
+            result.update(_schema_duration_properties(item, f"{node_path}.{key}[{index}]"))
+    return result
+
+
+def _schema_duration_properties(node: object, node_path: str = "$") -> dict[str, dict[str, object]]:
+    if not isinstance(node, dict):
+        return {}
+    result = _schema_duration_property_entries(node.get("properties"), node_path)
+    for key in ("items", "definitions", "$defs", "oneOf", "allOf", "anyOf", "if", "then", "else"):
+        result.update(_schema_duration_branch_entries(node.get(key), key, node_path))
+    return result
+
+
+def _schema_duration_issues(repo_root: Path, path: str, payload: dict[str, object], policy: dict[str, object]) -> list[PolicyIssue]:
+    duration_contract = policy.get("duration_contract")
+    if not isinstance(duration_contract, dict) or not duration_contract.get("unitless_numeric_duration_fields_are_forbidden_on_new_surfaces", False):
+        return []
+    current = _schema_duration_properties(payload)
+    if not current:
+        return []
+    baseline: dict[str, dict[str, object]] = {}
+    baseline_revision = _baseline_revision(repo_root)
+    if baseline_revision:
+        result = subprocess.run(
+            ["git", "show", f"{baseline_revision}:{path}"],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            try:
+                baseline_payload = json.loads(result.stdout)
+            except json.JSONDecodeError:
+                baseline_payload = None
+            if isinstance(baseline_payload, dict):
+                baseline = _schema_duration_properties(baseline_payload)
+    return [
+        PolicyIssue(
+            "unitless_duration_schema_property",
+            f"{node_path} must use the schema-backed duration object instead of a new numeric *_seconds property",
+            f"{path}:{node_path}",
+        )
+        for node_path in current
+        if node_path not in baseline
+    ]
+
+
+def _read_duration_schema(repo_root: Path, policy: dict[str, object]) -> tuple[str | None, dict[str, object] | None, PolicyIssue | None]:
+    duration_contract = policy.get("duration_contract")
+    if not isinstance(duration_contract, dict):
+        return None, None, None
+    schema_path = duration_contract.get("schema_path")
+    if not isinstance(schema_path, str):
+        return None, None, None
+    schema_file = repo_root / schema_path
+    if not schema_file.exists():
+        return schema_path, None, None
+    try:
+        schema = json.loads(schema_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return schema_path, None, PolicyIssue("duration_schema_contract_invalid", "duration schema must be valid JSON", schema_path)
+    if not isinstance(schema, dict):
+        return schema_path, None, PolicyIssue("duration_schema_contract_invalid", "duration schema must be a JSON object", schema_path)
+    return schema_path, schema, None
+
+
+def _duration_schema_field_issues(schema: dict[str, object], contract: dict[str, object], schema_path: str) -> list[PolicyIssue]:
+    required = schema.get("required")
+    properties = schema.get("properties")
+    value = properties.get("value") if isinstance(properties, dict) else None
+    unit = properties.get("unit") if isinstance(properties, dict) else None
+    issues = []
+    if not isinstance(required, list) or not {"value", "unit"}.issubset(required):
+        issues.append(PolicyIssue("duration_schema_required", "duration schema must require value and unit", schema_path))
+    if not isinstance(value, dict) or value.get("minimum") != contract.get("value_minimum"):
+        issues.append(PolicyIssue("duration_schema_value_minimum", "duration schema value.minimum must match duration_contract.value_minimum", schema_path))
+    if not isinstance(unit, dict) or unit.get("enum") != contract.get("units"):
+        issues.append(PolicyIssue("duration_schema_units", "duration schema unit enum must match duration_contract.units", schema_path))
+    return issues
+
+
+def _duration_schema_contract_issues(repo_root: Path, policy: dict[str, object]) -> list[PolicyIssue]:
+    schema_path, schema, load_issue = _read_duration_schema(repo_root, policy)
+    if load_issue is not None:
+        return [load_issue]
+    if schema is None or schema_path is None:
+        return []
+    contract = policy["duration_contract"]
+    issues = []
+    if schema.get("type") != contract.get("representation"):
+        issues.append(PolicyIssue("duration_schema_representation", "duration schema type must match duration_contract.representation", schema_path))
+    issues.extend(_duration_schema_field_issues(schema, contract, schema_path))
+    return issues
 
 
 def _policy_issues(repo_root: Path, policy: dict[str, object]) -> list[PolicyIssue]:
@@ -378,6 +544,7 @@ def _policy_issues(repo_root: Path, policy: dict[str, object]) -> list[PolicyIss
         legacy_fields = duration_contract.get("legacy_compatibility_fields")
         if not isinstance(legacy_fields, list) or not all(isinstance(field, str) for field in legacy_fields):
             issues.append(PolicyIssue("type_policy_invalid", "duration_contract.legacy_compatibility_fields must be a string list", POLICY_PATH))
+        issues.extend(_duration_schema_contract_issues(repo_root, policy))
     return issues
 
 
