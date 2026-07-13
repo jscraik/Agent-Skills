@@ -13,11 +13,19 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[3]
+LIB_ROOT = ROOT / "Infrastructure/scripts/lib"
+if str(LIB_ROOT) not in sys.path:
+    sys.path.insert(0, str(LIB_ROOT))
+
+from ask.skills_sdk.review_plan import _target_digest as canonical_target_digest  # noqa: E402
+
+
 SOURCE_PATH = ROOT / "Infrastructure/scripts/validation-and-linting/review_handoff_replay.py"
 TEST_PATH = ROOT / "Infrastructure/tests/test_review_handoff_replay.py"
 PLAN_PATH = ROOT / ".harness/artifacts/sdk-review-plan/simplify.json"
@@ -68,16 +76,10 @@ def _source_digest() -> str:
 
 
 def _target_digest() -> str:
-    digest = hashlib.sha256()
-    target = ROOT / "Skills/agent-ops/simplify"
-    for path in sorted(target.rglob("*")):
-        if not path.is_file():
-            continue
-        digest.update(str(path.relative_to(ROOT)).encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+    status, digest, findings = canonical_target_digest(ROOT / "Skills/agent-ops/simplify")
+    if status != "available" or digest is None:
+        raise ValueError(f"canonical target digest unavailable: {status}; findings={findings}")
+    return digest
 
 
 def _tracked_status() -> str:

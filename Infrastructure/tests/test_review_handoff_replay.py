@@ -10,6 +10,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
+sys.path.insert(0, str(ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from review_handoff_replay import (  # noqa: E402
     EXPECTED_HANDOFF_ARGV,
@@ -19,6 +20,7 @@ from review_handoff_replay import (  # noqa: E402
     _cleanup,
 )
 import review_handoff_replay as replay  # noqa: E402
+from ask.skills_sdk.review_plan import _target_digest as canonical_target_digest  # noqa: E402
 
 
 def _positive_payload() -> dict[str, object]:
@@ -123,6 +125,13 @@ class TestReviewHandoffReplay(unittest.TestCase):
 
     def test_findings_are_json_serializable(self) -> None:
         json.dumps(_classify_handoff_payload(_positive_payload()))
+
+    def test_target_digest_matches_the_canonical_review_plan_contract(self) -> None:
+        status, digest, findings = canonical_target_digest(ROOT / "Skills/agent-ops/simplify")
+        self.assertEqual(status, "available")
+        self.assertIsNotNone(digest)
+        self.assertEqual(findings, [])
+        self.assertEqual(replay._target_digest(), digest)
 
     def test_cleanup_removes_only_empty_generated_trace_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
