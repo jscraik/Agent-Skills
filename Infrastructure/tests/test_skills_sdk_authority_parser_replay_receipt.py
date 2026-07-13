@@ -69,6 +69,11 @@ class TestSkillsSdkAuthorityParserReplayReceipt(unittest.TestCase):
                 self.assertGreater(len(row["mutation_evidence"]), 0)
                 self.assertEqual(row["stderr_bytes"], 0)
 
+    def test_install_receipt_key_points_to_preview_object(self) -> None:
+        selection = json.loads(SELECTION_PATH.read_text(encoding="utf-8"))
+        install_row = next(row for row in selection["receipt_backed_replays"] if row["family"] == "install")
+        self.assertEqual(install_row["receipt_key"], "skills_sdk_install_preview.preview")
+
 
 def _git_head() -> str:
     return subprocess.run(

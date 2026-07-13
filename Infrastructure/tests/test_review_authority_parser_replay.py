@@ -93,6 +93,12 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
     def test_adversarial_review_checks_negative_contracts(self) -> None:
         self.assertEqual(_adversarial_findings(ARTIFACT, SELECTION), [])
 
+    def test_review_binds_reordered_candidate_rows_by_family(self) -> None:
+        artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+        selection = json.loads(SELECTION.read_text(encoding="utf-8"))
+        artifact["commands"] = list(reversed(artifact["commands"]))
+        self.assertEqual(_artifact_shape_findings(artifact, selection, ARTIFACT, SELECTION), [])
+
     def test_adversarial_review_rejects_undeclared_boundaries(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifact_path = Path(temp_dir) / "artifact.json"

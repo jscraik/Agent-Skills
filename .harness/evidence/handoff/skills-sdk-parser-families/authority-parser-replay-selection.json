@@ -22,6 +22,7 @@
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/AGENTS.md",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/extraction-plan.yaml",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/knowledge-demand.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-demand.yaml",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/evals/authority-replay.md",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule-routing.md",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule.manifest.yaml",
@@ -41,7 +42,7 @@
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
   ],
-  "source_tree_digest": "sha256:d3261687a5222924b45feb7cb426aa17daa5c75a872631624d3dc3ef541a6464",
+  "source_tree_digest": "sha256:8bebdb457d5127f2fab8b34dd8886772779623cd1773a3b8089cf476bcdc189a",
   "source_surface": "Infrastructure/scripts/lib/ask/commands/sdk*.py",
   "inventory_command": "./bin/ask sdk evidence parser-families --preview --json --robot",
   "command_plan_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
@@ -150,7 +151,7 @@
       "family": "install",
       "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
       "command": "ask sdk install Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
-      "receipt_key": "skills_sdk_install_preview.receipt",
+      "receipt_key": "skills_sdk_install_preview.preview",
       "expected_receipt_status": "preview",
       "mutation_evidence": "preview.mutation_performed:false; lockfile_delta_preview.would_write:false; fixture_snapshot:unchanged"
     },

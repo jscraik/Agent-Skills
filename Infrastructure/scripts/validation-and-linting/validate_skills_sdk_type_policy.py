@@ -183,7 +183,7 @@ def _walk_schema_children(
     legacy_patterns: dict[str, object],
 ) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
-    for key in ("items", "definitions", "$defs", "oneOf", "allOf", "if", "then"):
+    for key in ("items", "definitions", "$defs", "oneOf", "allOf", "anyOf", "if", "then", "else"):
         child = node.get(key)
         if key in {"definitions", "$defs"} and isinstance(child, dict):
             for definition_name, definition in child.items():
@@ -247,9 +247,12 @@ def _duration_annotation_issue(
     repo_root: Path,
 ) -> list[PolicyIssue]:
     if isinstance(node, ast.AnnAssign):
-        if not isinstance(node.target, ast.Name):
+        if isinstance(node.target, ast.Name):
+            name = node.target.id
+        elif isinstance(node.target, ast.Attribute):
+            name = node.target.attr
+        else:
             return []
-        name = node.target.id
     else:
         name = node.arg
     if not name.endswith("_seconds"):
@@ -312,6 +315,27 @@ def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, a
     return False
 
 
+def _policy_issues(repo_root: Path, policy: dict[str, object]) -> list[PolicyIssue]:
+    issues: list[PolicyIssue] = []
+    identity_details = _identity_contract_details(repo_root, policy)
+    if isinstance(identity_details, list):
+        issues.extend(identity_details)
+
+    duration_contract = policy.get("duration_contract")
+    if not isinstance(duration_contract, dict):
+        issues.append(PolicyIssue("type_policy_invalid", "duration_contract is missing from the policy", POLICY_PATH))
+    else:
+        duration_schema_path = duration_contract.get("schema_path")
+        if not isinstance(duration_schema_path, str):
+            issues.append(PolicyIssue("type_policy_invalid", "duration_contract.schema_path must be a string", POLICY_PATH))
+        elif not (repo_root / duration_schema_path).exists():
+            issues.append(PolicyIssue("type_policy_path_missing", "duration schema path does not exist", duration_schema_path))
+        legacy_fields = duration_contract.get("legacy_compatibility_fields")
+        if not isinstance(legacy_fields, list) or not all(isinstance(field, str) for field in legacy_fields):
+            issues.append(PolicyIssue("type_policy_invalid", "duration_contract.legacy_compatibility_fields must be a string list", POLICY_PATH))
+    return issues
+
+
 def validate_paths(repo_root: Path, paths: Iterable[str]) -> tuple[PolicyIssue, ...]:
     policy = _load_policy(repo_root)
     issues: list[PolicyIssue] = []
@@ -319,8 +343,11 @@ def validate_paths(repo_root: Path, paths: Iterable[str]) -> tuple[PolicyIssue, 
         normalized = path.strip().replace("\\", "/").removeprefix("./")
         if not normalized:
             continue
-        issues.extend(_schema_identity_issues(repo_root, normalized, policy))
-        issues.extend(_python_policy_issues(repo_root, normalized, policy))
+        if normalized == POLICY_PATH:
+            issues.extend(_policy_issues(repo_root, policy))
+        else:
+            issues.extend(_schema_identity_issues(repo_root, normalized, policy))
+            issues.extend(_python_policy_issues(repo_root, normalized, policy))
     return tuple(issues)
 
 

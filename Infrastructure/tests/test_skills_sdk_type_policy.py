@@ -100,6 +100,31 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         self.assertIn("identity_schema_type", codes)
         self.assertIn("unbranded_identity_schema", codes)
 
+    def test_schema_identity_walks_anyof_and_else_branches(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            id_schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json"
+            id_schema_path.parent.mkdir(parents=True, exist_ok=True)
+            id_schema_path.write_text((REPO_ROOT / id_schema_path.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/conditional-branches.schema.json"
+            schema_path.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "anyOf": [{"properties": {"request_id": {"type": "string", "pattern": "^bad$"}}}],
+                        "else": {"properties": {"trace_id": {"type": "string", "pattern": "^bad$"}}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            issues = self.validator.validate_paths(temp_root, ("Infrastructure/config/schemas/skills-sdk/conditional-branches.schema.json",))
+        paths = {issue.path for issue in issues if issue.code == "unbranded_identity_schema"}
+        self.assertTrue(any(".anyOf" in path for path in paths))
+        self.assertTrue(any(".else" in path for path in paths))
+
     def test_nullable_identity_accepts_unordered_json_schema_type_array(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
@@ -131,6 +156,30 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         codes = {issue.code for issue in issues}
         self.assertIn("manual_newtype_forbidden", codes)
         self.assertIn("unitless_duration_annotation", codes)
+
+    def test_attribute_duration_annotation_is_checked(self) -> None:
+        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-attribute.py"
+        path.write_text("class Runner:\n    def run(self) -> None:\n        self.timeout_seconds: int = 1\n", encoding="utf-8")
+        try:
+            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-attribute.py",))
+        finally:
+            path.unlink()
+        self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
+
+    def test_changed_policy_validates_policy_object(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy = json.loads((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"))
+            policy.pop("id_contract")
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            for filename in ("branded-id.v1.schema.json", "duration.v1.schema.json"):
+                target = temp_root / "Infrastructure/config/schemas/skills-sdk" / filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            issues = self.validator.validate_paths(temp_root, (self.validator.POLICY_PATH,))
+        self.assertIn("type_policy_invalid", {issue.code for issue in issues})
 
     def test_existing_legacy_duration_fields_remain_compatible_until_owner_migration(self) -> None:
         path = "Infrastructure/scripts/lib/ask/commands/plugins.py"

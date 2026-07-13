@@ -191,7 +191,13 @@ def _row_binding_findings(rows: list[Any], selected: Any, artifact_path: Path, s
     if not isinstance(selected, list):
         return []
     findings: list[dict[str, Any]] = []
-    for index, (row, expected) in enumerate(zip(rows, selected)):
+    selected_by_family = {
+        expected.get("family"): expected
+        for expected in selected
+        if isinstance(expected, dict) and isinstance(expected.get("family"), str)
+    }
+    for index, row in enumerate(rows):
+        expected = selected_by_family.get(row.get("family")) if isinstance(row, dict) else None
         if not isinstance(row, dict) or not isinstance(expected, dict):
             findings.append({"severity": "blocker", "message": f"candidate row {index} cannot be bound to a selected preview row", "evidence": [str(artifact_path), str(selection_path)]})
             continue
