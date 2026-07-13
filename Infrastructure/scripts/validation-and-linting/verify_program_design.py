@@ -106,7 +106,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--baseline-ref",
         default=None,
-        help="Git revision used as the pre-change baseline; defaults to the merge-base with the PR base.",
+        help=(
+            "Git revision used as the pre-change baseline; head-source validation "
+            "defaults to the tracked upstream, otherwise the merge-base with the PR base."
+        ),
     )
     parser.add_argument(
         "--staged-source",
@@ -659,9 +662,19 @@ def _changed_paths(
     return sorted(set(paths))
 
 
-def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
+def _default_baseline_ref(*, staged_source: bool = False, source_ref: str | None = None) -> str | None:
     if staged_source:
         return "HEAD"
+    if source_ref == "HEAD":
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", "@{upstream}^{commit}"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            return "@{upstream}"
     base_branch = os.environ.get("GITHUB_BASE_REF")
     candidates = [f"origin/{base_branch}"] if base_branch else []
     candidates.extend(("origin/main", "HEAD^"))
@@ -718,7 +731,7 @@ def main() -> int:
         for issue in metadata_issues:
             print(f"- {issue}")
         return 1
-    baseline_ref = args.baseline_ref or _default_baseline_ref(staged_source=args.staged_source)
+    baseline_ref = args.baseline_ref or _default_baseline_ref(staged_source=args.staged_source, source_ref=args.source_ref)
     if not baseline_ref:
         print("Program design verification blocked: baseline revision could not be determined")
         return 1

@@ -380,6 +380,17 @@ class Factory:
         validator = _load_validator()
         self.assertEqual(validator._default_baseline_ref(staged_source=True), "HEAD")
 
+    def test_head_source_uses_tracked_upstream_as_default_baseline(self) -> None:
+        validator = _load_validator()
+        result = mock.Mock(returncode=0, stdout="abc123\n", stderr="")
+        with mock.patch.object(validator.subprocess, "run", return_value=result) as run:
+            self.assertEqual(validator._default_baseline_ref(source_ref="HEAD"), "@{upstream}")
+
+        self.assertEqual(
+            run.call_args.args[0],
+            ["git", "rev-parse", "--verify", "@{upstream}^{commit}"],
+        )
+
     def test_baseline_path_uses_cached_staged_rename_map(self) -> None:
         validator = _load_validator()
         validator._rename_map.cache_clear()
