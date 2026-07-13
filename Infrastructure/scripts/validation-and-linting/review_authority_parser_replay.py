@@ -32,6 +32,26 @@ EXPECTED_DATA_KEYS = {
     "uninstall": "skills_sdk_project_uninstall",
     "knowledge": "knowledge_ingest",
 }
+EXPECTED_RECEIPT_SCHEMAS = {
+    "eval": "skills-sdk.ab-preview-receipt.v0",
+    "trust": "skills-sdk.trust-decision-receipt.v0",
+    "plugin": "skills-sdk-plugin-review.v0",
+    "improve": "skills-sdk.project-improvement-receipt.v0",
+    "install": "skills-sdk.install-preview.v1",
+    "rollback": "skills-sdk.project-cleanup-receipt.v1",
+    "uninstall": "skills-sdk.project-cleanup-receipt.v1",
+    "knowledge": "skills-sdk-knowledge-ingest.v1",
+}
+EXPECTED_RECEIPT_STATUSES = {
+    "eval": "preview",
+    "trust": "preview",
+    "plugin": "preview",
+    "improve": "pass",
+    "install": "preview",
+    "rollback": "preview",
+    "uninstall": "preview",
+    "knowledge": "preview",
+}
 MUTATION_KEYS = {
     "mutation_performed",
     "source_mutation_performed",
@@ -74,18 +94,24 @@ def _walk_mutation_flags(value: Any, path: str = "$") -> list[str]:
     return findings
 
 
-def _capture_receipt(body: dict[str, Any]) -> dict[str, Any] | None:
+def _capture_receipt(body: dict[str, Any], family: str) -> dict[str, Any] | None:
+    expected_schema = EXPECTED_RECEIPT_SCHEMAS[family]
+    expected_status = EXPECTED_RECEIPT_STATUSES[family]
     preview = body.get("preview")
-    if isinstance(preview, dict) and isinstance(preview.get("schema_version"), str):
-        return preview
+    if isinstance(preview, dict):
+        return (
+            preview
+            if preview.get("schema_version") == expected_schema and preview.get("status") == expected_status
+            else None
+        )
     candidates = [body.get("receipt"), body]
     return next(
         (
             candidate
             for candidate in candidates
             if isinstance(candidate, dict)
-            and isinstance(candidate.get("schema_version"), str)
-            and candidate.get("status") in {"pass", "preview"}
+            and candidate.get("schema_version") == expected_schema
+            and candidate.get("status") == expected_status
         ),
         None,
     )
@@ -125,7 +151,7 @@ def _capture_findings(capture_dir: Path, family: str) -> list[dict[str, Any]]:
         findings.append({"severity": "blocker", "family": family, "message": f"expected data key {key!r} is missing", "evidence": [str(output_path)]})
         return findings
     body = data[key]
-    receipt = _capture_receipt(body)
+    receipt = _capture_receipt(body, family)
     if receipt is None:
         findings.append({"severity": "blocker", "family": family, "message": "nested receipt schema_version/status is missing or invalid", "evidence": [str(output_path)]})
     else:

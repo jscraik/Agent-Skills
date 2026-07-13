@@ -12,6 +12,8 @@ sys.path.insert(0, str(ROOT / "Infrastructure" / "scripts" / "validation-and-lin
 
 from review_authority_parser_replay import (  # noqa: E402
     EXPECTED_DATA_KEYS,
+    EXPECTED_RECEIPT_SCHEMAS,
+    EXPECTED_RECEIPT_STATUSES,
     FAMILIES,
     REQUIRED_NO_WRITE_KEYS,
     _adversarial_findings,
@@ -36,8 +38,8 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
         for family in FAMILIES:
             key = EXPECTED_DATA_KEYS[family]
             receipt = {
-                "schema_version": f"fixture.{family}.v1",
-                "status": "preview",
+                "schema_version": EXPECTED_RECEIPT_SCHEMAS[family],
+                "status": EXPECTED_RECEIPT_STATUSES[family],
                 **{key: False for key in REQUIRED_NO_WRITE_KEYS[family]},
             }
             if family == missing_receipt_family:
@@ -45,7 +47,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             else:
                 if family == mutation_family:
                     receipt["mutation_performed"] = True
-                body = {"receipt": receipt}
+                body = {"preview" if family == "install" else "receipt": receipt}
             payload = {"status": "success", "data": {key: body}}
             (capture_dir / f"{family}.json").write_text(json.dumps(payload), encoding="utf-8")
             (capture_dir / f"{family}.exit").write_text("0\n", encoding="utf-8")
@@ -76,6 +78,30 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
             findings = _worker_findings(capture_dir)
             self.assertTrue(any("omits explicit no-write fields" in finding["message"] for finding in findings))
+
+    def test_worker_review_rejects_blocked_install_preview_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "install.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["data"][EXPECTED_DATA_KEYS["install"]]["preview"]["status"] = "blocked"
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir)
+            self.assertTrue(any("nested receipt schema_version/status" in finding["message"] for finding in findings))
+
+    def test_worker_review_rejects_wrong_family_receipt_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "eval.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["data"][EXPECTED_DATA_KEYS["eval"]]["receipt"]["schema_version"] = "bogus.schema"
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir)
+            self.assertTrue(any("nested receipt schema_version/status" in finding["message"] for finding in findings))
 
     def test_worker_review_accepts_family_specific_no_write_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
