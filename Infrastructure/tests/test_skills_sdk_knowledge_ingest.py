@@ -588,7 +588,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertEqual(payload["status"], "preview")
             self.assertEqual(payload["staged_preflight"]["status"], "pass")
 
-    def test_repo_preflight_uses_managed_infrastructure_python_wrapper(self) -> None:
+    def test_repo_preflight_uses_current_python_without_dependency_resolution(self) -> None:
         extraction = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction"
         payload = build_knowledge_ingest(
             REPO_ROOT,
@@ -599,7 +599,8 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
         )
         self.assertEqual(payload["status"], "preview")
         self.assertEqual(payload["staged_preflight"]["status"], "pass")
-        self.assertIn("run-infrastructure-python.sh", payload["staged_preflight"]["command"])
+        self.assertNotIn("run-infrastructure-python.sh", payload["staged_preflight"]["command"])
+        self.assertIn("skill_gate.py", payload["staged_preflight"]["command"])
 
     def test_preflight_blocks_warning_only_skill_gate_output(self) -> None:
         payload = {

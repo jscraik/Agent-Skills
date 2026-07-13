@@ -8,7 +8,7 @@ annotations. Existing legacy duration fields remain visible until their owner
 slice migrates them to ``duration.v1``. A clean full-repository invocation
 validates every tracked Skills SDK schema and emitter surface; legacy fields
 are allowed only when the same path and annotation already existed in the
-parent commit.
+merge-base (or the first-parent baseline when the merge-base ref is unavailable).
 """
 
 from __future__ import annotations
@@ -223,9 +223,10 @@ def _python_tree_issues(
     repo_root: Path,
 ) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
+    newtype_aliases = _newtype_aliases(tree)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and (
-            (isinstance(node.func, ast.Name) and node.func.id == "NewType")
+            (isinstance(node.func, ast.Name) and node.func.id in newtype_aliases)
             or (isinstance(node.func, ast.Attribute) and node.func.attr == "NewType")
         ):
             issues.append(
@@ -238,6 +239,17 @@ def _python_tree_issues(
         if isinstance(node, (ast.AnnAssign, ast.arg)):
             issues.extend(_duration_annotation_issue(node, path, legacy_duration_fields, repo_root))
     return issues
+
+
+def _newtype_aliases(tree: ast.AST) -> set[str]:
+    aliases = {"NewType"}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom) or node.module not in {"typing", "typing_extensions"}:
+            continue
+        for imported in node.names:
+            if imported.name == "NewType":
+                aliases.add(imported.asname or imported.name)
+    return aliases
 
 
 def _duration_annotation_issue(
@@ -287,32 +299,40 @@ def _annotation_keys(tree: ast.AST) -> set[tuple[str, str]]:
 
 
 def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, annotation: ast.AST) -> bool:
-    result = subprocess.run(
-        ["git", "rev-list", "--parents", "-n", "1", "HEAD"],
+    """Allow a legacy annotation only when it exists in the PR base baseline."""
+    merge_base = subprocess.run(
+        ["git", "merge-base", "HEAD", "origin/main"],
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
     )
-    if result.returncode != 0:
-        return False
-    for parent in result.stdout.split()[1:]:
-        baseline_result = subprocess.run(
-            ["git", "show", f"{parent}:{path}"],
+    baseline_revision = merge_base.stdout.strip() if merge_base.returncode == 0 else ""
+    if not baseline_revision:
+        first_parent = subprocess.run(
+            ["git", "rev-parse", "HEAD^1"],
             cwd=repo_root,
             text=True,
             capture_output=True,
             check=False,
         )
-        if baseline_result.returncode != 0:
-            continue
-        try:
-            baseline = ast.parse(baseline_result.stdout, filename=path)
-        except SyntaxError:
-            continue
-        if (name, ast.unparse(annotation)) in _annotation_keys(baseline):
-            return True
-    return False
+        baseline_revision = first_parent.stdout.strip() if first_parent.returncode == 0 else ""
+    if not baseline_revision:
+        return False
+    baseline_result = subprocess.run(
+        ["git", "show", f"{baseline_revision}:{path}"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if baseline_result.returncode != 0:
+        return False
+    try:
+        baseline = ast.parse(baseline_result.stdout, filename=path)
+    except SyntaxError:
+        return False
+    return (name, ast.unparse(annotation)) in _annotation_keys(baseline)
 
 
 def _policy_issues(repo_root: Path, policy: dict[str, object]) -> list[PolicyIssue]:

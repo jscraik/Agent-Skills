@@ -157,6 +157,15 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         self.assertIn("manual_newtype_forbidden", codes)
         self.assertIn("unitless_duration_annotation", codes)
 
+    def test_aliased_newtype_is_forbidden(self) -> None:
+        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-aliased-newtype.py"
+        path.write_text("from typing import NewType as NT\nReceiptId = NT('ReceiptId', str)\n", encoding="utf-8")
+        try:
+            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-aliased-newtype.py",))
+        finally:
+            path.unlink()
+        self.assertIn("manual_newtype_forbidden", {issue.code for issue in issues})
+
     def test_attribute_duration_annotation_is_checked(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-attribute.py"
         path.write_text("class Runner:\n    def run(self) -> None:\n        self.timeout_seconds: int = 1\n", encoding="utf-8")
@@ -186,13 +195,19 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         issues = self.validator.validate_paths(REPO_ROOT, (path,))
         self.assertNotIn("unitless_duration_annotation", {issue.code for issue in issues})
 
-    def test_legacy_duration_fields_accept_merge_parent_baseline(self) -> None:
+    def test_legacy_duration_fields_accept_merge_base_baseline(self) -> None:
         annotation = ast.parse("def f(timeout_seconds: int): ...").body[0].args.args[0].annotation
-        parent_result = mock.Mock(returncode=0, stdout="merge-commit merge-head base-head\n")
-        missing_parent = mock.Mock(returncode=1, stdout="")
-        matching_parent = mock.Mock(returncode=0, stdout="def f(timeout_seconds: int): ...\n")
-        with mock.patch.object(self.validator.subprocess, "run", side_effect=[parent_result, missing_parent, matching_parent]):
+        merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
+        matching_base = mock.Mock(returncode=0, stdout="def f(timeout_seconds: int): ...\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, matching_base]):
             self.assertTrue(self.validator._legacy_annotation_exists_in_parent(REPO_ROOT, "fixture.py", "timeout_seconds", annotation))
+
+    def test_legacy_duration_fields_ignore_non_base_parent(self) -> None:
+        annotation = ast.parse("def f(timeout_seconds: int): ...").body[0].args.args[0].annotation
+        merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
+        non_matching_base = mock.Mock(returncode=0, stdout="def f(timeout_seconds: str): ...\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, non_matching_base]):
+            self.assertFalse(self.validator._legacy_annotation_exists_in_parent(REPO_ROOT, "fixture.py", "timeout_seconds", annotation))
 
     def test_new_legacy_named_duration_field_is_not_allowlisted_by_name(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-new-legacy.py"
