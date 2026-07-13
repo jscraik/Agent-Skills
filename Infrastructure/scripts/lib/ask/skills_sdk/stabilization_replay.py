@@ -47,6 +47,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "plugin", "--help"),
     ("./bin/ask", "sdk", "plugin", "create", "demo-skill", "--kind", "skill", "--category", "agent-ops", "--description", "Demo skill", "--with-registry", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "create", "demo-plugin", "--kind", "plugin", "--category", "third-party", "--with-registry", "--with-references", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "plugin", "save-registry", "--kind", "plugin", "--target", "Plugins/plugin-factory", "--preview", "--json", "--robot"),
 }
 MUTATION_KEYS = frozenset(
     {
