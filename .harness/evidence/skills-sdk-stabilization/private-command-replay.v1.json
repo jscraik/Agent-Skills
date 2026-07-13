@@ -767,12 +767,15 @@
       "capability_id": "sandbox",
       "command": "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_sandbox_validate"
       ],
       "execution_id": "sha256:f9a6dd7cce2eb290a75d8d4dfb97411f4062ebfcb05103e223107ba822cc4452",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

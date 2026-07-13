@@ -179,6 +179,41 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
         self.assertEqual(row["evidence"], ["deny_by_default"])
         run.assert_not_called()
 
+    def test_read_only_sandbox_validate_is_allowlisted_for_command_receipt(self) -> None:
+        command = "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot"
+        argv = command.split(" ")
+        plan = {"commands": [{"capability_id": "sandbox", "command": command, "argv": argv}]}
+        completed = mock.Mock(
+            returncode=0,
+            stdout=(
+                '{"status":"success","metadata":{},"data":{'
+                '"skills_sdk_sandbox_validate":{"status":"pass",'
+                '"mutation_performed":false,"execution_performed":false}}}'
+            ),
+            stderr="",
+        )
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        self.assertIn("robot_receipt:valid_envelope", receipt["rows"][0]["evidence"])
+        run.assert_called_once()
+
+    def test_sandbox_validate_unsafe_profile_remains_deny_by_default(self) -> None:
+        command = "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/invalid/sandbox-profile-allow-default.json --json --robot"
+        plan = {"commands": [{"capability_id": "sandbox", "command": command, "argv": command.split(" ")}]}
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run"
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        row = receipt["rows"][0]
+        self.assertEqual(row["status"], "blocked_unsafe")
+        self.assertEqual(row["evidence"], ["deny_by_default"])
+        run.assert_not_called()
+
     def test_read_only_skills_doctor_is_allowlisted_for_command_receipt(self) -> None:
         command = "./bin/ask skills doctor Skills/agent-ops/simplify --json --robot"
         plan = {
