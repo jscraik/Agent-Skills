@@ -237,6 +237,19 @@ def outer():
         self.assertEqual(run.call_count, 1)
         self.assertIn("--cached", run.call_args.args[0])
 
+    def test_baseline_path_falls_back_to_non_staged_rename_map(self) -> None:
+        validator = _load_validator()
+        validator._rename_map.cache_clear()
+        staged_result = mock.Mock(returncode=0, stdout="", stderr="")
+        non_staged_result = mock.Mock(returncode=0, stdout="R100\told.py\tnew.py\n", stderr="")
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_result, non_staged_result]) as run:
+            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
+
+        self.assertEqual(run.call_count, 2)
+        self.assertIn("--cached", run.call_args_list[0].args[0])
+        self.assertNotIn("--cached", run.call_args_list[1].args[0])
+
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
         with self.subTest("python shebang"):
