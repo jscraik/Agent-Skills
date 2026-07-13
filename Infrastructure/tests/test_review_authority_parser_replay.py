@@ -52,6 +52,8 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
                         "copied_files": [{"action": "preview"}],
                     }
                 )
+            if family == "install":
+                receipt["lockfile_delta_preview"] = {"would_write": False}
             if family == missing_receipt_family:
                 body = {"result": "missing-receipt"}
             else:
@@ -136,6 +138,18 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
 
             findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
             self.assertTrue(any("nested receipt schema_version/status" in finding["message"] for finding in findings))
+
+    def test_worker_review_rejects_install_preview_that_would_write(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "install.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["data"][EXPECTED_DATA_KEYS["install"]]["preview"]["lockfile_delta_preview"]["would_write"] = True
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
+            self.assertTrue(any("lockfile_delta_preview must prove would_write:false" in finding["message"] for finding in findings))
 
     def test_worker_review_rejects_wrong_family_receipt_schema(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

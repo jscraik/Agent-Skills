@@ -3,7 +3,7 @@
   "artifact_type": "read_only_command_service_inventory",
   "status": "planned",
   "scope": "capability-matrix",
-  "base_commit": "977890bd8076004e811f8a5bca77bc9046172634",
+  "base_commit": "79248c15d97a4ac42993dfab9713261507aa1aec",
   "base_source_files": [
     "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
     "Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json",
@@ -21,7 +21,7 @@
     "Infrastructure/tests/test_skills_sdk_capability_evidence.py",
     "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py"
   ],
-  "base_source_tree_digest": "sha256:50a3e971a8d24e19f8e073c83644fcb396db296ee5fa5e6b43dc0a1e1b7a4a55",
+  "base_source_tree_digest": "sha256:ee70375ab5f9241abb1206dd525d8b6c682b6b23e6e94f87cabb9a9010aacb68",
   "source_delta": [
     {
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/command_evidence_plan.py",

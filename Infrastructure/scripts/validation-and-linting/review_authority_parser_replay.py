@@ -128,6 +128,8 @@ def _capture_no_write_findings(receipt: dict[str, Any], family: str, output_path
         findings.append({"severity": "blocker", "family": family, "message": f"nested receipt no-write fields are not false: {', '.join(non_false)}", "evidence": [str(output_path)]})
     if family == "knowledge":
         findings.extend(_knowledge_no_write_findings(receipt, output_path))
+    if family == "install":
+        findings.extend(_install_no_write_findings(receipt, output_path))
     return findings
 
 
@@ -142,6 +144,20 @@ def _knowledge_no_write_findings(receipt: dict[str, Any], output_path: Path) -> 
     ):
         findings.append({"severity": "blocker", "family": "knowledge", "message": "knowledge receipt copied_files must prove preview-only actions", "evidence": evidence})
     return findings
+
+
+def _install_no_write_findings(receipt: dict[str, Any], output_path: Path) -> list[dict[str, Any]]:
+    lockfile_preview = receipt.get("lockfile_delta_preview")
+    if isinstance(lockfile_preview, dict) and lockfile_preview.get("would_write") is False:
+        return []
+    return [
+        {
+            "severity": "blocker",
+            "family": "install",
+            "message": "install receipt lockfile_delta_preview must prove would_write:false",
+            "evidence": [str(output_path)],
+        }
+    ]
 
 
 def _capture_findings(capture_dir: Path, family: str) -> list[dict[str, Any]]:

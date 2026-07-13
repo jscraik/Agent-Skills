@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
 
-
 SECURITY_GATE_FLAGS = ("--require-security-evals", "--pi-high-fail", "--require-fail-fast")
 SCHEMA_VERSION = "skills-sdk-knowledge-ingest.v1"
 ROUTING_TEXT = (
@@ -54,6 +53,7 @@ def build_knowledge_ingest(
     if findings or not apply:
         return receipt
     _apply_knowledge_ingest(skill_dir, extraction_root, source_files, eval_routes=context["eval_routes"], manifest=manifest)
+    receipt["mutation_performed"] = True
     if run_proof:
         receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
         if any(item["status"] != "pass" for item in receipt["proof_results"]):
@@ -113,7 +113,7 @@ def _build_knowledge_receipt(
             "name": context["skill_name"],
             "path": skill_path,
         },
-        "mutation_performed": apply,
+        "mutation_performed": False,
         "copied_files": copied,
         "routing_updates": _routing_updates(repo_root, skill_dir, apply=apply),
         "validation_commands": [
