@@ -9,6 +9,8 @@ from pathlib import Path
 from types import ModuleType
 from unittest import mock
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VALIDATOR_PATH = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
@@ -36,7 +38,7 @@ class TestProgramDesign(unittest.TestCase):
 
     def test_boolean_default_findings_require_aligned_arguments(self) -> None:
         validator = _load_validator()
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             validator._boolean_default_findings("run", [], [None])
 
     def test_existing_wide_interface_is_ratchet_only(self) -> None:
@@ -303,9 +305,11 @@ class Public:
         validator = _load_validator()
         validator._staged_paths.cache_clear()
         path = validator.REPO_ROOT / "Infrastructure/scripts/example.py"
-        with mock.patch.object(Path, "read_text", return_value="worktree source") as read_text:
-            with mock.patch.object(validator.subprocess, "run") as run:
-                source = validator._current_source_text(path)
+        with (
+            mock.patch.object(Path, "read_text", return_value="worktree source") as read_text,
+            mock.patch.object(validator.subprocess, "run") as run,
+        ):
+            source = validator._current_source_text(path)
 
         self.assertEqual(source, "worktree source")
         read_text.assert_called_once_with(encoding="utf-8")
