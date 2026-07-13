@@ -1,0 +1,64 @@
+{
+  "schema_version": "skills-sdk.phase2-lifecycle-scaffold-unittest-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T08:48:00Z",
+  "base_head_sha": "53a924bb719057619426d45441291d8ad4d8edbf",
+  "scope": "read-only Skills SDK lifecycle-scaffold unittest command admission with repo-native review fallback",
+  "allowlisted_argv": "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_lifecycle_scaffold_unittest_replay.py",
+    "Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py",
+    "Infrastructure/tests/test_review_lifecycle_scaffold_unittest_replay.py"
+  ],
+  "source_digests": {
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:a8432211f108af6ac97a8a69d9eb00bae3214a453729b8f51df59726d7f9c309",
+    "Infrastructure/tests/test_skills_sdk_lifecycle_scaffold_unittest_replay.py": "sha256:3351c03da3eb4bae7466f7700b9cbe35b98f2df87501ed4e04a2cb58e9fb0f9b",
+    "Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py": "sha256:5df7255200a696cc5dd676c706a6d78a5511f278429a2a849b7c68e3e3e55e5f",
+    "Infrastructure/tests/test_review_lifecycle_scaffold_unittest_replay.py": "sha256:1fdfd7ee663f7851718a5459a9bb53f048cac4b935b8fb72aab462d817704a21"
+  },
+  "behavior_proof": {
+    "test_marker": "Ran 4 tests in <ASCII duration>s",
+    "terminal_marker": "OK",
+    "failure_markers_rejected": ["FAILED", "ERROR", "FAIL"],
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "altered_argv": "blocked_unsafe_without_subprocess",
+    "malformed_marker": "executed_fail_without_exception",
+    "no_mutation_status": true,
+    "review_fallback": "separate worker, qa, and adversarial processes write machine-readable reports when child-agent artifact provisioning stalls"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 36,
+    "blocked_unsafe": 7,
+    "unclassified": 0,
+    "lifecycle_scaffold_unittest_row": {
+      "status": "executed_pass",
+      "evidence": [
+        "lifecycle_scaffold_unittest_receipt:valid_marker",
+        "lifecycle_scaffold_unittest_test_count:4"
+      ]
+    }
+  },
+  "reviews": {
+    "worker": "artifacts/agent-runs/default-lifecycle-scaffold-fallback/worker.json (status=pass)",
+    "qa": "artifacts/reviews/lifecycle-scaffold-unittest-qa.md and artifacts/agent-runs/default-lifecycle-scaffold-fallback/qa.json (status=pass)",
+    "adversarial": "artifacts/agent-runs/default-lifecycle-scaffold-fallback/adversarial.json (status=pass)",
+    "child_runtime_blocker": "Independent Codex child attempts produced no report artifact; repo-native fallback was used and all three role processes passed."
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_lifecycle_scaffold_unittest_replay.py tests/test_review_lifecycle_scaffold_unittest_replay.py -> pass (8 passed)",
+    "Command: python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v -> pass (4 tests; OK)",
+    "Command: uv run --python 3.12 ruff check Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_lifecycle_scaffold_unittest_replay.py Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py Infrastructure/tests/test_review_lifecycle_scaffold_unittest_replay.py -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_lifecycle_scaffold_unittest_replay.py Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py Infrastructure/tests/test_review_lifecycle_scaffold_unittest_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py --role worker --output artifacts/agent-runs/default-lifecycle-scaffold-fallback/worker.json -> pass (status=pass)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py --role qa --output artifacts/agent-runs/default-lifecycle-scaffold-fallback/qa.json -> pass (status=pass)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_lifecycle_scaffold_unittest_replay.py --role adversarial --output artifacts/agent-runs/default-lifecycle-scaffold-fallback/adversarial.json -> pass (status=pass)",
+    "Command: PYTHONPATH=/private/tmp/agent-skills-emitter-reconcile/Infrastructure/scripts/lib UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-emitter-reconcile --output artifacts/agent-runs/default-lifecycle-scaffold-unittest/private-replay.json -> pass (43 refs; 36 executed_pass, 7 blocked_unsafe, 0 unclassified)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass (findings=0)"
+  ],
+  "claims_boundary": "No review handoff or execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows."
+}

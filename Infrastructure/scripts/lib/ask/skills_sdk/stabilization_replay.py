@@ -26,6 +26,13 @@ STAGE_SHAPE_UNITTEST_ARGV = (
     "Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator",
     "-v",
 )
+LIFECYCLE_SCAFFOLD_UNITTEST_ARGV = (
+    "python3",
+    "-m",
+    "unittest",
+    "Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold",
+    "-v",
+)
 ALLOWLIST = {
     ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
@@ -62,6 +69,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "plugin", "save-registry", "--kind", "plugin", "--target", "Plugins/plugin-factory", "--preview", "--json", "--robot"),
     STAGE_SHAPE_VALIDATOR_ARGV,
     STAGE_SHAPE_UNITTEST_ARGV,
+    LIFECYCLE_SCAFFOLD_UNITTEST_ARGV,
 }
 MUTATION_KEYS = frozenset(
     {
@@ -163,6 +171,10 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
         reason = "Exact allowlisted local read-only command returned a non-zero exit code."
     elif argv == STAGE_SHAPE_UNITTEST_ARGV:
         status, reason, receipt_evidence = _classify_stage_shape_unittest(completed.stdout, completed.stderr)
+    elif argv == LIFECYCLE_SCAFFOLD_UNITTEST_ARGV:
+        status, reason, receipt_evidence = _classify_lifecycle_scaffold_unittest(
+            completed.stdout, completed.stderr
+        )
     elif argv == STAGE_SHAPE_VALIDATOR_ARGV:
         status, reason, receipt_evidence = _classify_stage_shape(completed.stdout)
     elif argv[-1:] == ("--help",):
@@ -193,6 +205,21 @@ def _classify_stage_shape_unittest(stdout: str, stderr: str) -> tuple[str, str, 
     if status == "success":
         return "executed_pass", "Exact allowlisted SDK stage shape unittest returned a bounded success marker.", evidence
     return "executed_fail", "Allowlisted SDK stage shape unittest returned zero but not its bounded success marker.", evidence
+
+
+def _classify_lifecycle_scaffold_unittest(stdout: str, stderr: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_lifecycle_scaffold_unittest_receipt(stdout, stderr)
+    if status == "success":
+        return (
+            "executed_pass",
+            "Exact allowlisted lifecycle scaffold unittest returned a bounded success marker.",
+            evidence,
+        )
+    return (
+        "executed_fail",
+        "Allowlisted lifecycle scaffold unittest returned zero but not its bounded success marker.",
+        evidence,
+    )
 
 
 def _classify_stage_shape(stdout: str) -> tuple[str, str, list[str]]:
@@ -282,6 +309,29 @@ def _observe_stage_shape_unittest_receipt(stdout: str, stderr: str) -> tuple[str
     if _has_unittest_failure_marker(lines):
         return None, ["stage_shape_unittest_receipt:invalid_marker"]
     return "success", ["stage_shape_unittest_receipt:valid_marker", "stage_shape_unittest_test_count:6"]
+
+
+def _observe_lifecycle_scaffold_unittest_receipt(stdout: str, stderr: str) -> tuple[str | None, list[str]]:
+    """Record bounded lifecycle scaffold unittest success evidence."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    output_bytes = len(combined.encode("utf-8"))
+    lines = [line.strip() for line in combined.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["lifecycle_scaffold_unittest_receipt:oversize"]
+
+    ran_prefix = "Ran 4 tests in "
+    ran_lines = [line for line in lines if line.startswith("Ran ")]
+    if len(ran_lines) != 1:
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    ran_line = ran_lines[0]
+    if not ran_line.startswith(ran_prefix) or not ran_line.endswith("s"):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    duration = ran_line[len(ran_prefix) : -1]
+    if not _valid_unittest_duration(duration):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    if lines[-1] != "OK" or _has_unittest_failure_marker(lines):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    return "success", ["lifecycle_scaffold_unittest_receipt:valid_marker", "lifecycle_scaffold_unittest_test_count:4"]
 
 
 def _valid_unittest_duration(duration: str) -> bool:
