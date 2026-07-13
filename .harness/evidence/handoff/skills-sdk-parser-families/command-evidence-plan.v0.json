@@ -301,10 +301,11 @@
     },
     {
       "capability_id": "review_execution",
-      "command": "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
       "argv": [
-        "/Users/jamiecraik/.venvs/pyyaml/bin/python",
-        "Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
+        "bash",
+        "Infrastructure/scripts/run-infrastructure-python.sh",
+        "scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
       ],
       "status": "planned",
       "execution_lane": "local_command",
@@ -447,18 +448,17 @@
     },
     {
       "capability_id": "refs_ingestion",
-      "command": "./bin/ask sdk knowledge ingest --extraction /Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native --skill Skills/agent-ops/improve-agent-native --apply --run-proof --json --robot",
+      "command": "./bin/ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
       "argv": [
         "./bin/ask",
         "sdk",
         "knowledge",
         "ingest",
         "--extraction",
-        "/Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction",
         "--skill",
-        "Skills/agent-ops/improve-agent-native",
-        "--apply",
-        "--run-proof",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture",
+        "--preview",
         "--json",
         "--robot"
       ],
@@ -466,8 +466,8 @@
       "execution_lane": "local_command",
       "receipt_required": true,
       "execution_policy": "manual_or_ci_replay",
-      "replay_disposition": "authority_bound_mutation",
-      "caller_consequence": "Do not replay under the inventory lane; a bounded authority and a dedicated mutation receipt are required.",
+      "replay_disposition": "preview_replay",
+      "caller_consequence": "Replay may exercise only the declared preview path and still requires its own run receipt.",
       "source_evidence_reason": "Command evidence is classified but not executed by preview verification."
     },
     {

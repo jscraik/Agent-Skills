@@ -3,10 +3,10 @@
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/authority-parser-replay-receipt.v1.schema.json",
   "status": "pass",
   "operation": "authority_parser_replay",
-  "base_commit": "883844d98ae84bb085c28c026ae4bc48de4ccf4a",
+  "base_commit": "977890bd8076004e811f8a5bca77bc9046172634",
   "source_selection_path": ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-selection.json",
   "source_selection_schema": "skills-sdk.parser-family-authority-replay-selection.v1",
-  "source_tree_digest": "sha256:d694799a2a4bf012bb56367d01455fd36e6fcc25724d87873db420920ab7b843",
+  "source_tree_digest": "sha256:9fd763e82753ee2d5e36a5a02c16650d788cde53b4d69ecbfbfc136880da71e0",
   "command_count": 8,
   "commands": [
     {

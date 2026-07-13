@@ -34,9 +34,9 @@
   "command_count": 43,
   "service_count": 3,
   "command_disposition_counts": {
-    "authority_bound_mutation": 2,
+    "authority_bound_mutation": 1,
     "explicit_run_receipt": 20,
-    "preview_replay": 20,
+    "preview_replay": 21,
     "template_requires_concrete_fixture": 1
   },
   "service_dispositions": [
@@ -85,7 +85,7 @@
     "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py",
     "Infrastructure/tests/test_skills_sdk_command_service_rationalization.py"
   ],
-  "source_tree_digest": "sha256:5a3b9649afb8f4a019d5e9317291a3bbb80f0a3940440ed2f5cb7f70b76560f2",
+  "source_tree_digest": "sha256:10bf21d03c1a97c2158208c399bcaf235f9e8bce7d4ad32960fbd7b5047ea3a3",
   "blockers": [],
   "mutation_performed": false,
   "command_execution_performed": false,

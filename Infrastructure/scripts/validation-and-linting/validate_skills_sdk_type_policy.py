@@ -128,7 +128,7 @@ def _identity_property_issues(
 ) -> list[PolicyIssue]:
     brand = brands.get(name)
     branded_pattern = f"^{brand}_[a-z0-9]{{12,32}}$" if isinstance(brand, str) else expected_pattern
-    allowed = {expected_pattern, branded_pattern}
+    allowed = {branded_pattern} if isinstance(brand, str) else {expected_pattern}
     compatibility = legacy_patterns.get(name)
     if isinstance(compatibility, list):
         allowed.update(item for item in compatibility if isinstance(item, str))
@@ -155,11 +155,11 @@ def _walk_schema_children(
     legacy_patterns: dict[str, object],
 ) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
-    for key in ("items", "definitions", "oneOf", "allOf", "if", "then"):
+    for key in ("items", "definitions", "$defs", "oneOf", "allOf", "if", "then"):
         child = node.get(key)
-        if key == "definitions" and isinstance(child, dict):
+        if key in {"definitions", "$defs"} and isinstance(child, dict):
             for definition_name, definition in child.items():
-                issues.extend(_walk_schema_identity(definition, path, f"{node_path}.definitions.{definition_name}", expected_pattern, brands, legacy_patterns))
+                issues.extend(_walk_schema_identity(definition, path, f"{node_path}.{key}.{definition_name}", expected_pattern, brands, legacy_patterns))
         elif isinstance(child, dict):
             issues.extend(_walk_schema_identity(child, path, f"{node_path}.{key}", expected_pattern, brands, legacy_patterns))
         elif isinstance(child, list):
@@ -191,7 +191,10 @@ def _legacy_duration_fields(policy: dict[str, object]) -> set[str]:
 def _python_tree_issues(tree: ast.AST, path: str, legacy_duration_fields: set[str]) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "NewType":
+        if isinstance(node, ast.Call) and (
+            (isinstance(node.func, ast.Name) and node.func.id == "NewType")
+            or (isinstance(node.func, ast.Attribute) and node.func.attr == "NewType")
+        ):
             issues.append(
                 PolicyIssue(
                     "manual_newtype_forbidden",
@@ -207,7 +210,12 @@ def _python_tree_issues(tree: ast.AST, path: str, legacy_duration_fields: set[st
 def _duration_annotation_issue(
     node: ast.AnnAssign | ast.arg, path: str, legacy_duration_fields: set[str]
 ) -> list[PolicyIssue]:
-    name = node.target.id if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) else node.arg
+    if isinstance(node, ast.AnnAssign):
+        if not isinstance(node.target, ast.Name):
+            return []
+        name = node.target.id
+    else:
+        name = node.arg
     if name in legacy_duration_fields or not name.endswith("_seconds"):
         return []
     annotation = node.annotation

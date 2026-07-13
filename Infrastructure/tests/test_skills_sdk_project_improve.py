@@ -13,7 +13,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import _sdk_improve_update_registry, skills_sdk_project_improve  # noqa: E402
+from ask.commands.skills_impl import _sdk_improve_project_root, _sdk_improve_update_registry, skills_sdk_project_improve  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -183,6 +183,13 @@ def _assert_apply_receipt_evidence(
 
 
 class TestSkillsSdkProjectImprove(unittest.TestCase):
+    def test_apply_requires_absolute_project_root(self) -> None:
+        self.assertIsNone(_sdk_improve_project_root("Infrastructure", REPO_ROOT, allow_relative=False))
+        self.assertEqual(
+            _sdk_improve_project_root("Infrastructure", REPO_ROOT, allow_relative=True),
+            (REPO_ROOT / "Infrastructure").resolve(),
+        )
+
     def test_preview_does_not_write_owner_repo_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_root, skill_md = _project_with_codex_skill(Path(tmp))

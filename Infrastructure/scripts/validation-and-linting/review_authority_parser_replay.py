@@ -12,6 +12,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
+import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -37,6 +40,7 @@ MUTATION_KEYS = {
     "credentials_accessed",
     "codex_exec_invoked",
 }
+PLACEHOLDER_ROOTS = ("/tmp/sample-project", "/path/to/")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -118,12 +122,32 @@ def _row_findings(row: Any, artifact_path: Path) -> list[dict[str, Any]]:
     if row.get("mutation_performed") is not False:
         findings.append({"severity": "blocker", "family": family, "message": "candidate row is not explicitly no-write", "evidence": [str(artifact_path)]})
     command = str(row.get("command", ""))
-    if any(token.startswith("<") and token.endswith(">") for token in command.split()):
-        findings.append({"severity": "blocker", "family": family, "message": "candidate command contains a template token", "evidence": [command]})
+    try:
+        argv = shlex.split(command)
+    except ValueError as exc:
+        findings.append({"severity": "blocker", "family": family, "message": f"candidate command cannot be parsed: {exc}", "evidence": [command]})
+        argv = []
+    if any(_is_placeholder_argument(argument) for argument in argv):
+        findings.append({"severity": "blocker", "family": family, "message": "candidate command contains a template or placeholder argument", "evidence": [command]})
     fixture = str(row.get("source_fixture", ""))
-    if fixture.startswith("/"):
-        findings.append({"severity": "blocker", "family": family, "message": "candidate fixture path is not repository-relative", "evidence": [fixture]})
+    if not _is_repo_relative_path(fixture):
+        findings.append({"severity": "blocker", "family": family, "message": "candidate fixture path is not a safe repository-relative path", "evidence": [fixture]})
     return findings
+
+
+def _is_placeholder_argument(argument: str) -> bool:
+    return bool(re.search(r"<[^>]+>", argument)) or any(argument.startswith(root) for root in PLACEHOLDER_ROOTS)
+
+
+def _is_repo_relative_path(value: str) -> bool:
+    if not value or Path(value).is_absolute():
+        return False
+    try:
+        resolved = (ROOT / value).resolve()
+        resolved.relative_to(ROOT.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def _artifact_shape_findings(artifact: dict[str, Any], selection: dict[str, Any], artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
@@ -131,6 +155,22 @@ def _artifact_shape_findings(artifact: dict[str, Any], selection: dict[str, Any]
     if artifact.get("schema_version") != "skills-sdk.authority-parser-replay-receipt.v1":
         findings.append({"severity": "blocker", "message": "candidate schema_version is incorrect", "evidence": [str(artifact_path)]})
     rows = artifact.get("commands")
+    if artifact.get("status") == "blocked":
+        return findings + _blocked_shape_findings(artifact, rows, artifact_path)
+    return findings + _pass_shape_findings(artifact, selection, rows, artifact_path, selection_path)
+
+
+def _blocked_shape_findings(artifact: dict[str, Any], rows: Any, artifact_path: Path) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    if not isinstance(rows, list) or rows:
+        findings.append({"severity": "blocker", "message": "blocked candidate must contain an empty commands array", "evidence": [str(artifact_path)]})
+    if artifact.get("command_count") != 0:
+        findings.append({"severity": "blocker", "message": "blocked candidate must declare command_count 0 when no commands were executed", "evidence": [str(artifact.get("command_count"))]})
+    return findings
+
+
+def _pass_shape_findings(artifact: dict[str, Any], selection: dict[str, Any], rows: Any, artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
     selected = selection.get("selected_preview_commands")
     if not isinstance(rows, list) or len(rows) != len(FAMILIES):
         findings.append({"severity": "blocker", "message": "candidate does not contain exactly eight command rows", "evidence": [str(artifact_path)]})
@@ -143,6 +183,8 @@ def _artifact_shape_findings(artifact: dict[str, Any], selection: dict[str, Any]
             findings.append({"severity": "blocker", "message": "candidate family set does not match the selected authority families", "evidence": [str(artifact_path)]})
         if len(set(commands)) != len(commands):
             findings.append({"severity": "blocker", "message": "candidate contains duplicate commands", "evidence": [str(artifact_path)]})
+        if artifact.get("command_count") != len(rows):
+            findings.append({"severity": "blocker", "message": "candidate command_count does not equal the commands array length", "evidence": [str(artifact.get("command_count")), str(len(rows))]})
         for row in rows:
             findings.extend(_row_findings(row, artifact_path))
     return findings
@@ -207,7 +249,10 @@ def _qa_findings(artifact_path: Path, selection_path: Path) -> list[dict[str, An
         "-q",
         "tests/test_skills_sdk_authority_parser_replay_receipt.py",
     ]
-    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=90, check=False)
+    environment = os.environ.copy()
+    environment["SKILLS_SDK_AUTHORITY_REPLAY_ARTIFACT"] = str(artifact_path)
+    environment["SKILLS_SDK_AUTHORITY_REPLAY_SELECTION"] = str(selection_path)
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=90, check=False, env=environment)
     if result.returncode != 0:
         findings.append({"severity": "blocker", "message": "focused receipt test failed", "evidence": [" ".join(command), result.stdout[-1000:], result.stderr[-1000:]]})
     return findings

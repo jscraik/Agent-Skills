@@ -25,7 +25,6 @@
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/evals/authority-replay.md",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule-routing.md",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule.manifest.yaml",
-    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-demand.yaml",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills-sdk.json",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills.lock.json",
     "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture/SKILL.md",
@@ -42,7 +41,7 @@
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
   ],
-  "source_tree_digest": "sha256:d694799a2a4bf012bb56367d01455fd36e6fcc25724d87873db420920ab7b843",
+  "source_tree_digest": "sha256:9fd763e82753ee2d5e36a5a02c16650d788cde53b4d69ecbfbfc136880da71e0",
   "source_surface": "Infrastructure/scripts/lib/ask/commands/sdk*.py",
   "inventory_command": "./bin/ask sdk evidence parser-families --preview --json --robot",
   "command_plan_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",

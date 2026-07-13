@@ -8629,12 +8629,17 @@ def _sdk_improve_receipt_slug(package_id: str, timestamp: str) -> str:
     return f"{safe_package}-{safe_time}"
 
 
-def _sdk_improve_project_root(project_root: str | None, repo_root: Path | None = None) -> Path | None:
+def _sdk_improve_project_root(
+    project_root: str | None,
+    repo_root: Path | None = None,
+    *,
+    allow_relative: bool = False,
+) -> Path | None:
     if not project_root:
         return None
     candidate = Path(project_root).expanduser()
     if not candidate.is_absolute():
-        if repo_root is None:
+        if not allow_relative or repo_root is None:
             return None
         candidate = repo_root / candidate
     try:
@@ -8899,7 +8904,7 @@ def skills_sdk_project_improve(
     result.metadata["command"] = "sdk improve --apply" if apply else "sdk improve --preview"
     query = target.strip()
     timestamp = _sdk_improve_timestamp()
-    resolved_project_root = _sdk_improve_project_root(project_root, repo_root)
+    resolved_project_root = _sdk_improve_project_root(project_root, repo_root, allow_relative=not apply)
     if resolved_project_root is None:
         receipt = {
             "schema_version": "skills-sdk.project-improvement-receipt.v0",
@@ -8919,7 +8924,7 @@ def skills_sdk_project_improve(
             query=query,
             status="blocked",
             message="Skills SDK improve requires an existing --project-root.",
-            fix_suggestion="Pass an existing project root containing skills-sdk.json; relative paths resolve against the repository root.",
+            fix_suggestion="Pass an existing absolute project root for apply; relative paths are accepted only for preview.",
             receipt=receipt,
         )
 

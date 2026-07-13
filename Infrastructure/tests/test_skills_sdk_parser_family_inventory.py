@@ -193,7 +193,7 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
         self.assertTrue(all(family["caller_consequence"] for family in receipt["families"]))
         self.assertEqual(
             {family["receipt_policy"]["disposition"] for family in receipt["families"]},
-            {"authority_bound_mutation", "explicit_run_receipt", "preview_replay"},
+            {"authority_bound_mutation", "explicit_run_receipt", "preview_replay", "template_requires_concrete_fixture"},
         )
         eval_family = next(family for family in receipt["families"] if family["id"] == "eval")
         self.assertEqual(eval_family["receipt_policy"]["disposition"], "authority_bound_mutation")
@@ -318,6 +318,8 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
 
     def test_policy_keeps_authority_and_fixture_requirements_separate(self) -> None:
         self.assertTrue(_requires_concrete_fixture(["ask sdk eval regression-plan --view-json <run-id> --preview"]))
+        self.assertTrue(_requires_concrete_fixture(["ask sdk improve --project-root /tmp/sample-project --preview"]))
+        self.assertTrue(_requires_concrete_fixture(["ask sdk improve --project-root /path/to/project --preview"]))
         self.assertEqual(
             _receipt_policy("eval", ["ask sdk eval regression-plan --view-json <run-id> --preview"]),
             "authority_bound_mutation",

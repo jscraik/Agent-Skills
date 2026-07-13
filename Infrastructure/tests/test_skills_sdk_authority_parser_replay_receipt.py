@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -14,12 +15,27 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 
 
-ARTIFACT_PATH = REPO_ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-receipt.v1.json"
+ARTIFACT_PATH = Path(os.environ.get("SKILLS_SDK_AUTHORITY_REPLAY_ARTIFACT", REPO_ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-receipt.v1.json"))
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/authority-parser-replay-receipt.v1.schema.json"
-SELECTION_PATH = REPO_ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-selection.json"
+SELECTION_PATH = Path(os.environ.get("SKILLS_SDK_AUTHORITY_REPLAY_SELECTION", REPO_ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-selection.json"))
 
 
 class TestSkillsSdkAuthorityParserReplayReceipt(unittest.TestCase):
+    def test_blocked_receipt_shape_is_schema_valid(self) -> None:
+        artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+        schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        artifact.update(
+            {
+                "status": "blocked",
+                "command_count": 0,
+                "commands": [],
+                "command_execution_performed": False,
+                "blocked_reason": "candidate fixture is unavailable",
+                "blocked_evidence": ["fixture_missing"],
+            }
+        )
+        _validate_schema_subset(schema, artifact, {SCHEMA_PATH.name: schema})
+
     def test_receipt_is_schema_valid_and_revision_bound(self) -> None:
         artifact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))

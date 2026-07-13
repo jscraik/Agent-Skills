@@ -13,19 +13,40 @@
     "source_selection_path": {"type": "string", "minLength": 1},
     "source_selection_schema": {"type": "string", "const": "skills-sdk.parser-family-authority-replay-selection.v1"},
     "source_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-    "command_count": {"type": "integer", "minimum": 1},
-    "commands": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/command"}},
+    "command_count": {"type": "integer", "minimum": 0},
+    "commands": {"type": "array", "items": {"$ref": "#/definitions/command"}},
     "execution_policy": {"type": "string", "const": "exact_repository_owned_preview_allowlist"},
     "mutation_performed": {"type": "boolean", "const": false},
-    "command_execution_performed": {"type": "boolean", "const": true},
+    "command_execution_performed": {"type": "boolean"},
     "network_accessed": {"type": "boolean", "const": false},
     "credentials_accessed": {"type": "boolean", "const": false},
     "excluded_dirty_state": {"type": "array", "items": {"type": "string", "minLength": 1}},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-006", "FR-008", "FR-010", "SA-003", "SA-004", "SA-020", "SA-021", "VP-021", "VP-022", "VP-025", "VP-030", "PU-010-TR-001", "PU-010-TR-002", "PU-010-TR-005", "PU-010-TR-007", "PU-010-TR-009", "PU-010-TR-010", "PU-010-TR-016", "PU-010-TR-017"]}},
     "does_not_prove": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "agent_summary": {"type": "string", "minLength": 1}
+    "agent_summary": {"type": "string", "minLength": 1},
+    "blocked_reason": {"type": "string", "minLength": 1},
+    "blocked_evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
   },
   "required": ["schema_version", "schema_uri", "status", "operation", "base_commit", "source_selection_path", "source_selection_schema", "source_tree_digest", "command_count", "commands", "execution_policy", "mutation_performed", "command_execution_performed", "network_accessed", "credentials_accessed", "excluded_dirty_state", "acceptance_trace", "does_not_prove", "agent_summary"],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "command_count": {"minimum": 1},
+          "commands": {"minItems": 1},
+          "command_execution_performed": {"const": true}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]},
+      "then": {
+        "required": ["blocked_reason", "blocked_evidence"],
+        "properties": {"command_execution_performed": {"const": false}}
+      }
+    }
+  ],
   "definitions": {
     "command": {
       "type": "object",

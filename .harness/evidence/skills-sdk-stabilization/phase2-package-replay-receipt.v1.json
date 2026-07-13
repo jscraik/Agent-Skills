@@ -4,7 +4,7 @@
   "status": "bounded_local_pass_independent_review_blocked",
   "captured_at": "2026-07-12T16:11:13Z",
   "revision": {
-    "base_head_sha": "26b061b74",
+    "base_head_sha": "26b061b74fd3b281df7c2c453619b975833dbb06",
     "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
     "identity_command": "git rev-parse HEAD"
   },
@@ -77,7 +77,10 @@
     "adversarial": {
       "status": "waived_by_explicit_user_authorization",
       "artifact": "codex review --uncommitted blocked before review process start",
-      "reason": "The user-authorized independent-review waiver applies to this bounded, locally proven stabilization slice; no independent pass is claimed."
+      "reason": "The user-authorized independent-review waiver applies to this bounded, locally proven stabilization slice; no independent pass is claimed.",
+      "rule_id": "independent-review-required",
+      "ticket_or_issue": "https://github.com/jscraik/Agent-Skills/pull/330",
+      "expiry_or_adr": "2026-07-20"
     }
   },
   "replay_receipt": {

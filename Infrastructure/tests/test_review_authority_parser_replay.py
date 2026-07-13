@@ -14,6 +14,7 @@ from review_authority_parser_replay import (  # noqa: E402
     EXPECTED_DATA_KEYS,
     FAMILIES,
     _adversarial_findings,
+    _artifact_shape_findings,
     _qa_findings,
     _worker_findings,
 )
@@ -24,6 +25,12 @@ SELECTION = ROOT / ".harness/evidence/handoff/skills-sdk-parser-families/authori
 
 
 class TestReviewAuthorityParserReplay(unittest.TestCase):
+    def test_blocked_candidate_can_skip_command_execution(self) -> None:
+        artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+        artifact.update({"status": "blocked", "command_count": 0, "commands": []})
+        findings = _artifact_shape_findings(artifact, json.loads(SELECTION.read_text(encoding="utf-8")), ARTIFACT, SELECTION)
+        self.assertEqual(findings, [])
+
     def _write_capture_dir(self, capture_dir: Path, *, mutation_family: str | None = None, missing_receipt_family: str | None = None) -> None:
         for family in FAMILIES:
             key = EXPECTED_DATA_KEYS[family]
@@ -70,6 +77,15 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             messages = [finding["message"] for finding in findings]
             self.assertTrue(any("Foundry extraction or source admission" in message for message in messages))
             self.assertTrue(any("hosted CI" in message for message in messages))
+
+    def test_review_rejects_mismatched_command_count(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_path = Path(temp_dir) / "artifact.json"
+            artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+            artifact["command_count"] = len(artifact["commands"]) + 1
+            artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+            findings = _adversarial_findings(artifact_path, SELECTION)
+            self.assertTrue(any("command_count" in finding["message"] for finding in findings))
 
 
 if __name__ == "__main__":

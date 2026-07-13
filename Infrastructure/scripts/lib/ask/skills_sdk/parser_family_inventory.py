@@ -449,14 +449,14 @@ def _requires_concrete_fixture(examples: list[str]) -> bool:
             argv = shlex.split(example)
         except ValueError:
             continue
-        if any(re.search(r"<[^>]+>", argument) for argument in argv):
+        if any(_is_placeholder_argument(argument) for argument in argv):
             return True
     return False
 
 
 def _receipt_policy_reason(disposition: str, requires_fixture: bool) -> str:
     if disposition == "template_requires_concrete_fixture":
-        return "At least one compatibility example contains a template token; replace it with a repository-owned fixture before replay."
+        return "At least one compatibility example contains a template token or placeholder root; replace it with a repository-owned fixture before replay."
     if disposition == "authority_bound_mutation":
         if requires_fixture:
             return "The family reaches an authority-bearing or execution path and includes a template token; replace it with a repository-owned fixture before obtaining a bounded mutation receipt."
