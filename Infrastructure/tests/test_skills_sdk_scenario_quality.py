@@ -837,6 +837,19 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
         self.assertEqual(payload["cases"][0]["eval_modes"], ["smoke"])
         self.assertIsInstance(payload["cases"][0]["deterministic_checks"], dict)
 
+    def test_yaml_fallback_omits_absent_evaluation_lane_policy(self) -> None:
+        real_import = __import__
+
+        def import_without_yaml(name: str, *args: object, **kwargs: object) -> object:
+            if name == "yaml":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        with mock.patch("builtins.__import__", side_effect=import_without_yaml):
+            payload = _yaml_safe_load(_plain_evals_yaml())
+
+        self.assertNotIn("evaluation_lane_policy", payload)
+
     def test_yaml_fallback_ignores_claims_and_parses_root_aligned_cases(self) -> None:
         real_import = __import__
 

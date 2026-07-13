@@ -229,6 +229,34 @@ class ProjectionIntegrityPluginCacheTests(TestCase):
             self.assertTrue(projected.is_symlink())
             self.assertEqual(projected.readlink().as_posix(), "references/contract.md")
 
+    def test_verify_accepts_symlink_into_excluded_fixture_tree(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="projection-plugin-excluded-link-") as tmp:
+            repo_root = Path(tmp) / "repo"
+            plugin = repo_root / "Plugins" / "demo"
+            package = plugin / "skills" / "router"
+            fixture = plugin / "fixtures" / "reference.md"
+            package.mkdir(parents=True)
+            fixture.parent.mkdir(parents=True)
+            fixture.write_text("fixture reference\n", encoding="utf-8")
+            (plugin / ".codex-plugin").mkdir(parents=True)
+            (plugin / ".codex-plugin" / "plugin.json").write_text('{"name":"demo","skills":"./skills/"}', encoding="utf-8")
+            (package / "SKILL.md").write_text("---\nname: router\ndescription: Route.\n---\n", encoding="utf-8")
+            (package / "fixture-link").symlink_to("../../fixtures/reference.md")
+            mirror = MirrorProjection(
+                name="cache-demo",
+                source_path="Plugins/demo",
+                projection_path=".agents/plugins-runtime/cache/demo",
+                tags=("plugin-caches",),
+                follow_symlinks=True,
+                replace_before_sync=True,
+                excluded_dir_names=("fixtures",),
+                plugin_cache_package=True,
+            )
+
+            sync_mirror(repo_root, mirror)
+
+            self.assertEqual("pass", verify_mirror(repo_root, mirror)["status"])
+
     def test_same_bytes_with_distinct_executable_bits_are_preserved(self) -> None:
         with tempfile.TemporaryDirectory(prefix="projection-plugin-mode-") as tmp:
             skills = Path(tmp) / "skills"

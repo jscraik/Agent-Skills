@@ -13,7 +13,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import _sdk_improve_update_registry, skills_sdk_project_improve  # noqa: E402
+from ask.commands.skills_impl import (  # noqa: E402
+    _sdk_improve_evidence_paths,
+    _sdk_improve_update_registry,
+    skills_sdk_project_improve,
+)
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -183,6 +187,19 @@ def _assert_apply_receipt_evidence(
 
 
 class TestSkillsSdkProjectImprove(unittest.TestCase):
+    def test_full_manifest_evidence_defaults_follow_output_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = Path(tmp) / "x-writer-canary"
+            manifest = _project_manifest_with_skill_roots()
+            manifest["evidence"] = {"output_path": ".harness/custom-evidence"}
+
+            paths = _sdk_improve_evidence_paths(project_root, manifest, "x-content-writer")
+
+        resolved_root = project_root.resolve()
+        self.assertEqual(paths["registry"], resolved_root / ".harness/custom-evidence/registry.json")
+        self.assertEqual(paths["events"], resolved_root / ".harness/custom-evidence/events.jsonl")
+        self.assertEqual(paths["receipt"], resolved_root / ".harness/custom-evidence/receipts/improvements/x-content-writer.json")
+
     def test_preview_does_not_write_owner_repo_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_root, skill_md = _project_with_codex_skill(Path(tmp))

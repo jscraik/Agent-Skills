@@ -31,6 +31,11 @@ class ProjectionApi(Protocol):
     def _replace_plugin_cache_package_copy(self, source: Path, projection: Path, *, follow_symlinks: bool, excluded_dir_names: Iterable[str], keep_duplicates: bool = False) -> tuple[int, int, list[str]]: ...
 
 
+def compare_symlinks(spec: object) -> bool:
+    """Compare package links by target when projections intentionally omit fixtures."""
+    return bool(spec.plugin_cache_package or not spec.follow_symlinks)
+
+
 def unsafe_package_symlinks(package_root: Path) -> list[dict[str, str]]:
     """Return fail-closed diagnostics for absolute, broken, or escaping links."""
     root = package_root.resolve()
