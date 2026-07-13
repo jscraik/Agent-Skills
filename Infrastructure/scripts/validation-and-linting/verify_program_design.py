@@ -42,7 +42,7 @@ PRODUCTION_PREFIXES = (
     "skills-system/",
 )
 EXCLUDED_PARTS: frozenset[str] = frozenset(
-    {".venv", "__pycache__", "fixtures", "references", "tests", "test"}
+    {".venv", "__pycache__", "fixtures", "references", "tests", "test", "testing"}
 )
 BROAD_EXCEPTION_NAMES: frozenset[str] = frozenset({"Exception", "BaseException"})
 MUTABLE_VALUE_NODES = (
@@ -56,7 +56,6 @@ MUTABLE_VALUE_NODES = (
 MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "defaultdict", "dict", "list", "set"})
 PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
 WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
-PUBLIC_DUNDER_NAMES = frozenset({"__init__", "__new__"})
 
 
 @dataclass(frozen=True)
@@ -111,6 +110,11 @@ def parse_args() -> argparse.Namespace:
         "--staged-source",
         action="store_true",
         help="Read staged index blobs for staged paths; use only for staged pre-commit validation.",
+    )
+    parser.add_argument(
+        "--source-ref",
+        default=None,
+        help="Read changed source blobs from this Git revision instead of the worktree.",
     )
     return parser.parse_args()
 
@@ -267,7 +271,7 @@ def _mutable_target_names(target: ast.expr, value: ast.expr | None) -> list[str]
         and len(target.elts) == len(value.elts)
     ):
         names: list[str] = []
-        for target_element, value_element in zip(target.elts, value.elts):
+        for target_element, value_element in zip(target.elts, value.elts, strict=True):
             names.extend(_mutable_target_names(target_element, value_element))
         return names
     if _is_mutable_value(value):
@@ -286,7 +290,7 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
         return None
 
     def visit_ClassDef(self, _node: ast.ClassDef) -> None:
-        return None
+        self.generic_visit(_node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
         self._record(node, node.targets, node.value)
@@ -331,7 +335,7 @@ class _PublicFunctionCollector(ast.NodeVisitor):
         self._record(node)
 
     def _record(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
-        if node.name.startswith("_") and node.name not in PUBLIC_DUNDER_NAMES:
+        if node.name.startswith("_") and not (node.name.startswith("__") and node.name.endswith("__")):
             return
         qualified_name = ".".join((*self.scope, node.name))
         self.functions.append((qualified_name, node, bool(self.scope) and not _is_staticmethod(node)))
@@ -409,20 +413,31 @@ def _staged_paths() -> frozenset[str]:
     return frozenset(line for line in result.stdout.splitlines() if line)
 
 
-def _current_source_text(path: Path, *, staged_source: bool = False) -> str:
+def _current_source_text(
+    path: Path,
+    *,
+    staged_source: bool = False,
+    source_ref: str | None = None,
+) -> str:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if not staged_source or relpath not in _staged_paths():
+    if source_ref is not None:
+        revision_path = f"{source_ref}:{relpath}"
+        error_prefix = "source revision"
+    elif not staged_source or relpath not in _staged_paths():
         return path.read_text(encoding="utf-8")
+    else:
+        revision_path = f":{relpath}"
+        error_prefix = "staged source"
     result = subprocess.run(
-        ["git", "show", f":{relpath}"],
+        ["git", "show", revision_path],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
     if result.returncode != 0:
-        detail = result.stderr.strip() or "staged file could not be read"
-        raise BaselineUnavailable(f"staged source lookup failed for {relpath}: {detail}")
+        detail = result.stderr.strip() or f"{error_prefix} file could not be read"
+        raise BaselineUnavailable(f"{error_prefix} lookup failed for {relpath}: {detail}")
     return result.stdout
 
 
@@ -430,7 +445,27 @@ def _baseline_path(relpath: str, revision: str) -> str:
     staged_path = _rename_map(revision, staged=True).get(relpath)
     if staged_path:
         return staged_path
-    return _rename_map(revision, staged=False).get(relpath, relpath)
+    renamed_path = _rename_map(revision, staged=False).get(relpath)
+    if renamed_path and _is_production_baseline_path(renamed_path, revision):
+        return renamed_path
+    return relpath
+
+
+def _is_production_baseline_path(relpath: str, revision: str) -> bool:
+    path = REPO_ROOT / relpath
+    source_text = None
+    if not relpath.endswith((".py", ".pyw")):
+        result = subprocess.run(
+            ["git", "show", f"{revision}:{relpath}"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return False
+        source_text = result.stdout
+    return _is_production_python(relpath, path=path, source_text=source_text)
 
 
 def _git_revision_text(path: Path, revision: str) -> str | None:
@@ -569,20 +604,26 @@ def _is_changed_production_python(
     staged_paths: frozenset[str],
     *,
     staged_source: bool,
+    source_ref: str | None,
 ) -> bool:
     is_staged = normalized in staged_paths
-    if not path.is_file() and not is_staged:
+    if not path.is_file() and not is_staged and source_ref is None:
         return False
     source_text = None
     if not normalized.endswith((".py", ".pyw")):
         try:
-            source_text = _current_source_text(path, staged_source=staged_source)
+            if source_ref is None:
+                source_text = _current_source_text(path, staged_source=staged_source)
+            else:
+                source_text = _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
         except UnicodeDecodeError:
             source_text = ""
     return _is_production_python(normalized, path=path, source_text=source_text)
 
 
-def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
+def _changed_paths(
+    changed_files: tuple[str, ...], *, staged_source: bool = False, source_ref: str | None = None
+) -> list[Path]:
     if not changed_files:
         tracked = subprocess.run(
             ["git", "ls-files"],
@@ -605,7 +646,9 @@ def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = Fals
             path.relative_to(REPO_ROOT)
         except ValueError:
             continue
-        if _is_changed_production_python(normalized, path, staged_paths, staged_source=staged_source):
+        if _is_changed_production_python(
+            normalized, path, staged_paths, staged_source=staged_source, source_ref=source_ref
+        ):
             paths.append(path)
     return sorted(set(paths))
 
@@ -633,16 +676,21 @@ def _scan_paths(
     max_public_parameters: int,
     *,
     staged_source: bool,
+    source_ref: str | None,
 ) -> tuple[int, list[str]]:
     issues: list[str] = []
-    paths = _changed_paths(changed_files, staged_source=staged_source)
+    paths = _changed_paths(changed_files, staged_source=staged_source, source_ref=source_ref)
     for path in paths:
         relpath = path.relative_to(REPO_ROOT).as_posix()
         baseline_text = _git_revision_text(path, baseline_ref)
         issues.extend(
             _check_source(
                 relpath,
-                _current_source_text(path, staged_source=staged_source),
+                (
+                    _current_source_text(path, staged_source=staged_source)
+                    if source_ref is None
+                    else _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
+                ),
                 baseline_text,
                 max_public_parameters=max_public_parameters,
             )
@@ -677,6 +725,7 @@ def main() -> int:
             baseline_ref,
             max(1, int(args.max_public_parameters)),
             staged_source=args.staged_source,
+            source_ref=args.source_ref,
         )
     except BaselineUnavailable as exc:
         print(f"Program design verification blocked: {exc}")

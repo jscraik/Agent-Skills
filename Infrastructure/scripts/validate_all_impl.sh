@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--staged-source] [--scope <name>] [--changed-files <file>...] [--changed-files-from <path>]
+Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--staged-source] [--head-source] [--scope <name>] [--changed-files <file>...] [--changed-files-from <path>]
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
@@ -14,6 +14,9 @@ Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [-
   --staged-source
                 Validate staged Git index blobs for the program-design check.
                 Only use this from the pre-commit staged validation lane.
+  --head-source Validate HEAD Git blobs for the program-design check. Use this
+                from pre-push validation so dirty worktree edits cannot mask a
+                violation in the pushed commit.
   --scope       Run a named validation subset. Valid scopes: all, lint,
                 typecheck, test, audit, check, skills-sdk,
                 consistency-advisory, consistency-health.
@@ -28,6 +31,7 @@ EOF
 output_mode="${VALIDATE_ALL_OUTPUT_MODE:-persistent}"
 fail_fast=0
 staged_source_mode=0
+head_source_mode=0
 validation_scope="all"
 changed_files=()
 changed_files_mode=0
@@ -46,6 +50,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --staged-source)
       staged_source_mode=1
+      ;;
+    --head-source)
+      head_source_mode=1
       ;;
     --scope)
       shift
@@ -723,6 +730,9 @@ schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity...
 program_design_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_program_design.py)
 if [[ "$staged_source_mode" -eq 1 ]]; then
   program_design_cmd+=(--staged-source)
+fi
+if [[ "$head_source_mode" -eq 1 ]]; then
+  program_design_cmd+=(--source-ref HEAD)
 fi
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   program_design_cmd+=(--changed-files "${changed_files[@]}")

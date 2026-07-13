@@ -38,7 +38,7 @@ class TestProgramDesign(unittest.TestCase):
 
     def test_boolean_default_findings_require_aligned_arguments(self) -> None:
         validator = _load_validator()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="same length"):
             validator._boolean_default_findings("run", [], [None])
 
     def test_existing_wide_interface_is_ratchet_only(self) -> None:
@@ -304,6 +304,28 @@ class Public:
             validator._check_source("Infrastructure/scripts/example.py", source, "")
         ))
 
+    def test_public_protocol_dunders_are_checked(self) -> None:
+        validator = _load_validator()
+        source = """
+class CallableService:
+    def __call__(self, enabled=False):
+        return enabled
+"""
+        metrics = validator._metrics(source)
+        self.assertEqual(set(metrics.public_parameters), {"CallableService.__call__"})
+        self.assertIn(
+            "CallableService.__call__(enabled=bool)",
+            "\n".join(validator._check_source("Infrastructure/scripts/example.py", source, "")),
+        )
+
+    def test_class_attributes_are_checked_for_shared_mutable_state(self) -> None:
+        validator = _load_validator()
+        source = "class Registry:\n    cache = {}\n"
+        self.assertIn(
+            "module mutable state cache",
+            "\n".join(validator._check_source("Infrastructure/scripts/example.py", source, "")),
+        )
+
     def test_staticmethod_first_self_parameter_is_counted(self) -> None:
         validator = _load_validator()
         source = """
@@ -358,14 +380,37 @@ class Factory:
         validator = _load_validator()
         validator._rename_map.cache_clear()
         staged_result = mock.Mock(returncode=0, stdout="", stderr="")
-        non_staged_result = mock.Mock(returncode=0, stdout="R100\told.py\tnew.py\n", stderr="")
+        non_staged_result = mock.Mock(
+            returncode=0,
+            stdout="R100\tInfrastructure/scripts/old.py\tInfrastructure/scripts/new.py\n",
+            stderr="",
+        )
 
         with mock.patch.object(validator.subprocess, "run", side_effect=[staged_result, non_staged_result]) as run:
-            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
+            self.assertEqual(
+                validator._baseline_path("Infrastructure/scripts/new.py", "origin/main"),
+                "Infrastructure/scripts/old.py",
+            )
 
         self.assertEqual(run.call_count, 2)
         self.assertIn("--cached", run.call_args_list[0].args[0])
         self.assertNotIn("--cached", run.call_args_list[1].args[0])
+
+    def test_baseline_path_does_not_carry_excluded_rename_baseline(self) -> None:
+        validator = _load_validator()
+        validator._rename_map.cache_clear()
+        staged_result = mock.Mock(returncode=0, stdout="", stderr="")
+        non_staged_result = mock.Mock(
+            returncode=0,
+            stdout="R100\tInfrastructure/tests/helper.py\tInfrastructure/scripts/helper.py\n",
+            stderr="",
+        )
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_result, non_staged_result]):
+            self.assertEqual(
+                validator._baseline_path("Infrastructure/scripts/helper.py", "origin/main"),
+                "Infrastructure/scripts/helper.py",
+            )
 
     def test_current_source_text_reads_staged_blob(self) -> None:
         validator = _load_validator()
@@ -397,6 +442,16 @@ class Factory:
         read_text.assert_called_once_with(encoding="utf-8")
         run.assert_not_called()
 
+    def test_current_source_text_reads_explicit_source_revision(self) -> None:
+        validator = _load_validator()
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example.py"
+        source = mock.Mock(returncode=0, stdout="def run(value):\n    return value\n", stderr="")
+        with mock.patch.object(validator.subprocess, "run", return_value=source) as run:
+            result = validator._current_source_text(path, source_ref="HEAD")
+
+        self.assertEqual(result, source.stdout)
+        self.assertEqual(run.call_args.args[0], ["git", "show", "HEAD:Infrastructure/scripts/example.py"])
+
     def test_staged_source_selects_deleted_extensionless_python_path(self) -> None:
         validator = _load_validator()
         relpath = "Infrastructure/scripts/staged_deleted_program_design_fixture"
@@ -423,6 +478,10 @@ class Factory:
     def test_fixture_trees_are_not_selected_as_production_python(self) -> None:
         validator = _load_validator()
         self.assertFalse(validator._is_production_python("Plugins/harness-engineering/fixtures/scripts/run.py"))
+
+    def test_testing_support_trees_are_not_selected_as_production_python(self) -> None:
+        validator = _load_validator()
+        self.assertFalse(validator._is_production_python("Infrastructure/scripts/testing/support.py"))
 
     def test_pyw_without_shebang_is_selected(self) -> None:
         validator = _load_validator()
