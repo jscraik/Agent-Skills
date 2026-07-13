@@ -39,6 +39,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "explorer", "static", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "emitter", "preview", "--skill", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "ci", "policy", "--risk-tier", "high", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "package", "harden", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "--help"),
 }
 MUTATION_KEYS = frozenset(

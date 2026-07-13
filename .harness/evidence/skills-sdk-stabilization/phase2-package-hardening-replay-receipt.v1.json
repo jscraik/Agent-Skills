@@ -1,0 +1,50 @@
+{
+  "schema_version": "skills-sdk.phase2-package-hardening-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T03:09:22Z",
+  "base_head_sha": "1dc6ee4d879e2901b82aa4c09fe3c030d64366eb",
+  "scope": "read-only package hardening receipt command admission",
+  "allowlisted_argv": "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_package_hardening_replay.py"
+  ],
+  "source_digest": "sha256:83512530b2d2ea5141f3e651c032a43bda5008f477aa98981439f3e714351e3a",
+  "test_digest": "sha256:a5de246b6c1d0f0274c7e5fd16fa1eee6fa5373a7b817847a63b5ba259eaf391",
+  "patch_digest": "sha256:0834cf9a5caf8df997be0decdfa81162967c90a809a895d038a224eadd558db0",
+  "behavior_proof": {
+    "receipt_status": "pass",
+    "package_id": "skills-sdk-valid-fixture",
+    "included_files": [
+      "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+      "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+    ],
+    "mutation_performed": false,
+    "network_accessed": false,
+    "altered_apply_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/package-hardening-worker.md",
+    "qa": "artifacts/reviews/package-hardening-qa.md",
+    "adversarial": "artifacts/reviews/package-hardening-adversarial.md",
+    "worker_runtime_recovery": "one artifact-only retry after child runtime stall"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 26,
+    "blocked_unsafe": 17,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: ./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot -> pass (status=pass; mutation_performed=false; two included source files)",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot; after=$(git status --porcelain); test \"$before\" = \"$after\" -> pass (hardening left the worktree unchanged)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_package_hardening_replay.py tests/test_skills_sdk_package_hardening.py tests/test_skills_sdk_stabilization_replay.py::TestPrivateStabilizationReplay::test_replay_is_terminal_and_deny_by_default -> pass (9 passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_package_hardening_replay.py -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_package_hardening_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: PYTHONPATH=/private/tmp/agent-skills-emitter-reconcile/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-emitter-reconcile --output /private/tmp/agent-skills-emitter-reconcile/.harness/evidence/skills-sdk-stabilization/phase2-package-hardening-private-replay.json -> pass (26 executed_pass; 17 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<independent QA prompt>' < /tmp/agent-skills-package-hardening-candidate.patch -> pass (QA_PASS_NO_FINDINGS)",
+    "Command: ollama run h4rithd/coder:14b '<independent adversarial prompt>' < /tmp/agent-skills-package-hardening-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No archive emission, signing, installation, publication, Foundry extraction, source admission, apply behavior, Tessl/CircleCI mutation, merge, or release-readiness claim follows."
+}
