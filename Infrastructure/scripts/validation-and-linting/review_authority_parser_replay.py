@@ -78,6 +78,17 @@ def _capture_receipt(body: dict[str, Any]) -> dict[str, Any] | None:
     )
 
 
+def _capture_no_write_findings(receipt: dict[str, Any], family: str, output_path: Path) -> list[dict[str, Any]]:
+    missing = sorted(key for key in MUTATION_KEYS if key not in receipt)
+    non_false = sorted(key for key in MUTATION_KEYS if key in receipt and receipt[key] is not False)
+    findings: list[dict[str, Any]] = []
+    if missing:
+        findings.append({"severity": "blocker", "family": family, "message": f"nested receipt omits explicit no-write fields: {', '.join(missing)}", "evidence": [str(output_path)]})
+    if non_false:
+        findings.append({"severity": "blocker", "family": family, "message": f"nested receipt no-write fields are not false: {', '.join(non_false)}", "evidence": [str(output_path)]})
+    return findings
+
+
 def _capture_findings(capture_dir: Path, family: str) -> list[dict[str, Any]]:
     output_path = capture_dir / f"{family}.json"
     exit_path = capture_dir / f"{family}.exit"
@@ -101,8 +112,11 @@ def _capture_findings(capture_dir: Path, family: str) -> list[dict[str, Any]]:
         findings.append({"severity": "blocker", "family": family, "message": f"expected data key {key!r} is missing", "evidence": [str(output_path)]})
         return findings
     body = data[key]
-    if _capture_receipt(body) is None:
+    receipt = _capture_receipt(body)
+    if receipt is None:
         findings.append({"severity": "blocker", "family": family, "message": "nested receipt schema_version/status is missing or invalid", "evidence": [str(output_path)]})
+    else:
+        findings.extend(_capture_no_write_findings(receipt, family, output_path))
     findings.extend(
         {"severity": "blocker", "family": family, "message": f"mutation or external-access flag is true: {flag}", "evidence": [str(output_path)]}
         for flag in _walk_mutation_flags(body, f"$.data.{key}")
@@ -139,7 +153,7 @@ def _is_placeholder_argument(argument: str) -> bool:
     return bool(re.search(r"<[^>]+>", argument)) or any(argument.startswith(root) for root in PLACEHOLDER_ROOTS)
 
 
-def _is_repo_relative_path(value: str) -> bool:
+def _is_repo_relative_path(value: str, *, require_file: bool = False) -> bool:
     if not value or Path(value).is_absolute():
         return False
     try:
@@ -147,7 +161,30 @@ def _is_repo_relative_path(value: str) -> bool:
         resolved.relative_to(ROOT.resolve())
     except (OSError, ValueError):
         return False
-    return True
+    return resolved.is_file() if require_file else resolved.exists()
+
+
+def _command_argv(command: Any) -> list[str] | None:
+    try:
+        argv = shlex.split(str(command))
+    except ValueError:
+        return None
+    if argv and argv[0] == "ask":
+        argv[0] = "./bin/ask"
+    return argv
+
+
+def _row_binding_findings(rows: list[Any], selected: Any, artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
+    if not isinstance(selected, list):
+        return []
+    findings: list[dict[str, Any]] = []
+    for index, (row, expected) in enumerate(zip(rows, selected)):
+        if not isinstance(row, dict) or not isinstance(expected, dict):
+            findings.append({"severity": "blocker", "message": f"candidate row {index} cannot be bound to a selected preview row", "evidence": [str(artifact_path), str(selection_path)]})
+            continue
+        if row.get("family") != expected.get("family") or _command_argv(row.get("command")) != _command_argv(expected.get("command")):
+            findings.append({"severity": "blocker", "message": f"candidate row {index} command does not exactly match the selected preview row", "evidence": [str(row.get("command")), str(expected.get("command"))]})
+    return findings
 
 
 def _artifact_shape_findings(artifact: dict[str, Any], selection: dict[str, Any], artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
@@ -185,6 +222,7 @@ def _pass_shape_findings(artifact: dict[str, Any], selection: dict[str, Any], ro
             findings.append({"severity": "blocker", "message": "candidate contains duplicate commands", "evidence": [str(artifact_path)]})
         if artifact.get("command_count") != len(rows):
             findings.append({"severity": "blocker", "message": "candidate command_count does not equal the commands array length", "evidence": [str(artifact.get("command_count")), str(len(rows))]})
+        findings.extend(_row_binding_findings(rows, selected, artifact_path, selection_path))
         for row in rows:
             findings.extend(_row_findings(row, artifact_path))
     return findings
@@ -234,6 +272,8 @@ def _git_is_ancestor(base_commit: str, head: str) -> bool:
 def _source_tree_digest(source_files: list[str]) -> str:
     digest = hashlib.sha256()
     for path in sorted(source_files):
+        if not _is_repo_relative_path(path, require_file=True):
+            raise OSError(f"declared source file is not a safe existing repository-relative file: {path}")
         digest.update(path.encode())
         digest.update(b"\0")
         digest.update((ROOT / path).read_bytes())

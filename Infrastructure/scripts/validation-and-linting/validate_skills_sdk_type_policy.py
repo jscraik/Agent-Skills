@@ -149,8 +149,14 @@ def _identity_property_issues(
     if isinstance(compatibility, list):
         allowed.update(item for item in compatibility if isinstance(item, str))
     declared_pattern = child.get("pattern")
-    if declared_pattern is None and ".then" in node_path:
-        return []
+    if not (child.get("type") == "string" or child.get("type") == ["string", "null"]):
+        return [
+            PolicyIssue(
+                "identity_schema_type",
+                f"{name} must declare JSON Schema type string",
+                f"{path}:{node_path}.{name}",
+            )
+        ]
     if declared_pattern in allowed:
         return []
     return [

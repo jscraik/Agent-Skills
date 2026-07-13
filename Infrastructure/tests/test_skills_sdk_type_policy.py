@@ -79,6 +79,25 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
             )
         self.assertIn("unbranded_identity_schema", {issue.code for issue in issues})
 
+    def test_conditional_identity_requires_brand_and_string_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            id_schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json"
+            id_schema_path.write_text((REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json").read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/conditional.schema.json"
+            schema_path.parent.mkdir(parents=True, exist_ok=True)
+            schema_path.write_text(
+                json.dumps({"type": "object", "then": {"properties": {"request_id": {"type": "integer", "pattern": "^rq_[a-z0-9]{12,32}$"}, "trace_id": {"type": "string"}}}}),
+                encoding="utf-8",
+            )
+            issues = self.validator.validate_paths(temp_root, ("Infrastructure/config/schemas/skills-sdk/conditional.schema.json",))
+        codes = {issue.code for issue in issues}
+        self.assertIn("identity_schema_type", codes)
+        self.assertIn("unbranded_identity_schema", codes)
+
     def test_manual_newtype_and_unitless_duration_fail(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-bad.py"
         path.write_text(

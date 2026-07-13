@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "Infrastructure" / "scripts" / "validation-and-lin
 from review_authority_parser_replay import (  # noqa: E402
     EXPECTED_DATA_KEYS,
     FAMILIES,
+    MUTATION_KEYS,
     _adversarial_findings,
     _artifact_shape_findings,
     _qa_findings,
@@ -34,7 +35,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
     def _write_capture_dir(self, capture_dir: Path, *, mutation_family: str | None = None, missing_receipt_family: str | None = None) -> None:
         for family in FAMILIES:
             key = EXPECTED_DATA_KEYS[family]
-            receipt = {"schema_version": f"fixture.{family}.v1", "status": "preview", "mutation_performed": False}
+            receipt = {"schema_version": f"fixture.{family}.v1", "status": "preview", **{key: False for key in MUTATION_KEYS}}
             if family == missing_receipt_family:
                 body = {"result": "missing-receipt"}
             else:
@@ -60,6 +61,17 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             messages = [finding["message"] for finding in findings]
             self.assertTrue(any("mutation or external-access flag" in message for message in messages))
             self.assertTrue(any("nested receipt schema_version/status" in message for message in messages))
+
+    def test_worker_review_rejects_partial_no_write_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "eval.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            del payload["data"][EXPECTED_DATA_KEYS["eval"]]["receipt"]["network_accessed"]
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+            findings = _worker_findings(capture_dir)
+            self.assertTrue(any("omits explicit no-write fields" in finding["message"] for finding in findings))
 
     def test_qa_review_accepts_candidate_and_focused_test(self) -> None:
         self.assertEqual(_qa_findings(ARTIFACT, SELECTION), [])
@@ -95,6 +107,33 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             selection_path.write_text(json.dumps(selection), encoding="utf-8")
             findings = _adversarial_findings(ARTIFACT, selection_path)
             self.assertTrue(any("source_files" in finding["message"] for finding in findings))
+
+    def test_review_rejects_candidate_command_not_bound_to_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_path = Path(temp_dir) / "artifact.json"
+            artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+            artifact["commands"][0]["command"] += " --unexpected"
+            artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+            findings = _adversarial_findings(artifact_path, SELECTION)
+            self.assertTrue(any("does not exactly match the selected preview row" in finding["message"] for finding in findings))
+
+    def test_review_rejects_missing_source_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_path = Path(temp_dir) / "artifact.json"
+            artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+            artifact["commands"][0]["source_fixture"] = "Infrastructure/tests/fixtures/skills_sdk/does-not-exist"
+            artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+            findings = _adversarial_findings(artifact_path, SELECTION)
+            self.assertTrue(any("fixture path is not a safe" in finding["message"] for finding in findings))
+
+    def test_review_rejects_unsafe_source_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            selection_path = Path(temp_dir) / "selection.json"
+            selection = json.loads(SELECTION.read_text(encoding="utf-8"))
+            selection["source_files"] = ["../outside-repo.py"]
+            selection_path.write_text(json.dumps(selection), encoding="utf-8")
+            findings = _adversarial_findings(ARTIFACT, selection_path)
+            self.assertTrue(any("declared source digest could not be recomputed" in finding["message"] for finding in findings))
 
 
 if __name__ == "__main__":

@@ -108,7 +108,7 @@
         "properties": {
           "run_receipt_path": {"type": "string"},
           "run_receipt_digest": {"type": "string"},
-          "experiment_id": {"type": "string"},
+          "experiment_id": {"type": "string", "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"},
           "judge_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"},
           "rubric_id": {"type": "string"},
           "rubric_digest": {"type": "string"},
