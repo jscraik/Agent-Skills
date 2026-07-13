@@ -63,6 +63,11 @@ class Finding:
     line: int
     key: str
     detail: str
+    waiver_key: str | None = None
+
+    @property
+    def effective_waiver_key(self) -> str:
+        return self.waiver_key or self.key
 
 
 @dataclass(frozen=True)
@@ -195,7 +200,14 @@ def _broad_exceptions(tree: ast.AST) -> list[Finding]:
             continue
         for name in _exception_names(node.type):
             if name in BROAD_EXCEPTION_NAMES or name == "bare":
-                findings.append(Finding(node.lineno, name, f"except {name}"))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        name,
+                        f"except {name}",
+                        f"{name}@{node.lineno}:{node.col_offset}",
+                    )
+                )
     return findings
 
 
@@ -211,6 +223,8 @@ def _global_statements(tree: ast.AST) -> list[Finding]:
 def _target_names(node: ast.AST) -> list[str]:
     if isinstance(node, ast.Name):
         return [node.id]
+    if isinstance(node, ast.Starred):
+        return _target_names(node.value)
     if isinstance(node, (ast.Tuple, ast.List)):
         names: list[str] = []
         for element in node.elts:
@@ -229,6 +243,21 @@ def _is_mutable_value(value: ast.expr | None) -> bool:
         and isinstance(value.func, ast.Name)
         and value.func.id in MUTABLE_CONSTRUCTOR_NAMES
     )
+
+
+def _mutable_target_names(target: ast.expr, value: ast.expr | None) -> list[str]:
+    if (
+        isinstance(target, (ast.Tuple, ast.List))
+        and isinstance(value, (ast.Tuple, ast.List))
+        and len(target.elts) == len(value.elts)
+    ):
+        names: list[str] = []
+        for target_element, value_element in zip(target.elts, value.elts):
+            names.extend(_mutable_target_names(target_element, value_element))
+        return names
+    if _is_mutable_value(value):
+        return _target_names(target)
+    return []
 
 
 class _ModuleMutableStateVisitor(ast.NodeVisitor):
@@ -253,10 +282,8 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def _record(self, node: ast.AST, targets: list[ast.expr], value: ast.expr | None) -> None:
-        if not _is_mutable_value(value):
-            return
         for target in targets:
-            for name in _target_names(target):
+            for name in _mutable_target_names(target, value):
                 if name == "__all__":
                     continue
                 self.findings.append(Finding(node.lineno, name, f"module mutable state {name}"))
@@ -438,8 +465,12 @@ def _check_waiver_metadata(
 
 
 def _is_waived(
-    relpath: str, rule_id: str, finding_key: str, waivers: Mapping[str, Mapping[str, str]] | None
+    relpath: str,
+    rule_id: str,
+    finding: Finding | str,
+    waivers: Mapping[str, Mapping[str, str]] | None,
 ) -> bool:
+    finding_key = finding.effective_waiver_key if isinstance(finding, Finding) else finding
     return f"{relpath}:{rule_id}:{finding_key}" in (waivers or PROGRAM_DESIGN_WAIVERS)
 
 
@@ -474,7 +505,7 @@ def _check_smells(
     issues: list[str] = []
     for label, rule_id, current_findings, baseline_findings in checks:
         for finding in _new_findings(current_findings, baseline_findings):
-            if _is_waived(relpath, rule_id, finding.key, waivers):
+            if _is_waived(relpath, rule_id, finding, waivers):
                 continue
             issues.append(f"{relpath}:{finding.line}:{label}: {finding.detail}")
     return issues
@@ -518,6 +549,25 @@ def _check_source(
     return issues
 
 
+def _is_changed_production_python(
+    normalized: str,
+    path: Path,
+    staged_paths: frozenset[str],
+    *,
+    staged_source: bool,
+) -> bool:
+    is_staged = normalized in staged_paths
+    if not path.is_file() and not is_staged:
+        return False
+    source_text = None
+    if not normalized.endswith((".py", ".pyw")):
+        try:
+            source_text = _current_source_text(path, staged_source=staged_source)
+        except UnicodeDecodeError:
+            source_text = ""
+    return _is_production_python(normalized, path=path, source_text=source_text)
+
+
 def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
     if not changed_files:
         tracked = subprocess.run(
@@ -531,6 +581,7 @@ def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = Fals
             detail = tracked.stderr.strip() or "tracked file list could not be read"
             raise BaselineUnavailable(f"production file discovery failed: {detail}")
         changed_files = tuple(line for line in tracked.stdout.splitlines() if line)
+    staged_paths = _staged_paths() if staged_source else frozenset()
     paths: list[Path] = []
     for relpath in changed_files:
         normalized = relpath.removeprefix("./")
@@ -540,13 +591,7 @@ def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = Fals
             path.relative_to(REPO_ROOT)
         except ValueError:
             continue
-        source_text = None
-        if path.is_file() and not normalized.endswith((".py", ".pyw")):
-            try:
-                source_text = _current_source_text(path, staged_source=staged_source)
-            except UnicodeDecodeError:
-                source_text = ""
-        if path.is_file() and _is_production_python(normalized, path=path, source_text=source_text):
+        if _is_changed_production_python(normalized, path, staged_paths, staged_source=staged_source):
             paths.append(path)
     return sorted(set(paths))
 

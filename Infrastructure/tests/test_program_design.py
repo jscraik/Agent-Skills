@@ -70,6 +70,17 @@ class TestProgramDesign(unittest.TestCase):
         self.assertIn("module mutable state cache", rendered)
         self.assertIn("module mutable state items", rendered)
 
+    def test_tuple_unpacked_mutable_state_pairs_targets_with_values(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "cache, version = {}, 1\n",
+            "",
+        )
+        rendered = "\n".join(issues)
+        self.assertIn("module mutable state cache", rendered)
+        self.assertNotIn("module mutable state version", rendered)
+
     def test_uppercase_mutable_state_is_rejected(self) -> None:
         validator = _load_validator()
         issues = validator._check_source(
@@ -147,6 +158,29 @@ class TestProgramDesign(unittest.TestCase):
         source = "def run(value):\n    try:\n        return value\n    except Exception:\n        return None\n"
 
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", "\n" + source, source), [])
+
+    def test_broad_exception_waiver_is_scoped_to_one_handler(self) -> None:
+        validator = _load_validator()
+        source = """try:
+    first()
+except Exception:
+    pass
+
+try:
+    second()
+except Exception:
+    pass
+"""
+        metrics = validator._metrics(source)
+        first, second = metrics.broad_exceptions
+        self.assertNotEqual(first.effective_waiver_key, second.effective_waiver_key)
+        waivers = {
+            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
+        }
+
+        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
+
+        self.assertEqual("\n".join(issues).count("broad exception handler"), 1)
 
     def test_waiver_is_scoped_to_one_finding(self) -> None:
         validator = _load_validator()
@@ -314,6 +348,19 @@ class Public:
         self.assertEqual(source, "worktree source")
         read_text.assert_called_once_with(encoding="utf-8")
         run.assert_not_called()
+
+    def test_staged_source_selects_deleted_extensionless_python_path(self) -> None:
+        validator = _load_validator()
+        relpath = "Infrastructure/scripts/staged_deleted_program_design_fixture"
+        path = validator.REPO_ROOT / relpath
+        with (
+            mock.patch.object(validator, "_staged_paths", return_value=frozenset({relpath})),
+            mock.patch.object(validator, "_current_source_text", return_value="#!/usr/bin/env python3\n") as source_text,
+        ):
+            paths = validator._changed_paths((relpath,), staged_source=True)
+
+        self.assertEqual(paths, [path])
+        source_text.assert_called_once_with(path, staged_source=True)
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
