@@ -1,0 +1,61 @@
+{
+  "schema_version": "skills-sdk.phase2-remaining-queue-after-signing-intent-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T08:20:00Z",
+  "base_head_sha": "ba4bc051d81bdc2c81946953eec62bce57c7280a",
+  "latest_completed_checkpoint": {
+    "command": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-signing-intent-fixture-replay-receipt.v1.json",
+    "status": "executed_pass",
+    "evidence": [
+      "skills-sdk.package-signing-intent.v1",
+      "package_digest_pinned:current",
+      "mutation_performed:false",
+      "signing_performed:false",
+      "artifact_written:false",
+      "stale_policy_negative:blocked"
+    ]
+  },
+  "remaining_rows": [
+    {
+      "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "status": "blocked_missing_artifact",
+      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> fail (path missing)",
+      "nearest_safe_proof": "The exact argv remains deny-by-default; no review execution is admitted without a valid handoff fixture."
+    },
+    {
+      "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "status": "blocked_missing_artifact",
+      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> fail (path missing)",
+      "nearest_safe_proof": "The exact argv remains deny-by-default; verification is not replayable against a missing handoff."
+    },
+    {
+      "command": "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "status": "blocked_policy",
+      "evidence": "evals-router boundary -> blocked (actual runner execution requires stronger trace and calibration proof)",
+      "nearest_safe_proof": "The command remains deny-by-default; local eval profile and preview receipts do not prove runner execution."
+    },
+    {
+      "command": "ask sdk eval ab-run --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --execute --json --robot",
+      "status": "blocked_policy",
+      "evidence": "exact argv contains --execute and placeholder paths -> blocked (authority-sensitive and non-replayable)",
+      "nearest_safe_proof": "A/B plan and judge-preview receipts do not authorize A/B execution."
+    },
+    {
+      "command": "ask sdk eval ab-judge-score --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --execute --json --robot",
+      "status": "blocked_policy",
+      "evidence": "exact argv contains --execute -> blocked (authority-sensitive judge execution)",
+      "nearest_safe_proof": "The A/B judge-preview receipt is local and read-only; no judge-score execution claim follows."
+    }
+  ],
+  "private_replay": {
+    "path": "artifacts/agent-runs/default-signing-intent-private-replay/private-command-replay-postcommit.json",
+    "total": 43,
+    "executed_pass": 37,
+    "blocked_unsafe": 6,
+    "unclassified": 0,
+    "digest": "sha256:ccb10cda7d0aeec32f5792862f9e2835da944478ae5c6ca27a0da20213f19971"
+  },
+  "claims_boundary": "No review execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows.",
+  "next_gate": "Select the smallest genuinely read-only command only after checking whether a repository-owned review handoff fixture has been admitted; otherwise retain the first two rows as deny-by-default blockers."
+}
