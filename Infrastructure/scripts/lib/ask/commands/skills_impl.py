@@ -6575,10 +6575,18 @@ def skills_sdk_plugin_create(
         lower_command = (
             _skills_validation_command("init", name, "--category", category, "--description", description or "")
             if kind == "skill"
-            else _ask_validation_command("plugins", "create", name, "--category", category)
+            else None
         )
-        if kind == "plugin" and with_registry:
-            lower_command = f"{lower_command} --with-marketplace"
+        if kind == "plugin":
+            from ask.commands.plugins import _plugin_init_validation_command  # noqa: PLC0415
+
+            lower_command = _plugin_init_validation_command(
+                name,
+                category=category,
+                with_marketplace=with_registry,
+                companion_folders=companion_folders,
+                action="create",
+            )
         payload = {
             "schema_version": "skills-sdk-plugin-create.v0",
             "status": "preview",
