@@ -1,8 +1,8 @@
 {
   "schema_version": "skills-sdk.phase2-remaining-queue-after-lifecycle-receipt.v1",
   "status": "bounded_local_pass",
-  "captured_at": "2026-07-13T09:16:00Z",
-  "base_head_sha": "92c79baf67999d513755202924eee30528e0c49d",
+  "captured_at": "2026-07-13T09:32:00Z",
+  "base_head_sha": "e35f1acebbdbb44ffc1aa46239ed922149cb9194",
   "completed_checkpoint": {
     "command": "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-lifecycle-scaffold-unittest-replay-receipt.v1.json",
@@ -12,6 +12,17 @@
       "lifecycle_scaffold_unittest_test_count:4"
     ]
   },
+  "latest_completed_checkpoint": {
+    "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-handoff-replay-receipt.v1.json",
+    "status": "executed_pass",
+    "evidence": [
+      "skills-sdk.review-handoff-receipt.v1",
+      "mutation_performed:false",
+      "receipt_written:false",
+      "clean_generated_plan_and_trace_directories"
+    ]
+  },
   "private_replay": {
     "total": 43,
     "executed_pass": 36,
@@ -19,12 +30,6 @@
     "unclassified": 0
   },
   "remaining_rows": [
-    {
-      "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
-      "status": "blocked_missing_artifact",
-      "evidence": "test -f .harness/artifacts/sdk-review-plan/simplify.json -> fail (path missing)",
-      "nearest_safe_proof": "The exact argv remains deny-by-default; no handoff execution is admitted without a repository-owned plan fixture."
-    },
     {
       "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
       "status": "blocked_missing_artifact",
@@ -62,6 +67,6 @@
       "nearest_safe_proof": "The signing-intent receipt is typed and fail-closed; fixture digest reconciliation remains a separate bounded slice."
     }
   ],
-  "next_safe_action": "Select the smallest genuinely read-only command among the seven remaining blocked rows only after its missing fixture or policy boundary has a repository-owned proof; do not repeat the completed lifecycle row.",
+  "next_safe_action": "Select the smallest genuinely read-only command among the six remaining blocked rows only after its missing fixture or policy boundary has a repository-owned proof; do not repeat the completed lifecycle or review-handoff rows.",
   "claims_boundary": "No review execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows."
 }
