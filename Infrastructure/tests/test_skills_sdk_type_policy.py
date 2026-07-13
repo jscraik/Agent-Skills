@@ -244,6 +244,17 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
                 )
             )
 
+    def test_legacy_attribute_duration_fields_accept_merge_base_baseline(self) -> None:
+        annotation = ast.parse("class Runner:\n    def run(self):\n        self.timeout_seconds: int = 1\n").body[0].body[0].body[0].annotation
+        merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")
+        matching_base = mock.Mock(returncode=0, stdout="class Runner:\n    def run(self):\n        self.timeout_seconds: int = 1\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[merge_base_result, matching_base]):
+            self.assertTrue(
+                self.validator._legacy_annotation_exists_in_parent(
+                    REPO_ROOT, "fixture.py", "timeout_seconds", annotation, owner_path=("Runner", "run")
+                )
+            )
+
     def test_legacy_duration_fields_ignore_non_base_parent(self) -> None:
         annotation = ast.parse("def f(timeout_seconds: int): ...").body[0].args.args[0].annotation
         merge_base_result = mock.Mock(returncode=0, stdout="base-head\n")

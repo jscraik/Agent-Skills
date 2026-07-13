@@ -336,8 +336,16 @@ def _annotation_keys(tree: ast.AST) -> set[tuple[tuple[str, ...], str, str]]:
     keys: set[tuple[tuple[str, ...], str, str]] = set()
     parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     for node in ast.walk(tree):
-        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.annotation is not None:
-            keys.add((_annotation_owner(node, parents), node.target.id, ast.unparse(node.annotation)))
+        if isinstance(node, ast.AnnAssign) and node.annotation is not None:
+            target = node.target
+            if isinstance(target, ast.Name):
+                name = target.id
+            elif isinstance(target, ast.Attribute):
+                name = target.attr
+            else:
+                name = None
+            if name is not None:
+                keys.add((_annotation_owner(node, parents), name, ast.unparse(node.annotation)))
         elif isinstance(node, ast.arg) and node.annotation is not None:
             keys.add((_annotation_owner(node, parents), node.arg, ast.unparse(node.annotation)))
     return keys
