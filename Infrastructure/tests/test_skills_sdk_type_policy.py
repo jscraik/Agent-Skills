@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 from pathlib import Path
@@ -7,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from types import ModuleType
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -116,6 +118,14 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         path = "Infrastructure/scripts/lib/ask/commands/plugins.py"
         issues = self.validator.validate_paths(REPO_ROOT, (path,))
         self.assertNotIn("unitless_duration_annotation", {issue.code for issue in issues})
+
+    def test_legacy_duration_fields_accept_merge_parent_baseline(self) -> None:
+        annotation = ast.parse("def f(timeout_seconds: int): ...").body[0].args.args[0].annotation
+        parent_result = mock.Mock(returncode=0, stdout="merge-commit merge-head base-head\n")
+        missing_parent = mock.Mock(returncode=1, stdout="")
+        matching_parent = mock.Mock(returncode=0, stdout="def f(timeout_seconds: int): ...\n")
+        with mock.patch.object(self.validator.subprocess, "run", side_effect=[parent_result, missing_parent, matching_parent]):
+            self.assertTrue(self.validator._legacy_annotation_exists_in_parent(REPO_ROOT, "fixture.py", "timeout_seconds", annotation))
 
     def test_new_legacy_named_duration_field_is_not_allowlisted_by_name(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-new-legacy.py"

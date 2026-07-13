@@ -279,7 +279,7 @@ def _annotation_keys(tree: ast.AST) -> set[tuple[str, str]]:
 
 def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, annotation: ast.AST) -> bool:
     result = subprocess.run(
-        ["git", "show", f"HEAD^:{path}"],
+        ["git", "rev-list", "--parents", "-n", "1", "HEAD"],
         cwd=repo_root,
         text=True,
         capture_output=True,
@@ -287,11 +287,23 @@ def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, a
     )
     if result.returncode != 0:
         return False
-    try:
-        baseline = ast.parse(result.stdout, filename=path)
-    except SyntaxError:
-        return False
-    return (name, ast.unparse(annotation)) in _annotation_keys(baseline)
+    for parent in result.stdout.split()[1:]:
+        baseline_result = subprocess.run(
+            ["git", "show", f"{parent}:{path}"],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if baseline_result.returncode != 0:
+            continue
+        try:
+            baseline = ast.parse(baseline_result.stdout, filename=path)
+        except SyntaxError:
+            continue
+        if (name, ast.unparse(annotation)) in _annotation_keys(baseline):
+            return True
+    return False
 
 
 def validate_paths(repo_root: Path, paths: Iterable[str]) -> tuple[PolicyIssue, ...]:
