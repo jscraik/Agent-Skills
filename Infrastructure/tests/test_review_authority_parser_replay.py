@@ -49,7 +49,10 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             else:
                 if family == mutation_family:
                     receipt["mutation_performed"] = True
-                body = {"preview" if family == "install" else "receipt": receipt}
+                if family == "install":
+                    body = {"status": receipt.pop("status"), "preview": receipt}
+                else:
+                    body = {"receipt": receipt}
             payload = {
                 "status": "success",
                 "metadata": {
@@ -93,7 +96,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             self._write_capture_dir(capture_dir)
             payload_path = capture_dir / "install.json"
             payload = json.loads(payload_path.read_text(encoding="utf-8"))
-            payload["data"][EXPECTED_DATA_KEYS["install"]]["preview"]["status"] = "blocked"
+            payload["data"][EXPECTED_DATA_KEYS["install"]]["status"] = "blocked"
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
 
             findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)

@@ -99,9 +99,10 @@ def _capture_receipt(body: dict[str, Any], family: str) -> dict[str, Any] | None
     expected_status = EXPECTED_RECEIPT_STATUSES[family]
     preview = body.get("preview")
     if isinstance(preview, dict):
+        status = body.get("status") if family == "install" else preview.get("status")
         return (
             preview
-            if preview.get("schema_version") == expected_schema and preview.get("status") == expected_status
+            if preview.get("schema_version") == expected_schema and status == expected_status
             else None
         )
     candidates = [body.get("receipt"), body]
