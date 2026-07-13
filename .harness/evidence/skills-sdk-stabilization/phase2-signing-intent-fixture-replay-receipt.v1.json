@@ -50,8 +50,8 @@
       "Infrastructure/tests/test_skills_sdk_signing_intent_replay.py": "sha256:7cb356f2e2c04e78759da4e7b13e77168eb9fd2ca0ba0cdedd4264bf7968c936"
     },
     "package_identity": {
-      "source_digest": "sha256:56b96f9f00a7bfbab4cde3e6a4afdb61e5a919e94c16b0aa0ec429f7cf6e0d8c",
-      "manifest_digest": "sha256:bb71ddfc2d6e0a1e35ba8ffab3b0b68aecbfcc5e0159cd0e6f5d8e0ab5ab30bf",
+      "source_digest": "sha256:56b96f9feb5eeec0f1721c1af3a4282ee0579570f7cd4f86daf996dd1d35a1d0",
+      "manifest_digest": "sha256:bb71ddfcba83965f6a5ad7ff586ff6d945944b032a48ee130f5f1a443d793bcc",
       "package_digest": "sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97"
     }
   },
