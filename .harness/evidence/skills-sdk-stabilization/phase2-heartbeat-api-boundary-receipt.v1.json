@@ -1,0 +1,32 @@
+{
+  "schema_version": "skills-sdk.phase2-heartbeat-api-boundary-receipt.v1",
+  "status": "blocked_runtime",
+  "captured_at": "2026-07-13T07:28:00Z",
+  "automation_id": "skills-sdk-implementation-heartbeat",
+  "target_thread_id": "019f4ea7-36e9-7e12-bc0b-ce79aa095bbe",
+  "persisted_automation_path": "/Users/jamiecraik/.codex/automations/skills-sdk-implementation-heartbeat/automation.toml",
+  "persisted_file_sha256": "sha256:f2b606c9ec9de9d9a29573bbf5b4a2ac35f2a4c3c10bcc8b98bfa57e8edde45a",
+  "requested_checkpoint": "immutable commit 431b08267; stage-shape validator unittest slice complete; continue from remaining 8 deny-by-default rows",
+  "update_attempts": [
+    {
+      "tool": "codex_app__automation_update",
+      "operation": "view",
+      "result": "blocked",
+      "reason": "Tool call did not return within the bounded execution window and was terminated; no view result was available."
+    },
+    {
+      "tool": "codex_app__automation_update",
+      "operation": "update",
+      "result": "blocked",
+      "reason": "Tool call did not return within the bounded execution window and was terminated; persisted automation file remained unchanged."
+    }
+  ],
+  "nearest_safe_proof": {
+    "branch_head": "431b08267a1243c8701fa51c289c26eb36f0f8fc",
+    "remote_verified": true,
+    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-stage-shape-unittest-replay-receipt.v1.json",
+    "next_queue": 8
+  },
+  "deterministic_fallback": "Treat the pushed revision-bound receipt and remote branch head as the authoritative checkpoint; do not claim the heartbeat prompt itself was refreshed until the app automation API returns a successful update and the persisted file hash changes.",
+  "claims_boundary": "This artifact proves an automation API boundary only. It does not prove hosted CI, Tessl state, source admission, publication, installation, merge, or release readiness."
+}
