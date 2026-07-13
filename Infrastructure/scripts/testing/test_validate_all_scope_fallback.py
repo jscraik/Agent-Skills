@@ -76,3 +76,82 @@ def test_lint_changed_python_files_run_ask_cli_modularity() -> None:
         assert args is not None
         assert "--changed-files" in args
         assert changed_file in args
+
+
+def test_lint_changed_python_files_run_program_design() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        rows = repo.check_results()
+        by_slug = {row["slug"]: row for row in rows}
+        assert by_slug["program-design"]["outcome"] == "pass"
+
+        args = repo.recorded_args_for("Infrastructure/scripts/validation-and-linting/verify_program_design.py")
+        assert args is not None
+        assert "--changed-files" in args
+        assert changed_file in args
+
+
+def test_staged_source_forwards_only_to_program_design() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        proc = repo.run(
+            "--persistent",
+            "--scope",
+            "lint",
+            "--staged-source",
+            "--changed-files",
+            "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        )
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        program_design_args = repo.recorded_args_for(
+            "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
+        )
+        assert program_design_args is not None
+        assert "--staged-source" in program_design_args
+
+
+def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        rows = repo.check_results()
+        by_slug = {row["slug"]: row for row in rows}
+        assert by_slug["program-design"]["outcome"] == "pass"
+        args = repo.recorded_args_for("Infrastructure/scripts/validation-and-linting/verify_program_design.py")
+        assert args is not None
+        assert "--changed-files" in args
+        assert changed_file in args
+
+
+def test_lint_changed_unscanned_python_wrapper_falls_back_to_required_baseline() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "bin/ask"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "Changed-files scope classification missed all known buckets" in proc.stdout
+
+
+def test_head_source_probes_extensionless_shebang_from_head() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        impl_text = (repo.root / "Infrastructure/scripts/validate_all_impl.sh").read_text(encoding="utf-8")
+        assert 'git show "HEAD:$changed_file"' in impl_text
