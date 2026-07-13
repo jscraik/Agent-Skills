@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.phase2-remaining-queue-after-lifecycle-receipt.v1",
   "status": "bounded_local_pass",
   "captured_at": "2026-07-13T09:32:00Z",
-  "base_head_sha": "e35f1acebbdbb44ffc1aa46239ed922149cb9194",
+  "base_head_sha": "ab7041b928e3eabcdc176546f194d108648f741c"
   "completed_checkpoint": {
     "command": "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-lifecycle-scaffold-unittest-replay-receipt.v1.json",
