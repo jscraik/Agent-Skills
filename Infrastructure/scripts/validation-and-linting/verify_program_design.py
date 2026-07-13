@@ -102,18 +102,22 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _is_python_entrypoint(path: Path) -> bool:
+def _is_python_entrypoint(path: Path, *, source_text: str | None = None) -> bool:
     try:
-        first_line = path.read_text(encoding="utf-8").splitlines()[0]
+        first_line = (source_text if source_text is not None else path.read_text(encoding="utf-8")).splitlines()[0]
     except (OSError, IndexError, UnicodeError):
         return False
     return first_line.startswith("#!") and "python" in first_line.lower()
 
 
-def _is_production_python(relpath: str, *, path: Path | None = None) -> bool:
+def _is_production_python(
+    relpath: str, *, path: Path | None = None, source_text: str | None = None
+) -> bool:
     if not relpath.startswith(PRODUCTION_PREFIXES) or relpath.startswith("Plugins/cache/"):
         return False
-    if not relpath.endswith((".py", ".pyw")) and (path is None or not _is_python_entrypoint(path)):
+    if not relpath.endswith((".py", ".pyw")) and (
+        path is None or not _is_python_entrypoint(path, source_text=source_text)
+    ):
         return False
     parts = set(Path(relpath).parts)
     if parts & EXCLUDED_PARTS:
@@ -261,6 +265,8 @@ class _PublicFunctionCollector(ast.NodeVisitor):
         self.functions: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        if node.name.startswith("_"):
+            return
         previous_scope = self.scope
         self.scope = (*previous_scope, node.name)
         for statement in node.body:
@@ -335,6 +341,38 @@ def _rename_map(revision: str, *, staged: bool) -> dict[str, str]:
         if len(fields) >= 3 and fields[0].startswith("R"):
             mapping[fields[2]] = fields[1]
     return mapping
+
+
+@lru_cache(maxsize=1)
+def _staged_paths() -> frozenset[str]:
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "staged file list could not be read"
+        raise BaselineUnavailable(f"staged source lookup failed: {detail}")
+    return frozenset(line for line in result.stdout.splitlines() if line)
+
+
+def _current_source_text(path: Path) -> str:
+    relpath = path.relative_to(REPO_ROOT).as_posix()
+    if relpath not in _staged_paths():
+        return path.read_text(encoding="utf-8")
+    result = subprocess.run(
+        ["git", "show", f":{relpath}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "staged file could not be read"
+        raise BaselineUnavailable(f"staged source lookup failed for {relpath}: {detail}")
+    return result.stdout
 
 
 def _baseline_path(relpath: str, revision: str) -> str:
@@ -493,7 +531,10 @@ def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
             path.relative_to(REPO_ROOT)
         except ValueError:
             continue
-        if path.is_file() and _is_production_python(normalized, path=path):
+        source_text = None
+        if path.is_file() and not normalized.endswith((".py", ".pyw")):
+            source_text = _current_source_text(path)
+        if path.is_file() and _is_production_python(normalized, path=path, source_text=source_text):
             paths.append(path)
     return sorted(set(paths))
 
@@ -526,7 +567,7 @@ def _scan_paths(
         issues.extend(
             _check_source(
                 relpath,
-                path.read_text(encoding="utf-8"),
+                _current_source_text(path),
                 baseline_text,
                 max_public_parameters=max_public_parameters,
             )

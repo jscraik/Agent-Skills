@@ -202,6 +202,23 @@ def outer():
         self.assertIn("B.run(enabled=bool)", rendered)
         self.assertNotIn("helper(enabled=bool)", rendered)
 
+    def test_private_class_methods_are_skipped(self) -> None:
+        validator = _load_validator()
+        source = """
+class _Internal:
+    def run(self, enabled=False):
+        return enabled
+
+class Public:
+    def run(self, enabled=False):
+        return enabled
+"""
+        metrics = validator._metrics(source)
+        self.assertEqual(set(metrics.public_parameters), {"Public.run"})
+        self.assertNotIn("_Internal.run(enabled=bool)", "\n".join(
+            validator._check_source("Infrastructure/scripts/example.py", source, "")
+        ))
+
     def test_public_constructor_is_checked(self) -> None:
         validator = _load_validator()
         source = "class Service:\n    def __init__(self, enabled=False):\n        self.enabled = enabled\n"
@@ -249,6 +266,19 @@ def outer():
         self.assertEqual(run.call_count, 2)
         self.assertIn("--cached", run.call_args_list[0].args[0])
         self.assertNotIn("--cached", run.call_args_list[1].args[0])
+
+    def test_current_source_text_reads_staged_blob(self) -> None:
+        validator = _load_validator()
+        validator._staged_paths.cache_clear()
+        staged_listing = mock.Mock(returncode=0, stdout="Infrastructure/scripts/example.py\n", stderr="")
+        staged_source = mock.Mock(returncode=0, stdout="def run(value):\n    return value\n", stderr="")
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_listing, staged_source]) as run:
+            source = validator._current_source_text(validator.REPO_ROOT / "Infrastructure/scripts/example.py")
+
+        self.assertEqual(source, staged_source.stdout)
+        self.assertIn("--cached", run.call_args_list[0].args[0])
+        self.assertEqual(run.call_args_list[1].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
