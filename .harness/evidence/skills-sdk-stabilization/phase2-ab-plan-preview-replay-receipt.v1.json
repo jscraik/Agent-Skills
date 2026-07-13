@@ -1,0 +1,51 @@
+{
+  "schema_version": "skills-sdk.phase2-ab-plan-preview-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T03:43:28Z",
+  "base_head_sha": "f341c432abd7caddef175436aef32221f7841d2e",
+  "scope": "read-only A/B evaluation plan preview command admission",
+  "allowlisted_argv": "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_ab_plan_replay.py"
+  ],
+  "source_digest": "sha256:c78143904bb60f0f63dd4faa3700afd1561ca78a4fb34820fe13020660a7f3aa",
+  "test_digest": "sha256:c3ee25d025270cc3757cd82ce332506720816c272e82c233cbf7d8cbeda2a564",
+  "patch_digest": "sha256:4972b5d41edd8ec150ecc0796597d3997a7de9427d9893196712abde0417ffef",
+  "behavior_proof": {
+    "receipt_status": "planned",
+    "execution_profile": "codex-read-only",
+    "judge_profile": "oss-local",
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "codex_exec_invoked": false,
+    "planned_write_paths_are_evidence_only": true,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/ab-plan-worker.md",
+    "qa": "artifacts/reviews/ab-plan-qa.md",
+    "adversarial": "artifacts/reviews/ab-plan-adversarial.md",
+    "worker_runtime_recovery": "one artifact-only retry after child runtime stall; fallback report retained"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 29,
+    "blocked_unsafe": 14,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_ab_plan_replay.py -> pass (2 passed; red before allowlist admission, green after)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_ab_plan.py tests/test_skills_sdk_ab_plan_replay.py -> pass (5 passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_ab_plan_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_ab_plan_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: ./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot -> pass (planned receipt; mutation_performed=false; network_accessed=false; provider_invoked=false; codex_exec_invoked=false)",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot > /tmp/agent-skills-ab-plan.json; after=$(git status --porcelain); test \"$before\" = \"$after\" -> pass (preview left the worktree unchanged)",
+    "Command: PYTHONPATH=/private/tmp/agent-skills-emitter-reconcile/Infrastructure/scripts/lib UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-emitter-reconcile --output /private/tmp/agent-skills-emitter-reconcile/.harness/evidence/skills-sdk-stabilization/phase2-ab-plan-private-replay.json -> pass (29 executed_pass; 14 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<independent QA prompt>' < /tmp/agent-skills-ab-plan-candidate.patch -> pass (QA_PASS_NO_FINDINGS)",
+    "Command: ollama run h4rithd/coder:14b '<independent adversarial prompt>' < /tmp/agent-skills-ab-plan-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No eval runner execution, judge execution, remote model or cloud evidence, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, or release-readiness claim follows."
+}
