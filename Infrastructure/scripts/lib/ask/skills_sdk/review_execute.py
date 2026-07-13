@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from ask.skills_sdk.review_plan import canonical_receipt_digest
+from ask.skills_sdk.review_handoff import validate_handoff_current_head
 
 
 REVIEW_EXECUTION_SCHEMA_VERSION = "skills-sdk.review-execution-receipt.v1"
@@ -26,6 +27,7 @@ def build_review_execution(
     source_handoff_path = _safe_repo_path(repo_root, handoff_path, label="handoff path")
     source_handoff = _load_json_object(source_handoff_path, label="review handoff receipt")
     _validate_handoff_shape(source_handoff)
+    validate_handoff_current_head(repo_root, source_handoff)
     artifact_paths = _resolve_required_artifact_paths(repo_root, source_handoff["required_artifacts"])
     output_path = _resolve_receipt_output_path(
         repo_root,
@@ -33,18 +35,34 @@ def build_review_execution(
         handoff_path=source_handoff_path,
         artifact_paths=[path for _artifact, path in artifact_paths],
     )
-
     executed_at = _format_timestamp((clock_provider or _default_clock_provider)())
-    blocked_artifact_results = [
-        _artifact_blocker(repo_root, path)
-        for _artifact, path in artifact_paths
-    ]
-    known_failed_artifacts = [
-        result["path"]
-        for result in blocked_artifact_results
-        if result is not None
-    ]
-    artifact_results = [
+    artifact_results = _materialize_review_artifacts(
+        repo_root,
+        source_handoff,
+        artifact_paths,
+        executed_at=executed_at,
+    )
+    failed_artifacts = [result["path"] for result in artifact_results if result["status"] != "pass"]
+    receipt = _execution_receipt(
+        repo_root,
+        source_handoff_path,
+        source_handoff,
+        artifact_results,
+        failed_artifacts,
+    )
+    return _write_execution_receipt(repo_root, receipt, output_path)
+
+
+def _materialize_review_artifacts(
+    repo_root: Path,
+    source_handoff: dict[str, Any],
+    artifact_paths: list[tuple[str, Path]],
+    *,
+    executed_at: str,
+) -> list[dict[str, Any]]:
+    blocked_results = [_artifact_blocker(repo_root, path) for _artifact, path in artifact_paths]
+    failed_artifacts = [result["path"] for result in blocked_results if result is not None]
+    return [
         _materialize_artifact(
             repo_root,
             source_handoff,
@@ -52,12 +70,20 @@ def build_review_execution(
             path,
             executed_at=executed_at,
             blocked_result=blocked_result,
-            failed_artifacts=known_failed_artifacts,
+            failed_artifacts=failed_artifacts,
         )
-        for (artifact, path), blocked_result in zip(artifact_paths, blocked_artifact_results)
+        for (artifact, path), blocked_result in zip(artifact_paths, blocked_results)
     ]
-    failed_artifacts = [result["path"] for result in artifact_results if result["status"] != "pass"]
-    receipt: dict[str, Any] = {
+
+
+def _execution_receipt(
+    repo_root: Path,
+    source_handoff_path: Path,
+    source_handoff: dict[str, Any],
+    artifact_results: list[dict[str, Any]],
+    failed_artifacts: list[str],
+) -> dict[str, Any]:
+    return {
         "schema_version": REVIEW_EXECUTION_SCHEMA_VERSION,
         "schema_uri": REVIEW_EXECUTION_SCHEMA_URI,
         "status": "pass" if not failed_artifacts else "fail",
@@ -88,6 +114,13 @@ def build_review_execution(
         "receipt_written": False,
         "receipt_path": None,
     }
+
+
+def _write_execution_receipt(
+    repo_root: Path,
+    receipt: dict[str, Any],
+    output_path: Path | None,
+) -> dict[str, Any]:
     if output_path is not None:
         receipt["receipt_written"] = True
         receipt["receipt_path"] = _repo_relative(repo_root, output_path)

@@ -224,6 +224,17 @@ def _validate_source_context(repo_root: Path, *, source_context: dict[str, objec
             raise ValueError(f"source_context {key} is stale or mismatched.")
 
 
+def validate_handoff_current_head(repo_root: Path, source_handoff: dict[str, object]) -> None:
+    """Reject execution or verification against a stale same-head handoff."""
+    source_context = source_handoff.get("source_context")
+    if not isinstance(source_context, dict):
+        raise ValueError("source review handoff source_context must be an object.")
+    if source_context.get("branch_policy") != "same_head_required":
+        raise ValueError("source review handoff branch_policy is unsupported.")
+    if source_context.get("head_sha") != _head_sha(repo_root):
+        raise ValueError("source_context head_sha is stale.")
+
+
 def _selected_lens_ids(source_plan: dict[str, object]) -> list[str]:
     selected = source_plan["selected_lenses"]
     if not isinstance(selected, list):
