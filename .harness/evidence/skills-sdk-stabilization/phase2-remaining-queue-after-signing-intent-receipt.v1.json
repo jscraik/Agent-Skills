@@ -1,0 +1,63 @@
+{
+  "schema_version": "skills-sdk.phase2-remaining-queue-after-signing-intent-receipt.v1",
+  "status": "bounded_local_pass_with_current_head_guard_and_fixture_replay",
+  "captured_at": "2026-07-13T11:12:03Z",
+  "base_head_sha": "dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
+  "latest_completed_checkpoint": {
+    "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-handoff-fixture-admission-receipt.v1.json",
+    "status": "executed_pass_current_head_replay",
+    "evidence": [
+      "./bin/ask sdk review plan ... --receipt-out .harness/artifacts/sdk-review-plan/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
+      "./bin/ask sdk review handoff ... --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
+      "same_head:dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
+      "target_content_digest:7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
+      "plan_sha256:5c1c347661dd9df15d0f7dee2f0e6fde3a8c38e3130e8c59859c4fa97765102e",
+      "handoff_sha256:bccf7b81ae4b1e0c51d4f010ed8a9fb1d67bff0c4058b6f812cbc46c513dd7e2"
+    ]
+  },
+  "remaining_rows": [
+    {
+      "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "status": "executed_pass_local_artifact_materialization",
+      "evidence": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-execute/simplify.json --json --robot -> pass (receipt_written=true; mutation_performed=true; failed_artifacts=[]; source_head_sha=dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df)",
+      "nearest_safe_proof": "The command materialized only local generated review artifacts and a local execution receipt; independent reviewer approval, CI, PR, tracker, and merge-readiness remain unproven.",
+      "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-execution-verification-receipt.v1.json"
+    },
+    {
+      "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "status": "verified_pass_local_artifact_verification",
+      "evidence": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-verify/simplify.json --json --robot -> pass (receipt_written=true; mutation_performed=false; review_artifacts_verified=true; missing_or_invalid_artifacts=[]; source_head_sha=dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df)",
+      "nearest_safe_proof": "The command verified the three local generated artifacts without mutation; reviewer completion, CI, PR, tracker, and merge-readiness remain unproven.",
+      "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-execution-verification-receipt.v1.json"
+    },
+    {
+      "command": "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "status": "blocked_policy",
+      "evidence": "evals-router boundary -> blocked (actual runner execution requires stronger trace and calibration proof)",
+      "nearest_safe_proof": "The command remains deny-by-default; local eval profile and preview receipts do not prove runner execution."
+    },
+    {
+      "command": "ask sdk eval ab-run --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --execute --json --robot",
+      "status": "blocked_policy",
+      "evidence": "exact argv contains --execute and placeholder paths -> blocked (authority-sensitive and non-replayable)",
+      "nearest_safe_proof": "A/B plan and judge-preview receipts do not authorize A/B execution."
+    },
+    {
+      "command": "ask sdk eval ab-judge-score --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --execute --json --robot",
+      "status": "blocked_policy",
+      "evidence": "exact argv contains --execute -> blocked (authority-sensitive judge execution)",
+      "nearest_safe_proof": "The A/B judge-preview receipt is local and read-only; no judge-score execution claim follows."
+    }
+  ],
+  "private_replay": {
+    "path": "artifacts/agent-runs/default-signing-intent-private-replay/private-command-replay-postcommit.json",
+    "total": 43,
+    "executed_pass": 37,
+    "blocked_unsafe": 6,
+    "unclassified": 0,
+    "digest": "sha256:ccb10cda7d0aeec32f5792862f9e2835da944478ae5c6ca27a0da20213f19971"
+  },
+  "claims_boundary": "This receipt records bounded local review execute/verify artifact materialization and verification only. No independent reviewer approval, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows.",
+  "next_gate": "Select the next deny-by-default parser family from the remaining queue; retain eval runner/judge execution as evals-router-blocked."
+}

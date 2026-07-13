@@ -1,0 +1,58 @@
+{
+  "schema_version": "skills-sdk.phase2-stage-shape-validator-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T05:36:39Z",
+  "base_head_sha": "d612848a33d17dd6fea7afadd40ca042de136610",
+  "scope": "read-only Skills SDK stage-shape validator command admission",
+  "allowlisted_argv": "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py"
+  ],
+  "source_digests": {
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:94ebcf2b5173cecc61aaa9ab32ab088bf961fd1d287c90b6b813c8393955f5c0",
+    "Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py": "sha256:8e34e0a9363f9cec900bdbe8b2df2d3ac30e1cd4cd91f35863b00c28f53d1db3"
+  },
+  "patch_digest": "sha256:729b72003da06548dcc06a2ac5ca346a8649674fb4a52dc520d49e563a96b38b",
+  "behavior_proof": {
+    "validator_marker": "[sdk-stage-shape] SDK stage skill shape passed (11 skill(s))",
+    "marker_grammar": "one non-empty line, <=4096 bytes, exact prefix/suffix, positive ASCII decimal count",
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "altered_argv": "blocked_unsafe_without_subprocess",
+    "malformed_marker": "executed_fail_without_exception",
+    "no_mutation_status": true
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 34,
+    "blocked_unsafe": 9,
+    "unclassified": 0,
+    "validator_row": {
+      "status": "executed_pass",
+      "evidence": [
+        "stage_shape_receipt:valid_marker",
+        "stage_shape_skill_count:11"
+      ]
+    }
+  },
+  "reviews": {
+    "worker": "worker report: exact tuple, TDD red/green, focused tests and ruff pass",
+    "qa": "artifacts/reviews/stage-shape-validator-qa.md",
+    "adversarial": "artifacts/reviews/stage-shape-validator-adversarial.md",
+    "qa_initial_finding": "Unicode superscript digit could raise ValueError; fixed with ASCII-only count guard and regression test"
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stage_shape_validator_replay.py -> pass (3 passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_parser_family_inventory.py tests/test_skills_sdk_plugin_lifecycle.py -> pass (26 passed; 24 subtests passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stage_shape_validator_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stage_shape_validator_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py -> pass",
+    "Command: before=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py); bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py; after=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py); test \"$before\" = \"$after\" -> pass (11 skills; intended files unchanged)",
+    "Command: PYTHONPATH=Infrastructure/scripts/lib UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root . --output .harness/evidence/skills-sdk-stabilization/private-stage-shape-replay.json -> pass (34 executed_pass; 9 blocked_unsafe; 0 unclassified)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_skills_sdk_stage_shape_validator_replay.py -> blocked (35 passed; revision-bound determinism receipt requires immutable commit)",
+    "Command: fresh independent QA and adversarial review -> pass (artifacts/stage-shape-validator-qa.md and artifacts/stage-shape-validator-adversarial.md; both WROTE markers present)"
+  ],
+  "claims_boundary": "No review handoff or execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows."
+}

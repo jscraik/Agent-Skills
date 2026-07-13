@@ -144,6 +144,17 @@ class TestSkillsSdkReviewVerify(unittest.TestCase):
         self.assertIn("ci_passed", receipt["not_proven"])
         self.assertTrue(all(result["sha256"] for result in receipt["artifact_results"]))
 
+    def test_verification_rejects_stale_same_head_handoff(self) -> None:
+        handoff = self._write_handoff()
+        handoff["source_context"]["head_sha"] = "0" * 40
+        self.handoff_path.write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "source_context head_sha is stale"):
+            build_review_verification(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-verify-handoff.json",
+            )
+
     def test_verification_reports_missing_required_artifacts_without_claiming_completion(self) -> None:
         self._write_handoff()
 

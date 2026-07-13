@@ -1,0 +1,102 @@
+{
+  "schema_version": "skills-sdk.phase2-package-signature-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_worker_blocked_adversarial_pass_with_advisory",
+  "captured_at": "2026-07-12T16:19:07Z",
+  "revision": {
+    "base_head_sha": "0e3db774cf34082fda06f82d22fe38bb5f0d9d0f",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the already-proven package-signature preview command into the exact read-only replay allowlist",
+      "TDD positive receipt coverage",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "authority-bound apply commands",
+      "runtime installation",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk security package-signature Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+    "source_digest": "sha256:811269b9919b1137ff8d76de3200939462b497624f766a327d313888be59d30f",
+    "test_digest": "sha256:8f521945401fe86ae8d1581ef0214e017c0ca65e42938b65f1a685a96c2211f6"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_package_signature",
+      "status": "fail",
+      "evidence": "TDD red phase: 1 failed; package-signature argv was blocked before allowlist change."
+    },
+    {
+      "command": "./bin/ask sdk security package-signature Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=success; package security signature receipt status=pass; inspected_file_count=2; execution_performed=false; network_accessed=false; credentials_accessed=false; mutation_performed=false"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "15 passed, 8 subtests passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 7 executed_pass; 36 blocked_unsafe; 0 unclassified; receipt sha256:6913f4d71e0c1318925305743886ee43d66b7c26061edb6de8ef446a19f212b6"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_runtime",
+      "artifact": "not emitted",
+      "reason": "The child Worker was interrupted after the app-server runtime produced no artifact; no Worker verdict is claimed."
+    },
+    "qa": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-package-signature-qa.json",
+      "finding": "Focused tests, exact preview, replay counts, receipt digest, source/test digests, and no-mutation evidence passed. Whole-worktree diff-check remains noisy only because generated artifacts/reviews/default.md has pre-existing trailing whitespace; the targeted slice is clean."
+    },
+    "adversarial": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-phase2-package-signature-adversarial.json",
+      "finding": "Allowlist, receipt/schema consistency, revision binding, no-mutation evidence, generated-artifact exclusion, and claims boundaries passed. Advisory: the unrelated generated review file has pre-existing trailing whitespace; the targeted slice is clean."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 7,
+    "blocked_unsafe_count": 36,
+    "unclassified_count": 0,
+    "digest": "sha256:6913f4d71e0c1318925305743886ee43d66b7c26061edb6de8ef446a19f212b6",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The package-signature preview command is covered by the exact read-only replay allowlist and emits a valid success envelope in the replay harness.",
+    "The 43-row receipt is terminally classified; 36 rows remain intentionally denied and have no behavior proof.",
+    "The Worker artifact remains unavailable because of the child-runtime boundary; fresh QA and adversarial review both passed with the unrelated generated-file whitespace advisory recorded. No Worker pass is claimed.",
+    "No claim is made about apply-mode mutation, installed runtime, command/service rationalization, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Preserve this bounded replay-policy change as an immutable local commit under the recorded Worker-runtime coverage gap, push it to draft PR #330, and select the next smallest concrete read-only command receipt."
+}

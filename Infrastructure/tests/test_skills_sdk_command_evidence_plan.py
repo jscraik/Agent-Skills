@@ -22,6 +22,13 @@ class TestSkillsSdkCommandEvidencePlan(unittest.TestCase):
         self.assertTrue(all(command["status"] == "planned" for command in receipt["commands"]))
         self.assertTrue(all(command["replay_disposition"] for command in receipt["commands"]))
         self.assertTrue(all(command["caller_consequence"] for command in receipt["commands"]))
+        self.assertTrue(
+            all(
+                "/Users/" not in command["command"]
+                and "knowledge-OS/exports" not in command["command"]
+                for command in receipt["commands"]
+            )
+        )
         self.assertEqual(
             {command["replay_disposition"] for command in receipt["commands"]},
             {

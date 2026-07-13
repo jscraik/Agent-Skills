@@ -1,0 +1,22 @@
+{
+  "schema_version": "skills-sdk.lockfile.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/lockfile.v1.schema.json",
+  "generated_by": "authority-replay-fixture",
+  "entries": {
+    "authority-replay-fixture": {
+      "name": "authority-replay-fixture",
+      "source_path": "skills/authority-replay-fixture",
+      "source_digest": "sha256:f96414c81abc3a28f6641e757ea3c3df4e2d95d88224a21f643a4d34380265c6",
+      "target_path": ".agents/skills/authority-replay-fixture",
+      "receipt_ref": ".harness/receipts/skills-sdk/install/authority-replay-fixture.json",
+      "installed_at": "2026-07-12T00:00:00Z",
+      "files": [
+        {
+          "source_path": "SKILL.md",
+          "target_path": ".agents/skills/authority-replay-fixture/SKILL.md",
+          "digest": "sha256:4c1689c0ee13e9a9c118254f0bb46e507940d0bdbf6a451f0e4847b6fd36ad6a"
+        }
+      ]
+    }
+  }
+}

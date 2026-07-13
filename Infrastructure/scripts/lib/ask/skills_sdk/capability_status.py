@@ -27,7 +27,6 @@ MUTATING_CAPABILITY_IDS = frozenset(
         "ab_judge_score",
         "ab_run",
         "real_install",
-        "refs_ingestion",
         "review_execution",
         "rollback",
         "sdk_plugin_lifecycle",

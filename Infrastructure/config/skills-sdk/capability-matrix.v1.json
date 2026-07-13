@@ -53,7 +53,7 @@
     "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
     "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
     "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
-    "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+    "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
     "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py -q",
@@ -356,7 +356,7 @@
         "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
         "Infrastructure/config/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json",
         "Infrastructure/tests/test_skills_sdk_review_execute.py",
-        "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
         "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
         "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v"
       ],
@@ -432,17 +432,17 @@
     {
       "id": "refs_ingestion",
       "title": "Reference ingestion / knowledge capsules",
-      "status": "implemented",
+      "status": "preview_only",
       "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/knowledge_ingest.py",
       "pipeline_sections": ["knowledge_engineering", "full_skill_lifecycle"],
       "feature_executed": true,
-      "mutation_performed": true,
+      "mutation_performed": false,
       "evidence_refs": [
-        "./bin/ask sdk knowledge ingest --extraction /Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native --skill Skills/agent-ops/improve-agent-native --apply --run-proof --json --robot",
+        "./bin/ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
         "Infrastructure/tests/test_skills_sdk_knowledge_ingest.py"
       ],
-      "next_slice": "After the route-truth declutter slice, add no-network fixture coverage and runtime projection proof for vendored capsule discoverability.",
-      "notes": "PU-019 now has a first implemented Skills SDK consumer lane: validate a portable KnowledgeOS extraction, preflight the staged skill package, vendor references into the skill, update capsule routing, and run package proof without making runtime depend on KnowledgeOS."
+      "next_slice": "Run an explicitly approved --apply fixture and retain its apply receipt before claiming mutating ingestion.",
+      "notes": "PU-019 is preview-only in this evidence lane: it validates the portable extraction and staged package plan, but the retained command does not prove vendoring, routing updates, runtime projection, or mutation."
     },
     {
       "id": "evals",

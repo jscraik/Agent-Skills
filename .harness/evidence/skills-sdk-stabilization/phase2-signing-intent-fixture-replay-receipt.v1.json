@@ -1,0 +1,129 @@
+{
+  "schema_version": "skills-sdk.phase2-signing-intent-fixture-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T08:20:00Z",
+  "revision": {
+    "base_head_sha": "ba4bc051d81bdc2c81946953eec62bce57c7280a",
+    "worktree_state": "immutable local source and test commit; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "reconcile repository-owned signing-intent and package identity fixtures with the current package builder output",
+      "admit the exact local signing-intent argv to the private read-only replay allowlist",
+      "prove positive readiness-envelope and negative stale-policy fail-closed behavior without signing or artifact mutation",
+      "record Worker, fresh QA, and fresh adversarial fallback verdicts when app-server and Ollama child runtimes were unavailable"
+    ],
+    "excluded": [
+      "cryptographic signing, key access, archive creation, package installation, publication, registry or runtime readiness",
+      "review handoff materialization or review execution",
+      "eval runner or judge execution",
+      "Foundry extraction or source admission",
+      "Tessl or CircleCI mutation, hosted CI, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "allowlisted_argv": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+    "source_files": [
+      ".harness/quality/steering-uptake.md",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+      "Infrastructure/scripts/validation-and-linting/review_signing_intent_replay.py",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-digest-receipt.json",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-hardening-receipt.json",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-intent-receipt.json",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
+      "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+      "Infrastructure/tests/test_skills_sdk_signing_intent.py",
+      "Infrastructure/tests/test_skills_sdk_signing_intent_replay.py"
+    ],
+    "source_digests": {
+      ".harness/quality/steering-uptake.md": "sha256:2e23e8002e5a4c2970a60dbb9f04407996b1aededea6bc3abf2cc924c32fbe96",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:d3061dbbe306c2e68d0163dcee1e7e506880b3b6ab4b1de42ec9c17a640a34c9",
+      "Infrastructure/scripts/validation-and-linting/review_signing_intent_replay.py": "sha256:066edcb1db371cebc74cbd6d66068f646f1b77b5fc4a4a1c8d5444d257f42a79",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-digest-receipt.json": "sha256:50da23f46c19d7f7edd965b8d18cf5c845cc0611538e692603c72d279ea775bf",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-hardening-receipt.json": "sha256:817f005d9769c4322bb9fd25fa99ddddc37d2a3cd7dd4875d709500dacfd5e22",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-intent-receipt.json": "sha256:9b59b3c31ac90ad24c6385a7afb636a28be21a93f5d1dd34d33866a55cd968be",
+      "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json": "sha256:aca19e163db5cfdfe9187519855017a5519db2c3cde79ec14b9ccb102eb16323",
+      "Infrastructure/tests/test_skills_sdk_schema_spine.py": "sha256:be77ccbc17c6189e66bfd580fb710fcfb61767ae6d4964dac736a3680293217a",
+      "Infrastructure/tests/test_skills_sdk_signing_intent.py": "sha256:6365e6513a5b60a720d64989fd445c69ecc38867a5901081a99b17274da43cb7",
+      "Infrastructure/tests/test_skills_sdk_signing_intent_replay.py": "sha256:7cb356f2e2c04e78759da4e7b13e77168eb9fd2ca0ba0cdedd4264bf7968c936"
+    },
+    "package_identity": {
+      "source_digest": "sha256:56b96f9feb5eeec0f1721c1af3a4282ee0579570f7cd4f86daf996dd1d35a1d0",
+      "manifest_digest": "sha256:bb71ddfcba83965f6a5ad7ff586ff6d945944b032a48ee130f5f1a443d793bcc",
+      "package_digest": "sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97"
+    }
+  },
+  "behavior_proof": {
+    "positive": {
+      "command": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+      "status": "pass",
+      "evidence": "exit 0; package_digest matches policy; ready=true; signing_performed=false; key_accessed=false; artifact_written=false"
+    },
+    "negative": {
+      "command": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy /tmp/alternate-signing-policy.json --json --robot",
+      "status": "pass",
+      "evidence": "expected exit 2; nested receipt status=blocked; blocker=package_digest_pinned; no subprocess or write flags were enabled"
+    },
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "signing_performed": false,
+    "key_accessed": false,
+    "artifact_written": false,
+    "no_mutation_snapshot": "tracked source and fixture paths were unchanged before and after the exact positive replay"
+  },
+  "replay_receipt": {
+    "path": "artifacts/agent-runs/default-signing-intent-private-replay/private-command-replay-postcommit.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 37,
+    "blocked_unsafe_count": 6,
+    "unclassified_count": 0,
+    "digest": "sha256:ccb10cda7d0aeec32f5792862f9e2835da944478ae5c6ca27a0da20213f19971",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-signing-intent-fixture-fallback/worker-postcommit.json",
+      "finding": "Fixture refresh, exact allowlist, positive and negative replay, and focused tests are bounded and caller-safe."
+    },
+    "qa": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-signing-intent-fixture-fallback/qa-postcommit.json",
+      "finding": "The committed tree passes package, schema, signing-intent, replay, Ruff, modularity, and no-mutation checks."
+    },
+    "adversarial": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-signing-intent-fixture-fallback/adversarial-postcommit.json",
+      "finding": "No blocking issue found in exact-path admission, stale-policy denial, mutation boundary, fixture identity, or claims boundary."
+    },
+    "runtime_boundary": [
+      "Fresh app-server QA child did not produce an artifact and was interrupted after the bounded retry.",
+      "Fresh app-server adversarial child did not produce an artifact and was interrupted.",
+      "Ollama fallback was blocked by llama-server broken-pipe termination for h4rithd/coder:14b and gemma4:12b-mlx.",
+      "Repo-native fallback review script supplied the three independent role verdicts above."
+    ]
+  },
+  "validation": [
+    "Command: ./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot -> pass (exit 0; current package digest admitted; no signing or artifact mutation)",
+    "Command: ./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy /tmp/alternate-signing-policy.json --json --robot -> pass (expected fail-closed exit 2; package_digest_pinned)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_package_build.py tests/test_skills_sdk_package_hardening.py tests/test_skills_sdk_signing_intent.py tests/test_skills_sdk_signing_intent_replay.py tests/test_skills_sdk_schema_spine.py -k 'package or signing or hardening or schema_spine' -> pass (121 tests; 47 subtests)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_skills_sdk_signing_intent_replay.py -> pass (35 passed)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/validation-and-linting/review_signing_intent_replay.py scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_signing_intent.py tests/test_skills_sdk_signing_intent_replay.py -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/review_signing_intent_replay.py Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_signing_intent.py Infrastructure/tests/test_skills_sdk_signing_intent_replay.py Infrastructure/tests/test_skills_sdk_schema_spine.py -> pass (1873 lines; max 1900)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass (findings=0)",
+    "Command: git diff --check -> pass",
+    "Command: PREK_SKIP=validate-all /Users/jamiecraik/dev/agent-skills/.git/hooks/pre-commit -> pass"
+  ],
+  "claims_boundary": [
+    "This receipt proves only a local, read-only signing-intent envelope and fail-closed stale-policy behavior on commit ba4bc051d81bdc2c81946953eec62bce57c7280a.",
+    "The receipt does not prove signing, key access, archive creation, installation, runtime immutability, registry publication, provider or cloud execution, hosted CI, or release readiness.",
+    "Generated Worker, QA, and adversarial fallback artifacts are local evidence only and are intentionally excluded from the commit."
+  ],
+  "next_gate": "Repository-owned review handoff fixture admission is recorded at .harness/evidence/skills-sdk-stabilization/phase2-review-handoff-fixture-admission-receipt.v1.json; review execute and review verify remain blocked_pending_artifact_materialization_authority."
+}

@@ -6541,7 +6541,7 @@ def skills_sdk_plugin_create(
     apply: bool = False,
 ) -> CallResult:
     """Create or preview creation of a single skill or plugin through the SDK facade."""
-    command = _ask_validation_command(
+    command_args = [
         "sdk",
         "plugin",
         "create",
@@ -6550,8 +6550,16 @@ def skills_sdk_plugin_create(
         kind,
         "--category",
         category,
-        "--apply" if apply else "--preview",
-    )
+    ]
+    if description is not None:
+        command_args.extend(["--description", description])
+    if with_registry:
+        command_args.append("--with-registry")
+    for folder in companion_folders or []:
+        if folder in {"scripts", "assets", "references", "workflows"}:
+            command_args.append(f"--with-{folder}")
+    command_args.append("--apply" if apply else "--preview")
+    command = _ask_validation_command(*command_args)
     if kind == "skill" and not description:
         payload = {
             "schema_version": "skills-sdk-plugin-create.v0",
@@ -6575,10 +6583,18 @@ def skills_sdk_plugin_create(
         lower_command = (
             _skills_validation_command("init", name, "--category", category, "--description", description or "")
             if kind == "skill"
-            else _ask_validation_command("plugins", "create", name, "--category", category)
+            else None
         )
-        if kind == "plugin" and with_registry:
-            lower_command = f"{lower_command} --with-marketplace"
+        if kind == "plugin":
+            from ask.commands.plugins import _plugin_init_validation_command  # noqa: PLC0415
+
+            lower_command = _plugin_init_validation_command(
+                name,
+                category=category,
+                with_marketplace=with_registry,
+                companion_folders=companion_folders,
+                action="create",
+            )
         payload = {
             "schema_version": "skills-sdk-plugin-create.v0",
             "status": "preview",
@@ -8629,12 +8645,19 @@ def _sdk_improve_receipt_slug(package_id: str, timestamp: str) -> str:
     return f"{safe_package}-{safe_time}"
 
 
-def _sdk_improve_project_root(project_root: str | None) -> Path | None:
+def _sdk_improve_project_root(
+    project_root: str | None,
+    repo_root: Path | None = None,
+    *,
+    allow_relative: bool = False,
+) -> Path | None:
     if not project_root:
         return None
     candidate = Path(project_root).expanduser()
     if not candidate.is_absolute():
-        return None
+        if not allow_relative or repo_root is None:
+            return None
+        candidate = repo_root / candidate
     try:
         return candidate.resolve(strict=True)
     except OSError:
@@ -8907,7 +8930,7 @@ def skills_sdk_project_improve(
     result.metadata["command"] = "sdk improve --apply" if apply else "sdk improve --preview"
     query = target.strip()
     timestamp = _sdk_improve_timestamp()
-    resolved_project_root = _sdk_improve_project_root(project_root)
+    resolved_project_root = _sdk_improve_project_root(project_root, repo_root, allow_relative=not apply)
     if resolved_project_root is None:
         receipt = {
             "schema_version": "skills-sdk.project-improvement-receipt.v0",
@@ -8926,8 +8949,8 @@ def skills_sdk_project_improve(
             result=result,
             query=query,
             status="blocked",
-            message="Skills SDK improve requires an existing absolute --project-root.",
-            fix_suggestion="Pass an absolute project root containing skills-sdk.json.",
+            message="Skills SDK improve requires an existing --project-root.",
+            fix_suggestion="Pass an existing absolute project root for apply; relative paths are accepted only for preview.",
             receipt=receipt,
         )
 

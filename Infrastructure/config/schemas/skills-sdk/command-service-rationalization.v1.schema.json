@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/command-service-rationalization.v1.schema.json",
+  "title": "Skills SDK Command and Service Rationalization v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.command-service-rationalization.v1"},
+    "artifact_type": {"type": "string", "const": "read_only_command_service_inventory"},
+    "status": {"type": "string", "const": "planned"},
+    "scope": {"type": "string", "const": "capability-matrix"},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "base_source_files": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "base_source_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "source_delta": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source_delta"}},
+    "source_command": {"type": "string", "const": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot"},
+    "source_receipt_path": {"type": "string", "minLength": 1},
+    "source_receipt_schema": {"type": "string", "const": "skills-sdk.command-evidence-plan-receipt.v0"},
+    "command_count": {"type": "integer", "minimum": 0},
+    "service_count": {"type": "integer", "minimum": 0},
+    "command_disposition_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority_bound_mutation": {"type": "integer", "minimum": 0},
+        "explicit_run_receipt": {"type": "integer", "minimum": 0},
+        "preview_replay": {"type": "integer", "minimum": 0},
+        "template_requires_concrete_fixture": {"type": "integer", "minimum": 0}
+      },
+      "required": ["authority_bound_mutation", "explicit_run_receipt", "preview_replay", "template_requires_concrete_fixture"]
+    },
+    "service_dispositions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/service"}},
+    "source_files": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "source_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "blockers": {"type": "array", "maxItems": 0, "items": {"type": "string"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "command_execution_performed": {"type": "boolean", "const": false},
+    "does_not_prove": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "next_gate": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "disposition": {"type": "string", "enum": ["runtime_model_adapter", "generated_projection_adapter", "compatibility_adapter"]},
+        "caller_modules": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["path", "disposition", "caller_modules"]
+    },
+    "source_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["path", "reason"]
+    }
+  },
+  "required": [
+    "schema_version", "artifact_type", "status", "scope", "base_commit", "base_source_files",
+    "base_source_tree_digest", "source_delta", "source_command",
+    "source_receipt_path", "source_receipt_schema", "command_count", "service_count",
+    "command_disposition_counts", "service_dispositions", "source_files", "source_tree_digest",
+    "blockers", "mutation_performed", "command_execution_performed", "does_not_prove", "next_gate"
+  ]
+}

@@ -1,0 +1,1021 @@
+{
+  "command_ref_count": 43,
+  "execution_policy": "exact_argv_allowlist_deny_by_default",
+  "mutation_policy_intent": "read_only_preview_or_validation_commands_only",
+  "network_policy_intent": "local_only_no_network_requested",
+  "public_receipt_changed": false,
+  "rows": [
+    {
+      "argv": [
+        "./bin/ask",
+        "skills",
+        "doctor",
+        "Skills/agent-ops/simplify",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "authoring",
+      "command": "./bin/ask skills doctor Skills/agent-ops/simplify --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skill_doctor"
+      ],
+      "execution_id": "sha256:6a8648539454d8ddef47db526b695d2966ddc3f0b47896d3f6edd7c4344fcff5",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "check",
+        "Skills/agent-ops/simplify",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "check",
+      "command": "./bin/ask sdk check Skills/agent-ops/simplify --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skill_doctor,skills_sdk_check"
+      ],
+      "execution_id": "sha256:e358059faa46cac8be9f7d366c523d8e124ba87177042d7a0ee131c1d563f21b",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "security",
+        "risk-modes",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "risk_mode_taxonomy",
+      "command": "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_risk_mode_taxonomy"
+      ],
+      "execution_id": "sha256:e88cf58dd9f0684f7d5ce8bca2704099e887a549debd4b42d958cd378f6b8da9",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "security",
+        "package-signature",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "package_security_signature",
+      "command": "./bin/ask sdk security package-signature Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_package_security_signature"
+      ],
+      "execution_id": "sha256:6872d8b4e30a1e9b1713eb840fb3d1230c4140635647d8343150079b7a25a0a6",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "ir",
+        "build",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "skill_ir",
+      "command": "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_ir"
+      ],
+      "execution_id": "sha256:3b9c896b5bf46e46d5ad8d36f687024f0556c151b28c7d3f60947da4d353f8e6",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "package",
+        "build",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "package_identity",
+      "command": "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_package_build"
+      ],
+      "execution_id": "sha256:f19c6903a4c02823adc8758ee90b64203bbff14c67ed35a9767f6b13b4c1f0f2",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "install",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "install_preview",
+      "command": "./bin/ask sdk install Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_install_preview"
+      ],
+      "execution_id": "sha256:6dd1351b137ce112d939c5fb266bd60f0453874ae6626b7529468495f233b373",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "intake",
+        "inspect",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "skill_intake",
+      "command": "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_intake_inspect"
+      ],
+      "execution_id": "sha256:3f71d10e2fdb349cec7d892d7b63216a5467e097309f564d3b8bee36e8d7de20",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "intake",
+        "review",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "skill_intake_review",
+      "command": "./bin/ask sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_intake_review"
+      ],
+      "execution_id": "sha256:04de66f4f28e01297f02876ca321fcd133c8c384da510b81187c91e32a537e12",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "lenses",
+        "validate",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sdk_lenses",
+      "command": "./bin/ask sdk lenses validate --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:lens_catalog_validation"
+      ],
+      "execution_id": "sha256:e06917a3205eedc06f54e6c1163057fb71a5fba51fbb065892c57ea7ba487978",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "lenses",
+        "select",
+        "--prompt",
+        "review a skill for validation confidence",
+        "--intent",
+        "validation_review",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sdk_lenses",
+      "command": "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:lens_selection"
+      ],
+      "execution_id": "sha256:66781807e354a2451f0d0627073564b136b23ba1f17d9940698d6cb762432090",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "review",
+        "plan",
+        "--target",
+        "Skills/agent-ops/simplify",
+        "--intent",
+        "validation_review",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "review_plan",
+      "command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:review_plan"
+      ],
+      "execution_id": "sha256:a612cbb6cdbd8ce2765cedaeb3717c2289edc2f4f67ce4224235f88e9f92ad8d",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "review",
+        "handoff",
+        "--plan",
+        ".harness/artifacts/sdk-review-plan/simplify.json",
+        "--target",
+        "Skills/agent-ops/simplify",
+        "--intent",
+        "validation_review",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "review_handoff",
+      "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:e9951faf809d428973d3dd2d90872e88b4a8336f10fecf55b01c80a80871e8c6",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "review",
+        "execute",
+        "--handoff",
+        ".harness/artifacts/sdk-review-handoff/simplify.json",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "review_execution",
+      "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:79de7f801ce0060938f5409bfe05acef2ad9dbadfff506f81076ffe4b8683235",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "bash",
+        "Infrastructure/scripts/run-infrastructure-python.sh",
+        "scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
+      ],
+      "capability_id": "review_execution",
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:96d1bc573c6a83bb2d01af3fe8fe287e0346827a87a2b49287758846eab4eb99",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold",
+        "-v"
+      ],
+      "capability_id": "review_execution",
+      "command": "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:bedfbea1687b258fc4c38b6cd05877178940a9c39fe7c3b63ec7f4445e823204",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator",
+        "-v"
+      ],
+      "capability_id": "review_execution",
+      "command": "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:ecf8645661f4d1212cb744aab42de8e3f8d4b0e65d3e8b6d4771d7e6a86f2e88",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "review",
+        "verify",
+        "--handoff",
+        ".harness/artifacts/sdk-review-handoff/simplify.json",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "review_verification",
+      "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:8e6f29e9bef98dd97bfffd23a966b39b859436c14e15e33a0d074b4488fea760",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "determinism",
+        "audit",
+        "--scope",
+        "skills",
+        "--limit",
+        "10",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "determinism_audit",
+      "command": "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:determinism_audit"
+      ],
+      "execution_id": "sha256:8df29ca7696eba64fe4a4e8d6788298c1a2a7cd0e46b0b8b91d25f6494164b4c",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "trust",
+        "decide",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--decision",
+        "trust",
+        "--reason",
+        "fixture passed local checks",
+        "--owner",
+        "skills-sdk-tests",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "trust_store",
+      "command": "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_trust_decide"
+      ],
+      "execution_id": "sha256:561432e2feb40f19c1e01b82a74a61b9281ba397934a667e1cc0504829e94798",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "observability",
+        "feedback",
+        "--skill",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--events",
+        "Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "observability_feedback",
+      "command": "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:080331897a957a2730dd16f6fb86dffabce5bc80b2bfb48478f6ffd04352b5d3",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "knowledge",
+        "ingest",
+        "--extraction",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction",
+        "--skill",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "refs_ingestion",
+      "command": "./bin/ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:a3972fdfd9c73be70491e4b5f88b3c3484c6ee3f7f51265a6ba7c426b49a6487",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "run",
+        "--runner",
+        "deterministic-jsonl",
+        "--dataset",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+        "--skill",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "evals",
+      "command": "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:633e3b3f47811a8555f7b2645b028cc66c45c4d6b1640a7ea795a24213e77e13",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "profiles",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "eval_profiles",
+      "command": "./bin/ask sdk eval profiles --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_profiles"
+      ],
+      "execution_id": "sha256:cb7909cc8afff8efc7c9f6825a2d781c9f415427b8ca228a6150330f30ca1bb0",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "ab-rubric",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_rubric",
+      "command": "./bin/ask sdk eval ab-rubric --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_ab_rubric"
+      ],
+      "execution_id": "sha256:befcb574bdbd4b6c01754c438486d5018e78d358b84bf466af953735d984b43a",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "ab-preview",
+        "--skill-a",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--skill-b",
+        "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+        "--fixture",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_preview",
+      "command": "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_ab_preview"
+      ],
+      "execution_id": "sha256:1c088483023ca46a83737b9e465ce26e95c5296aa7f1757a6f6b7be3c9062a25",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "ab-plan",
+        "--skill-a",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--skill-b",
+        "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+        "--fixture",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_plan",
+      "command": "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:fdd2bad2d742cf46f4360972fd3d5a787bb97ff61424fed9aa3ef856ff8dda0a",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "ask",
+        "sdk",
+        "eval",
+        "ab-run",
+        "--skill-a",
+        "<skill-a>",
+        "--skill-b",
+        "<skill-b>",
+        "--fixture",
+        "<fixture>",
+        "--execute",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_run",
+      "command": "ask sdk eval ab-run --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --execute --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:18815e014ef6d6b163d0008e94b2e7de5295ffa945ff1cb78c03560f7bfbe477",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "ab-judge-preview",
+        "--run-receipt",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_judge_preview",
+      "command": "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:c71409162b44098ecd87956bf5b4ab482315865c231a35c43c03f16271a5b07a",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "ask",
+        "sdk",
+        "eval",
+        "ab-judge-score",
+        "--run-receipt",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
+        "--execute",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ab_judge_score",
+      "command": "ask sdk eval ab-judge-score --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --execute --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:52791f2b58d4cfab7530254187438a67d695515f7c9ec77870ce66c511304d83",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "eval",
+        "scenario-quality",
+        "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "scenario_quality_gate",
+      "command": "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_eval_scenario_quality"
+      ],
+      "execution_id": "sha256:17c29f48a55042a1c142537a5b126c910419fce6a36aed9e4bffd84441cedafa",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "package",
+        "signing-intent",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--policy",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "signing",
+      "command": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:f68e16673d41d42c794eb1a401087c66f4172cdf923edadb8be943f89cc708ec",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "sandbox",
+        "validate",
+        "--profile",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sandbox",
+      "command": "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_sandbox_validate"
+      ],
+      "execution_id": "sha256:f9a6dd7cce2eb290a75d8d4dfb97411f4062ebfcb05103e223107ba822cc4452",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "security",
+        "adapters",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "security_adapter",
+      "command": "./bin/ask sdk security adapters --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_security_adapter_discovery"
+      ],
+      "execution_id": "sha256:ed12faf0cecd30d2b152399409030775a2acd3a096a4a737799e60165c7b13e3",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "evidence",
+        "verify",
+        "--scope",
+        "capability-matrix",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "capability_evidence",
+      "command": "./bin/ask sdk evidence verify --scope capability-matrix --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_capability_evidence"
+      ],
+      "execution_id": "sha256:d5f1cf719574ef85fa8923d727fa5e315d0c42de5f696db63a82c4aac5df7585",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "explorer",
+        "static",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "skill_explorer",
+      "command": "./bin/ask sdk explorer static --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_static_explorer_preview"
+      ],
+      "execution_id": "sha256:e1fc35cf935956d218f3446e494663b287cbca055bd080f92bb260539c69f0a2",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "plugin",
+        "--help"
+      ],
+      "capability_id": "sdk_plugin_lifecycle",
+      "command": "./bin/ask sdk plugin --help",
+      "evidence": [
+        "help_receipt:valid_text",
+        "help_nonempty_line_count:18"
+      ],
+      "execution_id": "sha256:bfe23fa19a28d59a250364382117633bdde03453ce00e463380afa95657031b4",
+      "exit_code": 0,
+      "reason": "Exact allowlisted help command returned bounded non-empty argparse text.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "plugin",
+        "create",
+        "demo-skill",
+        "--kind",
+        "skill",
+        "--category",
+        "agent-ops",
+        "--description",
+        "Demo skill",
+        "--with-registry",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sdk_plugin_lifecycle",
+      "command": "./bin/ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --with-registry --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:301bb23ec89faaf1d7c3eeb9fb7688b183fca63e7262d1c7f387dc9c37babaa0",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "plugin",
+        "create",
+        "demo-plugin",
+        "--kind",
+        "plugin",
+        "--category",
+        "third-party",
+        "--with-registry",
+        "--with-references",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sdk_plugin_lifecycle",
+      "command": "./bin/ask sdk plugin create demo-plugin --kind plugin --category third-party --with-registry --with-references --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:686490262df08417b4e4a55d509417346b50bc005425f323e6c3f3bad423f8e5",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "plugin",
+        "save-registry",
+        "--kind",
+        "plugin",
+        "--target",
+        "Plugins/plugin-factory",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "sdk_plugin_lifecycle",
+      "command": "./bin/ask sdk plugin save-registry --kind plugin --target Plugins/plugin-factory --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:561aac96d672d55fd035d97ef6c780fbf5a868c8ab9b14fbe085f4007a996084",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "emitter",
+        "preview",
+        "--skill",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "emitters",
+      "command": "./bin/ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "evidence": [
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_emitter_preview"
+      ],
+      "execution_id": "sha256:67186647317455c488856ad366a8dd8dc1209b80a357f2e8bee2c3113432d8cf",
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "ci",
+        "policy",
+        "--risk-tier",
+        "high",
+        "--preview",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "ci_adoption_gates",
+      "command": "./bin/ask sdk ci policy --risk-tier high --preview --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:68475ec3787654e303f677110e7ad58e12676887fde1d8bd5636fae020226b9e",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    },
+    {
+      "argv": [
+        "./bin/ask",
+        "sdk",
+        "package",
+        "harden",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--json",
+        "--robot"
+      ],
+      "capability_id": "package_hardening",
+      "command": "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "evidence": [
+        "deny_by_default"
+      ],
+      "execution_id": "sha256:98bb3304bafffbab78b53a836cb17d30747eec55a5034ba72507f1fa703da8b1",
+      "exit_code": null,
+      "reason": "Command is not on the exact private stabilization read-only allowlist.",
+      "status": "blocked_unsafe"
+    }
+  ],
+  "schema_version": "skills-sdk.private-stabilization-replay.v1",
+  "scope": "capability-matrix-private-stabilization",
+  "status": "pass",
+  "terminal_count": 43,
+  "unclassified_count": 0,
+  "unique_execution_count": 43
+}

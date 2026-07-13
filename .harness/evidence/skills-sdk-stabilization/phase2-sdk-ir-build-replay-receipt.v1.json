@@ -1,0 +1,159 @@
+{
+  "schema_version": "skills-sdk.phase2-sdk-ir-build-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_with_fallback_review",
+  "captured_at": "2026-07-12T19:39:30Z",
+  "revision": {
+    "base_head_sha": "64ea6347c9b0520056cfaf4876ac4541b18d5b49",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the exact ./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot argv into the private read-only replay allowlist",
+      "capture its schema-valid skills-sdk.skill-ir.v0 success envelope and no-mutation evidence",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "package, install, runtime, registry, or release readiness",
+      "provider invocation or cloud execution",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "source_digest": "sha256:1d9827ed9a1c94c45476b6345b2b3c8c84d9598c5ecf8c589f337255a8695c06",
+    "test_digest": "sha256:7cb71c2a1db1b13075e4f593288c81d18674b8bf6147d3dffa6ecbe5c2298394",
+    "direct_payload": {
+      "top_level_status": "success",
+      "nested_schema": "skills-sdk-ir-build.v0",
+      "skill_ir_schema": "skills-sdk.skill-ir.v0",
+      "nested_status": "built",
+      "mutation_performed": false,
+      "permissions": {
+        "filesystem": "none",
+        "network": "none",
+        "secrets": "none"
+      }
+    }
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_sdk_ir_build",
+      "status": "fail",
+      "evidence": "TDD red phase: the focused test observed blocked_unsafe before the exact argv was allowlisted."
+    },
+    {
+      "command": "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "status": "pass",
+      "evidence": "exit 0; top-level status=success; skills-sdk-ir-build.v0 status=built; nested skills-sdk.skill-ir.v0 emitted; mutation_performed=false; permissions filesystem/network/secrets=none."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_sdk_ir_build",
+      "status": "pass",
+      "evidence": "1 passed, 16 deselected."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "24 passed, 8 subtests passed."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900."
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 15 executed_pass; 28 blocked_unsafe; 0 unclassified; receipt sha256:90588ae6cd78a58d5628b87a011c3b2f8bf0e2358dda684f7eb2e2fd85cdf9a2."
+    },
+    {
+      "command": "./bin/ask repo validate --scope skills-sdk --ephemeral --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json .harness/evidence/skills-sdk-stabilization/phase2-sdk-ir-build-replay-receipt.v1.json --json --robot",
+      "status": "pass",
+      "evidence": "required_failures=0; warn_only_issues=0."
+    },
+    {
+      "command": "git diff --check -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json .harness/evidence/skills-sdk-stabilization/phase2-sdk-ir-build-replay-receipt.v1.json",
+      "status": "pass",
+      "evidence": "No targeted whitespace errors; generated review paths remain outside the slice."
+    },
+    {
+      "command": "codex review --uncommitted",
+      "status": "blocked",
+      "evidence": "failed to initialize in-process app-server client: Operation not permitted (os error 1)."
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "blocked_missing_artifact",
+      "artifact": null,
+      "finding": "The requested Worker did not write its required artifact after one follow-up; direct fallback was used and independently validated."
+    },
+    "qa": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-ir-build-fallback-qa.json",
+      "finding": "Independent repo-native QA passed in inspection worktree /private/tmp/agent-skills-ir-build-qa-inspection-2; mise tracking symlink warning remained advisory."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-ir-build-fallback-adversarial.json",
+      "finding": "Fresh static/runtime disproof pass found no blocking finding across allowlist, negative sibling, digest binding, and no-mutation assertions; codex review fallback remained blocked by app-server initialization."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 15,
+    "blocked_unsafe_count": 28,
+    "unclassified_count": 0,
+    "digest": "sha256:90588ae6cd78a58d5628b87a011c3b2f8bf0e2358dda684f7eb2e2fd85cdf9a2",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "runtime_observability": {
+    "stale_node_checks": [
+      {
+        "command": "pgrep -af 'node|node_repl'",
+        "status": "blocked",
+        "evidence": "sysmon request failed with error: sysmond service not found; pgrep: Cannot get process list."
+      },
+      {
+        "command": "ps -Ao pid=,ppid=,stat=,etime=,command= | rg -i 'node(_repl)?|node_repl'",
+        "status": "blocked",
+        "evidence": "zsh: operation not permitted: ps."
+      },
+      {
+        "command": "launchctl list | rg -i 'node(_repl)?|node_repl' || true",
+        "status": "pass",
+        "evidence": "No matching launchd service rows were returned."
+      },
+      {
+        "command": "rg --files -g '*node_repl*' -g '*node*' .harness /tmp 2>/dev/null | rg -i '(^|/)(node|node_repl)(/|$)|node_repl' || true",
+        "status": "pass_with_advisory",
+        "evidence": "No node_repl path was found; two generated temporary node wrapper files were observed under /tmp and no live-process evidence was available."
+      }
+    ],
+    "claims_boundary": "Process-table visibility is blocked in this sandbox; no claim is made that the host has no stale Node or node_repl process."
+  },
+  "claims_boundary": [
+    "The exact SDK IR build command is covered by the private replay allowlist and emits a schema-valid local SkillIR receipt without mutation.",
+    "The 43-row receipt is terminally classified; 28 rows remain intentionally denied and have no behavior proof.",
+    "Worker child artifact provisioning failed, so the documented separate inspection-worktree fallback supplied fresh QA and adversarial artifacts with advisories.",
+    "No claim is made about provider/cloud execution, command/service rationalization, Foundry extraction, source admission, Tessl, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Stage only the two source files and two durable receipts, create the immutable local commit, push through the 1Password wrapper to draft PR #330, then select the next smallest deny-by-default read-only command."
+}

@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import (  # noqa: E402
     _sdk_improve_evidence_paths,
+    _sdk_improve_project_root,
     _sdk_improve_update_registry,
     skills_sdk_project_improve,
 )
@@ -187,6 +188,13 @@ def _assert_apply_receipt_evidence(
 
 
 class TestSkillsSdkProjectImprove(unittest.TestCase):
+    def test_apply_requires_absolute_project_root(self) -> None:
+        self.assertIsNone(_sdk_improve_project_root("Infrastructure", REPO_ROOT, allow_relative=False))
+        self.assertEqual(
+            _sdk_improve_project_root("Infrastructure", REPO_ROOT, allow_relative=True),
+            (REPO_ROOT / "Infrastructure").resolve(),
+        )
+
     def test_full_manifest_evidence_defaults_follow_output_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_root = Path(tmp) / "x-writer-canary"

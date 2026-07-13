@@ -1,0 +1,33 @@
+{
+  "schema_version": "skills-sdk.phase2-capability-evidence-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T02:09:19Z",
+  "base_head_sha": "d9ee47e7939a496dd4334e8ec13bc39fd0ed17cb",
+  "allowlisted_argv": "./bin/ask sdk evidence verify --scope capability-matrix --json --robot",
+  "source_digest": "sha256:53533129566aeb01da229299a3c4d0082925492b2f7178a50bd726dd84636427",
+  "test_digest": "sha256:ef7e573835e7e7961cda905343cd6ea928391e947d5569dbdea299430f450976",
+  "behavior_proof": {
+    "receipt_schema": "skills-sdk.capability-evidence-receipt.v0",
+    "receipt_status": "pass",
+    "scope": "capability-matrix",
+    "mutation_performed": false,
+    "command_execution_performed": false,
+    "altered_scope": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/capability-evidence-worker.md",
+    "qa": "artifacts/reviews/capability-evidence-qa.md",
+    "adversarial": "artifacts/reviews/capability-evidence-adversarial.md",
+    "patch_digest": "sha256:66927408ced53ba714fd5af65dfc312f748f19b884d8dc77bde66a803195a675"
+  },
+  "replay": {
+    "digest": "sha256:6b0645c2921e5553372258e50a1b965382ed53049a8f575c934d6aa813072472",
+    "total": 43,
+    "executed_pass": 22,
+    "blocked_unsafe": 21,
+    "unclassified": 0
+  },
+  "advisory": "The shared replay classifier validates the outer robot envelope; nested safety fields are independently proved by the direct command, source inspection, focused tests, and unchanged worktree state.",
+  "claims_boundary": "No Foundry, source-admission, apply, Tessl/CircleCI, publication, installation, merge, or release-readiness claim follows.",
+  "next_gate": "Push this receipt, then select the smallest genuinely read-only command from the remaining 21 deny-by-default references."
+}

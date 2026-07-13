@@ -58,6 +58,13 @@ SERVICE_RATIONALIZATION_ROWS = (
 
 
 def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capability-matrix") -> dict[str, Any]:
+    command_rows, blockers = _plan_command_rows(repo_root, scope)
+    if not command_rows:
+        blockers.append(_blocker("no_command_evidence_refs", "No command evidence refs were found to plan.", [scope]))
+    return _build_command_plan_receipt(scope, command_rows, blockers)
+
+
+def _plan_command_rows(repo_root: Path, scope: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     capability_receipt = build_capability_evidence_receipt(repo_root, scope=scope)
     command_rows: list[dict[str, Any]] = []
     blockers: list[dict[str, Any]] = []
@@ -74,8 +81,14 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
                     [str(row.get("capability_id") or "capability:unknown"), str(row.get("ref") or ""), str(exc)],
                 )
             )
-    if not command_rows:
-        blockers.append(_blocker("no_command_evidence_refs", "No command evidence refs were found to plan.", [scope]))
+    return command_rows, blockers
+
+
+def _build_command_plan_receipt(
+    scope: str,
+    command_rows: list[dict[str, Any]],
+    blockers: list[dict[str, Any]],
+) -> dict[str, Any]:
     status = "blocked" if blockers else "planned"
     return {
         "schema_version": COMMAND_EVIDENCE_PLAN_SCHEMA_VERSION,
@@ -86,7 +99,7 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
         "command_count": len(command_rows),
         "commands": command_rows,
         "service_count": len(SERVICE_RATIONALIZATION_ROWS),
-        "services": _service_receipt_rows(),
+        "services": _json_service_rows(),
         "blockers": blockers,
         "mutation_performed": False,
         "command_execution_performed": False,
@@ -98,7 +111,7 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
     }
 
 
-def _service_receipt_rows() -> list[dict[str, Any]]:
+def _json_service_rows() -> list[dict[str, Any]]:
     return [
         {**service, "caller_modules": list(service["caller_modules"])}
         for service in SERVICE_RATIONALIZATION_ROWS

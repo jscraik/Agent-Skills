@@ -1,0 +1,55 @@
+{
+  "schema_version": "skills-sdk.phase2-plugin-create-plugin-preview-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T05:09:54Z",
+  "base_head_sha": "29d87562e5729c007e5b7e4f1b44aad68db213ba",
+  "scope": "read-only Skills SDK plugin-kind create preview command admission",
+  "allowlisted_argv": "./bin/ask sdk plugin create demo-plugin --kind plugin --category third-party --with-registry --with-references --preview --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_plugin_create_plugin_preview_replay.py"
+  ],
+  "source_digests": {
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py": "sha256:4f535dac5b47eb6a57b5dc26d82dffa40a1d6fbdfef54eac8a56c1995dd2273f",
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:e751f437683f891ac35c9ebd23e8e0a4b4a72d6951f85dde304429304db43553",
+    "Infrastructure/tests/test_skills_sdk_plugin_create_plugin_preview_replay.py": "sha256:ae2105d35213bc466d1cb40f1100bba4ae9d5a5440f53231c042fde330d33231"
+  },
+  "patch_digest": "sha256:7e978b3673d14c13bcc39cc0dac2f3165ff2215cb3409ab7d04adfa2d2f2b8d0",
+  "behavior_proof": {
+    "receipt_status": "preview",
+    "planned_command_preserves_companion_flags": true,
+    "planned_command_contains": ["--with-marketplace", "--with-references"],
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "remote_publish_performed": false,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/plugin-create-plugin-preview-worker.md",
+    "qa": "artifacts/reviews/plugin-create-plugin-preview-qa.md",
+    "adversarial": "artifacts/reviews/plugin-create-plugin-preview-adversarial.md",
+    "worker_initial_finding": "P1 preview plan dropped --with-references; fixed by using canonical _plugin_init_validation_command and regression-tested",
+    "worker_runtime_recovery": "worker artifact retained; generated manifest and default artifact excluded"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 32,
+    "blocked_unsafe": 11,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_create_plugin_preview_replay.py -> fail (TDD red: preview planned command omitted --with-references)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_create_plugin_preview_replay.py -> pass (3 passed after planner fix and exact allowlist admission)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_lifecycle.py tests/test_skills_sdk_parser_family_inventory.py -> pass (24 passed; 24 subtests passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/commands/skills_impl.py scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_create_plugin_preview_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/commands/skills_impl.py scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_create_plugin_preview_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk plugin create demo-plugin --kind plugin --category third-party --with-registry --with-references --preview --json --robot > /tmp/agent-skills-plugin-create-plugin-preview.json; after=$(git status --porcelain); test \"$before\" = \"$after\"; jq -e '.status == \"success\" and .data.skills_sdk_plugin_create.status == \"preview\" and .data.skills_sdk_plugin_create.mutation_performed == false and (.data.skills_sdk_plugin_create.planned_commands | any(contains(\"--with-references\"))) and .data.skills_sdk_plugin_create.with_registry == true' /tmp/agent-skills-plugin-create-plugin-preview.json -> pass",
+    "Command: PYTHONPATH=\"$PWD/Infrastructure/scripts/lib\" UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root \"$PWD\" --output .harness/evidence/skills-sdk-stabilization/private-plugin-create-plugin-preview-replay.json -> pass (32 executed_pass; 11 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<fresh QA prompt>' < /tmp/agent-skills-plugin-create-plugin-preview-candidate.patch -> pass (QA_PASS_NO_FINDINGS marker)",
+    "Command: ollama run h4rithd/coder:14b '<adversarial prompt>' < /tmp/agent-skills-plugin-create-plugin-preview-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No plugin creation apply, local registry write, remote registry publication, installation, Foundry extraction, source admission, Tessl/CircleCI mutation, merge, or release-readiness claim follows."
+}

@@ -1,0 +1,142 @@
+{
+  "schema_version": "skills-sdk.stabilization-reconciliation-receipt.v1",
+  "status": "accepted_for_compatibility_review",
+  "captured_at": "2026-07-12T12:45:30Z",
+  "revision": {
+    "base_head_sha": "7c65e5f9341be0091f7cf63f5b5df707196d388d",
+    "requested_sha": "7c65e5f93",
+    "worktree": "/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93",
+    "branch_state": "detached HEAD with uncommitted bounded stabilization patch",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "README.md package-admission consistency",
+      "private deny-by-default replay classification for all 43 command references",
+      "stable patch identity for the bounded source/test set",
+      "focused compatibility tests"
+    ],
+    "excluded": [
+      "command/service refactor",
+      "deadwood deletion",
+      "Foundry extraction",
+      "source admission",
+      "runtime cutover",
+      "Tessl or CircleCI mutation",
+      "publish, install, push, pull request, or merge"
+    ]
+  },
+  "excluded_generated_outputs": [
+    ".harness/artifacts/sdk-review-plan/",
+    ".harness/artifacts/sdk-review-handoff/",
+    "artifacts/reviews/sdk-review-handoff/"
+  ],
+  "readme_admission": {
+    "status": "aligned",
+    "policy": "README.md is approved registry presentation; SKILL.md remains required runtime instruction source.",
+    "changed_source": "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py",
+    "positive_fixture": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "negative_fixture": "temporary source with unexpected top-level path and rejected subtree",
+    "package_build": "pass; README.md and SKILL.md included; mutation_performed=false",
+    "intake_inspect": "pass; README.md accepted; 2 files inspected; mutation_performed=false",
+    "focused_regression": "pass; positive README admission and negative unapproved-top-level coverage"
+  },
+  "patch_identity": {
+    "algorithm": "skills-sdk.stabilization-patch-identity.v1",
+    "identity": "sha256:b214348b7893cc76e80e4dcbdc8c349107cc7a91e9e14beb98ccaec1b85e8765",
+    "source": "skills-sdk.stabilization_identity.py",
+    "declared_paths": [
+      "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_identity.py",
+      "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+      "Infrastructure/tests/test_skills_sdk_skill_intake.py",
+      "Infrastructure/tests/test_skills_sdk_stabilization_identity.py",
+      "Infrastructure/tests/test_skills_sdk_stabilization_replay.py"
+    ]
+  },
+  "command_replay": {
+    "receipt_path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "receipt_digest": "sha256:deaa68a8155b8286730f0c32571d99c3ea377f3c06d5e393d936dc5ed32dee03",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "unclassified_count": 0,
+    "unique_execution_count": 43,
+    "executed_pass_count": 5,
+    "blocked_unsafe_count": 38,
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "network_policy_intent": "local_only_no_network_requested",
+    "mutation_policy_intent": "read_only_preview_or_validation_commands_only",
+    "receipt_contract": "executed_pass requires a stable JSON object with status=success, metadata object, and data object; receipt evidence records only stable envelope keys",
+    "allowlisted_commands": [
+      "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "./bin/ask sdk lenses validate --json --robot",
+      "./bin/ask sdk eval profiles --preview --json --robot",
+      "./bin/ask sdk security adapters --preview --json --robot"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests/test_skills_sdk_stabilization_identity.py tests/test_skills_sdk_stabilization_replay.py tests/test_skills_sdk_skill_intake.py tests/test_skills_sdk_skill_intake_review.py tests/test_skills_sdk_package_hardening.py tests/test_skills_sdk_command_evidence_plan.py tests/test_skills_sdk_command_service_rationalization.py -q",
+      "status": "pass",
+      "evidence": "60 passed"
+    },
+    {
+      "command": "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+      "status": "pass",
+      "evidence": "README.md and SKILL.md included; mutation_performed=false"
+    },
+    {
+      "command": "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+      "status": "pass",
+      "evidence": "approved_top_level_paths passed with README.md; mutation_performed=false"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 5 allowlisted executions passed; 38 rows denied by exact allowlist"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "evidence": "no whitespace errors"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_identity.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py Infrastructure/scripts/lib/ask/skills_sdk/stabilization_identity.py Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_skill_intake.py Infrastructure/tests/test_skills_sdk_stabilization_identity.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "identity sha256:4cbfc3e5da73a31ee8208300a11bcadc22e66584facc92a74857ddc4466467cf"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json && shasum -a 256 .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json && PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/tmp-replay.json && shasum -a 256 .harness/evidence/skills-sdk-stabilization/tmp-replay.json && cmp -s .harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json .harness/evidence/skills-sdk-stabilization/tmp-replay.json",
+      "status": "pass",
+      "evidence": "two consecutive replays produced identical digest sha256:deaa68a8155b8286730f0c32571d99c3ea377f3c06d5e393d936dc5ed32dee03 and cmp passed"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py && bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py && git diff --check",
+      "status": "pass",
+      "evidence": "ruff, py_compile, and diff checks passed"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests -q",
+      "status": "blocked",
+      "evidence": "pre-existing command-surface metadata collection drift: handle source_revision values are missing"
+    }
+  ],
+  "compatibility_slice": {
+    "status": "accepted",
+    "adversarial_verdict": "accepted",
+    "adversarial_report_path": "/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93-commit-review.json",
+    "adversarial_report_digest": "sha256:5dd5190e67603633b7248d20021ebb944235c0f41a2be60793c01f2ca5f3ac90",
+    "public_behavior_boundary": "README admission is the only intentional behavior correction; SKILL.md requirement, unknown top-level rejection, symlink rejection, valid success robot-envelope observation, safe evidence output anchoring, and non-mutation boundaries remain covered.",
+    "refactor_deletion_decision": "not_justified",
+    "evidence_boundary": "Private replay proves terminal classification and five allowlisted local read-only executions with valid success envelopes; it does not prove behavior for the 38 deny-by-default rows."
+  },
+  "claims_boundary": [
+    "This receipt records a bounded uncommitted stabilization patch against base HEAD 7c65e5f9341be0091f7cf63f5b5df707196d388d.",
+    "The private replay receipt exhaustively classifies all 43 command references without silently omitting blocked rows.",
+    "No command/service refactor or deletion is justified by this evidence.",
+    "This artifact does not claim Foundry extraction, source admission, runtime readiness, Tessl/CircleCI state, publication, installation, hosted CI, PR, merge, or release readiness."
+  ],
+  "next_gate": "Compatibility review is accepted and direct authorization is recorded. Preserve this bounded patch as the immutable local stabilization commit; only after that commit may a separately authorized command/service rationalization slice begin."
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": "skills-sdk.phase2-review-handoff-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_with_fallback_review",
+  "captured_at": "2026-07-13T08:22:07Z",
+  "revision": {
+    "base_head_sha": "91fab8040e0a2018cf3faecb6af9b63758d4c554",
+    "worktree": "/private/tmp/agent-skills-emitter-reconcile",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "generate the same-head simplify review-plan input under the existing explicit artifact-write policy",
+      "replay the exact sdk review handoff argv against that generated input",
+      "assert schema, no-mutation, no-output, and not-proven boundaries",
+      "preserve positive and negative replay coverage with independent Worker, QA, and adversarial processes"
+    ],
+    "excluded": [
+      "review execution or required review-artifact materialization",
+      "eval runner or judge execution",
+      "package signing, install, runtime, registry, or release readiness",
+      "Foundry extraction or source admission",
+      "Tessl or CircleCI mutation",
+      "publication, push, pull request, merge, or hosted CI readiness"
+    ]
+  },
+  "change": {
+    "changed_files": [
+      "Infrastructure/scripts/validation-and-linting/review_handoff_replay.py",
+      "Infrastructure/tests/test_review_handoff_replay.py",
+      ".harness/quality/steering-uptake.md"
+    ],
+    "source_digests": {
+      "Infrastructure/scripts/validation-and-linting/review_handoff_replay.py": "sha256:27fa72d677e443f8d6790c9cf91eeaa965c84292b0a798cb705246c4361f2cb5",
+      "Infrastructure/tests/test_review_handoff_replay.py": "sha256:2d04d8217e8a3dcbe67260322432aab09925272b83178a1b106d0bfe97bbc352",
+      ".harness/quality/steering-uptake.md": "sha256:9b6c557021ce24e0c15940a74f481d82b5a776023212812635201fc0099a26ee"
+    },
+    "allowlisted_argv": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot"
+  },
+  "behavior_proof": {
+    "setup_command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
+    "handoff_command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "plan_receipt": {
+      "schema_version": "skills-sdk.review-plan-receipt.v1",
+      "status": "pass",
+      "receipt_written": true,
+      "mutation_performed": false
+    },
+    "handoff_receipt": {
+      "schema_version": "skills-sdk.review-handoff-receipt.v1",
+      "status": "pass",
+      "mutation_performed": false,
+      "receipt_written": false,
+      "not_proven": [
+        "reviewers_completed",
+        "ci_passed",
+        "pr_mergeable",
+        "review_threads_resolved",
+        "tracker_updated"
+      ]
+    },
+    "generated_inputs": "plan receipt and trace sidecar are temporary same-head evidence and are removed after replay; no generated review artifacts are admitted"
+    ,"cleanup_invariant": "a clean replay removes the generated plan, trace file, empty trace directory, and empty plan directory; pre-existing paths are preserved"
+  },
+  "reviews": {
+    "worker": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-fallback/worker.json",
+      "finding": "Exact plan setup and handoff replay passed with schema-valid no-write receipt."
+    },
+    "fresh_qa": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-qa-child/followup.json and artifacts/agent-runs/default-review-handoff-fixture-fallback/qa.json",
+      "finding": "Independent child QA and process-isolated fallback replay, focused pytest, Ruff, and CLI modularity all passed; clean replay left no generated plan or trace directories."
+    },
+    "adversarial": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-fallback/adversarial.json",
+      "finding": "Negative mutation/schema payloads were rejected and no concrete execution/network authority was introduced."
+    },
+    "child_qa_runtime": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-qa-child/followup.json",
+      "finding": "The follow-up QA child reran after the cleanup fix and emitted a non-empty pass artifact."
+    }
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_review_handoff_replay.py -> pass (8 passed)",
+    "Command: uv run --python 3.12 ruff check Infrastructure/scripts/validation-and-linting/review_handoff_replay.py Infrastructure/tests/test_review_handoff_replay.py -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/review_handoff_replay.py Infrastructure/tests/test_review_handoff_replay.py -> pass (1873/1900)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_handoff_replay.py --role worker --output artifacts/agent-runs/default-review-handoff-fixture-fallback/worker.json -> pass (status=pass)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_handoff_replay.py --role qa --output artifacts/agent-runs/default-review-handoff-fixture-fallback/qa.json -> pass (status=pass)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/review_handoff_replay.py --role adversarial --output artifacts/agent-runs/default-review-handoff-fixture-fallback/adversarial.json -> pass (status=pass)",
+    "Command: clean replay then test ! -e .harness/artifacts/sdk-review-plan/traces && test ! -e .harness/artifacts/sdk-review-plan -> pass (generated plan and trace directories absent)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass (findings=0)",
+    "Command: git diff --check -- Infrastructure/scripts/validation-and-linting/review_handoff_replay.py Infrastructure/tests/test_review_handoff_replay.py .harness/evidence/skills-sdk-stabilization/phase2-review-handoff-replay-receipt.v1.json -> pass"
+  ],
+  "claims_boundary": "The exact handoff command is locally replayable only after an explicitly authorized same-head plan artifact is generated. This proves a read-only schema-valid handoff receipt and its no-write boundary; it does not prove reviewer execution, artifact collection, hosted CI, PR state, registry publication, installation, Foundry extraction, source admission, Tessl, CircleCI, or release readiness.",
+  "next_gate": "Update the remaining-row receipt against the immutable commit, then select sdk review execute only if a repository-owned handoff fixture and separate artifact-materialization authority are admitted; otherwise continue with the smallest deny-by-default read-only row."
+}

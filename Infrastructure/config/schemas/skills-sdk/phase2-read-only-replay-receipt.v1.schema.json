@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json",
+  "title": "Skills SDK Phase 2 Read-only Replay Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.phase2-read-only-replay-receipt.v1"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json"},
+    "status": {"type": "string", "enum": ["selected", "bounded_local_pass", "blocked"]},
+    "operation": {"type": "string", "const": "phase2_read_only_parser_replay"},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "branch": {"type": "string", "minLength": 1},
+    "source_files": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "source_tree_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "private_replay_row": {"type": "integer", "minimum": 1},
+    "remaining_deny_by_default_count": {"type": "integer", "minimum": 0},
+    "selected": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability_id": {"type": "string", "const": "determinism_audit"},
+        "command": {"type": "string", "const": "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot"},
+        "argv": {"type": "array", "const": ["./bin/ask", "sdk", "determinism", "audit", "--scope", "skills", "--limit", "10", "--json", "--robot"]},
+        "registration_owner": {"type": "string", "const": "Infrastructure/scripts/lib/ask/commands/sdk.py"},
+        "dispatch_owner": {"type": "string", "const": "Infrastructure/scripts/lib/ask/commands/sdk.py::_dispatch_sdk_determinism"},
+        "domain_owner": {"type": "string", "const": "Infrastructure/scripts/lib/ask/skills_sdk/determinism.py::audit_skill_determinism"},
+        "receipt_schema_version": {"type": "string", "const": "skill-determinism-audit.v1"},
+        "replay_disposition": {"type": "string", "const": "preview_replay"},
+        "mutation_performed": {"type": "boolean", "const": false},
+        "network_accessed": {"type": "boolean", "const": false},
+        "credentials_accessed": {"type": "boolean", "const": false}
+      },
+      "required": ["capability_id", "command", "argv", "registration_owner", "dispatch_owner", "domain_owner", "receipt_schema_version", "replay_disposition", "mutation_performed", "network_accessed", "credentials_accessed"]
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command_execution_performed": {"type": "boolean", "const": true},
+        "exit_code": {"type": "integer", "const": 0},
+        "top_level_status": {"type": "string", "const": "success"},
+        "receipt_status": {"type": "string", "const": "pass"},
+        "receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "skills_scanned": {"type": "integer", "minimum": 1},
+        "candidate_count": {"type": "integer", "const": 10},
+        "candidate_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "stderr_bytes": {"type": "integer", "const": 0}
+      },
+      "required": ["command_execution_performed", "exit_code", "top_level_status", "receipt_status", "receipt_digest", "skills_scanned", "candidate_count", "candidate_digest", "stderr_bytes"]
+    },
+    "no_mutation_evidence": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+    "next_gate": {"type": "string", "minLength": 1},
+    "claims_boundary": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  },
+  "required": ["schema_version", "schema_uri", "status", "operation", "base_commit", "branch", "source_files", "source_tree_digest", "private_replay_row", "remaining_deny_by_default_count", "selected", "execution", "no_mutation_evidence", "next_gate", "claims_boundary"]
+}

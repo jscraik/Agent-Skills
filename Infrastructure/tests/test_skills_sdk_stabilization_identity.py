@@ -21,7 +21,10 @@ class TestStabilizationPatchIdentity(unittest.TestCase):
             (root / "a.txt").write_text("a", encoding="utf-8")
             payload = build_patch_identity(root, ["b.txt", "a.txt", "a.txt"])
             records = b"".join(
-                path.encode("utf-8") + b"\0" + str(payload["files"][path]).removeprefix("sha256:").encode("ascii") + b"\n"
+                path.encode("utf-8")
+                + b"\0"
+                + str(payload["files"][path]).removeprefix("sha256:").encode("ascii")
+                + b"\n"
                 for path in payload["paths"]
             )
 

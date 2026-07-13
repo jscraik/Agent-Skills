@@ -72,6 +72,27 @@ class TestSkillsSdkSigningIntent(unittest.TestCase):
         self.assertFalse(model.artifact_emitted)
         self.assertFalse(model.mutation_performed)
 
+    def test_repository_owned_receipts_match_current_package_identity(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        fixture_root = FIXTURE_POLICY.parent
+        static_package = json.loads((fixture_root / "package-digest-receipt.json").read_text(encoding="utf-8"))
+        static_hardening = json.loads((fixture_root / "package-hardening-receipt.json").read_text(encoding="utf-8"))
+        static_signing = json.loads((fixture_root / "signing-intent-receipt.json").read_text(encoding="utf-8"))
+
+        for receipt in (static_package, static_hardening, static_signing):
+            self.assertEqual(receipt["package_id"], package_receipt["package_id"])
+            self.assertEqual(receipt["package_digest"], package_receipt["package_digest"])
+            self.assertEqual(receipt["source_digest"], package_receipt["source_digest"])
+            self.assertEqual(receipt["manifest_digest"], package_receipt["manifest_digest"])
+            self.assertFalse(receipt["mutation_performed"])
+
+        self.assertEqual(static_hardening["included_files"], package_receipt["included_files"])
+        self.assertEqual(static_hardening["file_count"], len(package_receipt["included_files"]))
+        self.assertEqual(static_signing["status"], "ready")
+        self.assertFalse(static_signing["signing_performed"])
+        self.assertFalse(static_signing["key_material_accessed"])
+        self.assertFalse(static_signing["artifact_emitted"])
+
     def test_builder_blocks_unpinned_package_digest(self) -> None:
         package_receipt, hardening_receipt = self._package_receipts()
         policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))

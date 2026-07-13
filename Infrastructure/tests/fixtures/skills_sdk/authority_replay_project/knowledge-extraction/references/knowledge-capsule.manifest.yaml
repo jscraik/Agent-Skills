@@ -1,0 +1,17 @@
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: authority-replay-fixture
+  declared_name: authority-replay-fixture
+  writable_root: Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture
+upstream_pack:
+  pack_id: pack.skills-sdk-fixture
+  snapshot_digest: sha256:fixture-knowledge
+selected_facets:
+  - receipt_policy
+selected_asset_ids: []
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+manifest_path: references/knowledge-capsule.manifest.yaml
+demand_path: references/knowledge-demand.yaml

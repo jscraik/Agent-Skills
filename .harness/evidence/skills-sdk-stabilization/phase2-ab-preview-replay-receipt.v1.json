@@ -1,0 +1,105 @@
+{
+  "schema_version": "skills-sdk.phase2-ab-preview-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_adversarial_pass_with_advisories",
+  "captured_at": "2026-07-12T17:22:09Z",
+  "revision": {
+    "base_head_sha": "d6b42ebe44fc5133b4ef0afcdcbe470c5718f159",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the already-proven A/B preview command into the exact read-only replay allowlist",
+      "TDD positive receipt coverage",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "A/B skill execution or judging",
+      "provider invocation or cloud execution",
+      "authority-bound apply commands",
+      "runtime installation",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+    "source_digest": "sha256:3d9f297bb93a49e0578e8842d8111e90bb045d430754087c3640caf895f87d24",
+    "test_digest": "sha256:4b8e625d070dbd83728f82825e8c8cf3ff38d31b4b3feb9c533fdf453500695f"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_ab_preview",
+      "status": "fail",
+      "evidence": "TDD red phase: 1 failed; A/B preview argv was blocked before allowlist change."
+    },
+    {
+      "command": "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=preview; skills-sdk.ab-preview-receipt.v0; skill A/B package digests and fixture digest present; execution profile codex-read-only; provider_invoked=false; codex_exec_invoked=false; network_accessed=false; mutation_performed=false; blockers=[]"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "19 passed, 8 subtests passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 11 executed_pass; 32 blocked_unsafe; 0 unclassified; receipt sha256:1f11ebcfbffc55f9facd0f4345df52111d13a76f087be34eb4a6a355270188e0"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-preview-worker.json",
+      "finding": "Exact argv, TDD red/green behavior, direct A/B preview envelope, fixture and package digests, no provider/network/codex execution, replay stats/digest, and scope/no-mutation checks passed."
+    },
+    "qa": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-preview-qa.json",
+      "finding": "Dedicated preview tests, exact package and fixture digests, read-only profile, no provider/network/codex/mutation flags, replay counts/digest, and unchanged worktree passed. Advisories: judge metadata declares network_required=true but was not invoked; unrelated generated review-file whitespace."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-preview-adversarial.json",
+      "finding": "Eight checks passed or passed with boundary advisories: exact argv, source/test and HEAD binding, independent package/fixture digests, schema/read-only profile, no provider/network/Codex/mutation, replay stats/digest, generated-artifact exclusion, and claims boundaries. Advisories: judge metadata network_required=true is plan-only, lifecycle reconciliation, and unrelated generated review-file whitespace."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 11,
+    "blocked_unsafe_count": 32,
+    "unclassified_count": 0,
+    "digest": "sha256:1f11ebcfbffc55f9facd0f4345df52111d13a76f087be34eb4a6a355270188e0",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The A/B preview command is covered by the exact read-only replay allowlist and emits a valid success envelope in the replay harness.",
+    "The preview proves only plan and receipt generation; it does not prove A/B skill execution, judging, provider invocation, cloud execution, or release confirmation.",
+    "The 43-row receipt is terminally classified; 32 rows remain intentionally denied and have no behavior proof.",
+    "Worker, fresh QA, and adversarial review artifacts are reconciled. The adversarial verdict carries boundary advisories only; no claim is made about A/B judging, calibration completion, provider invocation, cloud execution, hosted CI, or release readiness.",
+    "No claim is made about apply-mode mutation, installed runtime, command/service rationalization, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Preserve this bounded replay-policy change as an immutable local commit, push it to draft PR #330, and select the next smallest concrete read-only command receipt."
+}

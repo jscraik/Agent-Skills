@@ -1,0 +1,51 @@
+{
+  "schema_version": "skills-sdk.phase2-plugin-save-registry-preview-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T05:15:35Z",
+  "base_head_sha": "1229e31bf2f624e1e98a96c72f333a402dcac8e6",
+  "scope": "read-only local plugin registry save preview command admission",
+  "allowlisted_argv": "./bin/ask sdk plugin save-registry --kind plugin --target Plugins/plugin-factory --preview --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_plugin_save_registry_preview_replay.py"
+  ],
+  "source_digest": "sha256:0976802e0c7ebec2875b05e06dce9723f2f4802c49af46d516ece76f8a3bc7fc",
+  "test_digest": "sha256:849c769732693caec7db31ca2bba7525c0c0fd9e80f047cf7dca38bb2e9b470a",
+  "patch_digest": "sha256:e8f12943af57fd487f1953cd3cabd6d177ef0ef4e7bf429ccbaa668762cc83d0",
+  "behavior_proof": {
+    "receipt_schema": "skills-sdk.plugin-registry-save.v1",
+    "target_contained": true,
+    "registry_path": "Plugins/marketplace.json",
+    "mutation_performed": false,
+    "remote_publish_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "outside_target_rejected": true,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/plugin-save-registry-preview-worker.md",
+    "qa": "artifacts/reviews/plugin-save-registry-preview-qa.md",
+    "adversarial": "artifacts/reviews/plugin-save-registry-preview-adversarial.md"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 33,
+    "blocked_unsafe": 10,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_save_registry_preview_replay.py -> fail (TDD red before allowlist admission: positive tuple was blocked_unsafe)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_save_registry_preview_replay.py -> pass (2 passed after exact allowlist admission)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_lifecycle.py tests/test_skills_sdk_parser_family_inventory.py -> pass (24 passed; 24 subtests passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_save_registry_preview_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_save_registry_preview_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk plugin save-registry --kind plugin --target Plugins/plugin-factory --preview --json --robot > /tmp/agent-skills-plugin-save-registry-preview.json; after=$(git status --porcelain); test \"$before\" = \"$after\"; jq -e '.status == \"success\" and .data.skills_sdk_plugin_save_registry.status == \"preview\" and .data.skills_sdk_plugin_save_registry.receipt.mutation_performed == false and .data.skills_sdk_plugin_save_registry.mutation_performed == false and .data.skills_sdk_plugin_save_registry.remote_publish_performed == false and .data.skills_sdk_plugin_save_registry.receipt.registry_path == \"Plugins/marketplace.json\"' /tmp/agent-skills-plugin-save-registry-preview.json -> pass",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk plugin save-registry --kind plugin --target /tmp --preview --json --robot > /tmp/agent-skills-plugin-save-registry-outside.json; after=$(git status --porcelain); test \"$before\" = \"$after\"; jq -e '.status == \"error\" and .data.skills_sdk_plugin_save_registry.status == \"blocked\" and .data.skills_sdk_plugin_save_registry.mutation_performed == false' /tmp/agent-skills-plugin-save-registry-outside.json -> pass (outside target rejected)",
+    "Command: PYTHONPATH=\"$PWD/Infrastructure/scripts/lib\" UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root \"$PWD\" --output .harness/evidence/skills-sdk-stabilization/private-plugin-save-registry-preview-replay.json -> pass (33 executed_pass; 10 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<fresh QA prompt>' < /tmp/agent-skills-plugin-save-registry-preview-candidate.patch -> pass (QA_PASS_NO_FINDINGS)",
+    "Command: ollama run h4rithd/coder:14b '<adversarial prompt>' < /tmp/agent-skills-plugin-save-registry-preview-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No registry apply, local marketplace write, remote registry publication, installation, Foundry extraction, source admission, Tessl/CircleCI mutation, merge, or release-readiness claim follows."
+}

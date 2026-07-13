@@ -1,0 +1,127 @@
+{
+  "schema_version": "skills-sdk.phase2-review-execution-verification-receipt.v1",
+  "status": "bounded_local_execution_verification_pass_with_current_head_guard_and_artifact_ignore",
+  "captured_at": "2026-07-13T11:12:03Z",
+  "revision": {
+    "source_head_sha": "dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
+    "identity_command": "git rev-parse HEAD",
+    "branch_state": "detached; guard and modularity changes are committed in dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df",
+    "same_head_required": true,
+    "immutable_commit_pending": false,
+    "source_commit": "dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df"
+  },
+  "guard": {
+    "implementation": "validate_handoff_current_head",
+    "implementation_path": "Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py",
+    "consumers": [
+      "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
+      "Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py"
+    ],
+    "artifact_ignore_policy": ".gitignore:/artifacts/reviews/, /artifacts/agent-runs/, and the four .harness/artifacts/sdk-review-{plan,handoff,execute,verify}/ roots",
+    "negative_fixture_tests": [
+      "Infrastructure/tests/test_skills_sdk_review_execute.py::TestSkillsSdkReviewExecute::test_execution_rejects_stale_same_head_handoff_before_writing",
+      "Infrastructure/tests/test_skills_sdk_review_verify.py::TestSkillsSdkReviewVerify::test_verification_rejects_stale_same_head_handoff"
+    ],
+    "behavior": "A handoff with branch_policy same_head_required and a head_sha different from the current repository HEAD is rejected before execution or verification writes artifacts."
+  },
+  "commands": [
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_review_execute.py -k stale_same_head tests/test_skills_sdk_review_verify.py -k stale_same_head",
+      "status": "pass",
+      "evidence": "2 passed, 22 deselected"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_review_execute.py tests/test_skills_sdk_review_verify.py tests/test_skills_sdk_review_handoff.py tests/test_review_handoff_replay.py",
+      "status": "pass",
+      "evidence": "49 passed"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/review_handoff.py scripts/lib/ask/skills_sdk/review_execute.py scripts/lib/ask/skills_sdk/review_verify.py tests/test_skills_sdk_review_execute.py tests/test_skills_sdk_review_verify.py tests/test_skills_sdk_review_handoff.py tests/test_review_handoff_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py Infrastructure/tests/test_skills_sdk_review_execute.py Infrastructure/tests/test_skills_sdk_review_verify.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "status": "pass",
+      "evidence": "findings=[]"
+    },
+    {
+      "command": "git check-ignore -q artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/review-summary.md artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/reviewer-findings.json artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/validation-evidence.json artifacts/agent-runs/current-review-handoff-fallback/worker.json",
+      "status": "pass",
+      "evidence": "all generated review and agent-run paths are ignored"
+    },
+    {
+      "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-execute/simplify.json --json --robot",
+      "status": "pass",
+      "evidence": "local governed artifact materialization at source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df; receipt_written=true; mutation_performed=true; failed_artifacts=[]"
+    },
+    {
+      "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --receipt-out .harness/artifacts/sdk-review-verify/simplify.json --json --robot",
+      "status": "pass",
+      "evidence": "local artifact verification at source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df; receipt_written=true; mutation_performed=false; review_artifacts_verified=true; missing_or_invalid_artifacts=[]"
+    }
+  ],
+  "generated_receipts": {
+    "plan": {
+      "path": ".harness/artifacts/sdk-review-plan/simplify.json",
+      "sha256": "79879d309e1b87347ad7e0aa15748a42420ee0211b2f039c67cf364b3a3a41fc"
+    },
+    "handoff": {
+      "path": ".harness/artifacts/sdk-review-handoff/simplify.json",
+      "sha256": "bccf7b81ae4b1e0c51d4f010ed8a9fb1d67bff0c4058b6f812cbc46c513dd7e2",
+      "canonical_receipt_sha256": "aec09baf0d7db10f9de233e6665528b9f4e029f19158880d327ec0eba921aca7"
+    },
+    "execution": {
+      "path": ".harness/artifacts/sdk-review-execute/simplify.json",
+      "sha256": "c861fe10b45018efafabca335f0f2d00c2670608106b1fdd0e2ebae394728d93"
+    },
+    "verification": {
+      "path": ".harness/artifacts/sdk-review-verify/simplify.json",
+      "sha256": "b155197f78e6d9fb953ef3cf82d37adbe526576351dc6c463f8796ffc00e376a"
+    }
+  },
+  "review_artifacts": {
+    "paths": [
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/review-summary.md",
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/reviewer-findings.json",
+      "artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/validation-evidence.json"
+    ],
+    "all_non_empty": true,
+    "execution_status": "pass",
+    "verification_status": "pass",
+    "claims": "local generated artifacts only"
+  },
+  "independent_review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/current-review-handoff-fallback/worker.json",
+      "scope": "repository-native handoff replay; no execute or verify"
+    },
+    "fresh_qa": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/current-review-handoff-fallback/qa.json",
+      "scope": "repository-native replay tests, Ruff, and modularity"
+    },
+    "adversarial": {
+      "status": "pass_after_fix",
+      "artifact": "artifacts/agent-runs/guard-adversarial-quick/report.json",
+      "scope": "same-head receipts, stale-head tests, guard call sites, diff hygiene, and generated artifact ignore policy; F-001 resolved by the narrow .gitignore rule"
+    },
+    "app_server_child": {
+      "status": "blocked_validation",
+      "reason": "fresh child did not emit a report artifact within the bounded window; repository-native fallback supplied explicit Worker/QA/adversarial reports"
+    }
+  },
+  "claims_boundary": [
+    "This receipt proves only local same-head guard behavior and local execute/verify artifact materialization and verification for source HEAD dfc3ebb4fa9fbd1578cb75622e8169c8bb1912df.",
+    "Execute mutation is limited to generated local review artifacts and its receipt; verify reports no mutation.",
+    "It does not prove independent reviewer approval, substantive human review, CI, PR mergeability, review-thread resolution, tracker state, publication, installation, Foundry extraction, source admission, Tessl or CircleCI mutation, or release readiness.",
+    "Generated plan, handoff, execution, verification, review, and agent-run paths are excluded runtime artifacts by .gitignore."
+  ],
+  "next_gate": "Select the next deny-by-default parser family from the remaining queue; retain eval runner/judge execution as evals-router-blocked."
+}

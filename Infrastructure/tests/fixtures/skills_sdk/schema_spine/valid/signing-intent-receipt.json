@@ -3,12 +3,12 @@
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
   "status": "ready",
   "policy_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
-  "policy_digest": "sha256:4d16ef847f821055f87c1f64e9e3f1251a928a877cd50e8c35d5bfbf54d21df0",
+  "policy_digest": "sha256:bb3bb66daea62a02551cf9d9d73f0a37019c76e7cd67a15f78ad48a9af1411ea",
   "package_id": "skills-sdk-valid-fixture",
   "version": "0.1.0",
-  "source_digest": "sha256:a22c823816dfd4d19fcf419e273effe1bddc35f56b797b841c692a661178fbb7",
-  "manifest_digest": "sha256:e5fc0580f2740e806f300e17294fd6b68393906cbea158e21fcc9cba55247025",
-  "package_digest": "sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6",
+  "source_digest": "sha256:56b96f9feb5eeec0f1721c1af3a4282ee0579570f7cd4f86daf996dd1d35a1d0",
+  "manifest_digest": "sha256:bb71ddfcba83965f6a5ad7ff586ff6d945944b032a48ee130f5f1a443d793bcc",
+  "package_digest": "sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97",
   "signing_checks": [
     {
       "id": "policy_schema",
@@ -22,7 +22,7 @@
       "status": "pass",
       "severity": "blocker",
       "message": "Signing policy must pin the exact package digest before requesting a signature.",
-      "evidence": ["package_digest:sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6"]
+      "evidence": ["package_digest:sha256:68265bfa1d209ef307d71b6156c11d23e022cc42a7d073ba55f4508874220b97"]
     }
   ],
   "blockers": [],

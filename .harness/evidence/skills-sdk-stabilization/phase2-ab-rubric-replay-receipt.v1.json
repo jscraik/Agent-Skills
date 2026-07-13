@@ -1,0 +1,105 @@
+{
+  "schema_version": "skills-sdk.phase2-ab-rubric-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass_adversarial_pass_with_advisories",
+  "captured_at": "2026-07-12T16:50:29Z",
+  "revision": {
+    "base_head_sha": "b354ade5dcc96d79ab6571d3d5d4a9d358ccd733",
+    "worktree_state": "uncommitted bounded replay-policy slice; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "promote the already-proven A/B rubric preview command into the exact read-only replay allowlist",
+      "TDD positive receipt coverage",
+      "refresh the 43-row private replay receipt and its digest-bound evidence"
+    ],
+    "excluded": [
+      "A/B execution or judging",
+      "provider invocation or cloud execution",
+      "authority-bound apply commands",
+      "runtime installation",
+      "command/service refactor or deletion",
+      "Foundry extraction",
+      "source admission",
+      "Tessl or CircleCI mutation",
+      "publication, installation, push, pull request, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk eval ab-rubric --preview --json --robot",
+    "source_digest": "sha256:14648d237d4464378ee65ffbccd8ef3aa6639c81235a59ac39d8b65ac8d89b90",
+    "test_digest": "sha256:1e99713b578916729bcc34f3715f79ef5a19c46be4290168ed539405d5be6560"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k read_only_ab_rubric",
+      "status": "fail",
+      "evidence": "TDD red phase: 1 failed; A/B rubric argv was blocked before allowlist change."
+    },
+    {
+      "command": "./bin/ask sdk eval ab-rubric --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=preview; rubric schema v0; stable rubric identity and digest; calibration_required=true; provider_invoked=false; network_accessed=false; mutation_performed=false"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_review_authority_parser_replay.py tests/test_skills_sdk_authority_parser_replay_receipt.py",
+      "status": "pass",
+      "evidence": "18 passed, 8 subtests passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "All checks passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    },
+    {
+      "command": "PYTHONPATH=/private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/Infrastructure/scripts/lib bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93 --output /private/tmp/agent-skills-sdk-stabilization-qa-7c65e5f93/.harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+      "status": "pass",
+      "evidence": "43 terminal rows; 10 executed_pass; 33 blocked_unsafe; 0 unclassified; receipt sha256:d220ea0df47b2bef422b78abced98ecaa95af544c1c5bfb481907cf091d6a2b2"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-rubric-worker.json",
+      "finding": "Exact argv, TDD red/green behavior, direct rubric envelope, replay stats/digest, and scope/no-mutation checks passed."
+    },
+    "qa": {
+      "status": "pass_with_advisory",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-rubric-qa.json",
+      "finding": "Dedicated rubric tests, exact preview, rubric digest, calibration flag, no provider/network/mutation, replay counts/digest, and worktree state passed. Diagnostics are limited to unrelated generated review-file whitespace."
+    },
+    "adversarial": {
+      "status": "pass_with_advisories",
+      "artifact": "local:/tmp/agent-skills-sdk-ab-rubric-adversarial.json",
+      "finding": "Eight checks passed or passed with boundary advisories: exact argv, source/test digests, rubric digest, schema and HEAD binding, replay counts/digest, no provider/network/mutation, generated-artifact exclusion, and claims boundaries. Advisories are lifecycle reconciliation and unrelated generated review-file whitespace; no blocking defect."
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 10,
+    "blocked_unsafe_count": 33,
+    "unclassified_count": 0,
+    "digest": "sha256:d220ea0df47b2bef422b78abced98ecaa95af544c1c5bfb481907cf091d6a2b2",
+    "execution_policy": "exact_argv_allowlist_deny_by_default",
+    "mutation_policy": "read_only_preview_or_validation_commands_only"
+  },
+  "claims_boundary": [
+    "The A/B rubric preview command is covered by the exact read-only replay allowlist and emits a valid success envelope in the replay harness.",
+    "The rubric preview proves only canonical rubric identity and local non-invocation; it does not prove A/B execution, judge calibration, cloud execution, or release confirmation.",
+    "The 43-row receipt is terminally classified; 33 rows remain intentionally denied and have no behavior proof.",
+    "Worker, fresh QA, and adversarial review artifacts are reconciled. The adversarial verdict carries boundary advisories only; no claim is made about judging, calibration completion, provider invocation, cloud execution, hosted CI, or release readiness.",
+    "No claim is made about apply-mode mutation, installed runtime, command/service rationalization, Foundry extraction, source admission, Tessl, registry, hosted CI, publication, push, merge, or release readiness."
+  ],
+  "next_gate": "Preserve this bounded replay-policy change as an immutable local commit, push it to draft PR #330, and select the next smallest concrete read-only command receipt."
+}

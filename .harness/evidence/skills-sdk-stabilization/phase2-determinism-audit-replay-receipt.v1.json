@@ -1,0 +1,54 @@
+{
+  "schema_version": "skills-sdk.phase2-read-only-replay-receipt.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json",
+  "status": "bounded_local_pass",
+  "operation": "phase2_read_only_parser_replay",
+  "base_commit": "bc96360b20eea49c1442427542e12a3606d8b1dd",
+  "branch": "codex/skills-sdk-command-service-callers",
+  "source_files": [
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/determinism.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_determinism.py",
+    "Infrastructure/tests/test_skills_sdk_stabilization_replay.py"
+  ],
+  "source_tree_digest": "sha256:2a3552f9d987d382b06a27523ba9083174fe77d2cb00a194cbd7af082701c4a6",
+  "private_replay_row": 19,
+  "remaining_deny_by_default_count": 24,
+  "selected": {
+    "capability_id": "determinism_audit",
+    "command": "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
+    "argv": ["./bin/ask", "sdk", "determinism", "audit", "--scope", "skills", "--limit", "10", "--json", "--robot"],
+    "registration_owner": "Infrastructure/scripts/lib/ask/commands/sdk.py",
+    "dispatch_owner": "Infrastructure/scripts/lib/ask/commands/sdk.py::_dispatch_sdk_determinism",
+    "domain_owner": "Infrastructure/scripts/lib/ask/skills_sdk/determinism.py::audit_skill_determinism",
+    "receipt_schema_version": "skill-determinism-audit.v1",
+    "replay_disposition": "preview_replay",
+    "mutation_performed": false,
+    "network_accessed": false,
+    "credentials_accessed": false
+  },
+  "execution": {
+    "command_execution_performed": true,
+    "exit_code": 0,
+    "top_level_status": "success",
+    "receipt_status": "pass",
+    "receipt_digest": "sha256:ec76e009b5f7fd202de1be1dc2e5ae6cd4145cf4baa73f888683e9ed0a5b631f",
+    "skills_scanned": 90,
+    "candidate_count": 10,
+    "candidate_digest": "sha256:f90007229e46492beb02a978418e8f35ba5f808655a5cbd44f1635d001e0de39",
+    "stderr_bytes": 0
+  },
+  "no_mutation_evidence": [
+    "working-tree status snapshot was unchanged by the direct command",
+    "the command emits a receipt only and does not accept --apply or a write target",
+    "private replay row status=executed_pass with robot_receipt:valid_envelope and robot_status:success"
+  ],
+  "next_gate": "Use this immutable receipt as the current revision-bound read-only parser-family checkpoint. The next candidate remains the first unreceipted row after this command; do not begin Foundry extraction, source admission, or authority-bound apply-mode replay.",
+  "claims_boundary": [
+    "This proves one local determinism-audit replay and its exact registration/dispatch callers only.",
+    "It does not prove installed-runtime behavior, hosted CI, Tessl, registry publication, or release readiness.",
+    "It does not authorize command/service deletion, Foundry extraction, or source admission."
+  ]
+}

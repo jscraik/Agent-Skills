@@ -1,0 +1,50 @@
+{
+  "schema_version": "skills-sdk.phase2-sandbox-validate-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T01:02:17Z",
+  "revision": {
+    "base_head_sha": "f3c2a4a9aa2c5631f49c07f5fabd19a5c408917c",
+    "worktree_state": "implementation and private replay committed; generated review artifacts excluded"
+  },
+  "change": {
+    "allowlisted_argv": "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
+    "source_digest": "sha256:5a14555707806da7db427040702a564b9991025313b0de7d7a73921a56fa2278",
+    "test_digest": "sha256:357b06556f259b8f2efffdc8992ec2415b0314fb7ccde1ba03f768c6902cbe64"
+  },
+  "behavior_proof": {
+    "receipt_status": "pass",
+    "mutation_performed": false,
+    "execution_performed": false,
+    "adapter_selected": false,
+    "provider_invoked": false,
+    "network_accessed": false,
+    "unsafe_profile_variant": "blocked_unsafe_without_subprocess"
+  },
+  "review_sequence": {
+    "worker": "artifacts/reviews/sandbox-validate-worker.md",
+    "qa": "artifacts/reviews/sandbox-validate-qa.md",
+    "adversarial": "artifacts/reviews/sandbox-validate-adversarial.md",
+    "candidate_patch_digest": "sha256:b1bb2385fbf1e6ae4e5d6d8349402ed441d49d94772b9179e73c834b36a38625",
+    "limitation": "Requested child processes produced no artifacts; fresh local QA and adversarial review processes returned no findings using the same functioning local model family."
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "digest": "sha256:d181b3eb24712239eebd37341145f4c0f4be3b21c5f3eb4c95439fbf7199dd6c",
+    "command_ref_count": 43,
+    "executed_pass_count": 21,
+    "blocked_unsafe_count": 22,
+    "unclassified_count": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k sandbox_validate -> pass (2 passed, 24 deselected)",
+    "Command: ./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot -> pass (no mutation, provider, adapter, or execution)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py -> pass (lines=1873; max=1900)"
+  ],
+  "claims_boundary": [
+    "This proves one exact local sandbox-profile validation replay and no-execution receipt.",
+    "The 22 remaining rows remain deny-by-default and have no behavior proof.",
+    "Foundry, source admission, authority-bound apply, Tessl/CircleCI, publication, installation, merge, and release readiness remain out of scope."
+  ],
+  "next_gate": "Push this receipt, then select the smallest genuinely read-only command from the remaining 22 deny-by-default references."
+}

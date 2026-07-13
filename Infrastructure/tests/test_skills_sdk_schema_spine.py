@@ -206,7 +206,13 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
         self.assertTrue(payload["source_digest"].startswith("sha256:"))
         self.assertEqual(payload["manifest"]["skill_ir_schema_version"], "skills-sdk.skill-ir.v0")
-        self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            payload["included_files"],
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
         self.assertFalse(payload["mutation_performed"])
 
     def test_package_hardening_fixture_records_non_mutating_checks(self) -> None:

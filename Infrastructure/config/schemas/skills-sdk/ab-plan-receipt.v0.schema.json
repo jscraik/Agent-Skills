@@ -24,7 +24,7 @@
     "execution_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"}]},
     "judge_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"}]},
     "evidence_root": {"type": ["string", "null"], "minLength": 1},
-    "experiment_id": {"type": ["string", "null"], "minLength": 16, "maxLength": 16},
+    "experiment_id": {"type": ["string", "null"], "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"},
     "command_variant_labels": {
       "type": "array",
       "maxItems": 2,
@@ -75,7 +75,7 @@
           "execution_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"},
           "judge_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"},
           "evidence_root": {"type": "string"},
-          "experiment_id": {"type": "string"},
+          "experiment_id": {"type": "string", "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"},
           "command_variant_labels": {"type": "array", "minItems": 2, "maxItems": 2},
           "command_plan": {
             "type": "array",

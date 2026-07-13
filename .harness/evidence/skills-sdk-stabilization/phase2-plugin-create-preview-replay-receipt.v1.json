@@ -1,0 +1,50 @@
+{
+  "schema_version": "skills-sdk.phase2-plugin-create-preview-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T05:00:21Z",
+  "base_head_sha": "4606bc050b280d22e46ed6891ead9cd2543a06a1",
+  "scope": "read-only Skills SDK plugin-create skill preview command admission",
+  "allowlisted_argv": "./bin/ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --with-registry --preview --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_plugin_create_preview_replay.py"
+  ],
+  "source_digest": "sha256:98eb51a4604e426f223778c3844475e2b91b6c6eabd667fffee3a4bb1b328c30",
+  "test_digest": "sha256:e1493e99679ca0b741ebff3ff2fd4674b420e31b6e8de96ddbd45f09331f7fef",
+  "patch_digest": "sha256:fec40eb96f89a6a21ec6a94a1550306af277a2e236a904796050f8a3be9308b9",
+  "behavior_proof": {
+    "receipt_status": "preview",
+    "shell_quoting_normalized": true,
+    "first_principles_artifact_decision": "IMPROVE_EXISTING",
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "remote_publish_performed": false,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/plugin-create-preview-worker.md",
+    "qa": "artifacts/reviews/plugin-create-preview-qa.md",
+    "adversarial": "artifacts/reviews/plugin-create-preview-adversarial.md",
+    "worker_runtime_recovery": "child stalled before artifact write; one artifact-only recovery attempt; coordinator fallback retained"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 31,
+    "blocked_unsafe": 12,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_create_preview_replay.py -> fail (TDD red before allowlist admission: positive tuple was blocked_unsafe)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_create_preview_replay.py -> pass (2 passed after shell-aware parsing and allowlist admission)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_plugin_lifecycle.py tests/test_skills_sdk_parser_family_inventory.py -> pass (24 passed; 24 subtests passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_create_preview_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_plugin_create_preview_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --with-registry --preview --json --robot > /tmp/agent-skills-plugin-create-preview.json; after=$(git status --porcelain); test \"$before\" = \"$after\"; jq -e '.status == \"success\" and .data.skills_sdk_plugin_create.status == \"preview\" and .data.skills_sdk_plugin_create.mutation_performed == false and .data.skills_sdk_plugin_create.with_registry == true' /tmp/agent-skills-plugin-create-preview.json -> pass",
+    "Command: PYTHONPATH=\"$PWD/Infrastructure/scripts/lib\" UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root \"$PWD\" --output .harness/evidence/skills-sdk-stabilization/private-plugin-create-preview-replay.json -> pass (31 executed_pass; 12 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<QA prompt>' < /tmp/agent-skills-plugin-create-preview-candidate.patch -> pass (QA_PASS_NO_FINDINGS)",
+    "Command: ollama run h4rithd/coder:14b '<adversarial prompt>' < /tmp/agent-skills-plugin-create-preview-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No plugin creation apply, local registry write, remote registry publication, installation, Foundry extraction, source admission, Tessl/CircleCI mutation, merge, or release-readiness claim follows."
+}

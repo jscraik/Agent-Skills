@@ -1,0 +1,264 @@
+{
+  "schema_version": "skills-sdk.parser-family-authority-replay-selection.v1",
+  "status": "planned",
+  "operation": "authority_parser_replay_selection",
+  "source_files": [
+    "Infrastructure/config/schemas/skills-sdk/parser-family-inventory-receipt.v1.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/ab-preview-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/lockfile-preview.v1.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/install-receipt.v1.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/lockfile.v1.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json",
+    "Infrastructure/scripts/lib/ask/command_metadata.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_ci.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_emitter.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_eval.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_evidence.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_explorer.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_intake.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_knowledge.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_plugin.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_receipts.py",
+    "Infrastructure/scripts/lib/ask/commands/sdk_security.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/parser_family_inventory.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup_receipts.py",
+    "Infrastructure/tests/test_skills_sdk_parser_family_inventory.py",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/.agents/skills/authority-replay-fixture/SKILL.md",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/.harness/receipts/skills-sdk/install/authority-replay-fixture.json",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/AGENTS.md",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/extraction-plan.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/knowledge-demand.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-demand.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/evals/authority-replay.md",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule-routing.md",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction/references/knowledge-capsule.manifest.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills-sdk.json",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills.lock.json",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture/SKILL.md",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture/references/contract.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture/references/evals.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture/references/knowledge-capsule-routing.md",
+    "Infrastructure/tests/fixtures/skills_sdk/parser_family_project/AGENTS.md",
+    "Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills-sdk.json",
+    "Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/README.md",
+    "Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md",
+    "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/SKILL.md",
+    "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml",
+    "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+    "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+    "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+  ],
+  "source_tree_digest": "sha256:dac098dc9ab78f90d09c4f3f1a9b2434aa3ed5e22710130a770a4ad9b44fe5ff",
+  "source_surface": "Infrastructure/scripts/lib/ask/commands/sdk*.py",
+  "inventory_command": "./bin/ask sdk evidence parser-families --preview --json --robot",
+  "command_plan_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
+  "command_plan_summary": {
+    "status": "planned",
+    "command_count": 43,
+    "authority_bound_mutation_count": 2,
+    "command_execution_performed": false,
+    "mutation_performed": false
+  },
+  "authority_family_count": 8,
+  "selected_count": 8,
+  "blocked_count": 0,
+  "selection_policy": [
+    "Select at most one canonical ask sdk command per authority-bound family.",
+    "Prefer a concrete repository-owned fixture --preview command over generic, mutation, or template examples.",
+    "Reject template tokens and known placeholder roots until repository-owned fixtures exist.",
+    "Keep authority-bound selection separate from parser inventory pass/fail status."
+  ],
+  "selected_preview_commands": [
+    {
+      "family": "eval",
+      "command": "ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "trust",
+      "command": "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "plugin",
+      "command": "ask sdk plugin review Infrastructure/tests/fixtures/skills_sdk/valid_skill --kind skill --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "improve",
+      "command": "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "install",
+      "command": "ask sdk install Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "rollback",
+      "command": "ask sdk rollback --receipt Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/.harness/receipts/skills-sdk/install/authority-replay-fixture.json --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "uninstall",
+      "command": "ask sdk uninstall authority-replay-fixture --project-root Infrastructure/tests/fixtures/skills_sdk/authority_replay_project --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    },
+    {
+      "family": "knowledge",
+      "command": "ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
+      "replay_disposition": "authority_bound_mutation",
+      "receipt_required": true
+    }
+  ],
+  "blocked_fixture_families": [],
+  "receipt_backed_replay_status": "pass",
+  "receipt_backed_replays": [
+    {
+      "family": "eval",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+      "command": "ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+      "receipt_key": "skills_sdk_eval_ab_preview.receipt",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "mutation_performed:false; codex_exec_invoked:false; network_accessed:false; fixture_snapshot:unchanged"
+    },
+    {
+      "family": "trust",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+      "command": "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+      "receipt_key": "skills_sdk_trust_decide.receipt",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "mutation_performed:false; trust_store_mutated:false; fixture_snapshot:unchanged"
+    },
+    {
+      "family": "plugin",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+      "command": "ask sdk plugin review Infrastructure/tests/fixtures/skills_sdk/valid_skill --kind skill --preview --json --robot",
+      "receipt_key": "skills_sdk_plugin_review",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "mutation_performed:false; planned_commands:present; fixture_snapshot:unchanged"
+    },
+    {
+      "family": "improve",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/parser_family_project",
+      "command": "ask sdk improve Infrastructure/tests/fixtures/skills_sdk/parser_family_project/skills/parser-family-example/SKILL.md --project-root Infrastructure/tests/fixtures/skills_sdk/parser_family_project --preview --json --robot",
+      "receipt_key": "skills_sdk_project_improve.receipt",
+      "expected_receipt_status": "pass",
+      "mutation_evidence": "mutation_performed:false; source_mutation_performed:false; fixture_snapshot:unchanged"
+    },
+    {
+      "family": "install",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
+      "command": "ask sdk install Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
+      "receipt_key": "skills_sdk_install_preview.preview",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "preview.mutation_performed:false; lockfile_delta_preview.would_write:false; fixture_snapshot:unchanged"
+    },
+    {
+      "family": "rollback",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
+      "command": "ask sdk rollback --receipt Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/.harness/receipts/skills-sdk/install/authority-replay-fixture.json --preview --json --robot",
+      "receipt_key": "skills_sdk_project_rollback.receipt",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "mutation_performed:false"
+    },
+    {
+      "family": "uninstall",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
+      "command": "ask sdk uninstall authority-replay-fixture --project-root Infrastructure/tests/fixtures/skills_sdk/authority_replay_project --preview --json --robot",
+      "receipt_key": "skills_sdk_project_uninstall.receipt",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "mutation_performed:false"
+    },
+    {
+      "family": "knowledge",
+      "fixture_root": "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project",
+      "command": "ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
+      "receipt_key": "knowledge_ingest",
+      "expected_receipt_status": "preview",
+      "mutation_evidence": "staged_preflight:pass; copied_files.action:preview; fixture_snapshot:unchanged"
+    }
+  ],
+  "negative_replay_coverage": {
+    "status": "pass",
+    "families": [
+      {
+        "family": "eval",
+        "receipt_key": "skills_sdk_eval_ab_preview",
+        "expected_status": "blocked",
+        "blocker": "fixture_missing",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "trust",
+        "receipt_key": "skills_sdk_trust_decide",
+        "expected_status": "blocked",
+        "blocker": "canonical source is missing",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "plugin",
+        "receipt_key": "skills_sdk_plugin_create",
+        "expected_status": "blocked",
+        "blocker": "description",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "improve",
+        "receipt_key": "skills_sdk_project_improve",
+        "expected_status": "blocked",
+        "blocker": "invalid_project_root",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "install",
+        "receipt_key": "skills_sdk_install_preview",
+        "expected_status": "blocked",
+        "blocker": "missing",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "rollback",
+        "receipt_key": "skills_sdk_project_rollback",
+        "expected_status": "blocked",
+        "blocker": "missing_receipt",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "uninstall",
+        "receipt_key": "skills_sdk_project_uninstall",
+        "expected_status": "blocked",
+        "blocker": "unknown_skill_id",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      },
+      {
+        "family": "knowledge",
+        "receipt_key": null,
+        "expected_status": "blocked_error",
+        "blocker": "skill must point at",
+        "mutation_evidence": "fixture_snapshot:unchanged; runtime_snapshot:unchanged"
+      }
+    ],
+    "assertion_source": "Infrastructure/tests/test_skills_sdk_parser_family_inventory.py::TestSkillsSdkParserFamilyInventory.test_authority_replay_negative_inputs_block_without_mutation"
+  },
+  "mutation_performed": false,
+  "command_execution_performed": false,
+  "does_not_prove": [
+    "authority-bound apply mutation receipts",
+    "installed-runtime behavior or apply-mode install, rollback, uninstall, or knowledge-ingest behavior",
+    "Foundry extraction or source admission",
+    "Tessl, registry, hosted CI, installed-runtime, or release readiness"
+  ]
+}

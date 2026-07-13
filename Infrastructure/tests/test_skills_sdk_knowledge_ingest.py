@@ -568,6 +568,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
                 payload["findings"],
             )
             self.assertIn("references/knowledge-demand:differs_from_root_knowledge-demand", payload["findings"])
+            self.assertFalse(payload["mutation_performed"])
 
     def test_preflight_resolves_canonical_plugins_skill_gate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -587,6 +588,20 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
 
             self.assertEqual(payload["status"], "preview")
             self.assertEqual(payload["staged_preflight"]["status"], "pass")
+
+    def test_repo_preflight_uses_locked_infrastructure_python_runtime(self) -> None:
+        extraction = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction"
+        payload = build_knowledge_ingest(
+            REPO_ROOT,
+            extraction=str(extraction),
+            skill="Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture",
+            apply=False,
+            preflight_security=True,
+        )
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["staged_preflight"]["status"], "pass")
+        self.assertIn("run-infrastructure-python.sh", payload["staged_preflight"]["command"])
+        self.assertIn("skill_gate.py", payload["staged_preflight"]["command"])
 
     def test_preflight_blocks_warning_only_skill_gate_output(self) -> None:
         payload = {

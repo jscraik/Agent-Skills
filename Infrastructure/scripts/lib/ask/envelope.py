@@ -1,11 +1,12 @@
 import json
 import logging
-import uuid
 import re
 import os
 from dataclasses import dataclass, asdict, field
 from typing import Optional
 from enum import IntEnum
+
+from ask.skills_sdk.id_types import new_branded_id
 
 
 class ExitCode(IntEnum):
@@ -66,8 +67,8 @@ class ErrorObject:
             )
 
 def _get_trace_id() -> str:
-    """Get trace_id from ASK_TRACE_ID env var or generate UUID."""
-    return os.environ.get("ASK_TRACE_ID") or str(uuid.uuid4())
+    """Get an operator-supplied trace ID or generate a branded SDK ID."""
+    return os.environ.get("ASK_TRACE_ID") or new_branded_id("tr")
 
 
 @dataclass

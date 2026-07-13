@@ -153,6 +153,20 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         self.assertEqual(verification["status"], "pass")
         self.assertTrue(verification["review_artifacts_verified"])
 
+    def test_execution_rejects_stale_same_head_handoff_before_writing(self) -> None:
+        handoff = self._write_handoff()
+        handoff["source_context"]["head_sha"] = "0" * 40
+        self.handoff_path.write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "source_context head_sha is stale"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
     def test_cli_execute_emits_robot_envelope_and_writes_receipt(self) -> None:
         self._write_handoff()
 

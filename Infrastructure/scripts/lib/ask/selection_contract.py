@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from uuid import uuid4
+
+from ask.skills_sdk.id_types import new_branded_id
 
 
 SCHEMA_VERSION = "selection-decision.v1"
@@ -200,7 +201,7 @@ def build_decision_payload(
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "request_id": request_id or str(uuid4()),
+        "request_id": request_id or new_branded_id("rq"),
         "policy_identity": policy_identity,
         "decision_status": decision_status,
         "failure_class": failure_class,

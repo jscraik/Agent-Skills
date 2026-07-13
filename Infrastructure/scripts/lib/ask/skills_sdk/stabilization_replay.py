@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -11,13 +12,86 @@ from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_rec
 
 
 SCHEMA_VERSION = "skills-sdk.private-stabilization-replay.v1"
+MAX_HELP_OUTPUT_BYTES = 4096
+MAX_HELP_OUTPUT_LINES = 64
+STAGE_SHAPE_VALIDATOR_ARGV = (
+    "bash",
+    "Infrastructure/scripts/run-infrastructure-python.sh",
+    "scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+)
+STAGE_SHAPE_UNITTEST_ARGV = (
+    "python3",
+    "-m",
+    "unittest",
+    "Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator",
+    "-v",
+)
+LIFECYCLE_SCAFFOLD_UNITTEST_ARGV = (
+    "python3",
+    "-m",
+    "unittest",
+    "Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold",
+    "-v",
+)
 ALLOWLIST = {
+    ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
+    (
+        "./bin/ask",
+        "sdk",
+        "package",
+        "signing-intent",
+        "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+        "--policy",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
+        "--json",
+        "--robot",
+    ),
+    ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "risk-modes", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "intake", "inspect", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "intake", "review", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "lenses", "validate", "--json", "--robot"),
     ("./bin/ask", "sdk", "eval", "profiles", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "ab-rubric", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "ab-preview", "--skill-a", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--skill-b", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--fixture", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "trust", "decide", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--decision", "trust", "--reason", "fixture passed local checks", "--owner", "skills-sdk-tests", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "sandbox", "validate", "--profile", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json", "--json", "--robot"),
+    ("./bin/ask", "sdk", "determinism", "audit", "--scope", "skills", "--limit", "10", "--json", "--robot"),
+    ("./bin/ask", "sdk", "evidence", "verify", "--scope", "capability-matrix", "--json", "--robot"),
+    ("./bin/ask", "skills", "doctor", "Skills/agent-ops/simplify", "--json", "--robot"),
+    ("./bin/ask", "sdk", "check", "Skills/agent-ops/simplify", "--json", "--robot"),
+    ("./bin/ask", "sdk", "ir", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
+    ("./bin/ask", "sdk", "install", "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "lenses", "select", "--prompt", "review a skill for validation confidence", "--intent", "validation_review", "--json", "--robot"),
+    ("./bin/ask", "sdk", "review", "plan", "--target", "Skills/agent-ops/simplify", "--intent", "validation_review", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "scenario-quality", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "adapters", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "explorer", "static", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "emitter", "preview", "--skill", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "observability", "feedback", "--skill", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--events", "Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "knowledge", "ingest", "--extraction", "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction", "--skill", "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "ab-plan", "--skill-a", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--skill-b", "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill", "--fixture", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "eval", "ab-judge-preview", "--run-receipt", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "ci", "policy", "--risk-tier", "high", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "package", "harden", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
+    ("./bin/ask", "sdk", "plugin", "--help"),
+    ("./bin/ask", "sdk", "plugin", "create", "demo-skill", "--kind", "skill", "--category", "agent-ops", "--description", "Demo skill", "--with-registry", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "plugin", "create", "demo-plugin", "--kind", "plugin", "--category", "third-party", "--with-registry", "--with-references", "--preview", "--json", "--robot"),
+    ("./bin/ask", "sdk", "plugin", "save-registry", "--kind", "plugin", "--target", "Plugins/plugin-factory", "--preview", "--json", "--robot"),
+    STAGE_SHAPE_VALIDATOR_ARGV,
+    STAGE_SHAPE_UNITTEST_ARGV,
+    LIFECYCLE_SCAFFOLD_UNITTEST_ARGV,
 }
+MUTATION_KEYS = frozenset(
+    {
+        "mutation_performed",
+        "source_mutation_performed",
+        "trust_store_mutated",
+        "network_accessed",
+        "credentials_accessed",
+        "codex_exec_invoked",
+    }
+)
 
 
 def build_private_stabilization_replay(repo_root: Path) -> dict[str, Any]:
@@ -61,27 +135,277 @@ def _occurrence_row(row: dict[str, Any], argv: tuple[str, ...], execution: dict[
 def _execute_argv(repo_root: Path, argv: tuple[str, ...]) -> dict[str, Any]:
     execution_id = f"sha256:{hashlib.sha256(json.dumps(argv).encode('utf-8')).hexdigest()}"
     if argv not in ALLOWLIST:
-        return {
-            "execution_id": execution_id,
-            "status": "blocked_unsafe",
-            "exit_code": None,
-            "reason": "Command is not on the exact private stabilization read-only allowlist.",
-            "evidence": ["deny_by_default"],
-        }
+        return _blocked_execution(execution_id)
     try:
-        completed = subprocess.run(list(argv), cwd=repo_root, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30, check=False)
+        completed = _run_allowlisted(repo_root, argv)
     except subprocess.TimeoutExpired:
-        return {"execution_id": execution_id, "status": "executed_fail", "exit_code": None, "reason": "Allowlisted command timed out after 30 seconds.", "evidence": ["timeout_seconds:30"]}
+        return _failed_execution(execution_id, "Allowlisted command timed out after 30 seconds.", ["timeout_seconds:30"])
     except OSError as exc:
-        return {"execution_id": execution_id, "status": "executed_fail", "exit_code": None, "reason": f"Allowlisted command could not execute: {type(exc).__name__}.", "evidence": [f"os_error:{exc.errno}"]}
-    status = "executed_pass" if completed.returncode == 0 else "executed_fail"
+        return _failed_execution(
+            execution_id,
+            f"Allowlisted command could not execute: {type(exc).__name__}.",
+            [f"os_error:{exc.errno}"],
+        )
+    return _classify_completed(execution_id, argv, completed)
+
+
+def _blocked_execution(execution_id: str) -> dict[str, Any]:
+    return {
+        "execution_id": execution_id,
+        "status": "blocked_unsafe",
+        "exit_code": None,
+        "reason": "Command is not on the exact private stabilization read-only allowlist.",
+        "evidence": ["deny_by_default"],
+    }
+
+
+def _failed_execution(execution_id: str, reason: str, evidence: list[str]) -> dict[str, Any]:
+    return {"execution_id": execution_id, "status": "executed_fail", "exit_code": None, "reason": reason, "evidence": evidence}
+
+
+def _run_allowlisted(repo_root: Path, argv: tuple[str, ...]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        list(argv),
+        cwd=repo_root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=30,
+        check=False,
+    )
+
+
+def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    receipt_status, receipt_evidence = _observe_robot_receipt(completed.stdout)
+    if completed.returncode != 0:
+        status = "executed_fail"
+        reason = "Exact allowlisted local read-only command returned a non-zero exit code."
+    elif argv == STAGE_SHAPE_UNITTEST_ARGV:
+        status, reason, receipt_evidence = _classify_stage_shape_unittest(completed.stdout, completed.stderr)
+    elif argv == LIFECYCLE_SCAFFOLD_UNITTEST_ARGV:
+        status, reason, receipt_evidence = _classify_lifecycle_scaffold_unittest(
+            completed.stdout, completed.stderr
+        )
+    elif argv == STAGE_SHAPE_VALIDATOR_ARGV:
+        status, reason, receipt_evidence = _classify_stage_shape(completed.stdout)
+    elif argv[-1:] == ("--help",):
+        status, reason, receipt_evidence = _classify_help(completed.stdout)
+    elif receipt_status == "success":
+        mutation_flags = _mutation_flag_findings(completed.stdout)
+        if mutation_flags:
+            status = "executed_fail"
+            reason = "Allowlisted command returned a success receipt with mutation or external-access flags."
+            receipt_evidence = [*receipt_evidence, *mutation_flags]
+        else:
+            status = "executed_pass"
+            reason = "Exact allowlisted local read-only command returned a valid success receipt."
+    else:
+        status = "executed_fail"
+        reason = "Allowlisted command returned zero but not a valid success robot receipt."
     return {
         "execution_id": execution_id,
         "status": status,
         "exit_code": completed.returncode,
-        "reason": "Exact allowlisted local read-only command completed.",
-        "evidence": [f"stdout_bytes:{len(completed.stdout.encode('utf-8'))}", f"stderr_bytes:{len(completed.stderr.encode('utf-8'))}"],
+        "reason": reason,
+        "evidence": receipt_evidence,
     }
+
+
+def _classify_stage_shape_unittest(stdout: str, stderr: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_stage_shape_unittest_receipt(stdout, stderr)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted SDK stage shape unittest returned a bounded success marker.", evidence
+    return "executed_fail", "Allowlisted SDK stage shape unittest returned zero but not its bounded success marker.", evidence
+
+
+def _classify_lifecycle_scaffold_unittest(stdout: str, stderr: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_lifecycle_scaffold_unittest_receipt(stdout, stderr)
+    if status == "success":
+        return (
+            "executed_pass",
+            "Exact allowlisted lifecycle scaffold unittest returned a bounded success marker.",
+            evidence,
+        )
+    return (
+        "executed_fail",
+        "Allowlisted lifecycle scaffold unittest returned zero but not its bounded success marker.",
+        evidence,
+    )
+
+
+def _classify_stage_shape(stdout: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_stage_shape_receipt(stdout)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted SDK stage shape validator returned a bounded success marker.", evidence
+    return "executed_fail", "Allowlisted SDK stage shape validator returned zero but not its bounded success marker.", evidence
+
+
+def _classify_help(stdout: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_help_receipt(stdout)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted help command returned bounded non-empty argparse text.", evidence
+    return "executed_fail", "Allowlisted help command returned zero but not bounded argparse help text.", evidence
+
+
+def _mutation_flag_findings(stdout: str) -> list[str]:
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        return []
+    findings: list[str] = []
+
+    def walk(value: Any, path: str = "$") -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                child_path = f"{path}.{key}"
+                if key in MUTATION_KEYS and child is True:
+                    findings.append(f"robot_receipt:{child_path}:true")
+                walk(child, child_path)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                walk(child, f"{path}[{index}]")
+
+    walk(payload)
+    return findings
+
+
+def _observe_help_receipt(stdout: str) -> tuple[str | None, list[str]]:
+    """Record bounded argparse help evidence without persisting help text."""
+    output_bytes = len(stdout.encode("utf-8"))
+    lines = [line for line in stdout.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["help_receipt:oversize"]
+    if not lines or not lines[0].startswith("usage:"):
+        return None, ["help_receipt:invalid_text"]
+    return "success", ["help_receipt:valid_text", f"help_nonempty_line_count:{len(lines)}"]
+
+
+def _observe_stage_shape_receipt(stdout: str) -> tuple[str | None, list[str]]:
+    """Record the validator's bounded plain-text success marker."""
+    output_bytes = len(stdout.encode("utf-8"))
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    prefix = "[sdk-stage-shape] SDK stage skill shape passed ("
+    suffix = " skill(s))"
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) != 1:
+        return None, ["stage_shape_receipt:invalid_marker"]
+    line = lines[0]
+    if not line.startswith(prefix) or not line.endswith(suffix):
+        return None, ["stage_shape_receipt:invalid_marker"]
+    count = line[len(prefix) : -len(suffix)]
+    if not count.isascii() or not count.isdigit() or int(count) < 1:
+        return None, ["stage_shape_receipt:invalid_marker"]
+    return "success", ["stage_shape_receipt:valid_marker", f"stage_shape_skill_count:{count}"]
+
+
+def _observe_stage_shape_unittest_receipt(stdout: str, stderr: str) -> tuple[str | None, list[str]]:
+    """Record bounded unittest success evidence across its stdout and stderr streams."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    output_bytes = len(combined.encode("utf-8"))
+    lines = [line.strip() for line in combined.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["stage_shape_unittest_receipt:oversize"]
+
+    ran_prefix = "Ran 6 tests in "
+    ran_lines = [line for line in lines if line.startswith("Ran ")]
+    if len(ran_lines) != 1:
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    ran_line = ran_lines[0]
+    if not ran_line.startswith(ran_prefix) or not ran_line.endswith("s"):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    duration = ran_line[len(ran_prefix) : -1]
+    if not _valid_unittest_duration(duration):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    if lines[-1] != "OK":
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    if _has_unittest_failure_marker(lines):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    return "success", ["stage_shape_unittest_receipt:valid_marker", "stage_shape_unittest_test_count:6"]
+
+
+def _observe_lifecycle_scaffold_unittest_receipt(stdout: str, stderr: str) -> tuple[str | None, list[str]]:
+    """Record bounded lifecycle scaffold unittest success evidence."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    output_bytes = len(combined.encode("utf-8"))
+    lines = [line.strip() for line in combined.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["lifecycle_scaffold_unittest_receipt:oversize"]
+
+    ran_prefix = "Ran 4 tests in "
+    ran_lines = [line for line in lines if line.startswith("Ran ")]
+    if len(ran_lines) != 1:
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    ran_line = ran_lines[0]
+    if not ran_line.startswith(ran_prefix) or not ran_line.endswith("s"):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    duration = ran_line[len(ran_prefix) : -1]
+    if not _valid_unittest_duration(duration):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    if lines[-1] != "OK" or _has_unittest_failure_marker(lines):
+        return None, ["lifecycle_scaffold_unittest_receipt:invalid_marker"]
+    return "success", ["lifecycle_scaffold_unittest_receipt:valid_marker", "lifecycle_scaffold_unittest_test_count:4"]
+
+
+def _valid_unittest_duration(duration: str) -> bool:
+    if not duration or not duration.isascii():
+        return False
+    whole, separator, fraction = duration.partition(".")
+    return whole.isdigit() and (not separator or fraction.isdigit())
+
+
+def _has_unittest_failure_marker(lines: list[str]) -> bool:
+    return any(line.startswith(("FAILED", "ERROR", "FAIL")) for line in lines)
+
+
+def _observe_robot_receipt(stdout: str) -> tuple[str | None, list[str]]:
+    """Record only bounded envelope evidence; never persist command output."""
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        return None, ["robot_receipt:invalid_json"]
+    if not isinstance(payload, dict):
+        return None, ["robot_receipt:non_object"]
+    status = payload.get("status")
+    if status not in {"success", "error"}:
+        return None, ["robot_receipt:missing_status"]
+    if not isinstance(payload.get("metadata"), dict) or not isinstance(payload.get("data"), dict):
+        return None, ["robot_receipt:missing_envelope_fields"]
+    metadata_keys = ",".join(sorted(str(key) for key in payload["metadata"]))
+    data_keys = ",".join(sorted(str(key) for key in payload["data"]))
+    return str(status), [
+        "robot_receipt:valid_envelope",
+        f"robot_status:{status}",
+        f"metadata_keys:{metadata_keys}",
+        f"data_keys:{data_keys}",
+    ]
+
+
+def _safe_output_path(repo_root: Path, output: Path) -> Path:
+    """Allow evidence output only inside repo_root and never through symlinks."""
+    resolved_root = repo_root.resolve()
+    candidate = output.expanduser()
+    if not candidate.is_absolute():
+        candidate = resolved_root / candidate
+    candidate = Path(os.path.normpath(str(candidate)))
+    try:
+        candidate.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError("output path must remain inside repo root") from exc
+
+    current = candidate
+    while True:
+        if current.is_symlink():
+            raise ValueError("output path and its parent directories must not be symlinks")
+        if current == resolved_root:
+            break
+        if current == current.parent:
+            raise ValueError("output path could not be anchored to repo root")
+        current = current.parent
+    resolved_candidate = candidate.resolve(strict=False)
+    try:
+        resolved_candidate.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError("output path must remain inside repo root") from exc
+    return candidate
 
 
 def main() -> int:
@@ -89,9 +413,14 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    payload = build_private_stabilization_replay(args.repo_root.resolve())
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    repo_root = args.repo_root.resolve()
+    try:
+        output_path = _safe_output_path(repo_root, args.output)
+    except ValueError as exc:
+        parser.error(str(exc))
+    payload = build_private_stabilization_replay(repo_root)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0 if payload["status"] == "pass" else 2
 
 

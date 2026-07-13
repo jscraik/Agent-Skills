@@ -1,0 +1,37 @@
+{
+  "schema_version": "skills-sdk.phase2-emitter-preview-replay-receipt.v1",
+  "status": "bounded_local_pass_with_preexisting_test_blocker",
+  "captured_at": "2026-07-13T02:25:34Z",
+  "base_head_sha": "674e97885",
+  "allowlisted_argv": "./bin/ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+  "source_digest": "sha256:77d2966ad33a642f3f225369575f2178dd2a32a237c1c8e0a14581a4b6d8cc0d",
+  "test_digest": "sha256:82d9d4f4e81f4f19808b6f2e13d5f6d54f76c60b75b35dacc6c30e9e91e14289",
+  "behavior_proof": {
+    "receipt_status": "preview",
+    "projection": "runtime-skill",
+    "target_root": ".agents/skills",
+    "mutation_performed": false,
+    "artifact_emitted": false,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/emitter-preview-worker.md",
+    "qa": "artifacts/reviews/emitter-preview-qa.md",
+    "adversarial": "artifacts/reviews/emitter-preview-adversarial.md",
+    "patch_digest": "sha256:f0613d76a813c629ba3eeaa39cc3769f3b67c7176b0545069b0416ecf1e666dd"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 24,
+    "blocked_unsafe": 19,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k emitter_preview -> pass (2 passed)",
+    "Command: ./bin/ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot -> pass (preview; mutation=false; artifact_emitted=false)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py tests/test_skills_sdk_emitter_preview.py -> fail (pre-existing emitter fixture-order assertion expects SKILL.md first but current manifest emits README.md first; unrelated to this two-file replay patch)",
+    "Command: codex_app__automation_update({id:skills-sdk-implementation-heartbeat,mode:view}) -> blocked (Automations are only supported for local threads)"
+  ],
+  "claims_boundary": "No Foundry, source-admission, apply, Tessl/CircleCI, publication, installation, merge, or release-readiness claim follows.",
+  "next_gate": "Resolve the pre-existing emitter fixture-order contract on its own bounded caller-safe slice before claiming the emitter family fully green."
+}

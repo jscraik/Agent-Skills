@@ -66,6 +66,8 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertEqual(receipt["skill_id"], "skills-sdk-valid-fixture")
         self.assertGreaterEqual(receipt["file_count"], 1)
         self.assertTrue(all(check["severity"] == "pass" for check in receipt["intake_checks"]))
+        top_level_check = next(check for check in receipt["intake_checks"] if check["id"] == "approved_top_level_paths")
+        self.assertIn("README.md", top_level_check["evidence"])
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["install_performed"])
         self.assertFalse(receipt["projection_mutation_performed"])
@@ -97,8 +99,9 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
             source = Path(tmp) / "external"
             source.mkdir()
             (source / "SKILL.md").write_text("---\nname: external\ndescription: external\n---\n\n# External\n", encoding="utf-8")
-            (source / "README.md").write_text("unexpected", encoding="utf-8")
-            hidden = source / "unexpected"
+            rejected = source / "unexpected"
+            rejected.write_text("unexpected", encoding="utf-8")
+            hidden = source / "unexpected-dir"
             hidden.mkdir()
             (hidden / "secret.txt").write_text("do not inspect", encoding="utf-8")
 
@@ -108,7 +111,7 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(any(check["id"] == "approved_top_level_paths" for check in receipt["blockers"]))
         self.assertTrue(all(check["severity"] == "blocker" for check in receipt["blockers"]))
-        self.assertNotIn("unexpected/secret.txt", {item["path"] for item in receipt["inspected_files"]})
+        self.assertNotIn("unexpected-dir/secret.txt", {item["path"] for item in receipt["inspected_files"]})
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["mutation_performed"])
 

@@ -17,7 +17,7 @@ _AB_JUDGE_DIMENSION_IDS = {str(dimension["id"]) for dimension in AB_RUBRIC_DIMEN
 _AB_JUDGE_DIMENSION_WEIGHTS = {
     str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
 }
-_EXPERIMENT_ID_PATTERN = r"^[0-9a-f]{16}$"
+_EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
@@ -368,7 +368,7 @@ class AbPlanReceipt(_SdkContractModel):
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
     evidence_root: str | None = Field(default=None, min_length=1)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
     command_variant_labels: list[Literal["A", "B"]] = Field(max_length=2)
     command_plan: list[AbCodexCommandPlan] = Field(max_length=2)
     secret_boundary: EvalSecretBoundary
@@ -451,7 +451,7 @@ class AbRunReceipt(_SdkContractModel):
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
     evidence_root: str | None = Field(default=None, min_length=1)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
     command_variant_labels: list[Literal["A", "B"]] = Field(max_length=2)
     command_plan: list[AbCodexCommandPlan] = Field(max_length=2)
     variant_results: list[AbVariantRunResult] = Field(max_length=2)
