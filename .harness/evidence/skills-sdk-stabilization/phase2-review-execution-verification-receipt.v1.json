@@ -123,5 +123,5 @@
     "It does not prove independent reviewer approval, substantive human review, CI, PR mergeability, review-thread resolution, tracker state, publication, installation, Foundry extraction, source admission, Tessl or CircleCI mutation, or release readiness.",
     "Generated plan, handoff, execution, verification, review, and agent-run paths are excluded runtime artifacts by .gitignore."
   ],
-  "next_gate": "Refresh the queue and push the immutable source/evidence commit to the existing draft branch; then select the next deny-by-default parser family."
+  "next_gate": "Select the next deny-by-default parser family from the remaining queue; retain eval runner/judge execution as evals-router-blocked."
 }
