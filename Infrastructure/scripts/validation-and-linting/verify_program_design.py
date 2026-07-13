@@ -41,7 +41,9 @@ PRODUCTION_PREFIXES = (
     "Skills/",
     "skills-system/",
 )
-EXCLUDED_PARTS: frozenset[str] = frozenset({".venv", "__pycache__", "references", "tests", "test"})
+EXCLUDED_PARTS: frozenset[str] = frozenset(
+    {".venv", "__pycache__", "fixtures", "references", "tests", "test"}
+)
 BROAD_EXCEPTION_NAMES: frozenset[str] = frozenset({"Exception", "BaseException"})
 MUTABLE_VALUE_NODES = (
     ast.Dict,
@@ -151,9 +153,17 @@ def _exception_names(node: ast.expr | None) -> list[str]:
     return [ast.unparse(node)]
 
 
-def _parameter_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+def _is_staticmethod(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    return any(
+        (isinstance(decorator, ast.Name) and decorator.id == "staticmethod")
+        or (isinstance(decorator, ast.Attribute) and decorator.attr == "staticmethod")
+        for decorator in node.decorator_list
+    )
+
+
+def _parameter_count(node: ast.FunctionDef | ast.AsyncFunctionDef, *, bound_method: bool = False) -> int:
     positional = list(node.args.posonlyargs) + list(node.args.args)
-    if positional and positional[0].arg in {"self", "cls"}:
+    if bound_method and positional and positional[0].arg in {"self", "cls"}:
         positional = positional[1:]
     count = len(positional) + len(node.args.kwonlyargs)
     if node.args.vararg is not None:
@@ -303,7 +313,7 @@ def _mutable_module_state(tree: ast.Module) -> list[Finding]:
 class _PublicFunctionCollector(ast.NodeVisitor):
     def __init__(self) -> None:
         self.scope: tuple[str, ...] = ()
-        self.functions: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
+        self.functions: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef, bool]] = []
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         if node.name.startswith("_"):
@@ -324,10 +334,10 @@ class _PublicFunctionCollector(ast.NodeVisitor):
         if node.name.startswith("_") and node.name not in PUBLIC_DUNDER_NAMES:
             return
         qualified_name = ".".join((*self.scope, node.name))
-        self.functions.append((qualified_name, node))
+        self.functions.append((qualified_name, node, bool(self.scope) and not _is_staticmethod(node)))
 
 
-def _public_functions(tree: ast.Module) -> list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]]:
+def _public_functions(tree: ast.Module) -> list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef, bool]]:
     collector = _PublicFunctionCollector()
     collector.visit(tree)
     return collector.functions
@@ -337,8 +347,8 @@ def _metrics(text: str) -> DesignMetrics:
     tree = ast.parse(text)
     public_parameters: dict[str, tuple[int, int]] = {}
     boolean_flags: list[Finding] = []
-    for qualified_name, node in _public_functions(tree):
-        public_parameters[qualified_name] = (_parameter_count(node), node.lineno)
+    for qualified_name, node, bound_method in _public_functions(tree):
+        public_parameters[qualified_name] = (_parameter_count(node, bound_method=bound_method), node.lineno)
         boolean_flags.extend(_boolean_flag_findings(node, qualified_name))
     return DesignMetrics(
         public_parameters=public_parameters,
@@ -483,15 +493,14 @@ def _new_findings(current: tuple[Finding, ...], baseline: tuple[Finding, ...]) -
     def identity(item: Finding) -> tuple[str, str]:
         return item.key, item.detail
 
-    current_counts = Counter(identity(item) for item in current)
-    baseline_counts = Counter(identity(item) for item in baseline)
-    remaining = {key: max(0, count - baseline_counts[key]) for key, count in current_counts.items()}
+    baseline_remaining = Counter(identity(item) for item in baseline)
     findings: list[Finding] = []
     for item in sorted(current, key=lambda finding: (finding.line, finding.key)):
         item_identity = identity(item)
-        if remaining.get(item_identity, 0) > 0:
-            findings.append(item)
-            remaining[item_identity] -= 1
+        if baseline_remaining[item_identity] > 0:
+            baseline_remaining[item_identity] -= 1
+            continue
+        findings.append(item)
     return findings
 
 

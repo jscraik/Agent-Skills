@@ -182,6 +182,30 @@ except Exception:
 
         self.assertEqual("\n".join(issues).count("broad exception handler"), 1)
 
+    def test_new_duplicate_broad_exception_is_not_hidden_by_baseline_waiver(self) -> None:
+        validator = _load_validator()
+        baseline = """try:
+    first()
+except Exception:
+    pass
+"""
+        current = baseline + """
+try:
+    second()
+except Exception:
+    pass
+"""
+        first = validator._metrics(current).broad_exceptions[0]
+        waivers = {
+            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
+        }
+
+        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline, waivers=waivers)
+
+        rendered = "\n".join(issues)
+        self.assertEqual(rendered.count("broad exception handler"), 1)
+        self.assertIn(":8:broad exception handler", rendered)
+
     def test_waiver_is_scoped_to_one_finding(self) -> None:
         validator = _load_validator()
         source = "def run(value, enabled=False, verbose=False):\n    return value\n"
@@ -279,6 +303,21 @@ class Public:
         self.assertNotIn("_Internal.run(enabled=bool)", "\n".join(
             validator._check_source("Infrastructure/scripts/example.py", source, "")
         ))
+
+    def test_staticmethod_first_self_parameter_is_counted(self) -> None:
+        validator = _load_validator()
+        source = """
+class Factory:
+    @staticmethod
+    def build(cls, a, b, c, d, e):
+        return cls, a, b, c, d, e
+"""
+        metrics = validator._metrics(source)
+        self.assertEqual(metrics.public_parameters["Factory.build"][0], 6)
+        self.assertIn(
+            "Factory.build public interface is too wide",
+            "\n".join(validator._check_source("Infrastructure/scripts/example.py", source, "")),
+        )
 
     def test_public_constructor_is_checked(self) -> None:
         validator = _load_validator()
@@ -380,6 +419,10 @@ class Public:
     def test_canonical_skills_python_scripts_are_selected(self) -> None:
         validator = _load_validator()
         self.assertTrue(validator._is_production_python("Skills/agent-ops/example/scripts/run.py"))
+
+    def test_fixture_trees_are_not_selected_as_production_python(self) -> None:
+        validator = _load_validator()
+        self.assertFalse(validator._is_production_python("Plugins/harness-engineering/fixtures/scripts/run.py"))
 
     def test_pyw_without_shebang_is_selected(self) -> None:
         validator = _load_validator()
