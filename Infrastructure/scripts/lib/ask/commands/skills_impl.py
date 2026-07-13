@@ -8667,17 +8667,27 @@ def _sdk_improve_project_id(manifest: dict[str, Any] | None, project_root: Path)
 def _sdk_improve_evidence_paths(project_root: Path, manifest: dict[str, Any] | None, slug: str) -> dict[str, Path]:
     evidence = manifest.get("evidence") if isinstance(manifest, dict) else None
     evidence = evidence if isinstance(evidence, dict) else {}
-    registry = _resolve_project_relative_config_path(
-        project_root,
-        str(evidence.get("registry") or ".harness/skills/registry.json"),
+    output_path = evidence.get("output_path")
+    if output_path is None:
+        output_root = _resolve_project_relative_config_path(project_root, ".harness/skills")
+    elif isinstance(output_path, str) and output_path.strip():
+        output_root = _resolve_project_relative_config_path(project_root, output_path)
+    else:
+        output_root = None
+    registry = (
+        _resolve_project_relative_config_path(project_root, str(evidence["registry"]))
+        if evidence.get("registry")
+        else output_root / "registry.json" if output_root is not None else None
     )
-    events = _resolve_project_relative_config_path(
-        project_root,
-        str(evidence.get("events") or ".harness/skills/events.jsonl"),
+    events = (
+        _resolve_project_relative_config_path(project_root, str(evidence["events"]))
+        if evidence.get("events")
+        else output_root / "events.jsonl" if output_root is not None else None
     )
-    receipts_root = _resolve_project_relative_config_path(
-        project_root,
-        str(evidence.get("receipts") or ".harness/skills/receipts"),
+    receipts_root = (
+        _resolve_project_relative_config_path(project_root, str(evidence["receipts"]))
+        if evidence.get("receipts")
+        else output_root / "receipts" if output_root is not None else None
     )
     if registry is None or events is None or receipts_root is None:
         raise ValueError("Project evidence paths must be relative paths inside project_root.")

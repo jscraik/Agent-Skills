@@ -71,6 +71,8 @@ def _parse_case_list(block: list[tuple[str, int]]) -> list[str] | None:
 
 def _load_minimal_evaluation_lane_policy(text: str) -> dict[str, Any]:
     rows = _section_rows(text, "evaluation_lane_policy")
+    if not rows:
+        return {}
     policy = _parse_policy_scalars(rows)
     for section in ("model_routing", "pools"):
         policy[section] = _parse_policy_map(rows, section)

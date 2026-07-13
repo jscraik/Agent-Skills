@@ -790,7 +790,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             for rel in iter_files(
                 source_abs,
                 excluded_dirs,
-                follow_symlinks=spec.follow_symlinks,
+                follow_symlinks=not _projection_mirror.compare_symlinks(spec),
             )
         }
         projection_files = {
@@ -799,7 +799,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         source_manifest_hashes: dict[str, str] = {}
         for rel_key, rel in source_files.items():
             source_file = source_abs / rel
-            if source_file.is_symlink() and not spec.follow_symlinks:
+            if source_file.is_symlink() and _projection_mirror.compare_symlinks(spec):
                 source_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(source_file)}")
             else:
                 try:
@@ -809,7 +809,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         projection_manifest_hashes: dict[str, str] = {}
         for rel_key, rel in projection_files.items():
             projection_file = projection_abs / rel
-            if projection_file.is_symlink() and not spec.follow_symlinks:
+            if projection_file.is_symlink() and _projection_mirror.compare_symlinks(spec):
                 projection_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(projection_file)}")
                 continue
             try:
@@ -838,7 +838,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             source_file = source_abs / rel
             projection_file = projection_abs / rel
 
-            if (source_file.is_symlink() or projection_file.is_symlink()) and not spec.follow_symlinks:
+            if (source_file.is_symlink() or projection_file.is_symlink()) and _projection_mirror.compare_symlinks(spec):
                 if source_file.is_symlink() and projection_file.is_symlink():
                     source_target = os.readlink(source_file)
                     projection_target = os.readlink(projection_file)
