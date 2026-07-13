@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,6 +17,7 @@ from review_lifecycle_scaffold_unittest_replay import (  # noqa: E402
     _build_report,
     _observe_transcript,
 )
+import review_lifecycle_scaffold_unittest_replay as replay  # noqa: E402
 
 
 class TestReviewLifecycleScaffoldUnittestReplay(unittest.TestCase):
@@ -61,6 +63,16 @@ class TestReviewLifecycleScaffoldUnittestReplay(unittest.TestCase):
         self.assertEqual(report["schema_version"], "skills-sdk.lifecycle-scaffold-unittest-review.v1")
         self.assertEqual(report["status"], "blocked_validation")
         json.dumps(report)
+
+    def test_worker_review_requires_the_bounded_transcript_marker(self) -> None:
+        with (
+            mock.patch.object(replay, "_candidate_findings", return_value=[]),
+            mock.patch.object(replay, "_status_snapshot", side_effect=("", "")),
+            mock.patch.object(replay, "_run", return_value=(0, "Ran 3 tests in 0.135s\nOK\n", "")),
+        ):
+            findings, evidence = replay._worker_findings()
+        self.assertTrue(any("transcript did not contain" in finding["message"] for finding in findings))
+        self.assertEqual(evidence[0]["transcript_status"], "fail")
 
 
 if __name__ == "__main__":

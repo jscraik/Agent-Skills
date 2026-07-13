@@ -228,6 +228,10 @@ def _normalized_command(command: Any) -> list[str] | None:
     return argv
 
 
+def _has_shell_quoting(command: Any) -> bool:
+    return isinstance(command, str) and ("'" in command or '"' in command)
+
+
 def _rows_by_family(payload: dict[str, Any], key: str) -> dict[str, dict[str, Any]]:
     return {
         row.get("family"): row
@@ -271,6 +275,8 @@ def _compare_worker_command(
         _normalized_command(actual_command.replace("'", "").replace('"', ""))
         == _normalized_command(expected_command.replace("'", "").replace('"', ""))
         if isinstance(actual_command, str)
+        and not _has_shell_quoting(actual_command)
+        and not _has_shell_quoting(expected_command)
         else False
     )
     if actual_normalized == expected_normalized or legacy_normalized:

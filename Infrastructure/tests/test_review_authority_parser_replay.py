@@ -86,6 +86,18 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
 
             self.assertEqual(_worker_findings(capture_dir, ARTIFACT, SELECTION), [])
 
+    def test_worker_review_rejects_unquoted_legacy_capture_for_quoted_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "trust.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["metadata"]["command"] = payload["metadata"]["command"].replace("'", "")
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
+            self.assertTrue(any("worker capture command does not match" in finding["message"] for finding in findings))
+
     def test_worker_review_rejects_mutation_and_missing_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             capture_dir = Path(temp_dir)
