@@ -3,7 +3,7 @@
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json",
   "status": "bounded_local_pass",
   "operation": "phase2_read_only_parser_replay",
-  "base_commit": "f9157369a7fce36abb61d25351524fe8d169d7f9",
+  "base_commit": "3c84c2fcce4cddc691f1387406a0a37876c713a3",
   "branch": "codex/skills-sdk-command-service-callers",
   "source_files": [
     "Infrastructure/scripts/lib/ask/command_metadata.py",
