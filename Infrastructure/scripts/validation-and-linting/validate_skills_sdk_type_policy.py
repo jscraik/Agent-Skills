@@ -149,7 +149,7 @@ def _identity_property_issues(
     if isinstance(compatibility, list):
         allowed.update(item for item in compatibility if isinstance(item, str))
     declared_pattern = child.get("pattern")
-    if not (child.get("type") == "string" or child.get("type") == ["string", "null"]):
+    if not _is_string_schema_type(child.get("type")):
         return [
             PolicyIssue(
                 "identity_schema_type",
@@ -166,6 +166,12 @@ def _identity_property_issues(
             f"{path}:{node_path}.{name}",
         )
     ]
+
+
+def _is_string_schema_type(value: object) -> bool:
+    if value == "string":
+        return True
+    return isinstance(value, list) and all(isinstance(item, str) for item in value) and set(value) == {"string", "null"}
 
 
 def _walk_schema_children(

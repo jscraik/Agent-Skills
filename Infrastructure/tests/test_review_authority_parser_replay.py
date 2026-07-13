@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "Infrastructure" / "scripts" / "validation-and-lin
 from review_authority_parser_replay import (  # noqa: E402
     EXPECTED_DATA_KEYS,
     FAMILIES,
-    MUTATION_KEYS,
+    REQUIRED_NO_WRITE_KEYS,
     _adversarial_findings,
     _artifact_shape_findings,
     _qa_findings,
@@ -35,7 +35,11 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
     def _write_capture_dir(self, capture_dir: Path, *, mutation_family: str | None = None, missing_receipt_family: str | None = None) -> None:
         for family in FAMILIES:
             key = EXPECTED_DATA_KEYS[family]
-            receipt = {"schema_version": f"fixture.{family}.v1", "status": "preview", **{key: False for key in MUTATION_KEYS}}
+            receipt = {
+                "schema_version": f"fixture.{family}.v1",
+                "status": "preview",
+                **{key: False for key in REQUIRED_NO_WRITE_KEYS[family]},
+            }
             if family == missing_receipt_family:
                 body = {"result": "missing-receipt"}
             else:
@@ -72,6 +76,16 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
             findings = _worker_findings(capture_dir)
             self.assertTrue(any("omits explicit no-write fields" in finding["message"] for finding in findings))
+
+    def test_worker_review_accepts_family_specific_no_write_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            knowledge_receipt = json.loads((capture_dir / "knowledge.json").read_text(encoding="utf-8"))
+            receipt = knowledge_receipt["data"][EXPECTED_DATA_KEYS["knowledge"]]
+            self.assertEqual(REQUIRED_NO_WRITE_KEYS["knowledge"], frozenset())
+            self.assertNotIn("network_accessed", receipt)
+            self.assertEqual(_worker_findings(capture_dir), [])
 
     def test_qa_review_accepts_candidate_and_focused_test(self) -> None:
         self.assertEqual(_qa_findings(ARTIFACT, SELECTION), [])

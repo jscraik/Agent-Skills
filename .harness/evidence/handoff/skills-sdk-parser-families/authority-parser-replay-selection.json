@@ -41,7 +41,7 @@
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
     "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
   ],
-  "source_tree_digest": "sha256:9fd763e82753ee2d5e36a5a02c16650d788cde53b4d69ecbfbfc136880da71e0",
+  "source_tree_digest": "sha256:d3261687a5222924b45feb7cb426aa17daa5c75a872631624d3dc3ef541a6464",
   "source_surface": "Infrastructure/scripts/lib/ask/commands/sdk*.py",
   "inventory_command": "./bin/ask sdk evidence parser-families --preview --json --robot",
   "command_plan_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",

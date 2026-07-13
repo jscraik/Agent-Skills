@@ -37,6 +37,16 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "security", "adapters", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "--help"),
 }
+MUTATION_KEYS = frozenset(
+    {
+        "mutation_performed",
+        "source_mutation_performed",
+        "trust_store_mutated",
+        "network_accessed",
+        "credentials_accessed",
+        "codex_exec_invoked",
+    }
+)
 
 
 def build_private_stabilization_replay(repo_root: Path) -> dict[str, Any]:
@@ -136,8 +146,14 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
             reason = "Allowlisted help command returned zero but not bounded argparse help text."
             receipt_evidence = help_evidence
     elif receipt_status == "success":
-        status = "executed_pass"
-        reason = "Exact allowlisted local read-only command returned a valid success receipt."
+        mutation_flags = _mutation_flag_findings(completed.stdout)
+        if mutation_flags:
+            status = "executed_fail"
+            reason = "Allowlisted command returned a success receipt with mutation or external-access flags."
+            receipt_evidence = [*receipt_evidence, *mutation_flags]
+        else:
+            status = "executed_pass"
+            reason = "Exact allowlisted local read-only command returned a valid success receipt."
     else:
         status = "executed_fail"
         reason = "Allowlisted command returned zero but not a valid success robot receipt."
@@ -148,6 +164,28 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
         "reason": reason,
         "evidence": receipt_evidence,
     }
+
+
+def _mutation_flag_findings(stdout: str) -> list[str]:
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        return []
+    findings: list[str] = []
+
+    def walk(value: Any, path: str = "$") -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                child_path = f"{path}.{key}"
+                if key in MUTATION_KEYS and child is True:
+                    findings.append(f"robot_receipt:{child_path}:true")
+                walk(child, child_path)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                walk(child, f"{path}[{index}]")
+
+    walk(payload)
+    return findings
 
 
 def _observe_help_receipt(stdout: str) -> tuple[str | None, list[str]]:

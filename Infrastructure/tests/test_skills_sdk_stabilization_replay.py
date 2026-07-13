@@ -106,6 +106,22 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
         self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
         run.assert_called_once()
 
+    def test_read_only_receipt_rejects_nested_mutation_flag(self) -> None:
+        command = "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot"
+        plan = {"commands": [{"capability_id": "eval_ab_preview", "command": command, "argv": command.split(" ")}]}
+        completed = mock.Mock(
+            returncode=0,
+            stdout='{"status":"success","metadata":{},"data":{"receipt":{"status":"preview","mutation_performed":true}}}',
+            stderr="",
+        )
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ):
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_fail")
+        self.assertIn("robot_receipt:$.data.receipt.mutation_performed:true", receipt["rows"][0]["evidence"])
+
     def test_read_only_trust_preview_is_allowlisted_for_command_receipt(self) -> None:
         command = "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot"
         argv = [

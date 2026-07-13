@@ -40,6 +40,16 @@ MUTATION_KEYS = {
     "credentials_accessed",
     "codex_exec_invoked",
 }
+REQUIRED_NO_WRITE_KEYS = {
+    "eval": frozenset({"mutation_performed", "network_accessed", "codex_exec_invoked"}),
+    "trust": frozenset({"mutation_performed", "trust_store_mutated"}),
+    "plugin": frozenset({"mutation_performed"}),
+    "improve": frozenset({"mutation_performed", "source_mutation_performed"}),
+    "install": frozenset({"mutation_performed"}),
+    "rollback": frozenset({"mutation_performed"}),
+    "uninstall": frozenset({"mutation_performed"}),
+    "knowledge": frozenset(),
+}
 PLACEHOLDER_ROOTS = ("/tmp/sample-project", "/path/to/")
 
 
@@ -79,7 +89,7 @@ def _capture_receipt(body: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _capture_no_write_findings(receipt: dict[str, Any], family: str, output_path: Path) -> list[dict[str, Any]]:
-    missing = sorted(key for key in MUTATION_KEYS if key not in receipt)
+    missing = sorted(key for key in REQUIRED_NO_WRITE_KEYS[family] if key not in receipt)
     non_false = sorted(key for key in MUTATION_KEYS if key in receipt and receipt[key] is not False)
     findings: list[dict[str, Any]] = []
     if missing:

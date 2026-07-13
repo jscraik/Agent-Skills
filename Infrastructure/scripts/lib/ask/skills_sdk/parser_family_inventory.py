@@ -267,7 +267,8 @@ def _is_concrete_preview(command: str) -> bool:
         argv = shlex.split(command)
     except ValueError:
         return False
-    return "--preview" in argv and not any(_is_placeholder_argument(argument) for argument in argv)
+    mutation_flags = {"--apply", "--execute"}
+    return "--preview" in argv and not mutation_flags.intersection(argv) and not any(_is_placeholder_argument(argument) for argument in argv)
 
 
 def _is_placeholder_argument(argument: str) -> bool:

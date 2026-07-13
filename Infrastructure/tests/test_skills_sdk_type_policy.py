@@ -100,6 +100,24 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         self.assertIn("identity_schema_type", codes)
         self.assertIn("unbranded_identity_schema", codes)
 
+    def test_nullable_identity_accepts_unordered_json_schema_type_array(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            id_schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json"
+            id_schema_path.parent.mkdir(parents=True, exist_ok=True)
+            id_schema_path.write_text((REPO_ROOT / id_schema_path.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/nullable.schema.json"
+            schema_path.write_text(
+                json.dumps({"type": "object", "properties": {"trace_id": {"type": ["null", "string"], "pattern": "^tr_[a-z0-9]{12,32}$"}}}),
+                encoding="utf-8",
+            )
+            issues = self.validator.validate_paths(temp_root, ("Infrastructure/config/schemas/skills-sdk/nullable.schema.json",))
+        self.assertNotIn("identity_schema_type", {issue.code for issue in issues})
+        self.assertNotIn("unbranded_identity_schema", {issue.code for issue in issues})
+
     def test_manual_newtype_and_unitless_duration_fail(self) -> None:
         path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-bad.py"
         path.write_text(

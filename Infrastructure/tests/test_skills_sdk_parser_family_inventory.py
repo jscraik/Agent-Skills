@@ -19,6 +19,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 from ask.skills_sdk.parser_family_inventory import (  # noqa: E402
     PARSER_FAMILY_IDS,
     _discover_compatibility_examples,
+    _is_concrete_preview,
     _receipt_policy,
     _requires_concrete_fixture,
     build_parser_family_inventory_receipt,
@@ -228,6 +229,12 @@ class TestSkillsSdkParserFamilyInventory(unittest.TestCase):
         self.assertIn("Infrastructure/tests/fixtures/skills_sdk/", selected["eval"]["command"])
         self.assertIn("--fixture", selected["eval"]["command"])
         self.assertEqual(selection["blockers"], [])
+
+    def test_preview_selection_rejects_mutation_mode_flags(self) -> None:
+        command = "ask sdk install Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview"
+        self.assertTrue(_is_concrete_preview(command))
+        self.assertFalse(_is_concrete_preview(f"{command} --apply"))
+        self.assertFalse(_is_concrete_preview(f"{command} --execute"))
 
     def test_authority_replay_previews_emit_receipts_without_mutation(self) -> None:
         for family_id, case in _AUTHORITY_REPLAY_CASES.items():
