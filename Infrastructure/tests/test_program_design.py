@@ -442,6 +442,24 @@ class Factory:
         )
         self.assertIn("module mutable state cache", "\n".join(issues))
 
+    def test_named_expression_in_definition_default_is_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "def build(value=(cache := {})):\n    return value\n",
+            "",
+        )
+        self.assertIn("module mutable state cache", "\n".join(issues))
+
+    def test_named_expression_in_lambda_body_is_ignored(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "factory = lambda: (items := [])\n",
+            "",
+        )
+        self.assertNotIn("module mutable state items", "\n".join(issues))
+
     def test_baseline_path_falls_back_to_non_staged_rename_map(self) -> None:
         validator = _load_validator()
         validator._rename_map.cache_clear()

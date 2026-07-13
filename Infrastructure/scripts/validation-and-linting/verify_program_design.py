@@ -288,11 +288,19 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.findings: list[Finding] = []
 
-    def visit_FunctionDef(self, _node: ast.FunctionDef) -> None:
-        return None
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._visit_definition_time(node)
 
-    def visit_AsyncFunctionDef(self, _node: ast.AsyncFunctionDef) -> None:
-        return None
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._visit_definition_time(node)
+
+    def visit_Lambda(self, node: ast.Lambda) -> None:
+        defaults = (
+            *node.args.defaults,
+            *(default for default in node.args.kw_defaults if default is not None),
+        )
+        for default in defaults:
+            self.visit(default)
 
     def visit_ClassDef(self, _node: ast.ClassDef) -> None:
         self.generic_visit(_node)
@@ -308,6 +316,17 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
     def visit_NamedExpr(self, node: ast.NamedExpr) -> None:
         self._record(node, [node.target], node.value)
         self.generic_visit(node)
+
+    def _visit_definition_time(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        expressions = (
+            *node.decorator_list,
+            node.returns,
+            *node.args.defaults,
+            *(default for default in node.args.kw_defaults if default is not None),
+        )
+        for expression in expressions:
+            if expression is not None:
+                self.visit(expression)
 
     def _record(self, node: ast.AST, targets: list[ast.expr], value: ast.expr | None) -> None:
         for target in targets:
