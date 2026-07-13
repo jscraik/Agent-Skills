@@ -6,14 +6,14 @@
     "path": ".harness/artifacts/sdk-review-plan/fixture.json",
     "schema_version": "skills-sdk.review-plan-receipt.v1",
     "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "receipt_instance_id": "fixture-review-plan"
+    "receipt_instance_id": "rp_fixturereviewplan"
   },
   "source_context": {
     "repo_root": "/tmp/agent-skills",
     "head_sha": "0123456789abcdef",
     "branch": "codex/skills-sdk-pu-015-review-handoff",
     "branch_policy": "same_head_required",
-    "receipt_instance_id": "fixture-review-plan",
+    "receipt_instance_id": "rp_fixturereviewplan",
     "receipt_created_at": "2026-06-08T00:00:00Z",
     "target_input": "Skills/agent-ops/simplify",
     "target_kind": "skill_source",
@@ -26,7 +26,7 @@
   "source_trace": {
     "path": ".harness/artifacts/sdk-review-plan/traces/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.trace.json",
     "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "receipt_instance_id": "fixture-review-plan",
+    "receipt_instance_id": "rp_fixturereviewplan",
     "branch_policy": "same_head_required"
   },
   "target": "Skills/agent-ops/simplify",

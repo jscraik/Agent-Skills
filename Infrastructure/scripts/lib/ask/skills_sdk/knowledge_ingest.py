@@ -13,6 +13,7 @@ from typing import Any
 from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
 
 
+SECURITY_GATE_FLAGS = ("--require-security-evals", "--pi-high-fail", "--require-fail-fast")
 SCHEMA_VERSION = "skills-sdk-knowledge-ingest.v1"
 ROUTING_TEXT = (
     "Load `references/knowledge-capsule.manifest.yaml` when an audit needs "
@@ -675,23 +676,11 @@ def _preflight_security_gate(
         eval_routes = _eval_reference_routes(extraction_root, source_files)
         _update_knowledge_routing_files(staged_skill, eval_routes=eval_routes, manifest=manifest)
         gate_script = _resolve_skill_gate_script(repo_root)
-        process = subprocess.run(
-            [
-                sys.executable,
-                str(gate_script),
-                str(staged_skill),
-                "--require-security-evals",
-                "--pi-high-fail",
-                "--require-fail-fast",
-            ],
-            cwd=repo_root,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
+        python_command = ["bash", str(repo_root / "Infrastructure/scripts/run-infrastructure-python.sh")] if (repo_root / "Infrastructure/scripts/run-infrastructure-python.sh").is_file() else [sys.executable]
+        command = [*python_command, str(gate_script), str(staged_skill), *SECURITY_GATE_FLAGS]
+        process = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
         return {
-            "command": "skill_gate.py <staged-skill> --require-security-evals --pi-high-fail --require-fail-fast",
+            "command": " ".join([*python_command, "skill_gate.py", "<staged-skill>", *SECURITY_GATE_FLAGS]),
             "status": "pass" if process.returncode == 0 else "fail",
             "exit_code": process.returncode,
             "stdout_excerpt": process.stdout[:4000],

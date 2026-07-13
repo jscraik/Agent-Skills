@@ -202,7 +202,9 @@ def _artifact_findings(artifact_path: Path, selection_path: Path) -> tuple[dict[
     if not _git_is_ancestor(base_commit, head):
         findings.append({"severity": "blocker", "message": "candidate base_commit is not an ancestor of the current immutable HEAD", "evidence": [base_commit, head]})
     source_files = selection.get("source_files")
-    if isinstance(source_files, list) and all(isinstance(path, str) for path in source_files):
+    if not isinstance(source_files, list) or not source_files or not all(isinstance(path, str) and path for path in source_files):
+        findings.append({"severity": "blocker", "message": "selection must declare a non-empty source_files string list before replay approval", "evidence": [str(selection_path)]})
+    else:
         try:
             current_digest = _source_tree_digest(source_files)
         except OSError as exc:

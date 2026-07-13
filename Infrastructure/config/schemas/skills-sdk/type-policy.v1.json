@@ -32,6 +32,7 @@
       "ttl_seconds",
       "duration_seconds",
       "stability_seconds",
+      "stability_interval_seconds",
       "cooldown_seconds"
     ]
   },

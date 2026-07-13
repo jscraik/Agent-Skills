@@ -87,6 +87,15 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             findings = _adversarial_findings(artifact_path, SELECTION)
             self.assertTrue(any("command_count" in finding["message"] for finding in findings))
 
+    def test_review_rejects_selection_without_source_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            selection_path = Path(temp_dir) / "selection.json"
+            selection = json.loads(SELECTION.read_text(encoding="utf-8"))
+            selection.pop("source_files", None)
+            selection_path.write_text(json.dumps(selection), encoding="utf-8")
+            findings = _adversarial_findings(ARTIFACT, selection_path)
+            self.assertTrue(any("source_files" in finding["message"] for finding in findings))
+
 
 if __name__ == "__main__":
     unittest.main()

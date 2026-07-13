@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Enforce the touched-surface Skills SDK schema/type policy.
+"""Enforce the Skills SDK schema/type policy.
 
 JSON Schemas remain the public compatibility authority. This validator is a
 small migration gate: it rejects new handwritten ``NewType`` public values,
 unbranded identity fields in changed schemas, and new unitless duration
-annotations. Existing legacy duration fields remain visible and explicitly
-allowlisted until their owner slice migrates them to ``duration.v1``.
+annotations. Existing legacy duration fields remain visible until their owner
+slice migrates them to ``duration.v1``. A clean full-repository invocation
+validates every tracked Skills SDK schema and emitter surface; legacy fields
+are allowed only when the same path and annotation already existed in the
+parent commit.
 """
 
 from __future__ import annotations
@@ -22,7 +25,14 @@ from typing import Iterable
 POLICY_PATH = "Infrastructure/config/schemas/skills-sdk/type-policy.v1.json"
 ID_FIELD_NAMES = frozenset({"receipt_instance_id", "trace_id", "request_id", "experiment_id"})
 DURATION_FIELD_NAMES = frozenset(
-    {"timeout_seconds", "ttl_seconds", "duration_seconds", "stability_seconds", "cooldown_seconds"}
+    {
+        "timeout_seconds",
+        "ttl_seconds",
+        "duration_seconds",
+        "stability_seconds",
+        "stability_interval_seconds",
+        "cooldown_seconds",
+    }
 )
 
 
@@ -40,15 +50,21 @@ def _load_policy(repo_root: Path) -> dict[str, object]:
     return payload
 
 
-def _changed_files_from_git(repo_root: Path) -> tuple[str, ...]:
+def _policy_surface_paths(repo_root: Path) -> tuple[str, ...]:
     result = subprocess.run(
-        ["git", "diff", "--name-only", "HEAD", "--"],
+        ["git", "ls-files", "--", "Infrastructure/config/schemas/skills-sdk", "Infrastructure/scripts/lib/ask"],
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
     )
-    return tuple(line.strip() for line in result.stdout.splitlines() if line.strip())
+    if result.returncode != 0:
+        raise RuntimeError(f"unable to enumerate tracked Skills SDK policy surfaces: {result.stderr.strip()}")
+    return tuple(
+        path
+        for line in result.stdout.splitlines()
+        if (path := line.strip()) and (path.endswith(".schema.json") or path.endswith(".py"))
+    )
 
 
 def _is_public_schema(path: str) -> bool:
@@ -178,7 +194,7 @@ def _python_policy_issues(repo_root: Path, path: str, policy: dict[str, object])
         tree = ast.parse(candidate.read_text(encoding="utf-8"), filename=path)
     except SyntaxError as exc:
         return [PolicyIssue("type_policy_python_invalid", str(exc), path)]
-    return _python_tree_issues(tree, path, _legacy_duration_fields(policy))
+    return _python_tree_issues(tree, path, _legacy_duration_fields(policy), repo_root)
 
 
 def _legacy_duration_fields(policy: dict[str, object]) -> set[str]:
@@ -188,7 +204,12 @@ def _legacy_duration_fields(policy: dict[str, object]) -> set[str]:
     return set(DURATION_FIELD_NAMES)
 
 
-def _python_tree_issues(tree: ast.AST, path: str, legacy_duration_fields: set[str]) -> list[PolicyIssue]:
+def _python_tree_issues(
+    tree: ast.AST,
+    path: str,
+    legacy_duration_fields: set[str],
+    repo_root: Path,
+) -> list[PolicyIssue]:
     issues: list[PolicyIssue] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and (
@@ -203,12 +224,15 @@ def _python_tree_issues(tree: ast.AST, path: str, legacy_duration_fields: set[st
                 )
             )
         if isinstance(node, (ast.AnnAssign, ast.arg)):
-            issues.extend(_duration_annotation_issue(node, path, legacy_duration_fields))
+            issues.extend(_duration_annotation_issue(node, path, legacy_duration_fields, repo_root))
     return issues
 
 
 def _duration_annotation_issue(
-    node: ast.AnnAssign | ast.arg, path: str, legacy_duration_fields: set[str]
+    node: ast.AnnAssign | ast.arg,
+    path: str,
+    legacy_duration_fields: set[str],
+    repo_root: Path,
 ) -> list[PolicyIssue]:
     if isinstance(node, ast.AnnAssign):
         if not isinstance(node.target, ast.Name):
@@ -216,10 +240,12 @@ def _duration_annotation_issue(
         name = node.target.id
     else:
         name = node.arg
-    if name in legacy_duration_fields or not name.endswith("_seconds"):
+    if not name.endswith("_seconds"):
         return []
     annotation = node.annotation
     if annotation is None or not _contains_raw_numeric(annotation):
+        return []
+    if name in legacy_duration_fields and _legacy_annotation_exists_in_parent(repo_root, path, name, annotation):
         return []
     rendered_annotation = ast.unparse(annotation)
     return [
@@ -233,6 +259,33 @@ def _duration_annotation_issue(
 
 def _contains_raw_numeric(annotation: ast.AST) -> bool:
     return any(isinstance(node, ast.Name) and node.id in {"int", "float"} for node in ast.walk(annotation))
+
+
+def _annotation_keys(tree: ast.AST) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.annotation is not None:
+            keys.add((node.target.id, ast.unparse(node.annotation)))
+        elif isinstance(node, ast.arg) and node.annotation is not None:
+            keys.add((node.arg, ast.unparse(node.annotation)))
+    return keys
+
+
+def _legacy_annotation_exists_in_parent(repo_root: Path, path: str, name: str, annotation: ast.AST) -> bool:
+    result = subprocess.run(
+        ["git", "show", f"HEAD^:{path}"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return False
+    try:
+        baseline = ast.parse(result.stdout, filename=path)
+    except SyntaxError:
+        return False
+    return (name, ast.unparse(annotation)) in _annotation_keys(baseline)
 
 
 def validate_paths(repo_root: Path, paths: Iterable[str]) -> tuple[PolicyIssue, ...]:
@@ -254,7 +307,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
-    paths = tuple(args.changed_files) or _changed_files_from_git(repo_root)
+    paths = tuple(args.changed_files) or _policy_surface_paths(repo_root)
     issues = validate_paths(repo_root, paths)
     payload = {
         "schema_version": "skills-sdk.type-policy-validation.v1",

@@ -93,17 +93,19 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         self.assertIn("manual_newtype_forbidden", codes)
         self.assertIn("unitless_duration_annotation", codes)
 
-    def test_legacy_duration_fields_remain_compatible_until_owner_migration(self) -> None:
-        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-legacy.py"
-        path.write_text(
-            "from typing import Optional\ndef run(timeout_seconds: Optional[int]) -> None: ...\n",
-            encoding="utf-8",
-        )
+    def test_existing_legacy_duration_fields_remain_compatible_until_owner_migration(self) -> None:
+        path = "Infrastructure/scripts/lib/ask/commands/plugins.py"
+        issues = self.validator.validate_paths(REPO_ROOT, (path,))
+        self.assertNotIn("unitless_duration_annotation", {issue.code for issue in issues})
+
+    def test_new_legacy_named_duration_field_is_not_allowlisted_by_name(self) -> None:
+        path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/type-policy-new-legacy.py"
+        path.write_text("def run(timeout_seconds: int) -> None: ...\n", encoding="utf-8")
         try:
-            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-legacy.py",))
+            issues = self.validator.validate_paths(REPO_ROOT, ("Infrastructure/tests/fixtures/skills_sdk/type-policy-new-legacy.py",))
         finally:
             path.unlink()
-        self.assertNotIn("unitless_duration_annotation", {issue.code for issue in issues})
+        self.assertIn("unitless_duration_annotation", {issue.code for issue in issues})
 
 
 if __name__ == "__main__":

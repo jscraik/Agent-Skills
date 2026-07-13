@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.review-plan-trace.v1",
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json",
   "receipt_path": ".harness/artifacts/sdk-review-plan/fixture.json",
-  "receipt_instance_id": "fixture-review-plan",
+  "receipt_instance_id": "rp_fixturereviewplan",
   "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "repo_root": "/tmp/agent-skills",
   "head_sha": "0123456789abcdef",

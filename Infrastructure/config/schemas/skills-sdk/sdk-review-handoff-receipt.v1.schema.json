@@ -38,7 +38,7 @@
         "path": {"type": "string", "minLength": 1},
         "schema_version": {"const": "skills-sdk.review-plan-receipt.v1"},
         "receipt_sha256": {"type": "string", "minLength": 64},
-        "receipt_instance_id": {"type": "string", "minLength": 1}
+        "receipt_instance_id": {"type": "string", "pattern": "^rp_[a-z0-9]{12,32}$"}
       }
     },
     "source_context": {
@@ -51,7 +51,7 @@
       "properties": {
         "path": {"type": "string", "minLength": 1},
         "receipt_sha256": {"type": "string", "minLength": 64},
-        "receipt_instance_id": {"type": "string", "minLength": 1},
+        "receipt_instance_id": {"type": "string", "pattern": "^rp_[a-z0-9]{12,32}$"},
         "branch_policy": {"const": "same_head_required"}
       }
     },
