@@ -1,0 +1,33 @@
+{
+  "schema_version": "skills-sdk.phase2-explorer-static-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T02:25:34Z",
+  "base_head_sha": "6f918a8ae32658c9418e41a6942aeb1ae77af18b",
+  "allowlisted_argv": "./bin/ask sdk explorer static --preview --json --robot",
+  "source_digest": "sha256:159d0caa1515c5c2ffb618ecd98082d09d4362db9bafc11fd0d822ee1d1423b3",
+  "test_digest": "sha256:2df023edec23731c5625b6d3603df0d2e91a33d5bc87ab118f14f75a127f42c5",
+  "behavior_proof": {
+    "receipt_status": "preview",
+    "capability_count": 52,
+    "skill_count": 154,
+    "html_rendered": false,
+    "hosted_publish_requested": false,
+    "mutation_performed": false,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/explorer-static-worker.md",
+    "qa": "artifacts/reviews/explorer-static-qa.md",
+    "adversarial": "artifacts/reviews/explorer-static-adversarial.md",
+    "patch_digest": "sha256:6b7a56c8529b109efc7562eaca8c901e4050710a5ad03959fb6bd5b38a09bca6"
+  },
+  "replay": {
+    "digest": "sha256:3c4016a8b87c380cded38f0d891986ba00e6b77121be4abc10b1d306c0ce6a55",
+    "total": 43,
+    "executed_pass": 23,
+    "blocked_unsafe": 20,
+    "unclassified": 0
+  },
+  "claims_boundary": "No Foundry, source-admission, apply, Tessl/CircleCI, publication, installation, merge, or release-readiness claim follows.",
+  "next_gate": "Push this receipt, then select the smallest genuinely read-only command from the remaining 20 deny-by-default references."
+}
