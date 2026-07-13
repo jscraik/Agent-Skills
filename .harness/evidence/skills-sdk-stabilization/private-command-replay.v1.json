@@ -336,15 +336,16 @@
     },
     {
       "argv": [
-        "/Users/jamiecraik/.venvs/pyyaml/bin/python",
-        "Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
+        "bash",
+        "Infrastructure/scripts/run-infrastructure-python.sh",
+        "scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
       ],
       "capability_id": "review_execution",
-      "command": "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
       "evidence": [
         "deny_by_default"
       ],
-      "execution_id": "sha256:cce64767134b86c4e1030e9602f8e6c95f45d47de03f91f488f622651f9dfd3e",
+      "execution_id": "sha256:96d1bc573c6a83bb2d01af3fe8fe287e0346827a87a2b49287758846eab4eb99",
       "exit_code": null,
       "reason": "Command is not on the exact private stabilization read-only allowlist.",
       "status": "blocked_unsafe"
@@ -493,20 +494,19 @@
         "knowledge",
         "ingest",
         "--extraction",
-        "/Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction",
         "--skill",
-        "Skills/agent-ops/improve-agent-native",
-        "--apply",
-        "--run-proof",
+        "Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture",
+        "--preview",
         "--json",
         "--robot"
       ],
       "capability_id": "refs_ingestion",
-      "command": "./bin/ask sdk knowledge ingest --extraction /Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native --skill Skills/agent-ops/improve-agent-native --apply --run-proof --json --robot",
+      "command": "./bin/ask sdk knowledge ingest --extraction Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/knowledge-extraction --skill Infrastructure/tests/fixtures/skills_sdk/authority_replay_project/skills/authority-replay-fixture --preview --json --robot",
       "evidence": [
         "deny_by_default"
       ],
-      "execution_id": "sha256:82502e92ec1a450579892308b558e1bbdd7da1d3dadfaf37258fba6678575ebf",
+      "execution_id": "sha256:a3972fdfd9c73be70491e4b5f88b3c3484c6ee3f7f51265a6ba7c426b49a6487",
       "exit_code": null,
       "reason": "Command is not on the exact private stabilization read-only allowlist.",
       "status": "blocked_unsafe"
@@ -837,12 +837,15 @@
       "capability_id": "skill_explorer",
       "command": "./bin/ask sdk explorer static --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_static_explorer_preview"
       ],
       "execution_id": "sha256:e1fc35cf935956d218f3446e494663b287cbca055bd080f92bb260539c69f0a2",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

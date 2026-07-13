@@ -529,6 +529,56 @@ class TestPrivateStabilizationReplay(unittest.TestCase):
             check=False,
         )
 
+    def test_read_only_static_explorer_preview_is_allowlisted_for_command_receipt(self) -> None:
+        command = "./bin/ask sdk explorer static --preview --json --robot"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "skill_explorer",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        completed = mock.Mock(returncode=0, stdout='{"status":"success","metadata":{},"data":{}}', stderr="")
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run", return_value=completed
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        self.assertEqual(receipt["rows"][0]["status"], "executed_pass")
+        self.assertIn("robot_receipt:valid_envelope", receipt["rows"][0]["evidence"])
+        run.assert_called_once_with(
+            command.split(" "),
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            check=False,
+        )
+
+    def test_static_explorer_preview_missing_preview_remains_deny_by_default(self) -> None:
+        command = "./bin/ask sdk explorer static --json --robot"
+        plan = {
+            "commands": [
+                {
+                    "capability_id": "skill_explorer",
+                    "command": command,
+                    "argv": [*command.split(" ")],
+                }
+            ]
+        }
+        with mock.patch("ask.skills_sdk.stabilization_replay.build_command_evidence_plan_receipt", return_value=plan), mock.patch(
+            "ask.skills_sdk.stabilization_replay.subprocess.run"
+        ) as run:
+            receipt = build_private_stabilization_replay(REPO_ROOT)
+
+        row = receipt["rows"][0]
+        self.assertEqual(row["status"], "blocked_unsafe")
+        self.assertEqual(row["evidence"], ["deny_by_default"])
+        run.assert_not_called()
+
     def test_capability_evidence_verify_altered_scope_remains_deny_by_default(self) -> None:
         command = "./bin/ask sdk evidence verify --scope package --json --robot"
         plan = {
