@@ -207,19 +207,24 @@ def _is_repo_relative_path(value: str, *, require_file: bool = False) -> bool:
 
 
 def _command_argv(command: Any) -> list[str] | None:
-    try:
-        argv = shlex.split(str(command))
-    except ValueError:
-        return None
+    if isinstance(command, list):
+        if not command or not all(isinstance(argument, str) for argument in command):
+            return None
+        argv = list(command)
+    else:
+        try:
+            argv = shlex.split(str(command))
+        except ValueError:
+            return None
     if argv and argv[0] == "ask":
         argv[0] = "./bin/ask"
     return argv
 
 
 def _normalized_command(command: Any) -> list[str] | None:
-    if not isinstance(command, str):
-        return None
-    argv = _command_argv(command.replace("'", "").replace('"', ""))
+    if isinstance(command, str):
+        command = command.replace("'", "").replace('"', "")
+    argv = _command_argv(command)
     if argv and argv[0] == "./bin/ask":
         return argv[1:]
     return argv
@@ -233,7 +238,7 @@ def _rows_by_family(payload: dict[str, Any], key: str) -> dict[str, dict[str, An
     }
 
 
-def _worker_capture_command(capture_dir: Path, family: str) -> tuple[Path, str | None, list[dict[str, Any]]]:
+def _worker_capture_command(capture_dir: Path, family: str) -> tuple[Path, str | list[str] | None, list[dict[str, Any]]]:
     output_path = capture_dir / f"{family}.json"
     if not output_path.is_file():
         return output_path, None, []
@@ -243,13 +248,16 @@ def _worker_capture_command(capture_dir: Path, family: str) -> tuple[Path, str |
         finding = {"severity": "blocker", "family": family, "message": f"worker command capture could not be loaded: {exc}", "evidence": [str(output_path)]}
         return output_path, None, [finding]
     metadata = payload.get("metadata")
+    actual_argv = metadata.get("command_argv") if isinstance(metadata, dict) else None
+    if isinstance(actual_argv, list) and actual_argv and all(isinstance(argument, str) for argument in actual_argv):
+        return output_path, actual_argv, []
     actual_command = metadata.get("command") if isinstance(metadata, dict) else None
     return output_path, actual_command if isinstance(actual_command, str) and actual_command.strip() else None, []
 
 
 def _compare_worker_command(
     family: str,
-    actual_command: str,
+    actual_command: str | list[str],
     label: str,
     rows: dict[str, dict[str, Any]],
     source_path: Path,

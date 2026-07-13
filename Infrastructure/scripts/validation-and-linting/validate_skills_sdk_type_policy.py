@@ -34,6 +34,8 @@ DURATION_FIELD_NAMES = frozenset(
         "cooldown_seconds",
     }
 )
+_TOKEN_ALPHABET_PATTERNS = {"lowercase_ascii_alphanumeric": "[a-z0-9]"}
+_BRANDED_PREFIX_PATTERN = r"[a-z][a-z0-9]{0,15}"
 
 
 @dataclass(frozen=True)
@@ -103,6 +105,17 @@ def _identity_contract_details(
     expected_pattern = id_schema_payload.get("pattern") if isinstance(id_schema_payload, dict) else None
     if not isinstance(expected_pattern, str):
         return [PolicyIssue("type_policy_invalid", "branded ID schema must declare a string pattern", id_schema_path)]
+    canonical_pattern = _canonical_branded_id_pattern(id_contract)
+    if isinstance(canonical_pattern, PolicyIssue):
+        return [canonical_pattern]
+    if expected_pattern != canonical_pattern:
+        return [
+            PolicyIssue(
+                "type_policy_invalid",
+                "branded ID schema pattern must match the declared alphabet and token-length contract",
+                id_schema_path,
+            )
+        ]
     brands = id_contract.get("brands") if isinstance(id_contract.get("brands"), dict) else {}
     legacy_patterns = (
         id_contract.get("legacy_compatibility_patterns")
@@ -110,6 +123,18 @@ def _identity_contract_details(
         else {}
     )
     return expected_pattern, brands, legacy_patterns
+
+
+def _canonical_branded_id_pattern(id_contract: dict[str, object]) -> str | PolicyIssue:
+    alphabet = id_contract.get("token_alphabet")
+    token_pattern = _TOKEN_ALPHABET_PATTERNS.get(alphabet) if isinstance(alphabet, str) else None
+    minimum = id_contract.get("minimum_token_length")
+    maximum = id_contract.get("maximum_token_length")
+    if token_pattern is None or not isinstance(minimum, int) or isinstance(minimum, bool) or not isinstance(maximum, int) or isinstance(maximum, bool):
+        return PolicyIssue("type_policy_invalid", "id_contract must declare a supported token alphabet and integer token lengths", POLICY_PATH)
+    if minimum < 1 or maximum < minimum:
+        return PolicyIssue("type_policy_invalid", "id_contract token lengths must define a positive inclusive range", POLICY_PATH)
+    return f"^{_BRANDED_PREFIX_PATTERN}_{token_pattern}{{{minimum},{maximum}}}$"
 
 
 def _walk_schema_identity(

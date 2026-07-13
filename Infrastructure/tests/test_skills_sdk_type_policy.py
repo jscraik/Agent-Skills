@@ -81,6 +81,32 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
             )
         self.assertIn("unbranded_identity_schema", {issue.code for issue in issues})
 
+    def test_permissive_branded_id_schema_fails_policy_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text(
+                (REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            id_schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json"
+            id_schema_path.parent.mkdir(parents=True, exist_ok=True)
+            branded_schema = json.loads(
+                (REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/branded-id.v1.schema.json").read_text(encoding="utf-8")
+            )
+            branded_schema["pattern"] = "^.*$"
+            id_schema_path.write_text(json.dumps(branded_schema), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/conditional.schema.json"
+            schema_path.write_text(
+                json.dumps({"type": "object", "properties": {"trace_id": {"type": "string", "pattern": "^tr_[a-z0-9]{12,32}$"}}}),
+                encoding="utf-8",
+            )
+
+            issues = self.validator.validate_paths(temp_root, ("Infrastructure/config/schemas/skills-sdk/conditional.schema.json",))
+
+        self.assertIn("type_policy_invalid", {issue.code for issue in issues})
+
     def test_conditional_identity_requires_brand_and_string_type(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
