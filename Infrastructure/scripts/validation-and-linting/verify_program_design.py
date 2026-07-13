@@ -99,6 +99,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Git revision used as the pre-change baseline; defaults to the merge-base with the PR base.",
     )
+    parser.add_argument(
+        "--staged-source",
+        action="store_true",
+        help="Read staged index blobs for staged paths; use only for staged pre-commit validation.",
+    )
     return parser.parse_args()
 
 
@@ -169,7 +174,9 @@ def _boolean_default_findings(
     defaults: list[ast.expr | None],
 ) -> list[Finding]:
     findings: list[Finding] = []
-    for argument, default in zip(arguments, defaults, strict=True):
+    if len(arguments) != len(defaults):
+        raise ValueError("argument and default lists must have the same length")
+    for argument, default in zip(arguments, defaults):
         if isinstance(default, ast.Constant) and isinstance(default.value, bool):
             findings.append(
                 Finding(
@@ -215,6 +222,8 @@ def _target_names(node: ast.AST) -> list[str]:
 def _is_mutable_value(value: ast.expr | None) -> bool:
     if isinstance(value, MUTABLE_VALUE_NODES):
         return True
+    if isinstance(value, ast.Tuple):
+        return any(_is_mutable_value(element) for element in value.elts)
     return (
         isinstance(value, ast.Call)
         and isinstance(value.func, ast.Name)
@@ -358,9 +367,9 @@ def _staged_paths() -> frozenset[str]:
     return frozenset(line for line in result.stdout.splitlines() if line)
 
 
-def _current_source_text(path: Path) -> str:
+def _current_source_text(path: Path, *, staged_source: bool = False) -> str:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath not in _staged_paths():
+    if not staged_source or relpath not in _staged_paths():
         return path.read_text(encoding="utf-8")
     result = subprocess.run(
         ["git", "show", f":{relpath}"],
@@ -509,7 +518,7 @@ def _check_source(
     return issues
 
 
-def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
+def _changed_paths(changed_files: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
     if not changed_files:
         tracked = subprocess.run(
             ["git", "ls-files"],
@@ -534,7 +543,7 @@ def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
         source_text = None
         if path.is_file() and not normalized.endswith((".py", ".pyw")):
             try:
-                source_text = _current_source_text(path)
+                source_text = _current_source_text(path, staged_source=staged_source)
             except UnicodeDecodeError:
                 source_text = ""
         if path.is_file() and _is_production_python(normalized, path=path, source_text=source_text):
@@ -560,17 +569,21 @@ def _default_baseline_ref() -> str | None:
 
 
 def _scan_paths(
-    changed_files: tuple[str, ...], baseline_ref: str, max_public_parameters: int
+    changed_files: tuple[str, ...],
+    baseline_ref: str,
+    max_public_parameters: int,
+    *,
+    staged_source: bool,
 ) -> tuple[int, list[str]]:
     issues: list[str] = []
-    paths = _changed_paths(changed_files)
+    paths = _changed_paths(changed_files, staged_source=staged_source)
     for path in paths:
         relpath = path.relative_to(REPO_ROOT).as_posix()
         baseline_text = _git_revision_text(path, baseline_ref)
         issues.extend(
             _check_source(
                 relpath,
-                _current_source_text(path),
+                _current_source_text(path, staged_source=staged_source),
                 baseline_text,
                 max_public_parameters=max_public_parameters,
             )
@@ -604,6 +617,7 @@ def main() -> int:
             changed_files,
             baseline_ref,
             max(1, int(args.max_public_parameters)),
+            staged_source=args.staged_source,
         )
     except BaselineUnavailable as exc:
         print(f"Program design verification blocked: {exc}")

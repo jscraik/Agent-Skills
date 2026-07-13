@@ -96,6 +96,26 @@ def test_lint_changed_python_files_run_program_design() -> None:
         assert changed_file in args
 
 
+def test_staged_source_forwards_only_to_program_design() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        proc = repo.run(
+            "--persistent",
+            "--scope",
+            "lint",
+            "--staged-source",
+            "--changed-files",
+            "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        )
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        program_design_args = repo.recorded_args_for(
+            "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
+        )
+        assert program_design_args is not None
+        assert "--staged-source" in program_design_args
+
+
 def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
     with TemporaryDirectory() as tmpdir:
         repo = FakeRepo(Path(tmpdir))

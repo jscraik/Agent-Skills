@@ -34,6 +34,11 @@ class TestProgramDesign(unittest.TestCase):
         )
         self.assertIn("publish public interface is too wide", "\n".join(issues))
 
+    def test_boolean_default_findings_require_aligned_arguments(self) -> None:
+        validator = _load_validator()
+        with self.assertRaises(ValueError):
+            validator._boolean_default_findings("run", [], [None])
+
     def test_existing_wide_interface_is_ratchet_only(self) -> None:
         validator = _load_validator()
         source = "def publish(a, b, c, d, e, f):\n    return None\n"
@@ -51,6 +56,17 @@ class TestProgramDesign(unittest.TestCase):
         self.assertIn("broad exception handler", rendered)
         self.assertIn("global statement", rendered)
         self.assertIn("module mutable state", rendered)
+
+    def test_tuple_unpacked_mutable_state_is_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "cache, items = {}, []\n",
+            "",
+        )
+        rendered = "\n".join(issues)
+        self.assertIn("module mutable state cache", rendered)
+        self.assertIn("module mutable state items", rendered)
 
     def test_uppercase_mutable_state_is_rejected(self) -> None:
         validator = _load_validator()
@@ -274,11 +290,26 @@ class Public:
         staged_source = mock.Mock(returncode=0, stdout="def run(value):\n    return value\n", stderr="")
 
         with mock.patch.object(validator.subprocess, "run", side_effect=[staged_listing, staged_source]) as run:
-            source = validator._current_source_text(validator.REPO_ROOT / "Infrastructure/scripts/example.py")
+            source = validator._current_source_text(
+                validator.REPO_ROOT / "Infrastructure/scripts/example.py",
+                staged_source=True,
+            )
 
         self.assertEqual(source, staged_source.stdout)
         self.assertIn("--cached", run.call_args_list[0].args[0])
         self.assertEqual(run.call_args_list[1].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
+
+    def test_current_source_text_uses_worktree_outside_staged_lane(self) -> None:
+        validator = _load_validator()
+        validator._staged_paths.cache_clear()
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example.py"
+        with mock.patch.object(Path, "read_text", return_value="worktree source") as read_text:
+            with mock.patch.object(validator.subprocess, "run") as run:
+                source = validator._current_source_text(path)
+
+        self.assertEqual(source, "worktree source")
+        read_text.assert_called_once_with(encoding="utf-8")
+        run.assert_not_called()
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
