@@ -533,7 +533,10 @@ def _changed_paths(changed_files: tuple[str, ...]) -> list[Path]:
             continue
         source_text = None
         if path.is_file() and not normalized.endswith((".py", ".pyw")):
-            source_text = _current_source_text(path)
+            try:
+                source_text = _current_source_text(path)
+            except UnicodeDecodeError:
+                source_text = ""
         if path.is_file() and _is_production_python(normalized, path=path, source_text=source_text):
             paths.append(path)
     return sorted(set(paths))
