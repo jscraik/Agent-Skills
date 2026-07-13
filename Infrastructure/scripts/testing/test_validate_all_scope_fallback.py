@@ -99,7 +99,7 @@ def test_lint_changed_python_files_run_program_design() -> None:
 def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
     with TemporaryDirectory() as tmpdir:
         repo = FakeRepo(Path(tmpdir))
-        changed_file = "Plugins/example/scripts/run.pyw"
+        changed_file = "Plugins/example/scripts/run"
         entrypoint = repo.root / changed_file
         entrypoint.parent.mkdir(parents=True, exist_ok=True)
         entrypoint.write_text("#!/usr/bin/env python3\n", encoding="utf-8")

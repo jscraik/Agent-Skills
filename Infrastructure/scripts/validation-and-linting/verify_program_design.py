@@ -27,6 +27,7 @@ from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 
@@ -112,7 +113,7 @@ def _is_python_entrypoint(path: Path) -> bool:
 def _is_production_python(relpath: str, *, path: Path | None = None) -> bool:
     if not relpath.startswith(PRODUCTION_PREFIXES) or relpath.startswith("Plugins/cache/"):
         return False
-    if not relpath.endswith(".py") and (path is None or not _is_python_entrypoint(path)):
+    if not relpath.endswith((".py", ".pyw")) and (path is None or not _is_python_entrypoint(path)):
         return False
     parts = set(Path(relpath).parts)
     if parts & EXCLUDED_PARTS:
@@ -314,9 +315,12 @@ def _validate_baseline_ref(revision: str) -> None:
         raise BaselineUnavailable(f"baseline revision {revision!r} is unavailable: {detail}")
 
 
-def _baseline_path(relpath: str, revision: str) -> str:
+@lru_cache(maxsize=8)
+def _rename_map(revision: str, *, staged: bool) -> dict[str, str]:
+    command = ["git", "diff", "--find-renames", "--name-status"]
+    command.extend(["--cached", revision] if staged else [revision, "HEAD"])
     result = subprocess.run(
-        ["git", "diff", "--find-renames", "--name-status", revision, "HEAD"],
+        command,
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -325,11 +329,19 @@ def _baseline_path(relpath: str, revision: str) -> str:
     if result.returncode != 0:
         detail = result.stderr.strip() or "rename map could not be inspected"
         raise BaselineUnavailable(f"baseline rename lookup failed: {detail}")
+    mapping: dict[str, str] = {}
     for line in result.stdout.splitlines():
         fields = line.split("\t")
-        if len(fields) >= 3 and fields[0].startswith("R") and fields[2] == relpath:
-            return fields[1]
-    return relpath
+        if len(fields) >= 3 and fields[0].startswith("R"):
+            mapping[fields[2]] = fields[1]
+    return mapping
+
+
+def _baseline_path(relpath: str, revision: str) -> str:
+    staged_path = _rename_map(revision, staged=True).get(relpath)
+    if staged_path:
+        return staged_path
+    return _rename_map(revision, staged=False).get(relpath, relpath)
 
 
 def _git_revision_text(path: Path, revision: str) -> str | None:

@@ -538,6 +538,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=lint
 
@@ -547,6 +549,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=typecheck
 
@@ -556,6 +560,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.12"
@@ -570,6 +576,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=audit
 
@@ -579,6 +587,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.12"

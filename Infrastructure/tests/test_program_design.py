@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
 from types import ModuleType
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -223,11 +225,30 @@ def outer():
         with self.assertRaises(validator.BaselineUnavailable):
             validator._validate_baseline_ref("not-a-real-revision")
 
+    def test_baseline_path_uses_cached_staged_rename_map(self) -> None:
+        validator = _load_validator()
+        validator._rename_map.cache_clear()
+        result = mock.Mock(returncode=0, stdout="R100\told.py\tnew.py\n", stderr="")
+
+        with mock.patch.object(validator.subprocess, "run", return_value=result) as run:
+            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
+            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
+
+        self.assertEqual(run.call_count, 1)
+        self.assertIn("--cached", run.call_args.args[0])
+
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
         with self.subTest("python shebang"):
             path = REPO_ROOT / "Infrastructure" / "bin" / "ask"
             self.assertTrue(validator._is_production_python("Infrastructure/bin/ask", path=path))
+
+    def test_pyw_without_shebang_is_selected(self) -> None:
+        validator = _load_validator()
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pyw", encoding="utf-8") as handle:
+            handle.write("# generated fixture\n")
+            handle.flush()
+            self.assertTrue(validator._is_production_python("Plugins/example/scripts/run.pyw", path=Path(handle.name)))
 
 
 if __name__ == "__main__":
