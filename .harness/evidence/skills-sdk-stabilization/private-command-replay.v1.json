@@ -452,12 +452,15 @@
       "capability_id": "trust_store",
       "command": "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_trust_decide"
       ],
       "execution_id": "sha256:561432e2feb40f19c1e01b82a74a61b9281ba397934a667e1cc0504829e94798",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [
