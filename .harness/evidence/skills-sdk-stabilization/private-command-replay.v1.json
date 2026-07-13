@@ -814,12 +814,15 @@
       "capability_id": "capability_evidence",
       "command": "./bin/ask sdk evidence verify --scope capability-matrix --json --robot",
       "evidence": [
-        "deny_by_default"
+        "robot_receipt:valid_envelope",
+        "robot_status:success",
+        "metadata_keys:command,correction_note,next_steps,version",
+        "data_keys:skills_sdk_capability_evidence"
       ],
       "execution_id": "sha256:d5f1cf719574ef85fa8923d727fa5e315d0c42de5f696db63a82c4aac5df7585",
-      "exit_code": null,
-      "reason": "Command is not on the exact private stabilization read-only allowlist.",
-      "status": "blocked_unsafe"
+      "exit_code": 0,
+      "reason": "Exact allowlisted local read-only command returned a valid success receipt.",
+      "status": "executed_pass"
     },
     {
       "argv": [

@@ -27,6 +27,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "trust", "decide", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--decision", "trust", "--reason", "fixture passed local checks", "--owner", "skills-sdk-tests", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "sandbox", "validate", "--profile", "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json", "--json", "--robot"),
     ("./bin/ask", "sdk", "determinism", "audit", "--scope", "skills", "--limit", "10", "--json", "--robot"),
+    ("./bin/ask", "sdk", "evidence", "verify", "--scope", "capability-matrix", "--json", "--robot"),
     ("./bin/ask", "skills", "doctor", "Skills/agent-ops/simplify", "--json", "--robot"),
     ("./bin/ask", "sdk", "check", "Skills/agent-ops/simplify", "--json", "--robot"),
     ("./bin/ask", "sdk", "ir", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
