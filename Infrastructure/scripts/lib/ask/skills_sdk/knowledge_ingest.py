@@ -9,7 +9,6 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any
-
 from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
 
 
@@ -40,35 +39,10 @@ def build_knowledge_ingest(
     run_proof: bool = False,
     preflight_security: bool = True,
 ) -> dict[str, Any]:
-    extraction_root = Path(extraction).expanduser().resolve()
-    skill_dir = _resolve_skill_dir(repo_root, skill)
-    source_files = _collect_reference_files(extraction_root)
-    plan = _load_yaml(extraction_root / "extraction-plan.yaml", label="extraction-plan.yaml")
-    demand = _load_yaml(extraction_root / "knowledge-demand.yaml", label="knowledge-demand.yaml")
-    vendored_demand = _load_yaml(
-        extraction_root / "references" / "knowledge-demand.yaml",
-        label="references/knowledge-demand.yaml",
-    )
-    manifest = _load_yaml(
-        extraction_root / "references" / "knowledge-capsule.manifest.yaml",
-        label="references/knowledge-capsule.manifest.yaml",
-    )
-
-    skill_name = _skill_name(skill_dir / "SKILL.md")
-    findings: list[str] = []
-    _validate_skill_identity(
-        skill_name=skill_name,
-        skill_rel=_repo_relative(repo_root, skill_dir),
-        plan=plan,
-        demand=demand,
-        manifest=manifest,
-        findings=findings,
-    )
-    _validate_runtime_policy(demand, findings, label="knowledge-demand")
-    _validate_runtime_policy(vendored_demand, findings, label="references/knowledge-demand")
-    if vendored_demand != demand:
-        findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
-    _validate_source_files(extraction_root, source_files, findings)
+    context = _prepare_knowledge_ingest(repo_root, extraction, skill)
+    extraction_root, skill_dir, source_files = (context[key] for key in ("extraction_root", "skill_dir", "source_files"))
+    manifest = context["manifest"]
+    findings = context["findings"]
     preflight = (
         _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files, manifest=manifest)
         if preflight_security and not findings
@@ -76,55 +50,10 @@ def build_knowledge_ingest(
     )
     if preflight and preflight["status"] != "pass":
         findings.append("staged_security_gate_failed")
-
-    copied: list[dict[str, Any]] = []
-    eval_routes = _eval_reference_routes(extraction_root, source_files)
-    for source_file in source_files:
-        relative = source_file.relative_to(extraction_root).as_posix()
-        target = skill_dir / relative
-        copied.append(
-            {
-                "source": relative,
-                "target": _repo_relative(repo_root, target),
-                "sha256": _sha256(source_file),
-                "bytes": source_file.stat().st_size,
-                "action": "write" if apply else "preview",
-            }
-        )
-
-    receipt: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
-        "status": "blocked" if findings else ("applied" if apply else "preview"),
-        "owner_boundary": {
-            "producer": "KnowledgeOS",
-            "consumer": "Skills SDK",
-            "runtime_dependency": "vendored_skill_references_only",
-        },
-        "extraction": {
-            "path": str(extraction_root),
-            "schema_version": plan.get("schema_version"),
-            "upstream_packs": plan.get("upstream_packs") or [],
-        },
-        "skill": {
-            "name": skill_name,
-            "path": _repo_relative(repo_root, skill_dir),
-        },
-        "copied_files": copied,
-        "routing_updates": _routing_updates(repo_root, skill_dir, apply=apply),
-        "validation_commands": [
-            f"./bin/ask skills audit {_repo_relative(repo_root, skill_dir)} --level strict --json --robot",
-            f"./bin/ask skills package verify {_repo_relative(repo_root, skill_dir)} --json --robot",
-        ],
-        "proof_results": [],
-        "staged_preflight": preflight,
-        "findings": findings,
-    }
-    if findings:
+    receipt = _build_knowledge_receipt(repo_root, context, preflight, apply=apply)
+    if findings or not apply:
         return receipt
-    if not apply:
-        return receipt
-
-    _apply_knowledge_ingest(skill_dir, extraction_root, source_files, eval_routes=eval_routes, manifest=manifest)
+    _apply_knowledge_ingest(skill_dir, extraction_root, source_files, eval_routes=context["eval_routes"], manifest=manifest)
     if run_proof:
         receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
         if any(item["status"] != "pass" for item in receipt["proof_results"]):
@@ -132,24 +61,97 @@ def build_knowledge_ingest(
     return receipt
 
 
-def _routing_updates(repo_root: Path, skill_dir: Path, *, apply: bool) -> list[dict[str, str]]:
+def _prepare_knowledge_ingest(repo_root: Path, extraction: str, skill: str) -> dict[str, Any]:
+    extraction_root = Path(extraction).expanduser().resolve()
+    skill_dir = _resolve_skill_dir(repo_root, skill)
+    source_files = _collect_reference_files(extraction_root)
+    plan = _load_yaml(extraction_root / "extraction-plan.yaml", label="extraction-plan.yaml")
+    demand = _load_yaml(extraction_root / "knowledge-demand.yaml", label="knowledge-demand.yaml")
+    vendored_demand = _load_yaml(extraction_root / "references/knowledge-demand.yaml", label="references/knowledge-demand.yaml")
+    manifest = _load_yaml(extraction_root / "references/knowledge-capsule.manifest.yaml", label="references/knowledge-capsule.manifest.yaml")
+    skill_name = _skill_name(skill_dir / "SKILL.md")
+    findings: list[str] = []
+    _validate_skill_identity(skill_name=skill_name, skill_rel=_repo_relative(repo_root, skill_dir), plan=plan, demand=demand, manifest=manifest, findings=findings)
+    _validate_runtime_policy(demand, findings, label="knowledge-demand")
+    _validate_runtime_policy(vendored_demand, findings, label="references/knowledge-demand")
+    if vendored_demand != demand:
+        findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
+    _validate_source_files(extraction_root, source_files, findings)
+    return {
+        "extraction_root": extraction_root,
+        "skill_dir": skill_dir,
+        "source_files": source_files,
+        "plan": plan,
+        "manifest": manifest,
+        "skill_name": skill_name,
+        "eval_routes": _eval_reference_routes(extraction_root, source_files),
+        "findings": findings,
+    }
+
+
+def _build_knowledge_receipt(
+    repo_root: Path, context: dict[str, Any], preflight: dict[str, Any] | None, *, apply: bool
+) -> dict[str, Any]:
+    extraction_root = context["extraction_root"]
+    skill_dir = context["skill_dir"]
+    copied = _copied_files(repo_root, skill_dir, extraction_root, context["source_files"], apply=apply)
+    skill_path = _repo_relative(repo_root, skill_dir)
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "status": "blocked" if context["findings"] else ("applied" if apply else "preview"),
+        "owner_boundary": {
+            "producer": "KnowledgeOS",
+            "consumer": "Skills SDK",
+            "runtime_dependency": "vendored_skill_references_only",
+        },
+        "extraction": {
+            "path": str(extraction_root),
+            "schema_version": context["plan"].get("schema_version"),
+            "upstream_packs": context["plan"].get("upstream_packs") or [],
+        },
+        "skill": {
+            "name": context["skill_name"],
+            "path": skill_path,
+        },
+        "mutation_performed": apply,
+        "copied_files": copied,
+        "routing_updates": _routing_updates(repo_root, skill_dir, apply=apply),
+        "validation_commands": [
+            f"./bin/ask skills audit {skill_path} --level strict --json --robot",
+            f"./bin/ask skills package verify {skill_path} --json --robot",
+        ],
+        "proof_results": [],
+        "staged_preflight": preflight,
+        "findings": context["findings"],
+    }
+
+
+def _copied_files(
+    repo_root: Path, skill_dir: Path, extraction_root: Path, source_files: list[Path], *, apply: bool
+) -> list[dict[str, Any]]:
     action = "write" if apply else "preview"
     return [
         {
-            "path": _repo_relative(repo_root, skill_dir / "SKILL.md"),
-            "description": "knowledge capsule progressive-disclosure routing",
+            "source": source_file.relative_to(extraction_root).as_posix(),
+            "target": _repo_relative(repo_root, skill_dir / source_file.relative_to(extraction_root)),
+            "sha256": _sha256(source_file),
+            "bytes": source_file.stat().st_size,
             "action": action,
-        },
-        {
-            "path": _repo_relative(repo_root, skill_dir / "references" / "source-context.yaml"),
-            "description": "source-context entries for vendored KnowledgeOS capsule references",
-            "action": action,
-        },
-        {
-            "path": _repo_relative(repo_root, skill_dir / "references" / "knowledge-capsule-routing.md"),
-            "description": "first-party routing index for vendored KnowledgeOS capsules",
-            "action": action,
-        },
+        }
+        for source_file in source_files
+    ]
+
+
+def _routing_updates(repo_root: Path, skill_dir: Path, *, apply: bool) -> list[dict[str, str]]:
+    action = "write" if apply else "preview"
+    entries = (
+        ("SKILL.md", "knowledge capsule progressive-disclosure routing"),
+        ("references/source-context.yaml", "source-context entries for vendored KnowledgeOS capsule references"),
+        ("references/knowledge-capsule-routing.md", "first-party routing index for vendored KnowledgeOS capsules"),
+    )
+    return [
+        {"path": _repo_relative(repo_root, skill_dir / path), "description": description, "action": action}
+        for path, description in entries
     ]
 
 
@@ -175,18 +177,8 @@ def _update_knowledge_routing_files(
     manifest: dict[str, Any],
 ) -> None:
     _update_skill_routing(_safe_skill_package_path(skill_dir, Path("SKILL.md"), label="skill routing"), eval_routes=eval_routes)
-    _update_source_context(
-        _safe_skill_package_path(skill_dir, Path("references/source-context.yaml"), label="source context"),
-        eval_routes=eval_routes,
-    )
-    _update_capsule_routing_index(
-        _safe_skill_package_path(
-            skill_dir,
-            Path("references/knowledge-capsule-routing.md"),
-            label="capsule routing index",
-        ),
-        manifest=manifest,
-    )
+    _update_source_context(_safe_skill_package_path(skill_dir, Path("references/source-context.yaml"), label="source context"), eval_routes=eval_routes)
+    _update_capsule_routing_index(_safe_skill_package_path(skill_dir, Path("references/knowledge-capsule-routing.md"), label="capsule routing index"), manifest=manifest)
 
 
 def _safe_skill_package_path(skill_dir: Path, relative_path: Path, *, label: str) -> Path:
@@ -676,11 +668,22 @@ def _preflight_security_gate(
         eval_routes = _eval_reference_routes(extraction_root, source_files)
         _update_knowledge_routing_files(staged_skill, eval_routes=eval_routes, manifest=manifest)
         gate_script = _resolve_skill_gate_script(repo_root)
-        python_command = [sys.executable]
-        command = [*python_command, str(gate_script), str(staged_skill), *SECURITY_GATE_FLAGS]
+        runner = _resolve_infrastructure_python(repo_root)
+        command = [
+            *(runner if runner is not None else [sys.executable]),
+            str(gate_script),
+            str(staged_skill),
+            *SECURITY_GATE_FLAGS,
+        ]
         process = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+        command_label = (
+            "bash Infrastructure/scripts/run-infrastructure-python.sh "
+            "Plugins/skill-factory/scripts/skill-builder/skill_gate.py <staged-skill>"
+            if runner is not None
+            else "python skill_gate.py <staged-skill>"
+        )
         return {
-            "command": " ".join([*python_command, "skill_gate.py", "<staged-skill>", *SECURITY_GATE_FLAGS]),
+            "command": " ".join([command_label, *SECURITY_GATE_FLAGS]),
             "status": "pass" if process.returncode == 0 else "fail",
             "exit_code": process.returncode,
             "stdout_excerpt": process.stdout[:4000],
@@ -699,6 +702,16 @@ def _resolve_skill_gate_script(repo_root: Path) -> Path:
         if module_local.is_file():
             return module_local
     raise ValueError("skill-factory security gate script is missing.")
+
+
+def _resolve_infrastructure_python(repo_root: Path) -> list[str] | None:
+    for candidate in (
+        repo_root / "Infrastructure/scripts/run-infrastructure-python.sh",
+        Path(__file__).resolve().parents[5] / "Infrastructure/scripts/run-infrastructure-python.sh",
+    ):
+        if candidate.is_file():
+            return ["bash", str(candidate)]
+    return None
 
 
 def _sha256(path: Path) -> str:

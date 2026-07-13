@@ -68,7 +68,7 @@ REQUIRED_NO_WRITE_KEYS = {
     "install": frozenset({"mutation_performed"}),
     "rollback": frozenset({"mutation_performed"}),
     "uninstall": frozenset({"mutation_performed"}),
-    "knowledge": frozenset(),
+    "knowledge": frozenset({"mutation_performed"}),
 }
 PLACEHOLDER_ROOTS = ("/tmp/sample-project", "/path/to/")
 
@@ -126,6 +126,21 @@ def _capture_no_write_findings(receipt: dict[str, Any], family: str, output_path
         findings.append({"severity": "blocker", "family": family, "message": f"nested receipt omits explicit no-write fields: {', '.join(missing)}", "evidence": [str(output_path)]})
     if non_false:
         findings.append({"severity": "blocker", "family": family, "message": f"nested receipt no-write fields are not false: {', '.join(non_false)}", "evidence": [str(output_path)]})
+    if family == "knowledge":
+        findings.extend(_knowledge_no_write_findings(receipt, output_path))
+    return findings
+
+
+def _knowledge_no_write_findings(receipt: dict[str, Any], output_path: Path) -> list[dict[str, Any]]:
+    evidence = [str(output_path)]
+    findings: list[dict[str, Any]] = []
+    if not isinstance(receipt.get("proof_results"), list):
+        findings.append({"severity": "blocker", "family": "knowledge", "message": "knowledge receipt must include proof_results evidence", "evidence": evidence})
+    copied_files = receipt.get("copied_files")
+    if not isinstance(copied_files, list) or not copied_files or any(
+        not isinstance(item, dict) or item.get("action") != "preview" for item in copied_files
+    ):
+        findings.append({"severity": "blocker", "family": "knowledge", "message": "knowledge receipt copied_files must prove preview-only actions", "evidence": evidence})
     return findings
 
 

@@ -53,6 +53,9 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
         )
         self.assertEqual(self.validator.validate_paths(REPO_ROOT, paths), ())
 
+    def test_full_policy_surface_includes_policy_json(self) -> None:
+        self.assertIn(self.validator.POLICY_PATH, self.validator._policy_surface_paths(REPO_ROOT))
+
     def test_unbranded_identity_schema_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
@@ -283,6 +286,30 @@ class TestSkillsSdkTypePolicy(unittest.TestCase):
                 target.write_text((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
             schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/new-duration.schema.json"
             schema_path.write_text(json.dumps({"type": "object", "properties": {"timeout_seconds": {"type": "number"}}}), encoding="utf-8")
+            issues = self.validator.validate_paths(temp_root, (str(schema_path.relative_to(temp_root)),))
+        self.assertIn("unitless_duration_schema_property", {issue.code for issue in issues})
+
+    def test_ref_backed_numeric_duration_schema_property_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_root = Path(tempdir)
+            policy_path = temp_root / self.validator.POLICY_PATH
+            policy_path.parent.mkdir(parents=True)
+            policy_path.write_text((REPO_ROOT / self.validator.POLICY_PATH).read_text(encoding="utf-8"), encoding="utf-8")
+            for filename in ("branded-id.v1.schema.json", "duration.v1.schema.json"):
+                target = temp_root / "Infrastructure/config/schemas/skills-sdk" / filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text((REPO_ROOT / target.relative_to(temp_root)).read_text(encoding="utf-8"), encoding="utf-8")
+            schema_path = temp_root / "Infrastructure/config/schemas/skills-sdk/ref-duration.schema.json"
+            schema_path.write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "properties": {"timeout_seconds": {"$ref": "#/$defs/seconds"}},
+                        "$defs": {"seconds": {"type": "integer"}},
+                    }
+                ),
+                encoding="utf-8",
+            )
             issues = self.validator.validate_paths(temp_root, (str(schema_path.relative_to(temp_root)),))
         self.assertIn("unitless_duration_schema_property", {issue.code for issue in issues})
 
