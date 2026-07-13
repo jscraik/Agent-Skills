@@ -17,7 +17,7 @@
       "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
       "Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py"
     ],
-    "artifact_ignore_policy": ".gitignore:/artifacts/reviews/sdk-review-handoff/ and /artifacts/agent-runs/",
+    "artifact_ignore_policy": ".gitignore:/artifacts/reviews/, /artifacts/agent-runs/, and the four .harness/artifacts/sdk-review-{plan,handoff,execute,verify}/ roots",
     "negative_fixture_tests": [
       "Infrastructure/tests/test_skills_sdk_review_execute.py::TestSkillsSdkReviewExecute::test_execution_rejects_stale_same_head_handoff_before_writing",
       "Infrastructure/tests/test_skills_sdk_review_verify.py::TestSkillsSdkReviewVerify::test_verification_rejects_stale_same_head_handoff"

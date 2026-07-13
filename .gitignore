@@ -152,6 +152,12 @@ Infrastructure/reports/data/candidates.json
 !.harness/quality/**
 !.harness/*.json
 
+# SDK review plan, handoff, execution, and verification receipts are generated runtime state.
+/.harness/artifacts/sdk-review-plan/
+/.harness/artifacts/sdk-review-handoff/
+/.harness/artifacts/sdk-review-execute/
+/.harness/artifacts/sdk-review-verify/
+
 # Local backups/patch leftovers
 *.bak
 *.bak.*
@@ -197,7 +203,7 @@ Infrastructure/artifacts/policy/
 /artifacts/reports/repo-surface/
 
 # Skills SDK review execution and bounded reviewer outputs are local runtime artifacts.
-/artifacts/reviews/sdk-review-handoff/
+/artifacts/reviews/
 /artifacts/agent-runs/
 
 # Validation evidence policy:
