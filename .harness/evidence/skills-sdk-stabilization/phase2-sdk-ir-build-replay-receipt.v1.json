@@ -127,27 +127,27 @@
   "runtime_observability": {
     "stale_node_checks": [
       {
-        "command": "pgrep -af 'node|node_reql'",
+        "command": "pgrep -af 'node|node_repl'",
         "status": "blocked",
         "evidence": "sysmon request failed with error: sysmond service not found; pgrep: Cannot get process list."
       },
       {
-        "command": "ps -Ao pid=,ppid=,stat=,etime=,command= | rg -i 'node(_reql)?|node_reql'",
+        "command": "ps -Ao pid=,ppid=,stat=,etime=,command= | rg -i 'node(_repl)?|node_repl'",
         "status": "blocked",
         "evidence": "zsh: operation not permitted: ps."
       },
       {
-        "command": "launchctl list | rg -i 'node(_reql)?|node_reql' || true",
+        "command": "launchctl list | rg -i 'node(_repl)?|node_repl' || true",
         "status": "pass",
         "evidence": "No matching launchd service rows were returned."
       },
       {
-        "command": "rg --files -g '*node_reql*' -g '*node*' .harness /tmp 2>/dev/null | rg -i '(^|/)(node|node_reql)(/|$)|node_reql' || true",
+        "command": "rg --files -g '*node_repl*' -g '*node*' .harness /tmp 2>/dev/null | rg -i '(^|/)(node|node_repl)(/|$)|node_repl' || true",
         "status": "pass_with_advisory",
-        "evidence": "No node_reql path was found; two generated temporary node wrapper files were observed under /tmp and no live-process evidence was available."
+        "evidence": "No node_repl path was found; two generated temporary node wrapper files were observed under /tmp and no live-process evidence was available."
       }
     ],
-    "claims_boundary": "Process-table visibility is blocked in this sandbox; no claim is made that the host has no stale Node or node_reql process."
+    "claims_boundary": "Process-table visibility is blocked in this sandbox; no claim is made that the host has no stale Node or node_repl process."
   },
   "claims_boundary": [
     "The exact SDK IR build command is covered by the private replay allowlist and emits a schema-valid local SkillIR receipt without mutation.",
