@@ -1,33 +1,33 @@
 {
   "schema_version": "skills-sdk.phase2-remaining-queue-after-signing-intent-receipt.v1",
-  "status": "bounded_local_pass",
-  "captured_at": "2026-07-13T08:20:00Z",
-  "base_head_sha": "ba4bc051d81bdc2c81946953eec62bce57c7280a",
+  "status": "bounded_local_pass_with_fixture_admission",
+  "captured_at": "2026-07-13T10:06:28Z",
+  "base_head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
   "latest_completed_checkpoint": {
-    "command": "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
-    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-signing-intent-fixture-replay-receipt.v1.json",
+    "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+    "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-handoff-fixture-admission-receipt.v1.json",
     "status": "executed_pass",
     "evidence": [
-      "skills-sdk.package-signing-intent.v1",
-      "package_digest_pinned:current",
-      "mutation_performed:false",
-      "signing_performed:false",
-      "artifact_written:false",
-      "stale_policy_negative:blocked"
+      "./bin/ask sdk review plan ... --receipt-out .harness/artifacts/sdk-review-plan/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
+      "./bin/ask sdk review handoff ... --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
+      "same_head:350bcd2c522ece35f0dc6063c52077e688401cd8",
+      "target_content_digest:7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
+      "plan_sha256:2147b7aac337b8aed99f118ff1d1fa5030d35e1c67bd280cbc5ae23ced9549b2",
+      "handoff_sha256:eb3c2b6cb128bb59abff418b63b58b931e71941234dfa274aee6d682b3328c8e"
     ]
   },
   "remaining_rows": [
     {
       "command": "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
-      "status": "blocked_missing_artifact",
-      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> fail (path missing)",
-      "nearest_safe_proof": "The exact argv remains deny-by-default; no review execution is admitted without a valid handoff fixture."
+      "status": "blocked_pending_artifact_materialization_authority",
+      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> pass (fixture admitted); ./bin/ask sdk review execute ... -> blocked (separate authority required for reviewer artifact materialization)",
+      "nearest_safe_proof": "The admitted handoff is receipt-backed and mutation-free; no reviewer output was created and review execution remains deny-by-default."
     },
     {
       "command": "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
-      "status": "blocked_missing_artifact",
-      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> fail (path missing)",
-      "nearest_safe_proof": "The exact argv remains deny-by-default; verification is not replayable against a missing handoff."
+      "status": "blocked_pending_artifact_materialization_authority",
+      "evidence": "test -f .harness/artifacts/sdk-review-handoff/simplify.json -> pass (fixture admitted); ./bin/ask sdk review verify ... -> blocked (separate authority required for reviewer artifact materialization)",
+      "nearest_safe_proof": "The admitted handoff is receipt-backed and mutation-free; verification is not claimed without reviewer artifact materialization authority."
     },
     {
       "command": "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
@@ -57,5 +57,5 @@
     "digest": "sha256:ccb10cda7d0aeec32f5792862f9e2835da944478ae5c6ca27a0da20213f19971"
   },
   "claims_boundary": "No review execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows.",
-  "next_gate": "Select the smallest genuinely read-only command only after checking whether a repository-owned review handoff fixture has been admitted; otherwise retain the first two rows as deny-by-default blockers."
+  "next_gate": "Obtain separate authority for review execute or review verify artifact materialization; until then retain both review rows as deny-by-default blockers and keep eval runner/judge rows blocked by evals-router policy."
 }

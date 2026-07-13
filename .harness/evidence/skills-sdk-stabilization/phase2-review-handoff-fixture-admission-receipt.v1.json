@@ -1,0 +1,101 @@
+{
+  "schema_version": "skills-sdk.phase2-review-handoff-fixture-admission-receipt.v1",
+  "artifact_type": "explicit_artifact_write_policy_receipt",
+  "status": "bounded_artifact_write_pass_with_fallback_review",
+  "captured_at": "2026-07-13T10:06:28Z",
+  "revision": {
+    "head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
+    "identity_command": "git rev-parse HEAD",
+    "worktree": "/private/tmp/agent-skills-emitter-reconcile",
+    "branch_state": "detached source commit; push target codex/skills-sdk-command-service-callers",
+    "draft_pr": "https://github.com/jscraik/Agent-Skills/pull/330"
+  },
+  "authorization": {
+    "policy_id": "skills-sdk.phase2.review-handoff-fixture-write.v1",
+    "authorization": "Jamie explicitly authorized admitting a repository-owned review-handoff fixture.",
+    "mutation_class": "repo_local_evidence_artifact_write",
+    "same_head_required": true,
+    "allowed_commands": [
+      "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
+      "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json --json --robot"
+    ],
+    "allowed_output_roots": [
+      ".harness/artifacts/sdk-review-plan/",
+      ".harness/artifacts/sdk-review-handoff/",
+      "artifacts/agent-runs/default-review-handoff-fixture-admission-postfix-fallback/"
+    ],
+    "disallowed_effects": [
+      "review execute",
+      "review verify",
+      "required reviewer artifact materialization",
+      "network or provider invocation",
+      "Tessl or CircleCI mutation",
+      "publication, installation, merge, or release claim"
+    ]
+  },
+  "fixture": {
+    "plan_path": ".harness/artifacts/sdk-review-plan/simplify.json",
+    "handoff_path": ".harness/artifacts/sdk-review-handoff/simplify.json",
+    "plan_sha256": "sha256:2147b7aac337b8aed99f118ff1d1fa5030d35e1c67bd280cbc5ae23ced9549b2",
+    "handoff_sha256": "sha256:eb3c2b6cb128bb59abff418b63b58b931e71941234dfa274aee6d682b3328c8e",
+    "plan_receipt_sha256": "sha256:4c3cb77bcf2e919382e0b98077584bbe198011c1571cb0c250e33baa43bb05a0",
+    "receipt_instance_id": "rp_21dqm5gyryz8",
+    "target": "Skills/agent-ops/simplify",
+    "target_content_digest": "sha256:7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
+    "head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
+    "receipt_flags": {
+      "plan_receipt_written": true,
+      "handoff_receipt_written": true,
+      "mutation_performed": false,
+      "network_accessed": false,
+      "provider_invoked": false,
+      "review_output_written": false
+    },
+    "admission_note": "The generated paths are repository-owned fixture locations and remain ignored runtime artifacts; this receipt binds their exact bytes to the source HEAD and target digest without promoting them into the commit."
+  },
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-admission-postfix-fallback/worker.json",
+      "finding": "The exact plan and handoff commands replayed with no findings and no review execution."
+    },
+    "fresh_qa": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-admission-postfix-fallback/qa.json",
+      "finding": "Focused replay tests, Ruff, modularity, and no-mutation boundaries passed for the admitted fixture."
+    },
+    "adversarial": {
+      "status": "pass",
+      "artifact": "artifacts/agent-runs/default-review-handoff-fixture-admission-postfix-fallback/adversarial.json",
+      "finding": "Canonical target digest parity was fixed and no blocking finding remained."
+    },
+    "child_runtime": {
+      "status": "blocked_validation",
+      "artifacts": [
+        "artifacts/agent-runs/default-review-handoff-fixture-postfix-worker/report.json",
+        "artifacts/agent-runs/default-review-handoff-fixture-postfix-qa/report.json",
+        "artifacts/agent-runs/default-review-handoff-fixture-postfix-adversarial/report.json"
+      ],
+      "reason": "The fresh app-server children did not emit complete independent evidence within the bounded retry; repo-native fallback supplied the three role reports."
+    }
+  },
+  "validation": [
+    "Command: ./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot -> pass (receipt_written=true; mutation_performed=false)",
+    "Command: ./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json --json --robot -> pass (receipt_written=true; mutation_performed=false)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_review_handoff.py tests/test_review_handoff_replay.py -> pass (24 passed)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_review_handoff_replay.py -k target_digest_matches_the_canonical_review_plan_contract -> fail (expected red TDD assertion before source fix; replay digest used repo-root-relative paths)",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/validation-and-linting/review_handoff_replay.py tests/test_review_handoff_replay.py -> pass",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/review_handoff_replay.py Infrastructure/tests/test_review_handoff_replay.py -> pass (1873 lines; max 1900)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass (findings=0)",
+    "Command: PYTHONPATH=Infrastructure/scripts/lib:Infrastructure/scripts/validation-and-linting python3 <canonical parity assertion> -> pass (plan, handoff, and replay target digests match; plan receipt hash matches handoff)",
+    "Command: test ! -e artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify -> pass (no review output files)",
+    "Command: git diff --check -> pass",
+    "Command: PREK_SKIP=validate-all /Users/jamiecraik/dev/agent-skills/.git/hooks/pre-commit -> pass"
+  ],
+  "claims_boundary": [
+    "This receipt proves only the explicitly authorized local admission of a receipt-backed review plan and handoff fixture at source HEAD 350bcd2c522ece35f0dc6063c52077e688401cd8.",
+    "It does not prove review execution, reviewer completion, review verification, CI, PR mergeability, resolved review threads, tracker updates, Foundry extraction, source admission, Tessl or CircleCI mutation, publication, installation, or release readiness.",
+    "Generated fixture and role-review artifacts are local evidence and remain excluded from the commit."
+  ],
+  "next_gate": "Obtain separate authority for review execute or review verify artifact materialization; until then retain both commands as deny-by-default blockers and do not start eval runner or judge execution."
+}

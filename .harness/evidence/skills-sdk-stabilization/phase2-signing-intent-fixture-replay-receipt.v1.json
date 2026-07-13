@@ -125,5 +125,5 @@
     "The receipt does not prove signing, key access, archive creation, installation, runtime immutability, registry publication, provider or cloud execution, hosted CI, or release readiness.",
     "Generated Worker, QA, and adversarial fallback artifacts are local evidence only and are intentionally excluded from the commit."
   ],
-  "next_gate": "Continue with the first remaining deny-by-default row only if a repository-owned review handoff fixture is admitted; otherwise preserve the exact review execute and review verify rows as blocked_missing_artifact."
+  "next_gate": "Repository-owned review handoff fixture admission is recorded at .harness/evidence/skills-sdk-stabilization/phase2-review-handoff-fixture-admission-receipt.v1.json; review execute and review verify remain blocked_pending_artifact_materialization_authority."
 }
