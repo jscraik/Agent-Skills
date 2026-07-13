@@ -35,6 +35,8 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
         self.assertEqual(findings, [])
 
     def _write_capture_dir(self, capture_dir: Path, *, mutation_family: str | None = None, missing_receipt_family: str | None = None) -> None:
+        selection = json.loads(SELECTION.read_text(encoding="utf-8"))
+        selected_commands = {row["family"]: row["command"] for row in selection["selected_preview_commands"]}
         for family in FAMILIES:
             key = EXPECTED_DATA_KEYS[family]
             receipt = {
@@ -48,7 +50,13 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
                 if family == mutation_family:
                     receipt["mutation_performed"] = True
                 body = {"preview" if family == "install" else "receipt": receipt}
-            payload = {"status": "success", "data": {key: body}}
+            payload = {
+                "status": "success",
+                "metadata": {
+                    "command": selected_commands[family].removeprefix("./bin/ask ").replace("'", "").replace('"', "")
+                },
+                "data": {key: body},
+            }
             (capture_dir / f"{family}.json").write_text(json.dumps(payload), encoding="utf-8")
             (capture_dir / f"{family}.exit").write_text("0\n", encoding="utf-8")
             (capture_dir / f"{family}.stderr").write_text("", encoding="utf-8")
@@ -57,13 +65,13 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             capture_dir = Path(temp_dir)
             self._write_capture_dir(capture_dir)
-            self.assertEqual(_worker_findings(capture_dir), [])
+            self.assertEqual(_worker_findings(capture_dir, ARTIFACT, SELECTION), [])
 
     def test_worker_review_rejects_mutation_and_missing_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             capture_dir = Path(temp_dir)
             self._write_capture_dir(capture_dir, mutation_family="trust", missing_receipt_family="install")
-            findings = _worker_findings(capture_dir)
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
             messages = [finding["message"] for finding in findings]
             self.assertTrue(any("mutation or external-access flag" in message for message in messages))
             self.assertTrue(any("nested receipt schema_version/status" in message for message in messages))
@@ -76,7 +84,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload = json.loads(payload_path.read_text(encoding="utf-8"))
             del payload["data"][EXPECTED_DATA_KEYS["eval"]]["receipt"]["network_accessed"]
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
-            findings = _worker_findings(capture_dir)
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
             self.assertTrue(any("omits explicit no-write fields" in finding["message"] for finding in findings))
 
     def test_worker_review_rejects_blocked_install_preview_receipt(self) -> None:
@@ -88,7 +96,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload["data"][EXPECTED_DATA_KEYS["install"]]["preview"]["status"] = "blocked"
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
 
-            findings = _worker_findings(capture_dir)
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
             self.assertTrue(any("nested receipt schema_version/status" in finding["message"] for finding in findings))
 
     def test_worker_review_rejects_wrong_family_receipt_schema(self) -> None:
@@ -100,7 +108,7 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             payload["data"][EXPECTED_DATA_KEYS["eval"]]["receipt"]["schema_version"] = "bogus.schema"
             payload_path.write_text(json.dumps(payload), encoding="utf-8")
 
-            findings = _worker_findings(capture_dir)
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
             self.assertTrue(any("nested receipt schema_version/status" in finding["message"] for finding in findings))
 
     def test_worker_review_accepts_family_specific_no_write_fields(self) -> None:
@@ -111,7 +119,18 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             receipt = knowledge_receipt["data"][EXPECTED_DATA_KEYS["knowledge"]]
             self.assertEqual(REQUIRED_NO_WRITE_KEYS["knowledge"], frozenset())
             self.assertNotIn("network_accessed", receipt)
-            self.assertEqual(_worker_findings(capture_dir), [])
+            self.assertEqual(_worker_findings(capture_dir, ARTIFACT, SELECTION), [])
+
+    def test_worker_review_rejects_capture_for_different_candidate_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "plugin.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            payload["metadata"]["command"] = "sdk plugin review Infrastructure/tests/fixtures/skills_sdk/other_skill --kind skill --preview --json --robot"
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
+            self.assertTrue(any("worker capture command does not match" in finding["message"] for finding in findings))
 
     def test_qa_review_accepts_candidate_and_focused_test(self) -> None:
         self.assertEqual(_qa_findings(ARTIFACT, SELECTION), [])

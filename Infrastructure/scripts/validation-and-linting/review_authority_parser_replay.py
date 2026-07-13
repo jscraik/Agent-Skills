@@ -163,8 +163,10 @@ def _capture_findings(capture_dir: Path, family: str) -> list[dict[str, Any]]:
     return findings
 
 
-def _worker_findings(capture_dir: Path) -> list[dict[str, Any]]:
-    return [finding for family in FAMILIES for finding in _capture_findings(capture_dir, family)]
+def _worker_findings(capture_dir: Path, artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
+    findings = [finding for family in FAMILIES for finding in _capture_findings(capture_dir, family)]
+    findings.extend(_worker_command_binding_findings(capture_dir, artifact_path, selection_path))
+    return findings
 
 
 def _row_findings(row: Any, artifact_path: Path) -> list[dict[str, Any]]:
@@ -211,6 +213,93 @@ def _command_argv(command: Any) -> list[str] | None:
     if argv and argv[0] == "ask":
         argv[0] = "./bin/ask"
     return argv
+
+
+def _normalized_command(command: Any) -> list[str] | None:
+    if not isinstance(command, str):
+        return None
+    argv = _command_argv(command.replace("'", "").replace('"', ""))
+    if argv and argv[0] == "./bin/ask":
+        return argv[1:]
+    return argv
+
+
+def _rows_by_family(payload: dict[str, Any], key: str) -> dict[str, dict[str, Any]]:
+    return {
+        row.get("family"): row
+        for row in payload.get(key, [])
+        if isinstance(row, dict) and isinstance(row.get("family"), str)
+    }
+
+
+def _worker_capture_command(capture_dir: Path, family: str) -> tuple[Path, str | None, list[dict[str, Any]]]:
+    output_path = capture_dir / f"{family}.json"
+    if not output_path.is_file():
+        return output_path, None, []
+    try:
+        payload = _load_json(output_path)
+    except (ValueError, json.JSONDecodeError, OSError) as exc:
+        finding = {"severity": "blocker", "family": family, "message": f"worker command capture could not be loaded: {exc}", "evidence": [str(output_path)]}
+        return output_path, None, [finding]
+    metadata = payload.get("metadata")
+    actual_command = metadata.get("command") if isinstance(metadata, dict) else None
+    return output_path, actual_command if isinstance(actual_command, str) and actual_command.strip() else None, []
+
+
+def _compare_worker_command(
+    family: str,
+    actual_command: str,
+    label: str,
+    rows: dict[str, dict[str, Any]],
+    source_path: Path,
+    output_path: Path,
+) -> list[dict[str, Any]]:
+    expected_row = rows.get(family)
+    expected_command = expected_row.get("command") if isinstance(expected_row, dict) else None
+    if not isinstance(expected_command, str) or not expected_command.strip():
+        return [{"severity": "blocker", "family": family, "message": f"{label} command is missing for worker binding", "evidence": [str(source_path)]}]
+    if _normalized_command(actual_command) == _normalized_command(expected_command):
+        return []
+    return [{"severity": "blocker", "family": family, "message": f"worker capture command does not match the {label} command", "evidence": [actual_command, expected_command, str(output_path)]}]
+
+
+def _worker_family_command_findings(
+    capture_dir: Path,
+    family: str,
+    candidate_rows: dict[str, dict[str, Any]],
+    selected_rows: dict[str, dict[str, Any]],
+    artifact_path: Path,
+    selection_path: Path,
+) -> list[dict[str, Any]]:
+    output_path, actual_command, findings = _worker_capture_command(capture_dir, family)
+    if findings or not output_path.is_file():
+        return findings
+    if actual_command is None:
+        return [{"severity": "blocker", "family": family, "message": "worker capture does not declare the executed command", "evidence": [str(output_path)]}]
+    for label, rows, source_path in (("candidate", candidate_rows, artifact_path), ("selected", selected_rows, selection_path)):
+        findings.extend(_compare_worker_command(family, actual_command, label, rows, source_path, output_path))
+    return findings
+
+
+def _worker_command_binding_findings(
+    capture_dir: Path,
+    artifact_path: Path,
+    selection_path: Path,
+) -> list[dict[str, Any]]:
+    try:
+        artifact = _load_json(artifact_path)
+        selection = _load_json(selection_path)
+    except (ValueError, json.JSONDecodeError, OSError) as exc:
+        return [{"severity": "blocker", "message": f"worker command binding inputs could not be loaded: {exc}", "evidence": [str(artifact_path), str(selection_path)]}]
+    candidate_rows = _rows_by_family(artifact, "commands")
+    selected_rows = _rows_by_family(selection, "selected_preview_commands")
+    return [
+        finding
+        for family in FAMILIES
+        for finding in _worker_family_command_findings(
+            capture_dir, family, candidate_rows, selected_rows, artifact_path, selection_path
+        )
+    ]
 
 
 def _row_binding_findings(rows: list[Any], selected: Any, artifact_path: Path, selection_path: Path) -> list[dict[str, Any]]:
@@ -368,7 +457,7 @@ def main() -> int:
     artifact_path = args.artifact if args.artifact.is_absolute() else ROOT / args.artifact
     selection_path = args.selection if args.selection.is_absolute() else ROOT / args.selection
     if args.role == "worker":
-        findings = _worker_findings(args.capture_dir)
+        findings = _worker_findings(args.capture_dir, artifact_path, selection_path)
     elif args.role == "qa":
         findings = _qa_findings(artifact_path, selection_path)
     else:

@@ -6,7 +6,7 @@
   "base_commit": "237e5a90a41f4cfc76962d696cfb1fd451e51f24",
   "source_selection_path": ".harness/evidence/handoff/skills-sdk-parser-families/authority-parser-replay-selection.json",
   "source_selection_schema": "skills-sdk.parser-family-authority-replay-selection.v1",
-  "source_tree_digest": "sha256:8bebdb457d5127f2fab8b34dd8886772779623cd1773a3b8089cf476bcdc189a",
+  "source_tree_digest": "sha256:dac098dc9ab78f90d09c4f3f1a9b2434aa3ed5e22710130a770a4ad9b44fe5ff",
   "command_count": 8,
   "commands": [
     {
