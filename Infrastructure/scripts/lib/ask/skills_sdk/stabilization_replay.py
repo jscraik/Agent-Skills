@@ -19,6 +19,13 @@ STAGE_SHAPE_VALIDATOR_ARGV = (
     "Infrastructure/scripts/run-infrastructure-python.sh",
     "scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
 )
+STAGE_SHAPE_UNITTEST_ARGV = (
+    "python3",
+    "-m",
+    "unittest",
+    "Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator",
+    "-v",
+)
 ALLOWLIST = {
     ("./bin/ask", "sdk", "package", "build", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--json", "--robot"),
     ("./bin/ask", "sdk", "security", "package-signature", "Infrastructure/tests/fixtures/skills_sdk/valid_skill", "--preview", "--json", "--robot"),
@@ -54,6 +61,7 @@ ALLOWLIST = {
     ("./bin/ask", "sdk", "plugin", "create", "demo-plugin", "--kind", "plugin", "--category", "third-party", "--with-registry", "--with-references", "--preview", "--json", "--robot"),
     ("./bin/ask", "sdk", "plugin", "save-registry", "--kind", "plugin", "--target", "Plugins/plugin-factory", "--preview", "--json", "--robot"),
     STAGE_SHAPE_VALIDATOR_ARGV,
+    STAGE_SHAPE_UNITTEST_ARGV,
 }
 MUTATION_KEYS = frozenset(
     {
@@ -153,6 +161,8 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
     if completed.returncode != 0:
         status = "executed_fail"
         reason = "Exact allowlisted local read-only command returned a non-zero exit code."
+    elif argv == STAGE_SHAPE_UNITTEST_ARGV:
+        status, reason, receipt_evidence = _classify_stage_shape_unittest(completed.stdout, completed.stderr)
     elif argv == STAGE_SHAPE_VALIDATOR_ARGV:
         status, reason, receipt_evidence = _classify_stage_shape(completed.stdout)
     elif argv[-1:] == ("--help",):
@@ -176,6 +186,13 @@ def _classify_completed(execution_id: str, argv: tuple[str, ...], completed: sub
         "reason": reason,
         "evidence": receipt_evidence,
     }
+
+
+def _classify_stage_shape_unittest(stdout: str, stderr: str) -> tuple[str, str, list[str]]:
+    status, evidence = _observe_stage_shape_unittest_receipt(stdout, stderr)
+    if status == "success":
+        return "executed_pass", "Exact allowlisted SDK stage shape unittest returned a bounded success marker.", evidence
+    return "executed_fail", "Allowlisted SDK stage shape unittest returned zero but not its bounded success marker.", evidence
 
 
 def _classify_stage_shape(stdout: str) -> tuple[str, str, list[str]]:
@@ -240,6 +257,42 @@ def _observe_stage_shape_receipt(stdout: str) -> tuple[str | None, list[str]]:
     if not count.isascii() or not count.isdigit() or int(count) < 1:
         return None, ["stage_shape_receipt:invalid_marker"]
     return "success", ["stage_shape_receipt:valid_marker", f"stage_shape_skill_count:{count}"]
+
+
+def _observe_stage_shape_unittest_receipt(stdout: str, stderr: str) -> tuple[str | None, list[str]]:
+    """Record bounded unittest success evidence across its stdout and stderr streams."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    output_bytes = len(combined.encode("utf-8"))
+    lines = [line.strip() for line in combined.splitlines() if line.strip()]
+    if output_bytes > MAX_HELP_OUTPUT_BYTES or len(lines) > MAX_HELP_OUTPUT_LINES:
+        return None, ["stage_shape_unittest_receipt:oversize"]
+
+    ran_prefix = "Ran 6 tests in "
+    ran_lines = [line for line in lines if line.startswith("Ran ")]
+    if len(ran_lines) != 1:
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    ran_line = ran_lines[0]
+    if not ran_line.startswith(ran_prefix) or not ran_line.endswith("s"):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    duration = ran_line[len(ran_prefix) : -1]
+    if not _valid_unittest_duration(duration):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    if lines[-1] != "OK":
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    if _has_unittest_failure_marker(lines):
+        return None, ["stage_shape_unittest_receipt:invalid_marker"]
+    return "success", ["stage_shape_unittest_receipt:valid_marker", "stage_shape_unittest_test_count:6"]
+
+
+def _valid_unittest_duration(duration: str) -> bool:
+    if not duration or not duration.isascii():
+        return False
+    whole, separator, fraction = duration.partition(".")
+    return whole.isdigit() and (not separator or fraction.isdigit())
+
+
+def _has_unittest_failure_marker(lines: list[str]) -> bool:
+    return any(line.startswith(("FAILED", "ERROR", "FAIL")) for line in lines)
 
 
 def _observe_robot_receipt(stdout: str) -> tuple[str | None, list[str]]:

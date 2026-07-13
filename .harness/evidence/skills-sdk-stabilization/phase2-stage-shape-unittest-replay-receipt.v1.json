@@ -1,0 +1,58 @@
+{
+  "schema_version": "skills-sdk.phase2-stage-shape-unittest-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T06:12:00Z",
+  "base_head_sha": "32c9bddd08dacd1fa2cfdef956d12eb2e7acc33a",
+  "scope": "read-only Skills SDK stage-shape validator unittest command admission",
+  "allowlisted_argv": "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py"
+  ],
+  "source_digests": {
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py": "sha256:c5a8ed31b25d19fc622b67ff24d3e19772abdd0865839a747a1dfee3e179f297",
+    "Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py": "sha256:6d23a7284879f7d7f07be2d58bb11313b497edd1de1c2383aec417d3d9147e5e"
+  },
+  "patch_digest": "sha256:5db0569adfce7ed934300cb39ff60b01b7d945761183ce8c5bb76be899f0454d",
+  "behavior_proof": {
+    "test_marker": "Ran 6 tests in <ascii duration>s",
+    "terminal_marker": "OK",
+    "failure_markers_rejected": ["FAILED", "ERROR", "FAIL"],
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "altered_argv": "blocked_unsafe_without_subprocess",
+    "malformed_marker": "executed_fail_without_exception",
+    "no_mutation_status": true
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 35,
+    "blocked_unsafe": 8,
+    "unclassified": 0,
+    "unittest_row": {
+      "status": "executed_pass",
+      "evidence": [
+        "stage_shape_unittest_receipt:valid_marker",
+        "stage_shape_unittest_test_count:6"
+      ]
+    }
+  },
+  "reviews": {
+    "worker": "worker report: TDD red/green, exact tuple, 7 focused tests, ruff and diff checks pass",
+    "qa": "artifacts/reviews/stage-shape-unittest-qa.md",
+    "adversarial": "artifacts/reviews/stage-shape-unittest-adversarial.md",
+    "adversarial_initial_finding": "Malformed durations and non-terminal success transcript could false-pass; fixed with strict duration grammar, terminal OK, failure-marker rejection, and four regression cases"
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stage_shape_validator_replay.py -> pass (8 passed)",
+    "Command: python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v -> pass (6 tests; OK)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stage_shape_validator_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_stage_shape_validator_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py -> pass",
+    "Command: before=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py); python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v; after=$(git status --porcelain -- Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stage_shape_validator_replay.py); test \"$before\" = \"$after\" -> pass (6 tests; intended files unchanged)",
+    "Command: PYTHONPATH=Infrastructure/scripts/lib UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root . --output .harness/evidence/skills-sdk-stabilization/private-stage-shape-unittest-replay.json -> pass (35 executed_pass; 8 blocked_unsafe; 0 unclassified)",
+    "Command: fresh independent QA and final adversarial review -> pass (artifacts/reviews/stage-shape-unittest-qa.md and artifacts/reviews/stage-shape-unittest-adversarial.md; WROTE markers present)"
+  ],
+  "claims_boundary": "No review handoff or execution, eval execution, signing, package hardening, Foundry extraction, source admission, Tessl/CircleCI mutation, publication, installation, merge, hosted CI, or release-readiness claim follows."
+}
