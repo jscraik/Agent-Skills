@@ -1,8 +1,8 @@
 {
   "schema_version": "skills-sdk.phase2-remaining-queue-after-signing-intent-receipt.v1",
   "status": "bounded_local_pass_with_fixture_admission",
-  "captured_at": "2026-07-13T10:06:28Z",
-  "base_head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
+  "captured_at": "2026-07-13T10:16:42Z",
+  "base_head_sha": "35190080c653d5eb9305e86776d3251f64cb326e",
   "latest_completed_checkpoint": {
     "command": "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "receipt": ".harness/evidence/skills-sdk-stabilization/phase2-review-handoff-fixture-admission-receipt.v1.json",
@@ -10,10 +10,10 @@
     "evidence": [
       "./bin/ask sdk review plan ... --receipt-out .harness/artifacts/sdk-review-plan/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
       "./bin/ask sdk review handoff ... --receipt-out .harness/artifacts/sdk-review-handoff/simplify.json -> pass (receipt_written=true; mutation_performed=false)",
-      "same_head:350bcd2c522ece35f0dc6063c52077e688401cd8",
+      "same_head:35190080c653d5eb9305e86776d3251f64cb326e",
       "target_content_digest:7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
-      "plan_sha256:2147b7aac337b8aed99f118ff1d1fa5030d35e1c67bd280cbc5ae23ced9549b2",
-      "handoff_sha256:eb3c2b6cb128bb59abff418b63b58b931e71941234dfa274aee6d682b3328c8e"
+      "plan_sha256:5c1c347661dd9df15d0f7dee2f0e6fde3a8c38e3130e8c59859c4fa97765102e",
+      "handoff_sha256:0e24ab06896b5c2607cf24ced7888d9804bd70414ed54380baff593ea657e10e"
     ]
   },
   "remaining_rows": [

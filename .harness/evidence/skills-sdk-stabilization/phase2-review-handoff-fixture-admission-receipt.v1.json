@@ -2,12 +2,12 @@
   "schema_version": "skills-sdk.phase2-review-handoff-fixture-admission-receipt.v1",
   "artifact_type": "explicit_artifact_write_policy_receipt",
   "status": "bounded_artifact_write_pass_with_fallback_review",
-  "captured_at": "2026-07-13T10:06:28Z",
+  "captured_at": "2026-07-13T10:16:42Z",
   "revision": {
-    "head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
+    "head_sha": "35190080c653d5eb9305e86776d3251f64cb326e",
     "identity_command": "git rev-parse HEAD",
     "worktree": "/private/tmp/agent-skills-emitter-reconcile",
-    "branch_state": "detached source commit; push target codex/skills-sdk-command-service-callers",
+    "branch_state": "detached merge commit; push target codex/skills-sdk-command-service-callers",
     "draft_pr": "https://github.com/jscraik/Agent-Skills/pull/330"
   },
   "authorization": {
@@ -36,13 +36,13 @@
   "fixture": {
     "plan_path": ".harness/artifacts/sdk-review-plan/simplify.json",
     "handoff_path": ".harness/artifacts/sdk-review-handoff/simplify.json",
-    "plan_sha256": "sha256:2147b7aac337b8aed99f118ff1d1fa5030d35e1c67bd280cbc5ae23ced9549b2",
-    "handoff_sha256": "sha256:eb3c2b6cb128bb59abff418b63b58b931e71941234dfa274aee6d682b3328c8e",
-    "plan_receipt_sha256": "sha256:4c3cb77bcf2e919382e0b98077584bbe198011c1571cb0c250e33baa43bb05a0",
-    "receipt_instance_id": "rp_21dqm5gyryz8",
+    "plan_sha256": "sha256:5c1c347661dd9df15d0f7dee2f0e6fde3a8c38e3130e8c59859c4fa97765102e",
+    "handoff_sha256": "sha256:0e24ab06896b5c2607cf24ced7888d9804bd70414ed54380baff593ea657e10e",
+    "plan_receipt_sha256": "sha256:820d9ae31989635f3835d990712d23e12fceb7e671b22168c5068fa059b90273",
+    "receipt_instance_id": "rp_hornhl3vwg9v",
     "target": "Skills/agent-ops/simplify",
     "target_content_digest": "sha256:7becbdfc9abe642a81f9d86630046493c72e68d1edc0647c3ef92de9928c6359",
-    "head_sha": "350bcd2c522ece35f0dc6063c52077e688401cd8",
+    "head_sha": "35190080c653d5eb9305e86776d3251f64cb326e",
     "receipt_flags": {
       "plan_receipt_written": true,
       "handoff_receipt_written": true,
@@ -93,7 +93,7 @@
     "Command: PREK_SKIP=validate-all /Users/jamiecraik/dev/agent-skills/.git/hooks/pre-commit -> pass"
   ],
   "claims_boundary": [
-    "This receipt proves only the explicitly authorized local admission of a receipt-backed review plan and handoff fixture at source HEAD 350bcd2c522ece35f0dc6063c52077e688401cd8.",
+    "This receipt proves only the explicitly authorized local admission of a receipt-backed review plan and handoff fixture at source HEAD 35190080c653d5eb9305e86776d3251f64cb326e.",
     "It does not prove review execution, reviewer completion, review verification, CI, PR mergeability, resolved review threads, tracker updates, Foundry extraction, source admission, Tessl or CircleCI mutation, publication, installation, or release readiness.",
     "Generated fixture and role-review artifacts are local evidence and remain excluded from the commit."
   ],
