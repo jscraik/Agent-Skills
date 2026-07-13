@@ -263,6 +263,18 @@ except Exception:
         )
         self.assertIn("module mutable state cache", "\n".join(issues))
 
+    def test_standard_mutable_collection_constructors_are_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "import collections\nfrom collections import Counter\n"
+            "cache = collections.deque()\ncounts = Counter()\n",
+            "",
+        )
+        rendered = "\n".join(issues)
+        self.assertIn("module mutable state cache", rendered)
+        self.assertIn("module mutable state counts", rendered)
+
     def test_private_helpers_are_skipped_and_public_methods_are_qualified(self) -> None:
         validator = _load_validator()
         source = """
@@ -363,6 +375,10 @@ class Factory:
         validator = _load_validator()
         with self.assertRaises(validator.BaselineUnavailable):
             validator._validate_baseline_ref("not-a-real-revision")
+
+    def test_staged_source_uses_head_as_default_baseline(self) -> None:
+        validator = _load_validator()
+        self.assertEqual(validator._default_baseline_ref(staged_source=True), "HEAD")
 
     def test_baseline_path_uses_cached_staged_rename_map(self) -> None:
         validator = _load_validator()

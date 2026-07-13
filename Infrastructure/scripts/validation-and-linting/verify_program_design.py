@@ -53,7 +53,9 @@ MUTABLE_VALUE_NODES = (
     ast.Set,
     ast.SetComp,
 )
-MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "defaultdict", "dict", "list", "set"})
+MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset(
+    {"Counter", "bytearray", "defaultdict", "deque", "dict", "list", "set"}
+)
 PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
 WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
 
@@ -653,7 +655,9 @@ def _changed_paths(
     return sorted(set(paths))
 
 
-def _default_baseline_ref() -> str | None:
+def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
+    if staged_source:
+        return "HEAD"
     base_branch = os.environ.get("GITHUB_BASE_REF")
     candidates = [f"origin/{base_branch}"] if base_branch else []
     candidates.extend(("origin/main", "HEAD^"))
@@ -710,7 +714,7 @@ def main() -> int:
         for issue in metadata_issues:
             print(f"- {issue}")
         return 1
-    baseline_ref = args.baseline_ref or _default_baseline_ref()
+    baseline_ref = args.baseline_ref or _default_baseline_ref(staged_source=args.staged_source)
     if not baseline_ref:
         print("Program design verification blocked: baseline revision could not be determined")
         return 1
