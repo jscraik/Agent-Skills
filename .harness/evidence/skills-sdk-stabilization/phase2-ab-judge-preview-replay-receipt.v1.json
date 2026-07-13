@@ -1,0 +1,52 @@
+{
+  "schema_version": "skills-sdk.phase2-ab-judge-preview-replay-receipt.v1",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T03:52:30Z",
+  "base_head_sha": "27b10bd43f257f62a54333dc9233a6bc9647dffe",
+  "scope": "read-only A/B judge input preview command admission",
+  "allowlisted_argv": "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
+  "changed_files": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "Infrastructure/tests/test_skills_sdk_ab_judge_preview_replay.py"
+  ],
+  "source_digest": "sha256:06215fe36216aba0074bde90fb81d05cdb11d192ac48d8002e0c31f94564ec79",
+  "test_digest": "sha256:85b7f4f153452919f674d471c7c5057d8913446f267432d9958f2575d6798341",
+  "patch_digest": "sha256:5a2a5fed0218e040d48ed6c64c53c762c2bedc9ea8baf7760d53a3df9d7c8eff",
+  "behavior_proof": {
+    "receipt_status": "preview",
+    "run_receipt_contained": true,
+    "run_receipt_shape_validated": true,
+    "sanitized_evidence_only": true,
+    "mutation_performed": false,
+    "network_accessed": false,
+    "provider_invoked": false,
+    "codex_exec_invoked": false,
+    "altered_argv": "blocked_unsafe_without_subprocess"
+  },
+  "reviews": {
+    "worker": "artifacts/reviews/ab-judge-preview-worker.md",
+    "qa": "artifacts/reviews/ab-judge-preview-qa.md",
+    "adversarial": "artifacts/reviews/ab-judge-preview-adversarial.md",
+    "worker_runtime_recovery": "one artifact-only retry after child artifact-tool capacity block; fallback report retained"
+  },
+  "replay": {
+    "total": 43,
+    "executed_pass": 30,
+    "blocked_unsafe": 13,
+    "unclassified": 0
+  },
+  "validation": [
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_ab_judge_preview_replay.py -> fail (red before allowlist admission: positive tuple was blocked_unsafe)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_ab_judge_preview_replay.py -> pass (2 passed after allowlist admission)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_ab_judge.py tests/test_skills_sdk_ab_judge_preview_replay.py -> pass (8 passed)",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_ab_judge_preview_replay.py -> pass",
+    "Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files scripts/lib/ask/skills_sdk/stabilization_replay.py tests/test_skills_sdk_ab_judge_preview_replay.py -> pass (1873/1900)",
+    "Command: git diff --check -> pass",
+    "Command: ./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot -> pass (preview receipt; provider_invoked=false; network_accessed=false; mutation_performed=false; run receipt contained and shape-valid)",
+    "Command: before=$(git status --porcelain); ./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot > /tmp/agent-skills-ab-judge-preview.json; after=$(git status --porcelain); test \"$before\" = \"$after\"; jq -e '.status == \"success\" and .data.skills_sdk_eval_ab_judge_preview.status == \"preview\" and .data.skills_sdk_eval_ab_judge_preview.mutation_performed == false and .data.skills_sdk_eval_ab_judge_preview.receipt.provider_invoked == false and .data.skills_sdk_eval_ab_judge_preview.receipt.network_accessed == false' /tmp/agent-skills-ab-judge-preview.json -> pass",
+    "Command: PYTHONPATH=\"$PWD/Infrastructure/scripts/lib\" UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh scripts/lib/ask/skills_sdk/stabilization_replay.py --repo-root \"$PWD\" --output .harness/evidence/skills-sdk-stabilization/phase2-ab-judge-preview-private-replay.json -> pass (30 executed_pass; 13 blocked_unsafe; 0 unclassified)",
+    "Command: ollama run h4rithd/coder:14b '<QA prompt>' < /tmp/agent-skills-ab-judge-preview-candidate.patch -> pass (QA_PASS_NO_FINDINGS)",
+    "Command: ollama run h4rithd/coder:14b '<adversarial prompt>' < /tmp/agent-skills-ab-judge-preview-candidate.patch -> pass (ADVERSARIAL_PASS_NO_FINDINGS)"
+  ],
+  "claims_boundary": "No actual judge provider execution, Ollama scoring, cloud or remote model evidence, eval run, Foundry extraction, source admission, authority-bound apply behavior, Tessl/CircleCI mutation, publication, installation, merge, or release-readiness claim follows."
+}
