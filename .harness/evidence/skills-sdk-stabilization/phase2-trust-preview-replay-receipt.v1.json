@@ -1,0 +1,82 @@
+{
+  "schema_version": "skills-sdk.phase2-trust-preview-replay-receipt.v1",
+  "artifact_type": "read_only_command_receipt_slice",
+  "status": "bounded_local_pass",
+  "captured_at": "2026-07-13T00:42:14Z",
+  "revision": {
+    "base_head_sha": "b4835b61575f0a2b602fc4cdf8048ef4fa72fb11",
+    "worktree_state": "implementation and private replay committed; generated review artifacts excluded",
+    "identity_command": "git rev-parse HEAD"
+  },
+  "scope": {
+    "included": [
+      "admit the exact repository-owned trust preview command into private replay",
+      "positive executed_pass coverage",
+      "negative missing-source deny-by-default coverage with no subprocess",
+      "receipt-backed no-mutation proof"
+    ],
+    "excluded": [
+      "trust apply or trust-store mutation",
+      "command or service deletion",
+      "Foundry extraction and source admission",
+      "Tessl, CircleCI, publication, installation, merge, or release readiness"
+    ]
+  },
+  "change": {
+    "source": "Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py",
+    "test": "Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+    "allowlisted_argv": "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+    "source_digest": "sha256:5b9993a34e398f13ab3708a4edb6336e01dedb83ac118241faea450d9a4410e7",
+    "test_digest": "sha256:9a21e171b5d35c99e6107a5217dea9a6c3ec259b7652f37765cbb877d9ee3350"
+  },
+  "validation": [
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_stabilization_replay.py -k 'trust_preview or deny_by_default'",
+      "status": "pass",
+      "evidence": "3 passed, 21 deselected"
+    },
+    {
+      "command": "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+      "status": "pass",
+      "evidence": "status=preview; mutation_performed=false; trust_store_mutated=false; worktree status unchanged"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/lib/ask/skills_sdk/stabilization_replay.py Infrastructure/tests/test_skills_sdk_stabilization_replay.py",
+      "status": "pass",
+      "evidence": "ask_cli_modularity lines=1873 max=1900"
+    }
+  ],
+  "review_sequence": {
+    "worker": {
+      "status": "pass",
+      "artifact": "artifacts/reviews/trust-preview-worker.md"
+    },
+    "qa": {
+      "status": "pass",
+      "artifact": "artifacts/reviews/trust-preview-qa-local-fallback.md",
+      "candidate_patch_digest": "sha256:d3335671362f97625c9bb8ba19477312448fb40b0300ab9c09bbbd8d07f8b5f2"
+    },
+    "adversarial": {
+      "status": "pass_with_independence_limitation",
+      "artifact": "artifacts/reviews/trust-preview-adversarial-local-fallback.md",
+      "candidate_patch_digest": "sha256:d3335671362f97625c9bb8ba19477312448fb40b0300ab9c09bbbd8d07f8b5f2"
+    }
+  },
+  "replay_receipt": {
+    "path": ".harness/evidence/skills-sdk-stabilization/private-command-replay.v1.json",
+    "status": "pass",
+    "command_ref_count": 43,
+    "terminal_count": 43,
+    "executed_pass_count": 20,
+    "blocked_unsafe_count": 23,
+    "unclassified_count": 0,
+    "digest": "sha256:4bbac24ba7a7bb3ecb053e4dc9a644e729d360181379a6237356f02852edbbcc",
+    "execution_policy": "exact_argv_allowlist_deny_by_default"
+  },
+  "claims_boundary": [
+    "This proves the exact local trust-preview replay and its no-mutation receipt only.",
+    "The 23 remaining rows are still deny-by-default and have no behavior proof.",
+    "No claim follows for apply mode, hosted CI, installed runtime, Foundry, source admission, Tessl, publication, merge, or release readiness."
+  ],
+  "next_gate": "Commit this revision-bound receipt, push the draft branch, then select the next smallest read-only row from the remaining 23 deny-by-default references."
+}
