@@ -383,14 +383,53 @@ class Factory:
     def test_baseline_path_uses_cached_staged_rename_map(self) -> None:
         validator = _load_validator()
         validator._rename_map.cache_clear()
-        result = mock.Mock(returncode=0, stdout="R100\told.py\tnew.py\n", stderr="")
+        result = mock.Mock(
+            returncode=0,
+            stdout="R100\tInfrastructure/scripts/old.py\tInfrastructure/scripts/new.py\n",
+            stderr="",
+        )
 
         with mock.patch.object(validator.subprocess, "run", return_value=result) as run:
-            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
-            self.assertEqual(validator._baseline_path("new.py", "origin/main"), "old.py")
+            self.assertEqual(
+                validator._baseline_path("Infrastructure/scripts/new.py", "origin/main"),
+                "Infrastructure/scripts/old.py",
+            )
+            self.assertEqual(
+                validator._baseline_path("Infrastructure/scripts/new.py", "origin/main"),
+                "Infrastructure/scripts/old.py",
+            )
 
         self.assertEqual(run.call_count, 1)
         self.assertIn("--cached", run.call_args.args[0])
+
+    def test_baseline_path_does_not_carry_excluded_staged_rename_baseline(self) -> None:
+        validator = _load_validator()
+        validator._rename_map.cache_clear()
+        staged_result = mock.Mock(
+            returncode=0,
+            stdout="R100\tInfrastructure/tests/helper.py\tInfrastructure/scripts/helper.py\n",
+            stderr="",
+        )
+        non_staged_result = mock.Mock(returncode=0, stdout="", stderr="")
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_result, non_staged_result]) as run:
+            self.assertEqual(
+                validator._baseline_path("Infrastructure/scripts/helper.py", "origin/main"),
+                "Infrastructure/scripts/helper.py",
+            )
+
+        self.assertEqual(run.call_count, 2)
+        self.assertIn("--cached", run.call_args_list[0].args[0])
+        self.assertNotIn("--cached", run.call_args_list[1].args[0])
+
+    def test_named_expression_module_state_is_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "if (cache := {}):\n    cache['ready'] = True\n",
+            "",
+        )
+        self.assertIn("module mutable state cache", "\n".join(issues))
 
     def test_baseline_path_falls_back_to_non_staged_rename_map(self) -> None:
         validator = _load_validator()

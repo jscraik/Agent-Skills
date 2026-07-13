@@ -302,6 +302,10 @@ class _ModuleMutableStateVisitor(ast.NodeVisitor):
         self._record(node, [node.target], node.value)
         self.generic_visit(node)
 
+    def visit_NamedExpr(self, node: ast.NamedExpr) -> None:
+        self._record(node, [node.target], node.value)
+        self.generic_visit(node)
+
     def _record(self, node: ast.AST, targets: list[ast.expr], value: ast.expr | None) -> None:
         for target in targets:
             for name in _mutable_target_names(target, value):
@@ -445,7 +449,7 @@ def _current_source_text(
 
 def _baseline_path(relpath: str, revision: str) -> str:
     staged_path = _rename_map(revision, staged=True).get(relpath)
-    if staged_path:
+    if staged_path and _is_production_baseline_path(staged_path, revision):
         return staged_path
     renamed_path = _rename_map(revision, staged=False).get(relpath)
     if renamed_path and _is_production_baseline_path(renamed_path, revision):

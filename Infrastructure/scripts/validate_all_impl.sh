@@ -394,6 +394,25 @@ should_run_check() {
   esac
 }
 
+is_program_design_scanned_path() {
+  local changed_file="$1"
+  case "$changed_file" in
+    Infrastructure/bin/*|Infrastructure/scripts/*|Plugins/*|Skills/*|skills-system/*)
+      case "$changed_file" in
+        */.venv/*|*/__pycache__/*|*/fixtures/*|*/references/*|*/tests/*|*/test/*|*/testing/*)
+          return 1
+          ;;
+        *)
+          return 0
+          ;;
+      esac
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 # run_check prints a label, executes the check and records pass/fail outcomes.
 run_check() {
   local mode="$1"
@@ -636,12 +655,16 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     staged_source_line=""
     if [[ "$staged_source_mode" -eq 1 ]]; then
       staged_source_line="$(git show ":$changed_file" 2>/dev/null | head -n 1 || true)"
+    elif [[ "$head_source_mode" -eq 1 ]]; then
+      staged_source_line="$(git show "HEAD:$changed_file" 2>/dev/null | head -n 1 || true)"
     elif [[ -f "$changed_file" ]]; then
       staged_source_line="$(head -n 1 "$changed_file" || true)"
     fi
-    if [[ "$changed_file" == *.py || "$changed_file" == *.pyw || "$changed_file" == Infrastructure/bin/ask ]] || \
-      [[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]; then
+    if is_program_design_scanned_path "$changed_file"; then
+      if [[ "$changed_file" == *.py || "$changed_file" == *.pyw ]] || \
+        [[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]; then
         scope_has_python_quality=1
+      fi
     fi
 
     case "$changed_file" in

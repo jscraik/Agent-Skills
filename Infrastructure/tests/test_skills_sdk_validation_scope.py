@@ -48,6 +48,10 @@ class TestSkillsSdkValidationScope(unittest.TestCase):
         self.assertIn('git show ":$changed_file"', self.impl_text)
         self.assertIn('[[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]', self.impl_text)
 
+    def test_head_source_scope_reads_extensionless_shebang_from_head(self) -> None:
+        self.assertIn('elif [[ "$head_source_mode" -eq 1 ]]; then', self.impl_text)
+        self.assertIn('git show "HEAD:$changed_file"', self.impl_text)
+
     def test_changed_file_classifier_matches_required_sdk_surfaces(self) -> None:
         expected_matches = (
             "Infrastructure/config/schemas/skills-sdk/install-receipt.v1.schema.json",

@@ -134,3 +134,24 @@ def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
         assert args is not None
         assert "--changed-files" in args
         assert changed_file in args
+
+
+def test_lint_changed_unscanned_python_wrapper_falls_back_to_required_baseline() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "bin/ask"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "Changed-files scope classification missed all known buckets" in proc.stdout
+
+
+def test_head_source_probes_extensionless_shebang_from_head() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        impl_text = (repo.root / "Infrastructure/scripts/validate_all_impl.sh").read_text(encoding="utf-8")
+        assert 'git show "HEAD:$changed_file"' in impl_text
