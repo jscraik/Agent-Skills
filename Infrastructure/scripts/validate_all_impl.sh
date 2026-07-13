@@ -626,8 +626,14 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
 
+    staged_source_line=""
+    if [[ "$staged_source_mode" -eq 1 ]]; then
+      staged_source_line="$(git show ":$changed_file" 2>/dev/null | head -n 1 || true)"
+    elif [[ -f "$changed_file" ]]; then
+      staged_source_line="$(head -n 1 "$changed_file" || true)"
+    fi
     if [[ "$changed_file" == *.py || "$changed_file" == *.pyw || "$changed_file" == Infrastructure/bin/ask ]] || \
-      { [[ -f "$changed_file" ]] && head -n 1 "$changed_file" | grep -Eiq '^#!.*python'; }; then
+      [[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]; then
         scope_has_python_quality=1
     fi
 

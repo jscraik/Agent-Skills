@@ -38,6 +38,7 @@ PRODUCTION_PREFIXES = (
     "Infrastructure/bin/",
     "Infrastructure/scripts/",
     "Plugins/",
+    "Skills/",
     "skills-system/",
 )
 EXCLUDED_PARTS: frozenset[str] = frozenset({".venv", "__pycache__", "references", "tests", "test"})
@@ -50,7 +51,7 @@ MUTABLE_VALUE_NODES = (
     ast.Set,
     ast.SetComp,
 )
-MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "dict", "list", "set"})
+MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset({"bytearray", "defaultdict", "dict", "list", "set"})
 PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
 WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
 PUBLIC_DUNDER_NAMES = frozenset({"__init__", "__new__"})
@@ -238,11 +239,15 @@ def _is_mutable_value(value: ast.expr | None) -> bool:
         return True
     if isinstance(value, ast.Tuple):
         return any(_is_mutable_value(element) for element in value.elts)
-    return (
-        isinstance(value, ast.Call)
-        and isinstance(value.func, ast.Name)
-        and value.func.id in MUTABLE_CONSTRUCTOR_NAMES
-    )
+    if not isinstance(value, ast.Call):
+        return False
+    if isinstance(value.func, ast.Name):
+        constructor_name = value.func.id
+    elif isinstance(value.func, ast.Attribute):
+        constructor_name = value.func.attr
+    else:
+        return False
+    return constructor_name in MUTABLE_CONSTRUCTOR_NAMES
 
 
 def _mutable_target_names(target: ast.expr, value: ast.expr | None) -> list[str]:

@@ -230,6 +230,15 @@ except Exception:
         self.assertIn("module mutable state items", rendered)
         self.assertIn("module mutable state seen", rendered)
 
+    def test_qualified_defaultdict_factory_is_rejected(self) -> None:
+        validator = _load_validator()
+        issues = validator._check_source(
+            "Infrastructure/scripts/example.py",
+            "import collections\ncache = collections.defaultdict(list)\n",
+            "",
+        )
+        self.assertIn("module mutable state cache", "\n".join(issues))
+
     def test_private_helpers_are_skipped_and_public_methods_are_qualified(self) -> None:
         validator = _load_validator()
         source = """
@@ -367,6 +376,10 @@ class Public:
         with self.subTest("python shebang"):
             path = REPO_ROOT / "Infrastructure" / "bin" / "ask"
             self.assertTrue(validator._is_production_python("Infrastructure/bin/ask", path=path))
+
+    def test_canonical_skills_python_scripts_are_selected(self) -> None:
+        validator = _load_validator()
+        self.assertTrue(validator._is_production_python("Skills/agent-ops/example/scripts/run.py"))
 
     def test_pyw_without_shebang_is_selected(self) -> None:
         validator = _load_validator()
