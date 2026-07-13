@@ -33,6 +33,7 @@ class TestSkillsSdkPluginCreatePluginPreviewReplay:
             kind="plugin",
             name="demo-plugin",
             category="third-party",
+            description="Demo plugin",
             with_registry=True,
             companion_folders=["references"],
             apply=False,
@@ -40,7 +41,14 @@ class TestSkillsSdkPluginCreatePluginPreviewReplay:
 
         payload = result.data["skills_sdk_plugin_create"]
         assert result.status == "success"
-        assert any("--with-references" in command for command in payload["planned_commands"])
+        facade_commands = [
+            command for command in payload["planned_commands"] if "sdk plugin create" in command
+        ]
+        assert len(facade_commands) == 1
+        facade_command = facade_commands[0]
+        assert "--description 'Demo plugin'" in facade_command
+        assert "--with-registry" in facade_command
+        assert "--with-references" in facade_command
 
     def test_plugin_preview_is_allowlisted_for_command_receipt(self) -> None:
         command = (

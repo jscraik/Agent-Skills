@@ -6541,7 +6541,7 @@ def skills_sdk_plugin_create(
     apply: bool = False,
 ) -> CallResult:
     """Create or preview creation of a single skill or plugin through the SDK facade."""
-    command = _ask_validation_command(
+    command_args = [
         "sdk",
         "plugin",
         "create",
@@ -6550,8 +6550,16 @@ def skills_sdk_plugin_create(
         kind,
         "--category",
         category,
-        "--apply" if apply else "--preview",
-    )
+    ]
+    if description is not None:
+        command_args.extend(["--description", description])
+    if with_registry:
+        command_args.append("--with-registry")
+    for folder in companion_folders or []:
+        if folder in {"scripts", "assets", "references", "workflows"}:
+            command_args.append(f"--with-{folder}")
+    command_args.append("--apply" if apply else "--preview")
+    command = _ask_validation_command(*command_args)
     if kind == "skill" and not description:
         payload = {
             "schema_version": "skills-sdk-plugin-create.v0",
