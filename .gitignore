@@ -196,6 +196,10 @@ Infrastructure/artifacts/policy/
 /artifacts/policy/
 /artifacts/reports/repo-surface/
 
+# Skills SDK review execution and bounded reviewer outputs are local runtime artifacts.
+/artifacts/reviews/sdk-review-handoff/
+/artifacts/agent-runs/
+
 # Validation evidence policy:
 # - ignore timestamped local run directories by default
 # - ignore the latest directory entirely (may contain sensitive logs)

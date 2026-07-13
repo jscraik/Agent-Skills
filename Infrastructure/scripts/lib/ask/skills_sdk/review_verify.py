@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.review_plan import canonical_receipt_digest
+from ask.skills_sdk.review_handoff import validate_handoff_current_head
 
 
 REVIEW_VERIFICATION_SCHEMA_VERSION = "skills-sdk.review-verification-receipt.v1"
@@ -24,6 +25,7 @@ def build_review_verification(
     source_handoff_path = _safe_repo_path(repo_root, handoff_path, label="handoff path")
     source_handoff = _load_json_object(source_handoff_path, label="review handoff receipt")
     _validate_handoff_shape(source_handoff)
+    validate_handoff_current_head(repo_root, source_handoff)
 
     artifact_results = [_artifact_result(repo_root, artifact) for artifact in source_handoff["required_artifacts"]]
     missing_or_invalid = [
@@ -31,7 +33,24 @@ def build_review_verification(
         for result in artifact_results
         if result["status"] != "pass"
     ]
-    receipt: dict[str, Any] = {
+    receipt = _verification_receipt(
+        repo_root,
+        source_handoff_path,
+        source_handoff,
+        artifact_results,
+        missing_or_invalid,
+    )
+    return _write_verification_receipt(repo_root, receipt, receipt_out)
+
+
+def _verification_receipt(
+    repo_root: Path,
+    source_handoff_path: Path,
+    source_handoff: dict[str, Any],
+    artifact_results: list[dict[str, Any]],
+    missing_or_invalid: list[str],
+) -> dict[str, Any]:
+    return {
         "schema_version": REVIEW_VERIFICATION_SCHEMA_VERSION,
         "schema_uri": REVIEW_VERIFICATION_SCHEMA_URI,
         "status": "pass" if not missing_or_invalid else "fail",
@@ -56,6 +75,13 @@ def build_review_verification(
         "receipt_written": False,
         "receipt_path": None,
     }
+
+
+def _write_verification_receipt(
+    repo_root: Path,
+    receipt: dict[str, Any],
+    receipt_out: str | None,
+) -> dict[str, Any]:
     if receipt_out:
         output_path = _safe_repo_path(repo_root, receipt_out, label="receipt_out")
         output_path.parent.mkdir(parents=True, exist_ok=True)
