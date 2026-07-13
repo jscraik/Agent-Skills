@@ -75,7 +75,10 @@ def _walk_mutation_flags(value: Any, path: str = "$") -> list[str]:
 
 
 def _capture_receipt(body: dict[str, Any]) -> dict[str, Any] | None:
-    candidates = [body.get("receipt"), body.get("preview"), body]
+    preview = body.get("preview")
+    if isinstance(preview, dict) and isinstance(preview.get("schema_version"), str):
+        return preview
+    candidates = [body.get("receipt"), body]
     return next(
         (
             candidate

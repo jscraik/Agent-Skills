@@ -3,7 +3,7 @@
   "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phase2-read-only-replay-receipt.v1.schema.json",
   "status": "bounded_local_pass",
   "operation": "phase2_read_only_parser_replay",
-  "base_commit": "3c84c2fcce4cddc691f1387406a0a37876c713a3",
+  "base_commit": "bc96360b20eea49c1442427542e12a3606d8b1dd",
   "branch": "codex/skills-sdk-command-service-callers",
   "source_files": [
     "Infrastructure/scripts/lib/ask/command_metadata.py",
@@ -13,7 +13,7 @@
     "Infrastructure/tests/test_skills_sdk_determinism.py",
     "Infrastructure/tests/test_skills_sdk_stabilization_replay.py"
   ],
-  "source_tree_digest": "sha256:e5e8b2c58b4c73c5c76e35d42c8bbf1047933f24461b7f21aa88d21f9d2bcc46",
+  "source_tree_digest": "sha256:2a3552f9d987d382b06a27523ba9083174fe77d2cb00a194cbd7af082701c4a6",
   "private_replay_row": 19,
   "remaining_deny_by_default_count": 24,
   "selected": {
