@@ -45,6 +45,13 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
                 "status": EXPECTED_RECEIPT_STATUSES[family],
                 **{key: False for key in REQUIRED_NO_WRITE_KEYS[family]},
             }
+            if family == "knowledge":
+                receipt.update(
+                    {
+                        "proof_results": [],
+                        "copied_files": [{"action": "preview"}],
+                    }
+                )
             if family == missing_receipt_family:
                 body = {"result": "missing-receipt"}
             else:
@@ -148,9 +155,28 @@ class TestReviewAuthorityParserReplay(unittest.TestCase):
             self._write_capture_dir(capture_dir)
             knowledge_receipt = json.loads((capture_dir / "knowledge.json").read_text(encoding="utf-8"))
             receipt = knowledge_receipt["data"][EXPECTED_DATA_KEYS["knowledge"]]
-            self.assertEqual(REQUIRED_NO_WRITE_KEYS["knowledge"], frozenset())
-            self.assertNotIn("network_accessed", receipt)
+            receipt = receipt["receipt"]
+            self.assertEqual(REQUIRED_NO_WRITE_KEYS["knowledge"], frozenset({"mutation_performed"}))
+            self.assertFalse(receipt["mutation_performed"])
+            self.assertEqual(receipt["proof_results"], [])
+            self.assertEqual(receipt["copied_files"], [{"action": "preview"}])
             self.assertEqual(_worker_findings(capture_dir, ARTIFACT, SELECTION), [])
+
+    def test_worker_review_rejects_knowledge_capture_without_preview_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            capture_dir = Path(temp_dir)
+            self._write_capture_dir(capture_dir)
+            payload_path = capture_dir / "knowledge.json"
+            payload = json.loads(payload_path.read_text(encoding="utf-8"))
+            receipt = payload["data"][EXPECTED_DATA_KEYS["knowledge"]]["receipt"]
+            receipt.pop("proof_results")
+            receipt["copied_files"][0]["action"] = "write"
+            payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            findings = _worker_findings(capture_dir, ARTIFACT, SELECTION)
+            messages = [finding["message"] for finding in findings]
+            self.assertTrue(any("proof_results evidence" in message for message in messages))
+            self.assertTrue(any("copied_files must prove preview-only" in message for message in messages))
 
     def test_worker_review_rejects_capture_for_different_candidate_command(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -64,7 +64,8 @@ def _policy_surface_paths(repo_root: Path) -> tuple[str, ...]:
     return tuple(
         path
         for line in result.stdout.splitlines()
-        if (path := line.strip()) and (path.endswith(".schema.json") or path.endswith(".py"))
+        if (path := line.strip())
+        and (path == POLICY_PATH or path.endswith(".schema.json") or path.endswith(".py"))
     )
 
 
@@ -335,8 +336,16 @@ def _annotation_keys(tree: ast.AST) -> set[tuple[tuple[str, ...], str, str]]:
     keys: set[tuple[tuple[str, ...], str, str]] = set()
     parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     for node in ast.walk(tree):
-        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.annotation is not None:
-            keys.add((_annotation_owner(node, parents), node.target.id, ast.unparse(node.annotation)))
+        if isinstance(node, ast.AnnAssign) and node.annotation is not None:
+            target = node.target
+            if isinstance(target, ast.Name):
+                name = target.id
+            elif isinstance(target, ast.Attribute):
+                name = target.attr
+            else:
+                name = None
+            if name is not None:
+                keys.add((_annotation_owner(node, parents), name, ast.unparse(node.annotation)))
         elif isinstance(node, ast.arg) and node.annotation is not None:
             keys.add((_annotation_owner(node, parents), node.arg, ast.unparse(node.annotation)))
     return keys
@@ -394,52 +403,92 @@ def _baseline_source_tree(repo_root: Path, path: str) -> ast.AST | None:
         return None
 
 
-def _schema_has_numeric_type(node: object) -> bool:
+def _resolve_local_schema_ref(node: object, root: object) -> object:
     if not isinstance(node, dict):
-        return False
-    declared_type = node.get("type")
-    if isinstance(declared_type, str) and declared_type in {"integer", "number"}:
-        return True
-    if isinstance(declared_type, list) and any(item in {"integer", "number"} for item in declared_type):
-        return True
-    return any(
-        _schema_has_numeric_type(item)
+        return node
+    reference = node.get("$ref")
+    if not isinstance(reference, str) or not reference.startswith("#/"):
+        return node
+    current = root
+    for raw_part in reference[2:].split("/"):
+        part = raw_part.replace("~1", "/").replace("~0", "~")
+        if not isinstance(current, dict) or part not in current:
+            return node
+        current = current[part]
+    return current
+
+
+def _schema_declares_numeric_type(declared_type: object) -> bool:
+    if isinstance(declared_type, str):
+        return declared_type in {"integer", "number"}
+    return isinstance(declared_type, list) and any(item in {"integer", "number"} for item in declared_type)
+
+
+def _schema_combinator_items(node: dict[str, object]) -> tuple[object, ...]:
+    return tuple(
+        item
         for key in ("oneOf", "anyOf", "allOf")
         for item in (node.get(key) if isinstance(node.get(key), list) else ())
     )
 
 
-def _schema_duration_property_entries(properties: object, node_path: str) -> dict[str, dict[str, object]]:
+def _schema_has_numeric_type(node: object, root: object | None = None, seen_refs: frozenset[str] = frozenset()) -> bool:
+    if not isinstance(node, dict):
+        return False
+    root = node if root is None else root
+    reference = node.get("$ref")
+    if isinstance(reference, str) and reference not in seen_refs:
+        resolved = _resolve_local_schema_ref(node, root)
+        if resolved is not node and _schema_has_numeric_type(resolved, root, seen_refs | {reference}):
+            return True
+    return _schema_declares_numeric_type(node.get("type")) or any(
+        _schema_has_numeric_type(item, root, seen_refs) for item in _schema_combinator_items(node)
+    )
+
+
+def _schema_duration_property_entries(
+    properties: object, node_path: str, root: object
+) -> dict[str, dict[str, object]]:
     result: dict[str, dict[str, object]] = {}
     if not isinstance(properties, dict):
         return result
     for name, child in properties.items():
         child_path = f"{node_path}.properties.{name}"
-        if isinstance(name, str) and name.endswith("_seconds") and isinstance(child, dict) and _schema_has_numeric_type(child):
+        if (
+            isinstance(name, str)
+            and name.endswith("_seconds")
+            and isinstance(child, dict)
+            and _schema_has_numeric_type(child, root)
+        ):
             result[child_path] = child
-        result.update(_schema_duration_properties(child, child_path))
+        result.update(_schema_duration_properties(child, child_path, root))
     return result
 
 
-def _schema_duration_branch_entries(child: object, key: str, node_path: str) -> dict[str, dict[str, object]]:
+def _schema_duration_branch_entries(
+    child: object, key: str, node_path: str, root: object
+) -> dict[str, dict[str, object]]:
     result: dict[str, dict[str, object]] = {}
     if isinstance(child, dict):
         entries = child.items() if key in {"definitions", "$defs"} else ((key, child),)
         for name, definition in entries:
             branch_path = f"{node_path}.{key}.{name}" if key in {"definitions", "$defs"} else f"{node_path}.{key}"
-            result.update(_schema_duration_properties(definition, branch_path))
+            result.update(_schema_duration_properties(definition, branch_path, root))
     elif isinstance(child, list):
         for index, item in enumerate(child):
-            result.update(_schema_duration_properties(item, f"{node_path}.{key}[{index}]"))
+            result.update(_schema_duration_properties(item, f"{node_path}.{key}[{index}]", root))
     return result
 
 
-def _schema_duration_properties(node: object, node_path: str = "$") -> dict[str, dict[str, object]]:
+def _schema_duration_properties(
+    node: object, node_path: str = "$", root: object | None = None
+) -> dict[str, dict[str, object]]:
     if not isinstance(node, dict):
         return {}
-    result = _schema_duration_property_entries(node.get("properties"), node_path)
+    root = node if root is None else root
+    result = _schema_duration_property_entries(node.get("properties"), node_path, root)
     for key in ("items", "definitions", "$defs", "oneOf", "allOf", "anyOf", "if", "then", "else"):
-        result.update(_schema_duration_branch_entries(node.get(key), key, node_path))
+        result.update(_schema_duration_branch_entries(node.get(key), key, node_path, root))
     return result
 
 
