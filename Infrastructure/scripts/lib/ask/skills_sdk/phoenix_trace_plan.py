@@ -39,7 +39,7 @@ def _command_profile(command: list[str]) -> tuple[str | None, int | None, list[s
         blockers.append(f"profile_flag_count:{len(profile_positions)}")
         return None, None, blockers
     position = profile_positions[0]
-    if position < 2 or position + 1 >= len(command):
+    if position != 2 or position + 1 >= len(command):
         blockers.append(f"profile_flag_misplaced:{position}")
         return None, position, blockers
     candidate = command[position + 1]
