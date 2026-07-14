@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ask.skills_sdk import ab_contracts, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
+from ask.skills_sdk import ab_contracts, ab_contracts_v0, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
 from ask.skills_sdk.eval_closeout_contracts import EvalCloseoutValidation
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
@@ -771,12 +771,26 @@ def validate_ab_preview_receipt(payload: object) -> ab_contracts.AbPreviewReceip
     return ab_contracts.AbPreviewReceipt.model_validate(payload)
 
 
-def validate_ab_plan_receipt(payload: object) -> ab_contracts.AbPlanReceipt:
-    return ab_contracts.AbPlanReceipt.model_validate(payload)
+def validate_ab_plan_receipt(payload: object) -> ab_contracts_v0.AbPlanReceiptV0 | ab_contracts.AbPlanReceipt:
+    if not isinstance(payload, dict):
+        raise ValueError("A/B plan receipt must be an object")
+    version = payload.get("schema_version")
+    if version == "skills-sdk.ab-plan-receipt.v0":
+        return ab_contracts_v0.AbPlanReceiptV0.model_validate(payload)
+    if version == "skills-sdk.ab-plan-receipt.v1":
+        return ab_contracts.AbPlanReceipt.model_validate(payload)
+    raise ValueError(f"unsupported A/B plan receipt version: {version!r}")
 
 
-def validate_ab_run_receipt(payload: object) -> ab_contracts.AbRunReceipt:
-    return ab_contracts.AbRunReceipt.model_validate(payload)
+def validate_ab_run_receipt(payload: object) -> ab_contracts_v0.AbRunReceiptV0 | ab_contracts.AbRunReceipt:
+    if not isinstance(payload, dict):
+        raise ValueError("A/B run receipt must be an object")
+    version = payload.get("schema_version")
+    if version == "skills-sdk.ab-run-receipt.v0":
+        return ab_contracts_v0.AbRunReceiptV0.model_validate(payload)
+    if version == "skills-sdk.ab-run-receipt.v1":
+        return ab_contracts.AbRunReceipt.model_validate(payload)
+    raise ValueError(f"unsupported A/B run receipt version: {version!r}")
 
 
 def validate_ab_judge_preview_receipt(payload: object) -> ab_contracts.AbJudgePreviewReceipt:

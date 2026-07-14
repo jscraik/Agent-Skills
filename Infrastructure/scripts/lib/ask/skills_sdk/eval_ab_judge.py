@@ -19,12 +19,14 @@ from ask.skills_sdk.eval_ab_judge_codex import (
 )
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
+from ask.skills_sdk.typed_contracts import validate_ab_run_receipt
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
 AB_JUDGE_PREVIEW_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
 AB_JUDGE_SCORE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
-_EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
+AB_RUN_RUNTIME_PROOF_SCHEMA_VERSION = "skills-sdk.ab-run-receipt.v1"
+_EXPERIMENT_ID_RE = re.compile(r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$")
 _SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
 _CODEX_TOKENS_USED_RE = re.compile(r"(?im)tokens used\s*(?::|\n)\s*([0-9][0-9,]*)")
 _CODEX_JSON_TOKENS_USED_RE = re.compile(r'"tokens_used"\s*:\s*([0-9]+)')
@@ -67,9 +69,11 @@ def _load_run_receipt(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     payload = _unwrap_run_receipt(payload)
     if not isinstance(payload, dict):
         return None, "run_receipt_not_object"
-    if not _run_receipt_shape_valid(payload):
+    try:
+        validated = validate_ab_run_receipt(payload)
+    except ValueError:
         return None, "run_receipt_contract_invalid"
-    return payload, None
+    return validated.model_dump(mode="json"), None
 
 
 def _unwrap_run_receipt(payload: object) -> object:
@@ -86,83 +90,12 @@ def _unwrap_run_receipt(payload: object) -> object:
     return payload
 
 
-def _digest_like(value: object) -> bool:
-    return isinstance(value, str) and len(value) >= 71 and value.startswith("sha256:")
-
-
-def _object_field(payload: dict[str, Any], key: str) -> dict[str, Any] | None:
-    value = payload.get(key)
-    return value if isinstance(value, dict) else None
-
-
-def _variant_labels(rows: object) -> set[str]:
-    if not isinstance(rows, list):
-        return set()
-    return {row.get("variant_label") for row in rows if isinstance(row, dict)}
-
-
-def _run_receipt_shape_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _run_receipt_header_valid(payload)
-        and _run_receipt_identity_valid(payload)
-        and _run_receipt_variants_valid(payload)
-    )
-
-
-def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
-    return payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0" and payload.get("operation") == "ab_run" and payload.get("status") in {"completed", "blocked"}
-
-
-def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _experiment_id_valid(payload.get("experiment_id"))
-        and _skill_identity_valid(_object_field(payload, "skill_a"))
-        and _skill_identity_valid(_object_field(payload, "skill_b"))
-        and _fixture_identity_valid(_object_field(payload, "fixture"))
-        and _profile_identity_valid(_object_field(payload, "execution_profile"))
-        and _profile_identity_valid(_object_field(payload, "judge_profile"))
-    )
-
-
 def _experiment_id_valid(value: object) -> bool:
     return isinstance(value, str) and _EXPERIMENT_ID_RE.fullmatch(value) is not None
 
 
-def _skill_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("package_id")) and _digest_like(value.get("package_digest"))
-
-
-def _fixture_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("path")) and _digest_like(value.get("digest"))
-
-
-def _profile_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("id"))
-
-
 def _non_empty_string(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
-
-
-def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _variant_labels(payload.get("variant_results")) == {"A", "B"}
-        and _variant_labels(payload.get("command_plan")) == {"A", "B"}
-        and all(_variant_result_digests_valid(result) for result in payload["variant_results"])
-    )
-
-
-def _variant_result_digests_valid(result: object) -> bool:
-    if not isinstance(result, dict):
-        return False
-    return (
-        all(
-            _digest_like(result.get(key))
-            for key in ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest")
-        )
-        and _non_empty_string(result.get("output_last_message_path"))
-        and _non_empty_string(result.get("runner_stdout_capture_path"))
-    )
 
 
 def _evidence_row(repo_root: Path, result: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
@@ -276,6 +209,13 @@ def build_ab_judge_preview_receipt(repo_root: Path, *, run_receipt: str) -> dict
     inputs = _judge_inputs(repo_root, run_receipt)
     blockers = inputs["blockers"]
     loaded_receipt = inputs["loaded_receipt"]
+    if loaded_receipt is not None and loaded_receipt["schema_version"] != AB_RUN_RUNTIME_PROOF_SCHEMA_VERSION:
+        blockers.extend(
+            [
+                "v1_runtime_profile_proof_required",
+                "run_receipt_runtime_proof_version_unsupported",
+            ]
+        )
     if loaded_receipt is not None and loaded_receipt["status"] != "completed":
         blockers.append("run_receipt_not_completed")
 

@@ -32,7 +32,7 @@ from ask.skills_sdk import eval_ab_judge_codex as codex_judge  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
 
 
-RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json"
+RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
 
 
 def _decision(experiment_id: str) -> dict[str, object]:

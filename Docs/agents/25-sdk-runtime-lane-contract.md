@@ -106,6 +106,47 @@ For each lane, report:
   blocked and continue only with lanes that do not claim cloud confirmation.
 - Before a live oss-cloud retry, run
   `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json` from a host context with 1Password desktop access. The runner accepts only the projected MiniMax/Ollama Cloud profile plus either a regular file containing an `OLLAMA_API_KEY=op://...` reference or the operator-approved FIFO that `op run --env-file` consumes. Its receipt records `auth_source=op_reference` or `auth_source=op_fifo` without reading the FIFO. An empty, plaintext, malformed, or unavailable regular env source is a local preflight blocker: it must not start `codex exec` or be reported as a provider failure.
+- Before an A/B plan admits the `oss-cloud` lane, its catalog preflight must
+  invoke the official `GET https://ollama.com/api/tags` list-models surface
+  through `op run --env-file ~/.codex/.env -- ...`. The env source is an
+  opaque operator stream: the parent process must not open, read, hash, copy,
+  or include its contents in commands, exceptions, logs, receipts, or test
+  fixtures. Only the probe child receives `OLLAMA_API_KEY`; it sends the
+  credential to the official endpoint and emits a redacted result containing
+  the HTTP classification, catalog digest, and exact selected-model match.
+  Missing `op`/auth, network or timeout denial, HTTP failure, malformed catalog,
+  missing model, and duplicate exact matches are typed blockers. There is no
+  direct unauthenticated fallback. This read-only catalog request proves only
+  profile/catalog admission: it performs no generation, does not invoke Codex,
+  and does not prove A/B, judge, provider-generation, or release behavior.
+  The parent accepts catalog-probe evidence only when `op run` returns the
+  exact built-in integer exit code `0`, stderr is empty, and stdout is exactly
+  one JSON object matching the closed probe contract. Boolean, float, string,
+  null, integer-subclass, negative, and nonzero transport results block before
+  stdout parsing; invalid transport types are retained only as redacted
+  exit-class evidence. Missing or extra fields, duplicate keys, trailing JSON,
+  non-finite numbers, wrong primitive types, and contradictions between the
+  result class and its network, HTTP, digest, match, secret, generation,
+  provider, or Codex fields block admission. A nonzero child exit is recorded
+  only as redacted exit-class evidence; its stdout cannot self-claim a pass.
+  Before any comparison or parsing, the parent copies a closed subprocess
+  envelope: `returncode` must be an exact built-in integer, and `stdout` and
+  `stderr` must be exact built-in strings. Missing or exception-raising
+  attributes, subclasses, bytes-like values, coercible objects, mappings,
+  tuples, oversized stdout, and NUL or control-framed stdout are typed,
+  redacted blockers. Evidence records only fixed transport classifications;
+  it never records malformed values, representations, exception text, child
+  stdout or stderr, or the opaque env-stream path. Each of the three attribute
+  reads contains every `BaseException` raised by that hostile property access,
+  including process-control subclasses, but that containment does not extend
+  to the runner invocation, JSON parsing, tests, or unrelated caller code.
+- A planned or completed A/B v1 runtime gate requires `status=pass` for its
+  profile configuration, model catalog, runtime, and catalog facts. The local
+  lane keeps its explicit non-secret `auth.status=not_applicable`
+  representation; the cloud lane requires `auth.status=pass` through the
+  approved opaque-auth boundary. A blocked or not-run receipt remains readable
+  with typed failed facts and blockers, but those facts cannot authorize a
+  plan, completed run, judge preview, or judge score.
 - If Tessl local blocks, preserve the `/tmp/ask-tessl-*` staged evidence and
   fix package shape, project-link setup, plugin pack output, or temp file-install
   setup before live scoring.

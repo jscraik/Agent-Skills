@@ -6,10 +6,23 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
+from ask.skills_sdk.ab_profile_contracts import (
+    AbLanePreflight,
+    AbPreflightBlocker,
+    EvalExecutionProfile,
+    EvalJudgeProfile,
+    EvalSecretBoundary,
+    runtime_preflight_identity_matches_lane,
+)
 
 
 class _SdkContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class DurationValue(_SdkContractModel):
+    value: Annotated[float, Field(ge=0)]
+    unit: Literal["ms", "s", "min", "h"]
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
@@ -17,11 +30,22 @@ _AB_JUDGE_DIMENSION_IDS = {str(dimension["id"]) for dimension in AB_RUBRIC_DIMEN
 _AB_JUDGE_DIMENSION_WEIGHTS = {
     str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
 }
-_EXPERIMENT_ID_PATTERN = r"^[0-9a-f]{16}$"
+_EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
+
+
+def _codex_profile_from_argv(argv: list[str]) -> str:
+    if len(argv) < 4 or argv[:3] != ["codex", "exec", "--profile"]:
+        raise ValueError("Codex argv must start with the installed CLI placement: codex exec --profile")
+    if argv.count("--profile") != 1:
+        raise ValueError("Codex argv must contain exactly one --profile option")
+    profile = argv[3]
+    if profile not in {"oss-local", "oss-cloud"}:
+        raise ValueError("Codex argv profile must be an admitted Skills SDK runtime profile")
+    return profile
 
 
 def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | None) -> bool:
@@ -29,12 +53,15 @@ def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | Non
         return False
     try:
         codex_index = argv.index("codex")
-        if argv[codex_index + 1] != "exec":
-            return False
-        profile_index = argv.index("--profile", codex_index + 2)
-    except (IndexError, ValueError):
+        exec_index = argv.index("exec", codex_index + 1)
+        profile_index = argv.index("--profile", exec_index + 1)
+    except ValueError:
         return False
-    return profile_index + 1 < len(argv) and argv[profile_index + 1] == codex_profile
+    return (
+        argv.count("--profile") == 1
+        and profile_index + 1 < len(argv)
+        and argv[profile_index + 1] == codex_profile
+    )
 
 
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
@@ -71,73 +98,6 @@ def _expected_judge_winner(decision: AbJudgeDecision, computed_scores: dict[str,
     if not _judge_confidence_meets_minimum(decision.confidence, minimum_confidence):
         return tie_result
     return "skill_b" if delta > 0 else "skill_a"
-
-
-class EvalExecutionProfile(_SdkContractModel):
-    id: str = Field(min_length=1)
-    runner: Literal["codex_exec"]
-    sandbox_mode: Literal["read-only", "workspace-write"]
-    approval_policy: Literal["on-request"]
-    codex_json_events_required: Literal[True]
-    output_schema_supported: Literal[True]
-    mutation_allowed: bool
-
-
-class EvalJudgeModelSettings(_SdkContractModel):
-    num_ctx: Annotated[int, Field(ge=1)]
-    num_predict: Annotated[int, Field(ge=1)] | None = None
-    repeat_penalty: Annotated[float, Field(ge=0)] | None = None
-    temperature: Annotated[float, Field(ge=0)]
-    top_k: Annotated[int, Field(ge=0)] | None = None
-    top_p: Annotated[float, Field(ge=0, le=1)]
-
-
-class EvalJudgeRuntimeMetadata(_SdkContractModel):
-    model_id: str = Field(min_length=1)
-    size_gb: Annotated[float, Field(gt=0)]
-    architecture: str = Field(min_length=1)
-    parameters: str = Field(min_length=1)
-    quantization: str = Field(min_length=1)
-    context_length: Annotated[int, Field(ge=1)]
-    metadata_source: Literal["ollama_show"]
-
-
-class EvalJudgeSmokeGuard(_SdkContractModel):
-    max_tokens_used: Annotated[int, Field(ge=1)]
-    forbid_visible_thinking: bool
-    allow_codex_jsonl_reasoning_events: bool = False
-    forbid_fallback_metadata: bool
-
-
-class EvalJudgeProfile(_SdkContractModel):
-    id: str = Field(min_length=1)
-    codex_profile: str = Field(min_length=1)
-    provider: Literal["ollama", "codex"]
-    mode: Literal["local", "cloud", "codex-fast"]
-    host: str | None
-    model: str = Field(min_length=1)
-    model_role: Literal[
-        "local_sandbox_eval_default",
-        "larger_local_transcript_trial",
-        "code_heavy_specialist",
-        "fast_fallback",
-        "local_security_specialist",
-        "cloud_confirmation",
-        "codex_fast_smoke",
-    ]
-    model_settings: EvalJudgeModelSettings | None
-    runtime_metadata: EvalJudgeRuntimeMetadata | None
-    smoke_guard: EvalJudgeSmokeGuard | None
-    network_required: bool
-    secret_env_names: list[str]
-    auth_boundary: Literal["none", "env_secret", "codex_cli_auth"]
-    receives_sanitized_outputs_only: Literal[True]
-
-
-class EvalSecretBoundary(_SdkContractModel):
-    skill_execution_env_secret_names: list[str]
-    judge_env_secret_names: list[str]
-    skill_execution_receives_judge_secrets: Literal[False]
 
 
 class EvalProfilePreviewReceipt(_SdkContractModel):
@@ -344,6 +304,7 @@ class AbPreviewReceipt(_SdkContractModel):
 
 class AbCodexCommandPlan(_SdkContractModel):
     variant_label: Literal["A", "B"]
+    codex_profile: Literal["oss-local", "oss-cloud"]
     command_argv: list[str] = Field(min_length=10)
     sandbox_mode: Literal["read-only", "workspace-write"]
     approval_policy: Literal["on-request"]
@@ -355,11 +316,45 @@ class AbCodexCommandPlan(_SdkContractModel):
     prompt_stdin_digest: str = Field(min_length=71)
     planned_write_paths: list[str]
     allowed_secret_env_names: list[str]
-
-
+    @model_validator(mode="after")
+    def _argv_proves_profile(self) -> AbCodexCommandPlan:
+        if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
+            raise ValueError("Codex command argv profile must match codex_profile")
+        return self
+def _validate_plan_gate_identity(gate: AbRuntimeProfilePlanGate) -> None:
+    expected_order = 1 if gate.lane == "oss-local" else 2
+    if gate.lane != gate.codex_profile or gate.order != expected_order:
+        raise ValueError("runtime profile gate identity or order is invalid")
+    if gate.judge_profile.codex_profile != gate.codex_profile:
+        raise ValueError("judge metadata cannot substitute for the runtime Codex profile")
+    if gate.status == "planned" and not runtime_preflight_identity_matches_lane(gate.lane, gate.preflight):
+        raise ValueError("planned runtime gate preflight identity does not match its lane")
+def _validate_plan_gate_packet(gate: AbRuntimeProfilePlanGate) -> None:
+    if gate.command_plan and not _exact_variant_labels(gate.command_plan):
+        raise ValueError("runtime profile gate command plan must be empty or include both A/B variants")
+    if any(plan.codex_profile != gate.codex_profile for plan in gate.command_plan):
+        raise ValueError("runtime profile gate command profile mismatch")
+    if (gate.status == "planned") != (gate.preflight.admission.status == "pass"):
+        raise ValueError("runtime profile gate status must match preflight admission")
+    if gate.blockers != gate.preflight.admission.blockers:
+        raise ValueError("runtime profile gate blockers must match preflight")
+class AbRuntimeProfilePlanGate(_SdkContractModel):
+    order: Literal[1, 2]
+    lane: Literal["oss-local", "oss-cloud"]
+    codex_profile: Literal["oss-local", "oss-cloud"]
+    judge_profile: EvalJudgeProfile
+    status: Literal["planned", "blocked"]
+    blockers: list[AbPreflightBlocker]
+    preflight: AbLanePreflight
+    command_plan: list[AbCodexCommandPlan] = Field(max_length=2)
+    @model_validator(mode="after")
+    def _gate_identity_matches(self) -> AbRuntimeProfilePlanGate:
+        _validate_plan_gate_identity(self)
+        _validate_plan_gate_packet(self)
+        return self
 class AbPlanReceipt(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-plan-receipt.v0"]
-    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"]
+    schema_version: Literal["skills-sdk.ab-plan-receipt.v1"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"]
     status: Literal["planned", "blocked"]
     operation: Literal["ab_plan"]
     skill_a: AbSkillVariant | None
@@ -367,55 +362,60 @@ class AbPlanReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
+    codex_profile: Literal["oss-local"] | None
+    runtime_profile_gates: list[AbRuntimeProfilePlanGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
     command_variant_labels: list[Literal["A", "B"]] = Field(max_length=2)
     command_plan: list[AbCodexCommandPlan] = Field(max_length=2)
     secret_boundary: EvalSecretBoundary
     execution_boundary: Literal["codex_exec_sandbox"]
     judge_boundary: Literal["post_run_sanitized_evidence_only"]
     mutation_performed: Literal[False]
-    network_accessed: Literal[False]
+    network_accessed: bool
     provider_invoked: Literal[False]
     codex_exec_invoked: Literal[False]
     blockers: list[str]
-    acceptance_trace: list[
-        Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
-    ] = Field(min_length=1)
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]]
     agent_summary: str = Field(min_length=1)
 
     @model_validator(mode="after")
     def _status_matches_plan(self) -> AbPlanReceipt:
         if self.status == "planned":
-            if self.blockers:
-                raise ValueError("planned A/B receipts must not include blockers")
-            if not self._has_plan_evidence():
-                raise ValueError("planned A/B receipts must include complete plan evidence")
-            if not _exact_variant_labels(self.command_plan):
-                raise ValueError("planned A/B receipts must include exactly one command plan per variant")
-            if not _exact_command_labels(self.command_variant_labels):
-                raise ValueError("planned A/B receipts must include exact command variant labels")
-        elif not self.blockers:
-            raise ValueError("blocked A/B plan receipts must include blockers")
+            self._validate_planned_packet()
+        else:
+            self._validate_blocked_packet()
         return self
 
+    def _validate_blocked_packet(self) -> None:
+        if not self.blockers:
+            raise ValueError("blocked A/B plan receipts must include blockers")
+        if self.command_plan or self.command_variant_labels:
+            raise ValueError("blocked A/B plan receipts cannot expose executable command packets")
+        if any(gate.command_plan for gate in self.runtime_profile_gates):
+            raise ValueError("blocked A/B runtime gates cannot expose executable command packets")
+
+    def _validate_planned_packet(self) -> None:
+        if self.blockers or not self._has_plan_evidence():
+            raise ValueError("planned A/B receipts require complete evidence and no blockers")
+        if not _exact_variant_labels(self.command_plan) or not _exact_command_labels(self.command_variant_labels):
+            raise ValueError("planned A/B receipts require exact A/B command packets and labels")
+        if [gate.lane for gate in self.runtime_profile_gates] != ["oss-local", "oss-cloud"]:
+            raise ValueError("A/B plan must require ordered oss-local then oss-cloud gates")
+        if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
+            raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
+        if self.command_plan != self.runtime_profile_gates[0].command_plan:
+            raise ValueError("top-level command plan must match the oss-local runtime gate")
+
     def _has_plan_evidence(self) -> bool:
-        return all(
-            item is not None
-            for item in (
-                self.skill_a,
-                self.skill_b,
-                self.fixture,
-                self.execution_profile,
-                self.judge_profile,
-                self.evidence_root,
-                self.experiment_id,
-            )
-        )
+        evidence = (self.skill_a, self.skill_b, self.fixture, self.execution_profile,
+                    self.judge_profile, self.evidence_root, self.experiment_id)
+        return all(item is not None for item in evidence)
 
 
 class AbVariantRunResult(_SdkContractModel):
     variant_label: Literal["A", "B"]
+    codex_profile: Literal["oss-local", "oss-cloud"]
     status: Literal["pass", "blocked"]
     exit_code: int
     command_argv: list[str] = Field(min_length=10)
@@ -430,19 +430,57 @@ class AbVariantRunResult(_SdkContractModel):
     output_last_message_digest: str | None = Field(default=None, min_length=71)
     semantic_output_excerpt: str | None = Field(default=None, min_length=1)
     blockers: list[str]
-
     @model_validator(mode="after")
     def _status_matches_blockers(self) -> AbVariantRunResult:
+        if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
+            raise ValueError("executed Codex argv profile must match codex_profile")
         if self.status == "pass" and self.blockers:
             raise ValueError("passing A/B variant results must not include blockers")
         if self.status == "blocked" and not self.blockers:
             raise ValueError("blocked A/B variant results must include blockers")
         return self
-
-
+class AbRuntimeProfileRunGate(_SdkContractModel):
+    order: Literal[1, 2]
+    lane: Literal["oss-local", "oss-cloud"]
+    codex_profile: Literal["oss-local", "oss-cloud"]
+    status: Literal["completed", "blocked", "not_run_with_reason"]
+    blockers: list[str | AbPreflightBlocker]
+    preflight: AbLanePreflight
+    variant_results: list[AbVariantRunResult] = Field(max_length=2)
+    @model_validator(mode="after")
+    def _gate_status_matches(self) -> AbRuntimeProfileRunGate:
+        expected_order = 1 if self.lane == "oss-local" else 2
+        if self.lane != self.codex_profile or self.order != expected_order:
+            raise ValueError("runtime run gate identity or order is invalid")
+        if self.status == "completed" and not self._is_completed_gate():
+            raise ValueError("completed runtime gate requires both variants and no blockers")
+        if self.status != "completed" and not self.blockers:
+            raise ValueError("blocked/not-run runtime gate requires a reason")
+        if self.status == "not_run_with_reason" and self.variant_results:
+            raise ValueError("not-run runtime gate cannot include variant results")
+        if any(result.codex_profile != self.codex_profile for result in self.variant_results):
+            raise ValueError("runtime result profile mismatch")
+        return self
+    def _is_completed_gate(self) -> bool:
+        facts = (
+            self.preflight.profile_config,
+            self.preflight.model_catalog,
+            self.preflight.runtime,
+            self.preflight.auth,
+            self.preflight.catalog,
+        )
+        return (
+            not self.blockers
+            and self.preflight.admission.status == "pass"
+            and not self.preflight.admission.blockers
+            and all(fact.status in {"pass", "not_applicable"} and fact.blocker is None for fact in facts)
+            and runtime_preflight_identity_matches_lane(self.lane, self.preflight)
+            and _exact_variant_labels(self.variant_results)
+            and all(_variant_result_proves_success(result) for result in self.variant_results)
+        )
 class AbRunReceipt(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-run-receipt.v0"]
-    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json"]
+    schema_version: Literal["skills-sdk.ab-run-receipt.v1"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v1.schema.json"]
     status: Literal["completed", "blocked"]
     operation: Literal["ab_run"]
     skill_a: AbSkillVariant | None
@@ -450,8 +488,10 @@ class AbRunReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
+    codex_profile: Literal["oss-local"]
+    runtime_profile_gates: list[AbRuntimeProfileRunGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
     command_variant_labels: list[Literal["A", "B"]] = Field(max_length=2)
     command_plan: list[AbCodexCommandPlan] = Field(max_length=2)
     variant_results: list[AbVariantRunResult] = Field(max_length=2)
@@ -463,7 +503,7 @@ class AbRunReceipt(_SdkContractModel):
     provider_invoked: bool
     judge_provider_invoked: Literal[False]
     codex_exec_invoked: bool
-    timeout_seconds: int = Field(ge=1)
+    timeout: DurationValue
     blockers: list[str]
     acceptance_trace: list[
         Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
@@ -483,11 +523,27 @@ class AbRunReceipt(_SdkContractModel):
                 raise ValueError("completed A/B run receipts must include exactly one result per variant")
             if set(self.command_variant_labels) != {"A", "B"}:
                 raise ValueError("completed A/B run receipts must include exact command variant labels")
+            if not self._has_consistent_runtime_gates():
+                raise ValueError(
+                    "A/B run must preserve ordered runtime gates and matching oss-local results"
+                )
+            if any(gate.status != "completed" for gate in self.runtime_profile_gates):
+                raise ValueError("completed A/B run requires both runtime profile gates")
             if not self._reports_codex_side_effects():
                 raise ValueError("completed A/B run receipts must report Codex execution side effects")
         elif not self.blockers:
             raise ValueError("blocked A/B run receipts must include blockers")
         return self
+    def _has_consistent_runtime_gates(self) -> bool:
+        return (
+            [gate.lane for gate in self.runtime_profile_gates] == ["oss-local", "oss-cloud"]
+            and self.variant_results == self.runtime_profile_gates[0].variant_results
+            and self._variant_results_match_command_plan()
+        )
+
+    def _variant_results_match_command_plan(self) -> bool:
+        plans = {plan.variant_label: plan.command_argv for plan in self.command_plan}
+        return all(plans.get(result.variant_label) == result.command_argv for result in self.variant_results)
 
     def _has_run_evidence(self) -> bool:
         return all(
@@ -504,7 +560,16 @@ class AbRunReceipt(_SdkContractModel):
         )
 
     def _reports_codex_side_effects(self) -> bool:
-        return self.mutation_performed and self.network_accessed and self.provider_invoked and self.codex_exec_invoked
+        return self.mutation_performed and self.provider_invoked and self.codex_exec_invoked
+
+
+def _variant_result_proves_success(result: AbVariantRunResult) -> bool:
+    return (
+        result.status == "pass"
+        and result.exit_code == 0
+        and not result.blockers
+        and result.output_last_message_digest is not None
+    )
 
 
 class AbJudgePackageIdentity(_SdkContractModel):

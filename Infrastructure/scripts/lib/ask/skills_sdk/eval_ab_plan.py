@@ -5,15 +5,21 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt
+from ask.skills_sdk.eval_profiles import select_judge_profile
+from ask.skills_sdk.eval_ab_preflight import PreflightProbe, build_lane_preflight
 
 
-AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v0"
-AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"
+AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v1"
+AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
 DEFAULT_EVIDENCE_ROOT = ".harness/artifacts/sdk-ab-evals"
 
 
 def _digest_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
+
+
+def _experiment_id_from_seed(seed: str) -> str:
+    return f"ex_{hashlib.sha256(seed.encode('utf-8')).hexdigest()[:16]}"
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
@@ -45,7 +51,7 @@ def _experiment_id(preview_receipt: dict[str, Any], execution_profile_id: str, j
         execution_profile_id,
         judge_profile_id,
     ]
-    return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:16]
+    return _experiment_id_from_seed("\n".join(parts))
 
 
 def _variant_command(
@@ -57,14 +63,18 @@ def _variant_command(
     evidence_root: str,
     experiment_id: str,
     prompt: str,
+    codex_profile: str,
 ) -> dict[str, Any]:
-    variant_root = f"{evidence_root}/{experiment_id}/{label}"
+    variant_root = f"{evidence_root}/{experiment_id}/{codex_profile}/{label}"
     output_path = f"{variant_root}/last-message.json"
     event_log_path = f"{variant_root}/codex-events.jsonl"
     prompt_path = f"{variant_root}/prompt.md"
     return {
         "variant_label": label,
-        "command_argv": _codex_command_argv(sandbox_mode, approval_policy, repo_root_label, output_path),
+        "codex_profile": codex_profile,
+        "command_argv": _codex_command_argv(
+            sandbox_mode, approval_policy, repo_root_label, output_path, codex_profile,
+        ),
         "sandbox_mode": sandbox_mode,
         "approval_policy": approval_policy,
         "event_log_path": event_log_path,
@@ -78,14 +88,20 @@ def _variant_command(
     }
 
 
-def _codex_command_argv(sandbox_mode: str, approval_policy: str, repo_root_label: str, output_path: str) -> list[str]:
+def _codex_command_argv(
+    sandbox_mode: str,
+    approval_policy: str,
+    repo_root_label: str,
+    output_path: str,
+    codex_profile: str,
+) -> list[str]:
     return [
         "codex",
         "exec",
+        "--profile",
+        codex_profile,
         "--sandbox",
         sandbox_mode,
-        "--ask-for-approval",
-        approval_policy,
         "--cd",
         repo_root_label,
         "--json",
@@ -106,7 +122,7 @@ def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
     )
 
 
-def build_ab_plan_receipt(
+def _build_ab_plan_receipt(
     repo_root: Path,
     *,
     skill_a: str,
@@ -117,6 +133,7 @@ def build_ab_plan_receipt(
     execution_profile_id: str = "codex-read-only",
     judge_profile_id: str = "oss-local",
     evidence_root: str = DEFAULT_EVIDENCE_ROOT,
+    preflight_probe: PreflightProbe | None = None,
 ) -> dict[str, Any]:
     preview = _preview_receipt(
         repo_root,
@@ -132,17 +149,45 @@ def build_ab_plan_receipt(
     evidence_root_label, evidence_blocker = _planned_evidence_root(repo_root, evidence_root)
     if evidence_blocker:
         blockers.append(evidence_blocker)
-
-    experiment_id, command_plan = _planned_commands(
+    experiment_id, runtime_profile_gates = _planned_commands(
         preview,
         blockers=blockers,
         evidence_root_label=evidence_root_label,
         execution_profile_id=execution_profile_id,
         judge_profile_id=judge_profile_id,
+        preflight_probe=preflight_probe,
+    )
+    status, command_plan = _plan_status(blockers, runtime_profile_gates)
+    return _plan_payload(
+        preview, status, blockers, evidence_root_label, experiment_id,
+        command_plan, runtime_profile_gates,
     )
 
+
+def build_ab_plan_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
+    """Build a canonical plan while keeping the public call surface narrow."""
+    return _build_ab_plan_receipt(repo_root, **kwargs)
+
+
+def _plan_status(
+    blockers: list[str], runtime_profile_gates: list[dict[str, Any]],
+) -> tuple[str, list[dict[str, Any]]]:
+    blockers.extend(_runtime_preflight_blockers(runtime_profile_gates))
     status = "blocked" if blockers else "planned"
-    return _plan_payload(preview, status, blockers, evidence_root_label, experiment_id, command_plan)
+    command_plan = (
+        runtime_profile_gates[0]["command_plan"]
+        if status == "planned" and runtime_profile_gates
+        else []
+    )
+    return status, command_plan
+
+
+def _runtime_preflight_blockers(runtime_profile_gates: list[dict[str, Any]]) -> list[str]:
+    return [
+        f"{gate['lane']}:{item['blocker_class']}"
+        for gate in runtime_profile_gates
+        for item in gate["preflight"]["admission"]["blockers"]
+    ]
 
 
 def _preview_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -156,14 +201,40 @@ def _planned_commands(
     evidence_root_label: str | None,
     execution_profile_id: str,
     judge_profile_id: str,
+    preflight_probe: PreflightProbe | None,
 ) -> tuple[str | None, list[dict[str, Any]]]:
     if blockers or evidence_root_label is None:
-        return None, []
+        return _experiment_id_from_seed("\n".join(blockers or ["evidence_root_unavailable"])), []
     experiment_id = _experiment_id(preview, execution_profile_id, judge_profile_id)
-    return experiment_id, _variant_commands(preview, evidence_root_label, experiment_id)
+    gates = []
+    for order, profile_id in enumerate(("oss-local", "oss-cloud"), start=1):
+        profile = select_judge_profile(profile_id)
+        codex_profile = str(profile["codex_profile"])
+        preflight = build_lane_preflight(profile, preflight_probe)
+        gates.append({
+            "order": order,
+            "lane": profile_id,
+            "codex_profile": codex_profile,
+            "judge_profile": profile,
+            "status": "planned" if preflight["admission"]["status"] == "pass" else "blocked",
+            "blockers": preflight["admission"]["blockers"],
+            "preflight": preflight,
+            "command_plan": [],
+        })
+    if all(gate["preflight"]["admission"]["status"] == "pass" for gate in gates):
+        for gate in gates:
+            gate["command_plan"] = _variant_commands(
+                preview,
+                evidence_root_label,
+                experiment_id,
+                gate["codex_profile"],
+            )
+    return experiment_id, gates
 
 
-def _variant_commands(preview: dict[str, Any], evidence_root_label: str, experiment_id: str) -> list[dict[str, Any]]:
+def _variant_commands(
+    preview: dict[str, Any], evidence_root_label: str, experiment_id: str, codex_profile: str,
+) -> list[dict[str, Any]]:
     sandbox_mode = preview["execution_profile"]["sandbox_mode"]
     approval_policy = preview["execution_profile"]["approval_policy"]
     return [
@@ -175,6 +246,7 @@ def _variant_commands(preview: dict[str, Any], evidence_root_label: str, experim
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
             prompt=_variant_prompt(preview["skill_a"], preview["fixture"]),
+            codex_profile=codex_profile,
         ),
         _variant_command(
             label="B",
@@ -184,6 +256,7 @@ def _variant_commands(preview: dict[str, Any], evidence_root_label: str, experim
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
             prompt=_variant_prompt(preview["skill_b"], preview["fixture"]),
+            codex_profile=codex_profile,
         ),
     ]
 
@@ -195,6 +268,7 @@ def _plan_payload(
     evidence_root_label: str | None,
     experiment_id: str | None,
     command_plan: list[dict[str, Any]],
+    runtime_profile_gates: list[dict[str, Any]],
 ) -> dict[str, Any]:
     return {
         "schema_version": AB_PLAN_SCHEMA_VERSION,
@@ -206,6 +280,8 @@ def _plan_payload(
         "fixture": preview["fixture"],
         "execution_profile": preview["execution_profile"],
         "judge_profile": preview["judge_profile"],
+        "codex_profile": "oss-local" if runtime_profile_gates else None,
+        "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": evidence_root_label,
         "experiment_id": experiment_id,
         "command_variant_labels": [plan["variant_label"] for plan in command_plan],
@@ -214,7 +290,7 @@ def _plan_payload(
         "execution_boundary": "codex_exec_sandbox",
         "judge_boundary": "post_run_sanitized_evidence_only",
         "mutation_performed": False,
-        "network_accessed": False,
+        "network_accessed": _preflight_network_accessed(runtime_profile_gates),
         "provider_invoked": False,
         "codex_exec_invoked": False,
         "blockers": blockers,
@@ -225,3 +301,10 @@ def _plan_payload(
             else f"A/B eval execution plan is blocked: {', '.join(blockers)}."
         ),
     }
+
+
+def _preflight_network_accessed(runtime_profile_gates: list[dict[str, Any]]) -> bool:
+    return any(
+        gate.get("preflight", {}).get("model_catalog", {}).get("network_accessed") is True
+        for gate in runtime_profile_gates
+    )
