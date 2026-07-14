@@ -10,7 +10,7 @@
     "status": {"type": "string", "enum": ["pass", "blocked"]},
     "operation": {"type": "string", "const": "phoenix_eval_trace"},
     "source_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-    "source_kind": {"type": "string", "enum": ["eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"]},
+    "source_kind": {"type": "string", "enum": ["eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt", "unsupported_receipt"]},
     "eval_status": {"type": ["string", "null"]},
     "observability_status": {"type": "string", "enum": ["not_run", "emitted", "blocked"]},
     "runner": {"type": ["string", "null"]},
@@ -18,7 +18,7 @@
     "profile": {"type": ["string", "null"], "enum": ["oss-local", "oss-cloud", null]},
     "profile_evidence": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "items": {"$ref": "#/$defs/profile_evidence"}
     },
     "target_path": {"type": ["string", "null"]},
@@ -32,10 +32,10 @@
     "root_span_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
     "span_plan": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 0,
       "items": {"$ref": "#/$defs/span_plan"}
     },
-    "planned_span_count": {"type": "integer", "minimum": 3},
+    "planned_span_count": {"type": "integer", "minimum": 0},
     "emitted_span_count": {"type": "integer", "minimum": 0},
     "case_span_trace_enabled": {"type": "boolean"},
     "case_span_limit": {"type": "integer", "minimum": 0, "maximum": 20},
@@ -45,7 +45,7 @@
       "type": "array",
       "items": {"$ref": "#/$defs/emitted_span"}
     },
-    "checks": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/check"}},
+    "checks": {"type": "array", "minItems": 0, "items": {"$ref": "#/$defs/check"}},
     "blockers": {"type": "array", "items": {"$ref": "#/$defs/check"}},
     "mutation_performed": {"type": "boolean"},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string"}},

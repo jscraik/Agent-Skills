@@ -379,8 +379,9 @@ def _build_plan_spans(
     return plan, root_span_id
 
 
-def build_eval_trace_plan(receipt: dict[str, Any]) -> dict[str, Any]:
-    source_digest = _sha256_json(receipt)
+def build_eval_trace_plan(receipt: dict[str, Any], source_digest: str | None = None) -> dict[str, Any]:
+    if source_digest is None:
+        source_digest = _sha256_json(receipt)
     source_kind = _source_kind(receipt)
     evidence = _profile_evidence(receipt, source_kind)
     blockers = [blocker for item in evidence for blocker in item["blockers"]]
@@ -425,17 +426,46 @@ def kv(key, value):
         target.string_value = str(value)
     return KeyValue(key=key, value=target)
 
+span_rows = cfg["plan"]["spans"]
+span_id_to_children = {}
+for row in span_rows:
+    parent_id = row["parent_span_id"]
+    if parent_id:
+        span_id_to_children.setdefault(parent_id, []).append(row["span_id"])
+
+span_timings = {}
+for index, row in enumerate(span_rows):
+    span_timings[row["span_id"]] = {
+        "start": now + (index * 1000000),
+        "end": now + ((index + 1) * 1000000),
+    }
+
+def get_max_descendant_end(span_id):
+    children = span_id_to_children.get(span_id, [])
+    if not children:
+        return span_timings[span_id]["end"]
+    child_ends = [get_max_descendant_end(child_id) for child_id in children]
+    return max(child_ends)
+
+for row in span_rows:
+    span_id = row["span_id"]
+    children = span_id_to_children.get(span_id, [])
+    if children:
+        max_child_end = get_max_descendant_end(span_id)
+        span_timings[span_id]["end"] = max(span_timings[span_id]["end"], max_child_end + 1000000)
+
 spans = []
-for index, row in enumerate(cfg["plan"]["spans"]):
+for index, row in enumerate(span_rows):
     blocked = row["status"] in {"blocked", "fail", "failed", "error"}
+    timing = span_timings[row["span_id"]]
     spans.append(Span(
         trace_id=bytes.fromhex(cfg["plan"]["trace_id"]),
         span_id=bytes.fromhex(row["span_id"]),
         parent_span_id=bytes.fromhex(row["parent_span_id"]) if row["parent_span_id"] else b"",
         name=row["name"],
         kind=Span.SPAN_KIND_INTERNAL,
-        start_time_unix_nano=now + (index * 1000000),
-        end_time_unix_nano=now + ((index + 1) * 1000000),
+        start_time_unix_nano=timing["start"],
+        end_time_unix_nano=timing["end"],
         attributes=[kv(key, value) for key, value in row["attributes"].items()] + [
             kv("openinference.span.kind", row["span_kind"]),
         ],

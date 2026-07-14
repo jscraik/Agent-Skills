@@ -677,19 +677,19 @@ def build_phoenix_eval_trace_receipt(
 
     config = _phoenix_config(repo_root)
     bounded_case_span_limit = max(0, min(case_span_limit, PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT))
+    source_digest = _sha256_json(eval_receipt)
     plan_receipt = dict(eval_receipt)
     cases = eval_receipt.get("cases")
     if isinstance(cases, list):
         plan_receipt["cases"] = cases[:bounded_case_span_limit] if trace_case_spans else []
-    plan = build_eval_trace_plan(plan_receipt)
-    source_digest = _sha256_json(eval_receipt)
+    plan = build_eval_trace_plan(plan_receipt, source_digest=source_digest)
     raw_paths = _raw_key_paths(eval_receipt)
     source_kind = _source_kind(eval_receipt)
     checks = [
         _check(
             "source_kind_supported",
             "pass" if source_kind in {"eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"} else "blocker",
-            "Phoenix eval tracing accepts eval-run, A/B run, and A/B judge-score receipts.",
+            "Phoenix eval tracing accepts eval_run_receipt, ab_run_receipt, and ab_judge_score_receipt.",
             [source_kind],
         ),
         _check(
@@ -849,7 +849,7 @@ def build_phoenix_mirror_receipt(
             _check(
                 "source_kind_supported",
                 "pass" if source_kind in SUPPORTED_SOURCE_KINDS else "blocker",
-                "Phoenix mirror accepts only eval closeout, eval run, or observability receipts.",
+                "Phoenix mirror accepts eval_closeout, eval_run_receipt, ab_run_receipt, ab_judge_score_receipt, and observability_receipt.",
                 [source_kind],
             )
         )

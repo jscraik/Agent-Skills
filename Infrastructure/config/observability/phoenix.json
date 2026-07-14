@@ -1,13 +1,11 @@
 {
   "base_url": "http://localhost:6006",
-  "case_span_limit": 10,
   "completion_tokens": 0,
   "enabled": false,
   "eval_tracing_enabled": false,
   "model": "qwen/qwen3-coder",
   "otel_python": "~/.agents/otel-collector/.venv/bin/python",
   "profile": "oss-local",
-  "project_name": "agent-skills-skills-sdk-evals",
   "prompt_tokens": 0,
   "provider": "local-oss",
   "timeout_seconds": 2.0

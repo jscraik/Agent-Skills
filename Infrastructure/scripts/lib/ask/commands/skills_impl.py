@@ -8346,9 +8346,34 @@ def _attach_phoenix_eval_trace(
     except (ImportError, KeyError, OSError, TypeError, ValueError) as exc:
         payload["phoenix_eval_trace"] = {
             "schema_version": schema_version,
+            "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v1.schema.json",
             "status": "blocked",
-            "observability_status": "blocked",
+            "operation": "phoenix_eval_trace",
+            "source_receipt_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "source_kind": "unsupported_receipt",
             "eval_status": receipt.get("status"),
+            "observability_status": "blocked",
+            "runner": receipt.get("runner"),
+            "mode": receipt.get("mode"),
+            "profile": None,
+            "profile_evidence": [],
+            "target_path": None,
+            "package_id": receipt.get("package_id"),
+            "package_digest": receipt.get("package_digest"),
+            "case_count": 0,
+            "passed_count": 0,
+            "failed_count": 0,
+            "project_name": "agent-skills-skills-sdk-evals",
+            "trace_id": "00000000000000000000000000000000",
+            "root_span_id": "0000000000000000",
+            "span_plan": [],
+            "planned_span_count": 0,
+            "emitted_span_count": 0,
+            "case_span_trace_enabled": False,
+            "case_span_limit": 0,
+            "case_span_count": 0,
+            "enabled": False,
+            "emitted_spans": [],
             "checks": [],
             "blockers": [
                 {
@@ -8359,8 +8384,9 @@ def _attach_phoenix_eval_trace(
                     "evidence": [f"error_class:{type(exc).__name__}"],
                 }
             ],
-            "error_class": type(exc).__name__,
             "mutation_performed": False,
+            "acceptance_trace": ["phoenix-oss-eval-observability-workflow-2026-07-08", "PU-026"],
+            "agent_summary": f"Phoenix eval trace blocked due to unexpected error: {type(exc).__name__}",
         }
 
 

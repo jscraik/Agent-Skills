@@ -142,7 +142,7 @@ so it cannot silently fall back to an internal-disk directory:
 
 ```bash
 export ASK_PHOENIX_DATA_DIR=/Volumes/ExternalSSD/jamiecraik-codex-storage/phoenix/data
-test -d /Volumes/ExternalSSD
+test -d /Volumes/ExternalSSD || { echo "External SSD not mounted; terminate before proceeding"; exit 1; }
 mkdir -p "$ASK_PHOENIX_DATA_DIR"
 docker compose -f Infrastructure/config/observability/compose.phoenix.yaml config --quiet
 docker compose -f Infrastructure/config/observability/compose.phoenix.yaml up -d

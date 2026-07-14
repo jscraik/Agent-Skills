@@ -19,3 +19,5 @@ services:
       - type: bind
         source: ${ASK_PHOENIX_DATA_DIR:?Set ASK_PHOENIX_DATA_DIR to an attached persistent data directory}
         target: /mnt/data
+        bind:
+          create_host_path: false
