@@ -23,6 +23,7 @@ from ask.skills_sdk.phoenix_observability import (  # noqa: E402
     build_phoenix_smoke_receipt,
     build_phoenix_status_receipt,
 )
+from ask.skills_sdk.phoenix_trace_plan import build_eval_trace_plan  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -74,6 +75,16 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
                 }
             ],
         }
+        if codex_exec_invoked:
+            receipt["codex_exec_command_shape"] = [
+                "codex",
+                "exec",
+                "--profile",
+                "oss-local",
+                "--sandbox",
+                "read-only",
+                "-",
+            ]
         if include_raw:
             receipt["prompt"] = "raw prompt must never enter mirror rows"
             receipt["cases"][0]["output"] = "raw output must never enter mirror rows"
@@ -93,6 +104,24 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
         self.assertEqual(receipt["server_version"], "test-phoenix")
         self.assertEqual(receipt["otlp_http_endpoint"], f"{base_url}/v1/traces")
         self.assertFalse(receipt["mutation_performed"])
+
+    def test_repo_config_keeps_generic_tracing_opt_in_and_pins_eval_project(self) -> None:
+        config = json.loads(
+            (REPO_ROOT / "Infrastructure/config/observability/phoenix.json").read_text(encoding="utf-8")
+        )
+        compose = (REPO_ROOT / "Infrastructure/config/observability/compose.phoenix.yaml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertFalse(config["enabled"])
+        self.assertFalse(config["eval_tracing_enabled"])
+        self.assertEqual(config["project_name"], "agent-skills-skills-sdk-evals")
+        self.assertEqual(config["otel_python"], "~/.agents/otel-collector/.venv/bin/python")
+        self.assertIn("arizephoenix/phoenix@sha256:", compose)
+        self.assertIn("ASK_PHOENIX_DATA_DIR:?", compose)
+        self.assertIn('127.0.0.1:6006:6006', compose)
+        self.assertIn('127.0.0.1:4317:4317', compose)
+        self.assertIn("PHOENIX_WORKING_DIR: /mnt/data", compose)
 
     def test_mirror_preview_whitelists_receipt_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -352,10 +381,13 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
 
         self.assertEqual(trace_receipt["status"], "pass")
-        self.assertEqual(trace_receipt["emitted_span_count"], 1)
-        self.assertFalse(trace_receipt["case_span_trace_enabled"])
-        self.assertEqual(trace_receipt["case_span_count"], 0)
-        self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
+        self.assertEqual(trace_receipt["observability_status"], "emitted")
+        self.assertEqual(trace_receipt["emitted_span_count"], 6)
+        self.assertTrue(trace_receipt["case_span_trace_enabled"])
+        self.assertEqual(trace_receipt["case_span_count"], 1)
+        self.assertEqual(payloads[0]["plan"]["project_name"], "agent-skills-skills-sdk-evals")
+        self.assertEqual(len(payloads[0]["plan"]["spans"]), 6)
+        self.assertEqual({span["trace_id"] for span in trace_receipt["emitted_spans"]}, {trace_receipt["trace_id"]})
 
     def test_eval_trace_case_spans_are_opt_in_and_capped(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -378,10 +410,10 @@ print(json.dumps({"status": "pass", "http_status": 200}))
                 "operation": "eval_run",
                 "runner": "deterministic_jsonl_v0",
                 "codex_profile": "oss-local",
-                "case_count": 8,
-                "passed_count": 8,
+                "case_count": 30,
+                "passed_count": 30,
                 "failed_count": 0,
-                "cases": [{"case_id": f"case-{index}", "status": "pass", "score": 1} for index in range(8)],
+                "cases": [{"case_id": f"case-{index}", "status": "pass", "score": 1} for index in range(30)],
             }
 
             trace_receipt = build_phoenix_eval_trace_receipt(
@@ -396,12 +428,12 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             payloads = [json.loads(line) for line in calls.read_text(encoding="utf-8").splitlines()]
 
         self.assertEqual(trace_receipt["status"], "pass")
-        self.assertEqual(trace_receipt["emitted_span_count"], 6)
+        self.assertEqual(trace_receipt["emitted_span_count"], 44)
         self.assertTrue(trace_receipt["case_span_trace_enabled"])
-        self.assertEqual(trace_receipt["case_span_limit"], 5)
-        self.assertEqual(trace_receipt["case_span_count"], 5)
-        self.assertEqual(payloads[0]["command_name"], "sdk eval run eval.run")
-        self.assertEqual(payloads[-1]["command_name"], "sdk eval run eval.case case-4")
+        self.assertEqual(trace_receipt["case_span_limit"], 20)
+        self.assertEqual(trace_receipt["case_span_count"], 20)
+        self.assertEqual(len(payloads), 1)
+        self.assertEqual(len(payloads[0]["plan"]["spans"]), 44)
 
     def test_eval_trace_blocks_raw_eval_receipts(self) -> None:
         trace_receipt = build_phoenix_eval_trace_receipt(
@@ -417,6 +449,91 @@ print(json.dumps({"status": "pass", "http_status": 200}))
         self.assertEqual(trace_receipt["status"], "blocked")
         self.assertIn("eval_trace_redaction", {check["id"] for check in trace_receipt["blockers"]})
         self.assertFalse(trace_receipt["mutation_performed"])
+
+    def test_ab_trace_keeps_ordered_runtime_profiles_and_metadata_profiles_separate(self) -> None:
+        receipt = {
+            "schema_version": "skills-sdk.ab-run-receipt.v1",
+            "status": "completed",
+            "operation": "ab_run",
+            "execution_profile": {"id": "codex-read-only"},
+            "judge_profile": {"id": "oss-local", "codex_profile": "oss-local"},
+            "experiment_id": "a" * 16,
+            "variant_results": [
+                {
+                    "variant_label": "A",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
+                    "output_last_message_digest": "sha256:" + ("a" * 64),
+                    "runner_stdout_digest": "sha256:" + ("b" * 64),
+                },
+                {
+                    "variant_label": "B",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
+                    "output_last_message_digest": "sha256:" + ("c" * 64),
+                    "runner_stdout_digest": "sha256:" + ("d" * 64),
+                },
+            ],
+        }
+
+        trace_receipt = build_phoenix_eval_trace_receipt(REPO_ROOT, eval_receipt=receipt, enabled=False)
+
+        self.assertEqual(trace_receipt["status"], "pass")
+        self.assertEqual(trace_receipt["observability_status"], "not_run")
+        self.assertEqual(
+            [row["derived_codex_profile"] for row in trace_receipt["profile_evidence"]],
+            ["oss-local", "oss-cloud"],
+        )
+        root_attributes = trace_receipt["span_plan"][0]["attributes"]
+        self.assertEqual(root_attributes["skills_sdk.execution_profile"], "codex-read-only")
+        self.assertEqual(root_attributes["skills_sdk.judge_profile"], "oss-local")
+        generation_spans = [span for span in trace_receipt["span_plan"] if span["name"] == "skills-sdk.eval.generation"]
+        self.assertEqual(
+            [span["attributes"]["skills_sdk.codex_profile"] for span in generation_spans],
+            ["oss-local", "oss-cloud"],
+        )
+
+    def test_ab_trace_rejects_metadata_only_duplicate_substituted_and_reordered_profiles(self) -> None:
+        counterexamples = {
+            "judge_metadata_only": [
+                ["codex", "exec", "--json", "-"],
+                ["codex", "exec", "--json", "-"],
+            ],
+            "duplicate": [
+                ["codex", "exec", "--profile", "oss-local", "--profile", "oss-cloud", "-"],
+                ["codex", "exec", "--profile", "oss-cloud", "-"],
+            ],
+            "substituted": [
+                ["codex", "exec", "--profile", "oss-local-code", "-"],
+                ["codex", "exec", "--profile", "oss-cloud", "-"],
+            ],
+            "reordered": [
+                ["codex", "exec", "--profile", "oss-cloud", "-"],
+                ["codex", "exec", "--profile", "oss-local", "-"],
+            ],
+        }
+        for label, commands in counterexamples.items():
+            with self.subTest(label=label):
+                plan = build_eval_trace_plan(
+                    {
+                        "schema_version": "skills-sdk.ab-run-receipt.v1",
+                        "status": "completed",
+                        "operation": "ab_run",
+                        "judge_profile": {"id": "oss-local", "codex_profile": "oss-local"},
+                        "variant_results": [
+                            {"variant_label": "A", "status": "pass", "command_argv": commands[0]},
+                            {"variant_label": "B", "status": "pass", "command_argv": commands[1]},
+                        ],
+                    }
+                )
+
+                self.assertTrue(plan["blockers"])
+                self.assertNotEqual(
+                    [row["derived_codex_profile"] for row in plan["profile_evidence"]],
+                    ["oss-local", "oss-cloud"],
+                )
 
     def test_public_cli_previews_phoenix_mirror(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

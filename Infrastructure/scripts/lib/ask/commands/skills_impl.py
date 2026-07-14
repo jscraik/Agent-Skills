@@ -7543,6 +7543,12 @@ def skills_sdk_eval_ab_run(
         ],
         "agent_summary": receipt["agent_summary"],
     }
+    _attach_phoenix_eval_trace(
+        payload,
+        repo_root,
+        receipt,
+        command_name="sdk eval ab-run",
+    )
     result.data["skills_sdk_eval_ab_run"] = payload
     if receipt["status"] == "blocked":
         result.status = "error"
@@ -7609,7 +7615,7 @@ def skills_sdk_eval_ab_judge_score(
     judge_profile: str = "oss-local",
     timeout_seconds: int = 300,
 ) -> CallResult:
-    """Invoke Ollama A/B judge scoring and emit advisory decision evidence."""
+    """Invoke Codex-backed A/B judge scoring and emit advisory decision evidence."""
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-judge-score --execute"
     receipt = _build_ab_judge_score_receipt(
@@ -7643,6 +7649,12 @@ def skills_sdk_eval_ab_judge_score(
         ],
         "agent_summary": receipt["agent_summary"],
     }
+    _attach_phoenix_eval_trace(
+        payload,
+        repo_root,
+        receipt,
+        command_name="sdk eval ab-judge-score",
+    )
     result.data["skills_sdk_eval_ab_judge_score"] = payload
     if receipt["status"] == "blocked":
         result.status = "error"
@@ -7651,7 +7663,7 @@ def skills_sdk_eval_ab_judge_score(
                 code="ERR_VALIDATION",
                 message=receipt["agent_summary"],
                 fix_suggestion=(
-                    "Provide a completed ab-run receipt and the selected Ollama judge runtime before "
+                    "Provide a completed ab-run receipt and the selected Codex judge profile before "
                     "running ask sdk eval ab-judge-score."
                 ),
             )
@@ -8317,7 +8329,7 @@ def _attach_phoenix_eval_trace(
     command_name: str = "sdk eval run",
     profile: str | None = None,
 ) -> None:
-    schema_version = "skills-sdk.phoenix-eval-trace-receipt.v0"
+    schema_version = "skills-sdk.phoenix-eval-trace-receipt.v1"
     try:
         from ask.skills_sdk.phoenix_observability import (  # noqa: PLC0415
             PHOENIX_EVAL_TRACE_SCHEMA_VERSION,
@@ -8331,10 +8343,12 @@ def _attach_phoenix_eval_trace(
             command_name=command_name,
             profile=profile,
         )
-    except Exception as exc:  # noqa: BLE001 - Phoenix is an inspection surface, not the eval gate.
+    except (ImportError, KeyError, OSError, TypeError, ValueError) as exc:
         payload["phoenix_eval_trace"] = {
             "schema_version": schema_version,
             "status": "blocked",
+            "observability_status": "blocked",
+            "eval_status": receipt.get("status"),
             "checks": [],
             "blockers": [
                 {
@@ -8342,12 +8356,14 @@ def _attach_phoenix_eval_trace(
                     "status": "blocker",
                     "severity": "blocker",
                     "message": "Phoenix eval trace emission raised an unexpected error.",
-                    "evidence": [f"{type(exc).__name__}: {exc}"],
+                    "evidence": [f"error_class:{type(exc).__name__}"],
                 }
             ],
-            "error": f"{type(exc).__name__}: {exc}",
+            "error_class": type(exc).__name__,
             "mutation_performed": False,
         }
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
