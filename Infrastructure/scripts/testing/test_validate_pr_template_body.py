@@ -112,6 +112,7 @@ def _assert_refresh_execution_contract(
     _assert_refresh_workflow_boundary(template_workflow, template_job)
     checkout = _named_step(template_job, "Checkout trusted PR template validator")
     assert checkout.get("if") == "github.event_name == 'pull_request'"
+    assert checkout.get("uses") == "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
     checkout_with = _mapping(checkout.get("with"), "checkout inputs")
     assert checkout_with == {
         "persist-credentials": False,
@@ -124,10 +125,11 @@ def _assert_refresh_execution_contract(
     validate_env = _mapping(validate.get("env"), "validator environment")
     assert validate_env == {"PR_BODY": "${{ github.event.pull_request.body }}"}
     run = validate.get("run")
-    assert isinstance(run, str)
-    assert "python3 trusted-base/.github/scripts/validate_pr_template_body.py" in run
-    assert "--template trusted-base/.github/PULL_REQUEST_TEMPLATE.md" in run
-    assert "--body-env PR_BODY" in run
+    assert run == (
+        "python3 trusted-base/.github/scripts/validate_pr_template_body.py \\\n"
+        "  --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \\\n"
+        "  --body-env PR_BODY\n"
+    )
     merge_group = _named_step(template_job, "Skip PR template enforcement for merge queue")
     assert merge_group.get("if") == "github.event_name == 'merge_group'"
 
@@ -442,6 +444,21 @@ def test_pr_template_refresh_contract_rejects_privilege_or_secret_expansion() ->
     checkout = _named_step(job, "Checkout trusted PR template validator")
     _mapping(checkout["with"], "checkout inputs")["token"] = "${{ secrets.PRIVATE_TOKEN }}"
     _assert_contract_rejects(secret_checkout, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_supply_chain_or_noop_substitution() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    substituted_action = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(substituted_action["jobs"], "jobs")["pr-template"], "job")
+    checkout = _named_step(job, "Checkout trusted PR template validator")
+    checkout["uses"] = "attacker/checkout@0000000000000000000000000000000000000000"
+    _assert_contract_rejects(substituted_action, pipeline_workflow)
+    no_op_validator = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(no_op_validator["jobs"], "jobs")["pr-template"], "job")
+    validate = _named_step(job, "Validate PR template completion")
+    validate["run"] = f"exit 0\n{validate['run']}"
+    _assert_contract_rejects(no_op_validator, pipeline_workflow)
 
 
 def test_pr_template_refresh_contract_rejects_stale_runs_or_event_guard_drift() -> None:
