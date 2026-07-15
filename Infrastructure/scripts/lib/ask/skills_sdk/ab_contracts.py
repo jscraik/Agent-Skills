@@ -19,7 +19,10 @@ from ask.skills_sdk.ab_profile_contracts import (
     EvalJudgeProfile,
     EvalSecretBoundary,
 )
-from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference as _is_opaque_env_reference
+from ask.skills_sdk.ab_transport_contracts import (
+    is_approved_op_binary as _is_approved_op_binary,
+    is_opaque_env_reference as _is_opaque_env_reference,
+)
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
 
 
@@ -73,11 +76,9 @@ def _judge_codex_index(argv: list[str]) -> int:
         raise ValueError("empty argv")
     if argv[0] == "codex":
         return 0
-    op_binary = argv[0]
-    approved_op = op_binary == "op" or (op_binary.startswith("/") and op_binary.endswith("/op"))
     if (
         len(argv) >= 6
-        and approved_op
+        and _is_approved_op_binary(argv[0])
         and argv[1:3] == ["run", "--env-file"]
         and _is_opaque_env_reference(argv[3])
         and argv[4] == "--"
@@ -483,7 +484,7 @@ def _validate_execution_argv(execution_argv: list[str], command_argv: list[str],
         return
     if len(execution_argv) < len(command_argv) + 5:
         raise ValueError("cloud execution argv must include the approved op run wrapper")
-    if execution_argv[0] != "op" and not execution_argv[0].endswith("/op"):
+    if not _is_approved_op_binary(execution_argv[0]):
         raise ValueError("cloud execution argv must invoke the approved op binary")
     if execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"] or execution_argv[3] != "<operator-approved-opaque-env-stream>":
         raise ValueError("cloud execution argv must use op run --env-file <opaque> --")

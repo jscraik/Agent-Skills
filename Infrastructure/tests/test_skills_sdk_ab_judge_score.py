@@ -181,6 +181,13 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
             self.assertEqual(blockers, [])
 
+            relative = ["evil/op", "run", "--env-file", str(env_file), *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=relative)
+            evidence = {"command_argv": relative, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
     def setUp(self) -> None:
         self.evidence_root = ".harness/test-sdk-ab-judge-score"
         self._remove_evidence_root()

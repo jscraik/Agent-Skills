@@ -137,7 +137,7 @@
           "then": {
             "properties": {
               "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "execution_argv": {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
             }
           }
         }
@@ -948,7 +948,7 @@
         },
         {
           "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
-          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
         },
         {
           "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},

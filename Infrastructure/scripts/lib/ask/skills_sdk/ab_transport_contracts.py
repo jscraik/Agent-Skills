@@ -4,6 +4,10 @@ import stat
 from pathlib import Path
 
 
+def is_approved_op_binary(value: str) -> bool:
+    return value == "op" or (Path(value).is_absolute() and Path(value).name == "op")
+
+
 def is_opaque_env_reference(value: str) -> bool:
     if value == "<operator-approved-opaque-env-stream>":
         return True

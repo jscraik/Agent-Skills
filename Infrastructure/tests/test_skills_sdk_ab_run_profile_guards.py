@@ -157,6 +157,17 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         self.assertEqual(self._schema_result(candidate).status, "fail")
 
     def test_execute_variant_rejects_external_evidence_paths_before_runner_starts(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        for gate in candidate["runtime_profile_gates"]:
+            if gate["lane"] != "oss-cloud":
+                continue
+            for packet in (*gate["command_plan"], *gate["variant_results"]):
+                packet["execution_argv"][0] = "evil/op"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
         calls: list[list[str]] = []
 
         def fake_runner(command_argv, prompt, repo_root, timeout):

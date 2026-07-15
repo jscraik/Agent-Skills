@@ -266,6 +266,18 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
             skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
             preflight_probe=declared_profile_preflight,
         )
+        forged = deepcopy(receipt)
+        for command in forged["runtime_profile_gates"][1]["command_plan"]:
+            command["execution_argv"][0] = "evil/op"
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(forged)
+        self._assert_v1_schema_invalid(forged)
+
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
         for gates in (receipt["runtime_profile_gates"][1:], list(reversed(receipt["runtime_profile_gates"]))):
             candidate = dict(receipt)
             candidate["runtime_profile_gates"] = gates
