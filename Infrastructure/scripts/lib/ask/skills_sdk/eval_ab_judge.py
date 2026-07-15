@@ -500,6 +500,10 @@ def _score_runner_result(
     if not isinstance(executed_argv, list) or not all(isinstance(item, str) for item in executed_argv):
         blockers.append("judge_command_profile_missing_or_invalid")
         return None, output_digest, True, True, mutation_performed
+    planned_argv = evidence.get("command_argv")
+    if executed_argv != planned_argv:
+        blockers.append("judge_command_argv_mismatch")
+        return None, output_digest, True, True, mutation_performed
     try:
         executed_profile = _codex_profile_from_judge_argv(executed_argv)
     except ValueError:
