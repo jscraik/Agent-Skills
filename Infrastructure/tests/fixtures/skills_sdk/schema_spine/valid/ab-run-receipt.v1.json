@@ -183,6 +183,68 @@
           "semantic_output_excerpt": "sanitized fixture output",
           "blockers": []
         }
+      ],
+      "command_plan": [
+        {
+          "allowed_secret_env_names": [],
+          "approval_policy": "on-request",
+          "codex_profile": "oss-local",
+          "command_argv": [
+            "codex",
+            "exec",
+            "--profile",
+            "oss-local",
+            "--sandbox",
+            "read-only",
+            "--cd",
+            ".",
+            "--json",
+            "--output-last-message",
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/last-message.json",
+            "-"
+          ],
+          "event_log_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/codex-events.jsonl",
+          "output_last_message_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/last-message.json",
+          "planned_write_paths": [
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/last-message.json"
+          ],
+          "prompt_stdin_digest": "sha256:7313a309a5b4a393d25282ab0475a1b90ef506f0980c0244170d7ad2b56d0d25",
+          "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/prompt.md",
+          "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/prompt.md",
+          "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/A/codex-events.jsonl",
+          "sandbox_mode": "read-only",
+          "variant_label": "A"
+        },
+        {
+          "allowed_secret_env_names": [],
+          "approval_policy": "on-request",
+          "codex_profile": "oss-local",
+          "command_argv": [
+            "codex",
+            "exec",
+            "--profile",
+            "oss-local",
+            "--sandbox",
+            "read-only",
+            "--cd",
+            ".",
+            "--json",
+            "--output-last-message",
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/last-message.json",
+            "-"
+          ],
+          "event_log_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/codex-events.jsonl",
+          "output_last_message_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/last-message.json",
+          "planned_write_paths": [
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/last-message.json"
+          ],
+          "prompt_stdin_digest": "sha256:092fb6edf7f63efcfa9ca57f8f269b3dbcc51efa5d44985bdf39fd63e6c4b4c5",
+          "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/prompt.md",
+          "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/prompt.md",
+          "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-local/B/codex-events.jsonl",
+          "sandbox_mode": "read-only",
+          "variant_label": "B"
+        }
       ]
     },
     {
@@ -306,6 +368,68 @@
           "output_last_message_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "semantic_output_excerpt": "sanitized fixture output",
           "blockers": []
+        }
+      ],
+      "command_plan": [
+        {
+          "allowed_secret_env_names": [],
+          "approval_policy": "on-request",
+          "codex_profile": "oss-cloud",
+          "command_argv": [
+            "codex",
+            "exec",
+            "--profile",
+            "oss-cloud",
+            "--sandbox",
+            "read-only",
+            "--cd",
+            ".",
+            "--json",
+            "--output-last-message",
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/last-message.json",
+            "-"
+          ],
+          "event_log_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/codex-events.jsonl",
+          "output_last_message_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/last-message.json",
+          "planned_write_paths": [
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/last-message.json"
+          ],
+          "prompt_stdin_digest": "sha256:7313a309a5b4a393d25282ab0475a1b90ef506f0980c0244170d7ad2b56d0d25",
+          "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/prompt.md",
+          "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/prompt.md",
+          "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/A/codex-events.jsonl",
+          "sandbox_mode": "read-only",
+          "variant_label": "A"
+        },
+        {
+          "allowed_secret_env_names": [],
+          "approval_policy": "on-request",
+          "codex_profile": "oss-cloud",
+          "command_argv": [
+            "codex",
+            "exec",
+            "--profile",
+            "oss-cloud",
+            "--sandbox",
+            "read-only",
+            "--cd",
+            ".",
+            "--json",
+            "--output-last-message",
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/last-message.json",
+            "-"
+          ],
+          "event_log_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/codex-events.jsonl",
+          "output_last_message_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/last-message.json",
+          "planned_write_paths": [
+            ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/last-message.json"
+          ],
+          "prompt_stdin_digest": "sha256:092fb6edf7f63efcfa9ca57f8f269b3dbcc51efa5d44985bdf39fd63e6c4b4c5",
+          "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/prompt.md",
+          "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/prompt.md",
+          "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/ex_2f17c65de51f3a24/oss-cloud/B/codex-events.jsonl",
+          "sandbox_mode": "read-only",
+          "variant_label": "B"
         }
       ]
     }
@@ -450,7 +574,7 @@
   "execution_boundary": "codex_exec_sandbox",
   "judge_boundary": "post_run_sanitized_evidence_only",
   "mutation_performed": true,
-  "network_accessed": false,
+  "network_accessed": true,
   "provider_invoked": true,
   "judge_provider_invoked": false,
   "codex_exec_invoked": true,

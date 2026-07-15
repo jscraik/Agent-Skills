@@ -119,16 +119,16 @@ For each lane, report:
   direct unauthenticated fallback. This read-only catalog request proves only
   profile/catalog admission: it performs no generation, does not invoke Codex,
   and does not prove A/B, judge, provider-generation, or release behavior.
-  The parent accepts catalog-probe evidence only when `op run` returns the
-  exact built-in integer exit code `0`, stderr is empty, and stdout is exactly
-  one JSON object matching the closed probe contract. Boolean, float, string,
-  null, integer-subclass, negative, and nonzero transport results block before
-  stdout parsing; invalid transport types are retained only as redacted
-  exit-class evidence. Missing or extra fields, duplicate keys, trailing JSON,
-  non-finite numbers, wrong primitive types, and contradictions between the
-  result class and its network, HTTP, digest, match, secret, generation,
-  provider, or Codex fields block admission. A nonzero child exit is recorded
-  only as redacted exit-class evidence; its stdout cannot self-claim a pass.
+  The parent accepts catalog-probe transport only when `op run` returns the
+  exact built-in integer exit code `0` for a pass or `2` for a validated typed
+  blocker, stderr is empty, and stdout is exactly one JSON object matching the
+  closed probe contract for that result class. Boolean, float, string, null,
+  integer-subclass, negative, and exits outside `0` or `2` block before stdout
+  parsing; invalid transport types are retained only as redacted exit-class
+  evidence. Missing or extra fields, duplicate keys, trailing JSON, non-finite
+  numbers, wrong primitive types, and contradictions between the result class
+  and its network, HTTP, digest, match, secret, generation, provider, or Codex
+  fields block admission. A nonzero child exit cannot self-claim a pass.
   Before any comparison or parsing, the parent copies a closed subprocess
   envelope: `returncode` must be an exact built-in integer, and `stdout` and
   `stderr` must be exact built-in strings. Missing or exception-raising

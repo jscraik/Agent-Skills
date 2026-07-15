@@ -24,6 +24,7 @@ class CodexJudgeResult:
     stdout: str
     stderr: str
     output_text: str = ""
+    executed_argv: list[str] | None = None
 
 
 class CodexProfileConfigError(RuntimeError):
@@ -60,6 +61,7 @@ def _run_codex_judge(
         stdout=completed.stdout,
         stderr=completed.stderr,
         output_text=completed.stdout,
+        executed_argv=command,
     )
 
 

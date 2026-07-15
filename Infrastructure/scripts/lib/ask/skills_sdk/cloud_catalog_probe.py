@@ -6,6 +6,7 @@ import json
 import os
 import socket
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Callable
 
@@ -52,11 +53,27 @@ def _catalog_names(payload: object) -> list[str] | None:
     return names
 
 
+def _is_expected_catalog_url(url: str) -> bool:
+    parsed = urllib.parse.urlparse(url)
+    expected = urllib.parse.urlparse(DEFAULT_CATALOG_URL)
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == expected.netloc
+        and parsed.path == expected.path
+        and parsed.params == ""
+        and parsed.query == ""
+        and parsed.fragment == ""
+    )
+
+
 def _fetch_catalog(
     request: urllib.request.Request, timeout_s: int, opener: UrlOpen,
 ) -> tuple[int | None, bytes | None, dict[str, object] | None]:
     try:
         with opener(request, timeout=timeout_s) as response:
+            final_url = response.geturl() if hasattr(response, "geturl") else request.full_url
+            if final_url != DEFAULT_CATALOG_URL:
+                return None, None, _safe_result("redirect_rejected", network_accessed=True, http_status=None)
             status = int(response.getcode())
             body = response.read(MAX_CATALOG_BYTES + 1)
     except urllib.error.HTTPError as exc:
@@ -104,11 +121,14 @@ def probe_catalog(
     api_key = os.environ.get("OLLAMA_API_KEY")
     if not api_key:
         return _safe_result("auth_missing", network_accessed=False, http_status=None)
+    if not _is_expected_catalog_url(url):
+        return _safe_result("invalid_catalog_url", network_accessed=False, http_status=None)
     request = urllib.request.Request(
         url,
-        headers={"Accept": "application/json", "Authorization": f"Bearer {api_key}"},
+        headers={"Accept": "application/json"},
         method="GET",
     )
+    request.add_unredirected_header("Authorization", f"Bearer {api_key}")
     status, body, failure = _fetch_catalog(request, timeout_s, opener)
     if failure is not None:
         return failure

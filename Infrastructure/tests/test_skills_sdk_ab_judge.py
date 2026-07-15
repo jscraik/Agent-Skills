@@ -173,6 +173,7 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
                 candidate = deepcopy(fixture)
                 result = candidate["runtime_profile_gates"][0]["variant_results"][0]
                 result["command_argv"] = prefix + result["command_argv"][4:]
+                candidate["variant_results"][0]["command_argv"] = deepcopy(result["command_argv"])
                 receipt = self._preview_for_payload(candidate, label)
                 self.assertEqual(receipt["status"], "blocked")
                 self.assertIn("run_receipt_contract_invalid", receipt["blockers"])

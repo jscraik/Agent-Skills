@@ -120,7 +120,7 @@ class AbPreflightBlocker(_SdkContractModel):
 class AbPreflightFact(_SdkContractModel):
     status: Literal["pass", "blocked", "not_applicable"]
     evidence_source: str = Field(min_length=1)
-    evidence_digest: str = Field(min_length=71)
+    evidence_digest: str = Field(min_length=71, pattern=r"^sha256:[0-9a-f]{64}$")
     blocker: AbPreflightBlocker | None
 
 
@@ -181,7 +181,28 @@ class AbLanePreflight(_SdkContractModel):
     @model_validator(mode="after")
     def _admission_matches_facts(self) -> AbLanePreflight:
         facts = (self.profile_config, self.model_catalog, self.runtime, self.auth, self.catalog)
-        runtime_admitted = self.runtime.status == "pass" or cloud_runtime_not_applicable_is_valid(
+        passing = self._typed_facts_pass() and all(fact.blocker is None for fact in facts)
+        if passing != (self.admission.status == "pass"):
+            raise ValueError("preflight admission must match typed facts")
+        if self.admission.status == "pass" and self.admission.blockers:
+            raise ValueError("passing preflight admission must not include blockers")
+        if self.admission.status == "blocked" and not self.admission.blockers:
+            raise ValueError("blocked preflight admission requires blockers")
+        return self
+
+    def _typed_facts_pass(self) -> bool:
+        return (
+            self.profile_config.status == "pass"
+            and self.model_catalog.status == "pass"
+            and self._runtime_is_admitted()
+            and self.catalog.status == "pass"
+            and self.auth.status in {"pass", "not_applicable"}
+        )
+
+    def _runtime_is_admitted(self) -> bool:
+        if self.runtime.status == "pass":
+            return True
+        return cloud_runtime_not_applicable_is_valid(
             lane=self.profile_config.profile_id,
             runtime_status=self.runtime.status,
             availability_kind=self.runtime.availability_kind,
@@ -193,19 +214,6 @@ class AbLanePreflight(_SdkContractModel):
             codex_executable_identity=self.runtime.codex_executable_identity,
             blocker=self.runtime.blocker,
         )
-        passing = (
-            self.profile_config.status == "pass"
-            and self.model_catalog.status == "pass"
-            and runtime_admitted
-            and self.catalog.status == "pass"
-            and self.auth.status in {"pass", "not_applicable"}
-            and all(fact.blocker is None for fact in facts)
-        )
-        if passing != (self.admission.status == "pass"):
-            raise ValueError("preflight admission must match typed facts")
-        if self.admission.status == "blocked" and not self.admission.blockers:
-            raise ValueError("blocked preflight admission requires blockers")
-        return self
 
 
 def cloud_runtime_not_applicable_is_valid(**facts: object) -> bool:

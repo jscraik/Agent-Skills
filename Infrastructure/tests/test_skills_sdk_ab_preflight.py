@@ -14,6 +14,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402
 from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402
@@ -23,9 +24,9 @@ from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402
     _cloud_runtime_fact,
     _catalog_probe_result,
     build_lane_preflight,
-    declared_profile_preflight,
 )
 from ask.skills_sdk.eval_profiles import select_judge_profile  # noqa: E402
+from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
 
 
 class _CustomBoundarySignal(BaseException):

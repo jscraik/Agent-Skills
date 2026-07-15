@@ -31,7 +31,7 @@ _CATALOG_PROBE_KEYS = frozenset(
 )
 _CATALOG_RESULT_CLASSES = frozenset(
     "pass auth_missing http_failure timeout network_failure payload_too_large malformed_json malformed_catalog "
-    "model_missing model_ambiguous".split()
+    "model_missing model_ambiguous invalid_catalog_url redirect_rejected".split()
 )
 _MAX_PROBE_STDOUT_CHARS = 1024 * 1024
 _MISSING = object()
@@ -212,7 +212,7 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         mode = path.lstat().st_mode
         if stat.S_ISFIFO(mode):
             approved, source_kind = True, "op_fifo"
-        elif stat.S_ISREG(mode):
+        elif stat.S_ISREG(mode) and _regular_env_file_has_required_op_reference(path):
             approved, source_kind = True, "op_opaque_env_file"
     except OSError:
         pass
@@ -235,6 +235,18 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "secret_value_observed": False,
         "auth_source": source_kind,
     }
+
+
+def _regular_env_file_has_required_op_reference(path: Path) -> bool:
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return False
+    for line in lines:
+        name, sep, value = line.partition("=")
+        if sep and name == "OLLAMA_API_KEY" and value.startswith("op://"):
+            return True
+    return False
 
 
 def _cloud_catalog_command(op_binary: str, env_file: Path, selected_model: str) -> list[str]:
@@ -598,7 +610,7 @@ def _cloud_catalog_fact(
         return _blocked_catalog_probe(
             selected_model, evidence, "cloud_catalog_unavailable",
             f"cloud catalog probe failed: {failure}",
-            network_accessed=failure != "malformed_probe_output",
+            network_accessed=False,
         )
     return _catalog_fact_from_payload(selected_model, evidence, payload)
 
@@ -668,41 +680,6 @@ def _cloud_profile_facts(profile_fact: dict[str, Any], model: str) -> dict[str, 
         "profile_config": profile_fact, "model_catalog": cloud_catalog,
         "runtime": _cloud_runtime_fact(model, path), "auth": auth,
         "catalog": _catalog_fact(cloud_catalog, str(cloud_catalog["catalog_identity"])),
-    }
-
-
-def declared_profile_preflight(profile: dict[str, Any]) -> dict[str, Any]:
-    lane = str(profile["id"])
-    model = str(profile["model"])
-    source = "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py"
-    is_local = lane == "oss-local"
-    catalog_identity = "declared-local-model-catalog" if is_local else DEFAULT_CATALOG_URL
-    model_catalog = {**_fact("pass", source, {"lane": lane, "model": model}),
-                     "selected_model_id": model, "catalog_identity": catalog_identity}
-    if not is_local:
-        model_catalog.update({
-            "probe_url": DEFAULT_CATALOG_URL, "http_status": 200,
-            "catalog_digest": _digest({"models": [model]}), "matched_model": model, "network_accessed": True,
-        })
-    return {
-        "profile_config": {
-            **_fact("pass", source, profile),
-            "profile_id": lane, "configured_model_id": model,
-            "configured_provider_id": _expected_provider(lane),
-        },
-        "model_catalog": model_catalog,
-        "runtime": {
-            **_fact("pass", source, {"lane": lane, "model": model}),
-            "availability_kind": "local_model" if is_local else "cloud_endpoint", "selected_model_id": model,
-        },
-        "auth": {
-            **_fact("not_applicable" if is_local else "pass", source, {"lane": lane}),
-            "auth_reference": "none" if is_local else "codex_cli_auth", "secret_value_observed": False,
-            "auth_source": "not_applicable" if is_local else "op_opaque_env_file",
-        },
-        "catalog": {
-            **_fact("pass", source, {"lane": lane, "model": model}), "catalog_identity": catalog_identity,
-        },
     }
 
 

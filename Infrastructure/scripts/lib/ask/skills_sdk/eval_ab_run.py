@@ -288,13 +288,12 @@ def _build_ab_run_receipt(
     )
     blockers.extend(_execution_blockers(runtime_profile_gates, variant_results))
     status = "completed" if not blockers else "blocked"
-    codex_exec_started = any(result.get("codex_exec_started") is True for result in variant_results)
-    provider_invoked = any(result.get("provider_invoked") is True for result in variant_results)
-    network_accessed = any(result.get("network_accessed") is True for result in variant_results)
+    side_effects = _run_side_effects(plan, variant_results)
     receipt_variant_results = runtime_profile_gates[0]["variant_results"] if runtime_profile_gates else []
     return _run_payload(
         plan, status, blockers, receipt_variant_results, runtime_profile_gates,
-        codex_exec_started, provider_invoked, network_accessed, timeout_seconds,
+        side_effects["codex_exec_started"], side_effects["provider_invoked"],
+        side_effects["network_accessed"], timeout_seconds,
     )
 
 
@@ -312,6 +311,20 @@ def _execution_blockers(
         for item in gate["blockers"]
     ]
     return gate_blockers + [item for result in variant_results for item in result["blockers"]]
+
+
+def _run_side_effects(plan: dict[str, Any], variant_results: list[dict[str, Any]]) -> dict[str, bool]:
+    preflight_network_accessed = any(
+        gate["preflight"]["model_catalog"].get("network_accessed") is True
+        for gate in plan["runtime_profile_gates"]
+    )
+    return {
+        "codex_exec_started": any(result.get("codex_exec_started") is True for result in variant_results),
+        "provider_invoked": any(result.get("provider_invoked") is True for result in variant_results),
+        "network_accessed": preflight_network_accessed or any(
+            result.get("network_accessed") is True for result in variant_results
+        ),
+    }
 
 
 def _build_plan(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -356,6 +369,7 @@ def _execute_runtime_profile_gates(
             "status": "completed" if not gate_blockers else "blocked",
             "blockers": gate_blockers,
             "preflight": gate["preflight"],
+            "command_plan": gate["command_plan"],
             "variant_results": [_strip_internal_variant_state(result) for result in results],
         })
     return gate_results, all_results
@@ -371,6 +385,7 @@ def _blocked_plan_gate(gate: dict[str, Any]) -> dict[str, Any]:
         "status": "not_run_with_reason",
         "blockers": [_PLAN_BLOCKED_NOT_RUN_REASON],
         "preflight": gate["preflight"],
+        "command_plan": [],
         "variant_results": [],
     }
 
@@ -380,6 +395,7 @@ def _not_run_gate(gate: dict[str, Any]) -> dict[str, Any]:
         "order": gate["order"], "lane": gate["lane"], "codex_profile": gate["codex_profile"],
         "status": "not_run_with_reason", "blockers": ["prior_runtime_profile_gate_blocked"],
         "preflight": gate["preflight"],
+        "command_plan": [],
         "variant_results": [],
     }
 
@@ -388,7 +404,7 @@ def _preflight_blocked_gate(gate: dict[str, Any]) -> dict[str, Any]:
     return {
         "order": gate["order"], "lane": gate["lane"], "codex_profile": gate["codex_profile"],
         "status": "blocked", "blockers": gate["preflight"]["admission"]["blockers"],
-        "preflight": gate["preflight"], "variant_results": [],
+        "preflight": gate["preflight"], "command_plan": [], "variant_results": [],
     }
 
 

@@ -3,23 +3,24 @@
     "AbAuthPreflightFact": {
       "additionalProperties": false,
       "properties": {
-        "auth_reference": {
+        "status": {
           "enum": [
-            "none",
-            "codex_cli_auth"
+            "pass",
+            "blocked",
+            "not_applicable"
           ],
-          "title": "Auth Reference",
+          "title": "Status",
           "type": "string"
         },
-        "auth_source": {
-          "default": "not_applicable",
-          "enum": [
-            "not_applicable",
-            "missing_or_invalid",
-            "op_fifo",
-            "op_opaque_env_file"
-          ],
-          "title": "Auth Source",
+        "evidence_source": {
+          "minLength": 1,
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidence Digest",
           "type": "string"
         },
         "blocker": {
@@ -32,14 +33,12 @@
             }
           ]
         },
-        "evidence_digest": {
-          "minLength": 71,
-          "title": "Evidence Digest",
-          "type": "string"
-        },
-        "evidence_source": {
-          "minLength": 1,
-          "title": "Evidence Source",
+        "auth_reference": {
+          "enum": [
+            "none",
+            "codex_cli_auth"
+          ],
+          "title": "Auth Reference",
           "type": "string"
         },
         "secret_value_observed": {
@@ -47,13 +46,15 @@
           "title": "Secret Value Observed",
           "type": "boolean"
         },
-        "status": {
+        "auth_source": {
+          "default": "not_applicable",
           "enum": [
-            "pass",
-            "blocked",
-            "not_applicable"
+            "not_applicable",
+            "missing_or_invalid",
+            "op_fifo",
+            "op_opaque_env_file"
           ],
-          "title": "Status",
+          "title": "Auth Source",
           "type": "string"
         }
       },
@@ -71,6 +72,26 @@
     "AbCatalogPreflightFact": {
       "additionalProperties": false,
       "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "blocked",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_source": {
+          "minLength": 1,
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidence Digest",
+          "type": "string"
+        },
         "blocker": {
           "anyOf": [
             {
@@ -84,25 +105,6 @@
         "catalog_identity": {
           "minLength": 1,
           "title": "Catalog Identity",
-          "type": "string"
-        },
-        "evidence_digest": {
-          "minLength": 71,
-          "title": "Evidence Digest",
-          "type": "string"
-        },
-        "evidence_source": {
-          "minLength": 1,
-          "title": "Evidence Source",
-          "type": "string"
-        },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked",
-            "not_applicable"
-          ],
-          "title": "Status",
           "type": "string"
         }
       },
@@ -119,16 +121,12 @@
     "AbCodexCommandPlan": {
       "additionalProperties": false,
       "properties": {
-        "allowed_secret_env_names": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Allowed Secret Env Names",
-          "type": "array"
-        },
-        "approval_policy": {
-          "const": "on-request",
-          "title": "Approval Policy",
+        "variant_label": {
+          "enum": [
+            "A",
+            "B"
+          ],
+          "title": "Variant Label",
           "type": "string"
         },
         "codex_profile": {
@@ -147,6 +145,19 @@
           "title": "Command Argv",
           "type": "array"
         },
+        "sandbox_mode": {
+          "enum": [
+            "read-only",
+            "workspace-write"
+          ],
+          "title": "Sandbox Mode",
+          "type": "string"
+        },
+        "approval_policy": {
+          "const": "on-request",
+          "title": "Approval Policy",
+          "type": "string"
+        },
         "event_log_path": {
           "minLength": 1,
           "title": "Event Log Path",
@@ -157,26 +168,9 @@
           "title": "Output Last Message Path",
           "type": "string"
         },
-        "planned_write_paths": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Planned Write Paths",
-          "type": "array"
-        },
-        "prompt_stdin_digest": {
-          "minLength": 71,
-          "title": "Prompt Stdin Digest",
-          "type": "string"
-        },
         "prompt_stdin_path": {
           "minLength": 1,
           "title": "Prompt Stdin Path",
-          "type": "string"
-        },
-        "runner_prompt_input_path": {
-          "minLength": 1,
-          "title": "Runner Prompt Input Path",
           "type": "string"
         },
         "runner_stdout_capture_path": {
@@ -184,21 +178,29 @@
           "title": "Runner Stdout Capture Path",
           "type": "string"
         },
-        "sandbox_mode": {
-          "enum": [
-            "read-only",
-            "workspace-write"
-          ],
-          "title": "Sandbox Mode",
+        "runner_prompt_input_path": {
+          "minLength": 1,
+          "title": "Runner Prompt Input Path",
           "type": "string"
         },
-        "variant_label": {
-          "enum": [
-            "A",
-            "B"
-          ],
-          "title": "Variant Label",
+        "prompt_stdin_digest": {
+          "minLength": 71,
+          "title": "Prompt Stdin Digest",
           "type": "string"
+        },
+        "planned_write_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Planned Write Paths",
+          "type": "array"
+        },
+        "allowed_secret_env_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Secret Env Names",
+          "type": "array"
         }
       },
       "required": [
@@ -222,14 +224,14 @@
     "AbFixtureIdentity": {
       "additionalProperties": false,
       "properties": {
-        "digest": {
-          "minLength": 71,
-          "title": "Digest",
-          "type": "string"
-        },
         "path": {
           "minLength": 1,
           "title": "Path",
+          "type": "string"
+        },
+        "digest": {
+          "minLength": 71,
+          "title": "Digest",
           "type": "string"
         },
         "size_bytes": {
@@ -312,8 +314,14 @@
       ],
       "additionalProperties": false,
       "properties": {
-        "admission": {
-          "$ref": "#/$defs/AbPreflightAdmission"
+        "profile_config": {
+          "$ref": "#/$defs/AbProfileConfigPreflightFact"
+        },
+        "model_catalog": {
+          "$ref": "#/$defs/AbModelCatalogPreflightFact"
+        },
+        "runtime": {
+          "$ref": "#/$defs/AbRuntimePreflightFact"
         },
         "auth": {
           "$ref": "#/$defs/AbAuthPreflightFact"
@@ -321,14 +329,8 @@
         "catalog": {
           "$ref": "#/$defs/AbCatalogPreflightFact"
         },
-        "model_catalog": {
-          "$ref": "#/$defs/AbModelCatalogPreflightFact"
-        },
-        "profile_config": {
-          "$ref": "#/$defs/AbProfileConfigPreflightFact"
-        },
-        "runtime": {
-          "$ref": "#/$defs/AbRuntimePreflightFact"
+        "admission": {
+          "$ref": "#/$defs/AbPreflightAdmission"
         }
       },
       "required": [
@@ -345,6 +347,26 @@
     "AbModelCatalogPreflightFact": {
       "additionalProperties": false,
       "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "blocked",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_source": {
+          "minLength": 1,
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidence Digest",
+          "type": "string"
+        },
         "blocker": {
           "anyOf": [
             {
@@ -355,10 +377,20 @@
             }
           ]
         },
-        "catalog_digest": {
+        "selected_model_id": {
+          "minLength": 1,
+          "title": "Selected Model Id",
+          "type": "string"
+        },
+        "catalog_identity": {
+          "minLength": 1,
+          "title": "Catalog Identity",
+          "type": "string"
+        },
+        "probe_url": {
           "anyOf": [
             {
-              "minLength": 71,
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -366,34 +398,7 @@
             }
           ],
           "default": null,
-          "title": "Catalog Digest"
-        },
-        "catalog_identity": {
-          "minLength": 1,
-          "title": "Catalog Identity",
-          "type": "string"
-        },
-        "codex_exec_invoked": {
-          "const": false,
-          "default": false,
-          "title": "Codex Exec Invoked",
-          "type": "boolean"
-        },
-        "evidence_digest": {
-          "minLength": 71,
-          "title": "Evidence Digest",
-          "type": "string"
-        },
-        "evidence_source": {
-          "minLength": 1,
-          "title": "Evidence Source",
-          "type": "string"
-        },
-        "generation_performed": {
-          "const": false,
-          "default": false,
-          "title": "Generation Performed",
-          "type": "boolean"
+          "title": "Probe Url"
         },
         "http_status": {
           "anyOf": [
@@ -408,6 +413,19 @@
           ],
           "default": null,
           "title": "Http Status"
+        },
+        "catalog_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catalog Digest"
         },
         "matched_model": {
           "anyOf": [
@@ -427,18 +445,17 @@
           "title": "Network Accessed",
           "type": "boolean"
         },
-        "probe_url": {
-          "anyOf": [
-            {
-              "minLength": 1,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Probe Url"
+        "secret_value_observed": {
+          "const": false,
+          "default": false,
+          "title": "Secret Value Observed",
+          "type": "boolean"
+        },
+        "generation_performed": {
+          "const": false,
+          "default": false,
+          "title": "Generation Performed",
+          "type": "boolean"
         },
         "provider_invoked": {
           "const": false,
@@ -446,25 +463,11 @@
           "title": "Provider Invoked",
           "type": "boolean"
         },
-        "secret_value_observed": {
+        "codex_exec_invoked": {
           "const": false,
           "default": false,
-          "title": "Secret Value Observed",
+          "title": "Codex Exec Invoked",
           "type": "boolean"
-        },
-        "selected_model_id": {
-          "minLength": 1,
-          "title": "Selected Model Id",
-          "type": "string"
-        },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked",
-            "not_applicable"
-          ],
-          "title": "Status",
-          "type": "string"
         }
       },
       "required": [
@@ -481,6 +484,14 @@
     "AbPreflightAdmission": {
       "additionalProperties": false,
       "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
         "blockers": {
           "items": {
             "$ref": "#/$defs/AbPreflightBlocker"
@@ -492,14 +503,6 @@
           "const": false,
           "title": "Secret Values Observed",
           "type": "boolean"
-        },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked"
-          ],
-          "title": "Status",
-          "type": "string"
         }
       },
       "required": [
@@ -546,6 +549,26 @@
     "AbProfileConfigPreflightFact": {
       "additionalProperties": false,
       "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "blocked",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_source": {
+          "minLength": 1,
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidence Digest",
+          "type": "string"
+        },
         "blocker": {
           "anyOf": [
             {
@@ -555,6 +578,14 @@
               "type": "null"
             }
           ]
+        },
+        "profile_id": {
+          "enum": [
+            "oss-local",
+            "oss-cloud"
+          ],
+          "title": "Profile Id",
+          "type": "string"
         },
         "configured_model_id": {
           "anyOf": [
@@ -584,33 +615,6 @@
           ],
           "default": null,
           "title": "Configured Provider Id"
-        },
-        "evidence_digest": {
-          "minLength": 71,
-          "title": "Evidence Digest",
-          "type": "string"
-        },
-        "evidence_source": {
-          "minLength": 1,
-          "title": "Evidence Source",
-          "type": "string"
-        },
-        "profile_id": {
-          "enum": [
-            "oss-local",
-            "oss-cloud"
-          ],
-          "title": "Profile Id",
-          "type": "string"
-        },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked",
-            "not_applicable"
-          ],
-          "title": "Status",
-          "type": "string"
         }
       },
       "required": [
@@ -626,12 +630,24 @@
     "AbRuntimePreflightFact": {
       "additionalProperties": false,
       "properties": {
-        "availability_kind": {
+        "status": {
           "enum": [
-            "local_model",
-            "cloud_endpoint"
+            "pass",
+            "blocked",
+            "not_applicable"
           ],
-          "title": "Availability Kind",
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_source": {
+          "minLength": 1,
+          "title": "Evidence Source",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidence Digest",
           "type": "string"
         },
         "blocker": {
@@ -644,14 +660,12 @@
             }
           ]
         },
-        "evidence_digest": {
-          "minLength": 71,
-          "title": "Evidence Digest",
-          "type": "string"
-        },
-        "evidence_source": {
-          "minLength": 1,
-          "title": "Evidence Source",
+        "availability_kind": {
+          "enum": [
+            "local_model",
+            "cloud_endpoint"
+          ],
+          "title": "Availability Kind",
           "type": "string"
         },
         "selected_model_id": {
@@ -659,14 +673,18 @@
           "title": "Selected Model Id",
           "type": "string"
         },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked",
-            "not_applicable"
+        "codex_executable_identity": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Status",
-          "type": "string"
+          "default": null,
+          "title": "Codex Executable Identity"
         }
       },
       "required": [
@@ -683,6 +701,39 @@
     "AbRuntimeProfileRunGate": {
       "additionalProperties": false,
       "properties": {
+        "order": {
+          "enum": [
+            1,
+            2
+          ],
+          "title": "Order",
+          "type": "integer"
+        },
+        "lane": {
+          "enum": [
+            "oss-local",
+            "oss-cloud"
+          ],
+          "title": "Lane",
+          "type": "string"
+        },
+        "codex_profile": {
+          "enum": [
+            "oss-local",
+            "oss-cloud"
+          ],
+          "title": "Codex Profile",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "blocked",
+            "not_run_with_reason"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
         "blockers": {
           "items": {
             "anyOf": [
@@ -697,41 +748,16 @@
           "title": "Blockers",
           "type": "array"
         },
-        "codex_profile": {
-          "enum": [
-            "oss-local",
-            "oss-cloud"
-          ],
-          "title": "Codex Profile",
-          "type": "string"
-        },
-        "lane": {
-          "enum": [
-            "oss-local",
-            "oss-cloud"
-          ],
-          "title": "Lane",
-          "type": "string"
-        },
-        "order": {
-          "enum": [
-            1,
-            2
-          ],
-          "title": "Order",
-          "type": "integer"
-        },
         "preflight": {
           "$ref": "#/$defs/AbLanePreflight"
         },
-        "status": {
-          "enum": [
-            "completed",
-            "blocked",
-            "not_run_with_reason"
-          ],
-          "title": "Status",
-          "type": "string"
+        "command_plan": {
+          "items": {
+            "$ref": "#/$defs/AbCodexCommandPlan"
+          },
+          "maxItems": 2,
+          "title": "Command Plan",
+          "type": "array"
         },
         "variant_results": {
           "items": {
@@ -749,6 +775,7 @@
         "status",
         "blockers",
         "preflight",
+        "command_plan",
         "variant_results"
       ],
       "title": "AbRuntimeProfileRunGate",
@@ -765,16 +792,6 @@
           "title": "Label",
           "type": "string"
         },
-        "package_digest": {
-          "minLength": 71,
-          "title": "Package Digest",
-          "type": "string"
-        },
-        "package_id": {
-          "minLength": 1,
-          "title": "Package Id",
-          "type": "string"
-        },
         "query": {
           "minLength": 1,
           "title": "Query",
@@ -783,6 +800,16 @@
         "skill_ir_schema_version": {
           "minLength": 1,
           "title": "Skill Ir Schema Version",
+          "type": "string"
+        },
+        "package_id": {
+          "minLength": 1,
+          "title": "Package Id",
+          "type": "string"
+        },
+        "package_digest": {
+          "minLength": 71,
+          "title": "Package Digest",
           "type": "string"
         }
       },
@@ -799,12 +826,13 @@
     "AbVariantRunResult": {
       "additionalProperties": false,
       "properties": {
-        "blockers": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Blockers",
-          "type": "array"
+        "variant_label": {
+          "enum": [
+            "A",
+            "B"
+          ],
+          "title": "Variant Label",
+          "type": "string"
         },
         "codex_profile": {
           "enum": [
@@ -814,6 +842,18 @@
           "title": "Codex Profile",
           "type": "string"
         },
+        "status": {
+          "enum": [
+            "pass",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "exit_code": {
+          "title": "Exit Code",
+          "type": "integer"
+        },
         "command_argv": {
           "items": {
             "type": "string"
@@ -822,9 +862,48 @@
           "title": "Command Argv",
           "type": "array"
         },
-        "exit_code": {
-          "title": "Exit Code",
-          "type": "integer"
+        "sandbox_mode": {
+          "enum": [
+            "read-only",
+            "workspace-write"
+          ],
+          "title": "Sandbox Mode",
+          "type": "string"
+        },
+        "prompt_stdin_path": {
+          "minLength": 1,
+          "title": "Prompt Stdin Path",
+          "type": "string"
+        },
+        "prompt_stdin_digest": {
+          "minLength": 71,
+          "title": "Prompt Stdin Digest",
+          "type": "string"
+        },
+        "runner_stdout_capture_path": {
+          "minLength": 1,
+          "title": "Runner Stdout Capture Path",
+          "type": "string"
+        },
+        "runner_stdout_digest": {
+          "minLength": 71,
+          "title": "Runner Stdout Digest",
+          "type": "string"
+        },
+        "runner_stderr_capture_path": {
+          "minLength": 1,
+          "title": "Runner Stderr Capture Path",
+          "type": "string"
+        },
+        "runner_stderr_digest": {
+          "minLength": 71,
+          "title": "Runner Stderr Digest",
+          "type": "string"
+        },
+        "output_last_message_path": {
+          "minLength": 1,
+          "title": "Output Last Message Path",
+          "type": "string"
         },
         "output_last_message_digest": {
           "anyOf": [
@@ -839,49 +918,6 @@
           "default": null,
           "title": "Output Last Message Digest"
         },
-        "output_last_message_path": {
-          "minLength": 1,
-          "title": "Output Last Message Path",
-          "type": "string"
-        },
-        "prompt_stdin_digest": {
-          "minLength": 71,
-          "title": "Prompt Stdin Digest",
-          "type": "string"
-        },
-        "prompt_stdin_path": {
-          "minLength": 1,
-          "title": "Prompt Stdin Path",
-          "type": "string"
-        },
-        "runner_stderr_capture_path": {
-          "minLength": 1,
-          "title": "Runner Stderr Capture Path",
-          "type": "string"
-        },
-        "runner_stderr_digest": {
-          "minLength": 71,
-          "title": "Runner Stderr Digest",
-          "type": "string"
-        },
-        "runner_stdout_capture_path": {
-          "minLength": 1,
-          "title": "Runner Stdout Capture Path",
-          "type": "string"
-        },
-        "runner_stdout_digest": {
-          "minLength": 71,
-          "title": "Runner Stdout Digest",
-          "type": "string"
-        },
-        "sandbox_mode": {
-          "enum": [
-            "read-only",
-            "workspace-write"
-          ],
-          "title": "Sandbox Mode",
-          "type": "string"
-        },
         "semantic_output_excerpt": {
           "anyOf": [
             {
@@ -895,21 +931,12 @@
           "default": null,
           "title": "Semantic Output Excerpt"
         },
-        "status": {
-          "enum": [
-            "pass",
-            "blocked"
-          ],
-          "title": "Status",
-          "type": "string"
-        },
-        "variant_label": {
-          "enum": [
-            "A",
-            "B"
-          ],
-          "title": "Variant Label",
-          "type": "string"
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
         }
       },
       "required": [
@@ -934,6 +961,11 @@
     "DurationValue": {
       "additionalProperties": false,
       "properties": {
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        },
         "unit": {
           "enum": [
             "ms",
@@ -943,11 +975,6 @@
           ],
           "title": "Unit",
           "type": "string"
-        },
-        "value": {
-          "minimum": 0,
-          "title": "Value",
-          "type": "number"
         }
       },
       "required": [
@@ -960,29 +987,10 @@
     "EvalExecutionProfile": {
       "additionalProperties": false,
       "properties": {
-        "approval_policy": {
-          "const": "on-request",
-          "title": "Approval Policy",
-          "type": "string"
-        },
-        "codex_json_events_required": {
-          "const": true,
-          "title": "Codex Json Events Required",
-          "type": "boolean"
-        },
         "id": {
           "minLength": 1,
           "title": "Id",
           "type": "string"
-        },
-        "mutation_allowed": {
-          "title": "Mutation Allowed",
-          "type": "boolean"
-        },
-        "output_schema_supported": {
-          "const": true,
-          "title": "Output Schema Supported",
-          "type": "boolean"
         },
         "runner": {
           "const": "codex_exec",
@@ -996,6 +1004,25 @@
           ],
           "title": "Sandbox Mode",
           "type": "string"
+        },
+        "approval_policy": {
+          "const": "on-request",
+          "title": "Approval Policy",
+          "type": "string"
+        },
+        "codex_json_events_required": {
+          "const": true,
+          "title": "Codex Json Events Required",
+          "type": "boolean"
+        },
+        "output_schema_supported": {
+          "const": true,
+          "title": "Output Schema Supported",
+          "type": "boolean"
+        },
+        "mutation_allowed": {
+          "title": "Mutation Allowed",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1080,18 +1107,31 @@
     "EvalJudgeProfile": {
       "additionalProperties": false,
       "properties": {
-        "auth_boundary": {
-          "enum": [
-            "none",
-            "env_secret",
-            "codex_cli_auth"
-          ],
-          "title": "Auth Boundary",
+        "id": {
+          "minLength": 1,
+          "title": "Id",
           "type": "string"
         },
         "codex_profile": {
           "minLength": 1,
           "title": "Codex Profile",
+          "type": "string"
+        },
+        "provider": {
+          "enum": [
+            "ollama",
+            "codex"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "local",
+            "cloud",
+            "codex-fast"
+          ],
+          "title": "Mode",
           "type": "string"
         },
         "host": {
@@ -1104,20 +1144,6 @@
             }
           ],
           "title": "Host"
-        },
-        "id": {
-          "minLength": 1,
-          "title": "Id",
-          "type": "string"
-        },
-        "mode": {
-          "enum": [
-            "local",
-            "cloud",
-            "codex-fast"
-          ],
-          "title": "Mode",
-          "type": "string"
         },
         "model": {
           "minLength": 1,
@@ -1147,23 +1173,6 @@
             }
           ]
         },
-        "network_required": {
-          "title": "Network Required",
-          "type": "boolean"
-        },
-        "provider": {
-          "enum": [
-            "ollama",
-            "codex"
-          ],
-          "title": "Provider",
-          "type": "string"
-        },
-        "receives_sanitized_outputs_only": {
-          "const": true,
-          "title": "Receives Sanitized Outputs Only",
-          "type": "boolean"
-        },
         "runtime_metadata": {
           "anyOf": [
             {
@@ -1174,13 +1183,6 @@
             }
           ]
         },
-        "secret_env_names": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Secret Env Names",
-          "type": "array"
-        },
         "smoke_guard": {
           "anyOf": [
             {
@@ -1190,6 +1192,31 @@
               "type": "null"
             }
           ]
+        },
+        "network_required": {
+          "title": "Network Required",
+          "type": "boolean"
+        },
+        "secret_env_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secret Env Names",
+          "type": "array"
+        },
+        "auth_boundary": {
+          "enum": [
+            "none",
+            "env_secret",
+            "codex_cli_auth"
+          ],
+          "title": "Auth Boundary",
+          "type": "string"
+        },
+        "receives_sanitized_outputs_only": {
+          "const": true,
+          "title": "Receives Sanitized Outputs Only",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1214,24 +1241,19 @@
     "EvalJudgeRuntimeMetadata": {
       "additionalProperties": false,
       "properties": {
-        "architecture": {
-          "minLength": 1,
-          "title": "Architecture",
-          "type": "string"
-        },
-        "context_length": {
-          "minimum": 1,
-          "title": "Context Length",
-          "type": "integer"
-        },
-        "metadata_source": {
-          "const": "ollama_show",
-          "title": "Metadata Source",
-          "type": "string"
-        },
         "model_id": {
           "minLength": 1,
           "title": "Model Id",
+          "type": "string"
+        },
+        "size_gb": {
+          "exclusiveMinimum": 0,
+          "title": "Size Gb",
+          "type": "number"
+        },
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
           "type": "string"
         },
         "parameters": {
@@ -1244,10 +1266,15 @@
           "title": "Quantization",
           "type": "string"
         },
-        "size_gb": {
-          "exclusiveMinimum": 0,
-          "title": "Size Gb",
-          "type": "number"
+        "context_length": {
+          "minimum": 1,
+          "title": "Context Length",
+          "type": "integer"
+        },
+        "metadata_source": {
+          "const": "ollama_show",
+          "title": "Metadata Source",
+          "type": "string"
         }
       },
       "required": [
@@ -1265,6 +1292,15 @@
     "EvalJudgeSmokeGuard": {
       "additionalProperties": false,
       "properties": {
+        "max_tokens_used": {
+          "minimum": 1,
+          "title": "Max Tokens Used",
+          "type": "integer"
+        },
+        "forbid_visible_thinking": {
+          "title": "Forbid Visible Thinking",
+          "type": "boolean"
+        },
         "allow_codex_jsonl_reasoning_events": {
           "default": false,
           "title": "Allow Codex Jsonl Reasoning Events",
@@ -1273,15 +1309,6 @@
         "forbid_fallback_metadata": {
           "title": "Forbid Fallback Metadata",
           "type": "boolean"
-        },
-        "forbid_visible_thinking": {
-          "title": "Forbid Visible Thinking",
-          "type": "boolean"
-        },
-        "max_tokens_used": {
-          "minimum": 1,
-          "title": "Max Tokens Used",
-          "type": "integer"
         }
       },
       "required": [
@@ -1295,18 +1322,18 @@
     "EvalSecretBoundary": {
       "additionalProperties": false,
       "properties": {
-        "judge_env_secret_names": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Judge Env Secret Names",
-          "type": "array"
-        },
         "skill_execution_env_secret_names": {
           "items": {
             "type": "string"
           },
           "title": "Skill Execution Env Secret Names",
+          "type": "array"
+        },
+        "judge_env_secret_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Judge Env Secret Names",
           "type": "array"
         },
         "skill_execution_receives_judge_secrets": {
@@ -1324,167 +1351,30 @@
       "type": "object"
     }
   },
-  "$id": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v1.schema.json",
   "additionalProperties": false,
   "properties": {
-    "acceptance_trace": {
-      "items": {
-        "enum": [
-          "FR-003",
-          "FR-008",
-          "SA-003",
-          "SA-004",
-          "VP-021",
-          "VP-022",
-          "VP-030"
-        ],
-        "type": "string"
-      },
-      "minItems": 1,
-      "title": "Acceptance Trace",
-      "type": "array"
-    },
-    "agent_summary": {
-      "minLength": 1,
-      "title": "Agent Summary",
+    "schema_version": {
+      "const": "skills-sdk.ab-run-receipt.v1",
+      "title": "Schema Version",
       "type": "string"
-    },
-    "blockers": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Blockers",
-      "type": "array"
-    },
-    "codex_exec_invoked": {
-      "title": "Codex Exec Invoked",
-      "type": "boolean"
-    },
-    "codex_profile": {
-      "const": "oss-local",
-      "title": "Codex Profile",
-      "type": "string"
-    },
-    "command_plan": {
-      "items": {
-        "$ref": "#/$defs/AbCodexCommandPlan"
-      },
-      "maxItems": 2,
-      "title": "Command Plan",
-      "type": "array"
-    },
-    "command_variant_labels": {
-      "items": {
-        "enum": [
-          "A",
-          "B"
-        ],
-        "type": "string"
-      },
-      "maxItems": 2,
-      "title": "Command Variant Labels",
-      "type": "array"
-    },
-    "evidence_root": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Evidence Root"
-    },
-    "execution_boundary": {
-      "const": "codex_exec_sandbox",
-      "title": "Execution Boundary",
-      "type": "string"
-    },
-    "execution_profile": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/EvalExecutionProfile"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "experiment_id": {
-      "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$",
-      "title": "Experiment Id",
-      "type": "string"
-    },
-    "fixture": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/AbFixtureIdentity"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "judge_boundary": {
-      "const": "post_run_sanitized_evidence_only",
-      "title": "Judge Boundary",
-      "type": "string"
-    },
-    "judge_profile": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/EvalJudgeProfile"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "judge_provider_invoked": {
-      "const": false,
-      "title": "Judge Provider Invoked",
-      "type": "boolean"
-    },
-    "mutation_performed": {
-      "title": "Mutation Performed",
-      "type": "boolean"
-    },
-    "network_accessed": {
-      "title": "Network Accessed",
-      "type": "boolean"
-    },
-    "operation": {
-      "const": "ab_run",
-      "title": "Operation",
-      "type": "string"
-    },
-    "provider_invoked": {
-      "title": "Provider Invoked",
-      "type": "boolean"
-    },
-    "runtime_profile_gates": {
-      "items": {
-        "$ref": "#/$defs/AbRuntimeProfileRunGate"
-      },
-      "maxItems": 2,
-      "title": "Runtime Profile Gates",
-      "type": "array"
     },
     "schema_uri": {
       "const": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v1.schema.json",
       "title": "Schema Uri",
       "type": "string"
     },
-    "schema_version": {
-      "const": "skills-sdk.ab-run-receipt.v1",
-      "title": "Schema Version",
+    "status": {
+      "enum": [
+        "completed",
+        "blocked"
+      ],
+      "title": "Status",
       "type": "string"
     },
-    "secret_boundary": {
-      "$ref": "#/$defs/EvalSecretBoundary"
+    "operation": {
+      "const": "ab_run",
+      "title": "Operation",
+      "type": "string"
     },
     "skill_a": {
       "anyOf": [
@@ -1506,16 +1396,86 @@
         }
       ]
     },
-    "status": {
-      "enum": [
-        "completed",
-        "blocked"
-      ],
-      "title": "Status",
+    "fixture": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AbFixtureIdentity"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "execution_profile": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvalExecutionProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "judge_profile": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvalJudgeProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "codex_profile": {
+      "const": "oss-local",
+      "title": "Codex Profile",
       "type": "string"
     },
-    "timeout": {
-      "$ref": "#/$defs/DurationValue"
+    "runtime_profile_gates": {
+      "items": {
+        "$ref": "#/$defs/AbRuntimeProfileRunGate"
+      },
+      "maxItems": 2,
+      "title": "Runtime Profile Gates",
+      "type": "array"
+    },
+    "evidence_root": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evidence Root"
+    },
+    "experiment_id": {
+      "pattern": "^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$",
+      "title": "Experiment Id",
+      "type": "string"
+    },
+    "command_variant_labels": {
+      "items": {
+        "enum": [
+          "A",
+          "B"
+        ],
+        "type": "string"
+      },
+      "maxItems": 2,
+      "title": "Command Variant Labels",
+      "type": "array"
+    },
+    "command_plan": {
+      "items": {
+        "$ref": "#/$defs/AbCodexCommandPlan"
+      },
+      "maxItems": 2,
+      "title": "Command Plan",
+      "type": "array"
     },
     "variant_results": {
       "items": {
@@ -1524,6 +1484,72 @@
       "maxItems": 2,
       "title": "Variant Results",
       "type": "array"
+    },
+    "secret_boundary": {
+      "$ref": "#/$defs/EvalSecretBoundary"
+    },
+    "execution_boundary": {
+      "const": "codex_exec_sandbox",
+      "title": "Execution Boundary",
+      "type": "string"
+    },
+    "judge_boundary": {
+      "const": "post_run_sanitized_evidence_only",
+      "title": "Judge Boundary",
+      "type": "string"
+    },
+    "mutation_performed": {
+      "title": "Mutation Performed",
+      "type": "boolean"
+    },
+    "network_accessed": {
+      "title": "Network Accessed",
+      "type": "boolean"
+    },
+    "provider_invoked": {
+      "title": "Provider Invoked",
+      "type": "boolean"
+    },
+    "judge_provider_invoked": {
+      "const": false,
+      "title": "Judge Provider Invoked",
+      "type": "boolean"
+    },
+    "codex_exec_invoked": {
+      "title": "Codex Exec Invoked",
+      "type": "boolean"
+    },
+    "timeout": {
+      "$ref": "#/$defs/DurationValue"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "acceptance_trace": {
+      "items": {
+        "enum": [
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "SA-004",
+          "VP-021",
+          "VP-022",
+          "VP-030"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Acceptance Trace",
+      "type": "array"
+    },
+    "agent_summary": {
+      "minLength": 1,
+      "title": "Agent Summary",
+      "type": "string"
     }
   },
   "required": [

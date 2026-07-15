@@ -13,10 +13,10 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_preflight import declared_profile_preflight  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt  # noqa: E402
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
+from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
 
 
 SKILL_A = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"

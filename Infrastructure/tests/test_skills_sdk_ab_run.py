@@ -13,12 +13,13 @@ from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.eval_ab_run import CodexRunResult, _codex_runner_env, _execute_variant, build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_preflight import declared_profile_preflight  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt, validate_ab_run_receipt  # noqa: E402
+from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
 
 
 SKILL_A = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -75,6 +76,18 @@ def _cloud_auth_blocked_probe(profile: dict[str, object]) -> dict[str, object]:
             "blocker": {
                 "blocker_class": "cloud_auth_unavailable",
                 "reason": "typed cloud-only blocker",
+            },
+        }
+        facts["model_catalog"] = {
+            **facts["model_catalog"],
+            "status": "blocked",
+            "network_accessed": False,
+            "http_status": None,
+            "catalog_digest": None,
+            "matched_model": None,
+            "blocker": {
+                "blocker_class": "cloud_catalog_unavailable",
+                "reason": "cloud catalog probe requires authenticated preflight",
             },
         }
     return facts
@@ -226,7 +239,10 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(local_gate["variant_results"], [])
         self.assertEqual(cloud_gate["status"], "blocked")
         self.assertEqual(cloud_gate["blockers"], cloud_gate["preflight"]["admission"]["blockers"])
-        self.assertEqual(cloud_gate["blockers"][0]["blocker_class"], "cloud_auth_unavailable")
+        self.assertIn(
+            "cloud_auth_unavailable",
+            {blocker["blocker_class"] for blocker in cloud_gate["blockers"]},
+        )
         self.assertEqual(cloud_gate["variant_results"], [])
         validate_ab_run_receipt(receipt)
 
@@ -403,7 +419,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["command_variant_labels"], ["A", "B"])
         self.assertEqual({result["variant_label"] for result in receipt["variant_results"]}, {"A", "B"})
         self.assertTrue(receipt["mutation_performed"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         self.assertTrue(receipt["provider_invoked"])
         self.assertFalse(receipt["judge_provider_invoked"])
         self.assertTrue(receipt["codex_exec_invoked"])
@@ -461,7 +477,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertFalse(receipt["provider_invoked"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
 
     def test_builder_records_app_server_initialization_failure_without_provider_claim(self) -> None:
@@ -479,7 +495,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertFalse(receipt["provider_invoked"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         self.assertEqual(receipt["runtime_profile_gates"][0]["status"], "blocked")
         self.assertEqual(receipt["runtime_profile_gates"][1]["status"], "not_run_with_reason")
         self.assertEqual(receipt["runtime_profile_gates"][1]["variant_results"], [])
@@ -499,7 +515,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
 
                 receipt = _build_test_ab_run_receipt(self.evidence_root, runner)
                 self.assertFalse(receipt["provider_invoked"])
-                self.assertFalse(receipt["network_accessed"])
+                self.assertTrue(receipt["network_accessed"])
                 validate_ab_run_receipt(receipt)
 
     def test_builder_records_successful_observable_codex_execution(self) -> None:
@@ -520,7 +536,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["status"], "completed")
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertTrue(receipt["provider_invoked"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
 
     def test_builder_preserves_provider_claim_for_nonzero_post_invocation_failure(self) -> None:
@@ -538,7 +554,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertTrue(receipt["provider_invoked"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
 
     def test_builder_preserves_provider_claim_when_last_message_is_missing(self) -> None:
@@ -556,7 +572,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertTrue(receipt["provider_invoked"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         self.assertIn("A:output_last_message_missing", receipt["blockers"])
         validate_ab_run_receipt(receipt)
 
@@ -631,7 +647,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertIn("A:codex_exec_unavailable", receipt["blockers"])
         self.assertIn("B:codex_exec_unavailable", receipt["blockers"])
         self.assertTrue(receipt["mutation_performed"])
-        self.assertFalse(receipt["network_accessed"])
+        self.assertTrue(receipt["network_accessed"])
         self.assertFalse(receipt["provider_invoked"])
         self.assertFalse(receipt["codex_exec_invoked"])
         self.assertFalse(receipt["judge_provider_invoked"])

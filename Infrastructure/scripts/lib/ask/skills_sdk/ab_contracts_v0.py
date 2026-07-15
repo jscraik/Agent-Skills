@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ask.skills_sdk.ab_contracts import (
     AbFixtureIdentity,
@@ -61,6 +61,19 @@ class AbPlanReceiptV0(_SdkContractModel):
     acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]]
     agent_summary: str = Field(min_length=1)
 
+    @model_validator(mode="after")
+    def _status_matches_packet(self) -> AbPlanReceiptV0:
+        if self.status == "planned":
+            if self.blockers:
+                raise ValueError("planned v0 A/B plan receipts must not include blockers")
+            if not all((self.skill_a, self.skill_b, self.fixture, self.execution_profile, self.judge_profile)):
+                raise ValueError("planned v0 A/B plan receipts require complete experiment evidence")
+            if len(self.command_plan) != 2 or set(self.command_variant_labels) != {"A", "B"}:
+                raise ValueError("planned v0 A/B plan receipts require exact A/B command packets")
+        elif not self.blockers:
+            raise ValueError("blocked v0 A/B plan receipts must include blockers")
+        return self
+
 
 class AbVariantRunResultV0(_SdkContractModel):
     variant_label: Literal["A", "B"]
@@ -107,3 +120,27 @@ class AbRunReceiptV0(_SdkContractModel):
     blockers: list[str]
     acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]]
     agent_summary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _status_matches_results(self) -> AbRunReceiptV0:
+        if self.status == "completed":
+            self._validate_completed_results()
+        elif not self.blockers:
+            raise ValueError("blocked v0 A/B run receipts must include blockers")
+        return self
+
+    def _validate_completed_results(self) -> None:
+        if self.blockers:
+            raise ValueError("completed v0 A/B run receipts must not include blockers")
+        if not all((self.skill_a, self.skill_b, self.fixture, self.execution_profile, self.judge_profile)):
+            raise ValueError("completed v0 A/B run receipts require complete experiment evidence")
+        if len(self.command_plan) != 2 or len(self.variant_results) != 2:
+            raise ValueError("completed v0 A/B run receipts require exact A/B command and result packets")
+        if any(not _legacy_result_passed(result) for result in self.variant_results):
+            raise ValueError("completed v0 A/B run receipts require passing variant results")
+        if not (self.mutation_performed and self.provider_invoked and self.codex_exec_invoked):
+            raise ValueError("completed v0 A/B run receipts must report execution side effects")
+
+
+def _legacy_result_passed(result: AbVariantRunResultV0) -> bool:
+    return result.status == "pass" and result.exit_code == 0 and not result.blockers

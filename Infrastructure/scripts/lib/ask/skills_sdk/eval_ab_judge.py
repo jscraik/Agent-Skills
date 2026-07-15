@@ -496,6 +496,20 @@ def _score_runner_result(
     if not _contained_file_exists(repo_root, evidence["output_file"]):
         _write_text_evidence(repo_root, evidence["output_file"], output_text)
     output_digest = _digest_text(output_text)
+    executed_argv = getattr(result, "executed_argv", None)
+    if not isinstance(executed_argv, list) or not all(isinstance(item, str) for item in executed_argv):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None, output_digest, True, True, mutation_performed
+    try:
+        executed_profile = _codex_profile_from_judge_argv(executed_argv)
+    except ValueError:
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None, output_digest, True, True, mutation_performed
+    if executed_profile != evidence.get("codex_profile"):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None, output_digest, True, True, mutation_performed
+    evidence["command_argv"] = executed_argv
+    evidence["codex_profile"] = executed_profile
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
         return None, output_digest, True, True, mutation_performed
