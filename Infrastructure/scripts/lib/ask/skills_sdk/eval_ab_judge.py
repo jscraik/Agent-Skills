@@ -19,6 +19,7 @@ from ask.skills_sdk.eval_ab_judge_codex import (
 )
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
+from ask.skills_sdk.ab_contracts import _codex_profile_from_judge_argv
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
@@ -363,7 +364,11 @@ def _score_preflight(
             _codex_judge_work_dir(evidence["output_file"]),
             evidence["output_file"],
         )
-        evidence["codex_profile"] = judge_profile.get("codex_profile") or judge_profile["id"]
+        try:
+            evidence["codex_profile"] = _codex_profile_from_judge_argv(evidence["command_argv"])
+        except ValueError:
+            evidence["codex_profile"] = None
+            blockers.append("judge_command_profile_missing_or_invalid")
     else:
         evidence["command_argv"] = []
         evidence["codex_profile"] = None

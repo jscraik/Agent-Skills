@@ -213,6 +213,19 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("oss-local-code", receipt["judge_command_argv"])
         validate_ab_judge_score_receipt(receipt)
 
+    def test_judge_metadata_alone_cannot_prove_executed_profile(self) -> None:
+        invalid_argv = ["codex", "exec", "--sandbox", "read-only", "--json", "-"]
+        with patch("ask.skills_sdk.eval_ab_judge._codex_judge_command", return_value=invalid_argv):
+            receipt = build_ab_judge_score_receipt(
+                REPO_ROOT,
+                run_receipt=RUN_RECEIPT,
+                evidence_root=self.evidence_root,
+                judge_profile_id="oss-local",
+            )
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_command_profile_missing_or_invalid", receipt["blockers"])
+        self.assertIsNone(receipt["codex_profile"])
+
     def test_codex_command_uses_large_transcript_model_settings(self) -> None:
         judge_profile = {
             "id": "oss-local-large-transcript",

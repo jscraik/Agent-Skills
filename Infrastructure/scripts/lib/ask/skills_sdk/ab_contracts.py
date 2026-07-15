@@ -27,9 +27,7 @@ class DurationValue(_SdkContractModel):
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
 _AB_JUDGE_DIMENSION_IDS = {str(dimension["id"]) for dimension in AB_RUBRIC_DIMENSIONS}
-_AB_JUDGE_DIMENSION_WEIGHTS = {
-    str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
-}
+_AB_JUDGE_DIMENSION_WEIGHTS = {str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS}
 _EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 
@@ -48,20 +46,18 @@ def _codex_profile_from_argv(argv: list[str]) -> str:
     return profile
 
 
-def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | None) -> bool:
-    if codex_profile is None:
-        return False
+def _codex_profile_from_judge_argv(argv: list[str]) -> str:
     try:
         codex_index = argv.index("codex")
-        exec_index = argv.index("exec", codex_index + 1)
-        profile_index = argv.index("--profile", exec_index + 1)
-    except ValueError:
-        return False
-    return (
-        argv.count("--profile") == 1
-        and profile_index + 1 < len(argv)
-        and argv[profile_index + 1] == codex_profile
-    )
+        profile_index = argv.index("--profile")
+        profile = argv[profile_index + 1]
+        if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index <= codex_index + 1:
+            raise ValueError("judge Codex argv must contain an ordered profile option")
+    except (IndexError, ValueError) as exc:
+        raise ValueError("judge Codex argv must contain an ordered profile option") from exc
+    if profile not in {"oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"}:
+        raise ValueError("judge Codex argv profile must be an admitted runtime profile")
+    return profile
 
 
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
@@ -763,10 +759,14 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must include complete score evidence")
         if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
             raise ValueError("scored A/B judge receipts must report provider side effects")
+        try:
+            executed_profile = _codex_profile_from_judge_argv(self.judge_command_argv)
+        except ValueError as exc:
+            raise ValueError("scored A/B judge receipts must prove profile in executed Codex argv") from exc
+        if self.codex_profile != executed_profile:
+            raise ValueError("scored A/B judge receipts must derive Codex profile from executed argv")
         if self.codex_profile != self.judge_profile.codex_profile:
-            raise ValueError("scored A/B judge receipts must bind Codex profile to judge profile")
-        if not _contains_codex_profile_invocation(self.judge_command_argv, self.codex_profile):
-            raise ValueError("scored A/B judge receipts must invoke codex exec with the judge Codex profile")
+            raise ValueError("scored A/B judge receipts must bind intended judge profile to executed profile")
         self._validate_decision_consistency()
 
     def _validate_decision_consistency(self) -> None:
