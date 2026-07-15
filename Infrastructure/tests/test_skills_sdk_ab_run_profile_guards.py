@@ -115,6 +115,12 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             validate_ab_run_receipt(duplicated)
         self.assertEqual(self._schema_result(duplicated).status, "fail")
 
+        unbound = deepcopy(fixture)
+        unbound["runtime_profile_gates"][0]["variant_results"][0]["codex_profile"] = None
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(unbound)
+        self.assertEqual(self._schema_result(unbound).status, "fail")
+
     def test_schema_rejects_completed_cloud_after_blocked_local(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         candidate = json.loads(fixture_path.read_text())

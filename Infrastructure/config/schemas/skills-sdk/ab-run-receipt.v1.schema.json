@@ -909,6 +909,22 @@
         {
           "if": {"properties": {"execution_argv": {"type": "null"}}, "required": ["execution_argv"]},
           "then": {"properties": {"codex_profile": {"const": null}}}
+        },
+        {
+          "if": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}]}}, "required": ["command_argv"]},
+          "then": {"properties": {"codex_profile": {"const": "oss-local"}}}
+        },
+        {
+          "if": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}]}}, "required": ["command_argv"]},
+          "then": {"properties": {"codex_profile": {"const": "oss-cloud"}}}
+        },
+        {
+          "if": {"properties": {"execution_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}]}}, "required": ["execution_argv"]},
+          "then": {"properties": {"codex_profile": {"const": "oss-local"}}}
+        },
+        {
+          "if": {"properties": {"execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}]}}, "required": ["execution_argv"]},
+          "then": {"properties": {"codex_profile": {"const": "oss-cloud"}}}
         }
       ],
       "properties": {
