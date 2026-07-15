@@ -712,7 +712,7 @@ def _attach_consistency_blockers(
         "local_model_unavailable": "runtime",
         "cloud_auth_unavailable": "auth",
         "cloud_catalog_unavailable": "model_catalog",
-        "preflight_evidence_missing": "profile_config",
+        "preflight_evidence_missing": "runtime",
     }
     for blocker in blockers:
         key = owners.get(blocker.get("blocker_class"))
