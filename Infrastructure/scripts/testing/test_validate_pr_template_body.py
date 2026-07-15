@@ -84,6 +84,7 @@ def _assert_refresh_job_identity(
     template_workflow: dict[object, object],
     pipeline_workflow: dict[object, object],
 ) -> dict[object, object]:
+    assert set(template_workflow) == {"name", "on", "permissions", "concurrency", "jobs"}
     template_jobs = _mapping(template_workflow.get("jobs"), "dedicated workflow jobs")
     pipeline_jobs = _mapping(pipeline_workflow.get("jobs"), "pipeline jobs")
     assert list(template_jobs) == ["pr-template"]
@@ -100,7 +101,7 @@ def _assert_refresh_job_identity(
     ]
     assert displayed_names.count("pr-template") == 1
     assert template_job.get("name") == "pr-template"
-    assert "permissions" not in template_job
+    assert set(template_job) == {"name", "runs-on", "steps"}
     assert pipeline_admission.get("name") == "pr-template-admission"
     return template_job
 
@@ -477,6 +478,22 @@ def test_pr_template_refresh_contract_rejects_failure_masking_controls() -> None
     validate = _named_step(job, "Validate PR template completion")
     validate["shell"] = "bash {0} || true"
     _assert_contract_rejects(masking_shell, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_parent_failure_masking_controls() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    job_continuation = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(job_continuation["jobs"], "jobs")["pr-template"], "job")
+    job["continue-on-error"] = True
+    _assert_contract_rejects(job_continuation, pipeline_workflow)
+    workflow_shell = copy.deepcopy(template_workflow)
+    workflow_shell["defaults"] = {"run": {"shell": "bash {0} || true"}}
+    _assert_contract_rejects(workflow_shell, pipeline_workflow)
+    job_shell = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(job_shell["jobs"], "jobs")["pr-template"], "job")
+    job["defaults"] = {"run": {"shell": "bash {0} || true"}}
+    _assert_contract_rejects(job_shell, pipeline_workflow)
 
 
 def test_pr_template_refresh_contract_rejects_stale_runs_or_event_guard_drift() -> None:
