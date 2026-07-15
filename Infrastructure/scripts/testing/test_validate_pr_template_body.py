@@ -111,6 +111,7 @@ def _assert_refresh_execution_contract(
 ) -> None:
     _assert_refresh_workflow_boundary(template_workflow, template_job)
     checkout = _named_step(template_job, "Checkout trusted PR template validator")
+    assert set(checkout) == {"name", "if", "uses", "with"}
     assert checkout.get("if") == "github.event_name == 'pull_request'"
     assert checkout.get("uses") == "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
     checkout_with = _mapping(checkout.get("with"), "checkout inputs")
@@ -121,6 +122,7 @@ def _assert_refresh_execution_contract(
     }
 
     validate = _named_step(template_job, "Validate PR template completion")
+    assert set(validate) == {"name", "if", "env", "run"}
     assert validate.get("if") == "github.event_name == 'pull_request'"
     validate_env = _mapping(validate.get("env"), "validator environment")
     assert validate_env == {"PR_BODY": "${{ github.event.pull_request.body }}"}
@@ -131,6 +133,7 @@ def _assert_refresh_execution_contract(
         "  --body-env PR_BODY\n"
     )
     merge_group = _named_step(template_job, "Skip PR template enforcement for merge queue")
+    assert set(merge_group) == {"name", "if", "run"}
     assert merge_group.get("if") == "github.event_name == 'merge_group'"
 
 
@@ -459,6 +462,21 @@ def test_pr_template_refresh_contract_rejects_supply_chain_or_noop_substitution(
     validate = _named_step(job, "Validate PR template completion")
     validate["run"] = f"exit 0\n{validate['run']}"
     _assert_contract_rejects(no_op_validator, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_failure_masking_controls() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    continued_failure = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(continued_failure["jobs"], "jobs")["pr-template"], "job")
+    validate = _named_step(job, "Validate PR template completion")
+    validate["continue-on-error"] = True
+    _assert_contract_rejects(continued_failure, pipeline_workflow)
+    masking_shell = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(masking_shell["jobs"], "jobs")["pr-template"], "job")
+    validate = _named_step(job, "Validate PR template completion")
+    validate["shell"] = "bash {0} || true"
+    _assert_contract_rejects(masking_shell, pipeline_workflow)
 
 
 def test_pr_template_refresh_contract_rejects_stale_runs_or_event_guard_drift() -> None:
