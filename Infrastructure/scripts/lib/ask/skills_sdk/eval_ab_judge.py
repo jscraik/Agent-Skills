@@ -358,7 +358,11 @@ def _score_preflight(
     evidence = _score_evidence_paths(repo_root, evidence_root, preview.get("experiment_id"))
     if evidence["blocker"]:
         blockers.append(evidence["blocker"])
-    if judge_profile is not None and evidence.get("output_file") is not None:
+    if (
+        judge_profile is not None
+        and evidence.get("output_file") is not None
+        and "judge_cloud_op_boundary_unavailable" not in blockers
+    ):
         evidence["command_argv"] = _codex_judge_command(
             judge_profile,
             _codex_judge_work_dir(evidence["output_file"]),
@@ -392,6 +396,8 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
 
 
 def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
+    if _codex_profile_id_for_score(judge_profile) == "oss-cloud" and not _codex_op_env_file_available(judge_profile):
+        return ["judge_cloud_op_boundary_unavailable"]
     missing = [
         name
         for name in judge_profile.get("secret_env_names", [])
@@ -400,6 +406,10 @@ def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
     if missing and _codex_op_env_file_available(judge_profile):
         return []
     return ["judge_profile_secret_missing"] if missing else []
+
+
+def _codex_profile_id_for_score(judge_profile: dict[str, Any]) -> str:
+    return str(judge_profile.get("codex_profile") or judge_profile.get("id"))
 
 
 def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
@@ -496,23 +506,10 @@ def _score_runner_result(
     if not _contained_file_exists(repo_root, evidence["output_file"]):
         _write_text_evidence(repo_root, evidence["output_file"], output_text)
     output_digest = _digest_text(output_text)
-    executed_argv = getattr(result, "executed_argv", None)
-    if not isinstance(executed_argv, list) or not all(isinstance(item, str) for item in executed_argv):
-        blockers.append("judge_command_profile_missing_or_invalid")
+    executed_profile = _validate_judge_execution_argv(evidence, result, blockers)
+    if executed_profile is None:
         return None, output_digest, True, True, mutation_performed
-    planned_argv = evidence.get("command_argv")
-    if executed_argv != planned_argv:
-        blockers.append("judge_command_argv_mismatch")
-        return None, output_digest, True, True, mutation_performed
-    try:
-        executed_profile = _codex_profile_from_judge_argv(executed_argv)
-    except ValueError:
-        blockers.append("judge_command_profile_missing_or_invalid")
-        return None, output_digest, True, True, mutation_performed
-    if executed_profile != evidence.get("codex_profile"):
-        blockers.append("judge_command_profile_missing_or_invalid")
-        return None, output_digest, True, True, mutation_performed
-    evidence["command_argv"] = executed_argv
+    evidence["command_argv"] = result.executed_argv or evidence.get("command_argv")
     evidence["codex_profile"] = executed_profile
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
@@ -525,6 +522,28 @@ def _score_runner_result(
     if blocker:
         blockers.append(blocker)
     return decision, output_digest, True, True, mutation_performed
+
+
+def _validate_judge_execution_argv(
+    evidence: dict[str, Any], result: CodexJudgeResult, blockers: list[str],
+) -> str | None:
+    planned = evidence.get("command_argv")
+    executed = getattr(result, "executed_argv", None) or planned
+    if not isinstance(executed, list) or not all(isinstance(item, str) for item in executed):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    if executed != planned:
+        blockers.append("judge_command_argv_mismatch")
+        return None
+    try:
+        profile = _codex_profile_from_judge_argv(executed)
+    except ValueError:
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    if profile != evidence.get("codex_profile"):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    return profile
 
 
 def _blocked_score_decision(mutation_performed: bool) -> tuple[None, None, bool, bool, bool]:

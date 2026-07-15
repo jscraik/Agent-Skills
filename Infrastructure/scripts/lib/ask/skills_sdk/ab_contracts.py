@@ -52,18 +52,42 @@ def _codex_profile_from_argv(argv: list[str]) -> str:
     return profile
 
 
-def _codex_profile_from_judge_argv(argv: list[str]) -> str:
+def _codex_profile_from_judge_argv(argv: list[str], *, require_approval: bool = True) -> str:
     try:
-        codex_index = argv.index("codex")
-        profile_index = argv.index("--profile")
-        profile = argv[profile_index + 1]
-        if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index != codex_index + 2:
-            raise ValueError("judge Codex argv must contain an ordered profile option")
+        codex_index = _judge_codex_index(argv)
+        profile = _judge_profile_token(argv, codex_index)
+        _validate_judge_argv(argv, codex_index, require_approval)
     except (IndexError, ValueError) as exc:
         raise ValueError("judge Codex argv must contain an ordered profile option") from exc
-    if profile not in {"oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"}:
+    if profile not in _JUDGE_PROFILES:
         raise ValueError("judge Codex argv profile must be an admitted runtime profile")
     return profile
+
+
+_JUDGE_PROFILES = ("oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud")
+
+
+def _judge_codex_index(argv: list[str]) -> int:
+    if not argv:
+        raise ValueError("empty argv")
+    if argv[0] == "codex":
+        return 0
+    if len(argv) >= 6 and (argv[0] == "op" or argv[0].endswith("/op")) and argv[1:3] == ["run", "--env-file"] and argv[4] == "--":
+        return 5
+    raise ValueError("judge argv must use codex directly or the approved op wrapper")
+
+
+def _judge_profile_token(argv: list[str], codex_index: int) -> str:
+    profile_index = argv.index("--profile", codex_index)
+    return argv[profile_index + 1]
+
+
+def _validate_judge_argv(argv: list[str], codex_index: int, require_approval: bool) -> None:
+    profile_index = argv.index("--profile", codex_index)
+    if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index != codex_index + 2:
+        raise ValueError("judge Codex argv must contain an ordered profile option")
+    if require_approval and (argv.count("--ask-for-approval") != 1 or argv[argv.index("--ask-for-approval", codex_index) + 1] != "on-request"):
+        raise ValueError("judge Codex argv must prove the on-request approval policy")
 
 
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
@@ -304,6 +328,7 @@ class AbCodexCommandPlan(_SdkContractModel):
     variant_label: Literal["A", "B"]
     codex_profile: Literal["oss-local", "oss-cloud"]
     command_argv: list[str] = Field(min_length=10)
+    execution_argv: list[str] | None = Field(default=None, min_length=10)
     sandbox_mode: Literal["read-only", "workspace-write"]
     approval_policy: Literal["on-request"]
     event_log_path: str = Field(min_length=1)
@@ -319,6 +344,10 @@ class AbCodexCommandPlan(_SdkContractModel):
     def _argv_proves_profile(self) -> AbCodexCommandPlan:
         if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
             raise ValueError("Codex command argv profile must match codex_profile")
+        if self.execution_argv is not None:
+            _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
+        if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != self.approval_policy:
+            raise ValueError("Codex command argv must prove the declared approval policy")
         return self
 
 
@@ -400,7 +429,7 @@ class AbPlanReceipt(_SdkContractModel):
 
     def _has_plan_evidence(self) -> bool:
         evidence = (self.skill_a, self.skill_b, self.fixture, self.execution_profile,
-                    self.judge_profile, self.evidence_root, self.experiment_id)
+                    self.judge_profile, self.codex_profile, self.evidence_root, self.experiment_id)
         return all(item is not None for item in evidence)
 
 
@@ -410,6 +439,7 @@ class AbVariantRunResult(_SdkContractModel):
     status: Literal["pass", "blocked"]
     exit_code: int
     command_argv: list[str] = Field(min_length=10)
+    execution_argv: list[str] | None = Field(default=None, min_length=10)
     sandbox_mode: Literal["read-only", "workspace-write"]
     prompt_stdin_path: str = Field(min_length=1)
     prompt_stdin_digest: str = Field(min_length=71)
@@ -426,11 +456,33 @@ class AbVariantRunResult(_SdkContractModel):
     def _status_matches_blockers(self) -> AbVariantRunResult:
         if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
             raise ValueError("executed Codex argv profile must match codex_profile")
+        if self.execution_argv is not None:
+            _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
+        if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != "on-request":
+            raise ValueError("executed Codex argv must prove on-request approval")
         if self.status == "pass" and self.blockers:
             raise ValueError("passing A/B variant results must not include blockers")
         if self.status == "blocked" and not self.blockers:
             raise ValueError("blocked A/B variant results must include blockers")
         return self
+
+
+def _validate_execution_argv(execution_argv: list[str], command_argv: list[str], codex_profile: str) -> None:
+    if codex_profile == "oss-local":
+        if execution_argv != command_argv:
+            raise ValueError("local execution argv must equal the Codex command argv")
+        return
+    if len(execution_argv) < len(command_argv) + 5:
+        raise ValueError("cloud execution argv must include the approved op run wrapper")
+    if execution_argv[0] != "op" and not execution_argv[0].endswith("/op"):
+        raise ValueError("cloud execution argv must invoke the approved op binary")
+    if (
+        execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"]
+        or not execution_argv[3]
+    ):
+        raise ValueError("cloud execution argv must use op run --env-file <opaque> --")
+    if execution_argv[5:] != command_argv:
+        raise ValueError("cloud execution argv must preserve the canonical Codex command argv")
 
 
 class AbRuntimeProfileRunGate(_SdkContractModel):
@@ -692,7 +744,13 @@ class AbJudgeScoreReceipt(_SdkContractModel):
         if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
             raise ValueError("scored A/B judge receipts must report provider side effects")
         try:
-            executed_profile = _codex_profile_from_judge_argv(self.judge_command_argv)
+            # v0 judge receipts predate the explicit approval-policy argv contract.
+            # Keep them readable while all newly planned/executed v1 lanes remain
+            # strict through their plan/run validators and runner evidence.
+            executed_profile = _codex_profile_from_judge_argv(
+                self.judge_command_argv,
+                require_approval=False,
+            )
         except ValueError as exc:
             raise ValueError("scored A/B judge receipts must prove profile in executed Codex argv") from exc
         if self.codex_profile != executed_profile:

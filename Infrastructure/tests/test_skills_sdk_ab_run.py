@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from copy import deepcopy
 import shutil
@@ -15,7 +16,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
-from ask.skills_sdk.eval_ab_run import CodexRunResult, _codex_runner_env, _execute_variant, build_ab_run_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_run import (  # noqa: E402
+    CodexRunResult,
+    _codex_runner_env,
+    _default_codex_runner,
+    _execute_variant,
+    build_ab_run_receipt,
+)
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt, validate_ab_run_receipt  # noqa: E402
@@ -128,6 +135,18 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             truth_lane="schema_contract",
         )
 
+    def _full_v1_schema_result(self, receipt: dict[str, object]) -> object:
+        schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v1.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        return schema_validation.validate_payload_against_schema(
+            receipt,
+            schema,
+            {},
+            schema_path=schema_path,
+            payload_source="full-ab-run-v1-regression",
+            truth_lane="schema_contract",
+        )
+
     def test_codex_runner_env_keeps_secret_names_out_of_skill_execution(self) -> None:
         env = _codex_runner_env(
             {
@@ -146,6 +165,60 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertNotIn("OLLAMA_API_KEY", env)
         self.assertNotIn("OPENAI_API_KEY", env)
         self.assertNotIn("SESSION_TOKEN", env)
+    def test_default_cloud_runner_executes_only_through_opaque_op_boundary(self) -> None:
+        captured: list[list[str]] = []
+
+        def fake_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured.append(argv)
+            return subprocess.CompletedProcess(argv, 0, stdout='{"type":"item.completed","item":{"type":"agent_message"}}\n', stderr="")
+
+        command = [
+            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
+            "--sandbox", "read-only", "--json", "-",
+        ]
+        with (
+            patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
+            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "/opaque/cloud-env"}),
+        ):
+            result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
+
+        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", "/opaque/cloud-env", "--"])
+        self.assertEqual(captured[0][5:], command)
+        self.assertEqual(result.executed_argv, captured[0])
+    def test_provider_event_absence_is_a_typed_variant_blocker(self) -> None:
+        def no_provider_event_runner(
+            command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
+        ) -> CodexRunResult:
+            return CodexRunResult(exit_code=0, stdout='{"type":"thread.started"}\n', stderr="")
+
+        receipt = _build_test_ab_run_receipt(self.evidence_root, no_provider_event_runner)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("A:provider_event_missing", receipt["blockers"])
+        self.assertIn("B:provider_event_missing", receipt["blockers"])
+        validate_ab_run_receipt(receipt)
+    def test_local_success_is_preserved_when_cloud_gate_blocks(self) -> None:
+        def local_then_cloud_runner(
+            command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
+        ) -> CodexRunResult:
+            profile = command_argv[command_argv.index("--profile") + 1]
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            if profile == "oss-local":
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text("local response", encoding="utf-8")
+                return CodexRunResult(
+                    exit_code=0,
+                    stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
+                    stderr="",
+                )
+            return CodexRunResult(exit_code=2, stdout="", stderr="cloud blocked")
+
+        receipt = _build_test_ab_run_receipt(self.evidence_root, local_then_cloud_runner)
+        local_gate, cloud_gate = receipt["runtime_profile_gates"]
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(local_gate["status"], "completed")
+        self.assertEqual(cloud_gate["status"], "blocked")
+        self.assertEqual(receipt["variant_results"], local_gate["variant_results"])
+        validate_ab_run_receipt(receipt)
 
     def test_v0_and_v1_run_fixtures_are_readable_under_own_semantics(self) -> None:
         fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid"
@@ -183,7 +256,10 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                     preflight[fact_name]["status"] = "not_applicable"
                     with self.assertRaises(ValueError):
                         validate_ab_run_receipt(candidate)
-                    self.assertEqual(self._schema_status_guard(preflight).status, "fail")
+                    if fact_name == "runtime":
+                        self.assertEqual(self._full_v1_schema_result(candidate).status, "fail")
+                    else:
+                        self.assertEqual(self._schema_status_guard(preflight).status, "fail")
 
     def test_preflight_blocker_prevents_runner_invocation_and_redacts_auth(self) -> None:
         calls: list[list[str]] = []
@@ -608,7 +684,11 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(json.dumps({"prompt": prompt[:12]}), encoding="utf-8")
-            return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="")
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
+                stderr="",
+            )
 
         first_receipt = _build_test_ab_run_receipt(self.evidence_root, successful_runner)
         self.assertEqual(first_receipt["status"], "completed")
@@ -616,7 +696,11 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         def missing_output_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int
         ) -> CodexRunResult:
-            return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="")
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
+                stderr="",
+            )
 
         second_receipt = _build_test_ab_run_receipt(self.evidence_root, missing_output_runner)
 

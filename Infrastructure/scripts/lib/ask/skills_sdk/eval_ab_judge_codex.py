@@ -72,6 +72,8 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
         "exec",
         "--profile",
         codex_profile,
+        "--ask-for-approval",
+        "on-request",
         "--cd",
         str(work_dir),
         "--sandbox",
@@ -91,6 +93,8 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
     op_bin = _codex_op_bin() if op_env_file is not None else None
     if op_env_file is not None and op_bin is not None:
         return [op_bin, "run", "--env-file", str(op_env_file), "--", *codex_command]
+    if codex_profile == "oss-cloud":
+        raise CodexProfileConfigError("oss-cloud judge execution requires the approved op run env boundary")
     return codex_command
 
 
@@ -172,21 +176,9 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
 
 
 def _has_required_op_references(path: Path, judge_profile: dict[str, Any]) -> bool:
-    if stat.S_ISFIFO(path.stat().st_mode):
-        return True
-    required_names = {
-        name
-        for name in judge_profile.get("secret_env_names", [])
-        if isinstance(name, str) and name
-    }
-    if not required_names or not path.is_file():
-        return False
-    references = {
-        line.split("=", 1)[0]
-        for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
-        if "=" in line and line.split("=", 1)[1].startswith("op://")
-    }
-    return required_names.issubset(references)
+    # The operator-owned source is an opaque FIFO; never read credential
+    # material in the parent process to decide whether the boundary is valid.
+    return stat.S_ISFIFO(path.stat().st_mode)
 
 
 def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) -> Path:

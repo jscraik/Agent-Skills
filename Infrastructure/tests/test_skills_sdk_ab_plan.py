@@ -42,7 +42,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                 / "Infrastructure/config/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
             ).read_text(encoding="utf-8")
         )
-        _validate_schema_subset({"allOf": schema["allOf"]}, payload, {})
+        _validate_schema_subset(schema, payload, {})
 
     def _assert_v1_schema_invalid(self, payload: dict[str, object]) -> None:
         with self.assertRaises(AssertionError):
@@ -175,28 +175,35 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertEqual(receipt["command_variant_labels"], ["A", "B"])
         self.assertEqual({plan["variant_label"] for plan in receipt["command_plan"]}, {"A", "B"})
         self.assertEqual(receipt["codex_profile"], "oss-local")
-        gate_identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]
-        self.assertEqual(gate_identities, [(1, "oss-local", "oss-local"), (2, "oss-cloud", "oss-cloud")])
-        self.assertEqual(
-            receipt["command_plan"][0]["command_argv"][:8],
-            ["codex", "exec", "--profile", "oss-local", "--sandbox", "read-only", "--cd", "."],
-        )
-        self.assertEqual(receipt["command_plan"][0]["approval_policy"], "on-request")
-        self.assertIn("--json", receipt["command_plan"][0]["command_argv"])
+        self._assert_gate_identities(receipt)
+        self._assert_command_argv(receipt)
+        self._assert_plan_evidence(receipt)
+        validate_ab_plan_receipt(receipt)
+
+    def _assert_gate_identities(self, receipt: dict[str, object]) -> None:
+        identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]
+        self.assertEqual(identities, [(1, "oss-local", "oss-local"), (2, "oss-cloud", "oss-cloud")])
+
+    def _assert_command_argv(self, receipt: dict[str, object]) -> None:
+        first = receipt["command_plan"][0]
+        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "--ask-for-approval", "on-request", "--sandbox", "read-only"])
+        self.assertEqual(first["approval_policy"], "on-request")
+        self.assertIn("--json", first["command_argv"])
         for gate in receipt["runtime_profile_gates"]:
             for command in gate["command_plan"]:
                 argv = command["command_argv"]
                 self.assertEqual(argv[argv.index("--profile") + 1], gate["codex_profile"])
-        self.assertEqual(
-            receipt["command_plan"][0]["runner_stdout_capture_path"],
-            receipt["command_plan"][0]["event_log_path"],
-        )
-        self.assertEqual(receipt["command_plan"][0]["planned_write_paths"], [receipt["command_plan"][0]["output_last_message_path"]])
+                expected = argv if gate["codex_profile"] == "oss-local" else ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *argv]
+                self.assertEqual(command["execution_argv"], expected)
+
+    def _assert_plan_evidence(self, receipt: dict[str, object]) -> None:
+        first = receipt["command_plan"][0]
+        self.assertEqual(first["runner_stdout_capture_path"], first["event_log_path"])
+        self.assertEqual(first["planned_write_paths"], [first["output_last_message_path"]])
         self.assertFalse(receipt["codex_exec_invoked"])
         self.assertFalse(receipt["provider_invoked"])
         self.assertTrue(receipt["network_accessed"])
         self.assertFalse(receipt["mutation_performed"])
-        validate_ab_plan_receipt(receipt)
 
     def test_validator_rejects_judge_metadata_without_matching_runtime_argv(self) -> None:
         receipt = build_ab_plan_receipt(
@@ -207,6 +214,18 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         receipt["runtime_profile_gates"][0]["command_plan"][0]["command_argv"][3] = "fast"
         with self.assertRaises(ValueError):
             validate_ab_plan_receipt(receipt)
+
+    def test_validator_rejects_direct_cloud_execution_without_op_wrapper(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+        cloud_command = receipt["runtime_profile_gates"][1]["command_plan"][0]
+        cloud_command["execution_argv"] = list(cloud_command["command_argv"])
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(receipt)
+        self._assert_v1_schema_invalid(receipt)
 
     def test_validator_rejects_missing_or_reordered_runtime_lane(self) -> None:
         receipt = build_ab_plan_receipt(
@@ -238,7 +257,10 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                     preflight[fact_name]["status"] = "not_applicable"
                     with self.assertRaises(ValueError):
                         validate_ab_plan_receipt(candidate)
-                    self.assertEqual(self._schema_status_guard(preflight).status, "fail")
+                    if fact_name == "runtime":
+                        self._assert_v1_schema_invalid(candidate)
+                    else:
+                        self.assertEqual(self._schema_status_guard(preflight).status, "fail")
 
     def test_cli_plan_returns_non_executing_receipt(self) -> None:
         proc = subprocess.run(

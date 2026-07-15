@@ -174,7 +174,8 @@ def _ollama_inventory(ollama: str, selected_model: str) -> OllamaInventoryResult
     try:
         completed = subprocess.run(
             [ollama, "list"], capture_output=True, check=False, text=True, timeout=10,
-            env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH", "OLLAMA_HOST"}},
+            # Never allow a caller-provided remote endpoint to redirect the local probe.
+            env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}},
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         failure = _blocked_fact(
@@ -212,8 +213,6 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         mode = path.lstat().st_mode
         if stat.S_ISFIFO(mode):
             approved, source_kind = True, "op_fifo"
-        elif stat.S_ISREG(mode) and _regular_env_file_has_required_op_reference(path):
-            approved, source_kind = True, "op_opaque_env_file"
     except OSError:
         pass
     op_binary = shutil.which("op")
@@ -235,18 +234,6 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "secret_value_observed": False,
         "auth_source": source_kind,
     }
-
-
-def _regular_env_file_has_required_op_reference(path: Path) -> bool:
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return False
-    for line in lines:
-        name, sep, value = line.partition("=")
-        if sep and name == "OLLAMA_API_KEY" and value.startswith("op://"):
-            return True
-    return False
 
 
 def _cloud_catalog_command(op_binary: str, env_file: Path, selected_model: str) -> list[str]:
@@ -697,8 +684,9 @@ def _fact(status: str, source: str, evidence: object) -> dict[str, Any]:
 
 def build_lane_preflight(profile: dict[str, Any], probe: PreflightProbe | None = None) -> dict[str, Any]:
     facts = (probe or installed_profile_preflight)(profile)
+    consistency_blockers = _consistency_blockers(profile, facts)
+    _attach_consistency_blockers(facts, consistency_blockers)
     blockers = _fact_blockers(str(profile["id"]), facts)
-    blockers.extend(_consistency_blockers(profile, facts))
     return {
         **facts,
         "admission": {
@@ -707,6 +695,32 @@ def build_lane_preflight(profile: dict[str, Any], probe: PreflightProbe | None =
             "secret_values_observed": False,
         },
     }
+
+
+def _attach_consistency_blockers(
+    facts: dict[str, Any], blockers: list[dict[str, str]],
+) -> None:
+    """Make every admission blocker owned by a typed fact, never metadata-only."""
+    owners = {
+        "profile_config_missing_or_invalid": "profile_config",
+        "model_catalog_entry_missing": "model_catalog",
+        "selected_model_unavailable": "model_catalog",
+        "local_runtime_unavailable": "runtime",
+        "codex_cli_unavailable": "runtime",
+        "local_runtime_binary_unavailable": "runtime",
+        "local_runtime_service_unavailable": "runtime",
+        "local_model_unavailable": "runtime",
+        "cloud_auth_unavailable": "auth",
+        "cloud_catalog_unavailable": "model_catalog",
+        "preflight_evidence_missing": "profile_config",
+    }
+    for blocker in blockers:
+        key = owners.get(blocker.get("blocker_class"))
+        fact = facts.get(key) if key else None
+        if not isinstance(fact, dict) or fact.get("blocker") is not None:
+            continue
+        fact["status"] = "blocked"
+        fact["blocker"] = blocker
 
 
 def _fact_blockers(lane: str, facts: dict[str, Any]) -> list[dict[str, str]]:

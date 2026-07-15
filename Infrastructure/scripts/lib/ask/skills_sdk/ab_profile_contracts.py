@@ -135,7 +135,7 @@ class AbModelCatalogPreflightFact(AbPreflightFact):
     catalog_identity: str = Field(min_length=1)
     probe_url: str | None = Field(default=None, min_length=1)
     http_status: int | None = Field(default=None, ge=100, le=599)
-    catalog_digest: str | None = Field(default=None, min_length=71)
+    catalog_digest: str | None = Field(default=None, pattern=r"^sha256:[0-9a-f]{64}$")
     matched_model: str | None = Field(default=None, min_length=1)
     network_accessed: bool = False
     secret_value_observed: Literal[False] = False
@@ -181,13 +181,9 @@ class AbLanePreflight(_SdkContractModel):
     @model_validator(mode="after")
     def _admission_matches_facts(self) -> AbLanePreflight:
         facts = (self.profile_config, self.model_catalog, self.runtime, self.auth, self.catalog)
-        passing = self._typed_facts_pass() and all(fact.blocker is None for fact in facts)
-        if passing != (self.admission.status == "pass"):
-            raise ValueError("preflight admission must match typed facts")
-        if self.admission.status == "pass" and self.admission.blockers:
-            raise ValueError("passing preflight admission must not include blockers")
-        if self.admission.status == "blocked" and not self.admission.blockers:
-            raise ValueError("blocked preflight admission requires blockers")
+        _validate_fact_blocker_shapes(facts)
+        fact_blockers = _collect_fact_blockers(facts)
+        _validate_admission_shape(self.admission, self._typed_facts_pass() and not fact_blockers, fact_blockers)
         return self
 
     def _typed_facts_pass(self) -> bool:
@@ -214,6 +210,40 @@ class AbLanePreflight(_SdkContractModel):
             codex_executable_identity=self.runtime.codex_executable_identity,
             blocker=self.runtime.blocker,
         )
+
+
+def _validate_fact_blocker_shapes(facts: tuple[object, ...]) -> None:
+    for fact in facts:
+        status = getattr(fact, "status")
+        blocker = getattr(fact, "blocker")
+        if status == "blocked" and blocker is None:
+            raise ValueError("blocked preflight facts must carry their typed blocker")
+        if status in {"pass", "not_applicable"} and blocker is not None:
+            raise ValueError("passing or not-applicable preflight facts cannot carry blockers")
+
+
+def _collect_fact_blockers(facts: tuple[object, ...]) -> list[AbPreflightBlocker]:
+    blockers: list[AbPreflightBlocker] = []
+    for fact in facts:
+        blocker = getattr(fact, "blocker")
+        if blocker is not None and blocker not in blockers:
+            blockers.append(blocker)
+    return blockers
+
+
+def _validate_admission_shape(
+    admission: AbPreflightAdmission,
+    facts_pass: bool,
+    fact_blockers: list[AbPreflightBlocker],
+) -> None:
+    if facts_pass != (admission.status == "pass"):
+        raise ValueError("preflight admission must match typed facts")
+    if admission.status == "pass" and admission.blockers:
+        raise ValueError("passing preflight admission must not include blockers")
+    if admission.status == "blocked" and not admission.blockers:
+        raise ValueError("blocked preflight admission requires blockers")
+    if admission.blockers != fact_blockers:
+        raise ValueError("preflight admission blockers must equal collected fact blockers")
 
 
 def cloud_runtime_not_applicable_is_valid(**facts: object) -> bool:

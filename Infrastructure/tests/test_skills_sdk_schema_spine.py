@@ -50,6 +50,8 @@ SCHEMA_NAMES = {
     "ab-preview-receipt": "ab-preview-receipt.v0.schema.json",
     "ab-plan-receipt": "ab-plan-receipt.v0.schema.json",
     "ab-run-receipt": "ab-run-receipt.v0.schema.json",
+    "ab-plan-receipt-v1": "ab-plan-receipt.v1.schema.json",
+    "ab-run-receipt-v1": "ab-run-receipt.v1.schema.json",
     "ab-judge-preview-receipt": "ab-judge-preview-receipt.v0.schema.json",
     "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
@@ -540,6 +542,12 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertTrue(all(gate["preflight"]["admission"]["status"] == "pass" for gate in plan["runtime_profile_gates"]))
         self.assertEqual([gate["lane"] for gate in run["runtime_profile_gates"]], ["oss-local", "oss-cloud"])
         self.assertTrue(all(gate["status"] == "completed" for gate in run["runtime_profile_gates"]))
+
+    def test_ab_v1_full_receipts_are_valid_against_their_versioned_schemas(self) -> None:
+        plan = self.assert_valid("ab-plan-receipt-v1", "ab-plan-receipt.v1.json")
+        run = self.assert_valid("ab-run-receipt-v1", "ab-run-receipt.v1.json")
+        self.assertEqual(plan["schema_version"], "skills-sdk.ab-plan-receipt.v1")
+        self.assertEqual(run["schema_version"], "skills-sdk.ab-run-receipt.v1")
 
     def test_ab_plan_v1_schema_rejects_status_packet_contradictions(self) -> None:
         schema = _json(SCHEMA_DIR / "ab-plan-receipt.v1.schema.json")

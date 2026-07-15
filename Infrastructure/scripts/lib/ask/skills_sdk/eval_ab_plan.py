@@ -75,6 +75,9 @@ def _variant_command(
         "command_argv": _codex_command_argv(
             sandbox_mode, approval_policy, repo_root_label, output_path, codex_profile,
         ),
+        "execution_argv": _planned_execution_argv(codex_profile, _codex_command_argv(
+            sandbox_mode, approval_policy, repo_root_label, output_path, codex_profile,
+        )),
         "sandbox_mode": sandbox_mode,
         "approval_policy": approval_policy,
         "event_log_path": event_log_path,
@@ -100,6 +103,8 @@ def _codex_command_argv(
         "exec",
         "--profile",
         codex_profile,
+        "--ask-for-approval",
+        approval_policy,
         "--sandbox",
         sandbox_mode,
         "--cd",
@@ -109,6 +114,13 @@ def _codex_command_argv(
         output_path,
         "-",
     ]
+
+
+def _planned_execution_argv(codex_profile: str, command_argv: list[str]) -> list[str]:
+    """Return the transport argv without exposing the opaque credential source."""
+    if codex_profile == "oss-cloud":
+        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+    return list(command_argv)
 
 
 def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:

@@ -107,6 +107,16 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 result_class=result_class, http_status=403,
                 catalog_digest=None, match_count=None,
             )
+        if result_class == "invalid_catalog_url":
+            return cls._catalog_payload(
+                result_class=result_class, network_accessed=False, http_status=None,
+                catalog_digest=None, matched_model=None, match_count=None,
+            )
+        if result_class == "redirect_rejected":
+            return cls._catalog_payload(
+                result_class=result_class, network_accessed=True, http_status=None,
+                catalog_digest=None, matched_model=None, match_count=None,
+            )
         if result_class in {"timeout", "network_failure"}:
             return cls._catalog_payload(
                 result_class=result_class, http_status=None,
@@ -339,7 +349,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         )
         self.assertEqual(cloud["admission"]["status"], "blocked")
         self.assertIn(
-            "preflight_evidence_missing",
+            "cloud_auth_unavailable",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
 
@@ -550,7 +560,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         result_classes = (
             "model_missing", "model_ambiguous", "auth_missing", "http_failure",
             "timeout", "network_failure", "payload_too_large", "malformed_json",
-            "malformed_catalog",
+            "malformed_catalog", "invalid_catalog_url", "redirect_rejected",
         )
         with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
             for result_class in result_classes:

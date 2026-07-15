@@ -1,4 +1,6 @@
 {
+  "$id": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
     "AbAuthPreflightFact": {
       "additionalProperties": false,
@@ -120,6 +122,26 @@
     },
     "AbCodexCommandPlan": {
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"codex_profile": {"const": "oss-local"}}, "required": ["codex_profile"]},
+          "then": {
+            "properties": {
+              "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
+              "execution_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
+          "then": {
+            "properties": {
+              "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
+              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+            }
+          }
+        }
+      ],
       "properties": {
         "variant_label": {
           "enum": [
@@ -144,6 +166,10 @@
           "minItems": 10,
           "title": "Command Argv",
           "type": "array"
+        },
+        "execution_argv": {
+          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array"}, {"type": "null"}],
+          "title": "Execution Argv"
         },
         "sandbox_mode": {
           "enum": [
@@ -185,6 +211,7 @@
         },
         "prompt_stdin_digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Prompt Stdin Digest",
           "type": "string"
         },
@@ -231,6 +258,7 @@
         },
         "digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Digest",
           "type": "string"
         },
@@ -304,11 +332,44 @@
               "runtime": {
                 "properties": {
                   "status": {
-                    "const": "pass"
+                    "enum": ["pass", "not_applicable"]
                   }
                 }
               }
             }
+          }
+        }
+        ,{
+          "if": {
+            "properties": {
+              "admission": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              },
+              "runtime": {
+                "properties": {"status": {"const": "not_applicable"}},
+                "required": ["status"]
+              }
+            },
+            "required": ["admission", "runtime"]
+          },
+          "then": {
+            "properties": {
+              "profile_config": {
+                "properties": {"profile_id": {"const": "oss-cloud"}},
+                "required": ["profile_id"]
+              },
+              "runtime": {
+                "properties": {
+                  "status": {"const": "not_applicable"},
+                  "availability_kind": {"const": "cloud_endpoint"},
+                  "blocker": {"type": "null"},
+                  "codex_executable_identity": {"pattern": "^sha256:[0-9a-f]{64}$"}
+                },
+                "required": ["status", "availability_kind", "blocker", "codex_executable_identity"]
+              }
+            },
+            "required": ["profile_config", "runtime"]
           }
         }
       ],
@@ -418,6 +479,7 @@
           "anyOf": [
             {
               "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
               "type": "string"
             },
             {
@@ -809,6 +871,7 @@
         },
         "package_digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Package Digest",
           "type": "string"
         }
@@ -825,6 +888,16 @@
     },
     "AbVariantRunResult": {
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"codex_profile": {"const": "oss-local"}}, "required": ["codex_profile"]},
+          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+        },
+        {
+          "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
+          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+        }
+      ],
       "properties": {
         "variant_label": {
           "enum": [
@@ -862,6 +935,10 @@
           "title": "Command Argv",
           "type": "array"
         },
+        "execution_argv": {
+          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array"}, {"type": "null"}],
+          "title": "Execution Argv"
+        },
         "sandbox_mode": {
           "enum": [
             "read-only",
@@ -877,6 +954,7 @@
         },
         "prompt_stdin_digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Prompt Stdin Digest",
           "type": "string"
         },
@@ -887,6 +965,7 @@
         },
         "runner_stdout_digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Runner Stdout Digest",
           "type": "string"
         },
@@ -897,6 +976,7 @@
         },
         "runner_stderr_digest": {
           "minLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Runner Stderr Digest",
           "type": "string"
         },
@@ -909,6 +989,7 @@
           "anyOf": [
             {
               "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
               "type": "string"
             },
             {
@@ -1435,6 +1516,10 @@
       "items": {
         "$ref": "#/$defs/AbRuntimeProfileRunGate"
       },
+      "prefixItems": [
+        {"$ref": "#/$defs/AbRuntimeProfileRunGate"},
+        {"$ref": "#/$defs/AbRuntimeProfileRunGate"}
+      ],
       "maxItems": 2,
       "title": "Runtime Profile Gates",
       "type": "array"
@@ -1582,5 +1667,21 @@
     "agent_summary"
   ],
   "title": "AbRunReceipt",
-  "type": "object"
+  "type": "object",
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "completed"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "runtime_profile_gates": {
+            "minItems": 2,
+            "prefixItems": [
+              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}},
+              {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

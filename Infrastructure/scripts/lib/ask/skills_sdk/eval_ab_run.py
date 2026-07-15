@@ -25,6 +25,7 @@ class CodexRunResult:
     exit_code: int
     stdout: str
     stderr: str
+    executed_argv: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -87,8 +88,9 @@ def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
 
 
 def _default_codex_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+    execution_argv = _execution_argv_for_run(command_argv)
     proc = subprocess.run(
-        command_argv,
+        execution_argv,
         cwd=repo_root,
         input=prompt,
         text=True,
@@ -97,7 +99,17 @@ def _default_codex_runner(command_argv: list[str], prompt: str, repo_root: Path,
         timeout=timeout_seconds,
         env=_codex_runner_env(),
     )
-    return CodexRunResult(exit_code=proc.returncode, stdout=proc.stdout, stderr=proc.stderr)
+    return CodexRunResult(
+        exit_code=proc.returncode, stdout=proc.stdout, stderr=proc.stderr, executed_argv=execution_argv,
+    )
+
+
+def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
+    profile = _codex_profile_from_argv(command_argv)
+    if profile == "oss-local":
+        return list(command_argv)
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+    return ["op", "run", "--env-file", env_file, "--", *command_argv]
 
 
 def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
@@ -127,14 +139,27 @@ def _execute_variant(
     _write_runner_outputs(paths, result)
     provider_invoked = _provider_event_observed(result.stdout)
     output_digest = _digest_file(paths.output)
-    blockers = _variant_blockers(variant_label, run_error, result.exit_code, output_digest)
+    execution_argv = result.executed_argv or command_plan.get("execution_argv") or command_plan["command_argv"]
+    blockers = _variant_blockers(variant_label, run_error, result.exit_code, output_digest, provider_invoked)
+    return _variant_result(
+        repo_root, command_plan, paths, result, execution_argv, output_digest,
+        blockers, provider_invoked, codex_exec_started,
+    )
+
+
+def _variant_result(
+    repo_root: Path, command_plan: dict[str, Any], paths: VariantPaths, result: CodexRunResult,
+    execution_argv: list[str], output_digest: str | None, blockers: list[str],
+    provider_invoked: bool, codex_exec_started: bool,
+) -> dict[str, Any]:
     semantic_excerpt = _semantic_output_excerpt(paths.output)
     return {
-        "variant_label": variant_label,
+        "variant_label": command_plan["variant_label"],
         "codex_profile": _codex_profile_from_argv(command_plan["command_argv"]),
         "status": "pass" if not blockers else "blocked",
         "exit_code": result.exit_code,
         "command_argv": command_plan["command_argv"],
+        "execution_argv": execution_argv,
         "sandbox_mode": command_plan["sandbox_mode"],
         "prompt_stdin_path": command_plan["runner_prompt_input_path"],
         "prompt_stdin_digest": _digest_file(paths.prompt),
@@ -192,12 +217,16 @@ def _run_variant(
                 exit_code=124,
                 stdout=_timeout_output_text(exc.stdout),
                 stderr=_timeout_output_text(exc.stderr),
+                executed_argv=_execution_argv_for_run(command_plan["command_argv"]),
             ),
             "codex_exec_timeout",
             True,
         )
     except OSError as exc:
-        return CodexRunResult(exit_code=127, stdout="", stderr=str(exc)), "codex_exec_unavailable", False
+        return CodexRunResult(
+            exit_code=127, stdout="", stderr=str(exc),
+            executed_argv=_execution_argv_for_run(command_plan["command_argv"]),
+        ), "codex_exec_unavailable", False
 
 
 def _timeout_output_text(value: str | bytes | None) -> str:
@@ -245,7 +274,10 @@ def _semantic_output_excerpt(path: Path) -> str | None:
     return compact or None
 
 
-def _variant_blockers(variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None) -> list[str]:
+def _variant_blockers(
+    variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None,
+    provider_invoked: bool,
+) -> list[str]:
     blockers: list[str] = []
     if run_error:
         blockers.append(f"{variant_label}:{run_error}")
@@ -253,6 +285,8 @@ def _variant_blockers(variant_label: str, run_error: str | None, exit_code: int,
         blockers.append(f"{variant_label}:codex_exec_exit_{exit_code}")
     if output_digest is None:
         blockers.append(f"{variant_label}:output_last_message_missing")
+    if not provider_invoked:
+        blockers.append(f"{variant_label}:provider_event_missing")
     return blockers
 
 

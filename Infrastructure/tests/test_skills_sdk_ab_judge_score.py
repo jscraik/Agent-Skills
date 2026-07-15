@@ -42,12 +42,11 @@ def _judge_result(
     stderr: str = "",
     exit_code: int = 0,
 ) -> CodexJudgeResult:
-    profile = str(judge_profile["codex_profile"])
     return CodexJudgeResult(
         exit_code=exit_code,
         stdout=stdout,
         stderr=stderr,
-        executed_argv=["codex", "exec", "--profile", profile, "--json", "-"],
+        executed_argv=None,
     )
 
 
@@ -127,14 +126,19 @@ def _run_codex_with_captured_subprocess(
         with tempfile.TemporaryDirectory() as profile_dir:
             op_env_file = Path(profile_dir) / "codex.env" if profile_id == "oss-cloud" else None
             if op_env_file is not None:
-                op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\\n", encoding="utf-8")
+                os.mkfifo(op_env_file)
             Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
             env = {"ASK_CODEX_PROFILE_SOURCE_DIR": profile_dir, **(extra_env or {})}
             if op_env_file is not None:
                 env["ASK_CODEX_OP_ENV_FILE"] = str(op_env_file)
             subprocess.run = fake_run  # type: ignore[assignment]
             base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
-            with patch.dict(os.environ, {**base_env, **env}, clear=True):
+            op_patch = (
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op")
+                if op_env_file is not None
+                else patch.object(codex_judge, "_codex_op_bin", return_value=None)
+            )
+            with patch.dict(os.environ, {**base_env, **env}, clear=True), op_patch:
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
             return result, captured_command, captured_env, captured_profile_text, op_env_file
     finally:
@@ -292,7 +296,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as profile_dir:
             op_env_file = Path(profile_dir) / "codex.env"
-            op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            os.mkfifo(op_env_file)
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 receipt = build_ab_judge_score_receipt(
                     REPO_ROOT,
@@ -1021,7 +1025,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as profile_dir:
             op_env_file = Path(profile_dir) / "codex.env"
-            op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            os.mkfifo(op_env_file)
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 command = _codex_judge_command(
                     {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
@@ -1036,6 +1040,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(
             command[9:],
             [
+                "--ask-for-approval",
+                "on-request",
                 "--cd",
                 str(codex_judge._codex_judge_work_dir(output_file)),
                 "--sandbox",
@@ -1056,9 +1062,26 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_file.write_text("", encoding="utf-8")
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
                 self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+
+    def test_cloud_judge_rejects_direct_codex_when_opaque_op_boundary_is_missing(self) -> None:
+        output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as profile_dir:
+            env_file = Path(profile_dir) / "codex.env"
+            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}, clear=True),
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+            ):
+                with self.assertRaises(codex_judge.CodexProfileConfigError):
+                    _codex_judge_command(
+                        profile,
+                        codex_judge._codex_judge_work_dir(output_file),
+                        output_file,
+                    )
             env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
-                self.assertEqual(codex_judge._codex_op_env_file_path(profile), env_file)
+                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
