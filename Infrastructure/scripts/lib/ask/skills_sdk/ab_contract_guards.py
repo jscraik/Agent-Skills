@@ -43,13 +43,25 @@ def run_gate_is_completed(gate: Any) -> bool:
         not gate.blockers
         and gate.preflight.admission.status == "pass"
         and not gate.preflight.admission.blockers
-        and all(fact.status in {"pass", "not_applicable"} and fact.blocker is None for fact in facts)
+        and _runtime_gate_preflight_facts_admitted(gate, facts)
         and runtime_preflight_identity_matches_lane(gate.lane, gate.preflight)
         and exact_variant_labels(gate.command_plan)
         and exact_variant_labels(gate.variant_results)
         and all(_variant_result_proves_success(result) for result in gate.variant_results)
         and _gate_results_match_command_plan(gate)
     )
+
+
+def _runtime_gate_preflight_facts_admitted(gate: Any, facts: tuple[Any, ...]) -> bool:
+    keys = ("profile_config", "model_catalog", "runtime", "auth", "catalog")
+    return all(
+        fact.blocker is None and _fact_status_admitted(gate.lane, key, fact.status)
+        for key, fact in zip(keys, facts, strict=True)
+    )
+
+
+def _fact_status_admitted(lane: str, key: str, status: str) -> bool:
+    return status == "pass" or (lane == "oss-local" and key == "auth" and status == "not_applicable")
 
 
 def validate_run_receipt_status(receipt: Any) -> None:
@@ -113,7 +125,7 @@ def _validate_completed_run_packets(receipt: Any) -> None:
 def _run_has_evidence(receipt: Any) -> bool:
     evidence = (
         receipt.skill_a, receipt.skill_b, receipt.fixture, receipt.execution_profile,
-        receipt.judge_profile, receipt.evidence_root, receipt.experiment_id,
+        receipt.judge_profile, receipt.codex_profile, receipt.evidence_root, receipt.experiment_id,
     )
     return all(item is not None for item in evidence)
 

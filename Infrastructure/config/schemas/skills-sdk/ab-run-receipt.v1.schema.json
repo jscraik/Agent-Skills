@@ -337,14 +337,62 @@
               "runtime": {
                 "properties": {
                   "status": {
-                    "enum": ["pass", "not_applicable"]
+                    "const": "pass"
                   }
                 }
               }
             }
           }
-        }
-        ,{
+        },
+        {
+          "if": {
+            "properties": {
+              "admission": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              },
+              "profile_config": {
+                "properties": {"profile_id": {"const": "oss-cloud"}},
+                "required": ["profile_id"]
+              }
+            },
+            "required": ["admission", "profile_config"]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              }
+            },
+            "required": ["auth"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admission": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              },
+              "profile_config": {
+                "properties": {"profile_id": {"const": "oss-local"}},
+                "required": ["profile_id"]
+              }
+            },
+            "required": ["admission", "profile_config"]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "properties": {"status": {"const": "not_applicable"}},
+                "required": ["status"]
+              }
+            },
+            "required": ["auth"]
+          }
+        },
+        {
           "if": {
             "properties": {
               "admission": {
@@ -1700,12 +1748,32 @@
       "if": {"properties": {"status": {"const": "completed"}}, "required": ["status"]},
       "then": {
         "properties": {
+          "blockers": {
+            "maxItems": 0
+          },
+          "command_plan": {
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "command_variant_labels": {
+            "minItems": 2,
+            "maxItems": 2
+          },
           "runtime_profile_gates": {
             "minItems": 2,
+            "maxItems": 2,
             "prefixItems": [
               {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}},
               {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
-            ]
+            ],
+            "items": {"$ref": "#/$defs/AbRuntimeProfileRunGate"}
+          },
+          "variant_results": {
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "codex_exec_invoked": {
+            "const": true
           }
         }
       }
@@ -1724,7 +1792,12 @@
       },
       "then": {
         "properties": {
+          "blockers": {
+            "minItems": 1
+          },
           "runtime_profile_gates": {
+            "minItems": 2,
+            "maxItems": 2,
             "prefixItems": [
               {},
               {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}

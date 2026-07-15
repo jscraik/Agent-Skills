@@ -167,7 +167,7 @@
     }
   },
   "mutation_performed": false,
-  "network_accessed": false,
+  "network_accessed": true,
   "operation": "ab_plan",
   "provider_invoked": false,
   "runtime_profile_gates": [

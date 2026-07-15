@@ -235,6 +235,18 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(validate_ab_run_receipt(v0).schema_version, "skills-sdk.ab-run-receipt.v0")
         self.assertEqual(validate_ab_run_receipt(v1).schema_version, "skills-sdk.ab-run-receipt.v1")
 
+    def test_v0_run_requires_exact_a_and_b_commands_and_results(self) -> None:
+        fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid"
+        fixture = json.loads((fixture_root / "ab-run-receipt.json").read_text())
+        fixture["command_plan"][1]["variant_label"] = "A"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(fixture)
+
+        fixture = json.loads((fixture_root / "ab-run-receipt.json").read_text())
+        fixture["variant_results"][1]["variant_label"] = "A"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(fixture)
+
     def test_v1_reader_rejects_claimed_profile_not_proven_by_executed_argv(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         fixture = json.loads(fixture_path.read_text())
@@ -535,6 +547,34 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(receipt["codex_exec_invoked"])
         self.assertTrue(receipt["provider_invoked"])
         self.assertTrue(receipt["network_accessed"])
+        validate_ab_run_receipt(receipt)
+
+    def test_mixed_provider_evidence_blocks_non_proving_variant(self) -> None:
+        def mixed_evidence_runner(
+            command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
+        ) -> CodexRunResult:
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("sanitized response", encoding="utf-8")
+            is_variant_a = output_path.as_posix().endswith("/A/last-message.json")
+            stdout = (
+                '{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n'
+                if is_variant_a
+                else '{"type":"item.completed","item":{"type":"metadata","name":"usage"}}\n'
+            )
+            return CodexRunResult(
+                exit_code=0,
+                stdout=stdout,
+                stderr="",
+                executed_argv=_test_execution_argv(command_argv),
+            )
+
+        receipt = _build_test_ab_run_receipt(self.evidence_root, mixed_evidence_runner)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("B:provider_event_missing", receipt["blockers"])
+        self.assertEqual(receipt["runtime_profile_gates"][0]["status"], "blocked")
+        self.assertEqual(receipt["runtime_profile_gates"][1]["status"], "not_run_with_reason")
         validate_ab_run_receipt(receipt)
 
     def test_builder_preserves_provider_claim_for_nonzero_post_invocation_failure(self) -> None:

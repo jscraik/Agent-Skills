@@ -197,7 +197,7 @@ def _cloud_runtime_fact(selected_model: str, profile_path: Path) -> dict[str, An
         )
     codex, identity = installed_identity
     return {
-        "status": "not_applicable", "evidence_source": codex,
+        "status": "pass", "evidence_source": codex,
         "evidence_digest": codex_identity_evidence_digest(codex, identity), "blocker": None,
         "availability_kind": "cloud_endpoint", "selected_model_id": selected_model,
         "codex_executable_identity": identity,
@@ -764,6 +764,7 @@ def _consistency_blockers(profile: dict[str, Any], facts: dict[str, Any]) -> lis
     configured_provider = facts.get("profile_config", {}).get("configured_provider_id")
     selected_model = facts.get("model_catalog", {}).get("selected_model_id")
     runtime_model = facts.get("runtime", {}).get("selected_model_id")
+    runtime_kind = facts.get("runtime", {}).get("availability_kind")
     if profile_id != profile.get("id"):
         blockers.append(_blocker("profile_config_missing_or_invalid", "resolved profile id does not match lane"))
     if configured_model != profile.get("model"):
@@ -784,6 +785,9 @@ def _consistency_blockers(profile: dict[str, Any], facts: dict[str, Any]) -> lis
         blockers.append(_blocker("selected_model_unavailable", "selected model does not match profile catalog"))
     if runtime_model != selected_model:
         blockers.append(_blocker("selected_model_unavailable", "runtime model does not match selected catalog model"))
+    expected_runtime_kind = "local_model" if profile.get("id") == "oss-local" else "cloud_endpoint"
+    if runtime_kind != expected_runtime_kind:
+        blockers.append(_blocker("local_runtime_unavailable", "runtime availability kind does not match lane"))
     if profile.get("id") == "oss-cloud" and facts.get("auth", {}).get("auth_reference") != "codex_cli_auth":
         blockers.append(_blocker("cloud_auth_unavailable", "approved cloud auth reference is unavailable"))
     return blockers

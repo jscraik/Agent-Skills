@@ -68,7 +68,11 @@ class AbPlanReceiptV0(_SdkContractModel):
                 raise ValueError("planned v0 A/B plan receipts must not include blockers")
             if not all((self.skill_a, self.skill_b, self.fixture, self.execution_profile, self.judge_profile)):
                 raise ValueError("planned v0 A/B plan receipts require complete experiment evidence")
-            if len(self.command_plan) != 2 or set(self.command_variant_labels) != {"A", "B"}:
+            if (
+                len(self.command_plan) != 2
+                or {plan.variant_label for plan in self.command_plan} != {"A", "B"}
+                or set(self.command_variant_labels) != {"A", "B"}
+            ):
                 raise ValueError("planned v0 A/B plan receipts require exact A/B command packets")
         elif not self.blockers:
             raise ValueError("blocked v0 A/B plan receipts must include blockers")
@@ -134,12 +138,23 @@ class AbRunReceiptV0(_SdkContractModel):
             raise ValueError("completed v0 A/B run receipts must not include blockers")
         if not all((self.skill_a, self.skill_b, self.fixture, self.execution_profile, self.judge_profile)):
             raise ValueError("completed v0 A/B run receipts require complete experiment evidence")
-        if len(self.command_plan) != 2 or len(self.variant_results) != 2:
+        if not _exact_v0_ab_packets(self.command_plan, self.variant_results):
             raise ValueError("completed v0 A/B run receipts require exact A/B command and result packets")
         if any(not _legacy_result_passed(result) for result in self.variant_results):
             raise ValueError("completed v0 A/B run receipts require passing variant results")
         if not (self.mutation_performed and self.provider_invoked and self.codex_exec_invoked):
             raise ValueError("completed v0 A/B run receipts must report execution side effects")
+
+
+def _exact_v0_ab_packets(
+    command_plan: list[AbCodexCommandPlanV0], results: list[AbVariantRunResultV0],
+) -> bool:
+    return (
+        len(command_plan) == 2
+        and {plan.variant_label for plan in command_plan} == {"A", "B"}
+        and len(results) == 2
+        and {result.variant_label for result in results} == {"A", "B"}
+    )
 
 
 def _legacy_result_passed(result: AbVariantRunResultV0) -> bool:

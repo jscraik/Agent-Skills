@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 from typing import Any, Callable
 
-from ask.skills_sdk.ab_contracts import _codex_profile_from_argv
+from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 
@@ -156,16 +156,24 @@ def _variant_result(
 ) -> dict[str, Any]:
     semantic_excerpt = _semantic_output_excerpt(paths.output)
     declared_profile = _codex_profile_from_argv(command_plan["command_argv"])
-    executed_profile = None if execution_argv is None else _codex_profile_from_argv(
-        execution_argv[5:] if declared_profile == "oss-cloud" else execution_argv
-    )
+    recorded_execution_argv = None
+    executed_profile = None
+    if execution_argv is not None:
+        try:
+            _validate_execution_argv(execution_argv, command_plan["command_argv"], declared_profile)
+            executed_profile = _codex_profile_from_argv(
+                execution_argv[5:] if declared_profile == "oss-cloud" else execution_argv
+            )
+            recorded_execution_argv = _redact_execution_argv(execution_argv)
+        except ValueError:
+            blockers.append(f"{command_plan['variant_label']}:execution_argv_invalid")
     return {
         "variant_label": command_plan["variant_label"],
         "codex_profile": executed_profile,
         "status": "pass" if not blockers else "blocked",
         "exit_code": result.exit_code,
         "command_argv": command_plan["command_argv"],
-        "execution_argv": execution_argv,
+        "execution_argv": recorded_execution_argv,
         "sandbox_mode": command_plan["sandbox_mode"],
         "prompt_stdin_path": command_plan["runner_prompt_input_path"],
         "prompt_stdin_digest": _digest_file(paths.prompt),
@@ -181,6 +189,18 @@ def _variant_result(
         "network_accessed": False,
         "blockers": blockers,
     }
+
+
+def _redact_execution_argv(execution_argv: list[str]) -> list[str]:
+    redacted = list(execution_argv)
+    if (
+        len(redacted) >= 5
+        and redacted[0] == "op"
+        and redacted[1:3] == ["run", "--env-file"]
+        and redacted[4] == "--"
+    ):
+        redacted[3] = "<operator-approved-opaque-env-stream>"
+    return redacted
 
 
 def _variant_paths(repo_root: Path, command_plan: dict[str, Any]) -> VariantPaths:

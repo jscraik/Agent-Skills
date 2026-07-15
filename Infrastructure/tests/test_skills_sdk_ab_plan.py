@@ -146,6 +146,25 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
             validate_ab_plan_receipt(blocked_with_packet)
         self._assert_v1_schema_invalid(blocked_with_packet)
 
+        planned_with_blockers = deepcopy(planned)
+        planned_with_blockers["blockers"] = ["contradictory_planned_blocker"]
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(planned_with_blockers)
+        self._assert_v1_schema_invalid(planned_with_blockers)
+
+        blocked_without_blockers = self._blocked_plan(planned)
+        blocked_without_blockers["blockers"] = []
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(blocked_without_blockers)
+        self._assert_v1_schema_invalid(blocked_without_blockers)
+
+    def test_v0_plan_requires_exact_a_and_b_packets(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.json"
+        fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+        fixture["command_plan"][1]["variant_label"] = "A"
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(fixture)
+
     def _blocked_plan(self, planned: dict[str, object]) -> dict[str, object]:
         blocked = deepcopy(planned)
         blocker = {

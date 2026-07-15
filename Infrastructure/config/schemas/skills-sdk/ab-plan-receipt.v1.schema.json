@@ -337,14 +337,62 @@
               "runtime": {
                 "properties": {
                   "status": {
-                    "enum": ["pass", "not_applicable"]
+                    "const": "pass"
                   }
                 }
               }
             }
           }
-        }
-        ,{
+        },
+        {
+          "if": {
+            "properties": {
+              "admission": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              },
+              "profile_config": {
+                "properties": {"profile_id": {"const": "oss-cloud"}},
+                "required": ["profile_id"]
+              }
+            },
+            "required": ["admission", "profile_config"]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              }
+            },
+            "required": ["auth"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admission": {
+                "properties": {"status": {"const": "pass"}},
+                "required": ["status"]
+              },
+              "profile_config": {
+                "properties": {"profile_id": {"const": "oss-local"}},
+                "required": ["profile_id"]
+              }
+            },
+            "required": ["admission", "profile_config"]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "properties": {"status": {"const": "not_applicable"}},
+                "required": ["status"]
+              }
+            },
+            "required": ["auth"]
+          }
+        },
+        {
           "if": {
             "properties": {
               "admission": {
@@ -1485,6 +1533,9 @@
       },
       "then": {
         "properties": {
+          "blockers": {
+            "maxItems": 0
+          },
           "command_plan": {
             "maxItems": 2,
             "minItems": 2
@@ -1528,6 +1579,9 @@
       },
       "then": {
         "properties": {
+          "blockers": {
+            "minItems": 1
+          },
           "command_plan": {
             "maxItems": 0
           },
