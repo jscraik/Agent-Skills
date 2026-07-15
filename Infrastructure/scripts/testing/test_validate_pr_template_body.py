@@ -72,7 +72,9 @@ def _assert_refresh_triggers(
     pipeline_workflow: dict[object, object],
 ) -> None:
     template_on = _mapping(template_workflow.get("on"), "dedicated workflow trigger")
+    assert set(template_on) == {"pull_request", "merge_group"}
     pull_request = _mapping(template_on.get("pull_request"), "dedicated pull_request trigger")
+    assert set(pull_request) == {"types"}
     assert pull_request.get("types") == ["opened", "synchronize", "reopened", "edited"]
     assert "merge_group" in template_on
     pipeline_on = _mapping(pipeline_workflow.get("on"), "pipeline trigger")
@@ -427,6 +429,19 @@ def test_pr_template_refresh_contract_rejects_broad_or_duplicate_check() -> None
     )
     duplicate_admission["name"] = "pr-template"
     _assert_contract_rejects(template_workflow, duplicate_check)
+
+
+def test_pr_template_refresh_contract_rejects_suppressing_event_filters() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    for filter_name in ("branches", "branches-ignore", "paths", "paths-ignore"):
+        filtered = copy.deepcopy(template_workflow)
+        pull_request = _mapping(
+            _mapping(filtered["on"], "trigger")["pull_request"],
+            "pull_request trigger",
+        )
+        pull_request[filter_name] = ["never-match-this-change"]
+        _assert_contract_rejects(filtered, pipeline_workflow)
 
 
 def test_pr_template_refresh_contract_rejects_privilege_or_secret_expansion() -> None:
