@@ -82,9 +82,9 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
     ]
     model_override = _codex_model_override(judge_profile)
     if model_override is not None:
-        codex_command[2:2] = ["-c", f"model={_json_toml_string(model_override)}"]
+        codex_command[4:4] = ["-c", f"model={_json_toml_string(model_override)}"]
     for override in reversed(_codex_model_setting_overrides(judge_profile)):
-        codex_command[2:2] = ["-c", override]
+        codex_command[4:4] = ["-c", override]
     op_env_file = _codex_op_env_file_path(judge_profile)
     op_bin = _codex_op_bin() if op_env_file is not None else None
     if op_env_file is not None and op_bin is not None:

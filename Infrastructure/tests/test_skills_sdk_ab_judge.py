@@ -164,6 +164,9 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
                 "codex", "exec", "--profile", "oss-local", "--profile", "oss-local"
             ],
             "profile-misplaced": ["codex", "--profile", "oss-local", "exec"],
+            "profile-delayed": [
+                "codex", "exec", "--sandbox", "read-only", "--profile", "oss-local"
+            ],
         }
         for label, prefix in prefixes.items():
             with self.subTest(label=label):

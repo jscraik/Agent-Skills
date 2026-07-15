@@ -51,7 +51,7 @@ def _codex_profile_from_judge_argv(argv: list[str]) -> str:
         codex_index = argv.index("codex")
         profile_index = argv.index("--profile")
         profile = argv[profile_index + 1]
-        if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index <= codex_index + 1:
+        if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index != codex_index + 2:
             raise ValueError("judge Codex argv must contain an ordered profile option")
     except (IndexError, ValueError) as exc:
         raise ValueError("judge Codex argv must contain an ordered profile option") from exc
