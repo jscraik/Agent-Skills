@@ -120,7 +120,7 @@ class AbPreflightBlocker(_SdkContractModel):
 class AbPreflightFact(_SdkContractModel):
     status: Literal["pass", "blocked", "not_applicable"]
     evidence_source: str = Field(min_length=1)
-    evidence_digest: str = Field(min_length=71, pattern=r"^sha256:[0-9a-f]{64}$")
+    evidence_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     blocker: AbPreflightBlocker | None
 
 
