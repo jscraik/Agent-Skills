@@ -86,6 +86,7 @@ def _assert_refresh_job_identity(
 ) -> dict[object, object]:
     template_jobs = _mapping(template_workflow.get("jobs"), "dedicated workflow jobs")
     pipeline_jobs = _mapping(pipeline_workflow.get("jobs"), "pipeline jobs")
+    assert list(template_jobs) == ["pr-template"]
     template_job = _mapping(template_jobs.get("pr-template"), "dedicated pr-template job")
     pipeline_admission = _mapping(
         pipeline_jobs.get("pr-template-admission"),
@@ -99,6 +100,7 @@ def _assert_refresh_job_identity(
     ]
     assert displayed_names.count("pr-template") == 1
     assert template_job.get("name") == "pr-template"
+    assert "permissions" not in template_job
     assert pipeline_admission.get("name") == "pr-template-admission"
     return template_job
 
@@ -107,21 +109,43 @@ def _assert_refresh_execution_contract(
     template_workflow: dict[object, object],
     template_job: dict[object, object],
 ) -> None:
-    assert template_workflow.get("permissions") == {"contents": "read", "pull-requests": "read"}
+    _assert_refresh_workflow_boundary(template_workflow, template_job)
     checkout = _named_step(template_job, "Checkout trusted PR template validator")
+    assert checkout.get("if") == "github.event_name == 'pull_request'"
     checkout_with = _mapping(checkout.get("with"), "checkout inputs")
-    assert checkout_with.get("persist-credentials") is False
-    assert checkout_with.get("ref") == "${{ github.event.pull_request.base.sha }}"
-    assert checkout_with.get("path") == "trusted-base"
+    assert checkout_with == {
+        "persist-credentials": False,
+        "ref": "${{ github.event.pull_request.base.sha }}",
+        "path": "trusted-base",
+    }
 
     validate = _named_step(template_job, "Validate PR template completion")
+    assert validate.get("if") == "github.event_name == 'pull_request'"
     validate_env = _mapping(validate.get("env"), "validator environment")
-    assert validate_env.get("PR_BODY") == "${{ github.event.pull_request.body }}"
+    assert validate_env == {"PR_BODY": "${{ github.event.pull_request.body }}"}
     run = validate.get("run")
     assert isinstance(run, str)
     assert "python3 trusted-base/.github/scripts/validate_pr_template_body.py" in run
     assert "--template trusted-base/.github/PULL_REQUEST_TEMPLATE.md" in run
     assert "--body-env PR_BODY" in run
+    merge_group = _named_step(template_job, "Skip PR template enforcement for merge queue")
+    assert merge_group.get("if") == "github.event_name == 'merge_group'"
+
+
+def _assert_refresh_workflow_boundary(
+    template_workflow: dict[object, object],
+    template_job: dict[object, object],
+) -> None:
+    assert template_workflow.get("permissions") == {"contents": "read", "pull-requests": "read"}
+    assert template_workflow.get("concurrency") == {
+        "group": "pr-template-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}",
+        "cancel-in-progress": True,
+    }
+    assert [step.get("name") for step in _steps(template_job)] == [
+        "Checkout trusted PR template validator",
+        "Validate PR template completion",
+        "Skip PR template enforcement for merge queue",
+    ]
 
 
 def _filled_template_body() -> str:
@@ -397,6 +421,45 @@ def test_pr_template_refresh_contract_rejects_broad_or_duplicate_check() -> None
     )
     duplicate_admission["name"] = "pr-template"
     _assert_contract_rejects(template_workflow, duplicate_check)
+
+
+def test_pr_template_refresh_contract_rejects_privilege_or_secret_expansion() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    privileged_job = copy.deepcopy(template_workflow)
+    _mapping(privileged_job["jobs"], "jobs")["extra"] = {
+        "permissions": {"actions": "write"},
+        "runs-on": "ubuntu-latest",
+        "steps": [{"run": "echo ${{ secrets.NPM_TOKEN }}"}],
+    }
+    _assert_contract_rejects(privileged_job, pipeline_workflow)
+    job_permission = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(job_permission["jobs"], "jobs")["pr-template"], "job")
+    job["permissions"] = {"actions": "write"}
+    _assert_contract_rejects(job_permission, pipeline_workflow)
+    secret_checkout = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(secret_checkout["jobs"], "jobs")["pr-template"], "job")
+    checkout = _named_step(job, "Checkout trusted PR template validator")
+    _mapping(checkout["with"], "checkout inputs")["token"] = "${{ secrets.PRIVATE_TOKEN }}"
+    _assert_contract_rejects(secret_checkout, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_stale_runs_or_event_guard_drift() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    no_cancellation = copy.deepcopy(template_workflow)
+    _mapping(no_cancellation["concurrency"], "concurrency")["cancel-in-progress"] = False
+    _assert_contract_rejects(no_cancellation, pipeline_workflow)
+    no_guard = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(no_guard["jobs"], "jobs")["pr-template"], "job")
+    _named_step(job, "Validate PR template completion").pop("if")
+    _assert_contract_rejects(no_guard, pipeline_workflow)
+    swapped_guard = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(swapped_guard["jobs"], "jobs")["pr-template"], "job")
+    _named_step(job, "Skip PR template enforcement for merge queue")["if"] = (
+        "github.event_name == 'pull_request'"
+    )
+    _assert_contract_rejects(swapped_guard, pipeline_workflow)
 
 
 def _assert_contract_rejects(
