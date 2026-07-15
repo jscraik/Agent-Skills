@@ -117,6 +117,7 @@ def _run_has_evidence(receipt: Any) -> bool:
 def _run_has_consistent_runtime_gates(receipt: Any) -> bool:
     return (
         [gate.lane for gate in receipt.runtime_profile_gates] == ["oss-local", "oss-cloud"]
+        and receipt.command_plan == receipt.runtime_profile_gates[0].command_plan
         and receipt.variant_results == receipt.runtime_profile_gates[0].variant_results
         and all(_gate_results_match_command_plan(gate) for gate in receipt.runtime_profile_gates)
     )
