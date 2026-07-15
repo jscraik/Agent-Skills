@@ -2,7 +2,6 @@ name: Harness PR Pipeline
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
   merge_group:
 
 permissions:
@@ -10,8 +9,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  pr-template:
-    name: pr-template
+  pr-template-admission:
+    name: pr-template-admission
     runs-on: ubuntu-latest
     steps:
       - name: Checkout trusted PR template validator
@@ -142,8 +141,8 @@ jobs:
   linear-gate:
     name: linear-gate
     runs-on: ubuntu-latest
-    needs: [pr-template]
-    if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template.result == 'success') }}
+    needs: [pr-template-admission]
+    if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template-admission.result == 'success') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -190,8 +189,8 @@ jobs:
   risk-policy-gate:
     name: risk-policy-gate
     runs-on: ubuntu-latest
-    needs: [pr-template, linear-gate]
-    if: ${{ always() && (github.event_name == 'merge_group' || (needs.pr-template.result == 'success' && needs.linear-gate.result == 'success')) }}
+    needs: [pr-template-admission, linear-gate]
+    if: ${{ always() && (github.event_name == 'merge_group' || (needs.pr-template-admission.result == 'success' && needs.linear-gate.result == 'success')) }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import re
 import sys
 from pathlib import Path
 from types import ModuleType
+
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -25,8 +28,100 @@ def _template() -> str:
     return (REPO_ROOT / ".github" / "PULL_REQUEST_TEMPLATE.md").read_text(encoding="utf-8")
 
 
-def _pr_pipeline_workflow() -> str:
-    return (REPO_ROOT / ".github" / "workflows" / "pr-pipeline.yml").read_text(encoding="utf-8")
+def _workflow(relative_path: str) -> dict[object, object]:
+    payload = yaml.safe_load((REPO_ROOT / relative_path).read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise TypeError(f"Workflow must be a mapping: {relative_path}")
+    # PyYAML's YAML 1.1 loader treats the unquoted GitHub Actions `on` key as true.
+    if True in payload and "on" not in payload:
+        payload["on"] = payload.pop(True)
+    return payload
+
+
+def _mapping(value: object, label: str) -> dict[object, object]:
+    if not isinstance(value, dict):
+        raise TypeError(f"{label} must be a mapping")
+    return value
+
+
+def _steps(job: dict[object, object]) -> list[dict[object, object]]:
+    raw_steps = job.get("steps")
+    if not isinstance(raw_steps, list) or not all(isinstance(step, dict) for step in raw_steps):
+        raise TypeError("workflow job steps must be a list of mappings")
+    return raw_steps
+
+
+def _named_step(job: dict[object, object], name: str) -> dict[object, object]:
+    for step in _steps(job):
+        if step.get("name") == name:
+            return step
+    raise AssertionError(f"Missing workflow step: {name}")
+
+
+def _assert_pr_template_refresh_contract(
+    template_workflow: dict[object, object],
+    pipeline_workflow: dict[object, object],
+) -> None:
+    _assert_refresh_triggers(template_workflow, pipeline_workflow)
+    template_job = _assert_refresh_job_identity(template_workflow, pipeline_workflow)
+    _assert_refresh_execution_contract(template_workflow, template_job)
+
+
+def _assert_refresh_triggers(
+    template_workflow: dict[object, object],
+    pipeline_workflow: dict[object, object],
+) -> None:
+    template_on = _mapping(template_workflow.get("on"), "dedicated workflow trigger")
+    pull_request = _mapping(template_on.get("pull_request"), "dedicated pull_request trigger")
+    assert pull_request.get("types") == ["opened", "synchronize", "reopened", "edited"]
+    assert "merge_group" in template_on
+    pipeline_on = _mapping(pipeline_workflow.get("on"), "pipeline trigger")
+    pipeline_pull_request = pipeline_on.get("pull_request")
+    assert pipeline_pull_request is None or pipeline_pull_request == {}
+
+
+def _assert_refresh_job_identity(
+    template_workflow: dict[object, object],
+    pipeline_workflow: dict[object, object],
+) -> dict[object, object]:
+    template_jobs = _mapping(template_workflow.get("jobs"), "dedicated workflow jobs")
+    pipeline_jobs = _mapping(pipeline_workflow.get("jobs"), "pipeline jobs")
+    template_job = _mapping(template_jobs.get("pr-template"), "dedicated pr-template job")
+    pipeline_admission = _mapping(
+        pipeline_jobs.get("pr-template-admission"),
+        "pipeline pr-template-admission job",
+    )
+    displayed_names = [
+        job.get("name")
+        for jobs in (template_jobs, pipeline_jobs)
+        for job in jobs.values()
+        if isinstance(job, dict)
+    ]
+    assert displayed_names.count("pr-template") == 1
+    assert template_job.get("name") == "pr-template"
+    assert pipeline_admission.get("name") == "pr-template-admission"
+    return template_job
+
+
+def _assert_refresh_execution_contract(
+    template_workflow: dict[object, object],
+    template_job: dict[object, object],
+) -> None:
+    assert template_workflow.get("permissions") == {"contents": "read", "pull-requests": "read"}
+    checkout = _named_step(template_job, "Checkout trusted PR template validator")
+    checkout_with = _mapping(checkout.get("with"), "checkout inputs")
+    assert checkout_with.get("persist-credentials") is False
+    assert checkout_with.get("ref") == "${{ github.event.pull_request.base.sha }}"
+    assert checkout_with.get("path") == "trusted-base"
+
+    validate = _named_step(template_job, "Validate PR template completion")
+    validate_env = _mapping(validate.get("env"), "validator environment")
+    assert validate_env.get("PR_BODY") == "${{ github.event.pull_request.body }}"
+    run = validate.get("run")
+    assert isinstance(run, str)
+    assert "python3 trusted-base/.github/scripts/validate_pr_template_body.py" in run
+    assert "--template trusted-base/.github/PULL_REQUEST_TEMPLATE.md" in run
+    assert "--body-env PR_BODY" in run
 
 
 def _filled_template_body() -> str:
@@ -230,11 +325,86 @@ def test_accepts_angle_tokens_not_owned_by_template() -> None:
 
 
 def test_pr_template_gate_refreshes_after_pr_body_edits() -> None:
-    workflow = _pr_pipeline_workflow()
-
-    assert re.search(
-        r"(?m)^  pull_request:\n    types: \[opened, synchronize, reopened, edited\]$",
-        workflow,
+    _assert_pr_template_refresh_contract(
+        _workflow(".github/workflows/pr-template.yml"),
+        _workflow(".github/workflows/pr-pipeline.yml"),
     )
-    assert "ref: ${{ github.event.pull_request.base.sha }}" in workflow
-    assert "PR_BODY: ${{ github.event.pull_request.body }}" in workflow
+
+
+def test_pr_template_refresh_contract_rejects_unsafe_or_stale_variants() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+    missing_edited = copy.deepcopy(template_workflow)
+    _mapping(
+        _mapping(missing_edited["on"], "trigger")["pull_request"],
+        "pull_request trigger",
+    )["types"] = ["opened", "synchronize", "reopened"]
+    _assert_contract_rejects(missing_edited, pipeline_workflow)
+    head_checkout = copy.deepcopy(template_workflow)
+    head_job = _mapping(_mapping(head_checkout["jobs"], "jobs")["pr-template"], "job")
+    _mapping(
+        _named_step(head_job, "Checkout trusted PR template validator")["with"],
+        "checkout inputs",
+    )["ref"] = "${{ github.event.pull_request.head.sha }}"
+    _assert_contract_rejects(head_checkout, pipeline_workflow)
+    credentialed_checkout = copy.deepcopy(template_workflow)
+    credentialed_job = _mapping(
+        _mapping(credentialed_checkout["jobs"], "jobs")["pr-template"],
+        "job",
+    )
+    _mapping(
+        _named_step(credentialed_job, "Checkout trusted PR template validator")["with"],
+        "checkout inputs",
+    )["persist-credentials"] = True
+    _assert_contract_rejects(credentialed_checkout, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_wrong_body_or_validator() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+
+    stale_body = copy.deepcopy(template_workflow)
+    stale_body_job = _mapping(_mapping(stale_body["jobs"], "jobs")["pr-template"], "job")
+    _mapping(
+        _named_step(stale_body_job, "Validate PR template completion")["env"],
+        "validator environment",
+    )["PR_BODY"] = "${{ github.event.pull_request.title }}"
+    _assert_contract_rejects(stale_body, pipeline_workflow)
+    untrusted_validator = copy.deepcopy(template_workflow)
+    untrusted_job = _mapping(
+        _mapping(untrusted_validator["jobs"], "jobs")["pr-template"],
+        "job",
+    )
+    _named_step(untrusted_job, "Validate PR template completion")["run"] = (
+        "python3 .github/scripts/validate_pr_template_body.py --body-env PR_BODY"
+    )
+    _assert_contract_rejects(untrusted_validator, pipeline_workflow)
+
+
+def test_pr_template_refresh_contract_rejects_broad_or_duplicate_check() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+
+    broad_pipeline = copy.deepcopy(pipeline_workflow)
+    _mapping(broad_pipeline["on"], "pipeline trigger")["pull_request"] = {
+        "types": ["opened", "synchronize", "reopened", "edited"]
+    }
+    _assert_contract_rejects(template_workflow, broad_pipeline)
+    duplicate_check = copy.deepcopy(pipeline_workflow)
+    duplicate_admission = _mapping(
+        _mapping(duplicate_check["jobs"], "jobs")["pr-template-admission"],
+        "pipeline admission",
+    )
+    duplicate_admission["name"] = "pr-template"
+    _assert_contract_rejects(template_workflow, duplicate_check)
+
+
+def _assert_contract_rejects(
+    template_workflow: dict[object, object],
+    pipeline_workflow: dict[object, object],
+) -> None:
+    try:
+        _assert_pr_template_refresh_contract(template_workflow, pipeline_workflow)
+    except AssertionError:
+        return
+    raise AssertionError("Unsafe or stale workflow mutation unexpectedly satisfied the contract")
