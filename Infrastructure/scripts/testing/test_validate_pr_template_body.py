@@ -25,6 +25,10 @@ def _template() -> str:
     return (REPO_ROOT / ".github" / "PULL_REQUEST_TEMPLATE.md").read_text(encoding="utf-8")
 
 
+def _pr_pipeline_workflow() -> str:
+    return (REPO_ROOT / ".github" / "workflows" / "pr-pipeline.yml").read_text(encoding="utf-8")
+
+
 def _filled_template_body() -> str:
     validator = _load_validator()
     body = _template()
@@ -223,3 +227,14 @@ def test_accepts_angle_tokens_not_owned_by_template() -> None:
     errors = validator.validate_pr_body(_template(), body)
 
     assert not any("Replace unresolved placeholder token" in error for error in errors)
+
+
+def test_pr_template_gate_refreshes_after_pr_body_edits() -> None:
+    workflow = _pr_pipeline_workflow()
+
+    assert re.search(
+        r"(?m)^  pull_request:\n    types: \[opened, synchronize, reopened, edited\]$",
+        workflow,
+    )
+    assert "ref: ${{ github.event.pull_request.base.sha }}" in workflow
+    assert "PR_BODY: ${{ github.event.pull_request.body }}" in workflow
