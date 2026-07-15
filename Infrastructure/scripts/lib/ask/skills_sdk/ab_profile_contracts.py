@@ -190,13 +190,26 @@ class AbLanePreflight(_SdkContractModel):
         return (
             self.profile_config.status == "pass"
             and self.model_catalog.status == "pass"
-            and self.runtime.status == "pass"
+            and self._runtime_is_admitted()
             and self.catalog.status == "pass"
             and self.auth.status in {"pass", "not_applicable"}
         )
 
     def _runtime_is_admitted(self) -> bool:
-        return self.runtime.status == "pass"
+        if self.runtime.status == "pass":
+            return True
+        return cloud_runtime_not_applicable_is_valid(
+            lane=self.profile_config.profile_id,
+            runtime_status=self.runtime.status,
+            availability_kind=self.runtime.availability_kind,
+            runtime_model_id=self.runtime.selected_model_id,
+            configured_model_id=self.profile_config.configured_model_id,
+            catalog_model_id=self.model_catalog.selected_model_id,
+            evidence_source=self.runtime.evidence_source,
+            evidence_digest=self.runtime.evidence_digest,
+            codex_executable_identity=self.runtime.codex_executable_identity,
+            blocker=self.runtime.blocker,
+        )
 
 
 def _validate_fact_blocker_shapes(facts: tuple[object, ...]) -> None:
@@ -310,7 +323,22 @@ def preflight_fact_status_is_admitted(
         return True
     if key == "auth":
         return lane == "oss-local" and fact.get("status") == "not_applicable"
-    return False
+    if key != "runtime":
+        return False
+    if set(fact) != {
+        "status", "evidence_source", "evidence_digest", "blocker",
+        "availability_kind", "selected_model_id", "codex_executable_identity",
+    }:
+        return False
+    return cloud_runtime_not_applicable_is_valid(
+        lane=lane, runtime_status=fact.get("status"),
+        availability_kind=fact.get("availability_kind"),
+        runtime_model_id=fact.get("selected_model_id"),
+        configured_model_id=profile_config.get("configured_model_id"),
+        catalog_model_id=model_catalog.get("selected_model_id"),
+        evidence_source=fact.get("evidence_source"), evidence_digest=fact.get("evidence_digest"),
+        codex_executable_identity=fact.get("codex_executable_identity"), blocker=fact.get("blocker"),
+    )
 
 
 _OLLAMA_CLOUD_CATALOG_URL = "https://ollama.com/api/tags"

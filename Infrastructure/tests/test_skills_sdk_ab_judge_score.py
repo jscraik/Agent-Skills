@@ -24,6 +24,7 @@ from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     _parse_judge_decision,
     _run_codex_judge,
     _score_evidence_paths,
+    _validate_judge_execution_argv,
     _write_text_evidence,
     build_ab_judge_score_receipt,
 )
@@ -129,7 +130,9 @@ def _run_codex_with_captured_subprocess(
     original_run = subprocess.run
     try:
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env" if profile_id == "oss-cloud" else None
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
             if op_env_file is not None:
                 os.mkfifo(op_env_file)
             Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
@@ -151,6 +154,33 @@ def _run_codex_with_captured_subprocess(
 
 
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
+    def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
+        command_tail = [
+            "--", "codex", "exec", "--profile", "oss-cloud",
+            "--ask-for-approval", "on-request", "-",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            regular = ["op", "run", "--env-file", str(env_file), *command_tail]
+            env_file.write_text("opaque reference only", encoding="utf-8")
+            blockers: list[str] = []
+            result = CodexJudgeResult(0, "", "", executed_argv=regular)
+            evidence = {"command_argv": regular, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
+            env_file.unlink()
+            os.mkfifo(env_file)
+            fifo_argv = ["op", "run", "--env-file", str(env_file), *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=fifo_argv)
+            evidence = {"command_argv": fifo_argv, "codex_profile": "oss-cloud"}
+            self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
+            self.assertEqual(blockers, [])
+
     def setUp(self) -> None:
         self.evidence_root = ".harness/test-sdk-ab-judge-score"
         self._remove_evidence_root()
@@ -301,7 +331,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 receipt = build_ab_judge_score_receipt(
@@ -1032,7 +1064,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
 
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 command = _codex_judge_command(
@@ -1096,7 +1130,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
         profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
             env_patch = patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)})
             bin_patch = patch.object(codex_judge, "_codex_op_bin", return_value="/opt/homebrew/bin/op")

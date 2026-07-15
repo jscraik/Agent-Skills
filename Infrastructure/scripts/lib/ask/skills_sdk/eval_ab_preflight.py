@@ -197,7 +197,7 @@ def _cloud_runtime_fact(selected_model: str, profile_path: Path) -> dict[str, An
         )
     codex, identity = installed_identity
     return {
-        "status": "pass", "evidence_source": codex,
+        "status": "not_applicable", "evidence_source": codex,
         "evidence_digest": codex_identity_evidence_digest(codex, identity), "blocker": None,
         "availability_kind": "cloud_endpoint", "selected_model_id": selected_model,
         "codex_executable_identity": identity,

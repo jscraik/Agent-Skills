@@ -241,46 +241,55 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                         {item["blocker_class"] for item in receipt["admission"]["blockers"]},
                     )
 
-    def test_cloud_runtime_not_applicable_is_rejected_even_with_installed_identity(self) -> None:
+    def test_only_proven_cloud_endpoint_runtime_may_use_not_applicable(self) -> None:
         profile = select_judge_profile("oss-cloud")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            binary = self._codex_fixture(root)
+            with patch.dict(os.environ, {"PATH": temp_dir}):
+                receipt = build_lane_preflight(profile, self._cloud_runtime_not_applicable)
+                self.assertEqual(receipt["admission"]["status"], "pass")
+                AbLanePreflight.model_validate(receipt)
+                substitutions = (
+                    {"evidence_source": "/definitely/not/an/installed/codex"},
+                    {"evidence_source": "PATH:codex"},
+                    {"evidence_source": str(root / "alternate-codex")},
+                    {"codex_executable_identity": "sha256:" + "0" * 64},
+                    {"evidence_digest": "sha256:" + "0" * 64},
+                    {"availability_kind": "local_model"},
+                    {"selected_model_id": "fast"},
+                    {"codex_executable_identity_copy": "sha256:" + "1" * 64},
+                )
+                for override in substitutions:
+                    with self.subTest(override=override):
+                        blocked = build_lane_preflight(profile, self._forged_cloud_runtime(override))
+                        self.assertEqual(blocked["admission"]["status"], "blocked")
+                missing = build_lane_preflight(
+                    profile, self._forged_cloud_runtime({}, missing_identity=True),
+                )
+                self.assertEqual(missing["admission"]["status"], "blocked")
+                symlink = root / "alternate-codex"
+                symlink.symlink_to(binary)
+                substituted = build_lane_preflight(
+                    profile, self._forged_cloud_runtime({"evidence_source": str(symlink)}),
+                )
+                self.assertEqual(substituted["admission"]["status"], "blocked")
 
-        def not_applicable_probe(candidate: dict[str, object]) -> dict[str, object]:
-            facts = declared_profile_preflight(candidate)
-            facts["runtime"] = {
-                **facts["runtime"],
-                "status": "not_applicable",
-                "blocker": None,
-            }
-            return facts
-
-        receipt = build_lane_preflight(profile, not_applicable_probe)
-        self.assertEqual(receipt["admission"]["status"], "blocked")
-        self.assertIn(
-            "preflight_evidence_missing",
-            {item["blocker_class"] for item in receipt["admission"]["blockers"]},
-        )
-        with self.assertRaises(ValueError):
-            AbLanePreflight.model_validate({
-                **receipt,
-                "admission": {"status": "pass", "blockers": [], "secret_values_observed": False},
-            })
-
-    def test_cloud_runtime_identity_metadata_cannot_rescue_not_applicable(self) -> None:
+    def test_changed_executable_content_invalidates_stored_cloud_identity(self) -> None:
         profile = select_judge_profile("oss-cloud")
-
-        def forged_probe(candidate: dict[str, object]) -> dict[str, object]:
-            facts = declared_profile_preflight(candidate)
-            facts["runtime"] = {
-                **facts["runtime"],
-                "status": "not_applicable",
-                "availability_kind": "cloud_endpoint",
-                "codex_executable_identity": "sha256:" + "1" * 64,
-                "blocker": None,
-            }
-            return facts
-
-        receipt = build_lane_preflight(profile, forged_probe)
-        self.assertEqual(receipt["admission"]["status"], "blocked")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            binary = self._codex_fixture(Path(temp_dir))
+            with patch.dict(os.environ, {"PATH": temp_dir}):
+                receipt = build_lane_preflight(profile, self._cloud_runtime_not_applicable)
+                self.assertEqual(receipt["admission"]["status"], "pass")
+                AbLanePreflight.model_validate(receipt)
+                binary.write_text("#!/bin/sh\n# changed bytes\nprintf '%s\\n' 'codex-cli 1.2.3'\n", encoding="utf-8")
+                binary.chmod(0o755)
+                with self.assertRaises(ValueError):
+                    AbLanePreflight.model_validate(receipt)
+                facts = {key: value for key, value in receipt.items() if key != "admission"}
+                rebuilt = build_lane_preflight(profile, lambda _candidate: facts)
+                self.assertEqual(rebuilt["admission"]["status"], "blocked")
 
     def test_invalid_codex_version_is_rejected_separately(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

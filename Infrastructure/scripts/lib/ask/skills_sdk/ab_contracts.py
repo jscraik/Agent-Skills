@@ -73,7 +73,15 @@ def _judge_codex_index(argv: list[str]) -> int:
         raise ValueError("empty argv")
     if argv[0] == "codex":
         return 0
-    if len(argv) >= 6 and (argv[0] == "op" or argv[0].endswith("/op")) and argv[1:3] == ["run", "--env-file"] and argv[4] == "--":
+    op_binary = argv[0]
+    approved_op = op_binary == "op" or (op_binary.startswith("/") and op_binary.endswith("/op"))
+    if (
+        len(argv) >= 6
+        and approved_op
+        and argv[1:3] == ["run", "--env-file"]
+        and _is_opaque_env_reference(argv[3])
+        and argv[4] == "--"
+    ):
         return 5
     raise ValueError("judge argv must use codex directly or the approved op wrapper")
 
@@ -477,7 +485,7 @@ def _validate_execution_argv(execution_argv: list[str], command_argv: list[str],
         raise ValueError("cloud execution argv must include the approved op run wrapper")
     if execution_argv[0] != "op" and not execution_argv[0].endswith("/op"):
         raise ValueError("cloud execution argv must invoke the approved op binary")
-    if execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"] or not _is_opaque_env_reference(execution_argv[3]):
+    if execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"] or execution_argv[3] != "<operator-approved-opaque-env-stream>":
         raise ValueError("cloud execution argv must use op run --env-file <opaque> --")
     if execution_argv[5:] != command_argv:
         raise ValueError("cloud execution argv must preserve the canonical Codex command argv")

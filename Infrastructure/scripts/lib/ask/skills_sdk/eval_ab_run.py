@@ -9,6 +9,7 @@ import subprocess
 from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
+from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 
@@ -160,11 +161,9 @@ def _variant_result(
     executed_profile = None
     if execution_argv is not None:
         try:
-            _validate_execution_argv(execution_argv, command_plan["command_argv"], declared_profile)
-            executed_profile = _codex_profile_from_argv(
-                execution_argv[5:] if declared_profile == "oss-cloud" else execution_argv
+            recorded_execution_argv, executed_profile = _validated_recorded_execution_argv(
+                execution_argv, command_plan["command_argv"], declared_profile,
             )
-            recorded_execution_argv = _redact_execution_argv(execution_argv)
         except ValueError:
             blockers.append(f"{command_plan['variant_label']}:execution_argv_invalid")
     return {
@@ -189,6 +188,17 @@ def _variant_result(
         "network_accessed": False,
         "blockers": blockers,
     }
+
+
+def _validated_recorded_execution_argv(
+    execution_argv: list[str], command_argv: list[str], declared_profile: str,
+) -> tuple[list[str], str]:
+    if declared_profile == "oss-cloud" and not is_opaque_env_reference(execution_argv[3]):
+        raise ValueError("cloud execution requires an operator-approved opaque environment stream")
+    recorded = _redact_execution_argv(execution_argv)
+    _validate_execution_argv(recorded, command_argv, declared_profile)
+    codex_argv = recorded[5:] if declared_profile == "oss-cloud" else recorded
+    return recorded, _codex_profile_from_argv(codex_argv)
 
 
 def _redact_execution_argv(execution_argv: list[str]) -> list[str]:

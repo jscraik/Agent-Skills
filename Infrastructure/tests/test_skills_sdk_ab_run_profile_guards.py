@@ -149,6 +149,12 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             candidate["runtime_profile_gates"][1]["command_plan"][0]["execution_argv"][3] = str(env_file)
             with self.assertRaises(ValueError):
                 validate_ab_run_receipt(candidate)
+            self.assertEqual(self._schema_result(candidate).status, "fail")
+
+        candidate["runtime_profile_gates"][1]["command_plan"][0]["execution_argv"][3] = "~/.codex/.env"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
 
     def test_execute_variant_rejects_external_evidence_paths_before_runner_starts(self) -> None:
         calls: list[list[str]] = []

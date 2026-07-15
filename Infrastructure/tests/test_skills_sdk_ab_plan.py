@@ -246,6 +246,20 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
             validate_ab_plan_receipt(receipt)
         self._assert_v1_schema_invalid(receipt)
 
+    def test_durable_plan_rejects_path_shaped_cloud_env_references(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+        for reference in ("~/.codex/.env", "/tmp/operator/.codex/.env"):
+            with self.subTest(reference=reference):
+                candidate = deepcopy(receipt)
+                candidate["runtime_profile_gates"][1]["command_plan"][0]["execution_argv"][3] = reference
+                with self.assertRaises(ValueError):
+                    validate_ab_plan_receipt(candidate)
+                self._assert_v1_schema_invalid(candidate)
+
     def test_validator_rejects_missing_or_reordered_runtime_lane(self) -> None:
         receipt = build_ab_plan_receipt(
             REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,

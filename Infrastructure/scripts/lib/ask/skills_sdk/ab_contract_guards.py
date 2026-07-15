@@ -55,13 +55,17 @@ def run_gate_is_completed(gate: Any) -> bool:
 def _runtime_gate_preflight_facts_admitted(gate: Any, facts: tuple[Any, ...]) -> bool:
     keys = ("profile_config", "model_catalog", "runtime", "auth", "catalog")
     return all(
-        fact.blocker is None and _fact_status_admitted(gate.lane, key, fact.status)
+        fact.blocker is None and _fact_status_admitted(gate, key, fact.status)
         for key, fact in zip(keys, facts, strict=True)
     )
 
 
-def _fact_status_admitted(lane: str, key: str, status: str) -> bool:
-    return status == "pass" or (lane == "oss-local" and key == "auth" and status == "not_applicable")
+def _fact_status_admitted(gate: Any, key: str, status: str) -> bool:
+    if status == "pass":
+        return True
+    if gate.lane == "oss-local" and key == "auth" and status == "not_applicable":
+        return True
+    return key == "runtime" and status == "not_applicable" and gate.preflight._runtime_is_admitted()
 
 
 def validate_run_receipt_status(receipt: Any) -> None:

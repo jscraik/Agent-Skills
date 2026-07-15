@@ -20,6 +20,7 @@ from ask.skills_sdk.eval_ab_judge_codex import (
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
 from ask.skills_sdk.ab_contracts import _codex_profile_from_judge_argv
+from ask.skills_sdk.ab_transport_contracts import redact_opaque_env_reference
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
@@ -509,7 +510,10 @@ def _score_runner_result(
     executed_profile = _validate_judge_execution_argv(evidence, result, blockers)
     if executed_profile is None:
         return None, output_digest, True, True, mutation_performed
-    evidence["command_argv"] = result.executed_argv
+    stored_argv = list(result.executed_argv)
+    if executed_profile == "oss-cloud":
+        stored_argv[3] = redact_opaque_env_reference(stored_argv[3])
+    evidence["command_argv"] = stored_argv
     evidence["codex_profile"] = executed_profile
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
