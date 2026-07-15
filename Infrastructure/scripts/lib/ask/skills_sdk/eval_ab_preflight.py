@@ -434,6 +434,8 @@ def _safe_catalog_probe_flags(payload: dict[str, Any]) -> bool:
 def _valid_catalog_result_semantics(payload: dict[str, Any]) -> bool:
     validators = {
         "pass": _valid_pass_semantics,
+        "invalid_catalog_url": _valid_auth_missing_semantics,
+        "redirect_rejected": _valid_transport_failure_semantics,
         "model_missing": _valid_missing_semantics,
         "model_ambiguous": _valid_ambiguous_semantics,
         "malformed_json": _valid_catalog_parse_failure_semantics,
@@ -444,7 +446,8 @@ def _valid_catalog_result_semantics(payload: dict[str, Any]) -> bool:
         "network_failure": _valid_transport_failure_semantics,
         "auth_missing": _valid_auth_missing_semantics,
     }
-    return validators[payload["result_class"]](payload)
+    validator = validators.get(payload["result_class"])
+    return validator is not None and validator(payload)
 
 
 def _valid_pass_semantics(payload: dict[str, Any]) -> bool:
