@@ -139,8 +139,10 @@ def _execute_variant(
     _write_runner_outputs(paths, result)
     provider_invoked = _provider_event_observed(result.stdout)
     output_digest = _digest_file(paths.output)
-    execution_argv = result.executed_argv or command_plan.get("execution_argv") or command_plan["command_argv"]
-    blockers = _variant_blockers(variant_label, run_error, result.exit_code, output_digest, provider_invoked)
+    execution_argv = result.executed_argv
+    blockers = _variant_blockers(
+        variant_label, run_error, result.exit_code, output_digest, provider_invoked, execution_argv,
+    )
     return _variant_result(
         repo_root, command_plan, paths, result, execution_argv, output_digest,
         blockers, provider_invoked, codex_exec_started,
@@ -149,13 +151,17 @@ def _execute_variant(
 
 def _variant_result(
     repo_root: Path, command_plan: dict[str, Any], paths: VariantPaths, result: CodexRunResult,
-    execution_argv: list[str], output_digest: str | None, blockers: list[str],
+    execution_argv: list[str] | None, output_digest: str | None, blockers: list[str],
     provider_invoked: bool, codex_exec_started: bool,
 ) -> dict[str, Any]:
     semantic_excerpt = _semantic_output_excerpt(paths.output)
+    declared_profile = _codex_profile_from_argv(command_plan["command_argv"])
+    executed_profile = None if execution_argv is None else _codex_profile_from_argv(
+        execution_argv[5:] if declared_profile == "oss-cloud" else execution_argv
+    )
     return {
         "variant_label": command_plan["variant_label"],
-        "codex_profile": _codex_profile_from_argv(command_plan["command_argv"]),
+        "codex_profile": executed_profile,
         "status": "pass" if not blockers else "blocked",
         "exit_code": result.exit_code,
         "command_argv": command_plan["command_argv"],
@@ -217,7 +223,6 @@ def _run_variant(
                 exit_code=124,
                 stdout=_timeout_output_text(exc.stdout),
                 stderr=_timeout_output_text(exc.stderr),
-                executed_argv=_execution_argv_for_run(command_plan["command_argv"]),
             ),
             "codex_exec_timeout",
             True,
@@ -225,7 +230,6 @@ def _run_variant(
     except OSError as exc:
         return CodexRunResult(
             exit_code=127, stdout="", stderr=str(exc),
-            executed_argv=_execution_argv_for_run(command_plan["command_argv"]),
         ), "codex_exec_unavailable", False
 
 
@@ -276,7 +280,7 @@ def _semantic_output_excerpt(path: Path) -> str | None:
 
 def _variant_blockers(
     variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None,
-    provider_invoked: bool,
+    provider_invoked: bool, execution_argv: list[str] | None,
 ) -> list[str]:
     blockers: list[str] = []
     if run_error:
@@ -287,6 +291,8 @@ def _variant_blockers(
         blockers.append(f"{variant_label}:output_last_message_missing")
     if not provider_invoked:
         blockers.append(f"{variant_label}:provider_event_missing")
+    if execution_argv is None:
+        blockers.append(f"{variant_label}:executed_argv_missing")
     return blockers
 
 
@@ -452,7 +458,7 @@ def _execute_runtime_gate(
             prompt=_variant_prompt(_variant_for_plan(plan, command_plan), plan["fixture"]),
             timeout_seconds=timeout, runner=runner,
         )
-        if result["codex_profile"] != gate["codex_profile"]:
+        if result["codex_profile"] is not None and result["codex_profile"] != gate["codex_profile"]:
             raise ValueError("executed Codex argv profile does not match runtime gate")
         results.append(result)
     return results

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 
@@ -48,6 +49,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "then",
     "title",
     "type",
+    "uniqueItems",
 }
 
 
@@ -259,6 +261,13 @@ def _validate_schema_array(
     path: str, root_schema: dict[str, object],
 ) -> None:
     _validate_array_limits(schema, value, path)
+    if schema.get("uniqueItems") is True:
+        try:
+            unique = {json.dumps(item, sort_keys=True, separators=(",", ":")) for item in value}
+        except (TypeError, ValueError) as exc:
+            raise AssertionError(f"{path} uniqueItems cannot serialize array values") from exc
+        if len(unique) != len(value):
+            raise AssertionError(f"{path} must contain unique items")
     prefix_items = schema.get("prefixItems")
     if isinstance(prefix_items, list):
         for index, item_schema in enumerate(prefix_items):

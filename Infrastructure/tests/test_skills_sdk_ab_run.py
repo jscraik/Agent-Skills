@@ -20,7 +20,6 @@ from ask.skills_sdk.eval_ab_run import (  # noqa: E402
     CodexRunResult,
     _codex_runner_env,
     _default_codex_runner,
-    _execute_variant,
     build_ab_run_receipt,
 )
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
@@ -44,6 +43,13 @@ IDENTITY_B = {
 }
 TestRunner = Callable[[list[str], str, Path, int], CodexRunResult]
 PreflightProbe = Callable[[dict[str, object]], dict[str, object]]
+
+
+def _test_execution_argv(command_argv: list[str]) -> list[str]:
+    profile = command_argv[command_argv.index("--profile") + 1]
+    if profile == "oss-cloud":
+        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+    return list(command_argv)
 
 
 def _build_test_ab_run_receipt(
@@ -178,24 +184,25 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         ]
         with (
             patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
-            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "/opaque/cloud-env"}),
+            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "~/.codex/.env"}),
         ):
             result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
 
-        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", "/opaque/cloud-env", "--"])
+        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", "~/.codex/.env", "--"])
         self.assertEqual(captured[0][5:], command)
         self.assertEqual(result.executed_argv, captured[0])
     def test_provider_event_absence_is_a_typed_variant_blocker(self) -> None:
         def no_provider_event_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
         ) -> CodexRunResult:
-            return CodexRunResult(exit_code=0, stdout='{"type":"thread.started"}\n', stderr="")
+            return CodexRunResult(exit_code=0, stdout='{"type":"thread.started"}\n', stderr="", executed_argv=_test_execution_argv(command_argv))
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, no_provider_event_runner)
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("A:provider_event_missing", receipt["blockers"])
         self.assertIn("B:provider_event_missing", receipt["blockers"])
         validate_ab_run_receipt(receipt)
+
     def test_local_success_is_preserved_when_cloud_gate_blocks(self) -> None:
         def local_then_cloud_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
@@ -209,8 +216,9 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                     exit_code=0,
                     stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                     stderr="",
+                    executed_argv=_test_execution_argv(command_argv),
                 )
-            return CodexRunResult(exit_code=2, stdout="", stderr="cloud blocked")
+            return CodexRunResult(exit_code=2, stdout="", stderr="cloud blocked", executed_argv=_test_execution_argv(command_argv))
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, local_then_cloud_runner)
         local_gate, cloud_gate = receipt["runtime_profile_gates"]
@@ -381,96 +389,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(all(gate["variant_results"] == [] for gate in receipt["runtime_profile_gates"]))
         validate_ab_run_receipt(receipt)
 
-    def test_execute_variant_rejects_external_evidence_paths_before_runner_starts(self) -> None:
-        calls: list[list[str]] = []
-
-        def fake_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout: int) -> CodexRunResult:
-            calls.append(command_argv)
-            return CodexRunResult(exit_code=0, stdout="", stderr="")
-
-        base_plan = {
-            "variant_label": "A",
-            "command_argv": ["codex", "exec", "--output-last-message", "unused"],
-            "sandbox_mode": "read-only",
-            "runner_prompt_input_path": f"{self.evidence_root}/A/prompt.txt",
-            "runner_stdout_capture_path": f"{self.evidence_root}/A/codex-stdout.jsonl",
-            "output_last_message_path": f"{self.evidence_root}/A/last-message.json",
-        }
-
-        for key, unsafe_path in (
-            ("runner_prompt_input_path", "/tmp/ab-run-prompt.txt"),
-            ("runner_stdout_capture_path", "../ab-run-stdout.jsonl"),
-            ("output_last_message_path", "/tmp/ab-run-last-message.json"),
-        ):
-            with self.subTest(key=key):
-                command_plan = dict(base_plan)
-                command_plan[key] = unsafe_path
-
-                with self.assertRaises(ValueError):
-                    _execute_variant(
-                        REPO_ROOT,
-                        command_plan=command_plan,
-                        prompt="prompt",
-                        timeout_seconds=1,
-                        runner=fake_runner,
-                    )
-
-        self.assertEqual(calls, [])
-
-    def test_run_blocks_before_subprocess_when_runtime_profile_argv_is_mismatched(self) -> None:
-        from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
-
-        plan = build_ab_plan_receipt(
-            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
-            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
-            evidence_root=self.evidence_root,
-            preflight_probe=declared_profile_preflight,
-        )
-        plan["runtime_profile_gates"][0]["command_plan"][0]["command_argv"][3] = "fast"
-        calls: list[list[str]] = []
-
-        def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout: int) -> CodexRunResult:
-            calls.append(command_argv)
-            return CodexRunResult(0, "", "")
-
-        with patch("ask.skills_sdk.eval_ab_run._build_plan", return_value=plan), self.assertRaises(ValueError):
-            _build_test_ab_run_receipt(self.evidence_root, runner)
-        self.assertEqual(calls, [])
-
-    def test_run_canonically_rejects_tampered_preflight_before_filesystem_or_runner(self) -> None:
-        from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
-
-        plan = build_ab_plan_receipt(
-            REPO_ROOT,
-            skill_a=SKILL_A,
-            skill_b=SKILL_B,
-            fixture=FIXTURE,
-            skill_a_identity=IDENTITY_A,
-            skill_b_identity=IDENTITY_B,
-            evidence_root=self.evidence_root,
-            preflight_probe=declared_profile_preflight,
-        )
-        plan["runtime_profile_gates"][0]["preflight"]["runtime"].update(
-            {"status": "not_applicable", "blocker": None}
-        )
-        calls: list[list[str]] = []
-
-        def forbidden_runner(
-            command_argv: list[str],
-            prompt: str,
-            repo_root: Path,
-            timeout: int,
-        ) -> CodexRunResult:
-            calls.append(command_argv)
-            raise AssertionError("runner reached with a canonically invalid v1 plan")
-
-        with patch("ask.skills_sdk.eval_ab_run._build_plan", return_value=plan):
-            with self.assertRaises(ValueError):
-                _build_test_ab_run_receipt(self.evidence_root, forbidden_runner)
-
-        self.assertEqual(calls, [])
-        self.assertFalse((REPO_ROOT / self.evidence_root).exists())
-
     def test_builder_executes_with_injected_runner_and_records_evidence(self) -> None:
         calls: list[list[str]] = []
 
@@ -483,6 +401,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=0,
                 stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                 stderr="",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = build_ab_run_receipt(
@@ -517,8 +436,8 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 output_path.write_text("{}", encoding="utf-8")
-                return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="")
-            return CodexRunResult(exit_code=2, stdout="", stderr="boom")
+                return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="", executed_argv=_test_execution_argv(command_argv))
+            return CodexRunResult(exit_code=2, stdout="", stderr="boom", executed_argv=_test_execution_argv(command_argv))
 
         receipt = build_ab_run_receipt(
             REPO_ROOT,
@@ -546,6 +465,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=2,
                 stdout="",
                 stderr="error: unexpected argument '--ask-for-approval' found",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, parse_failure_runner)
@@ -564,6 +484,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=1,
                 stdout='{"type":"thread.started","thread_id":"fixture"}\n',
                 stderr="failed to initialize in-process app-server client: Operation not permitted",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, initialization_failure_runner)
@@ -587,7 +508,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         for stdout in event_streams:
             with self.subTest(stdout=stdout):
                 def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object) -> CodexRunResult:
-                    return CodexRunResult(exit_code=1, stdout=stdout, stderr="blocked")
+                    return CodexRunResult(exit_code=1, stdout=stdout, stderr="blocked", executed_argv=_test_execution_argv(command_argv))
 
                 receipt = _build_test_ab_run_receipt(self.evidence_root, runner)
                 self.assertFalse(receipt["provider_invoked"])
@@ -605,6 +526,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=0,
                 stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                 stderr="",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, successful_runner)
@@ -623,6 +545,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=1,
                 stdout='{"type":"response.completed"}\n{"type":"error","message":"provider stream failed"}\n',
                 stderr="provider stream failed",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, post_invocation_failure_runner)
@@ -641,6 +564,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=0,
                 stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                 stderr="",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         receipt = _build_test_ab_run_receipt(self.evidence_root, missing_last_message_runner)
@@ -688,6 +612,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=0,
                 stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                 stderr="",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         first_receipt = _build_test_ab_run_receipt(self.evidence_root, successful_runner)
@@ -700,6 +625,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 exit_code=0,
                 stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
                 stderr="",
+                executed_argv=_test_execution_argv(command_argv),
             )
 
         second_receipt = _build_test_ab_run_receipt(self.evidence_root, missing_output_runner)

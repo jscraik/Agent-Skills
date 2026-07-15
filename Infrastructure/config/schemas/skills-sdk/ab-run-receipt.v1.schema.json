@@ -137,7 +137,7 @@
           "then": {
             "properties": {
               "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"pattern": "^(?:<operator-approved-opaque-env-stream>|~/.codex/.env|.*/\\.codex/\\.env)$", "type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
             }
           }
         }
@@ -164,12 +164,16 @@
             "type": "string"
           },
           "minItems": 10,
+          "uniqueItems": true,
           "title": "Command Argv",
           "type": "array"
         },
         "execution_argv": {
-          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array"}, {"type": "null"}],
-          "title": "Execution Argv"
+          "items": {"type": "string"},
+          "minItems": 10,
+          "uniqueItems": true,
+          "title": "Execution Argv",
+          "type": "array"
         },
         "sandbox_mode": {
           "enum": [
@@ -234,6 +238,7 @@
         "variant_label",
         "codex_profile",
         "command_argv",
+        "execution_argv",
         "sandbox_mode",
         "approval_policy",
         "event_log_path",
@@ -895,7 +900,15 @@
         },
         {
           "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
-          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"pattern": "^(?:<operator-approved-opaque-env-stream>|~/.codex/.env|.*/\\.codex/\\.env)$", "type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},
+          "then": {"required": ["execution_argv"]}
+        },
+        {
+          "if": {"properties": {"execution_argv": {"type": "null"}}, "required": ["execution_argv"]},
+          "then": {"properties": {"codex_profile": {"const": null}}}
         }
       ],
       "properties": {
@@ -908,12 +921,8 @@
           "type": "string"
         },
         "codex_profile": {
-          "enum": [
-            "oss-local",
-            "oss-cloud"
-          ],
-          "title": "Codex Profile",
-          "type": "string"
+          "anyOf": [{"enum": ["oss-local", "oss-cloud"]}, {"type": "null"}],
+          "title": "Codex Profile"
         },
         "status": {
           "enum": [
@@ -927,16 +936,17 @@
           "title": "Exit Code",
           "type": "integer"
         },
-        "command_argv": {
-          "items": {
-            "type": "string"
+          "command_argv": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 10,
+            "uniqueItems": true,
+            "title": "Command Argv",
+            "type": "array"
           },
-          "minItems": 10,
-          "title": "Command Argv",
-          "type": "array"
-        },
-        "execution_argv": {
-          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array"}, {"type": "null"}],
+          "execution_argv": {
+          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array", "uniqueItems": true}, {"type": "null"}],
           "title": "Execution Argv"
         },
         "sandbox_mode": {
@@ -1026,6 +1036,7 @@
         "status",
         "exit_code",
         "command_argv",
+        "execution_argv",
         "sandbox_mode",
         "prompt_stdin_path",
         "prompt_stdin_digest",
@@ -1678,6 +1689,29 @@
             "prefixItems": [
               {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}},
               {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
+            ]
+          }
+        },
+        "required": ["status", "runtime_profile_gates"]
+      },
+      "then": {
+        "properties": {
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {},
+              {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
             ]
           }
         }

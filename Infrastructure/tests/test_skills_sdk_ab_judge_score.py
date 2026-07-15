@@ -41,12 +41,17 @@ def _judge_result(
     stdout: str,
     stderr: str = "",
     exit_code: int = 0,
+    output_file: Path | None = None,
 ) -> CodexJudgeResult:
+    executed_argv = (
+        _codex_judge_command(judge_profile, codex_judge._codex_judge_work_dir(output_file), output_file)
+        if output_file is not None else None
+    )
     return CodexJudgeResult(
         exit_code=exit_code,
         stdout=stdout,
         stderr=stderr,
-        executed_argv=None,
+        executed_argv=executed_argv,
     )
 
 
@@ -168,6 +173,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             return _judge_result(
                 judge_profile,
+                output_file=output_file,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
             )
 
@@ -210,7 +216,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         ) -> CodexJudgeResult:
             calls.append(str(judge_profile["codex_profile"]))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return _judge_result(judge_profile, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -292,7 +298,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         ) -> CodexJudgeResult:
             calls.append((prompt, str(judge_profile["id"])))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return _judge_result(judge_profile, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         with tempfile.TemporaryDirectory() as profile_dir:
             op_env_file = Path(profile_dir) / "codex.env"
@@ -373,7 +379,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
     def test_builder_blocks_invalid_judge_output(self) -> None:
         def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
-            return _judge_result(judge_profile, stdout="not json")
+            return _judge_result(judge_profile, output_file=output_file, stdout="not json")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -399,6 +405,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             return _judge_result(
                 judge_profile,
+                output_file=output_file,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
                 stderr="warning: Model metadata for qwen3.5:9b-mlx not found. Defaulting to fallback metadata.",
             )
@@ -426,6 +433,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             return _judge_result(
                 judge_profile,
+                output_file=output_file,
                 stdout="<think>hidden chain should not leak</think>\n" + json.dumps(_decision(run_receipt["experiment_id"])),
             )
 
@@ -455,7 +463,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 "item": {"id": "item_1", "type": "reasoning", "text": "structured telemetry"},
             })
             output_file.write_text(json.dumps(_decision(run_receipt["experiment_id"])), encoding="utf-8")
-            return _judge_result(judge_profile, stdout=reasoning_event)
+            return _judge_result(judge_profile, output_file=output_file, stdout=reasoning_event)
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -483,7 +491,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 "usage": {"input_tokens": 8231, "output_tokens": 53, "reasoning_output_tokens": 0},
             })
             stdout = json.dumps(_decision(run_receipt["experiment_id"])) + "\n" + usage_event + "\n"
-            return _judge_result(judge_profile, stdout=stdout)
+            return _judge_result(judge_profile, output_file=output_file, stdout=stdout)
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -602,7 +610,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["unexpected"] = "blocked"
-            return _judge_result(judge_profile, stdout=json.dumps(decision))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -618,7 +626,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_typed_contract_rejects_decision_for_different_experiment(self) -> None:
         def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return _judge_result(judge_profile, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -634,7 +642,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_typed_contract_rejects_persisted_score_arithmetic_mismatch(self) -> None:
         def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return _judge_result(judge_profile, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -663,7 +671,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["winner"] = "skill_a"
-            return _judge_result(judge_profile, stdout=json.dumps(decision))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -681,7 +689,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["confidence"] = "low"
-            return _judge_result(judge_profile, stdout=json.dumps(decision))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -716,7 +724,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             decision["normalized_score_a"] = 0.20
             decision["normalized_score_b"] = 0.90
             decision["winner"] = "skill_b"
-            return _judge_result(judge_profile, stdout=json.dumps(decision))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -734,7 +742,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["normalized_score_a"] = math.nan
-            return _judge_result(judge_profile, stdout=json.dumps(decision))
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,

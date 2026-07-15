@@ -19,6 +19,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     EvalJudgeProfile,
     EvalSecretBoundary,
 )
+from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference as _is_opaque_env_reference
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
 
 
@@ -328,7 +329,7 @@ class AbCodexCommandPlan(_SdkContractModel):
     variant_label: Literal["A", "B"]
     codex_profile: Literal["oss-local", "oss-cloud"]
     command_argv: list[str] = Field(min_length=10)
-    execution_argv: list[str] | None = Field(default=None, min_length=10)
+    execution_argv: list[str] = Field(min_length=10)
     sandbox_mode: Literal["read-only", "workspace-write"]
     approval_policy: Literal["on-request"]
     event_log_path: str = Field(min_length=1)
@@ -344,8 +345,7 @@ class AbCodexCommandPlan(_SdkContractModel):
     def _argv_proves_profile(self) -> AbCodexCommandPlan:
         if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
             raise ValueError("Codex command argv profile must match codex_profile")
-        if self.execution_argv is not None:
-            _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
+        _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
         if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != self.approval_policy:
             raise ValueError("Codex command argv must prove the declared approval policy")
         return self
@@ -435,7 +435,7 @@ class AbPlanReceipt(_SdkContractModel):
 
 class AbVariantRunResult(_SdkContractModel):
     variant_label: Literal["A", "B"]
-    codex_profile: Literal["oss-local", "oss-cloud"]
+    codex_profile: Literal["oss-local", "oss-cloud"] | None
     status: Literal["pass", "blocked"]
     exit_code: int
     command_argv: list[str] = Field(min_length=10)
@@ -454,16 +454,17 @@ class AbVariantRunResult(_SdkContractModel):
 
     @model_validator(mode="after")
     def _status_matches_blockers(self) -> AbVariantRunResult:
-        if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
-            raise ValueError("executed Codex argv profile must match codex_profile")
-        if self.execution_argv is not None:
+        if self.execution_argv is None:
+            if self.status == "pass" or not any("executed_argv_missing" in blocker for blocker in self.blockers) or self.codex_profile is not None:
+                raise ValueError("blocked A/B results must carry executed_argv_missing and no Codex profile")
+        else:
+            if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
+                raise ValueError("executed Codex argv profile must match codex_profile")
             _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
         if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != "on-request":
             raise ValueError("executed Codex argv must prove on-request approval")
-        if self.status == "pass" and self.blockers:
-            raise ValueError("passing A/B variant results must not include blockers")
-        if self.status == "blocked" and not self.blockers:
-            raise ValueError("blocked A/B variant results must include blockers")
+        if bool(self.blockers) != (self.status == "blocked"):
+            raise ValueError("A/B variant blocker status is inconsistent")
         return self
 
 
@@ -476,13 +477,12 @@ def _validate_execution_argv(execution_argv: list[str], command_argv: list[str],
         raise ValueError("cloud execution argv must include the approved op run wrapper")
     if execution_argv[0] != "op" and not execution_argv[0].endswith("/op"):
         raise ValueError("cloud execution argv must invoke the approved op binary")
-    if (
-        execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"]
-        or not execution_argv[3]
-    ):
+    if execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"] or not _is_opaque_env_reference(execution_argv[3]):
         raise ValueError("cloud execution argv must use op run --env-file <opaque> --")
     if execution_argv[5:] != command_argv:
         raise ValueError("cloud execution argv must preserve the canonical Codex command argv")
+    if _codex_profile_from_argv(execution_argv[5:]) != codex_profile:
+        raise ValueError("executed Codex argv profile must match codex_profile")
 
 
 class AbRuntimeProfileRunGate(_SdkContractModel):
@@ -506,7 +506,7 @@ class AbRuntimeProfileRunGate(_SdkContractModel):
             raise ValueError("blocked/not-run runtime gate requires a reason")
         if self.status == "not_run_with_reason" and self.variant_results:
             raise ValueError("not-run runtime gate cannot include variant results")
-        if any(result.codex_profile != self.codex_profile for result in self.variant_results):
+        if any(result.codex_profile not in {None, self.codex_profile} for result in self.variant_results):
             raise ValueError("runtime result profile mismatch")
         return self
 

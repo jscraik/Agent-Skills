@@ -137,7 +137,7 @@
           "then": {
             "properties": {
               "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "execution_argv": {"prefixItems": [{"type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"pattern": "^(?:<operator-approved-opaque-env-stream>|~/.codex/.env|.*/\\.codex/\\.env)$", "type": "string"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
             }
           }
         }
@@ -164,12 +164,16 @@
             "type": "string"
           },
           "minItems": 10,
+          "uniqueItems": true,
           "title": "Command Argv",
           "type": "array"
         },
         "execution_argv": {
-          "anyOf": [{"items": {"type": "string"}, "minItems": 10, "type": "array"}, {"type": "null"}],
-          "title": "Execution Argv"
+          "items": {"type": "string"},
+          "minItems": 10,
+          "uniqueItems": true,
+          "title": "Execution Argv",
+          "type": "array"
         },
         "sandbox_mode": {
           "enum": [
@@ -234,6 +238,7 @@
         "variant_label",
         "codex_profile",
         "command_argv",
+        "execution_argv",
         "sandbox_mode",
         "approval_policy",
         "event_log_path",

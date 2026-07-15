@@ -509,7 +509,7 @@ def _score_runner_result(
     executed_profile = _validate_judge_execution_argv(evidence, result, blockers)
     if executed_profile is None:
         return None, output_digest, True, True, mutation_performed
-    evidence["command_argv"] = result.executed_argv or evidence.get("command_argv")
+    evidence["command_argv"] = result.executed_argv
     evidence["codex_profile"] = executed_profile
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
@@ -528,7 +528,7 @@ def _validate_judge_execution_argv(
     evidence: dict[str, Any], result: CodexJudgeResult, blockers: list[str],
 ) -> str | None:
     planned = evidence.get("command_argv")
-    executed = getattr(result, "executed_argv", None) or planned
+    executed = getattr(result, "executed_argv", None)
     if not isinstance(executed, list) or not all(isinstance(item, str) for item in executed):
         blockers.append("judge_command_profile_missing_or_invalid")
         return None
