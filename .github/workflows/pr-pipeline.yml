@@ -149,9 +149,12 @@ jobs:
         run: |
           echo "::error::PR template admission did not pass."
           exit 1
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout trusted Linear gate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -172,19 +175,19 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
-            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
-            printf '{"gate":"linear-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
-            exit 0
+            echo "::error::NPM_TOKEN is unavailable; the required Linear gate cannot resolve its approved Harness package."
+            printf '{"gate":"linear-gate","status":"blocked","reason":"harness_auth_unavailable"}\n'
+            exit 1
           fi
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BRANCH="$HEAD_REF"
-            bash Infrastructure/scripts/harness-cli.sh linear-gate \
+            bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \
               --branch "$BRANCH" \
               --pr-title "$PR_TITLE" \
               --pr-body "$PR_BODY" \
               --json
           else
-            bash Infrastructure/scripts/harness-cli.sh linear-gate \
+            bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \
               --allow-missing-branch \
               --allow-missing-pr \
               --json
@@ -202,10 +205,13 @@ jobs:
         run: |
           echo "::error::One or more admission gates did not pass."
           exit 1
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout trusted risk policy gate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -227,32 +233,27 @@ jobs:
           MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
           if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
-            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
-            printf '{"gate":"risk-policy-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
-            exit 0
+            echo "::error::NPM_TOKEN is unavailable; the required risk policy gate cannot resolve its approved Harness package."
+            printf '{"gate":"risk-policy-gate","status":"blocked","reason":"harness_auth_unavailable"}\n'
+            exit 1
           fi
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BASE_SHA="$PR_BASE_SHA"
             HEAD_SHA="$PR_HEAD_SHA"
-            BASE_REF="$PR_BASE_REF"
-            # Load contract from the trusted base branch, not the PR checkout.
-            # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
-            CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
-            if ! git show "origin/$BASE_REF:harness.contract.json" > "$CONTRACT_PATH"; then
-              echo "::error::Unable to load trusted harness.contract.json from origin/$BASE_REF"
-              exit 1
-            fi
+            CONTRACT_PATH="trusted-base/harness.contract.json"
           else
             BASE_SHA="$MERGE_GROUP_BASE_SHA"
             HEAD_SHA="$MERGE_GROUP_HEAD_SHA"
-            # Merge queue: contract is committed and protected by branch rules.
-            CONTRACT_PATH="harness.contract.json"
+            CONTRACT_PATH="trusted-base/harness.contract.json"
           fi
-          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
+          if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            git -C trusted-base fetch --no-tags --depth=1 origin "$HEAD_SHA"
+          fi
+          CHANGED_FILES="$(git -C trusted-base diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
           if [[ -z "$CHANGED_FILES" ]]; then
-            CHANGED_FILES="$(git ls-files | paste -sd, -)"
+            CHANGED_FILES="$(git -C trusted-base ls-files | paste -sd, -)"
           fi
-          bash Infrastructure/scripts/harness-cli.sh preflight-gate \
+          bash trusted-base/Infrastructure/scripts/harness-cli.sh preflight-gate \
             --contract "$CONTRACT_PATH" \
             --max-tier medium \
             --files "${CHANGED_FILES}" \

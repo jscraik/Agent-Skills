@@ -153,6 +153,7 @@ def _assert_edited_linear_contract(job: dict[object, object]) -> None:
     assert job.get("needs") == ["pr-template"]
     assert job.get("if") == "${{ always() }}"
     _assert_edited_linear_prerequisite(job)
+    _assert_edited_linear_checkout(job)
     _assert_edited_linear_command(job)
 
 
@@ -163,6 +164,16 @@ def _assert_edited_linear_prerequisite(job: dict[object, object]) -> None:
         'echo "::error::PR template validation did not pass."\n'
         "exit 1\n"
     )
+
+
+def _assert_edited_linear_checkout(job: dict[object, object]) -> None:
+    checkout = _named_step(job, "Checkout trusted Linear gate")
+    assert checkout.get("uses") == "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+    assert _mapping(checkout.get("with"), "edited Linear checkout") == {
+        "persist-credentials": False,
+        "ref": "${{ github.event.pull_request.base.sha }}",
+        "path": "trusted-base",
+    }
 
 
 def _assert_edited_linear_command(job: dict[object, object]) -> None:
@@ -179,7 +190,8 @@ def _assert_edited_linear_command(job: dict[object, object]) -> None:
     assert '"status":"blocked","reason":"edited_event_harness_auth_unavailable"' in run
     assert "exit 1" in run
     assert '"status":"deferred"' not in run
-    assert "bash Infrastructure/scripts/harness-cli.sh linear-gate \\\n" in run
+    assert "bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \\\n" in run
+    assert "bash Infrastructure/scripts/harness-cli.sh" not in run
     assert '--branch "$HEAD_REF"' in run
     assert '--pr-title "$PR_TITLE"' in run
     assert '--pr-body "$PR_BODY"' in run
@@ -211,6 +223,14 @@ def _assert_pipeline_linear_admission(jobs: dict[object, object]) -> None:
     linear_prerequisite = _named_step(linear, "Require PR template admission")
     assert linear_prerequisite.get("if") == "needs.pr-template-admission.result != 'success'"
     assert str(linear_prerequisite.get("run")).endswith("exit 1\n")
+    _assert_pipeline_trusted_checkout(linear, "Checkout trusted Linear gate", fetch_depth=False)
+    command = _named_step(linear, "Enforce Linear-first issue tracking policy")
+    run = str(command.get("run"))
+    assert '"status":"blocked","reason":"harness_auth_unavailable"' in run
+    assert '"status":"deferred"' not in run
+    assert "exit 1" in run
+    assert "bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \\\n" in run
+    assert "bash Infrastructure/scripts/harness-cli.sh" not in run
 
 
 def _assert_pipeline_risk_admission(jobs: dict[object, object]) -> None:
@@ -223,6 +243,34 @@ def _assert_pipeline_risk_admission(jobs: dict[object, object]) -> None:
         "needs.linear-gate.result != 'success'"
     )
     assert str(risk_prerequisite.get("run")).endswith("exit 1\n")
+    _assert_pipeline_trusted_checkout(risk, "Checkout trusted risk policy gate", fetch_depth=True)
+    command = _named_step(risk, "Run fast preflight policy gate")
+    run = str(command.get("run"))
+    assert '"status":"blocked","reason":"harness_auth_unavailable"' in run
+    assert '"status":"deferred"' not in run
+    assert "exit 1" in run
+    assert 'CONTRACT_PATH="trusted-base/harness.contract.json"' in run
+    assert "git -C trusted-base diff --name-only" in run
+    assert "bash trusted-base/Infrastructure/scripts/harness-cli.sh preflight-gate \\\n" in run
+    assert "bash Infrastructure/scripts/harness-cli.sh" not in run
+
+
+def _assert_pipeline_trusted_checkout(
+    job: dict[object, object],
+    step_name: str,
+    *,
+    fetch_depth: bool,
+) -> None:
+    checkout = _named_step(job, step_name)
+    assert checkout.get("uses") == "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+    expected: dict[str, object] = {
+        "persist-credentials": False,
+        "ref": "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}",
+        "path": "trusted-base",
+    }
+    if fetch_depth:
+        expected["fetch-depth"] = 0
+    assert _mapping(checkout.get("with"), f"{step_name} inputs") == expected
 
 
 def _assert_dependency_review_conditions(jobs: dict[object, object]) -> None:
@@ -610,6 +658,21 @@ def test_pr_template_refresh_contract_rejects_stale_runs_or_event_guard_drift() 
     _named_step(job, "Require PR template validation")["if"] = "false"
     _assert_contract_rejects(stale_linear_guard, pipeline_workflow)
 
+    head_linear_checkout = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(head_linear_checkout["jobs"], "jobs")["linear-gate"], "job")
+    checkout = _named_step(job, "Checkout trusted Linear gate")
+    _mapping(checkout["with"], "checkout inputs")["ref"] = "${{ github.event.pull_request.head.sha }}"
+    _assert_contract_rejects(head_linear_checkout, pipeline_workflow)
+
+    untrusted_linear_wrapper = copy.deepcopy(template_workflow)
+    job = _mapping(_mapping(untrusted_linear_wrapper["jobs"], "jobs")["linear-gate"], "job")
+    refresh = _named_step(job, "Refresh Linear-first issue tracking policy")
+    refresh["run"] = str(refresh["run"]).replace(
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "Infrastructure/scripts/harness-cli.sh",
+    )
+    _assert_contract_rejects(untrusted_linear_wrapper, pipeline_workflow)
+
 
 def test_pr_template_refresh_contract_rejects_pipeline_dependency_drift() -> None:
     template_workflow = _workflow(".github/workflows/pr-template.yml")
@@ -647,6 +710,38 @@ def test_pr_template_refresh_contract_rejects_pipeline_dependency_drift() -> Non
         "${{ steps.dependency-review-support.outputs.supported == 'true' }}"
     )
     _assert_contract_rejects(template_workflow, malformed_dependency_review)
+
+
+def test_pr_template_refresh_contract_rejects_untrusted_or_false_green_pipeline_gates() -> None:
+    template_workflow = _workflow(".github/workflows/pr-template.yml")
+    pipeline_workflow = _workflow(".github/workflows/pr-pipeline.yml")
+
+    for job_name, checkout_name in (
+        ("linear-gate", "Checkout trusted Linear gate"),
+        ("risk-policy-gate", "Checkout trusted risk policy gate"),
+    ):
+        head_checkout = copy.deepcopy(pipeline_workflow)
+        job = _mapping(_mapping(head_checkout["jobs"], "jobs")[job_name], job_name)
+        checkout = _named_step(job, checkout_name)
+        _mapping(checkout["with"], "checkout inputs")["ref"] = (
+            "${{ github.event.pull_request.head.sha }}"
+        )
+        _assert_contract_rejects(template_workflow, head_checkout)
+
+    untrusted_linear = copy.deepcopy(pipeline_workflow)
+    job = _mapping(_mapping(untrusted_linear["jobs"], "jobs")["linear-gate"], "linear")
+    step = _named_step(job, "Enforce Linear-first issue tracking policy")
+    step["run"] = str(step["run"]).replace("trusted-base/Infrastructure", "Infrastructure")
+    _assert_contract_rejects(template_workflow, untrusted_linear)
+
+    deferred_risk = copy.deepcopy(pipeline_workflow)
+    job = _mapping(_mapping(deferred_risk["jobs"], "jobs")["risk-policy-gate"], "risk")
+    step = _named_step(job, "Run fast preflight policy gate")
+    step["run"] = str(step["run"]).replace(
+        '"status":"blocked","reason":"harness_auth_unavailable"',
+        '"status":"deferred","reason":"harness_auth_unavailable"',
+    ).replace("exit 1", "exit 0", 1)
+    _assert_contract_rejects(template_workflow, deferred_risk)
 
 
 def test_pr_template_refresh_contract_rejects_merge_queue_noop() -> None:
