@@ -114,11 +114,19 @@ class GitMetadataPreflightTests(unittest.TestCase):
                 check=False,
             )
             allowed_payload = json.loads(allowed.stdout)
-            self.assertEqual(allowed.returncode, 0, allowed_payload)
-            self.assertEqual(allowed_payload["status"], "pass")
-            self.assertNotIn("stale_index_lock_candidate", allowed_payload["reason_codes"])
-            self.assertIn("expected_current_index_lock", allowed_payload["advisories"])
+            self.assertEqual(allowed.returncode, 78, allowed_payload)
+            self.assertIn("stale_index_lock_candidate", allowed_payload["reason_codes"])
             self.assertTrue(lock_path.exists(), "preflight must never remove locks")
+
+    def test_non_regular_index_lock_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["index_lock_path"]))
+            lock_path.mkdir()
+            code, payload = run_preflight(repo)
+            self.assertEqual(code, 78, payload)
+            self.assertIn("index_lock_non_regular", payload["reason_codes"])
 
     def test_linked_worktree_and_locked_metadata_are_visible(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -135,8 +143,8 @@ class GitMetadataPreflightTests(unittest.TestCase):
             locked = git(repo, "worktree", "lock", "--reason", "initializing", str(linked))
             self.assertEqual(locked.returncode, 0, locked.stderr)
             code, payload = run_preflight(linked)
-            self.assertEqual(code, 78, payload)
-            self.assertIn("locked_current_worktree", payload["reason_codes"])
+            self.assertEqual(code, 0, payload)
+            self.assertIn("locked_worktree", payload["advisories"])
 
     def test_prunable_worktree_is_advisory_until_explicit_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

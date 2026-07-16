@@ -95,7 +95,56 @@ def _lock_owner(path: Path) -> str | None:
     return " | ".join(lines[:4]) if lines else None
 
 
+def _lock_owner_pids(path: Path) -> set[int]:
+    lsof = shutil.which("lsof")
+    if lsof is None:
+        return set()
+    try:
+        proc = subprocess.run(
+            [lsof, "-nP", "-t", "--", str(path)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    except OSError:
+        return set()
+    pids: set[int] = set()
+    for line in proc.stdout.splitlines():
+        try:
+            pids.add(int(line.strip()))
+        except ValueError:
+            continue
+    return pids
+
+
+def _parent_process_ids() -> set[int]:
+    ancestors: set[int] = set()
+    pid = os.getppid()
+    while pid > 1 and pid not in ancestors:
+        ancestors.add(pid)
+        try:
+            proc = subprocess.run(
+                ["ps", "-o", "ppid=", "-p", str(pid)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            pid = int(proc.stdout.strip())
+        except (OSError, ValueError):
+            break
+    return ancestors
+
+
+def _lock_owned_by_parent(path: Path) -> bool:
+    return bool(_lock_owner_pids(path) & _parent_process_ids())
+
+
 def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
+    if not path.is_file():
+        return {
+            "path": str(path),
+            "classification": "index_lock_non_regular",
+        }
     now = time.time()
     try:
         age_seconds = max(0, int(now - path.stat().st_mtime))
@@ -188,7 +237,7 @@ def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str
 def _lock_records(
     index_lock_path: Path, worktrees_dir: Path, lock_max_age_seconds: int
 ) -> list[dict[str, Any]]:
-    lock_paths = [index_lock_path] if index_lock_path.is_file() else []
+    lock_paths = [index_lock_path] if (index_lock_path.exists() or index_lock_path.is_symlink()) else []
     if worktrees_dir.is_dir():
         lock_paths.extend(sorted(worktrees_dir.glob("*/index.lock")))
     return [
@@ -243,12 +292,12 @@ def _lock_reasons(
     if any(item.get("classification") == "lock_stat_failed" for item in lock_records):
         reasons.append("metadata_lock_uninspectable")
     current_lock = [item for item in lock_records if item.get("path") == str(index_lock_path)]
-    if current_lock and allow_current_index_lock:
+    if current_lock and allow_current_index_lock and _lock_owned_by_parent(index_lock_path):
         advisories.append("expected_current_index_lock")
     elif current_lock:
         reasons.append(str(current_lock[0].get("classification", "index_lock")))
     if any(item.get("current") for item in result["locked_worktrees"]):
-        reasons.append("locked_current_worktree")
+        advisories.append("locked_worktree")
     if result["prunable_worktrees"]:
         advisories.append("prunable_worktree")
     return list(dict.fromkeys(reasons)), advisories
@@ -278,8 +327,6 @@ def _next_action(reasons: list[str]) -> str:
         return "prove no owner, then use explicit Git worktree recovery; this preflight never removes locks"
     if "metadata_write_denied" in reasons:
         return "grant write access to the exact Git metadata directories or use a writable checkout"
-    if "locked_current_worktree" in reasons:
-        return "inspect the owning worktree and unlock it deliberately; do not delete metadata"
     return "repair Git metadata authority before running the hook again"
 
 

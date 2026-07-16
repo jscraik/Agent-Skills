@@ -34,7 +34,8 @@ if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 		hook_tmp_dir="/tmp"
 	fi
 fi
-prek_home="${PREK_HOME:-$hook_tmp_dir/agent-skills-hook-cache/prek}"
+hook_cache_root="${CODEX_HOOK_CACHE_ROOT:-$hook_tmp_dir/agent-skills-hook-cache}"
+prek_home="${PREK_HOME:-$hook_cache_root/prek}"
 mkdir -p "$prek_home"
 
 echo "[install-prek-hooks] installing prek hooks"
@@ -48,19 +49,21 @@ patch_hook() {
 		exit 1
 	fi
 
-python3 - "$hook_path" <<'PY'
+python3 - "$hook_path" "$hook_cache_root" "$prek_home" <<'PY'
 import sys
 from pathlib import Path
 
 hook_path = Path(sys.argv[1])
+hook_cache_root = sys.argv[2]
+prek_home = sys.argv[3]
 text = hook_path.read_text(encoding="utf-8")
 start = "# agent-skills prek home begin"
 end = "# agent-skills prek home end"
 block = (
     f"{start}\n"
     "# Keep prek logs/cache outside Git metadata and the worktree.\n"
-    'export CODEX_HOOK_CACHE_ROOT="${CODEX_HOOK_CACHE_ROOT:-${TMPDIR:-/tmp}/agent-skills-hook-cache}"\n'
-    'export PREK_HOME="${PREK_HOME:-$CODEX_HOOK_CACHE_ROOT/prek}"\n'
+    f'export CODEX_HOOK_CACHE_ROOT="{hook_cache_root}"\n'
+    f'export PREK_HOME="{prek_home}"\n'
     'mkdir -p "$PREK_HOME"\n'
     f"{end}\n"
 )

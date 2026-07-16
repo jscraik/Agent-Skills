@@ -204,7 +204,7 @@ PY
 	fi
 	for hook_name in pre-commit commit-msg pre-push; do
 		hook_path="$git_hooks_dir/$hook_name"
-		if [[ -f "$hook_path" ]] && ! rg -q "agent-skills prek home begin|PREK_HOME" "$hook_path"; then
+		if [[ -f "$hook_path" ]] && { ! rg -q "agent-skills prek home begin" "$hook_path" || ! rg -q "CODEX_HOOK_CACHE_ROOT" "$hook_path"; }; then
 			echo "Error: installed git hook '$hook_name' does not set a sandbox-safe PREK_HOME"
 			echo "Fix: run bash scripts/install-prek-hooks.sh"
 			exit 1
