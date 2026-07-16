@@ -3,7 +3,9 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import shlex
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -370,8 +372,51 @@ def test_harness_wrapper_projection_uses_supported_fallback_version() -> None:
     assert projected.resolve() == canonical.resolve()
 
     source = canonical.read_text(encoding="utf-8")
-    assert f'FALLBACK_PACKAGE="{HARNESS_FALLBACK_PACKAGE}"' in source
-    assert source.count("@brainwav/coding-harness@") == 1
+    assert 'SUPPORTED_VERSION="0.15.0"' in source
+    fallback_assignment = 'FALLBACK_PACKAGE="@brainwav/coding-harness@$SUPPORTED_VERSION"'
+    assert source.count(fallback_assignment) == 1
+    assert "@brainwav/coding-harness@0.14.0" not in source
+
+
+@pytest.mark.parametrize(
+    ("version", "expected_status", "expected_output"),
+    [
+        ("0.14.0", 1, "Unsupported local @brainwav/coding-harness version 0.14.0"),
+        ("0.15.0", 0, "ambient harness executed"),
+    ],
+)
+def test_harness_wrapper_rejects_unsupported_local_version(
+    tmp_path: Path,
+    version: str,
+    expected_status: int,
+    expected_output: str,
+) -> None:
+    wrapper = tmp_path / "scripts/harness-cli.sh"
+    wrapper.parent.mkdir()
+    wrapper.write_bytes((REPO_ROOT / "Infrastructure/scripts/harness-cli.sh").read_bytes())
+
+    package_root = tmp_path / "node_modules/@brainwav/coding-harness"
+    (package_root / "dist").mkdir(parents=True)
+    (package_root / "package.json").write_text(
+        json.dumps({"name": "@brainwav/coding-harness", "version": version}),
+        encoding="utf-8",
+    )
+    (package_root / "dist/cli.js").write_text(
+        'console.log("ambient harness executed");\n', encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        ["bash", str(wrapper), "--version"],
+        cwd=tmp_path,
+        env={**os.environ, "NODE_PATH": str(tmp_path / "node_modules")},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == expected_status
+    assert expected_output in result.stderr + result.stdout
+    if version != HARNESS_FALLBACK_PACKAGE.rsplit("@", maxsplit=1)[-1]:
+        assert "ambient harness executed" not in result.stdout
 
 
 def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:

@@ -3,7 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT_FALLBACK="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-FALLBACK_PACKAGE="@brainwav/coding-harness@0.15.0"
+SUPPORTED_VERSION="0.15.0"
+FALLBACK_PACKAGE="@brainwav/coding-harness@$SUPPORTED_VERSION"
 if REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else
@@ -38,14 +39,24 @@ fi
 
 set +e
 CLI_PATH="$(
-	REPO_ROOT="$REPO_ROOT" node -e '
+HARNESS_SUPPORTED_VERSION="$SUPPORTED_VERSION" REPO_ROOT="$REPO_ROOT" node -e '
 const { createRequire } = require("node:module");
+const { readFileSync } = require("node:fs");
 const { resolve } = require("node:path");
 
 const repoRoot = process.env.REPO_ROOT;
+const supportedVersion = process.env.HARNESS_SUPPORTED_VERSION;
 
 try {
 	const requireFromRepo = createRequire(resolve(repoRoot, "package.json"));
+	const packageJsonPath = requireFromRepo.resolve("@brainwav/coding-harness/package.json");
+	const packageMetadata = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+	if (packageMetadata.version !== supportedVersion) {
+		console.error(
+			`Unsupported local @brainwav/coding-harness version ${String(packageMetadata.version)}; expected ${supportedVersion}.`,
+		);
+		process.exit(44);
+	}
 	process.stdout.write(
 		requireFromRepo.resolve("@brainwav/coding-harness/dist/cli.js"),
 	);
@@ -84,6 +95,12 @@ if [[ $resolution_status -eq 42 ]]; then
 	echo "After the package is installed, rerun:" >&2
 	echo "  bash scripts/harness-cli.sh <command>" >&2
 	echo "  npm exec harness -- <command>" >&2
+	exit 1
+fi
+
+if [[ $resolution_status -eq 44 ]]; then
+	echo "Error: the resolved local @brainwav/coding-harness does not match $SUPPORTED_VERSION." >&2
+	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION or remove the stale ambient resolution path." >&2
 	exit 1
 fi
 
