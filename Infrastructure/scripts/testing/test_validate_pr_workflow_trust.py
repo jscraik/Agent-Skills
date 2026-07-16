@@ -20,6 +20,70 @@ EXPECTED_JOBS = {
     "consistency-drift-advisory",
     "consistency-drift-health",
 }
+APPROVED_HARNESS_ARGV = {
+    (
+        "bash",
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "linear-gate",
+        "--repo-root",
+        "trusted-base",
+        "--contract",
+        "harness.contract.json",
+        "--branch",
+        branch,
+        "--pr-title",
+        "$PR_TITLE",
+        "--pr-body",
+        "$PR_BODY",
+        "--json",
+    )
+    for branch in ("$HEAD_REF", "$BRANCH")
+} | {
+    (
+        "bash",
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "linear-gate",
+        "--repo-root",
+        "trusted-base",
+        "--contract",
+        "harness.contract.json",
+        "--allow-missing-branch",
+        "--allow-missing-pr",
+        "--json",
+    ),
+    (
+        "bash",
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "preflight-gate",
+        "--contract",
+        "$CONTRACT_PATH",
+        "--max-tier",
+        "medium",
+        "--files",
+        "${CHANGED_FILES}",
+        "--json",
+    ),
+    (
+        "bash",
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "drift-gate",
+        "--mode",
+        "advisory",
+        "--out",
+        "artifacts/consistency-gate/consistency-drift-advisory-latest.json",
+        "--json",
+    ),
+    (
+        "bash",
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "drift-gate",
+        "--mode",
+        "health",
+        "--out",
+        "artifacts/consistency-gate/health.json",
+        "--json",
+    ),
+}
 
 
 def _workflow(relative_path: str) -> dict[object, object]:
@@ -74,7 +138,7 @@ def _assert_only_approved_harness_executables(steps: list[dict[object, object]])
 
 def _assert_no_package_exec_runner(run: str) -> None:
     tokens = _shell_tokens(run)
-    assert "harness" not in tokens
+    assert not any(_is_unsafe_harness_token(token) for token in tokens)
     assert not any(token in {"npx", "bunx"} for token in tokens)
     assert not any(
         token in {"npm", "pnpm", "yarn"}
@@ -82,6 +146,20 @@ def _assert_no_package_exec_runner(run: str) -> None:
         and tokens[index + 1] in {"exec", "dlx"}
         for index, token in enumerate(tokens)
     )
+
+
+def _is_unsafe_harness_token(token: str) -> bool:
+    if "harness" not in token.lower():
+        return False
+    if token in {
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "harness.contract.json",
+        "CONTRACT_PATH=trusted-base/harness.contract.json",
+    }:
+        return False
+    if token.startswith("::error::") or '"reason":"' in token:
+        return False
+    return True
 
 
 def _shell_tokens(command: str) -> list[str]:
@@ -108,9 +186,7 @@ def _approved_harness_invocations(run: str) -> list[list[str]]:
             assert index < len(lines)
             block.append(lines[index].strip())
         tokens = _shell_tokens(" ".join(line.removesuffix("\\").strip() for line in block))
-        assert tokens[:2] == ["bash", "trusted-base/Infrastructure/scripts/harness-cli.sh"]
-        assert tokens[-1:] == ["--json"]
-        assert not any(token in {";", "&&", "||", "|", "&"} for token in tokens)
+        assert tuple(tokens) in APPROVED_HARNESS_ARGV
         invocations.append(block)
         index += 1
     return invocations
@@ -394,6 +470,57 @@ def test_shell_comments_may_describe_harness_commands_without_executing_them() -
         }
     )
     _assert_job_trust(job)
+
+
+@pytest.mark.parametrize(
+    "alternate_execution",
+    (
+        "bash -c 'harness linear-gate --json'",
+        "sh -c 'npm exec -- harness linear-gate --json'",
+        "eval 'harness linear-gate --json'",
+        "runner=harness; \"$runner\" linear-gate --json",
+        "/tmp/harness linear-gate --json",
+        "env SAFE=1 /tmp/harness linear-gate --json",
+        "result=$(/tmp/harness linear-gate --json)",
+        "result=`/tmp/harness linear-gate --json`",
+    ),
+)
+def test_token_job_rejects_indirect_or_absolute_harness_execution(
+    alternate_execution: str,
+) -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    _steps(job).append({"run": alternate_execution})
+    with pytest.raises(AssertionError):
+        _assert_job_trust(job)
+
+
+@pytest.mark.parametrize(
+    "trailing_syntax",
+    (
+        "--undeclared value",
+        "<<'EOF'\npayload\nEOF",
+    ),
+)
+def test_approved_wrapper_rejects_argv_or_redirection_outside_closed_contract(
+    trailing_syntax: str,
+) -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    command = _linear_command(job)
+    command["run"] = str(command["run"]).replace(
+        "--json",
+        f"--json {trailing_syntax}",
+        1,
+    )
+    with pytest.raises(AssertionError):
+        _assert_job_trust(job)
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
