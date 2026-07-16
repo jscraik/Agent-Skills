@@ -73,6 +73,8 @@ jobs:
             exit 1
           fi
           bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \
+            --repo-root trusted-base \
+            --contract harness.contract.json \
             --branch "$HEAD_REF" \
             --pr-title "$PR_TITLE" \
             --pr-body "$PR_BODY" \

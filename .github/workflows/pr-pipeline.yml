@@ -182,12 +182,16 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BRANCH="$HEAD_REF"
             bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \
+              --repo-root trusted-base \
+              --contract harness.contract.json \
               --branch "$BRANCH" \
               --pr-title "$PR_TITLE" \
               --pr-body "$PR_BODY" \
               --json
           else
             bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \
+              --repo-root trusted-base \
+              --contract harness.contract.json \
               --allow-missing-branch \
               --allow-missing-pr \
               --json

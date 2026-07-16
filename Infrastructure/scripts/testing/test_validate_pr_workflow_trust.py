@@ -61,6 +61,19 @@ def _assert_job_trust(job: dict[object, object]) -> None:
     assert all("bash Infrastructure/scripts/harness-cli.sh" not in run for run in harness_runs)
 
 
+def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
+    linear_runs = [run for run in _harness_runs(_steps(job)) if " linear-gate " in run]
+    assert linear_runs
+    assert all(
+        any(line.strip() == "--repo-root trusted-base \\" for line in run.splitlines())
+        for run in linear_runs
+    )
+    assert all(
+        any(line.strip() == "--contract harness.contract.json \\" for line in run.splitlines())
+        for run in linear_runs
+    )
+
+
 def _trusted_checkouts(steps: list[dict[object, object]]) -> list[dict[object, object]]:
     return [
         step
@@ -84,6 +97,46 @@ def test_all_token_bearing_harness_jobs_use_trusted_base_wrappers() -> None:
     assert set(jobs) == EXPECTED_JOBS
     for job in jobs.values():
         _assert_job_trust(job)
+
+
+def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:
+    workflows = (
+        _workflow(".github/workflows/pr-template.yml"),
+        _workflow(".github/workflows/pr-pipeline.yml"),
+    )
+    for workflow in workflows:
+        jobs = workflow["jobs"]
+        assert isinstance(jobs, dict)
+        job = jobs["linear-gate"]
+        assert isinstance(job, dict)
+        _assert_linear_gate_policy_root(job)
+
+        for unsafe_root in (".", "trusted-base/..", "${{ github.workspace }}"):
+            variant = copy.deepcopy(job)
+            command = next(
+                step
+                for step in _steps(variant)
+                if " linear-gate " in str(step.get("run"))
+            )
+            command["run"] = str(command["run"]).replace(
+                "--repo-root trusted-base",
+                f"--repo-root {unsafe_root}",
+            )
+            with pytest.raises(AssertionError):
+                _assert_linear_gate_policy_root(variant)
+
+        missing_contract = copy.deepcopy(job)
+        command = next(
+            step
+            for step in _steps(missing_contract)
+            if " linear-gate " in str(step.get("run"))
+        )
+        command["run"] = str(command["run"]).replace(
+            "--contract harness.contract.json",
+            "",
+        )
+        with pytest.raises(AssertionError):
+            _assert_linear_gate_policy_root(missing_contract)
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
