@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import shlex
 from pathlib import Path
 
 import pytest
@@ -57,6 +58,18 @@ def _assert_job_trust(job: dict[object, object]) -> None:
     assert harness_runs
     assert all("trusted-base/Infrastructure/scripts/harness-cli.sh" in run for run in harness_runs)
     assert all("bash Infrastructure/scripts/harness-cli.sh" not in run for run in harness_runs)
+    _assert_only_approved_harness_executables(steps)
+
+
+def _assert_only_approved_harness_executables(steps: list[dict[object, object]]) -> None:
+    approved = "bash trusted-base/Infrastructure/scripts/harness-cli.sh "
+    for step in steps:
+        run = str(step.get("run", ""))
+        assert "npm exec" not in run
+        assert "npx " not in run
+        for line in run.splitlines():
+            if "harness-cli.sh" in line:
+                assert line.strip().startswith(approved)
 
 
 def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
@@ -66,8 +79,17 @@ def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
         invocations = _linear_invocations(run)
         assert invocations
         for invocation in invocations:
-            assert invocation.count("--repo-root trusted-base \\") == 1
-            assert invocation.count("--contract harness.contract.json \\") == 1
+            tokens = shlex.split(" ".join(line.removesuffix("\\").strip() for line in invocation))
+            _assert_exact_flag(tokens, "--repo-root", "trusted-base")
+            _assert_exact_flag(tokens, "--contract", "harness.contract.json")
+
+
+def _assert_exact_flag(tokens: list[str], flag: str, expected_value: str) -> None:
+    assert all(not token.startswith(f"{flag}=") for token in tokens)
+    assert tokens.count(flag) == 1
+    flag_index = tokens.index(flag)
+    assert flag_index + 1 < len(tokens)
+    assert tokens[flag_index + 1] == expected_value
 
 
 def _linear_invocations(run: str) -> list[list[str]]:
@@ -76,7 +98,10 @@ def _linear_invocations(run: str) -> list[list[str]]:
     index = 0
     command = "bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \\"
     while index < len(lines):
-        if lines[index].strip() != command:
+        stripped = lines[index].strip()
+        if "harness-cli.sh" in stripped and "linear-gate" in stripped:
+            assert stripped == command
+        if stripped != command:
             index += 1
             continue
         block = [lines[index].strip()]
@@ -236,6 +261,43 @@ def test_alternate_token_bearing_harness_job_is_governed_and_rejected() -> None:
     assert "alternate-harness" in token_jobs
     with pytest.raises(AssertionError):
         _assert_job_trust(token_jobs["alternate-harness"])
+
+
+@pytest.mark.parametrize(
+    "extra_flag",
+    (
+        "--repo-root attacker",
+        "--repo-root=attacker",
+        "--contract attacker.json",
+        "--contract=attacker.json",
+    ),
+)
+def test_linear_gate_rejects_conflicting_effective_flags(extra_flag: str) -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    command = _linear_command(job)
+    command["run"] = str(command["run"]).replace(
+        "--json",
+        f"{extra_flag} \\\n  --json",
+        1,
+    )
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(job)
+
+
+def test_approved_wrapper_cannot_mask_alternate_harness_execution() -> None:
+    pipeline = _workflow(".github/workflows/pr-pipeline.yml")
+    jobs = pipeline["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    job_steps = _steps(job)
+    job_steps.append({"run": "npm exec -- harness linear-gate --json"})
+    with pytest.raises(AssertionError):
+        _assert_job_trust(job)
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
