@@ -64,14 +64,19 @@ def _assert_job_trust(job: dict[object, object]) -> None:
 def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
     linear_runs = [run for run in _harness_runs(_steps(job)) if " linear-gate " in run]
     assert linear_runs
-    assert all(
-        any(line.strip() == "--repo-root trusted-base \\" for line in run.splitlines())
-        for run in linear_runs
-    )
-    assert all(
-        any(line.strip() == "--contract harness.contract.json \\" for line in run.splitlines())
-        for run in linear_runs
-    )
+    for run in linear_runs:
+        invocation_count = run.count(
+            "trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate"
+        )
+        repo_root_count = sum(
+            line.strip() == "--repo-root trusted-base \\" for line in run.splitlines()
+        )
+        contract_count = sum(
+            line.strip() == "--contract harness.contract.json \\" for line in run.splitlines()
+        )
+        assert invocation_count > 0
+        assert repo_root_count == invocation_count
+        assert contract_count == invocation_count
 
 
 def _trusted_checkouts(steps: list[dict[object, object]]) -> list[dict[object, object]]:
@@ -86,6 +91,41 @@ def _trusted_checkouts(steps: list[dict[object, object]]) -> list[dict[object, o
 
 def _harness_runs(steps: list[dict[object, object]]) -> list[str]:
     return [str(step.get("run")) for step in steps if "harness-cli.sh" in str(step.get("run"))]
+
+
+def _linear_command(job: dict[object, object]) -> dict[object, object]:
+    return next(step for step in _steps(job) if " linear-gate " in str(step.get("run")))
+
+
+def _assert_repo_root_mutation_rejected(job: dict[object, object], unsafe_root: str) -> None:
+    variant = copy.deepcopy(job)
+    command = _linear_command(variant)
+    command["run"] = str(command["run"]).replace(
+        "--repo-root trusted-base",
+        f"--repo-root {unsafe_root}",
+    )
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(variant)
+
+
+def _assert_missing_contract_rejected(job: dict[object, object]) -> None:
+    variant = copy.deepcopy(job)
+    command = _linear_command(variant)
+    command["run"] = str(command["run"]).replace("--contract harness.contract.json", "")
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(variant)
+
+
+def _assert_duplicate_root_rejected(job: dict[object, object]) -> None:
+    variant = copy.deepcopy(job)
+    command = _linear_command(variant)
+    command["run"] = str(command["run"]).replace(
+        "--repo-root trusted-base \\",
+        "--repo-root trusted-base \\\n  --repo-root trusted-base \\",
+        1,
+    )
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(variant)
 
 
 def test_all_token_bearing_harness_jobs_use_trusted_base_wrappers() -> None:
@@ -112,31 +152,9 @@ def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:
         _assert_linear_gate_policy_root(job)
 
         for unsafe_root in (".", "trusted-base/..", "${{ github.workspace }}"):
-            variant = copy.deepcopy(job)
-            command = next(
-                step
-                for step in _steps(variant)
-                if " linear-gate " in str(step.get("run"))
-            )
-            command["run"] = str(command["run"]).replace(
-                "--repo-root trusted-base",
-                f"--repo-root {unsafe_root}",
-            )
-            with pytest.raises(AssertionError):
-                _assert_linear_gate_policy_root(variant)
-
-        missing_contract = copy.deepcopy(job)
-        command = next(
-            step
-            for step in _steps(missing_contract)
-            if " linear-gate " in str(step.get("run"))
-        )
-        command["run"] = str(command["run"]).replace(
-            "--contract harness.contract.json",
-            "",
-        )
-        with pytest.raises(AssertionError):
-            _assert_linear_gate_policy_root(missing_contract)
+            _assert_repo_root_mutation_rejected(job, unsafe_root)
+        _assert_missing_contract_rejected(job)
+        _assert_duplicate_root_rejected(job)
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
