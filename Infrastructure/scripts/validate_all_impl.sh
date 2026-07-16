@@ -304,7 +304,7 @@ check_matches_validation_scope() {
       ;;
     test)
       case "$slug" in
-        skill-lifecycle-tests|skill-authoring-family|skill-graph-profiles|gotcha-store)
+        skill-lifecycle-tests|pr-template-contract-tests|skill-authoring-family|skill-graph-profiles|gotcha-store)
           return 0
           ;;
       esac
@@ -381,6 +381,9 @@ should_run_check() {
       ;;
     skill-lifecycle-tests|skill-catalog|plugin-shadowing|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|skill-types|openai-format|progressive-disclosure|skill-graph-profiles|gotcha-store)
       [[ "$scope_has_skill_graph" -eq 1 ]]
+      ;;
+    pr-template-contract-tests)
+      [[ "$scope_has_validation_core" -eq 1 ]]
       ;;
     skill-authoring-family)
       [[ "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
@@ -669,10 +672,19 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 
     case "$changed_file" in
       Infrastructure/scripts/validate_all.sh|\
+      Infrastructure/scripts/validate_all_impl.sh|\
       Infrastructure/bin/ask|\
       Infrastructure/scripts/lib/ask/*|\
       Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py|\
       Infrastructure/scripts/validation-and-linting/*)
+        scope_has_validation_core=1
+        ;;
+    esac
+
+    case "$changed_file" in
+      .github/workflows/pr-pipeline.yml|\
+      .github/workflows/pr-template.yml|\
+      Infrastructure/scripts/testing/test_validate_pr_template_body.py)
         scope_has_validation_core=1
         ;;
     esac
@@ -711,6 +723,7 @@ schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK ty
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py
+schedule_check required pr-template-contract-tests "🧾 Validating PR metadata workflow contracts..." env UV_CACHE_DIR="${UV_CACHE_DIR:-${TMPDIR:-/tmp}/agent-skills-uv-cache}" bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_pr_template_body.py
 schedule_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" Infrastructure/scripts/verify_skill_catalog_freshness.py --strict
 schedule_check required skills-system-upstream-lock "📌 Verifying skills-system upstream lock..." "${python_cmd[@]}" Infrastructure/scripts/verify_skills_system_upstream_lock.py
 schedule_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash Infrastructure/scripts/check_plugin_skill_shadowing.sh
