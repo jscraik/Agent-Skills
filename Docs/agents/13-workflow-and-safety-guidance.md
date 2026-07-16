@@ -80,18 +80,22 @@ then record what changed.
 When working with git branches, prefer to merge over rebase for complex histories (>50 commits). Always run `ask repo status` and resolve conflicts systematically before proceeding with changes.
 For git operations like cherry-picking or branch syncing, prefer branch-aware merge/rebase flows that keep full-context history visible, and avoid direct low-level file restore commands.
 
-Before commit or push, make sure generated `prek` hooks use repo-local cache
-state:
+Before commit or push, make sure generated `prek` hooks use a writable
+temporary cache and that Git metadata is healthy:
 
 ```bash
 bash scripts/install-prek-hooks.sh
+preflight=Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py
+python3 "$preflight" --json
 ```
 
-This patches the generated git hook shims to set
-`PREK_HOME="$REPO_ROOT/.cache/prek"`. If a hook fails with
-`failed to open file ... ~/.cache/prek/prek.log`, do not retry the same push
-with broader home-directory write access. Run the installer, then rerun the
-normal hook-enforced commit or push path.
+The installer patches generated git hook shims to set `PREK_HOME` below
+`CODEX_HOOK_CACHE_ROOT` (a writable temporary directory by default). If a hook
+fails with `failed to open file ... ~/.cache/prek/prek.log`, do not retry the
+same push with broader home-directory write access. Run the installer, run the
+metadata preflight, and then rerun the normal hook-enforced commit or push
+path. A stale lock is only a candidate: prove no owner and perform any
+cleanup explicitly; the preflight never removes locks or worktrees.
 
 ### Worktree Removal And Runtime Links
 
