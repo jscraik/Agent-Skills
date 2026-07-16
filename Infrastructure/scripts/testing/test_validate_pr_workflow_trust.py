@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import shlex
 from pathlib import Path
 
@@ -19,6 +21,13 @@ EXPECTED_JOBS = {
     "risk-policy-gate",
     "consistency-drift-advisory",
     "consistency-drift-health",
+}
+APPROVED_TOKEN_JOB_DIGESTS = {
+    "e552ede774d7f95928657119011ab8178652988d02bb848cabbecbeead24698c",
+    "42c7f6501e8720d3076aa1cb317d17d21808e21e05b49563acb47c2d280dd081",
+    "61a69c7472fe7fc82aa0e83597a57aee675569b6de7ea2c71af101dd6c089e61",
+    "0545c0a6fbec679b50b4dc2ed99b00f9c93e5bf072d8a106b4db192749e0a808",
+    "fe800d683445fec4a41b3a2312620c8ab3d60b7eb4a0695b6ebc6fa2bfc4d796",
 }
 APPROVED_HARNESS_ARGV = {
     (
@@ -112,6 +121,7 @@ def _token_jobs(workflow: dict[object, object]) -> dict[str, dict[object, object
 
 
 def _assert_job_trust(job: dict[object, object]) -> None:
+    assert _job_digest(job) in APPROVED_TOKEN_JOB_DIGESTS
     steps = _steps(job)
     trusted = _trusted_checkouts(steps)
     assert len(trusted) == 1
@@ -123,6 +133,11 @@ def _assert_job_trust(job: dict[object, object]) -> None:
     assert all("trusted-base/Infrastructure/scripts/harness-cli.sh" in run for run in harness_runs)
     assert all("bash Infrastructure/scripts/harness-cli.sh" not in run for run in harness_runs)
     _assert_only_approved_harness_executables(steps)
+
+
+def _job_digest(job: dict[object, object]) -> str:
+    encoded = json.dumps(job, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _assert_only_approved_harness_executables(steps: list[dict[object, object]]) -> None:
@@ -314,9 +329,10 @@ def test_all_token_bearing_jobs_use_trusted_base_wrappers() -> None:
         _workflow(".github/workflows/pr-template.yml"),
         _workflow(".github/workflows/pr-pipeline.yml"),
     )
-    jobs = {name: job for workflow in workflows for name, job in _token_jobs(workflow).items()}
-    assert set(jobs) == EXPECTED_JOBS
-    for job in jobs.values():
+    jobs = [item for workflow in workflows for item in _token_jobs(workflow).items()]
+    assert {name for name, _job in jobs} == EXPECTED_JOBS
+    assert {_job_digest(job) for _name, job in jobs} == APPROVED_TOKEN_JOB_DIGESTS
+    for _name, job in jobs:
         _assert_job_trust(job)
 
 
@@ -456,20 +472,10 @@ def test_approved_wrapper_rejects_sibling_alternate_execution(
 
 
 def test_shell_comments_may_describe_harness_commands_without_executing_them() -> None:
-    metadata = _workflow(".github/workflows/pr-template.yml")
-    jobs = metadata["jobs"]
-    assert isinstance(jobs, dict)
-    job = copy.deepcopy(jobs["linear-gate"])
-    assert isinstance(job, dict)
-    _steps(job).append(
-        {
-            "run": (
-                "# npx harness is intentionally prohibited here\n"
-                "# bash trusted-base/Infrastructure/scripts/harness-cli.sh is the approved route"
-            )
-        }
+    _assert_no_package_exec_runner(
+        "# npx harness is intentionally prohibited here\n"
+        "# bash trusted-base/Infrastructure/scripts/harness-cli.sh is the approved route"
     )
-    _assert_job_trust(job)
 
 
 @pytest.mark.parametrize(
