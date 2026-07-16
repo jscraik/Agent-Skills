@@ -723,7 +723,7 @@ schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK ty
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py
-schedule_check required pr-template-contract-tests "🧾 Validating PR metadata workflow contracts..." env UV_CACHE_DIR="${UV_CACHE_DIR:-${TMPDIR:-/tmp}/agent-skills-uv-cache}" bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_pr_template_body.py
+schedule_check required pr-template-contract-tests "🧾 Validating PR metadata workflow contracts..." env UV_CACHE_DIR="${UV_CACHE_DIR:-${TMPDIR:-/tmp}/agent-skills-uv-cache}" bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_pr_template_body.py scripts/testing/test_validate_pr_workflow_trust.py
 schedule_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" Infrastructure/scripts/verify_skill_catalog_freshness.py --strict
 schedule_check required skills-system-upstream-lock "📌 Verifying skills-system upstream lock..." "${python_cmd[@]}" Infrastructure/scripts/verify_skills_system_upstream_lock.py
 schedule_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash Infrastructure/scripts/check_plugin_skill_shadowing.sh

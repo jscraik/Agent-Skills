@@ -202,6 +202,7 @@ def _assert_pipeline_admission_contract(pipeline_workflow: dict[object, object])
     _assert_pipeline_template_admission(jobs)
     _assert_pipeline_linear_admission(jobs)
     _assert_pipeline_risk_admission(jobs)
+    _assert_pipeline_drift_gate_boundaries(jobs)
     _assert_dependency_review_conditions(jobs)
 
 
@@ -271,6 +272,31 @@ def _assert_pipeline_trusted_checkout(
     if fetch_depth:
         expected["fetch-depth"] = 0
     assert _mapping(checkout.get("with"), f"{step_name} inputs") == expected
+
+
+def _assert_pipeline_drift_gate_boundaries(jobs: dict[object, object]) -> None:
+    for job_name, checkout_name, command_name in (
+        (
+            "consistency-drift-advisory",
+            "Checkout trusted advisory drift gate",
+            "Run advisory drift gate",
+        ),
+        (
+            "consistency-drift-health",
+            "Checkout trusted health drift gate",
+            "Run health drift gate",
+        ),
+    ):
+        job = _mapping(jobs.get(job_name), job_name)
+        _assert_pipeline_trusted_checkout(job, checkout_name, fetch_depth=False)
+        command = _named_step(job, command_name)
+        assert _mapping(command.get("env"), f"{job_name} environment").get(
+            "NODE_AUTH_TOKEN"
+        ) == "${{ secrets.NPM_TOKEN }}"
+        run = str(command.get("run"))
+        assert "bash trusted-base/Infrastructure/scripts/harness-cli.sh drift-gate \\\n" in run
+        assert "bash Infrastructure/scripts/harness-cli.sh" not in run
+        assert '"enforced_by": "ci/circleci: pr-pipeline"' not in run
 
 
 def _assert_dependency_review_conditions(jobs: dict[object, object]) -> None:
@@ -755,16 +781,6 @@ def test_pr_template_refresh_contract_rejects_merge_queue_noop() -> None:
     _named_step(admission, "Skip PR template enforcement for merge queue")["run"] = "exit 1"
 
     _assert_contract_rejects(template_workflow, no_op_merge_queue)
-
-
-def test_pr_template_contract_suite_is_wired_into_required_test_scope() -> None:
-    validate_all = (REPO_ROOT / "Infrastructure" / "scripts" / "validate_all_impl.sh").read_text(
-        encoding="utf-8"
-    )
-
-    assert "skill-lifecycle-tests|pr-template-contract-tests|skill-authoring-family" in validate_all
-    assert 'pr-template-contract-tests "🧾 Validating PR metadata workflow contracts..."' in validate_all
-    assert "Infrastructure/scripts/testing/test_validate_pr_template_body.py" in validate_all
 
 
 def _assert_contract_rejects(

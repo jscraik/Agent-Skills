@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+import copy
+from pathlib import Path
+
+import pytest
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+CHECKOUT_ACTION = "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+BASE_REFS = {
+    "${{ github.event.pull_request.base.sha }}",
+    "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}",
+}
+EXPECTED_JOBS = {
+    "linear-gate",
+    "risk-policy-gate",
+    "consistency-drift-advisory",
+    "consistency-drift-health",
+}
+
+
+def _workflow(relative_path: str) -> dict[object, object]:
+    payload = yaml.safe_load((REPO_ROOT / relative_path).read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    if True in payload and "on" not in payload:
+        payload["on"] = payload.pop(True)
+    return payload
+
+
+def _steps(job: dict[object, object]) -> list[dict[object, object]]:
+    steps = job.get("steps")
+    assert isinstance(steps, list)
+    assert all(isinstance(step, dict) for step in steps)
+    return steps
+
+
+def _token_harness_jobs(workflow: dict[object, object]) -> dict[str, dict[object, object]]:
+    jobs = workflow.get("jobs")
+    assert isinstance(jobs, dict)
+    return {
+        str(name): job
+        for name, job in jobs.items()
+        if isinstance(job, dict)
+        and "${{ secrets.NPM_TOKEN }}" in str(job)
+        and "harness-cli.sh" in str(job)
+    }
+
+
+def _assert_job_trust(job: dict[object, object]) -> None:
+    steps = _steps(job)
+    trusted = _trusted_checkouts(steps)
+    assert len(trusted) == 1
+    inputs = trusted[0]["with"]
+    assert inputs.get("persist-credentials") is False
+    assert inputs.get("ref") in BASE_REFS
+    harness_runs = _harness_runs(steps)
+    assert harness_runs
+    assert all("trusted-base/Infrastructure/scripts/harness-cli.sh" in run for run in harness_runs)
+    assert all("bash Infrastructure/scripts/harness-cli.sh" not in run for run in harness_runs)
+
+
+def _trusted_checkouts(steps: list[dict[object, object]]) -> list[dict[object, object]]:
+    return [
+        step
+        for step in steps
+        if step.get("uses") == CHECKOUT_ACTION
+        and isinstance(step.get("with"), dict)
+        and step["with"].get("path") == "trusted-base"
+    ]
+
+
+def _harness_runs(steps: list[dict[object, object]]) -> list[str]:
+    return [str(step.get("run")) for step in steps if "harness-cli.sh" in str(step.get("run"))]
+
+
+def test_all_token_bearing_harness_jobs_use_trusted_base_wrappers() -> None:
+    workflows = (
+        _workflow(".github/workflows/pr-template.yml"),
+        _workflow(".github/workflows/pr-pipeline.yml"),
+    )
+    jobs = {name: job for workflow in workflows for name, job in _token_harness_jobs(workflow).items()}
+    assert set(jobs) == EXPECTED_JOBS
+    for job in jobs.values():
+        _assert_job_trust(job)
+
+
+def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
+    validate_all = (REPO_ROOT / "Infrastructure" / "scripts" / "validate_all_impl.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "skill-lifecycle-tests|pr-template-contract-tests|skill-authoring-family" in validate_all
+    assert 'pr-template-contract-tests "🧾 Validating PR metadata workflow contracts..."' in validate_all
+    assert "scripts/testing/test_validate_pr_template_body.py" in validate_all
+    assert "scripts/testing/test_validate_pr_workflow_trust.py" in validate_all
+
+
+@pytest.mark.parametrize(
+    ("job_name", "checkout_name", "command_name"),
+    (
+        ("consistency-drift-advisory", "Checkout trusted advisory drift gate", "Run advisory drift gate"),
+        ("consistency-drift-health", "Checkout trusted health drift gate", "Run health drift gate"),
+    ),
+)
+def test_drift_jobs_reject_head_checkout_and_checkout_owned_wrapper(
+    job_name: str,
+    checkout_name: str,
+    command_name: str,
+) -> None:
+    pipeline = _workflow(".github/workflows/pr-pipeline.yml")
+    jobs = pipeline["jobs"]
+    assert isinstance(jobs, dict)
+    job = jobs[job_name]
+    assert isinstance(job, dict)
+
+    head_variant = copy.deepcopy(job)
+    checkout = next(step for step in _steps(head_variant) if step.get("name") == checkout_name)
+    checkout["with"]["ref"] = "${{ github.event.pull_request.head.sha }}"
+    with pytest.raises(AssertionError):
+        _assert_job_trust(head_variant)
+
+    wrapper_variant = copy.deepcopy(job)
+    command = next(step for step in _steps(wrapper_variant) if step.get("name") == command_name)
+    command["run"] = str(command["run"]).replace(
+        "trusted-base/Infrastructure/scripts/harness-cli.sh",
+        "Infrastructure/scripts/harness-cli.sh",
+    )
+    with pytest.raises(AssertionError):
+        _assert_job_trust(wrapper_variant)

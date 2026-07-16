@@ -328,9 +328,16 @@ jobs:
       pull-requests: read
       actions: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout candidate drift inputs
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+      - name: Checkout trusted advisory drift gate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -369,7 +376,7 @@ jobs:
             "error_class": "none",
             "generated_at": "1970-01-01T00:00:00.000Z",
             "repo_root": ".",
-            "enforced_by": "ci/circleci: pr-pipeline",
+            "enforced_by": "none",
             "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
             "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
             "findings": []
@@ -378,7 +385,7 @@ jobs:
             echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic advisory deferral artifact."
             exit 0
           fi
-          bash Infrastructure/scripts/harness-cli.sh drift-gate \
+          bash trusted-base/Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode advisory \
             --out artifacts/consistency-gate/consistency-drift-advisory-latest.json \
             --json
@@ -430,9 +437,16 @@ jobs:
       pull-requests: read
       actions: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout candidate drift inputs
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+      - name: Checkout trusted health drift gate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -470,7 +484,7 @@ jobs:
             "error_class": "none",
             "generated_at": "1970-01-01T00:00:00.000Z",
             "repo_root": ".",
-            "enforced_by": "ci/circleci: pr-pipeline",
+            "enforced_by": "none",
             "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
             "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
             "findings": []
@@ -479,7 +493,7 @@ jobs:
             echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic health deferral artifact."
             exit 0
           fi
-          bash Infrastructure/scripts/harness-cli.sh drift-gate \
+          bash trusted-base/Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode health \
             --out artifacts/consistency-gate/health.json \
             --json
