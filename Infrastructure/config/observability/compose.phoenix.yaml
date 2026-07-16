@@ -1,0 +1,23 @@
+name: agent-skills-phoenix
+
+services:
+  phoenix:
+    image: arizephoenix/phoenix@sha256:359f3f528cff510f7d1cf49c81bf14bba8bd04c8ed8ca608f801e2a1803824c5
+    container_name: agent-skills-phoenix
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6006:6006"
+      - "127.0.0.1:4317:4317"
+    environment:
+      PHOENIX_ALLOWED_SANDBOX_PROVIDERS: NONE
+      PHOENIX_ALLOW_EXTERNAL_RESOURCES: "false"
+      PHOENIX_GRPC_PORT: "4317"
+      PHOENIX_HOST: 0.0.0.0
+      PHOENIX_PORT: "6006"
+      PHOENIX_WORKING_DIR: /mnt/data
+    volumes:
+      - type: bind
+        source: ${ASK_PHOENIX_DATA_DIR:?Set ASK_PHOENIX_DATA_DIR to an attached persistent data directory}
+        target: /mnt/data
+        bind:
+          create_host_path: false

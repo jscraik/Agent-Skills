@@ -4,13 +4,19 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--scope <name>] [--changed-files <file>...] [--changed-files-from <path>]
+Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--staged-source] [--head-source] [--scope <name>] [--changed-files <file>...] [--changed-files-from <path>]
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
   --persistent  Write logs to Infrastructure/artifacts/validation/<timestamp> and refresh
                 Infrastructure/artifacts/validation/latest. This is the default behavior.
   --fail-fast   Stop scheduling new checks after the first required failure.
+  --staged-source
+                Validate staged Git index blobs for the program-design check.
+                Only use this from the pre-commit staged validation lane.
+  --head-source Validate HEAD Git blobs for the program-design check. Use this
+                from pre-push validation so dirty worktree edits cannot mask a
+                violation in the pushed commit.
   --scope       Run a named validation subset. Valid scopes: all, lint,
                 typecheck, test, audit, check, skills-sdk,
                 consistency-advisory, consistency-health.
@@ -24,6 +30,8 @@ EOF
 
 output_mode="${VALIDATE_ALL_OUTPUT_MODE:-persistent}"
 fail_fast=0
+staged_source_mode=0
+head_source_mode=0
 validation_scope="all"
 changed_files=()
 changed_files_mode=0
@@ -39,6 +47,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --fail-fast)
       fail_fast=1
+      ;;
+    --staged-source)
+      staged_source_mode=1
+      ;;
+    --head-source)
+      head_source_mode=1
       ;;
     --scope)
       shift
@@ -269,7 +283,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|no-breadcrumbs|project-pm-receipts|ask-cli-modularity|program-design|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -283,7 +297,7 @@ check_matches_validation_scope() {
       ;;
     typecheck)
       case "$slug" in
-        verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|selection-contract|router-schema|ask-cli-modularity)
+        verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|selection-contract|router-schema|ask-cli-modularity|program-design)
           return 0
           ;;
       esac
@@ -362,7 +376,7 @@ should_run_check() {
     repo-surface-inventory)
       return 0
       ;;
-    ask-cli-modularity)
+    ask-cli-modularity|program-design)
       [[ "$scope_has_validation_core" -eq 1 || "$scope_has_python_quality" -eq 1 ]]
       ;;
     skill-lifecycle-tests|skill-catalog|plugin-shadowing|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|skill-types|openai-format|progressive-disclosure|skill-graph-profiles|gotcha-store)
@@ -373,6 +387,25 @@ should_run_check() {
       ;;
     runtime-separation-*)
       [[ "$scope_has_runtime_separation" -eq 1 ]]
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_program_design_scanned_path() {
+  local changed_file="$1"
+  case "$changed_file" in
+    Infrastructure/bin/*|Infrastructure/scripts/*|Plugins/*|Skills/*|skills-system/*)
+      case "$changed_file" in
+        */.venv/*|*/__pycache__/*|*/fixtures/*|*/references/*|*/tests/*|*/test/*|*/testing/*)
+          return 1
+          ;;
+        *)
+          return 0
+          ;;
+      esac
       ;;
     *)
       return 1
@@ -619,11 +652,20 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
 
-    case "$changed_file" in
-      *.py|Infrastructure/bin/ask)
+    staged_source_line=""
+    if [[ "$staged_source_mode" -eq 1 ]]; then
+      staged_source_line="$(git show ":$changed_file" 2>/dev/null | head -n 1 || true)"
+    elif [[ "$head_source_mode" -eq 1 ]]; then
+      staged_source_line="$(git show "HEAD:$changed_file" 2>/dev/null | head -n 1 || true)"
+    elif [[ -f "$changed_file" ]]; then
+      staged_source_line="$(head -n 1 "$changed_file" || true)"
+    fi
+    if is_program_design_scanned_path "$changed_file"; then
+      if [[ "$changed_file" == *.py || "$changed_file" == *.pyw ]] || \
+        [[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]; then
         scope_has_python_quality=1
-        ;;
-    esac
+      fi
+    fi
 
     case "$changed_file" in
       Infrastructure/scripts/validate_all.sh|\
@@ -707,6 +749,18 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   ask_cli_modularity_cmd+=(--changed-files "${changed_files[@]}")
 fi
 schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${ask_cli_modularity_cmd[@]}"
+
+program_design_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_program_design.py)
+if [[ "$staged_source_mode" -eq 1 ]]; then
+  program_design_cmd+=(--staged-source)
+fi
+if [[ "$head_source_mode" -eq 1 ]]; then
+  program_design_cmd+=(--source-ref HEAD)
+fi
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  program_design_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required program-design "🧭 Verifying changed Python program design..." "${program_design_cmd[@]}"
 
 no_breadcrumbs_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_breadcrumbs.py)
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
@@ -795,7 +849,7 @@ schedule_check required runtime-separation-baseline-compare "🧭 Comparing runt
 schedule_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict
 schedule_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
 
-schedule_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
+schedule_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity --required-check program-design
 
 refresh_latest_dir
 

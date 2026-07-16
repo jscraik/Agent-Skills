@@ -54,6 +54,7 @@ SCHEMA_NAMES = {
     "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
+    "phoenix-eval-trace-receipt": "phoenix-eval-trace-receipt.v1.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
     "review-plan-receipt": "sdk-review-plan-receipt.v1.schema.json",
@@ -103,6 +104,13 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 self.assertIn("/skills-sdk/", schema["$id"])
                 self.assertRegex(schema["$id"], r"\.v[01]\.schema\.json$")
                 self.assertFalse(schema["additionalProperties"])
+
+    def test_phoenix_eval_trace_receipt_fixture_is_valid(self) -> None:
+        payload = self.assert_valid("phoenix-eval-trace-receipt", "phoenix-eval-trace-receipt.json")
+
+        self.assertEqual(payload["observability_status"], "not_run")
+        self.assertEqual(payload["eval_status"], "pass")
+        self.assertEqual(payload["project_name"], "agent-skills-skills-sdk-evals")
 
     def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
         schema = {"type": "number", "minimum": 1}
