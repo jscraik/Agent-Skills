@@ -62,14 +62,58 @@ def _assert_job_trust(job: dict[object, object]) -> None:
 
 
 def _assert_only_approved_harness_executables(steps: list[dict[object, object]]) -> None:
-    approved = "bash trusted-base/Infrastructure/scripts/harness-cli.sh "
     for step in steps:
         run = str(step.get("run", ""))
-        assert "npm exec" not in run
-        assert "npx " not in run
+        _assert_no_package_exec_runner(run)
+        invocations = _approved_harness_invocations(run)
         for line in run.splitlines():
-            if "harness-cli.sh" in line:
-                assert line.strip().startswith(approved)
+            stripped = line.strip()
+            if "harness-cli.sh" in stripped and not stripped.startswith("#"):
+                assert any(stripped in invocation for invocation in invocations)
+
+
+def _assert_no_package_exec_runner(run: str) -> None:
+    tokens = _shell_tokens(run)
+    assert "harness" not in tokens
+    assert not any(token in {"npx", "bunx"} for token in tokens)
+    assert not any(
+        token in {"npm", "pnpm", "yarn"}
+        and index + 1 < len(tokens)
+        and tokens[index + 1] in {"exec", "dlx"}
+        for index, token in enumerate(tokens)
+    )
+
+
+def _shell_tokens(command: str) -> list[str]:
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|")
+    lexer.commenters = "#"
+    lexer.whitespace_split = True
+    return list(lexer)
+
+
+def _approved_harness_invocations(run: str) -> list[list[str]]:
+    lines = run.splitlines()
+    invocations: list[list[str]] = []
+    index = 0
+    approved_prefix = "bash trusted-base/Infrastructure/scripts/harness-cli.sh "
+    while index < len(lines):
+        stripped = lines[index].strip()
+        if stripped.startswith("#") or "harness-cli.sh" not in stripped:
+            index += 1
+            continue
+        assert stripped.startswith(approved_prefix)
+        block = [stripped]
+        while block[-1].endswith("\\"):
+            index += 1
+            assert index < len(lines)
+            block.append(lines[index].strip())
+        tokens = _shell_tokens(" ".join(line.removesuffix("\\").strip() for line in block))
+        assert tokens[:2] == ["bash", "trusted-base/Infrastructure/scripts/harness-cli.sh"]
+        assert tokens[-1:] == ["--json"]
+        assert not any(token in {";", "&&", "||", "|", "&"} for token in tokens)
+        invocations.append(block)
+        index += 1
+    return invocations
 
 
 def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
@@ -93,24 +137,12 @@ def _assert_exact_flag(tokens: list[str], flag: str, expected_value: str) -> Non
 
 
 def _linear_invocations(run: str) -> list[list[str]]:
-    lines = run.splitlines()
-    invocations: list[list[str]] = []
-    index = 0
-    command = "bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \\"
-    while index < len(lines):
-        stripped = lines[index].strip()
-        if "harness-cli.sh" in stripped and "linear-gate" in stripped:
-            assert stripped == command
-        if stripped != command:
-            index += 1
-            continue
-        block = [lines[index].strip()]
-        while block[-1].endswith("\\"):
-            index += 1
-            assert index < len(lines)
-            block.append(lines[index].strip())
-        invocations.append(block)
-        index += 1
+    invocations = _approved_harness_invocations(run)
+    assert all(
+        _shell_tokens(invocation[0].removesuffix("\\").strip())[:3]
+        == ["bash", "trusted-base/Infrastructure/scripts/harness-cli.sh", "linear-gate"]
+        for invocation in invocations
+    )
     return invocations
 
 
@@ -298,6 +330,70 @@ def test_approved_wrapper_cannot_mask_alternate_harness_execution() -> None:
     job_steps.append({"run": "npm exec -- harness linear-gate --json"})
     with pytest.raises(AssertionError):
         _assert_job_trust(job)
+
+
+@pytest.mark.parametrize(
+    "alternate_execution",
+    (
+        "; npm  exec -- harness linear-gate --json",
+        "&& npx\tharness linear-gate --json",
+        "&& command harness linear-gate --json",
+        "&& bunx harness linear-gate --json",
+        "&& yarn dlx harness linear-gate --json",
+        "|| true",
+    ),
+)
+def test_approved_wrapper_rejects_chained_execution_or_success_override(
+    alternate_execution: str,
+) -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    command = _linear_command(job)
+    command["run"] = str(command["run"]).replace("--json", f"--json {alternate_execution}", 1)
+    with pytest.raises(AssertionError):
+        _assert_job_trust(job)
+
+
+@pytest.mark.parametrize(
+    "alternate_execution",
+    (
+        "command npm  exec -- harness linear-gate --json",
+        "command npx\tharness linear-gate --json",
+        "command bunx harness linear-gate --json",
+        "command yarn dlx harness linear-gate --json",
+    ),
+)
+def test_approved_wrapper_rejects_sibling_alternate_execution(
+    alternate_execution: str,
+) -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    _steps(job).append({"run": alternate_execution})
+    with pytest.raises(AssertionError):
+        _assert_job_trust(job)
+
+
+def test_shell_comments_may_describe_harness_commands_without_executing_them() -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = copy.deepcopy(jobs["linear-gate"])
+    assert isinstance(job, dict)
+    _steps(job).append(
+        {
+            "run": (
+                "# npx harness is intentionally prohibited here\n"
+                "# bash trusted-base/Infrastructure/scripts/harness-cli.sh is the approved route"
+            )
+        }
+    )
+    _assert_job_trust(job)
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
