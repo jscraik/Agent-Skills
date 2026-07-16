@@ -2,7 +2,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Linear work intake
-    url: https://linear.app/agent-skills/team/AS/new
+    url: https://linear.app/jscraik/project/skills-sdk-platformization-130679b67acd
     about: Create or update bugs, features, policy gaps, automation work, and release follow-ups in Linear.
   - name: Private security disclosure
     url: mailto:security@agent-skills.dev
