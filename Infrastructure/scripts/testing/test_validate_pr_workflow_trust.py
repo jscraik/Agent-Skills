@@ -36,15 +36,13 @@ def _steps(job: dict[object, object]) -> list[dict[object, object]]:
     return steps
 
 
-def _token_harness_jobs(workflow: dict[object, object]) -> dict[str, dict[object, object]]:
+def _token_jobs(workflow: dict[object, object]) -> dict[str, dict[object, object]]:
     jobs = workflow.get("jobs")
     assert isinstance(jobs, dict)
     return {
         str(name): job
         for name, job in jobs.items()
-        if isinstance(job, dict)
-        and "${{ secrets.NPM_TOKEN }}" in str(job)
-        and "harness-cli.sh" in str(job)
+        if isinstance(job, dict) and "${{ secrets.NPM_TOKEN }}" in str(job)
     }
 
 
@@ -65,18 +63,30 @@ def _assert_linear_gate_policy_root(job: dict[object, object]) -> None:
     linear_runs = [run for run in _harness_runs(_steps(job)) if " linear-gate " in run]
     assert linear_runs
     for run in linear_runs:
-        invocation_count = run.count(
-            "trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate"
-        )
-        repo_root_count = sum(
-            line.strip() == "--repo-root trusted-base \\" for line in run.splitlines()
-        )
-        contract_count = sum(
-            line.strip() == "--contract harness.contract.json \\" for line in run.splitlines()
-        )
-        assert invocation_count > 0
-        assert repo_root_count == invocation_count
-        assert contract_count == invocation_count
+        invocations = _linear_invocations(run)
+        assert invocations
+        for invocation in invocations:
+            assert invocation.count("--repo-root trusted-base \\") == 1
+            assert invocation.count("--contract harness.contract.json \\") == 1
+
+
+def _linear_invocations(run: str) -> list[list[str]]:
+    lines = run.splitlines()
+    invocations: list[list[str]] = []
+    index = 0
+    command = "bash trusted-base/Infrastructure/scripts/harness-cli.sh linear-gate \\"
+    while index < len(lines):
+        if lines[index].strip() != command:
+            index += 1
+            continue
+        block = [lines[index].strip()]
+        while block[-1].endswith("\\"):
+            index += 1
+            assert index < len(lines)
+            block.append(lines[index].strip())
+        invocations.append(block)
+        index += 1
+    return invocations
 
 
 def _trusted_checkouts(steps: list[dict[object, object]]) -> list[dict[object, object]]:
@@ -128,12 +138,50 @@ def _assert_duplicate_root_rejected(job: dict[object, object]) -> None:
         _assert_linear_gate_policy_root(variant)
 
 
-def test_all_token_bearing_harness_jobs_use_trusted_base_wrappers() -> None:
+def _assert_unbalanced_invocations_rejected(job: dict[object, object]) -> None:
+    variant = copy.deepcopy(job)
+    command = _linear_command(variant)
+    run = str(command["run"])
+    run = run.replace("--repo-root trusted-base \\\n", "", 1)
+    run = run.replace("--contract harness.contract.json \\\n", "", 1)
+    run = run.replace(
+        "--repo-root trusted-base \\",
+        "--repo-root trusted-base \\\n    --repo-root trusted-base \\",
+        1,
+    )
+    run = run.replace(
+        "--contract harness.contract.json \\",
+        "--contract harness.contract.json \\\n    --contract harness.contract.json \\",
+        1,
+    )
+    command["run"] = run
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(variant)
+
+
+def _assert_decoy_flags_rejected(job: dict[object, object]) -> None:
+    variant = copy.deepcopy(job)
+    command = _linear_command(variant)
+    run = str(command["run"])
+    run = run.replace("--repo-root trusted-base \\\n", "", 1)
+    run = run.replace("--contract harness.contract.json \\\n", "", 1)
+    decoy = (
+        "printf 'decoy' \\\n"
+        "  --repo-root trusted-base \\\n"
+        "  --contract harness.contract.json \\\n"
+        "  >/dev/null\n"
+    )
+    command["run"] = f"{decoy}{run}"
+    with pytest.raises(AssertionError):
+        _assert_linear_gate_policy_root(variant)
+
+
+def test_all_token_bearing_jobs_use_trusted_base_wrappers() -> None:
     workflows = (
         _workflow(".github/workflows/pr-template.yml"),
         _workflow(".github/workflows/pr-pipeline.yml"),
     )
-    jobs = {name: job for workflow in workflows for name, job in _token_harness_jobs(workflow).items()}
+    jobs = {name: job for workflow in workflows for name, job in _token_jobs(workflow).items()}
     assert set(jobs) == EXPECTED_JOBS
     for job in jobs.values():
         _assert_job_trust(job)
@@ -155,6 +203,39 @@ def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:
             _assert_repo_root_mutation_rejected(job, unsafe_root)
         _assert_missing_contract_rejected(job)
         _assert_duplicate_root_rejected(job)
+
+
+def test_linear_gate_rejects_cross_invocation_flag_redistribution() -> None:
+    pipeline = _workflow(".github/workflows/pr-pipeline.yml")
+    jobs = pipeline["jobs"]
+    assert isinstance(jobs, dict)
+    job = jobs["linear-gate"]
+    assert isinstance(job, dict)
+    _assert_unbalanced_invocations_rejected(job)
+
+
+def test_linear_gate_rejects_policy_flags_attached_to_decoy_command() -> None:
+    metadata = _workflow(".github/workflows/pr-template.yml")
+    jobs = metadata["jobs"]
+    assert isinstance(jobs, dict)
+    job = jobs["linear-gate"]
+    assert isinstance(job, dict)
+    _assert_decoy_flags_rejected(job)
+
+
+def test_alternate_token_bearing_harness_job_is_governed_and_rejected() -> None:
+    pipeline = _workflow(".github/workflows/pr-pipeline.yml")
+    jobs = pipeline["jobs"]
+    assert isinstance(jobs, dict)
+    jobs["alternate-harness"] = {
+        "runs-on": "ubuntu-latest",
+        "env": {"NODE_AUTH_TOKEN": "${{ secrets.NPM_TOKEN }}"},
+        "steps": [{"run": "npm exec -- harness linear-gate --json"}],
+    }
+    token_jobs = _token_jobs(pipeline)
+    assert "alternate-harness" in token_jobs
+    with pytest.raises(AssertionError):
+        _assert_job_trust(token_jobs["alternate-harness"])
 
 
 def test_pr_workflow_contract_suites_are_wired_into_required_test_scope() -> None:
