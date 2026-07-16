@@ -343,12 +343,17 @@ def test_package_less_root_uses_explicit_linear_project_policy() -> None:
     assert not (REPO_ROOT / "package.json").exists()
     contract = json.loads((REPO_ROOT / "harness.contract.json").read_text(encoding="utf-8"))
     policy = contract["issueTrackingPolicy"]
-    assert policy["provider"] == "linear"
-    assert policy["projectUrl"] == LINEAR_PROJECT_URL
-    assert policy["requirePackageBugsUrl"] is False
-    assert policy["disableGitHubIssues"] is True
-    assert policy["requireBranchIssueKey"] is True
-    assert policy["requirePrIssueKey"] is True
+    expected_policy = {
+        "provider": "linear",
+        "projectUrl": LINEAR_PROJECT_URL,
+        "requirePackageBugsUrl": False,
+        "disableGitHubIssues": True,
+        "requireBranchIssueKey": True,
+        "requirePrIssueKey": True,
+        "prReferenceMode": "either",
+        "branchPrefix": "codex",
+    }
+    assert {key: policy[key] for key in expected_policy} == expected_policy
 
     issue_config = yaml.safe_load(
         (REPO_ROOT / ".github/ISSUE_TEMPLATE/config.yml").read_text(encoding="utf-8")
