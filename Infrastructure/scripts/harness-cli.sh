@@ -41,8 +41,8 @@ set +e
 CLI_PATH="$(
 HARNESS_SUPPORTED_VERSION="$SUPPORTED_VERSION" REPO_ROOT="$REPO_ROOT" node -e '
 const { createRequire } = require("node:module");
-const { readFileSync } = require("node:fs");
-const { resolve } = require("node:path");
+const { readFileSync, realpathSync } = require("node:fs");
+const { isAbsolute, relative, resolve } = require("node:path");
 
 const repoRoot = process.env.REPO_ROOT;
 const supportedVersion = process.env.HARNESS_SUPPORTED_VERSION;
@@ -50,16 +50,42 @@ const supportedVersion = process.env.HARNESS_SUPPORTED_VERSION;
 try {
 	const requireFromRepo = createRequire(resolve(repoRoot, "package.json"));
 	const packageJsonPath = requireFromRepo.resolve("@brainwav/coding-harness/package.json");
+	const cliPath = requireFromRepo.resolve("@brainwav/coding-harness/dist/cli.js");
+	const expectedPackageRoot = resolve(
+		repoRoot,
+		"node_modules/@brainwav/coding-harness",
+	);
+	const isWithin = (root, candidate) => {
+		const pathFromRoot = relative(root, candidate);
+		return pathFromRoot !== ".." && !pathFromRoot.startsWith("../") && !isAbsolute(pathFromRoot);
+	};
+	if (!isWithin(expectedPackageRoot, resolve(packageJsonPath)) || !isWithin(expectedPackageRoot, resolve(cliPath))) {
+		console.error("Resolved local @brainwav/coding-harness is outside the approved repo-local dependency boundary.");
+		process.exit(45);
+	}
+	const realPackageRoot = realpathSync(expectedPackageRoot);
+	const realPackageJsonPath = realpathSync(packageJsonPath);
+	const realCliPath = realpathSync(cliPath);
+	if (
+		!isWithin(realPackageRoot, realPackageJsonPath) ||
+		!isWithin(realPackageRoot, realCliPath) ||
+		relative(realPackageRoot, realPackageJsonPath) !== "package.json" ||
+		relative(realPackageRoot, realCliPath) !== "dist/cli.js"
+	) {
+		console.error("Resolved local Harness metadata and CLI do not share the approved package root.");
+		process.exit(45);
+	}
 	const packageMetadata = JSON.parse(readFileSync(packageJsonPath, "utf8"));
-	if (packageMetadata.version !== supportedVersion) {
+	if (
+		packageMetadata.name !== "@brainwav/coding-harness" ||
+		packageMetadata.version !== supportedVersion
+	) {
 		console.error(
-			`Unsupported local @brainwav/coding-harness version ${String(packageMetadata.version)}; expected ${supportedVersion}.`,
+			`Unsupported local Harness identity ${String(packageMetadata.name)}@${String(packageMetadata.version)}; expected @brainwav/coding-harness@${supportedVersion}.`,
 		);
 		process.exit(44);
 	}
-	process.stdout.write(
-		requireFromRepo.resolve("@brainwav/coding-harness/dist/cli.js"),
-	);
+	process.stdout.write(cliPath);
 } catch (error) {
 	if (
 		error &&
@@ -101,6 +127,11 @@ fi
 if [[ $resolution_status -eq 44 ]]; then
 	echo "Error: the resolved local @brainwav/coding-harness does not match $SUPPORTED_VERSION." >&2
 	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION or remove the stale ambient resolution path." >&2
+	exit 1
+fi
+
+if [[ $resolution_status -eq 45 ]]; then
+	echo "Error: the resolved local Harness package is outside the approved repo-local boundary." >&2
 	exit 1
 fi
 

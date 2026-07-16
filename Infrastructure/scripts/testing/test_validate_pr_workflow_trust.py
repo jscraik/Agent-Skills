@@ -379,14 +379,21 @@ def test_harness_wrapper_projection_uses_supported_fallback_version() -> None:
 
 
 @pytest.mark.parametrize(
-    ("version", "expected_status", "expected_output"),
+    ("name", "version", "expected_status", "expected_output"),
     [
-        ("0.14.0", 1, "Unsupported local @brainwav/coding-harness version 0.14.0"),
-        ("0.15.0", 0, "ambient harness executed"),
+        (
+            "@brainwav/coding-harness",
+            "0.14.0",
+            1,
+            "expected @brainwav/coding-harness@0.15.0",
+        ),
+        ("@brainwav/coding-harness", "0.15.0", 0, "ambient harness executed"),
+        ("not-the-harness", "0.15.0", 1, "expected @brainwav/coding-harness@0.15.0"),
     ],
 )
 def test_harness_wrapper_rejects_unsupported_local_version(
     tmp_path: Path,
+    name: str,
     version: str,
     expected_status: int,
     expected_output: str,
@@ -398,7 +405,7 @@ def test_harness_wrapper_rejects_unsupported_local_version(
     package_root = tmp_path / "node_modules/@brainwav/coding-harness"
     (package_root / "dist").mkdir(parents=True)
     (package_root / "package.json").write_text(
-        json.dumps({"name": "@brainwav/coding-harness", "version": version}),
+        json.dumps({"name": name, "version": version}),
         encoding="utf-8",
     )
     (package_root / "dist/cli.js").write_text(
@@ -415,8 +422,39 @@ def test_harness_wrapper_rejects_unsupported_local_version(
     )
     assert result.returncode == expected_status
     assert expected_output in result.stderr + result.stdout
-    if version != HARNESS_FALLBACK_PACKAGE.rsplit("@", maxsplit=1)[-1]:
+    if name != "@brainwav/coding-harness" or version != HARNESS_FALLBACK_PACKAGE.rsplit("@", maxsplit=1)[-1]:
         assert "ambient harness executed" not in result.stdout
+
+
+def test_harness_wrapper_rejects_ambient_package_outside_repo_root(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    wrapper = repo_root / "scripts/harness-cli.sh"
+    wrapper.parent.mkdir(parents=True)
+    wrapper.write_bytes((REPO_ROOT / "Infrastructure/scripts/harness-cli.sh").read_bytes())
+
+    package_root = tmp_path / "ambient/node_modules/@brainwav/coding-harness"
+    (package_root / "dist").mkdir(parents=True)
+    (package_root / "package.json").write_text(
+        json.dumps(
+            {"name": "@brainwav/coding-harness", "version": "0.15.0"}
+        ),
+        encoding="utf-8",
+    )
+    (package_root / "dist/cli.js").write_text(
+        'console.log("ambient harness executed");\n', encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        ["bash", str(wrapper), "--version"],
+        cwd=repo_root,
+        env={**os.environ, "NODE_PATH": str(tmp_path / "ambient/node_modules")},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "outside the approved repo-local dependency boundary" in result.stderr
+    assert "ambient harness executed" not in result.stdout
 
 
 def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:
