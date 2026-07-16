@@ -19,6 +19,7 @@ BASE_REFS = {
 LINEAR_PROJECT_URL = (
     "https://linear.app/jscraik/project/skills-sdk-platformization-130679b67acd"
 )
+HARNESS_FALLBACK_PACKAGE = "@brainwav/coding-harness@0.15.0"
 EXPECTED_JOBS = {
     "linear-gate",
     "risk-policy-gate",
@@ -361,6 +362,16 @@ def test_package_less_root_uses_explicit_linear_project_policy() -> None:
     assert issue_config["blank_issues_enabled"] is False
     links = {link["name"]: link["url"] for link in issue_config["contact_links"]}
     assert links["Linear work intake"] == LINEAR_PROJECT_URL
+
+
+def test_harness_wrapper_projection_uses_supported_fallback_version() -> None:
+    canonical = REPO_ROOT / "Infrastructure/scripts/harness-cli.sh"
+    projected = REPO_ROOT / "scripts/harness-cli.sh"
+    assert projected.resolve() == canonical.resolve()
+
+    source = canonical.read_text(encoding="utf-8")
+    assert f'FALLBACK_PACKAGE="{HARNESS_FALLBACK_PACKAGE}"' in source
+    assert source.count("@brainwav/coding-harness@") == 1
 
 
 def test_linear_gates_bind_policy_inputs_to_trusted_base_checkout() -> None:
