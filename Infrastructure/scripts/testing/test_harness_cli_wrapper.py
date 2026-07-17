@@ -44,3 +44,5 @@ def test_harness_executes_only_the_validated_cli_path() -> None:
     source = WRAPPER.read_text(encoding="utf-8")
 
     assert 'exec node "$CLI_PATH" "$@"' in source
+    assert 'if [[ $resolution_status -eq 44 ]]; then' in source
+    assert 'if [[ $resolution_status -eq 45 ]]; then' in source
