@@ -2,11 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$SCRIPT_DIR/_sandbox_env.sh"
 REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+export MISE_TRUSTED_CONFIG_PATHS="${MISE_TRUSTED_CONFIG_PATHS:-$REPO_ROOT}"
 
 cd "$REPO_ROOT"
-
-source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"
 
 # Git legitimately holds the current index lock while invoking pre-commit.
 # Other metadata locks and write failures remain fail-closed.

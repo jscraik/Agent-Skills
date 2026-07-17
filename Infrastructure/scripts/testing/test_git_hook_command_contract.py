@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import tomllib
@@ -201,14 +202,51 @@ def test_hook_adapters_use_sandbox_safe_temp_files() -> None:
     assert "UV_CACHE_DIR" in helper
 
     for rel_path in [
+        "scripts/hooks/commit-msg.sh",
+        "scripts/hooks/pre-commit.sh",
+        "scripts/hooks/pre-push.sh",
+        "Infrastructure/scripts/hooks/commit-msg.sh",
+        "Infrastructure/scripts/hooks/pre-commit.sh",
+        "Infrastructure/scripts/hooks/pre-push.sh",
+    ]:
+        text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+        assert 'source "$SCRIPT_DIR/_sandbox_env.sh"' in text
+
+    for rel_path in [
         "scripts/hooks/pre-commit.sh",
         "scripts/hooks/pre-push.sh",
         "Infrastructure/scripts/hooks/pre-commit.sh",
         "Infrastructure/scripts/hooks/pre-push.sh",
     ]:
         text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        assert 'source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"' in text
         assert 'mktemp "$TMPDIR/agent-skills-' in text
+
+
+def test_hook_adapters_resolve_root_after_sanitizing_git_context() -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/hooks/_sandbox_env.sh"
+    hook_dir = REPO_ROOT / "Infrastructure/scripts/hooks"
+    poisoned_env = os.environ.copy()
+    poisoned_env.update(
+        {
+            "GIT_DIR": str(hook_dir),
+            "GIT_WORK_TREE": str(hook_dir),
+            "GIT_COMMON_DIR": str(hook_dir),
+            "GIT_INDEX_FILE": str(hook_dir / "index"),
+        }
+    )
+    command = (
+        f'source "{helper}"; '
+        f'git -C "{hook_dir}" rev-parse --show-toplevel'
+    )
+    result = subprocess.run(
+        ["bash", "-c", command],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=poisoned_env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert Path(result.stdout.strip()).resolve() == REPO_ROOT.resolve()
 
 
 def test_hook_adapters_pass_bash_syntax() -> None:
