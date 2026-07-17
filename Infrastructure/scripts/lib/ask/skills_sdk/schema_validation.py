@@ -43,6 +43,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "minimum",
     "maximum",
     "maxItems",
+    "maxLength",
     "oneOf",
     "pattern",
     "prefixItems",
@@ -264,6 +265,9 @@ def _validate_string_limits(schema: dict[str, object], value: object, path: str)
     minimum = schema.get("minLength")
     if isinstance(minimum, int) and len(value) < minimum:
         raise AssertionError(f"{path} shorter than minLength {minimum}")
+    maximum = schema.get("maxLength")
+    if isinstance(maximum, int) and len(value) > maximum:
+        raise AssertionError(f"{path} longer than maxLength {maximum}")
     pattern = schema.get("pattern")
     if isinstance(pattern, str) and re.fullmatch(pattern, value) is None:
         raise AssertionError(f"{path} does not match pattern {pattern!r}")

@@ -92,6 +92,31 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         self.assertIn("A:executed_argv_missing", receipt["blockers"])
         validate_ab_run_receipt(receipt)
 
+    def test_malformed_short_cloud_argv_becomes_typed_blocker(self) -> None:
+        def malformed_cloud_runner(command_argv, prompt, repo_root, timeout_seconds):
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("sanitized response", encoding="utf-8")
+            if command_argv[command_argv.index("--profile") + 1] == "oss-cloud":
+                return CodexRunResult(
+                    exit_code=0,
+                    stdout='{"type":"response.completed"}\n',
+                    stderr="",
+                    executed_argv=["op", "run", "--env-file"],
+                )
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"response.completed"}\n',
+                stderr="",
+                executed_argv=_test_execution_argv(command_argv),
+            )
+
+        receipt = self._receipt(malformed_cloud_runner)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("A:execution_argv_invalid", receipt["blockers"])
+        self.assertIn("A:executed_argv_missing", receipt["blockers"])
+        validate_ab_run_receipt(receipt)
+
     def test_v1_schema_requires_executed_argv_for_pass_and_rejects_profile_tampering(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         fixture = json.loads(fixture_path.read_text())

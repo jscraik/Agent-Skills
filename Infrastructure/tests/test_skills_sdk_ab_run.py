@@ -401,6 +401,23 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(all(gate["variant_results"] == [] for gate in receipt["runtime_profile_gates"]))
         validate_ab_run_receipt(receipt)
 
+    def test_pre_execution_plan_blocker_without_runtime_gates_is_valid(self) -> None:
+        receipt = build_ab_run_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture="Infrastructure/tests/fixtures/skills_sdk/missing-deterministic-fixture.json",
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            evidence_root=self.evidence_root,
+            runner=_forbidden_test_runner([]),
+            preflight_probe=declared_profile_preflight,
+        )
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["runtime_profile_gates"], [])
+        self.assertTrue(receipt["blockers"])
+        validate_ab_run_receipt(receipt)
+
     def test_builder_executes_with_injected_runner_and_records_evidence(self) -> None:
         calls: list[list[str]] = []
 

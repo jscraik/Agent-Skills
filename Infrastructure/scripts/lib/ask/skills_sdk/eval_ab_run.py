@@ -166,6 +166,7 @@ def _variant_result(
             )
         except ValueError:
             blockers.append(f"{command_plan['variant_label']}:execution_argv_invalid")
+            blockers.append(f"{command_plan['variant_label']}:executed_argv_missing")
     return {
         "variant_label": command_plan["variant_label"],
         "codex_profile": executed_profile,
@@ -193,8 +194,11 @@ def _variant_result(
 def _validated_recorded_execution_argv(
     execution_argv: list[str], command_argv: list[str], declared_profile: str,
 ) -> tuple[list[str], str]:
-    if declared_profile == "oss-cloud" and not is_opaque_env_reference(execution_argv[3]):
-        raise ValueError("cloud execution requires an operator-approved opaque environment stream")
+    if declared_profile == "oss-cloud":
+        if len(execution_argv) < 5:
+            raise ValueError("cloud execution requires the approved op run wrapper")
+        if not is_opaque_env_reference(execution_argv[3]):
+            raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     recorded = _redact_execution_argv(execution_argv)
     _validate_execution_argv(recorded, command_argv, declared_profile)
     codex_argv = recorded[5:] if declared_profile == "oss-cloud" else recorded

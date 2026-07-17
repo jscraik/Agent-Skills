@@ -74,6 +74,8 @@ def validate_run_receipt_status(receipt: Any) -> None:
         return
     if not receipt.blockers:
         raise ValueError("blocked A/B run receipts must include blockers")
+    if not receipt.runtime_profile_gates:
+        return
     blocked_seen = False
     for gate in receipt.runtime_profile_gates:
         if gate.status == "completed" and blocked_seen:
