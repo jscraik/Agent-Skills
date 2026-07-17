@@ -426,7 +426,8 @@
   },
   "issueTrackingPolicy": {
     "provider": "linear",
-    "requirePackageBugsUrl": true,
+    "projectUrl": "https://linear.app/jscraik/project/skills-sdk-platformization-130679b67acd",
+    "requirePackageBugsUrl": false,
     "disableGitHubIssues": true,
     "requireBranchIssueKey": true,
     "requirePrIssueKey": true,
