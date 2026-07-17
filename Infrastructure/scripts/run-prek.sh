@@ -14,7 +14,11 @@ if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 		hook_tmp_dir="/tmp"
 	fi
 fi
-export CODEX_HOOK_CACHE_ROOT="${CODEX_HOOK_CACHE_ROOT:-$hook_tmp_dir/agent-skills-hook-cache}"
+if [[ -n "${CODEX_HOOK_CACHE_ROOT:-}" ]]; then
+	export CODEX_HOOK_CACHE_ROOT
+else
+	export CODEX_HOOK_CACHE_ROOT="$(new_hook_cache_root "$hook_tmp_dir")"
+fi
 export PREK_HOME="${PREK_HOME:-$CODEX_HOOK_CACHE_ROOT/prek}"
 CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$repo_root" "$git_common_dir")"
 PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$repo_root" "$git_common_dir")"

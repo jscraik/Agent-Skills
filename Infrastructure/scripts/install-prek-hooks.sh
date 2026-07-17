@@ -35,7 +35,11 @@ if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 		hook_tmp_dir="/tmp"
 	fi
 fi
-hook_cache_root="${CODEX_HOOK_CACHE_ROOT:-$hook_tmp_dir/agent-skills-hook-cache}"
+if [[ -n "${CODEX_HOOK_CACHE_ROOT:-}" ]]; then
+	hook_cache_root="$CODEX_HOOK_CACHE_ROOT"
+else
+	hook_cache_root="$(new_hook_cache_root "$hook_tmp_dir")"
+fi
 prek_home="${PREK_HOME:-$hook_cache_root/prek}"
 hook_cache_root="$(validate_hook_cache_path "$hook_cache_root" "$REPO_ROOT" "$git_common_dir")"
 prek_home="$(validate_hook_cache_path "$prek_home" "$REPO_ROOT" "$git_common_dir")"
@@ -74,7 +78,10 @@ block = (
     f"export CODEX_HOOK_CACHE_ROOT={shlex.quote(hook_cache_root)}\n"
     'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"\n'
     'AGENT_SKILLS_REPO_ROOT="$(git rev-parse --show-toplevel)"\n'
+    'AGENT_SKILLS_GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"\n'
     'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"\n'
+    'CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"\n'
+    'PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"\n'
     'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"\n'
     'secure_hook_cache_dir "$PREK_HOME"\n'
     f"{end}\n"

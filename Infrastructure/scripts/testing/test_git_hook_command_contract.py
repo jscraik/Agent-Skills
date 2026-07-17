@@ -163,8 +163,10 @@ def test_environment_check_enforces_adapter_hook_shape() -> None:
         assert command.replace("$", "\\$") in text or command in text
     assert '"make hooks-pre-commit"' not in text
     assert '"make hooks-pre-push"' not in text
-    assert "re.fullmatch" in text
-    assert 'export PREK_HOME="\\$CODEX_HOOK_CACHE_ROOT/prek"' in text
+    assert "shlex.split" in text
+    assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in text
+    assert 'validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT"' in text
+    assert 'secure_hook_cache_dir "$PREK_HOME"' in text
 
 
 def test_hook_adapters_do_not_call_hook_runners() -> None:
@@ -302,6 +304,35 @@ def test_secure_hook_cache_rejects_symlinks_and_enforces_private_mode(tmp_path: 
     assert "must not be a symlink" in reject.stderr
 
 
+def test_secure_hook_cache_rejects_existing_unmarked_directories(tmp_path: Path) -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
+    unrelated = tmp_path / "unrelated"
+    unrelated.mkdir(mode=0o755)
+    reject = subprocess.run(
+        ["bash", "-c", f'source "{helper}"; secure_hook_cache_dir "$1"', "bash", str(unrelated)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert reject.returncode != 0
+    assert "ownership marker" in reject.stderr
+
+
+def test_secure_hook_cache_allows_descendants_of_marked_root(tmp_path: Path) -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
+    root = tmp_path / "root"
+    child = root / "prek"
+    command = f'source "{helper}"; secure_hook_cache_dir "$1"; secure_hook_cache_dir "$2"'
+    result = subprocess.run(
+        ["bash", "-c", command, "bash", str(root), str(child)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (root / ".agent-skills-hook-cache").read_text(encoding="utf-8") == "agent-skills-hook-cache/v1\n"
+
+
 def test_hook_cache_paths_are_absolute_and_outside_repo(tmp_path: Path) -> None:
     helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
     common_dir = Path(
@@ -333,6 +364,9 @@ def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     assert 'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"' in installer
     assert 'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"' in installer
     assert 'secure_hook_cache_dir "$PREK_HOME"' in installer
+    assert 'validate_hook_cache_path "$PREK_HOME"' in installer
+    assert 'new_hook_cache_root' in installer
+    assert 'agent-skills-hook-cache.XXXXXX' not in installer
     assert 'mkdir -p "$PREK_HOME"' not in installer
     assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in installer
 

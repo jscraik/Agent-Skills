@@ -95,6 +95,20 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertEqual(proc.returncode, 64, payload)
             self.assertEqual(payload["reason_codes"], ["invalid_usage"])
 
+        invalid_env = subprocess.run(
+            [sys.executable, str(SCRIPT), "--json"],
+            env={
+                **os.environ,
+                "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "not-an-integer",
+            },
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        invalid_payload = json.loads(invalid_env.stdout)
+        self.assertEqual(invalid_env.returncode, 64, invalid_payload)
+        self.assertEqual(invalid_payload["reason_codes"], ["invalid_usage"])
+
     def test_inherited_git_context_does_not_override_repo_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -254,6 +268,46 @@ class GitMetadataPreflightTests(unittest.TestCase):
                 self.assertIn("stale_git_metadata_lock_candidate", payload["reason_codes"])
                 self.assertIn(kind, {item["kind"] for item in payload["locks"]})
                 lock_path.unlink()
+
+    def test_symlinked_ref_locks_are_classified_from_original_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["ref_lock_path"]))
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            for live in (False, True):
+                target = Path(temp_dir) / ("live-target" if live else "missing-target")
+                if live:
+                    target.touch()
+                lock_path.symlink_to(target)
+                code, payload = run_preflight(repo)
+                self.assertEqual(code, 78, payload)
+                record = next(item for item in payload["locks"] if item["kind"] == "current_ref")
+                self.assertEqual(Path(str(record["path"])), lock_path)
+                if live:
+                    self.assertIn("recent_git_metadata_lock_unknown", payload["reason_codes"])
+                else:
+                    self.assertIn("git_metadata_lock_non_regular", payload["reason_codes"])
+                lock_path.unlink()
+                if live:
+                    target.unlink()
+
+    def test_ref_lock_parent_permission_denial_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            metadata_dir = Path(str(clean["ref_lock_path"])).parent
+            original_mode = metadata_dir.stat().st_mode & 0o777
+            try:
+                metadata_dir.chmod(0o555)
+                if os.access(metadata_dir, os.W_OK):
+                    self.skipTest("filesystem permits writes despite chmod(0555)")
+                code, payload = run_preflight(repo)
+                self.assertEqual(code, 78, payload)
+                self.assertIn("metadata_write_denied", payload["reason_codes"])
+                self.assertIn(str(metadata_dir), [item["path"] for item in payload["write_probe"]])
+            finally:
+                metadata_dir.chmod(original_mode)
 
     def test_git_subprocess_timeout_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

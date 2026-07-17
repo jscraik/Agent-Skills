@@ -85,8 +85,9 @@ temporary cache and that Git metadata is healthy:
 
 ```bash
 bash scripts/install-prek-hooks.sh
-preflight=Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py
-python3 "$preflight" --json
+repo_root="$(git rev-parse --show-toplevel)"
+preflight="$repo_root/Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py"
+python3 "$preflight" --repo-root "$repo_root" --json
 ```
 
 The installer patches generated git hook shims to set `PREK_HOME` below

@@ -65,9 +65,12 @@ def _run_git(repo_root: Path, *args: str) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
-def _resolve_git_path(repo_root: Path, value: str) -> Path:
+def _resolve_git_path(repo_root: Path, value: str, *, preserve_leaf: bool = False) -> Path:
     path = Path(value)
-    return (path if path.is_absolute() else repo_root / path).resolve()
+    path = path if path.is_absolute() else repo_root / path
+    if preserve_leaf:
+        return path.parent.resolve() / path.name
+    return path.resolve()
 
 
 def _probe_write(path: Path) -> dict[str, Any]:
@@ -262,13 +265,19 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
         code, value, stderr = _run_git(repo_root, *args)
         if code != 0 or not value:
             raise MetadataPreflightError(stderr or f"git {' '.join(args)} failed")
-        resolved[key] = _resolve_git_path(repo_root, value)
+        resolved[key] = _resolve_git_path(
+            repo_root,
+            value,
+            preserve_leaf=key.endswith("_lock_path"),
+        )
     code, head_ref, _ = _run_git(repo_root, "symbolic-ref", "-q", "HEAD")
     if code == 0 and head_ref:
         code, value, stderr = _run_git(repo_root, "rev-parse", "--git-path", f"{head_ref}.lock")
         if code != 0 or not value:
             raise MetadataPreflightError(stderr or "git could not resolve the current ref lock")
-        resolved["ref_lock_path"] = _resolve_git_path(repo_root, value)
+        resolved["ref_lock_path"] = _resolve_git_path(
+            repo_root, value, preserve_leaf=True
+        )
     return resolved
 
 
@@ -279,6 +288,16 @@ def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str
         {"path": str(path), "status": "blocked", "reason": "write_probe_disabled"}
         for path in metadata_dirs
     ]
+
+
+def _metadata_dirs(
+    resolved: dict[str, Path], git_dir: Path, common_dir: Path
+) -> list[Path]:
+    paths = [resolved["index_path"].parent, git_dir, common_dir]
+    ref_lock_path = resolved.get("ref_lock_path")
+    if ref_lock_path is not None:
+        paths.append(ref_lock_path.parent)
+    return _unique_paths(paths)
 
 
 def _lock_records(
@@ -474,7 +493,7 @@ def inspect(
     common_dir, git_dir = resolved["git_common_dir"], resolved["git_dir"]
     worktrees_dir = common_dir / "worktrees"
     result.update(worktrees_dir=str(worktrees_dir), linked_worktree=git_dir != common_dir)
-    metadata_dirs = _unique_paths([resolved["index_path"].parent, git_dir, common_dir])
+    metadata_dirs = _metadata_dirs(resolved, git_dir, common_dir)
     result["metadata_dirs"] = [str(path) for path in metadata_dirs]
     write_results = _write_probes(metadata_dirs, probe_write)
     result["write_probe"] = write_results
@@ -493,6 +512,16 @@ def inspect(
 
 
 def parse_args() -> argparse.Namespace:
+    raw_lock_age = os.environ.get(
+        "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS",
+        str(DEFAULT_LOCK_MAX_AGE_SECONDS),
+    )
+    try:
+        default_lock_age = int(raw_lock_age)
+    except (TypeError, ValueError) as exc:
+        raise UsageError(
+            "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS must be an integer"
+        ) from exc
     parser = UsageArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
@@ -505,7 +534,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--lock-max-age-seconds",
         type=int,
-        default=int(os.environ.get("GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS", DEFAULT_LOCK_MAX_AGE_SECONDS)),
+        default=default_lock_age,
     )
     return parser.parse_args()
 
