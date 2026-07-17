@@ -19,6 +19,22 @@ FIELD_LINE_RE = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE
 PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
 ANGLE_BRACKET_URL_RE = re.compile(r"^<https?://[^>\s]+>$")
+DEPENDABOT_GROUPED_HEADER_RE = re.compile(
+    r"^Bumps the .+ group with \d+ update(?:s)? in the .+ directory: "
+    r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)"
+    r"(?:\s*(?:,|and)\s*\[[^\]]+\]\(https://github\.com/[^)\s]+\))*\.$",
+    re.IGNORECASE,
+)
+DEPENDABOT_SINGLE_HEADER_RE = re.compile(
+    r"^Bumps \S+ from \S+ to \S+$",
+    re.IGNORECASE,
+)
+DEPENDABOT_UPDATE_RE = re.compile(r"^Updates `[^`]+` from \S+ to \S+$", re.IGNORECASE)
+SAFE_HTML_TAG_RE = re.compile(
+    r"</?(?:a|abbr|b|blockquote|br|code|dd|del|details|div|dl|dt|em|h[1-6]|hr|i|img|ins|kbd|li|mark|ol|p|pre|s|samp|small|source|span|strong|sub|summary|sup|table|tbody|td|th|thead|time|tr|u|ul|var)"
+    r"(?:\s+[^>\n]*)?\s*/?>",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -172,17 +188,55 @@ def _placeholder_errors(template: str, body: str) -> list[str]:
         if placeholder in body:
             errors.append(f"Replace template placeholder: {placeholder}")
     for token in PLACEHOLDER_RE.findall(body):
-        if token.startswith("<!--") or ANGLE_BRACKET_URL_RE.match(token):
+        if (
+            token.startswith("<!--")
+            or ANGLE_BRACKET_URL_RE.match(token)
+            or (SAFE_HTML_TAG_RE.fullmatch(token) and "<" not in token[1:])
+        ):
             continue
         if token in template_tokens or " " in token or "/" in token:
             errors.append(f"Replace unresolved placeholder token: {token}")
     return errors
 
 
-def validate_pr_body(template: str, body: str) -> list[str]:
+def _dependabot_body_errors(body: str) -> list[str]:
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    errors: list[str] = []
+    if not lines or not _is_dependabot_header(lines[0]):
+        errors.append("Dependabot body must start with its generated update summary.")
+    if lines and DEPENDABOT_GROUPED_HEADER_RE.fullmatch(lines[0]) and (
+        len(lines) < 2 or not DEPENDABOT_UPDATE_RE.fullmatch(lines[1])
+    ):
+        errors.append("Dependabot body must include its generated version update line.")
+    if "Dependabot will resolve any conflicts with this PR" not in body:
+        errors.append("Dependabot body is missing its generated conflict-resolution notice.")
+    return errors
+
+
+def _is_dependabot_header(line: str) -> bool:
+    return bool(
+        DEPENDABOT_GROUPED_HEADER_RE.fullmatch(line)
+        or DEPENDABOT_SINGLE_HEADER_RE.fullmatch(line)
+    )
+
+
+def _is_dependabot_body(body: str) -> bool:
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    return bool(
+        lines
+        and _is_dependabot_header(lines[0])
+        and "Dependabot will resolve any conflicts with this PR" in body
+    )
+
+
+def validate_pr_body(template: str, body: str, *, author: str | None = None) -> list[str]:
     contract = _template_contract(template)
     if body.strip() == "":
         return ["PR body is empty. Fill out the full PR template."]
+    if _is_dependabot_body(body):
+        if author not in {"dependabot[bot]", "dependabot"}:
+            return ["Dependabot body exception requires the trusted Dependabot PR author."]
+        return _dependabot_body_errors(body)
 
     body_blocks = _section_blocks(body)
     errors = _section_errors(contract, body)
@@ -203,11 +257,16 @@ def main() -> int:
     body_group = parser.add_mutually_exclusive_group()
     body_group.add_argument("--body-file", type=Path, help="Path containing the PR body.")
     body_group.add_argument("--body-env", help="Environment variable containing the PR body.")
+    parser.add_argument(
+        "--author",
+        default=None,
+        help="Trusted pull-request author login; Dependabot exceptions require dependabot[bot].",
+    )
     args = parser.parse_args()
 
     template = args.template.read_text(encoding="utf-8")
     body = _body_from_args(args)
-    errors = validate_pr_body(template, body)
+    errors = validate_pr_body(template, body, author=args.author or os.environ.get("PR_AUTHOR"))
     if errors:
         print("PR template validation failed:")
         for error in errors:
