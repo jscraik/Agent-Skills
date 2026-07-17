@@ -232,10 +232,10 @@ class GitMetadataPreflightTests(unittest.TestCase):
             locked = git(repo, "worktree", "lock", "--reason", "initializing", str(linked))
             self.assertEqual(locked.returncode, 0, locked.stderr)
             code, payload = run_preflight(linked)
-            self.assertEqual(code, 0, payload)
-            self.assertIn("locked_worktree", payload["advisories"])
+            self.assertEqual(code, 78, payload)
+            self.assertIn("current_worktree_locked", payload["reason_codes"])
 
-    def test_lock_in_other_worktree_does_not_block_current_worktree(self) -> None:
+    def test_lock_in_other_worktree_blocks_current_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             repo = make_repo(root)
@@ -249,9 +249,29 @@ class GitMetadataPreflightTests(unittest.TestCase):
             code, payload = run_preflight(
                 repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
             )
+            self.assertEqual(code, 78, payload)
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn("related_worktree_locked", payload["reason_codes"])
+
+    def test_object_store_and_reflog_parents_are_write_probed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            code, payload = run_preflight(repo)
             self.assertEqual(code, 0, payload)
-            self.assertEqual(payload["status"], "pass")
-            self.assertEqual(payload["locks"], [])
+            probed = {item["path"] for item in payload["write_probe"]}
+            self.assertIn(payload["objects_dir"], probed)
+            self.assertIn(str(Path(str(payload["ref_log_path"])).parent), probed)
+
+    def test_non_directory_ref_component_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            self.assertEqual(git(repo, "checkout", "-qb", "feature/topic").returncode, 0)
+            self.assertEqual(git(repo, "pack-refs", "--all", "--prune").returncode, 0)
+            ref_component = repo / ".git" / "refs" / "heads" / "feature"
+            ref_component.write_text("blocked\n", encoding="utf-8")
+            code, payload = run_preflight(repo)
+            self.assertEqual(code, 78, payload)
+            self.assertIn("metadata_path_component_not_directory", payload["reason_codes"])
 
     def test_current_head_and_ref_locks_are_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -226,6 +226,16 @@ def test_hook_adapters_do_not_call_hook_runners() -> None:
         assert re.search(r"bash .*validate_all\.sh|node scripts/validate-commit-msg\.js", text)
 
 
+def test_hook_adapters_resolve_root_without_inherited_git_context() -> None:
+    for rel_path in [
+        "Infrastructure/scripts/hooks/pre-commit.sh",
+        "Infrastructure/scripts/hooks/pre-push.sh",
+    ]:
+        text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+        assert 'REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"' in text
+        assert 'git -C "$SCRIPT_DIR" rev-parse --show-toplevel' not in text
+
+
 def test_pre_push_adapter_keeps_upstream_diff_scope() -> None:
     """
     Verify the pre-push hook adapter preserves upstream-aware diff scoping.

@@ -259,6 +259,7 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
         "index_path": ("rev-parse", "--git-path", "index"),
         "index_lock_path": ("rev-parse", "--git-path", "index.lock"),
         "head_lock_path": ("rev-parse", "--git-path", "HEAD.lock"),
+        "objects_dir": ("rev-parse", "--git-path", "objects"),
     }
     resolved: dict[str, Path] = {}
     for key, args in commands.items():
@@ -270,12 +271,26 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
             value,
             preserve_leaf=key.endswith("_lock_path"),
         )
+    resolved.update(_resolve_head_metadata(repo_root))
+    return resolved
+
+
+def _resolve_head_metadata(repo_root: Path) -> dict[str, Path]:
     code, head_ref, _ = _run_git(repo_root, "symbolic-ref", "-q", "HEAD")
+    resolved: dict[str, Path] = {}
     if code == 0 and head_ref:
         code, value, stderr = _run_git(repo_root, "rev-parse", "--git-path", f"{head_ref}.lock")
         if code != 0 or not value:
             raise MetadataPreflightError(stderr or "git could not resolve the current ref lock")
         resolved["ref_lock_path"] = _resolve_git_path(
+            repo_root, value, preserve_leaf=True
+        )
+        code, value, stderr = _run_git(
+            repo_root, "rev-parse", "--git-path", f"logs/{head_ref}"
+        )
+        if code != 0 or not value:
+            raise MetadataPreflightError(stderr or "git could not resolve the current reflog")
+        resolved["ref_log_path"] = _resolve_git_path(
             repo_root, value, preserve_leaf=True
         )
     return resolved
@@ -293,11 +308,25 @@ def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str
 def _metadata_dirs(
     resolved: dict[str, Path], git_dir: Path, common_dir: Path
 ) -> list[Path]:
-    paths = [resolved["index_path"].parent, git_dir, common_dir]
+    paths = [resolved["index_path"].parent, resolved["objects_dir"], git_dir, common_dir]
     ref_lock_path = resolved.get("ref_lock_path")
     if ref_lock_path is not None:
         paths.append(_nearest_existing_directory(ref_lock_path.parent))
+    ref_log_path = resolved.get("ref_log_path")
+    if ref_log_path is not None:
+        paths.append(_nearest_existing_directory(ref_log_path.parent))
     return _unique_paths(paths)
+
+
+def _non_directory_path_components(paths: list[Path]) -> list[str]:
+    blocked: list[str] = []
+    for path in paths:
+        candidate = path
+        while not candidate.exists() and candidate.parent != candidate:
+            candidate = candidate.parent
+        if candidate.exists() and not candidate.is_dir():
+            blocked.append(str(candidate))
+    return list(dict.fromkeys(blocked))
 
 
 def _nearest_existing_directory(path: Path) -> Path:
@@ -347,6 +376,15 @@ def _worktree_state(
                     "current": locked_path.parent.resolve() == git_dir,
                 }
             )
+        for index_lock in sorted(worktrees_dir.glob("*/index.lock")):
+            locked.append(
+                {
+                    "metadata_dir": str(index_lock.parent.resolve()),
+                    "reason": "index.lock exists",
+                    "current": index_lock.parent.resolve() == git_dir,
+                    "index_lock": str(index_lock),
+                }
+            )
     code, output, stderr = _run_git(repo_root, "worktree", "list", "--porcelain")
     prunable = [
         record
@@ -374,6 +412,8 @@ def _metadata_reasons(write_results: list[dict[str, Any]]) -> list[str]:
         reasons.append("metadata_write_denied")
     if any(item.get("reason") == "write_probe_disabled" for item in write_results):
         reasons.append("metadata_write_probe_disabled")
+    if any(item.get("reason") == "path_component_not_directory" for item in write_results):
+        reasons.append("metadata_path_component_not_directory")
     return reasons
 
 
@@ -401,11 +441,19 @@ def _lock_reasons(
                 reasons.append(classification)
         else:
             reasons.append(classification)
-    if any(item.get("current") for item in result["locked_worktrees"]):
-        advisories.append("locked_worktree")
+    reasons.extend(_worktree_lock_reasons(result["locked_worktrees"]))
     if result["prunable_worktrees"]:
         advisories.append("prunable_worktree")
     return list(dict.fromkeys(reasons)), advisories
+
+
+def _worktree_lock_reasons(locked_worktrees: list[dict[str, Any]]) -> list[str]:
+    reasons: list[str] = []
+    if any(item.get("current") for item in locked_worktrees):
+        reasons.append("current_worktree_locked")
+    if any(not item.get("current") for item in locked_worktrees):
+        reasons.append("related_worktree_locked")
+    return reasons
 
 
 def _reason_codes(
@@ -482,6 +530,33 @@ def _initial_result(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def _prepare_metadata_inspection(
+    result: dict[str, Any], resolved: dict[str, Path], probe_write: bool
+) -> tuple[list[dict[str, Any]], Path, Path]:
+    common_dir, git_dir = resolved["git_common_dir"], resolved["git_dir"]
+    result.update({key: str(path) for key, path in resolved.items()})
+    result.update(
+        worktrees_dir=str(common_dir / "worktrees"),
+        linked_worktree=git_dir != common_dir,
+    )
+    metadata_dirs = _metadata_dirs(resolved, git_dir, common_dir)
+    result["metadata_dirs"] = [str(path) for path in metadata_dirs]
+    write_results = _write_probes(metadata_dirs, probe_write)
+    invalid_components = _non_directory_path_components([
+        resolved["index_path"].parent,
+        resolved["objects_dir"],
+        resolved.get("ref_lock_path", common_dir).parent,
+        resolved.get("ref_log_path", common_dir).parent,
+    ])
+    if invalid_components:
+        result["non_directory_path_components"] = invalid_components
+        write_results.append({
+            "path": invalid_components[0], "status": "blocked",
+            "reason": "path_component_not_directory",
+        })
+    return write_results, common_dir, git_dir
+
+
 def inspect(
     repo_root: Path,
     probe_write: bool,
@@ -500,13 +575,10 @@ def inspect(
     except MetadataPreflightError as exc:
         result.update(reason_codes=["git_metadata_unavailable"], diagnostic=str(exc), next_action="repair the Git checkout or use a writable clone")
         return result
-    result.update({key: str(path) for key, path in resolved.items()})
-    common_dir, git_dir = resolved["git_common_dir"], resolved["git_dir"]
+    write_results, common_dir, git_dir = _prepare_metadata_inspection(
+        result, resolved, probe_write
+    )
     worktrees_dir = common_dir / "worktrees"
-    result.update(worktrees_dir=str(worktrees_dir), linked_worktree=git_dir != common_dir)
-    metadata_dirs = _metadata_dirs(resolved, git_dir, common_dir)
-    result["metadata_dirs"] = [str(path) for path in metadata_dirs]
-    write_results = _write_probes(metadata_dirs, probe_write)
     result["write_probe"] = write_results
     result["locks"] = _lock_records(
         resolved["index_lock_path"],
