@@ -82,7 +82,7 @@ fi
 		exit 1
 	fi
 
-	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/hooks/pre-commit.sh" "scripts/hooks/commit-msg.sh" "scripts/hooks/pre-push.sh" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml")
+	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/hooks/pre-commit.sh" "scripts/hooks/commit-msg.sh" "scripts/hooks/pre-push.sh" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml" "Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py" "Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py")
 	for support_file in "${required_support_files[@]}"; do
 		if [[ ! -f "$REPO_ROOT/${support_file}" ]]; then
 			echo "Error: missing required hook support file at $REPO_ROOT/${support_file}"
@@ -196,7 +196,7 @@ for stage, command in required_hooks.items():
         sys.exit(1)
 PY
 
-	git_common_dir="$(git -C "$REPO_ROOT" rev-parse --git-common-dir)"
+	git_common_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
 	if [[ "$git_common_dir" = /* ]]; then
 		git_hooks_dir="$git_common_dir/hooks"
 	else
@@ -204,8 +204,8 @@ PY
 	fi
 	for hook_name in pre-commit commit-msg pre-push; do
 		hook_path="$git_hooks_dir/$hook_name"
-		if [[ -f "$hook_path" ]] && ! rg -q "agent-skills prek home begin|PREK_HOME" "$hook_path"; then
-			echo "Error: installed git hook '$hook_name' does not set repo-local PREK_HOME"
+		if [[ -f "$hook_path" ]] && ! python3 "$REPO_ROOT/Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py" "$hook_path" "$REPO_ROOT" "$git_common_dir"; then
+			echo "Error: installed git hook '$hook_name' does not set a sandbox-safe PREK_HOME"
 			echo "Fix: run bash scripts/install-prek-hooks.sh"
 			exit 1
 		fi
