@@ -82,7 +82,7 @@ fi
 		exit 1
 	fi
 
-	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/hooks/pre-commit.sh" "scripts/hooks/commit-msg.sh" "scripts/hooks/pre-push.sh" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml" "Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py")
+	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/hooks/pre-commit.sh" "scripts/hooks/commit-msg.sh" "scripts/hooks/pre-push.sh" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml" "Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py" "Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py")
 	for support_file in "${required_support_files[@]}"; do
 		if [[ ! -f "$REPO_ROOT/${support_file}" ]]; then
 			echo "Error: missing required hook support file at $REPO_ROOT/${support_file}"
@@ -204,58 +204,7 @@ PY
 	fi
 	for hook_name in pre-commit commit-msg pre-push; do
 		hook_path="$git_hooks_dir/$hook_name"
-		if [[ -f "$hook_path" ]] && ! python3 - "$hook_path" "$REPO_ROOT" "$git_common_dir" <<'PY'
-import re
-import shlex
-import sys
-from pathlib import Path
-
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-repo_root = Path(sys.argv[2]).resolve()
-git_common_dir = Path(sys.argv[3]).resolve()
-start = "# agent-skills prek home begin"
-end = "# agent-skills prek home end"
-if text.count(start) != 1 or text.count(end) != 1:
-    raise SystemExit(1)
-block = text.split(start, 1)[1].split(end, 1)[0]
-commands = [line.strip() for line in block.splitlines() if line.strip() and not line.lstrip().startswith("#")]
-if len(commands) != 9:
-    raise SystemExit(1)
-
-root_assignments = [line for line in commands if line.startswith("export CODEX_HOOK_CACHE_ROOT=")]
-if len(root_assignments) != 1:
-    raise SystemExit(1)
-try:
-    root_tokens = shlex.split(root_assignments[0])
-except ValueError:
-    raise SystemExit(1)
-if len(root_tokens) != 2 or root_tokens[0] != "export" or not root_tokens[1].startswith("CODEX_HOOK_CACHE_ROOT="):
-    raise SystemExit(1)
-root_path = Path(root_tokens[1].split("=", 1)[1])
-if not root_path.is_absolute():
-    raise SystemExit(1)
-root_path = root_path.resolve(strict=False)
-if root_path == repo_root or repo_root in root_path.parents or root_path == git_common_dir or git_common_dir in root_path.parents:
-    raise SystemExit(1)
-if any(token in root_assignments[0] for token in ("$", "`", ";", "&&", "||")):
-    raise SystemExit(1)
-
-expected = [
-    'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"',
-    'AGENT_SKILLS_REPO_ROOT="$(git rev-parse --show-toplevel)"',
-    'AGENT_SKILLS_GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"',
-    'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"',
-    'CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"',
-    'PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"',
-    'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"',
-    'secure_hook_cache_dir "$PREK_HOME"',
-]
-if commands[1:] != expected:
-    raise SystemExit(1)
-if any(re.search(r"(?:\$HOME|~/.cache|\b(?:eval|exec|bash|sh|curl|rm|chmod)\b)", line) for line in commands):
-    raise SystemExit(1)
-PY
-		then
+		if [[ -f "$hook_path" ]] && ! python3 "$REPO_ROOT/Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py" "$hook_path" "$REPO_ROOT" "$git_common_dir"; then
 			echo "Error: installed git hook '$hook_name' does not set a sandbox-safe PREK_HOME"
 			echo "Fix: run bash scripts/install-prek-hooks.sh"
 			exit 1

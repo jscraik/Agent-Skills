@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import sys
 import tomllib
 from pathlib import Path
 
@@ -37,6 +38,52 @@ SIMPLE_GIT_HOOKS_JSON_EXPECTED = {
     **SIMPLE_GIT_HOOKS_EXPECTED,
     "commit-msg": 'bash scripts/hooks/commit-msg.sh \\"$1\\"',
 }
+
+
+def _assert_environment_validator_contract(text: str, validator: str) -> None:
+    _assert_commands_present(text)
+    _assert_simple_hook_commands_present(text)
+    assert '"make hooks-pre-commit"' not in text
+    assert '"make hooks-pre-push"' not in text
+    assert "validate_generated_prek_hook.py" in text
+    assert 're.search(r"(?:\\$HOME' not in text
+    assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in validator
+    assert 'validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT"' in validator
+    assert 'secure_hook_cache_dir "$PREK_HOME"' in validator
+
+
+def _assert_commands_present(text: str) -> None:
+    for command in ROOT_PREK_EXPECTED.values():
+        assert command in text
+
+
+def _assert_simple_hook_commands_present(text: str) -> None:
+    for command in SIMPLE_GIT_HOOKS_EXPECTED.values():
+        escaped = command.replace("$", "\\$")
+        assert escaped in text or command in text
+
+
+def _write_generated_hook_fixture(
+    tmp_path: Path, root_assignment: str, name: str
+) -> Path:
+    hook = tmp_path / name
+    hook.write_text(
+        f"""#!/usr/bin/env bash
+# agent-skills prek home begin
+export CODEX_HOOK_CACHE_ROOT={root_assignment}
+export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"
+AGENT_SKILLS_REPO_ROOT="$(git rev-parse --show-toplevel)"
+AGENT_SKILLS_GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"
+source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"
+CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"
+PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"
+secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"
+secure_hook_cache_dir "$PREK_HOME"
+# agent-skills prek home end
+""",
+        encoding="utf-8",
+    )
+    return hook
 
 
 def _local_prek_entries(path: Path) -> dict[str, list[str]]:
@@ -157,16 +204,8 @@ def test_environment_check_enforces_adapter_hook_shape() -> None:
     """
     path = REPO_ROOT / "Infrastructure/scripts/check-environment_impl.sh"
     text = path.read_text(encoding="utf-8")
-    for command in ROOT_PREK_EXPECTED.values():
-        assert command in text
-    for command in SIMPLE_GIT_HOOKS_EXPECTED.values():
-        assert command.replace("$", "\\$") in text or command in text
-    assert '"make hooks-pre-commit"' not in text
-    assert '"make hooks-pre-push"' not in text
-    assert "shlex.split" in text
-    assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in text
-    assert 'validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT"' in text
-    assert 'secure_hook_cache_dir "$PREK_HOME"' in text
+    validator = (REPO_ROOT / "Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py").read_text(encoding="utf-8")
+    _assert_environment_validator_contract(text, validator)
 
 
 def test_hook_adapters_do_not_call_hook_runners() -> None:
@@ -329,6 +368,22 @@ def test_secure_hook_cache_rejects_existing_unmarked_directories(tmp_path: Path)
     assert "ownership marker" in reject.stderr
 
 
+def test_secure_hook_cache_rejects_insecure_parent_chain(tmp_path: Path) -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
+    unsafe_parent = tmp_path / "unsafe-parent"
+    unsafe_parent.mkdir()
+    unsafe_parent.chmod(0o777)
+    candidate = unsafe_parent / "cache"
+    reject = subprocess.run(
+        ["bash", "-c", f'source "{helper}"; secure_hook_cache_dir "$1"', "bash", str(candidate)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert reject.returncode != 0
+    assert "world-writable" in reject.stderr
+
+
 def test_secure_hook_cache_allows_descendants_of_marked_root(tmp_path: Path) -> None:
     helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
     root = tmp_path / "root"
@@ -380,6 +435,42 @@ def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     assert 'agent-skills-hook-cache.XXXXXX' not in installer
     assert 'mkdir -p "$PREK_HOME"' not in installer
     assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in installer
+
+
+def test_generated_hook_validator_accepts_shell_suffix_and_rejects_injection(tmp_path: Path) -> None:
+    validator = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/validate_generated_prek_hook.py"
+    common_dir = Path(
+        subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+    )
+
+    valid = _write_generated_hook_fixture(tmp_path, str(tmp_path / "cache.sh"), "valid-hook.sh")
+    accepted = subprocess.run(
+        [sys.executable, str(validator), str(valid), str(REPO_ROOT), str(common_dir)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert accepted.returncode == 0, accepted.stdout + accepted.stderr
+
+    malicious = _write_generated_hook_fixture(
+        tmp_path,
+        f"{tmp_path}/cache$(touch {tmp_path}/pwned)",
+        "malicious-hook.sh",
+    )
+    rejected = subprocess.run(
+        [sys.executable, str(validator), str(malicious), str(REPO_ROOT), str(common_dir)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert rejected.returncode != 0
+    assert not (tmp_path / "pwned").exists()
 
 
 def test_hook_adapters_pass_bash_syntax() -> None:

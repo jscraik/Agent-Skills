@@ -31,8 +31,24 @@ new_hook_cache_root() {
 	fi
 	local cache_root
 	cache_root="$(mktemp -d "${tmp_dir%/}/agent-skills-hook-cache.XXXXXX")" || return
-	printf '%s\n' 'agent-skills-hook-cache/v1' > "$cache_root/.agent-skills-hook-cache"
-	chmod 0600 "$cache_root/.agent-skills-hook-cache"
+	if ! python3 - "$cache_root" <<'PY'
+import os
+import sys
+
+marker = os.path.join(sys.argv[1], ".agent-skills-hook-cache")
+flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+flags |= getattr(os, "O_NOFOLLOW", 0)
+fd = os.open(marker, flags, 0o600)
+try:
+    os.write(fd, b"agent-skills-hook-cache/v1\n")
+    os.fsync(fd)
+finally:
+    os.close(fd)
+PY
+	then
+		rmdir "$cache_root"
+		return 1
+	fi
 	printf '%s\n' "$cache_root"
 }
 
@@ -49,8 +65,33 @@ MARKER_CONTENT = "agent-skills-hook-cache/v1\n"
 path = Path(sys.argv[1]).expanduser()
 if not path.is_absolute():
     raise SystemExit(f"hook cache path must be absolute: {path}")
-if path.is_symlink():
-    raise SystemExit(f"hook cache path must not be a symlink: {path}")
+
+def validate_parent_chain(candidate: Path) -> None:
+    """Reject symlinked or attacker-writable existing path components."""
+    current = candidate
+    while True:
+        try:
+            metadata = current.lstat()
+        except FileNotFoundError:
+            current = current.parent
+            if current == current.parent:
+                break
+            continue
+        if stat.S_ISLNK(metadata.st_mode):
+            raise SystemExit(f"hook cache path component must not be a symlink: {current}")
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise SystemExit(f"hook cache path component must be a directory: {current}")
+        mode = stat.S_IMODE(metadata.st_mode)
+        is_sticky = bool(mode & stat.S_ISVTX)
+        if mode & 0o022 and not is_sticky:
+            raise SystemExit(
+                f"hook cache parent must not be group- or world-writable: {current}"
+            )
+        if current == current.parent:
+            break
+        current = current.parent
+
+validate_parent_chain(path)
 
 def marker_root(candidate: Path) -> Path | None:
     for parent in (candidate, *candidate.parents):
@@ -72,7 +113,7 @@ def marker_root(candidate: Path) -> Path | None:
     return None
 
 root = marker_root(path)
-path_existed = path.exists()
+path_existed = path.exists() or path.is_symlink()
 if path_existed and root is None:
     raise SystemExit(f"existing hook cache path lacks an ownership marker: {path}")
 if path_existed and not path.is_dir():
@@ -81,15 +122,25 @@ try:
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
 except OSError as exc:
     raise SystemExit(f"cannot create hook cache path {path}: {exc}") from exc
+validate_parent_chain(path)
 
 if root is None:
     marker = path / MARKER_NAME
     try:
-        marker.write_text(MARKER_CONTENT, encoding="utf-8")
-        marker.chmod(0o600)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(marker, flags, 0o600)
+        try:
+            os.write(fd, MARKER_CONTENT.encode("utf-8"))
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    except FileExistsError:
+        root = marker_root(path)
     except OSError as exc:
         raise SystemExit(f"cannot initialize hook cache marker {marker}: {exc}") from exc
-    root = path
+    if root is None:
+        root = path
 
 metadata = path.lstat()
 if not stat.S_ISDIR(metadata.st_mode):
