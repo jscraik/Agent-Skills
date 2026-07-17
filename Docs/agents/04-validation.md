@@ -17,10 +17,16 @@
   `python3 bin/ask repo status --json`.
 - Git hook readiness:
   `bash scripts/install-prek-hooks.sh` installs `prek` hooks and patches the
-  generated shims to use repo-local `.cache/prek` for `PREK_HOME`. This avoids
-  repeated Codex sandbox failures on `~/.cache/prek/prek.log` during commit and
-  push. `bash scripts/check-environment.sh` fails if installed hooks exist but
-  do not carry the repo-local `PREK_HOME` patch.
+  generated shims to use a writable temporary `PREK_HOME` outside Git
+  metadata.
+  This avoids repeated Codex sandbox failures on `~/.cache/prek/prek.log` and
+  prevents cache writes from being confused with linked-worktree metadata
+  locks. Run `python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --json`
+  from the repository root before expensive hook gates;
+  it fails closed on a current
+  `index.lock`, denied metadata writes, or a locked current worktree.
+  `bash scripts/check-environment.sh` fails if the adapter or hook wiring is
+  missing.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
 - `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/skills/**`, `.agents/plugins-runtime/cache/**`, `Plugins/cache/**`, and `runtime/**`)
