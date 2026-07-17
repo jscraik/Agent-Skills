@@ -46,6 +46,10 @@ if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
 	echo "[prepare-worktree] not inside a git work tree" >&2
 	exit 1
 fi
+
+echo "[prepare-worktree] checking Git metadata authority"
+python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
+
 git_common_dir="$(git rev-parse --git-common-dir)"
 
 echo "[prepare-worktree] repo: $REPO_ROOT"
