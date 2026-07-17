@@ -204,7 +204,26 @@ PY
 	fi
 	for hook_name in pre-commit commit-msg pre-push; do
 		hook_path="$git_hooks_dir/$hook_name"
-		if [[ -f "$hook_path" ]] && { ! rg -q "agent-skills prek home begin" "$hook_path" || ! rg -q "CODEX_HOOK_CACHE_ROOT" "$hook_path" || ! rg -q "export PREK_HOME=" "$hook_path"; }; then
+		if [[ -f "$hook_path" ]] && ! python3 - "$hook_path" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+start = "# agent-skills prek home begin"
+end = "# agent-skills prek home end"
+if text.count(start) != 1 or text.count(end) != 1:
+    raise SystemExit(1)
+block = text.split(start, 1)[1].split(end, 1)[0]
+commands = [line.strip() for line in block.splitlines() if line.strip() and not line.lstrip().startswith("#")]
+root_assignments = [line for line in commands if re.fullmatch(r"export CODEX_HOOK_CACHE_ROOT=.+", line)]
+prek_assignments = [line for line in commands if re.fullmatch(r'export PREK_HOME="\$CODEX_HOOK_CACHE_ROOT/prek"', line)]
+if len(root_assignments) != 1 or len(prek_assignments) != 1:
+    raise SystemExit(1)
+if any("$HOME" in line or "~/.cache" in line for line in root_assignments + prek_assignments):
+    raise SystemExit(1)
+PY
+		then
 			echo "Error: installed git hook '$hook_name' does not set a sandbox-safe PREK_HOME"
 			echo "Fix: run bash scripts/install-prek-hooks.sh"
 			exit 1

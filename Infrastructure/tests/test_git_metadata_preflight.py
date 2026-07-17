@@ -74,6 +74,27 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertEqual(payload["status"], "pass")
             self.assertTrue(payload["write_probe"])
 
+    def test_disabled_write_probe_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            proc = subprocess.run(
+                [sys.executable, str(SCRIPT), "--repo-root", str(repo), "--no-write-probe", "--json"],
+                text=True, capture_output=True, check=False,
+            )
+            payload = json.loads(proc.stdout)
+            self.assertEqual(proc.returncode, 78, payload)
+            self.assertIn("metadata_write_probe_disabled", payload["reason_codes"])
+
+    def test_invalid_cli_inputs_return_usage_exit(self) -> None:
+        for args in (("--unknown-option",), ("--lock-max-age-seconds", "-1")):
+            proc = subprocess.run(
+                [sys.executable, str(SCRIPT), *args, "--json"],
+                text=True, capture_output=True, check=False,
+            )
+            payload = json.loads(proc.stdout)
+            self.assertEqual(proc.returncode, 64, payload)
+            self.assertEqual(payload["reason_codes"], ["invalid_usage"])
+
     def test_inherited_git_context_does_not_override_repo_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -230,9 +251,25 @@ class GitMetadataPreflightTests(unittest.TestCase):
                     repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
                 )
                 self.assertEqual(code, 78, payload)
-                self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+                self.assertIn("stale_git_metadata_lock_candidate", payload["reason_codes"])
                 self.assertIn(kind, {item["kind"] for item in payload["locks"]})
                 lock_path.unlink()
+
+    def test_git_subprocess_timeout_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_git = fake_bin / "git"
+            fake_git.write_text("#!/bin/sh\nsleep 6\n", encoding="utf-8")
+            fake_git.chmod(0o755)
+            code, payload = run_preflight(
+                repo, PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}"
+            )
+            self.assertEqual(code, 78, payload)
+            self.assertEqual(payload["reason_codes"], ["not_git_worktree"])
+            self.assertIn("timed out after 5s", str(payload["diagnostic"]))
 
     def test_worktree_inspection_failure_is_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

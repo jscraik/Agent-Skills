@@ -163,6 +163,8 @@ def test_environment_check_enforces_adapter_hook_shape() -> None:
         assert command.replace("$", "\\$") in text or command in text
     assert '"make hooks-pre-commit"' not in text
     assert '"make hooks-pre-push"' not in text
+    assert "re.fullmatch" in text
+    assert 'export PREK_HOME="\\$CODEX_HOOK_CACHE_ROOT/prek"' in text
 
 
 def test_hook_adapters_do_not_call_hook_runners() -> None:
@@ -300,6 +302,30 @@ def test_secure_hook_cache_rejects_symlinks_and_enforces_private_mode(tmp_path: 
     assert "must not be a symlink" in reject.stderr
 
 
+def test_hook_cache_paths_are_absolute_and_outside_repo(tmp_path: Path) -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
+    common_dir = Path(
+        subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=REPO_ROOT, text=True, capture_output=True, check=True,
+        ).stdout.strip()
+    )
+    command = f'source "{helper}"; validate_hook_cache_path "$1" "$2" "$3"'
+    for candidate in ("relative-cache", str(REPO_ROOT), str(common_dir)):
+        result = subprocess.run(
+            ["bash", "-c", command, "bash", candidate, str(REPO_ROOT), str(common_dir)],
+            text=True, capture_output=True, check=False,
+        )
+        assert result.returncode != 0
+    approved = tmp_path / "cache"
+    result = subprocess.run(
+        ["bash", "-c", command, "bash", str(approved), str(REPO_ROOT), str(common_dir)],
+        text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert Path(result.stdout.strip()) == approved.resolve()
+
+
 def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     installer = (
         REPO_ROOT / "Infrastructure/scripts/install-prek-hooks.sh"
@@ -308,6 +334,7 @@ def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     assert 'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"' in installer
     assert 'secure_hook_cache_dir "$PREK_HOME"' in installer
     assert 'mkdir -p "$PREK_HOME"' not in installer
+    assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in installer
 
 
 def test_hook_adapters_pass_bash_syntax() -> None:

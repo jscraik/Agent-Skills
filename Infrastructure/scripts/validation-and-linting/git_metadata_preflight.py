@@ -25,6 +25,7 @@ EXIT_BLOCKED = 78
 EXIT_INTERNAL = 70
 EXIT_USAGE = 64
 DEFAULT_LOCK_MAX_AGE_SECONDS = 900
+SUBPROCESS_TIMEOUT_SECONDS = 5
 GIT_CONTEXT_ENV_VARS = frozenset({
     "GIT_ALTERNATE_OBJECT_DIRECTORIES",
     "GIT_COMMON_DIR",
@@ -40,19 +41,27 @@ class CurrentIndexLockPolicy(Enum):
     ALLOW_PARENT_OWNED = "allow_parent_owned"
 
 
+class UsageError(ValueError):
+    """Raised for invalid command-line input."""
+
+
+class UsageArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise UsageError(message)
+
+
 def _run_git(repo_root: Path, *args: str) -> tuple[int, str, str]:
     env = os.environ.copy()
     for name in GIT_CONTEXT_ENV_VARS:
         env.pop(name, None)
     git_binary = shutil.which("git") or "git"
-    proc = subprocess.run(
-        [git_binary, *args],
-        cwd=repo_root,
-        env=env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        proc = subprocess.run(
+            [git_binary, *args], cwd=repo_root, env=env, text=True,
+            capture_output=True, check=False, timeout=SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, "", f"git {' '.join(args)} timed out after {SUBPROCESS_TIMEOUT_SECONDS}s"
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
@@ -112,11 +121,10 @@ def _lock_owner(path: Path) -> str | None:
     try:
         proc = subprocess.run(
             [lsof, "-nP", "--", str(path)],
-            text=True,
-            capture_output=True,
-            check=False,
+            text=True, capture_output=True, check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     if proc.returncode != 0:
         return None
@@ -131,11 +139,10 @@ def _lock_owner_pids(path: Path) -> set[int] | None:
     try:
         proc = subprocess.run(
             [lsof, "-nP", "-t", "--", str(path)],
-            text=True,
-            capture_output=True,
-            check=False,
+            text=True, capture_output=True, check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     pids: set[int] = set()
     for line in proc.stdout.splitlines():
@@ -154,12 +161,11 @@ def _parent_process_ids() -> set[int]:
         try:
             proc = subprocess.run(
                 ["ps", "-o", "ppid=", "-p", str(pid)],
-                text=True,
-                capture_output=True,
-                check=False,
+                text=True, capture_output=True, check=False,
+                timeout=SUBPROCESS_TIMEOUT_SECONDS,
             )
             pid = int(proc.stdout.strip())
-        except (OSError, ValueError):
+        except (OSError, ValueError, subprocess.TimeoutExpired):
             break
     return ancestors
 
@@ -169,11 +175,12 @@ def _lock_owned_by_parent(path: Path) -> bool:
     return owner_pids is not None and bool(owner_pids & _parent_process_ids())
 
 
-def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
+def _classify_lock(path: Path, max_age_seconds: int, kind: str) -> dict[str, Any]:
+    prefix = "index" if kind == "index" else "git_metadata"
     if not path.is_file():
         return {
             "path": str(path),
-            "classification": "index_lock_non_regular",
+            "classification": f"{prefix}_lock_non_regular",
         }
     now = time.time()
     try:
@@ -187,11 +194,11 @@ def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
 
     owner = _lock_owner(path)
     if owner:
-        classification = "active_index_lock"
+        classification = f"active_{prefix}_lock"
     elif age_seconds >= max_age_seconds:
-        classification = "stale_index_lock_candidate"
+        classification = f"stale_{prefix}_lock_candidate"
     else:
-        classification = "recent_index_lock_unknown"
+        classification = f"recent_{prefix}_lock_unknown"
 
     result: dict[str, Any] = {
         "path": str(path),
@@ -268,7 +275,10 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
 def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str, Any]]:
     if probe_write:
         return [_probe_write(path) for path in metadata_dirs]
-    return [{"path": str(path), "status": "skipped"} for path in metadata_dirs]
+    return [
+        {"path": str(path), "status": "blocked", "reason": "write_probe_disabled"}
+        for path in metadata_dirs
+    ]
 
 
 def _lock_records(
@@ -284,7 +294,7 @@ def _lock_records(
     for kind, path in candidates:
         if not (path.exists() or path.is_symlink()):
             continue
-        record = _classify_lock(path, lock_max_age_seconds)
+        record = _classify_lock(path, lock_max_age_seconds, kind)
         record["kind"] = kind
         records.append(record)
     return records
@@ -332,6 +342,8 @@ def _metadata_reasons(write_results: list[dict[str, Any]]) -> list[str]:
         reasons.append("metadata_path_missing")
     if any(item.get("reason") in {"write_denied", "cleanup_denied"} for item in write_results):
         reasons.append("metadata_write_denied")
+    if any(item.get("reason") == "write_probe_disabled" for item in write_results):
+        reasons.append("metadata_write_probe_disabled")
     return reasons
 
 
@@ -384,9 +396,9 @@ def _reason_codes(
 def _next_action(reasons: list[str]) -> str:
     if not reasons:
         return "Git metadata is writable and no current-worktree lock blocks the hook"
-    if any(reason in reasons for reason in ("active_index_lock", "recent_index_lock_unknown")):
+    if any(reason.startswith(("active_", "recent_")) for reason in reasons):
         return "wait for the lock owner or stop the owning process; do not delete the lock"
-    if "stale_index_lock_candidate" in reasons:
+    if any(reason.startswith("stale_") for reason in reasons):
         return "prove no owner, then use explicit Git worktree recovery; this preflight never removes locks"
     if "metadata_write_denied" in reasons:
         return "grant write access to the exact Git metadata directories or use a writable checkout"
@@ -481,7 +493,7 @@ def inspect(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = UsageArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     parser.add_argument("--no-write-probe", action="store_true")
@@ -502,7 +514,7 @@ def main() -> int:
     try:
         args = parse_args()
         if args.lock_max_age_seconds < 0:
-            raise ValueError("--lock-max-age-seconds must be non-negative")
+            raise UsageError("--lock-max-age-seconds must be non-negative")
         payload = inspect(
             args.repo_root,
             probe_write=not args.no_write_probe,
@@ -513,6 +525,9 @@ def main() -> int:
                 else CurrentIndexLockPolicy.STRICT
             ),
         )
+    except UsageError as exc:
+        print(json.dumps({"schema_version": 1, "contract": CONTRACT, "status": "blocked", "reason_codes": ["invalid_usage"], "diagnostic": str(exc)}, sort_keys=True))
+        return EXIT_USAGE
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(json.dumps({"schema_version": 1, "contract": CONTRACT, "status": "blocked", "reason_codes": ["internal_error"], "diagnostic": str(exc)}, sort_keys=True))
         return EXIT_INTERNAL
