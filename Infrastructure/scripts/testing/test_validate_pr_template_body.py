@@ -246,6 +246,29 @@ Dependabot will resolve any conflicts with this PR as long as you don't alter it
     assert errors == []
 
 
+def test_accepts_multi_package_dependabot_group_body() -> None:
+    validator = _load_validator()
+    body = """Bumps the pip group with 2 updates in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk) and [typing-extensions](https://github.com/python/typing_extensions).
+
+Updates `mcp` from 1.27.2 to 1.28.1
+Updates `typing-extensions` from 4.12.2 to 4.13.2
+
+Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself.
+"""
+
+    errors = validator.validate_pr_body(_template(), body, author="dependabot[bot]")
+
+    assert errors == []
+
+    comma_body = body.replace(
+        ") and [typing-extensions]",
+        "), [typing-extensions]",
+        1,
+    )
+
+    assert validator.validate_pr_body(_template(), comma_body, author="dependabot[bot]") == []
+
+
 def test_rejects_dependabot_like_body_without_generated_markers() -> None:
     validator = _load_validator()
     body = """Bumps the pip group with 1 update in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk).
