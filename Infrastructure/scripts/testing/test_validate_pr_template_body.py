@@ -260,6 +260,14 @@ Dependabot will resolve any conflicts with this PR as long as you don't alter it
 
     assert errors == []
 
+    comma_body = body.replace(
+        ") and [typing-extensions]",
+        "), [typing-extensions]",
+        1,
+    )
+
+    assert validator.validate_pr_body(_template(), comma_body, author="dependabot[bot]") == []
+
 
 def test_rejects_dependabot_like_body_without_generated_markers() -> None:
     validator = _load_validator()
