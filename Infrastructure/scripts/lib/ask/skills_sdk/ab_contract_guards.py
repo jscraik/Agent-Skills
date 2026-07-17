@@ -80,6 +80,8 @@ def validate_run_receipt_status(receipt: Any) -> None:
             raise ValueError("blocked A/B run receipts cannot complete a gate after a blocked gate")
         if gate.status != "completed":
             blocked_seen = True
+    if not blocked_seen:
+        raise ValueError("blocked A/B run receipts require a non-completed runtime gate")
 
 
 def _validate_gate_packet_shape(gate: Any) -> None:
