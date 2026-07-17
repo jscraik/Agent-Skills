@@ -35,6 +35,24 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
+    def test_v1_fixture_passes_managed_schema_validator(self) -> None:
+        schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        payload = json.loads(
+            (REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        result = schema_validation.validate_payload_against_schema(
+            payload,
+            schema,
+            {schema_path.name: schema},
+            schema_path=schema_path,
+            payload_source="ab-plan-receipt.v1.fixture",
+            truth_lane="schema_contract",
+        )
+        self.assertEqual(result.status, "pass", result.diagnostics)
+
     def _assert_v1_schema_valid(self, payload: dict[str, object]) -> None:
         schema = json.loads(
             (

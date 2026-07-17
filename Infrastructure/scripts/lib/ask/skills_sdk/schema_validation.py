@@ -23,6 +23,7 @@ class SchemaValidationResult:
 
 
 SUPPORTED_SCHEMA_KEYS = {
+    "$defs",
     "$id",
     "$ref",
     "$schema",
@@ -116,6 +117,8 @@ def _schema_type_matches(value: object, expected: str) -> bool:
         return isinstance(value, list)
     if expected == "string":
         return isinstance(value, str)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
     if expected == "integer":
         return isinstance(value, int) and not isinstance(value, bool)
     if expected == "boolean":
