@@ -267,6 +267,17 @@ def test_hook_sandbox_preserves_git_temporary_index() -> None:
     assert result.stdout == temporary_index
 
 
+def test_pre_commit_names_and_proves_parent_owned_index_lock_policy() -> None:
+    for rel_path in [
+        "scripts/hooks/pre-commit.sh",
+        "Infrastructure/scripts/hooks/pre-commit.sh",
+    ]:
+        text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+        assert "--allow-parent-owned-index-lock" in text
+        assert "--allow-current-index-lock" not in text
+        assert "lock owner is a Git ancestor" in text
+
+
 def test_harness_fallback_wrappers_share_supported_version() -> None:
     expected = 'FALLBACK_PACKAGE="@brainwav/coding-harness@0.15.0"'
     wrapper_paths = [

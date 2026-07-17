@@ -160,7 +160,7 @@ class GitMetadataPreflightTests(unittest.TestCase):
                     str(SCRIPT),
                     "--repo-root",
                     str(repo),
-                    "--allow-current-index-lock",
+                    "--allow-parent-owned-index-lock",
                     "--json",
                 ],
                 env={**os.environ, "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0"},
@@ -192,7 +192,7 @@ class GitMetadataPreflightTests(unittest.TestCase):
                         str(SCRIPT),
                         "--repo-root",
                         str(repo),
-                        "--allow-current-index-lock",
+                        "--allow-parent-owned-index-lock",
                         "--json",
                     ],
                     env={

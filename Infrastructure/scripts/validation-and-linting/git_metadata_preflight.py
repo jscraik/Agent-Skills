@@ -527,9 +527,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     parser.add_argument("--no-write-probe", action="store_true")
     parser.add_argument(
+        "--allow-parent-owned-index-lock",
         "--allow-current-index-lock",
+        dest="allow_parent_owned_index_lock",
         action="store_true",
-        help="treat the current index.lock as an expected parent Git transaction (pre-commit only)",
+        help="treat index.lock as expected only when its owner is a Git ancestor (pre-commit only)",
     )
     parser.add_argument(
         "--lock-max-age-seconds",
@@ -550,7 +552,7 @@ def main() -> int:
             lock_max_age_seconds=args.lock_max_age_seconds,
             current_index_lock_policy=(
                 CurrentIndexLockPolicy.ALLOW_PARENT_OWNED
-                if args.allow_current_index_lock
+                if args.allow_parent_owned_index_lock
                 else CurrentIndexLockPolicy.STRICT
             ),
         )
