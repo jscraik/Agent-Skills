@@ -223,3 +223,74 @@ def test_accepts_angle_tokens_not_owned_by_template() -> None:
     errors = validator.validate_pr_body(_template(), body)
 
     assert not any("Replace unresolved placeholder token" in error for error in errors)
+
+
+def test_accepts_standard_dependabot_body_and_html_markup() -> None:
+    validator = _load_validator()
+    body = """Bumps the pip group with 1 update in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk).
+
+Updates `mcp` from 1.27.2 to 1.28.1
+<details>
+<summary>Release notes</summary>
+<p><a href="https://github.com/modelcontextprotocol/python-sdk/releases"><code>mcp</code></a></p>
+</details>
+
+Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself.
+
+@dependabot show <dependency name> ignore conditions
+@dependabot ignore <dependency name> <ignore condition>
+"""
+
+    errors = validator.validate_pr_body(_template(), body, author="dependabot[bot]")
+
+    assert errors == []
+
+
+def test_rejects_dependabot_like_body_without_generated_markers() -> None:
+    validator = _load_validator()
+    body = """Bumps the pip group with 1 update in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk).
+
+Updates `mcp` from 1.27.2 to 1.28.1
+"""
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert any("PR body sections must match" in error for error in errors)
+    assert any("Missing required section" in error for error in errors)
+
+
+def test_rejects_dependabot_shape_for_human_author() -> None:
+    validator = _load_validator()
+    body = """Bumps actions/checkout from 4.2.2 to 4.2.3
+
+Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself.
+"""
+
+    errors = validator.validate_pr_body(_template(), body, author="jscraik")
+
+    assert errors == ["Dependabot body exception requires the trusted Dependabot PR author."]
+
+
+def test_accepts_ungrouped_dependabot_body_for_bot_author() -> None:
+    validator = _load_validator()
+    body = """Bumps actions/checkout from 4.2.2 to 4.2.3
+
+Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself.
+"""
+
+    errors = validator.validate_pr_body(_template(), body, author="dependabot[bot]")
+
+    assert errors == []
+
+
+def test_rejects_placeholder_nested_inside_safe_html_attribute() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace(
+        "repo-relative evidence",
+        '<a href="<link / artifact path / comment ID>">proof</a>',
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert 'Replace unresolved placeholder token: <a href="<link / artifact path / comment ID>' in errors
