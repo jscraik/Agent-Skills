@@ -56,7 +56,11 @@ Start non-trivial responses with `heartbeat_status`. Include an action queue
 with `auto_fixable_now`, `needs_merge_conflict_strategy`,
 `blocked_policy_or_approval`, `blocked_external_ci`, `waived_external_ci`,
 `needs_user_decision`, and `cleanup_only`; include dirty-worktree,
-validation, merge, cleanup, and remaining-blocker ledgers.
+validation, merge, cleanup, and remaining-blocker ledgers. Include a
+`recurring_finding_classes` ledger that groups materially equivalent review or
+CI findings across the active queue and records `first_seen`, `occurrences`,
+`affected_repositories`, `root_cause`, `durable_guardrail`, and
+`guardrail_validation`.
 
 ## Current-State And Authority
 
@@ -92,14 +96,20 @@ verification.
    or branch divergence as `needs_merge_conflict_strategy`. Inspect the live PR
    and local branch/worktree state, then report the proposed strategy before any
    merge, rebase, force push, or destructive cleanup.
-7. Rotate through the ranked action queue one PR at a time.
-8. For unresolved review threads, fix actionable items, classify stale or blocked
+7. Before editing, group equivalent current review and CI findings across the
+   queue. When a class occurs twice, or matches an existing steering-uptake
+   pattern, stop that fix lane until the closest reusable test, validator,
+   schema, lint rule, shared helper, or workflow contract is added or an exact
+   `blocked_durable_guardrail` reason is recorded. A second point fix without
+   this recurrence proof is not merge-eligible.
+8. Rotate through the ranked action queue one PR at a time.
+9. For unresolved review threads, fix actionable items, classify stale or blocked
    items, validate the source path, refresh live thread state, then resolve.
-9. For CI failures, read exact failed job logs, classify the owner surface, patch
+10. For CI failures, read exact failed job logs, classify the owner surface, patch
    the smallest proven cause, and rerun or wait for affected checks.
-10. Before merge, verify latest-head required checks, unresolved threads, branch
+11. Before merge, verify latest-head required checks, unresolved threads, branch
    protection, and mergeability from live GitHub state.
-11. Before claiming the parent PR/worktree lane is closed, or before switching
+12. Before claiming the parent PR/worktree lane is closed, or before switching
     the primary checkout to `main`, run
     `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json --require-clean`
     from the primary checkout. Use `--ledger <path>` without `--require-clean`
@@ -107,10 +117,10 @@ verification.
     not authorize branch movement. If the clean check fails, block checkout-main
     until the checkout is clean. Review-thread closeout does not prove
     primary-worktree closeout.
-12. After target PRs merge, checkout `main`, pull with repo policy, and prune
+13. After target PRs merge, checkout `main`, pull with repo policy, and prune
    branches/worktrees only with merge proof, upstream state, unique-commit
    evidence, and primary-worktree dirty-closeout proof.
-13. End with a compact ledger of PRs merged, checks passed, review items closed,
+14. End with a compact ledger of PRs merged, checks passed, review items closed,
     branches/worktrees pruned, blockers, and exact validation evidence.
 
 ## Constraints
@@ -119,6 +129,9 @@ verification.
 - Create, reuse, or block on exactly one heartbeat before monitor or until-green
   rotation.
 - Build the action queue before patching; work one PR at a time.
+- Build the recurring-finding ledger before patching. Do not merge a second
+  occurrence of the same finding class without durable-guardrail proof or an
+  explicit `blocked_durable_guardrail` classification.
 - Classify dirty paths and validation surfaces before side effects.
 - Fail fast at the first required gate until fixed, classified, or explicitly
   waived.
@@ -151,6 +164,23 @@ Complete only with URL-first PR cards, latest head SHAs, live review-thread
 state, required-check outcomes, mergeability, dirty-work ownership, validation
 commands, cleanup proof, waived external checks, and remaining blockers. Report
 each command or tool outcome as `pass`, `fail`, or `blocked`.
+
+## Validation
+
+Fail fast: stop at the first failed required gate and do not proceed to the next
+PR action until the failure is fixed, classified to its owner, or explicitly
+waived by an applicable repository or operator policy. Before merge, validate
+the latest immutable head, required checks, review threads, mergeability, and
+every repeated-finding guardrail required by the action queue. Validate this
+skill contract itself with:
+
+```bash
+./bin/ask skills audit Skills/agent-ops/pr-green-sweep --level strict --json --robot
+python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json
+```
+
+Treat either non-zero exit as blocking. A local or historical pass does not
+replace live hosted evidence for the PR head being merged.
 
 ## Specialist Lane Router
 
