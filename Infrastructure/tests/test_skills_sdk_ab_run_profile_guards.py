@@ -1,0 +1,228 @@
+from __future__ import annotations
+
+import json
+from copy import deepcopy
+from pathlib import Path
+import shutil
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
+
+from ask.skills_sdk import schema_validation  # noqa: E402
+from ask.skills_sdk.eval_ab_run import CodexRunResult, _execute_variant, build_ab_run_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.typed_contracts import validate_ab_run_receipt  # noqa: E402
+from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
+
+
+SKILL_A = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
+SKILL_B = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
+FIXTURE = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json"
+IDENTITY_A = {
+    "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+    "package_id": "skills-sdk-valid-fixture",
+    "package_digest": f"sha256:{'1' * 64}",
+}
+IDENTITY_B = {
+    "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+    "package_id": "skills-sdk-scenario-quality-fixture",
+    "package_digest": f"sha256:{'2' * 64}",
+}
+
+
+def _test_execution_argv(command_argv: list[str]) -> list[str]:
+    profile = command_argv[command_argv.index("--profile") + 1]
+    if profile == "oss-cloud":
+        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+    return list(command_argv)
+
+
+class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
+    evidence_root = ".harness/test-sdk-ab-run-profile-guards"
+
+    def setUp(self) -> None:
+        shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
+
+    def _receipt(self, runner):
+        return build_ab_run_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            evidence_root=self.evidence_root,
+            runner=runner,
+            preflight_probe=declared_profile_preflight,
+        )
+
+    def _schema_result(self, receipt: dict[str, object]):
+        schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v1.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        return schema_validation.validate_payload_against_schema(
+            receipt,
+            schema,
+            {},
+            schema_path=schema_path,
+            payload_source="ab-run-profile-guard-regression",
+            truth_lane="schema_contract",
+        )
+
+    def test_missing_executed_argv_blocks_without_claiming_a_runtime_profile(self) -> None:
+        def missing_argv_runner(command_argv, prompt, repo_root, timeout_seconds):
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("response without runner argv", encoding="utf-8")
+            return CodexRunResult(exit_code=0, stdout='{"type":"response.completed"}\n', stderr="")
+
+        receipt = self._receipt(missing_argv_runner)
+        result = receipt["runtime_profile_gates"][0]["variant_results"][0]
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIsNone(result["codex_profile"])
+        self.assertIsNone(result["execution_argv"])
+        self.assertIn("A:executed_argv_missing", receipt["blockers"])
+        validate_ab_run_receipt(receipt)
+
+    def test_v1_schema_requires_executed_argv_for_pass_and_rejects_profile_tampering(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        fixture = json.loads(fixture_path.read_text())
+        result = fixture["runtime_profile_gates"][0]["variant_results"][0]
+
+        missing = deepcopy(fixture)
+        missing["runtime_profile_gates"][0]["variant_results"][0].pop("execution_argv")
+        self.assertEqual(self._schema_result(missing).status, "fail")
+
+        substituted = deepcopy(fixture)
+        substituted["runtime_profile_gates"][0]["variant_results"][0]["execution_argv"][3] = "fast"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(substituted)
+        self.assertEqual(self._schema_result(substituted).status, "fail")
+
+        duplicated = deepcopy(fixture)
+        duplicated["runtime_profile_gates"][0]["variant_results"][0]["execution_argv"] = (
+            list(result["execution_argv"][:4]) + ["--profile", "oss-local"] + list(result["execution_argv"][4:])
+        )
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(duplicated)
+        self.assertEqual(self._schema_result(duplicated).status, "fail")
+
+        unbound = deepcopy(fixture)
+        unbound["runtime_profile_gates"][0]["variant_results"][0]["codex_profile"] = None
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(unbound)
+        self.assertEqual(self._schema_result(unbound).status, "fail")
+
+    def test_schema_rejects_completed_cloud_after_blocked_local(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        local_gate, cloud_gate = candidate["runtime_profile_gates"]
+        candidate.update({"status": "blocked", "blockers": ["oss-local:typed_blocker"]})
+        local_gate.update({"status": "blocked", "blockers": ["oss-local:typed_blocker"]})
+        cloud_gate.update({"status": "completed", "blockers": []})
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+    def test_validator_rejects_direct_or_regular_cloud_credential_paths(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        cloud_command = candidate["runtime_profile_gates"][1]["command_plan"][0]
+        cloud_command["execution_argv"][3] = "/tmp/regular-credential-file"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+        with tempfile.TemporaryDirectory() as directory:
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            env_file.write_text("opaque reference only", encoding="utf-8")
+            candidate["runtime_profile_gates"][1]["command_plan"][0]["execution_argv"][3] = str(env_file)
+            with self.assertRaises(ValueError):
+                validate_ab_run_receipt(candidate)
+            self.assertEqual(self._schema_result(candidate).status, "fail")
+
+        candidate["runtime_profile_gates"][1]["command_plan"][0]["execution_argv"][3] = "~/.codex/.env"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+    def test_execute_variant_rejects_external_evidence_paths_before_runner_starts(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        for gate in candidate["runtime_profile_gates"]:
+            if gate["lane"] != "oss-cloud":
+                continue
+            for packet in (*gate["command_plan"], *gate["variant_results"]):
+                packet["execution_argv"][0] = "evil/op"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+        calls: list[list[str]] = []
+
+        def fake_runner(command_argv, prompt, repo_root, timeout):
+            calls.append(command_argv)
+            return CodexRunResult(exit_code=0, stdout="", stderr="", executed_argv=_test_execution_argv(command_argv))
+
+        base_plan = {
+            "variant_label": "A", "command_argv": ["codex", "exec", "--output-last-message", "unused"],
+            "sandbox_mode": "read-only", "runner_prompt_input_path": f"{self.evidence_root}/A/prompt.txt",
+            "runner_stdout_capture_path": f"{self.evidence_root}/A/codex-stdout.jsonl",
+            "output_last_message_path": f"{self.evidence_root}/A/last-message.json",
+        }
+        for key, unsafe_path in (
+            ("runner_prompt_input_path", "/tmp/ab-run-prompt.txt"),
+            ("runner_stdout_capture_path", "../ab-run-stdout.jsonl"),
+            ("output_last_message_path", "/tmp/ab-run-last-message.json"),
+        ):
+            with self.subTest(key=key):
+                command_plan = dict(base_plan)
+                command_plan[key] = unsafe_path
+                with self.assertRaises(ValueError):
+                    _execute_variant(REPO_ROOT, command_plan=command_plan, prompt="prompt", timeout_seconds=1, runner=fake_runner)
+        self.assertEqual(calls, [])
+
+    def test_run_blocks_before_subprocess_when_runtime_profile_argv_is_mismatched(self) -> None:
+        plan = build_ab_plan_receipt(
+            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
+            evidence_root=self.evidence_root, preflight_probe=declared_profile_preflight,
+        )
+        plan["runtime_profile_gates"][0]["command_plan"][0]["command_argv"][3] = "fast"
+        calls: list[list[str]] = []
+
+        def runner(command_argv, prompt, repo_root, timeout):
+            calls.append(command_argv)
+            return CodexRunResult(0, "", "", executed_argv=_test_execution_argv(command_argv))
+
+        with patch("ask.skills_sdk.eval_ab_run._build_plan", return_value=plan), self.assertRaises(ValueError):
+            self._receipt(runner)
+        self.assertEqual(calls, [])
+
+    def test_run_rejects_tampered_preflight_before_filesystem_or_runner(self) -> None:
+        plan = build_ab_plan_receipt(
+            REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
+            evidence_root=self.evidence_root, preflight_probe=declared_profile_preflight,
+        )
+        plan["runtime_profile_gates"][0]["preflight"]["runtime"].update({"status": "not_applicable", "blocker": None})
+        calls: list[list[str]] = []
+
+        def forbidden_runner(command_argv, prompt, repo_root, timeout):
+            calls.append(command_argv)
+            raise AssertionError("runner reached with a canonically invalid v1 plan")
+
+        with patch("ask.skills_sdk.eval_ab_run._build_plan", return_value=plan), self.assertRaises(ValueError):
+            self._receipt(forbidden_runner)
+        self.assertEqual(calls, [])
+        self.assertFalse((REPO_ROOT / self.evidence_root).exists())

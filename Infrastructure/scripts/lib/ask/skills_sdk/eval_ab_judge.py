@@ -19,12 +19,16 @@ from ask.skills_sdk.eval_ab_judge_codex import (
 )
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
+from ask.skills_sdk.ab_contracts import _codex_profile_from_judge_argv
+from ask.skills_sdk.ab_transport_contracts import redact_opaque_env_reference
+from ask.skills_sdk.typed_contracts import validate_ab_run_receipt
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
 AB_JUDGE_PREVIEW_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
 AB_JUDGE_SCORE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
-_EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
+AB_RUN_RUNTIME_PROOF_SCHEMA_VERSION = "skills-sdk.ab-run-receipt.v1"
+_EXPERIMENT_ID_RE = re.compile(r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$")
 _SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
 _CODEX_TOKENS_USED_RE = re.compile(r"(?im)tokens used\s*(?::|\n)\s*([0-9][0-9,]*)")
 _CODEX_JSON_TOKENS_USED_RE = re.compile(r'"tokens_used"\s*:\s*([0-9]+)')
@@ -67,9 +71,11 @@ def _load_run_receipt(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     payload = _unwrap_run_receipt(payload)
     if not isinstance(payload, dict):
         return None, "run_receipt_not_object"
-    if not _run_receipt_shape_valid(payload):
+    try:
+        validated = validate_ab_run_receipt(payload)
+    except ValueError:
         return None, "run_receipt_contract_invalid"
-    return payload, None
+    return validated.model_dump(mode="json"), None
 
 
 def _unwrap_run_receipt(payload: object) -> object:
@@ -86,83 +92,12 @@ def _unwrap_run_receipt(payload: object) -> object:
     return payload
 
 
-def _digest_like(value: object) -> bool:
-    return isinstance(value, str) and len(value) >= 71 and value.startswith("sha256:")
-
-
-def _object_field(payload: dict[str, Any], key: str) -> dict[str, Any] | None:
-    value = payload.get(key)
-    return value if isinstance(value, dict) else None
-
-
-def _variant_labels(rows: object) -> set[str]:
-    if not isinstance(rows, list):
-        return set()
-    return {row.get("variant_label") for row in rows if isinstance(row, dict)}
-
-
-def _run_receipt_shape_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _run_receipt_header_valid(payload)
-        and _run_receipt_identity_valid(payload)
-        and _run_receipt_variants_valid(payload)
-    )
-
-
-def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
-    return payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0" and payload.get("operation") == "ab_run" and payload.get("status") in {"completed", "blocked"}
-
-
-def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _experiment_id_valid(payload.get("experiment_id"))
-        and _skill_identity_valid(_object_field(payload, "skill_a"))
-        and _skill_identity_valid(_object_field(payload, "skill_b"))
-        and _fixture_identity_valid(_object_field(payload, "fixture"))
-        and _profile_identity_valid(_object_field(payload, "execution_profile"))
-        and _profile_identity_valid(_object_field(payload, "judge_profile"))
-    )
-
-
 def _experiment_id_valid(value: object) -> bool:
     return isinstance(value, str) and _EXPERIMENT_ID_RE.fullmatch(value) is not None
 
 
-def _skill_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("package_id")) and _digest_like(value.get("package_digest"))
-
-
-def _fixture_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("path")) and _digest_like(value.get("digest"))
-
-
-def _profile_identity_valid(value: dict[str, Any] | None) -> bool:
-    return value is not None and _non_empty_string(value.get("id"))
-
-
 def _non_empty_string(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
-
-
-def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
-    return (
-        _variant_labels(payload.get("variant_results")) == {"A", "B"}
-        and _variant_labels(payload.get("command_plan")) == {"A", "B"}
-        and all(_variant_result_digests_valid(result) for result in payload["variant_results"])
-    )
-
-
-def _variant_result_digests_valid(result: object) -> bool:
-    if not isinstance(result, dict):
-        return False
-    return (
-        all(
-            _digest_like(result.get(key))
-            for key in ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest")
-        )
-        and _non_empty_string(result.get("output_last_message_path"))
-        and _non_empty_string(result.get("runner_stdout_capture_path"))
-    )
 
 
 def _evidence_row(repo_root: Path, result: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
@@ -276,6 +211,13 @@ def build_ab_judge_preview_receipt(repo_root: Path, *, run_receipt: str) -> dict
     inputs = _judge_inputs(repo_root, run_receipt)
     blockers = inputs["blockers"]
     loaded_receipt = inputs["loaded_receipt"]
+    if loaded_receipt is not None and loaded_receipt["schema_version"] != AB_RUN_RUNTIME_PROOF_SCHEMA_VERSION:
+        blockers.extend(
+            [
+                "v1_runtime_profile_proof_required",
+                "run_receipt_runtime_proof_version_unsupported",
+            ]
+        )
     if loaded_receipt is not None and loaded_receipt["status"] != "completed":
         blockers.append("run_receipt_not_completed")
 
@@ -417,13 +359,21 @@ def _score_preflight(
     evidence = _score_evidence_paths(repo_root, evidence_root, preview.get("experiment_id"))
     if evidence["blocker"]:
         blockers.append(evidence["blocker"])
-    if judge_profile is not None and evidence.get("output_file") is not None:
+    if (
+        judge_profile is not None
+        and evidence.get("output_file") is not None
+        and "judge_cloud_op_boundary_unavailable" not in blockers
+    ):
         evidence["command_argv"] = _codex_judge_command(
             judge_profile,
             _codex_judge_work_dir(evidence["output_file"]),
             evidence["output_file"],
         )
-        evidence["codex_profile"] = judge_profile.get("codex_profile") or judge_profile["id"]
+        try:
+            evidence["codex_profile"] = _codex_profile_from_judge_argv(evidence["command_argv"])
+        except ValueError:
+            evidence["codex_profile"] = None
+            blockers.append("judge_command_profile_missing_or_invalid")
     else:
         evidence["command_argv"] = []
         evidence["codex_profile"] = None
@@ -447,6 +397,8 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
 
 
 def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
+    if _codex_profile_id_for_score(judge_profile) == "oss-cloud" and not _codex_op_env_file_available(judge_profile):
+        return ["judge_cloud_op_boundary_unavailable"]
     missing = [
         name
         for name in judge_profile.get("secret_env_names", [])
@@ -455,6 +407,10 @@ def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
     if missing and _codex_op_env_file_available(judge_profile):
         return []
     return ["judge_profile_secret_missing"] if missing else []
+
+
+def _codex_profile_id_for_score(judge_profile: dict[str, Any]) -> str:
+    return str(judge_profile.get("codex_profile") or judge_profile.get("id"))
 
 
 def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
@@ -551,6 +507,14 @@ def _score_runner_result(
     if not _contained_file_exists(repo_root, evidence["output_file"]):
         _write_text_evidence(repo_root, evidence["output_file"], output_text)
     output_digest = _digest_text(output_text)
+    executed_profile = _validate_judge_execution_argv(evidence, result, blockers)
+    if executed_profile is None:
+        return None, output_digest, True, True, mutation_performed
+    stored_argv = list(result.executed_argv)
+    if executed_profile == "oss-cloud":
+        stored_argv[3] = redact_opaque_env_reference(stored_argv[3])
+    evidence["command_argv"] = stored_argv
+    evidence["codex_profile"] = executed_profile
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
         return None, output_digest, True, True, mutation_performed
@@ -562,6 +526,28 @@ def _score_runner_result(
     if blocker:
         blockers.append(blocker)
     return decision, output_digest, True, True, mutation_performed
+
+
+def _validate_judge_execution_argv(
+    evidence: dict[str, Any], result: CodexJudgeResult, blockers: list[str],
+) -> str | None:
+    planned = evidence.get("command_argv")
+    executed = getattr(result, "executed_argv", None)
+    if not isinstance(executed, list) or not all(isinstance(item, str) for item in executed):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    if executed != planned:
+        blockers.append("judge_command_argv_mismatch")
+        return None
+    try:
+        profile = _codex_profile_from_judge_argv(executed)
+    except ValueError:
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    if profile != evidence.get("codex_profile"):
+        blockers.append("judge_command_profile_missing_or_invalid")
+        return None
+    return profile
 
 
 def _blocked_score_decision(mutation_performed: bool) -> tuple[None, None, bool, bool, bool]:
