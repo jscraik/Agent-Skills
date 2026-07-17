@@ -21,7 +21,8 @@ CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s
 ANGLE_BRACKET_URL_RE = re.compile(r"^<https?://[^>\s]+>$")
 DEPENDABOT_GROUPED_HEADER_RE = re.compile(
     r"^Bumps the .+ group with \d+ update(?:s)? in the .+ directory: "
-    r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)\.$",
+    r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)"
+    r"(?:\s*(?:,|and)\s*\[[^\]]+\]\(https://github\.com/[^)\s]+\))*\.$",
     re.IGNORECASE,
 )
 DEPENDABOT_SINGLE_HEADER_RE = re.compile(
