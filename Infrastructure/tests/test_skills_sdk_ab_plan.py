@@ -35,15 +35,10 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
-    def test_v1_fixture_passes_managed_schema_validator(self) -> None:
+    def _managed_v1_result(self, payload: dict[str, object]) -> schema_validation.SchemaValidationResult:
         schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
-        payload = json.loads(
-            (REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        result = schema_validation.validate_payload_against_schema(
+        return schema_validation.validate_payload_against_schema(
             payload,
             schema,
             {schema_path.name: schema},
@@ -51,7 +46,43 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
             payload_source="ab-plan-receipt.v1.fixture",
             truth_lane="schema_contract",
         )
+
+    def test_v1_fixture_passes_managed_schema_validator(self) -> None:
+        payload = json.loads(
+            (REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        result = self._managed_v1_result(payload)
         self.assertEqual(result.status, "pass", result.diagnostics)
+
+    def test_managed_v1_validator_rejects_invalid_json_numbers(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json"
+        for invalid_number in (-0.5, float("nan"), float("inf"), float("-inf"), False):
+            with self.subTest(invalid_number=invalid_number):
+                payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+                payload["judge_profile"]["model_settings"]["temperature"] = invalid_number
+                self.assertEqual(self._managed_v1_result(payload).status, "fail")
+
+    def test_managed_validator_checks_dormant_definitions(self) -> None:
+        schema = {
+            "$defs": {"unused": {"type": "number", "unsupportedKeyword": True}},
+            "type": "object",
+        }
+        result = schema_validation.validate_payload_against_schema(
+            {}, schema, {}, schema_path="inline", payload_source="inline", truth_lane="schema_contract",
+        )
+        self.assertEqual(result.status, "fail")
+
+    def test_managed_validator_enforces_number_bounds_through_local_ref(self) -> None:
+        schema = {
+            "$defs": {"value": {"type": "number", "minimum": 0}},
+            "$ref": "#/$defs/value",
+        }
+        result = schema_validation.validate_payload_against_schema(
+            -0.5, schema, {}, schema_path="inline", payload_source="inline", truth_lane="schema_contract",
+        )
+        self.assertEqual(result.status, "fail")
 
     def _assert_v1_schema_valid(self, payload: dict[str, object]) -> None:
         schema = json.loads(

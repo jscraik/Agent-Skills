@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import math
 from pathlib import Path
 import re
 
@@ -118,7 +119,7 @@ def _schema_type_matches(value: object, expected: str) -> bool:
     if expected == "string":
         return isinstance(value, str)
     if expected == "number":
-        return isinstance(value, (int, float)) and not isinstance(value, bool)
+        return _is_json_number(value)
     if expected == "integer":
         return isinstance(value, int) and not isinstance(value, bool)
     if expected == "boolean":
@@ -136,6 +137,7 @@ def _validate_schema_subset(
     root_schema: dict[str, object] | None = None,
 ) -> None:
     if root_schema is None:
+        _validate_schema_vocabulary(schema, path)
         root_schema = schema
     unsupported = set(schema) - SUPPORTED_SCHEMA_KEYS
     if unsupported:
@@ -159,7 +161,25 @@ def _validate_schema_reference(
     resolved_root = schemas.get(ref, root_schema)
     if "#" in ref and not ref.startswith("#/"):
         resolved_root = schemas[ref.split("#", 1)[0]]
+    if resolved_root is not root_schema:
+        _validate_schema_vocabulary(resolved_root, path)
     _validate_schema_subset(_resolve_schema_ref(ref, root_schema, schemas), value, schemas, path, resolved_root)
+
+
+def _validate_schema_vocabulary(schema: dict[str, object], path: str) -> None:
+    unsupported = set(schema) - SUPPORTED_SCHEMA_KEYS
+    if unsupported:
+        raise AssertionError(f"{path} has unsupported schema keys: {sorted(unsupported)}")
+    for container_key in ("$defs", "definitions", "properties"):
+        for name, subschema in _dict_of_dicts(schema.get(container_key)).items():
+            _validate_schema_vocabulary(subschema, f"{path}.{container_key}.{name}")
+    for list_key in ("allOf", "anyOf", "oneOf", "prefixItems"):
+        for index, subschema in enumerate(_list_of_dicts(schema.get(list_key))):
+            _validate_schema_vocabulary(subschema, f"{path}.{list_key}[{index}]")
+    for child_key in ("if", "then", "items", "additionalProperties"):
+        subschema = schema.get(child_key)
+        if isinstance(subschema, dict):
+            _validate_schema_vocabulary(subschema, f"{path}.{child_key}")
 
 
 def _validate_schema_combinators(
@@ -246,17 +266,25 @@ def _validate_string_limits(schema: dict[str, object], value: object, path: str)
 
 
 def _validate_number_limits(schema: dict[str, object], value: object, path: str) -> None:
-    minimum = schema.get("minimum")
-    if isinstance(value, int) and not isinstance(value, bool) and isinstance(minimum, int) and value < minimum:
-        raise AssertionError(f"{path} smaller than minimum {minimum}")
-    if not isinstance(value, (int, float)) or isinstance(value, bool):
+    if not _is_json_number(value):
         return
+    minimum = schema.get("minimum")
+    if _is_json_number(minimum) and value < minimum:
+        raise AssertionError(f"{path} smaller than minimum {minimum}")
     exclusive = schema.get("exclusiveMinimum")
-    if isinstance(exclusive, (int, float)) and value <= exclusive:
+    if _is_json_number(exclusive) and value <= exclusive:
         raise AssertionError(f"{path} not greater than exclusiveMinimum {exclusive}")
     maximum = schema.get("maximum")
-    if isinstance(maximum, (int, float)) and value > maximum:
+    if _is_json_number(maximum) and value > maximum:
         raise AssertionError(f"{path} greater than maximum {maximum}")
+
+
+def _is_json_number(value: object) -> bool:
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return True
+    return isinstance(value, float) and math.isfinite(value)
 
 
 def _validate_schema_array(
