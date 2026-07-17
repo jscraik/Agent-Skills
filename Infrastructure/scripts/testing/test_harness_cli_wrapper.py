@@ -46,3 +46,4 @@ def test_harness_executes_only_the_validated_cli_path() -> None:
     assert 'exec node "$CLI_PATH" "$@"' in source
     assert 'if [[ $resolution_status -eq 44 ]]; then' in source
     assert 'if [[ $resolution_status -eq 45 ]]; then' in source
+    assert source.index('if [[ $resolution_status -eq 44 ]]') < source.index('exec node "$CLI_PATH"')
