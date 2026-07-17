@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$SCRIPT_DIR/lib/secure-hook-cache.sh"
 if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else
@@ -36,7 +37,8 @@ if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 fi
 hook_cache_root="${CODEX_HOOK_CACHE_ROOT:-$hook_tmp_dir/agent-skills-hook-cache}"
 prek_home="${PREK_HOME:-$hook_cache_root/prek}"
-mkdir -p "$prek_home"
+secure_hook_cache_dir "$hook_cache_root"
+secure_hook_cache_dir "$prek_home"
 
 echo "[install-prek-hooks] installing prek hooks"
 PREK_HOME="$prek_home" prek install --overwrite
@@ -50,6 +52,7 @@ patch_hook() {
 	fi
 
 python3 - "$hook_path" "$hook_cache_root" "$prek_home" <<'PY'
+import shlex
 import sys
 from pathlib import Path
 
@@ -62,8 +65,8 @@ end = "# agent-skills prek home end"
 block = (
     f"{start}\n"
     "# Keep prek logs/cache outside Git metadata and the worktree.\n"
-    f'export CODEX_HOOK_CACHE_ROOT="{hook_cache_root}"\n'
-    f'export PREK_HOME="{prek_home}"\n'
+    f"export CODEX_HOOK_CACHE_ROOT={shlex.quote(hook_cache_root)}\n"
+    f"export PREK_HOME={shlex.quote(prek_home)}\n"
     'mkdir -p "$PREK_HOME"\n'
     f"{end}\n"
 )

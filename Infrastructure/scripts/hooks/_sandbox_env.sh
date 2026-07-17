@@ -5,7 +5,7 @@
 # hook runner. They are execution context, not authority for locating this
 # checkout, and projected hook invocations can otherwise resolve a nested
 # directory as the repository root.
-unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR
 unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
 
 hook_tmp_dir="${TMPDIR:-}"

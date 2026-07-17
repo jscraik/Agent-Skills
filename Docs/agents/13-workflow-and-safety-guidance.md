@@ -80,7 +80,7 @@ then record what changed.
 When working with git branches, prefer to merge over rebase for complex histories (>50 commits). Always run `ask repo status` and resolve conflicts systematically before proceeding with changes.
 For git operations like cherry-picking or branch syncing, prefer branch-aware merge/rebase flows that keep full-context history visible, and avoid direct low-level file restore commands.
 
-Before commit or push, make sure generated `prek` hooks use a writable
+Before committing or pushing, make sure generated `prek` hooks use a writable
 temporary cache and that Git metadata is healthy:
 
 ```bash

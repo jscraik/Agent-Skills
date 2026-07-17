@@ -249,6 +249,57 @@ def test_hook_adapters_resolve_root_after_sanitizing_git_context() -> None:
     assert Path(result.stdout.strip()).resolve() == REPO_ROOT.resolve()
 
 
+def test_hook_sandbox_preserves_git_temporary_index() -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/hooks/_sandbox_env.sh"
+    temporary_index = "/tmp/agent-skills-test-index"
+    result = subprocess.run(
+        ["bash", "-c", f'source "{helper}"; printf "%s" "$GIT_INDEX_FILE"'],
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "GIT_INDEX_FILE": temporary_index},
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == temporary_index
+
+
+def test_harness_fallback_wrappers_share_supported_version() -> None:
+    expected = 'FALLBACK_PACKAGE="@brainwav/coding-harness@0.15.0"'
+    wrapper_paths = [
+        REPO_ROOT / "scripts/harness-cli.sh",
+        REPO_ROOT / "Infrastructure/scripts/harness-cli.sh",
+    ]
+    wrapper_texts = [path.read_text(encoding="utf-8") for path in wrapper_paths]
+    assert all(expected in text for text in wrapper_texts)
+    assert wrapper_texts[0] == wrapper_texts[1]
+
+
+def test_secure_hook_cache_rejects_symlinks_and_enforces_private_mode(tmp_path: Path) -> None:
+    helper = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
+    cache_dir = tmp_path / "cache"
+    create = subprocess.run(
+        ["bash", "-c", f'source "{helper}"; secure_hook_cache_dir "$1"', "bash", str(cache_dir)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert create.returncode == 0, create.stderr
+    assert cache_dir.stat().st_mode & 0o777 == 0o700
+
+    target = tmp_path / "target"
+    target.mkdir()
+    symlink = tmp_path / "symlink-cache"
+    symlink.symlink_to(target, target_is_directory=True)
+    reject = subprocess.run(
+        ["bash", "-c", f'source "{helper}"; secure_hook_cache_dir "$1"', "bash", str(symlink)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert reject.returncode != 0
+    assert "must not be a symlink" in reject.stderr
+
+
 def test_hook_adapters_pass_bash_syntax() -> None:
     """
     Verify that bash adapter scripts pass syntax validation.

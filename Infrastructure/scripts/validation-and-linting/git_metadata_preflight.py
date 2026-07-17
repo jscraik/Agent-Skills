@@ -9,6 +9,7 @@ validation.  It reports stale or active locks but never removes them.
 from __future__ import annotations
 
 import argparse
+from enum import Enum
 import json
 import os
 from pathlib import Path
@@ -24,12 +25,30 @@ EXIT_BLOCKED = 78
 EXIT_INTERNAL = 70
 EXIT_USAGE = 64
 DEFAULT_LOCK_MAX_AGE_SECONDS = 900
+GIT_CONTEXT_ENV_VARS = frozenset({
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_DIR",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_WORK_TREE",
+})
+
+
+class CurrentIndexLockPolicy(Enum):
+    STRICT = "strict"
+    ALLOW_PARENT_OWNED = "allow_parent_owned"
 
 
 def _run_git(repo_root: Path, *args: str) -> tuple[int, str, str]:
+    env = os.environ.copy()
+    for name in GIT_CONTEXT_ENV_VARS:
+        env.pop(name, None)
+    git_binary = shutil.which("git") or "git"
     proc = subprocess.run(
-        ["git", *args],
+        [git_binary, *args],
         cwd=repo_root,
+        env=env,
         text=True,
         capture_output=True,
         check=False,
@@ -76,8 +95,18 @@ def _probe_write(path: Path) -> dict[str, Any]:
     return result
 
 
+def _lsof_binary() -> str | None:
+    discovered = shutil.which("lsof")
+    if discovered:
+        return discovered
+    for candidate in (Path("/usr/sbin/lsof"), Path("/usr/bin/lsof")):
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
 def _lock_owner(path: Path) -> str | None:
-    lsof = shutil.which("lsof")
+    lsof = _lsof_binary()
     if lsof is None:
         return None
     try:
@@ -95,10 +124,10 @@ def _lock_owner(path: Path) -> str | None:
     return " | ".join(lines[:4]) if lines else None
 
 
-def _lock_owner_pids(path: Path) -> set[int]:
-    lsof = shutil.which("lsof")
+def _lock_owner_pids(path: Path) -> set[int] | None:
+    lsof = _lsof_binary()
     if lsof is None:
-        return set()
+        return None
     try:
         proc = subprocess.run(
             [lsof, "-nP", "-t", "--", str(path)],
@@ -107,7 +136,7 @@ def _lock_owner_pids(path: Path) -> set[int]:
             check=False,
         )
     except OSError:
-        return set()
+        return None
     pids: set[int] = set()
     for line in proc.stdout.splitlines():
         try:
@@ -136,7 +165,8 @@ def _parent_process_ids() -> set[int]:
 
 
 def _lock_owned_by_parent(path: Path) -> bool:
-    return bool(_lock_owner_pids(path) & _parent_process_ids())
+    owner_pids = _lock_owner_pids(path)
+    return owner_pids is not None and bool(owner_pids & _parent_process_ids())
 
 
 def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
@@ -272,6 +302,16 @@ def _worktree_state(
     return locked, prunable, stderr if code != 0 else None
 
 
+def _apply_worktree_state(
+    result: dict[str, Any], repo_root: Path, worktrees_dir: Path, git_dir: Path
+) -> str | None:
+    locked, prunable, error = _worktree_state(repo_root, worktrees_dir, git_dir)
+    result.update(locked_worktrees=locked, prunable_worktrees=prunable)
+    if error:
+        result["worktree_list_diagnostic"] = error
+    return error
+
+
 def _metadata_reasons(write_results: list[dict[str, Any]]) -> list[str]:
     reasons: list[str] = []
     if any(item.get("reason") == "path_missing" for item in write_results):
@@ -291,11 +331,20 @@ def _lock_reasons(
     advisories: list[str] = []
     if any(item.get("classification") == "lock_stat_failed" for item in lock_records):
         reasons.append("metadata_lock_uninspectable")
-    current_lock = [item for item in lock_records if item.get("path") == str(index_lock_path)]
-    if current_lock and allow_current_index_lock and _lock_owned_by_parent(index_lock_path):
-        advisories.append("expected_current_index_lock")
-    elif current_lock:
-        reasons.append(str(current_lock[0].get("classification", "index_lock")))
+    for record in lock_records:
+        path = Path(str(record.get("path", "")))
+        classification = str(record.get("classification", "index_lock"))
+        is_current = path == index_lock_path
+        if is_current and allow_current_index_lock:
+            owner_pids = _lock_owner_pids(index_lock_path)
+            if owner_pids is None:
+                reasons.append("lock_owner_detector_unavailable")
+            elif owner_pids & _parent_process_ids():
+                advisories.append("expected_current_index_lock")
+            else:
+                reasons.append(classification)
+        else:
+            reasons.append(classification)
     if any(item.get("current") for item in result["locked_worktrees"]):
         advisories.append("locked_worktree")
     if result["prunable_worktrees"]:
@@ -347,11 +396,33 @@ def _finalize(
     result["next_action"] = _next_action(reasons)
 
 
+def _finalize_inspection(
+    result: dict[str, Any],
+    write_results: list[dict[str, Any]],
+    index_lock_path: Path,
+    lock_policy: CurrentIndexLockPolicy,
+    worktree_error: str | None,
+) -> None:
+    _finalize(
+        result,
+        write_results,
+        result["locks"],
+        index_lock_path,
+        lock_policy is CurrentIndexLockPolicy.ALLOW_PARENT_OWNED,
+    )
+    if worktree_error:
+        result["reason_codes"] = list(
+            dict.fromkeys([*result["reason_codes"], "worktree_state_unavailable"])
+        )
+        result["status"] = "blocked"
+        result["next_action"] = _next_action(result["reason_codes"])
+
+
 def inspect(
     repo_root: Path,
     probe_write: bool,
     lock_max_age_seconds: int,
-    allow_current_index_lock: bool = False,
+    current_index_lock_policy: CurrentIndexLockPolicy = CurrentIndexLockPolicy.STRICT,
 ) -> dict[str, Any]:
     result: dict[str, Any] = {
         "schema_version": 1, "contract": CONTRACT, "status": "blocked",
@@ -378,11 +449,11 @@ def inspect(
     write_results = _write_probes(metadata_dirs, probe_write)
     result["write_probe"] = write_results
     result["locks"] = _lock_records(resolved["index_lock_path"], worktrees_dir, lock_max_age_seconds)
-    locked, prunable, worktree_error = _worktree_state(repo_root, worktrees_dir, git_dir)
-    result.update(locked_worktrees=locked, prunable_worktrees=prunable)
-    if worktree_error:
-        result["worktree_list_diagnostic"] = worktree_error
-    _finalize(result, write_results, result["locks"], resolved["index_lock_path"], allow_current_index_lock)
+    worktree_error = _apply_worktree_state(result, repo_root, worktrees_dir, git_dir)
+    _finalize_inspection(
+        result, write_results, resolved["index_lock_path"], current_index_lock_policy,
+        worktree_error,
+    )
     return result
 
 
@@ -413,7 +484,11 @@ def main() -> int:
             args.repo_root,
             probe_write=not args.no_write_probe,
             lock_max_age_seconds=args.lock_max_age_seconds,
-            allow_current_index_lock=args.allow_current_index_lock,
+            current_index_lock_policy=(
+                CurrentIndexLockPolicy.ALLOW_PARENT_OWNED
+                if args.allow_current_index_lock
+                else CurrentIndexLockPolicy.STRICT
+            ),
         )
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(json.dumps({"schema_version": 1, "contract": CONTRACT, "status": "blocked", "reason_codes": ["internal_error"], "diagnostic": str(exc)}, sort_keys=True))

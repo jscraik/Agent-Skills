@@ -21,6 +21,10 @@ SCRIPT = (
 )
 
 
+def lsof_available() -> bool:
+    return shutil.which("lsof") is not None or Path("/usr/sbin/lsof").is_file()
+
+
 def git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(
@@ -70,6 +74,22 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertEqual(payload["status"], "pass")
             self.assertTrue(payload["write_probe"])
 
+    def test_inherited_git_context_does_not_override_repo_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            poison = root / "poison"
+            poison.mkdir()
+            code, payload = run_preflight(
+                repo,
+                GIT_DIR=str(poison),
+                GIT_WORK_TREE=str(poison),
+                GIT_INDEX_FILE=str(poison / "index"),
+            )
+
+            self.assertEqual(code, 0, payload)
+            self.assertEqual(Path(str(payload["repo_root"])), repo.resolve())
+
     def test_current_index_lock_blocks_without_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo = make_repo(Path(temp_dir))
@@ -85,7 +105,7 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
             self.assertTrue(lock_path.exists(), "preflight must never remove locks")
 
-    def test_expected_current_index_lock_is_advisory_for_pre_commit(self) -> None:
+    def test_unowned_current_index_lock_is_not_waived_for_pre_commit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo = make_repo(Path(temp_dir))
             _, clean = run_preflight(repo)
@@ -115,8 +135,42 @@ class GitMetadataPreflightTests(unittest.TestCase):
             )
             allowed_payload = json.loads(allowed.stdout)
             self.assertEqual(allowed.returncode, 78, allowed_payload)
-            self.assertIn("stale_index_lock_candidate", allowed_payload["reason_codes"])
+            expected_reason = (
+                "stale_index_lock_candidate"
+                if lsof_available()
+                else "lock_owner_detector_unavailable"
+            )
+            self.assertIn(expected_reason, allowed_payload["reason_codes"])
             self.assertTrue(lock_path.exists(), "preflight must never remove locks")
+
+    def test_owned_current_index_lock_is_advisory_for_pre_commit(self) -> None:
+        if not lsof_available():
+            self.skipTest("lsof is required to prove parent lock ownership")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["index_lock_path"]))
+            with lock_path.open("w", encoding="utf-8"):
+                owned = subprocess.run(
+                    [
+                        sys.executable,
+                        str(SCRIPT),
+                        "--repo-root",
+                        str(repo),
+                        "--allow-current-index-lock",
+                        "--json",
+                    ],
+                    env={
+                        **os.environ,
+                        "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                    },
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+            owned_payload = json.loads(owned.stdout)
+            self.assertEqual(owned.returncode, 0, owned_payload)
+            self.assertIn("expected_current_index_lock", owned_payload["advisories"])
 
     def test_non_regular_index_lock_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -145,6 +199,47 @@ class GitMetadataPreflightTests(unittest.TestCase):
             code, payload = run_preflight(linked)
             self.assertEqual(code, 0, payload)
             self.assertIn("locked_worktree", payload["advisories"])
+
+    def test_lock_in_other_worktree_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "linked"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "linked")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            _, linked_payload = run_preflight(linked)
+            linked_lock = Path(str(linked_payload["index_lock_path"]))
+            linked_lock.touch()
+
+            code, payload = run_preflight(
+                repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
+            )
+            self.assertEqual(code, 78, payload)
+            self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+
+    def test_worktree_inspection_failure_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            git_binary = shutil.which("git")
+            self.assertIsNotNone(git_binary)
+            fake_git = fake_bin / "git"
+            fake_git.write_text(
+                "#!/bin/sh\n"
+                'if [ "$1" = "worktree" ]; then echo unavailable >&2; exit 9; fi\n'
+                f'exec "{git_binary}" "$@"\n',
+                encoding="utf-8",
+            )
+            fake_git.chmod(0o755)
+
+            code, payload = run_preflight(
+                repo, PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}"
+            )
+            self.assertEqual(code, 78, payload)
+            self.assertIn("worktree_state_unavailable", payload["reason_codes"])
+            self.assertIn("unavailable", str(payload["worktree_list_diagnostic"]))
 
     def test_prunable_worktree_is_advisory_until_explicit_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

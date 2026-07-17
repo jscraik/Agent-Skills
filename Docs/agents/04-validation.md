@@ -21,8 +21,8 @@
   metadata.
   This avoids repeated Codex sandbox failures on `~/.cache/prek/prek.log` and
   prevents cache writes from being confused with linked-worktree metadata
-  locks. Run `git_metadata_preflight.py --json` from
-  `Infrastructure/scripts/validation-and-linting/` before expensive hook gates;
+  locks. Run `python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --json`
+  from the repository root before expensive hook gates;
   it fails closed on a current
   `index.lock`, denied metadata writes, or a locked current worktree.
   `bash scripts/check-environment.sh` fails if the adapter or hook wiring is
