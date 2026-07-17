@@ -253,9 +253,9 @@ def test_hook_adapters_resolve_root_after_sanitizing_git_context() -> None:
     assert Path(result.stdout.strip()).resolve() == REPO_ROOT.resolve()
 
 
-def test_hook_sandbox_preserves_git_temporary_index() -> None:
+def test_hook_sandbox_preserves_git_temporary_index(tmp_path: Path) -> None:
     helper = REPO_ROOT / "Infrastructure/scripts/hooks/_sandbox_env.sh"
-    temporary_index = "/tmp/agent-skills-test-index"
+    temporary_index = str(tmp_path / "index")
     result = subprocess.run(
         ["bash", "-c", f'source "{helper}"; printf "%s" "$GIT_INDEX_FILE"'],
         capture_output=True,
