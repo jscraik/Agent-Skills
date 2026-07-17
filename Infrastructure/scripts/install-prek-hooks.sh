@@ -67,7 +67,10 @@ block = (
     "# Keep prek logs/cache outside Git metadata and the worktree.\n"
     f"export CODEX_HOOK_CACHE_ROOT={shlex.quote(hook_cache_root)}\n"
     f"export PREK_HOME={shlex.quote(prek_home)}\n"
-    'mkdir -p "$PREK_HOME"\n'
+    'AGENT_SKILLS_REPO_ROOT="$(git rev-parse --show-toplevel)"\n'
+    'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"\n'
+    'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"\n'
+    'secure_hook_cache_dir "$PREK_HOME"\n'
     f"{end}\n"
 )
 if start in text:

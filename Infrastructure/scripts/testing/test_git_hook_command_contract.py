@@ -300,6 +300,16 @@ def test_secure_hook_cache_rejects_symlinks_and_enforces_private_mode(tmp_path: 
     assert "must not be a symlink" in reject.stderr
 
 
+def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
+    installer = (
+        REPO_ROOT / "Infrastructure/scripts/install-prek-hooks.sh"
+    ).read_text(encoding="utf-8")
+    assert 'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"' in installer
+    assert 'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"' in installer
+    assert 'secure_hook_cache_dir "$PREK_HOME"' in installer
+    assert 'mkdir -p "$PREK_HOME"' not in installer
+
+
 def test_hook_adapters_pass_bash_syntax() -> None:
     """
     Verify that bash adapter scripts pass syntax validation.

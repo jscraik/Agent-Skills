@@ -248,6 +248,7 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
         "git_dir": ("rev-parse", "--git-dir"),
         "index_path": ("rev-parse", "--git-path", "index"),
         "index_lock_path": ("rev-parse", "--git-path", "index.lock"),
+        "head_lock_path": ("rev-parse", "--git-path", "HEAD.lock"),
     }
     resolved: dict[str, Path] = {}
     for key, args in commands.items():
@@ -255,6 +256,12 @@ def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
         if code != 0 or not value:
             raise MetadataPreflightError(stderr or f"git {' '.join(args)} failed")
         resolved[key] = _resolve_git_path(repo_root, value)
+    code, head_ref, _ = _run_git(repo_root, "symbolic-ref", "-q", "HEAD")
+    if code == 0 and head_ref:
+        code, value, stderr = _run_git(repo_root, "rev-parse", "--git-path", f"{head_ref}.lock")
+        if code != 0 or not value:
+            raise MetadataPreflightError(stderr or "git could not resolve the current ref lock")
+        resolved["ref_lock_path"] = _resolve_git_path(repo_root, value)
     return resolved
 
 
@@ -265,15 +272,22 @@ def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str
 
 
 def _lock_records(
-    index_lock_path: Path, worktrees_dir: Path, lock_max_age_seconds: int
+    index_lock_path: Path,
+    head_lock_path: Path,
+    ref_lock_path: Path | None,
+    lock_max_age_seconds: int,
 ) -> list[dict[str, Any]]:
-    lock_paths = [index_lock_path] if (index_lock_path.exists() or index_lock_path.is_symlink()) else []
-    if worktrees_dir.is_dir():
-        lock_paths.extend(sorted(worktrees_dir.glob("*/index.lock")))
-    return [
-        _classify_lock(path, lock_max_age_seconds)
-        for path in _unique_paths(lock_paths)
-    ]
+    candidates = [("index", index_lock_path), ("head", head_lock_path)]
+    if ref_lock_path is not None:
+        candidates.append(("current_ref", ref_lock_path))
+    records: list[dict[str, Any]] = []
+    for kind, path in candidates:
+        if not (path.exists() or path.is_symlink()):
+            continue
+        record = _classify_lock(path, lock_max_age_seconds)
+        record["kind"] = kind
+        records.append(record)
+    return records
 
 
 def _worktree_state(
@@ -418,17 +432,21 @@ def _finalize_inspection(
         result["next_action"] = _next_action(result["reason_codes"])
 
 
+def _initial_result(repo_root: Path) -> dict[str, Any]:
+    return {
+        "schema_version": 1, "contract": CONTRACT, "status": "blocked",
+        "repo_root": str(repo_root.resolve()), "reason_codes": [],
+        "locks": [], "locked_worktrees": [], "prunable_worktrees": [],
+    }
+
+
 def inspect(
     repo_root: Path,
     probe_write: bool,
     lock_max_age_seconds: int,
     current_index_lock_policy: CurrentIndexLockPolicy = CurrentIndexLockPolicy.STRICT,
 ) -> dict[str, Any]:
-    result: dict[str, Any] = {
-        "schema_version": 1, "contract": CONTRACT, "status": "blocked",
-        "repo_root": str(repo_root.resolve()), "reason_codes": [],
-        "locks": [], "locked_worktrees": [], "prunable_worktrees": [],
-    }
+    result = _initial_result(repo_root)
     code, toplevel, stderr = _run_git(repo_root, "rev-parse", "--show-toplevel")
     if code != 0 or not toplevel:
         result.update(reason_codes=["not_git_worktree"], diagnostic=stderr or "git rev-parse --show-toplevel failed", next_action="run the hook from a Git worktree")
@@ -448,7 +466,12 @@ def inspect(
     result["metadata_dirs"] = [str(path) for path in metadata_dirs]
     write_results = _write_probes(metadata_dirs, probe_write)
     result["write_probe"] = write_results
-    result["locks"] = _lock_records(resolved["index_lock_path"], worktrees_dir, lock_max_age_seconds)
+    result["locks"] = _lock_records(
+        resolved["index_lock_path"],
+        resolved["head_lock_path"],
+        resolved.get("ref_lock_path"),
+        lock_max_age_seconds,
+    )
     worktree_error = _apply_worktree_state(result, repo_root, worktrees_dir, git_dir)
     _finalize_inspection(
         result, write_results, resolved["index_lock_path"], current_index_lock_policy,

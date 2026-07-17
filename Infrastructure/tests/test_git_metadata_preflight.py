@@ -200,7 +200,7 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertEqual(code, 0, payload)
             self.assertIn("locked_worktree", payload["advisories"])
 
-    def test_lock_in_other_worktree_is_fail_closed(self) -> None:
+    def test_lock_in_other_worktree_does_not_block_current_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             repo = make_repo(root)
@@ -214,8 +214,25 @@ class GitMetadataPreflightTests(unittest.TestCase):
             code, payload = run_preflight(
                 repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
             )
-            self.assertEqual(code, 78, payload)
-            self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+            self.assertEqual(code, 0, payload)
+            self.assertEqual(payload["status"], "pass")
+            self.assertEqual(payload["locks"], [])
+
+    def test_current_head_and_ref_locks_are_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            for key, kind in (("head_lock_path", "head"), ("ref_lock_path", "current_ref")):
+                lock_path = Path(str(clean[key]))
+                lock_path.parent.mkdir(parents=True, exist_ok=True)
+                lock_path.touch()
+                code, payload = run_preflight(
+                    repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
+                )
+                self.assertEqual(code, 78, payload)
+                self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+                self.assertIn(kind, {item["kind"] for item in payload["locks"]})
+                lock_path.unlink()
 
     def test_worktree_inspection_failure_is_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
