@@ -158,12 +158,16 @@ def _validate_schema_reference(
     ref: str, value: object, root_schema: dict[str, object],
     schemas: dict[str, dict[str, object]], path: str,
 ) -> None:
-    resolved_root = schemas.get(ref, root_schema)
-    if "#" in ref and not ref.startswith("#/"):
-        resolved_root = schemas[ref.split("#", 1)[0]]
+    try:
+        resolved_root = schemas.get(ref, root_schema)
+        if "#" in ref and not ref.startswith("`#/`"):
+            resolved_root = schemas[ref.split("#", 1)[0]]
+        resolved = _resolve_schema_ref(ref, root_schema, schemas)
+    except KeyError as exc:
+        raise AssertionError(f"{path} contains unresolved schema ref {ref!r}") from exc
     if resolved_root is not root_schema:
         _validate_schema_vocabulary(resolved_root, path)
-    _validate_schema_subset(_resolve_schema_ref(ref, root_schema, schemas), value, schemas, path, resolved_root)
+    _validate_schema_subset(resolved, value, schemas, path, resolved_root)
 
 
 def _validate_schema_vocabulary(schema: dict[str, object], path: str) -> None:
