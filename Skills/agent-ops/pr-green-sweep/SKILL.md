@@ -47,12 +47,14 @@ next safe action.
 
 Use the current repo unless the user names a broader scope. Gather target PRs,
 heartbeat cadence, merge/check policy, approval posture, and GitHub/CodeRabbit/
-CircleCI auth context. Run credentialed CircleCI commands through
+CircleCI auth context. Start with two or three focused failure surfaces before
+broadening a multi-repository sweep. Run credentialed CircleCI commands through
 `op run --env-file ~/.codex/.env` without printing secrets.
 
 ## Outputs
 
-Start non-trivial responses with `heartbeat_status`. Include an action queue
+Emit `schema_version: 1` with structured sweep outputs. Start non-trivial
+responses with `heartbeat_status`. Include an action queue
 with `auto_fixable_now`, `needs_merge_conflict_strategy`,
 `blocked_policy_or_approval`, `blocked_external_ci`, `waived_external_ci`,
 `needs_user_decision`, and `cleanup_only`; include dirty-worktree,
@@ -97,11 +99,14 @@ verification.
    and local branch/worktree state, then report the proposed strategy before any
    merge, rebase, force push, or destructive cleanup.
 7. Before editing, group equivalent current review and CI findings across the
-   queue. When a class occurs twice, or matches an existing steering-uptake
-   pattern, stop that fix lane until the closest reusable test, validator,
-   schema, lint rule, shared helper, or workflow contract is added or an exact
-   `blocked_durable_guardrail` reason is recorded. A second point fix without
-   this recurrence proof is not merge-eligible.
+   queue. Give each class a stable branded `finding_class_id`, a SHA-256
+   fingerprint of its normalized invariant, and exact occurrence evidence.
+   Validate the ledger with `scripts/validate_recurring_findings.py`. When a
+   class occurs twice, or matches an existing steering-uptake pattern, stop
+   that fix lane until the closest reusable test, validator, schema, lint rule,
+   shared helper, or workflow contract is added and its validation passes. A
+   blocked guardrail records an owner, evidence, expiry, and next review, but
+   remains non-merge-eligible; it is not a waiver.
 8. Rotate through the ranked action queue one PR at a time.
 9. For unresolved review threads, fix actionable items, classify stale or blocked
    items, validate the source path, refresh live thread state, then resolve.
@@ -130,8 +135,9 @@ verification.
   rotation.
 - Build the action queue before patching; work one PR at a time.
 - Build the recurring-finding ledger before patching. Do not merge a second
-  occurrence of the same finding class without durable-guardrail proof or an
-  explicit `blocked_durable_guardrail` classification.
+  occurrence of the same finding class without schema-valid, executable
+  durable-guardrail proof. A `blocked_durable_guardrail` classification keeps
+  the PR blocked.
 - Classify dirty paths and validation surfaces before side effects.
 - Fail fast at the first required gate until fixed, classified, or explicitly
   waived.
@@ -176,6 +182,7 @@ skill contract itself with:
 
 ```bash
 ./bin/ask skills audit Skills/agent-ops/pr-green-sweep --level strict --json --robot
+bash Infrastructure/scripts/run-infrastructure-python.sh ../Skills/agent-ops/pr-green-sweep/scripts/validate_recurring_findings.py --ledger <ledger.json>
 python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json
 ```
 
