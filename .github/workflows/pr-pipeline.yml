@@ -30,9 +30,43 @@ jobs:
             echo "::error::trusted base is missing the canonical PR template validator" >&2
             exit 1
           fi
-          python3 trusted-base/.github/scripts/validate_pr_template_body.py \
-            --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
-            --body-env PR_BODY
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          body = os.environ.get("PR_BODY", "")
+          author = os.environ.get("PR_AUTHOR", "")
+          lines = [line.strip() for line in body.splitlines() if line.strip()]
+          grouped = re.compile(
+              r"^Bumps the .+ group with \d+ update(?:s)? in the .+ directory: "
+              r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)\.$",
+              re.IGNORECASE,
+          )
+          single = re.compile(r"^Bumps \S+ from \S+ to \S+$", re.IGNORECASE)
+          if (
+              lines
+              and (grouped.fullmatch(lines[0]) or single.fullmatch(lines[0]))
+              and "Dependabot will resolve any conflicts with this PR" in body
+              and author not in {"dependabot[bot]", "dependabot"}
+          ):
+              print(
+                  "::error::Dependabot-shaped PR bodies require the trusted Dependabot author.",
+                  file=sys.stderr,
+              )
+              raise SystemExit(1)
+          PY
+          validator=trusted-base/.github/scripts/validate_pr_template_body.py
+          if python3 "$validator" --help 2>&1 | grep -q -- "--author"; then
+            python3 "$validator" \
+              --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
+              --body-env PR_BODY \
+              --author "$PR_AUTHOR"
+          else
+            python3 "$validator" \
+              --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
+              --body-env PR_BODY
+          fi
       - name: Skip PR template enforcement for merge queue
         if: github.event_name == 'merge_group'
         run: echo "merge_group event detected; PR template enforcement is pull_request-only."
@@ -115,6 +149,7 @@ jobs:
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_REF: ${{ github.base_ref }}
@@ -130,13 +165,19 @@ jobs:
             BASE_SHA="$PR_BASE_SHA"
             HEAD_SHA="$PR_HEAD_SHA"
             CONTRACT_PATH="trusted-base/harness.contract.json"
-            if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
-              git -C trusted-base fetch --no-tags --depth=1 origin "$HEAD_SHA"
-            fi
           else
             BASE_SHA="$MERGE_GROUP_BASE_SHA"
             HEAD_SHA="$MERGE_GROUP_HEAD_SHA"
             CONTRACT_PATH="trusted-base/harness.contract.json"
+          fi
+          if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            git -C trusted-base \
+              -c "http.extraheader=AUTHORIZATION: bearer ${GITHUB_TOKEN}" \
+              fetch --no-tags --depth=1 origin "$HEAD_SHA"
+          fi
+          if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            echo "::error::trusted-base could not resolve the event head ${HEAD_SHA}" >&2
+            exit 1
           fi
           CHANGED_FILES="$(git -C trusted-base diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
           if [[ -z "$CHANGED_FILES" ]]; then
