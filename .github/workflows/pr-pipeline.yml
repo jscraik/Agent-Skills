@@ -132,7 +132,7 @@ jobs:
       - name: Checkout trusted risk policy gate
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          persist-credentials: false
+          persist-credentials: true
           ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
           path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -149,7 +149,6 @@ jobs:
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ github.token }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_REF: ${{ github.base_ref }}
@@ -171,9 +170,7 @@ jobs:
             CONTRACT_PATH="trusted-base/harness.contract.json"
           fi
           if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
-            git -C trusted-base \
-              -c "http.extraheader=AUTHORIZATION: bearer ${GITHUB_TOKEN}" \
-              fetch --no-tags --depth=1 origin "$HEAD_SHA"
+            git -C trusted-base fetch --no-tags --depth=1 origin "$HEAD_SHA"
           fi
           if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
             echo "::error::trusted-base could not resolve the event head ${HEAD_SHA}" >&2
