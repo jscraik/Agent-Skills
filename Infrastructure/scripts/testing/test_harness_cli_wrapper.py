@@ -38,3 +38,9 @@ def test_harness_local_resolution_has_typed_identity_and_boundary_failures() -> 
     assert "process.exit(45)" in source
     assert "does not match $SUPPORTED_VERSION" in source
     assert "outside the approved repo-local boundary" in source
+
+
+def test_harness_executes_only_the_validated_cli_path() -> None:
+    source = WRAPPER.read_text(encoding="utf-8")
+
+    assert 'exec node "$CLI_PATH" "$@"' in source
