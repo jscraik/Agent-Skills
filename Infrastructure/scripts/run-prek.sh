@@ -17,7 +17,11 @@ fi
 if [[ -n "${CODEX_HOOK_CACHE_ROOT:-}" ]]; then
 	export CODEX_HOOK_CACHE_ROOT
 else
-	export CODEX_HOOK_CACHE_ROOT="$(new_hook_cache_root "$hook_tmp_dir")"
+	if ! CODEX_HOOK_CACHE_ROOT="$(new_hook_cache_root "$hook_tmp_dir")"; then
+		echo "[run-prek] failed to create secure hook cache root" >&2
+		exit 1
+	fi
+	export CODEX_HOOK_CACHE_ROOT
 fi
 export PREK_HOME="${PREK_HOME:-$CODEX_HOOK_CACHE_ROOT/prek}"
 CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$repo_root" "$git_common_dir")"
