@@ -1,3 +1,4 @@
 anthropic==0.39.0
+# CVE-2026-59950 is fixed in MCP 1.28.1; keep this fixture on the patched pin.
 mcp==1.28.1
 python-multipart==0.0.32
