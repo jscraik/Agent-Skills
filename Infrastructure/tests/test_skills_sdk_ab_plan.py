@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 from copy import deepcopy
 from pathlib import Path
@@ -35,6 +36,20 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
+    def test_skills_command_defers_optional_ab_contract_imports(self) -> None:
+        """The general ask command must load without the optional Pydantic lane."""
+        source_path = REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
+        top_level_imports = [
+            node.module
+            for node in tree.body
+            if isinstance(node, ast.ImportFrom) and node.module
+        ]
+        self.assertFalse(
+            any(module.startswith("ask.skills_sdk.eval_ab_") for module in top_level_imports),
+            "A/B contracts must remain lazy so repo validation does not require Pydantic",
+        )
+
     def _managed_v1_result(self, payload: dict[str, object]) -> schema_validation.SchemaValidationResult:
         schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))

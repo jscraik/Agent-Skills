@@ -117,12 +117,6 @@ from ask.skills_sdk.release_scenario_sets import (  # noqa: E402
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
 )
-from ask.skills_sdk.eval_ab_rubric import build_ab_rubric_preview_receipt as _build_ab_rubric_preview_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt as _build_ab_preview_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt as _build_ab_plan_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_run import build_ab_run_receipt as _build_ab_run_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_judge import build_ab_judge_preview_receipt as _build_ab_judge_preview_receipt  # noqa: E402
-from ask.skills_sdk.eval_ab_judge import build_ab_judge_score_receipt as _build_ab_judge_score_receipt  # noqa: E402
 from ask.skills_sdk.eval_profiles import build_eval_profile_preview_receipt as _build_eval_profile_preview_receipt  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
@@ -7332,10 +7326,14 @@ def skills_sdk_eval_profiles_preview(repo_root: Path) -> CallResult:
 
 def skills_sdk_eval_ab_rubric_preview(repo_root: Path) -> CallResult:
     """Emit the non-mutating canonical A/B scoring rubric contract."""
+    from ask.skills_sdk.eval_ab_rubric import (  # noqa: PLC0415
+        build_ab_rubric_preview_receipt,
+    )
+
     del repo_root
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-rubric --preview"
-    receipt = _build_ab_rubric_preview_receipt()
+    receipt = build_ab_rubric_preview_receipt()
     payload = {
         "schema_version": "skills-sdk-ab-rubric.v0",
         "status": receipt["status"],
@@ -7359,11 +7357,13 @@ def skills_sdk_eval_ab_preview(
     judge_profile: str = "oss-local",
 ) -> CallResult:
     """Emit a non-mutating Codex-backed A/B eval experiment contract."""
+    from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt  # noqa: PLC0415
+
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-preview --preview"
     skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
     skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
-    receipt = _build_ab_preview_receipt(
+    receipt = build_ab_preview_receipt(
         repo_root,
         skill_a=skill_a,
         skill_b=skill_b,
@@ -7426,11 +7426,13 @@ def skills_sdk_eval_ab_plan(
     evidence_root: str = ".harness/artifacts/sdk-ab-evals",
 ) -> CallResult:
     """Emit a non-mutating Codex-backed A/B eval execution plan."""
+    from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: PLC0415
+
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-plan --preview"
     skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
     skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
-    receipt = _build_ab_plan_receipt(
+    receipt = build_ab_plan_receipt(
         repo_root,
         skill_a=skill_a,
         skill_b=skill_b,
@@ -7497,11 +7499,13 @@ def skills_sdk_eval_ab_run(
     timeout_seconds: int = 1800,
 ) -> CallResult:
     """Execute a Codex-backed A/B eval and emit bounded evidence receipts."""
+    from ask.skills_sdk.eval_ab_run import build_ab_run_receipt  # noqa: PLC0415
+
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-run --execute"
     skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
     skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
-    receipt = _build_ab_run_receipt(
+    receipt = build_ab_run_receipt(
         repo_root,
         skill_a=skill_a,
         skill_b=skill_b,
@@ -7571,9 +7575,11 @@ def skills_sdk_eval_ab_judge_preview(
     run_receipt: str,
 ) -> CallResult:
     """Emit a non-mutating sanitized A/B judge input receipt."""
+    from ask.skills_sdk.eval_ab_judge import build_ab_judge_preview_receipt  # noqa: PLC0415
+
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-judge-preview --preview"
-    receipt = _build_ab_judge_preview_receipt(repo_root, run_receipt=run_receipt)
+    receipt = build_ab_judge_preview_receipt(repo_root, run_receipt=run_receipt)
     payload = {
         "schema_version": "skills-sdk-ab-judge-preview.v0",
         "status": receipt["status"],
@@ -7616,9 +7622,11 @@ def skills_sdk_eval_ab_judge_score(
     timeout_seconds: int = 300,
 ) -> CallResult:
     """Invoke Codex-backed A/B judge scoring and emit advisory decision evidence."""
+    from ask.skills_sdk.eval_ab_judge import build_ab_judge_score_receipt  # noqa: PLC0415
+
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-judge-score --execute"
-    receipt = _build_ab_judge_score_receipt(
+    receipt = build_ab_judge_score_receipt(
         repo_root,
         run_receipt=run_receipt,
         evidence_root=evidence_root,
