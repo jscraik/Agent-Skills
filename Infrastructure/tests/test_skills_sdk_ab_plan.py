@@ -84,6 +84,21 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         )
         self.assertEqual(result.status, "fail")
 
+    def test_managed_validator_resolves_local_ref_inside_any_of(self) -> None:
+        schema = {
+            "$defs": {"value": {"type": "string", "const": "expected"}},
+            "anyOf": [{"$ref": "#/$defs/value"}, {"type": "null"}],
+        }
+        result = schema_validation.validate_payload_against_schema(
+            "expected",
+            schema,
+            {},
+            schema_path="inline",
+            payload_source="inline",
+            truth_lane="schema_contract",
+        )
+        self.assertEqual(result.status, "pass", result.diagnostics)
+
     def _assert_v1_schema_valid(self, payload: dict[str, object]) -> None:
         schema = json.loads(
             (

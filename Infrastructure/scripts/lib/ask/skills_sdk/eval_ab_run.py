@@ -9,7 +9,7 @@ import subprocess
 from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
-from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference
+from ask.skills_sdk.ab_transport_contracts import is_approved_op_binary, is_opaque_env_reference
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 

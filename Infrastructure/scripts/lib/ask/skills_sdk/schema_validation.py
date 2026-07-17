@@ -160,7 +160,7 @@ def _validate_schema_reference(
 ) -> None:
     try:
         resolved_root = schemas.get(ref, root_schema)
-        if "#" in ref and not ref.startswith("`#/`"):
+        if "#" in ref and not ref.startswith("#/"):
             resolved_root = schemas[ref.split("#", 1)[0]]
         resolved = _resolve_schema_ref(ref, root_schema, schemas)
     except KeyError as exc:
