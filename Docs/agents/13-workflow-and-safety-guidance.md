@@ -84,7 +84,7 @@ Before committing or pushing, make sure generated `prek` hooks use a writable
 temporary cache and that Git metadata is healthy:
 
 ```bash
-bash scripts/install-prek-hooks.sh
+bash Infrastructure/scripts/install-prek-hooks.sh
 repo_root="$(git rev-parse --show-toplevel)"
 preflight="$repo_root/Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py"
 python3 "$preflight" --repo-root "$repo_root" --json
