@@ -426,7 +426,7 @@
   },
   "issueTrackingPolicy": {
     "provider": "linear",
-    "requirePackageBugsUrl": true,
+    "requirePackageBugsUrl": false,
     "disableGitHubIssues": true,
     "requireBranchIssueKey": true,
     "requirePrIssueKey": true,
