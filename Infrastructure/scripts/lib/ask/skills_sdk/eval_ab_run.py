@@ -205,7 +205,7 @@ def _redact_execution_argv(execution_argv: list[str]) -> list[str]:
     redacted = list(execution_argv)
     if (
         len(redacted) >= 5
-        and redacted[0] == "op"
+        and is_approved_op_binary(redacted[0])
         and redacted[1:3] == ["run", "--env-file"]
         and redacted[4] == "--"
     ):
