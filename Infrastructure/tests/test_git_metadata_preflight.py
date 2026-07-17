@@ -269,6 +269,23 @@ class GitMetadataPreflightTests(unittest.TestCase):
                 self.assertIn(kind, {item["kind"] for item in payload["locks"]})
                 lock_path.unlink()
 
+    def test_packed_ref_parent_is_probed_at_nearest_existing_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            created = git(repo, "checkout", "-qb", "feature/foo")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            packed = git(repo, "pack-refs", "--all", "--prune")
+            self.assertEqual(packed.returncode, 0, packed.stderr)
+
+            code, payload = run_preflight(repo)
+
+            self.assertEqual(code, 0, payload)
+            self.assertEqual(payload["status"], "pass")
+            ref_parent = Path(str(payload["ref_lock_path"])).parent
+            self.assertFalse(ref_parent.is_dir())
+            self.assertIn(str(ref_parent.parent), payload["metadata_dirs"])
+            self.assertNotIn(str(ref_parent), payload["metadata_dirs"])
+
     def test_symlinked_ref_locks_are_classified_from_original_path(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo = make_repo(Path(temp_dir))

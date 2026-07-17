@@ -296,8 +296,19 @@ def _metadata_dirs(
     paths = [resolved["index_path"].parent, git_dir, common_dir]
     ref_lock_path = resolved.get("ref_lock_path")
     if ref_lock_path is not None:
-        paths.append(ref_lock_path.parent)
+        paths.append(_nearest_existing_directory(ref_lock_path.parent))
     return _unique_paths(paths)
+
+
+def _nearest_existing_directory(path: Path) -> Path:
+    """Return the deepest existing parent Git can use for a packed ref."""
+    candidate = path
+    while not candidate.is_dir():
+        parent = candidate.parent
+        if parent == candidate:
+            return candidate
+        candidate = parent
+    return candidate
 
 
 def _lock_records(
