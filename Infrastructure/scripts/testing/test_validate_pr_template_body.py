@@ -223,3 +223,37 @@ def test_accepts_angle_tokens_not_owned_by_template() -> None:
     errors = validator.validate_pr_body(_template(), body)
 
     assert not any("Replace unresolved placeholder token" in error for error in errors)
+
+
+def test_accepts_standard_dependabot_body_and_html_markup() -> None:
+    validator = _load_validator()
+    body = """Bumps the pip group with 1 update in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk).
+
+Updates `mcp` from 1.27.2 to 1.28.1
+<details>
+<summary>Release notes</summary>
+<p><a href="https://github.com/modelcontextprotocol/python-sdk/releases"><code>mcp</code></a></p>
+</details>
+
+Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself.
+
+@dependabot show <dependency name> ignore conditions
+@dependabot ignore <dependency name> <ignore condition>
+"""
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert errors == []
+
+
+def test_rejects_dependabot_like_body_without_generated_markers() -> None:
+    validator = _load_validator()
+    body = """Bumps the pip group with 1 update in the /Infrastructure/scripts directory: [mcp](https://github.com/modelcontextprotocol/python-sdk).
+
+Updates `mcp` from 1.27.2 to 1.28.1
+"""
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert any("PR body sections must match" in error for error in errors)
+    assert any("Missing required section" in error for error in errors)

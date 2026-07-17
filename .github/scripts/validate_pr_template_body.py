@@ -19,6 +19,17 @@ FIELD_LINE_RE = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE
 PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
 ANGLE_BRACKET_URL_RE = re.compile(r"^<https?://[^>\s]+>$")
+DEPENDABOT_HEADER_RE = re.compile(
+    r"^Bumps the .+ group with \d+ update(?:s)? in the .+ directory: "
+    r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)\.$",
+    re.IGNORECASE,
+)
+DEPENDABOT_UPDATE_RE = re.compile(r"^Updates `[^`]+` from \S+ to \S+$", re.IGNORECASE)
+SAFE_HTML_TAG_RE = re.compile(
+    r"</?(?:a|abbr|b|blockquote|br|code|dd|del|details|div|dl|dt|em|h[1-6]|hr|i|img|ins|kbd|li|mark|ol|p|pre|s|samp|small|source|span|strong|sub|summary|sup|table|tbody|td|th|thead|time|tr|u|ul|var)"
+    r"(?:\s+[^>\n]*)?\s*/?>",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -172,17 +183,44 @@ def _placeholder_errors(template: str, body: str) -> list[str]:
         if placeholder in body:
             errors.append(f"Replace template placeholder: {placeholder}")
     for token in PLACEHOLDER_RE.findall(body):
-        if token.startswith("<!--") or ANGLE_BRACKET_URL_RE.match(token):
+        if (
+            token.startswith("<!--")
+            or ANGLE_BRACKET_URL_RE.match(token)
+            or SAFE_HTML_TAG_RE.fullmatch(token)
+        ):
             continue
         if token in template_tokens or " " in token or "/" in token:
             errors.append(f"Replace unresolved placeholder token: {token}")
     return errors
 
 
+def _dependabot_body_errors(body: str) -> list[str]:
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    errors: list[str] = []
+    if not lines or not DEPENDABOT_HEADER_RE.fullmatch(lines[0]):
+        errors.append("Dependabot body must start with its generated update summary.")
+    if len(lines) < 2 or not DEPENDABOT_UPDATE_RE.fullmatch(lines[1]):
+        errors.append("Dependabot body must include its generated version update line.")
+    if "Dependabot will resolve any conflicts with this PR" not in body:
+        errors.append("Dependabot body is missing its generated conflict-resolution notice.")
+    return errors
+
+
+def _is_dependabot_body(body: str) -> bool:
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    return bool(
+        lines
+        and DEPENDABOT_HEADER_RE.fullmatch(lines[0])
+        and "Dependabot will resolve any conflicts with this PR" in body
+    )
+
+
 def validate_pr_body(template: str, body: str) -> list[str]:
     contract = _template_contract(template)
     if body.strip() == "":
         return ["PR body is empty. Fill out the full PR template."]
+    if _is_dependabot_body(body):
+        return _dependabot_body_errors(body)
 
     body_blocks = _section_blocks(body)
     errors = _section_errors(contract, body)
