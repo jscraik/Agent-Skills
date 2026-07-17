@@ -68,6 +68,10 @@ resolution_status=$?
 set -e
 
 if [[ $resolution_status -eq 42 ]]; then
+	if command -v harness >/dev/null 2>&1; then
+		exec harness "$@"
+	fi
+
 	if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then
 		if ! command -v npm >/dev/null 2>&1; then
 			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
