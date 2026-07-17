@@ -7,6 +7,7 @@ from copy import deepcopy
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Callable
 import unittest
 from unittest.mock import patch
@@ -182,15 +183,65 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
             "--sandbox", "read-only", "--json", "-",
         ]
-        with (
-            patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
-            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "~/.codex/.env"}),
-        ):
-            result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
+        with tempfile.TemporaryDirectory() as directory:
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            os.mkfifo(env_file)
+            with (
+                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+            ):
+                result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
 
-        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", "~/.codex/.env", "--"])
+        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", str(env_file), "--"])
         self.assertEqual(captured[0][5:], command)
         self.assertEqual(result.executed_argv, captured[0])
+
+    def test_default_cloud_runner_blocks_replaced_plaintext_auth_before_subprocess(self) -> None:
+        captured: list[list[str]] = []
+
+        def forbidden_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured.append(argv)
+            raise AssertionError("subprocess must not receive a non-opaque auth source")
+
+        command = [
+            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
+            "--sandbox", "read-only", "--json", "-",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            env_file.write_text("plaintext must not be read", encoding="utf-8")
+            with (
+                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=forbidden_run),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+            ):
+                with self.assertRaisesRegex(ValueError, "opaque environment stream"):
+                    _default_codex_runner(command, "prompt", REPO_ROOT, 1)
+
+        self.assertEqual(captured, [])
+
+    def test_cloud_auth_replacement_becomes_typed_variant_blocker(self) -> None:
+        def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            if command_argv[command_argv.index("--profile") + 1] == "oss-cloud":
+                with patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "/tmp/plaintext.env"}):
+                    return _default_codex_runner(command_argv, prompt, repo_root, timeout_seconds)
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("local response", encoding="utf-8")
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"response.completed"}\n',
+                stderr="",
+                executed_argv=_test_execution_argv(command_argv),
+            )
+
+        receipt = _build_test_ab_run_receipt(self.evidence_root, runner)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("A:codex_exec_preflight_blocked", receipt["blockers"])
+        validate_ab_run_receipt(receipt)
     def test_provider_event_absence_is_a_typed_variant_blocker(self) -> None:
         def no_provider_event_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,

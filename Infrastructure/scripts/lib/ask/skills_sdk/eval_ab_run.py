@@ -110,6 +110,8 @@ def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     if profile == "oss-local":
         return list(command_argv)
     env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+    if not is_opaque_env_reference(env_file):
+        raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     return ["op", "run", "--env-file", env_file, "--", *command_argv]
 
 
@@ -265,6 +267,10 @@ def _run_variant(
         return CodexRunResult(
             exit_code=127, stdout="", stderr=str(exc),
         ), "codex_exec_unavailable", False
+    except ValueError as exc:
+        return CodexRunResult(
+            exit_code=2, stdout="", stderr=str(exc),
+        ), "codex_exec_preflight_blocked", False
 
 
 def _timeout_output_text(value: str | bytes | None) -> str:
