@@ -96,3 +96,17 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             validate_ab_run_receipt(candidate)
+
+    def test_v1_reader_rejects_reversed_blocked_a_b_labels(self) -> None:
+        candidate = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+        candidate["status"] = "blocked"
+        candidate["blockers"] = ["B:cloud_auth_unavailable"]
+        candidate["command_variant_labels"] = ["B", "A"]
+        cloud_gate = candidate["runtime_profile_gates"][1]
+        cloud_gate["status"] = "blocked"
+        cloud_gate["blockers"] = ["cloud_auth_unavailable"]
+        cloud_gate["command_plan"] = []
+        cloud_gate["variant_results"] = []
+
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)

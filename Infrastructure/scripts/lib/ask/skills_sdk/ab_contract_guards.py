@@ -83,6 +83,8 @@ def _fact_status_admitted(gate: Any, key: str, status: str) -> bool:
 
 
 def validate_run_receipt_status(receipt: Any) -> None:
+    if receipt.command_variant_labels and receipt.command_variant_labels != ["A", "B"]:
+        raise ValueError("A/B run receipts must preserve ordered command variant labels")
     if receipt.status == "completed":
         _validate_completed_run_receipt(receipt)
         return

@@ -4,13 +4,13 @@ import hashlib
 import json
 import os
 import shutil
-import stat
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference
 from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
 
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
@@ -165,20 +165,10 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     if not judge_profile.get("secret_env_names"):
         return None
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
-    candidate = Path(configured).expanduser() if configured else Path.home() / ".codex" / ".env"
-    try:
-        safe_candidate = _safe_existing_env_file(candidate, candidate.parent)
-    except OSError:
+    candidate = configured if configured is not None else str(Path.home() / ".codex" / ".env")
+    if not is_opaque_env_reference(candidate):
         return None
-    if safe_candidate is None:
-        return None
-    return safe_candidate if _has_required_op_references(safe_candidate, judge_profile) else None
-
-
-def _has_required_op_references(path: Path, judge_profile: dict[str, Any]) -> bool:
-    # The operator-owned source is an opaque FIFO; never read credential
-    # material in the parent process to decide whether the boundary is valid.
-    return stat.S_ISFIFO(path.stat().st_mode)
+    return Path(candidate)
 
 
 def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) -> Path:
@@ -230,16 +220,6 @@ def _safe_regular_file(path: Path, root: Path) -> Path | None:
 def _codex_profile_model(judge_profile: dict[str, Any]) -> str | None:
     model = judge_profile.get("model")
     return model if isinstance(model, str) and model else None
-
-
-def _safe_existing_env_file(path: Path, root: Path) -> Path | None:
-    root_real = os.path.realpath(root)
-    path_real = os.path.realpath(path)
-    if os.path.commonpath([root_real, path_real]) != root_real:
-        return None
-    if path.is_symlink() or path.is_dir() or not path.exists():
-        return None
-    return path
 
 
 def _codex_temp_parent() -> str | None:
