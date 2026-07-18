@@ -11,12 +11,15 @@ SUPPORTED_SCHEMA_KEYS = {
     "$ref",
     "$schema",
     "$defs",
+    "anyOf",
     "additionalProperties",
     "allOf",
     "const",
     "contains",
+    "default",
     "definitions",
     "enum",
+    "exclusiveMinimum",
     "if",
     "items",
     "maxContains",
@@ -29,6 +32,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "minimum",
     "oneOf",
     "pattern",
+    "prefixItems",
     "properties",
     "required",
     "then",
@@ -119,6 +123,11 @@ def _validate_schema_combinators(
         if matches != 1:
             raise AssertionError(f"{path} expected exactly one oneOf match, got {matches}")
 
+    if "anyOf" in schema:
+        matches = sum(_schema_option_matches(option, value, schemas, path, root_schema) for option in schema["anyOf"])
+        if matches == 0:
+            raise AssertionError(f"{path} expected at least one anyOf match")
+
 
 def _schema_option_matches(
     schema: dict[str, Any],
@@ -152,6 +161,14 @@ def _validate_minimum_constraint(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} smaller than minimum {minimum}")
 
 
+def _validate_exclusive_minimum_constraint(schema: dict[str, Any], value: object, path: str) -> None:
+    if "exclusiveMinimum" not in schema or not isinstance(value, (int, float)) or isinstance(value, bool):
+        return
+    minimum = schema["exclusiveMinimum"]
+    if isinstance(minimum, (int, float)) and value <= minimum:
+        raise AssertionError(f"{path} not greater than exclusiveMinimum {minimum}")
+
+
 def _validate_maximum_constraint(schema: dict[str, Any], value: object, path: str) -> None:
     if "maximum" not in schema or not isinstance(value, (int, float)) or isinstance(value, bool):
         return
@@ -169,6 +186,7 @@ def _validate_pattern_constraint(schema: dict[str, Any], value: object, path: st
 
 def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: str) -> None:
     _validate_type_constraint(schema, value, path)
+    _validate_exclusive_minimum_constraint(schema, value, path)
     if "const" in schema and value != schema["const"]:
         raise AssertionError(f"{path} expected const {schema['const']!r}, got {value!r}")
     if "enum" in schema and value not in schema["enum"]:
@@ -193,15 +211,40 @@ def _validate_array_constraints(
         raise AssertionError(f"{path} shorter than minItems {schema['minItems']}")
     if "maxItems" in schema and len(value) > schema["maxItems"]:
         raise AssertionError(f"{path} longer than maxItems {schema['maxItems']}")
-    if schema.get("uniqueItems") is True:
-        for index, item in enumerate(value):
-            if any(item == previous for previous in value[:index]):
-                raise AssertionError(f"{path} contains duplicate items")
+    _validate_prefix_items(schema, value, schemas, path, root_schema)
+    _validate_unique_items(schema, value, path)
     if "contains" in schema:
         _validate_contains_constraints(schema, value, schemas, path, root_schema)
-    if "items" in schema:
-        for index, item in enumerate(value):
-            _validate_schema_subset(schema["items"], item, schemas, f"{path}[{index}]", root_schema)
+    _validate_array_items(schema, value, schemas, path, root_schema)
+
+
+def _validate_prefix_items(
+    schema: dict[str, Any], value: list[object], schemas: dict[str, dict[str, Any]],
+    path: str, root_schema: dict[str, Any],
+) -> None:
+    for index, item_schema in enumerate(schema.get("prefixItems", [])):
+        if index >= len(value):
+            break
+        _validate_schema_subset(item_schema, value[index], schemas, f"{path}[{index}]", root_schema)
+
+
+def _validate_unique_items(schema: dict[str, Any], value: list[object], path: str) -> None:
+    if schema.get("uniqueItems") is not True:
+        return
+    for index, item in enumerate(value):
+        if any(item == previous for previous in value[:index]):
+            raise AssertionError(f"{path} contains duplicate items")
+
+
+def _validate_array_items(
+    schema: dict[str, Any], value: list[object], schemas: dict[str, dict[str, Any]],
+    path: str, root_schema: dict[str, Any],
+) -> None:
+    item_schema = schema.get("items")
+    if not isinstance(item_schema, dict):
+        return
+    for index, item in enumerate(value):
+        _validate_schema_subset(item_schema, item, schemas, f"{path}[{index}]", root_schema)
 
 
 def _validate_contains_constraints(

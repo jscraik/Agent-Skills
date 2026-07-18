@@ -17,7 +17,7 @@ from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
 )
 
 
-RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json"
+RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
 
 
 class TestSkillsSdkAbJudgeSemanticEvidence(unittest.TestCase):
@@ -30,6 +30,9 @@ class TestSkillsSdkAbJudgeSemanticEvidence(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             for result in run_receipt["variant_results"]:
                 result.pop("semantic_output_excerpt", None)
+            for gate in run_receipt.get("runtime_profile_gates", []):
+                for result in gate["variant_results"]:
+                    result.pop("semantic_output_excerpt", None)
             receipt_path.write_text(json.dumps(run_receipt), encoding="utf-8")
 
             def fake_runner(

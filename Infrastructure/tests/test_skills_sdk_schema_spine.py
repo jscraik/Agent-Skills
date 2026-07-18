@@ -50,6 +50,8 @@ SCHEMA_NAMES = {
     "ab-preview-receipt": "ab-preview-receipt.v0.schema.json",
     "ab-plan-receipt": "ab-plan-receipt.v0.schema.json",
     "ab-run-receipt": "ab-run-receipt.v0.schema.json",
+    "ab-plan-receipt-v1": "ab-plan-receipt.v1.schema.json",
+    "ab-run-receipt-v1": "ab-run-receipt.v1.schema.json",
     "ab-judge-preview-receipt": "ab-judge-preview-receipt.v0.schema.json",
     "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
@@ -519,7 +521,10 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["operation"], "ab_plan")
         self.assertEqual(payload["execution_profile"]["id"], "codex-read-only")
         self.assertEqual(payload["command_variant_labels"], ["A", "B"])
-        self.assertEqual(payload["command_plan"][0]["command_argv"][:4], ["codex", "exec", "--sandbox", "read-only"])
+        self.assertEqual(
+            payload["command_plan"][0]["command_argv"][:8],
+            ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", "."],
+        )
         self.assertEqual(payload["command_plan"][0]["approval_policy"], "on-request")
         self.assertIn("--ask-for-approval", payload["command_plan"][0]["command_argv"])
         self.assertEqual(payload["command_plan"][0]["runner_stdout_capture_path"], payload["command_plan"][0]["event_log_path"])
@@ -529,6 +534,41 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["provider_invoked"])
         self.assertFalse(payload["network_accessed"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_ab_v1_fixtures_require_typed_ordered_preflight(self) -> None:
+        plan = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+        run = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        self.assertEqual([gate["lane"] for gate in plan["runtime_profile_gates"]], ["oss-local", "oss-cloud"])
+        self.assertTrue(all(gate["preflight"]["admission"]["status"] == "pass" for gate in plan["runtime_profile_gates"]))
+        self.assertEqual([gate["lane"] for gate in run["runtime_profile_gates"]], ["oss-local", "oss-cloud"])
+        self.assertTrue(all(gate["status"] == "completed" for gate in run["runtime_profile_gates"]))
+
+    def test_ab_v1_full_receipts_are_valid_against_their_versioned_schemas(self) -> None:
+        plan = self.assert_valid("ab-plan-receipt-v1", "ab-plan-receipt.v1.json")
+        run = self.assert_valid("ab-run-receipt-v1", "ab-run-receipt.v1.json")
+        self.assertEqual(plan["schema_version"], "skills-sdk.ab-plan-receipt.v1")
+        self.assertEqual(run["schema_version"], "skills-sdk.ab-run-receipt.v1")
+
+    def test_ab_plan_v1_schema_rejects_status_packet_contradictions(self) -> None:
+        schema = _json(SCHEMA_DIR / "ab-plan-receipt.v1.schema.json")
+        status_packet_guard = {"allOf": schema["allOf"]}
+        planned = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+
+        planned["command_plan"] = []
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(status_packet_guard, planned, {})
+
+        blocked = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+        blocked.update(
+            {
+                "status": "blocked",
+                "blockers": ["typed_preflight_blocker"],
+                "command_variant_labels": [],
+                "command_plan": [],
+            }
+        )
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(status_packet_guard, blocked, {})
 
     def test_ab_plan_schema_rejects_duplicate_command_variant_labels(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.json")
