@@ -7,6 +7,7 @@ from copy import deepcopy
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Callable
 import unittest
 from unittest.mock import patch
@@ -42,12 +43,14 @@ IDENTITY_B = {
 }
 TestRunner = Callable[[list[str], str, Path, int], CodexRunResult]
 PreflightProbe = Callable[[dict[str, object]], dict[str, object]]
+_TEST_CLOUD_ENV_FILE: Path | None = None
 
 
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
-        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+        assert _TEST_CLOUD_ENV_FILE is not None
+        return ["op", "run", "--env-file", str(_TEST_CLOUD_ENV_FILE), "--", *command_argv]
     return list(command_argv)
 
 
@@ -121,10 +124,22 @@ def _local_runtime_blocked_probe(profile: dict[str, object]) -> dict[str, object
 
 class TestSkillsSdkAbRun(unittest.TestCase):
     def setUp(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
         self.evidence_root = ".harness/test-sdk-ab-run"
+        self._temporary_home = tempfile.TemporaryDirectory()
+        home = Path(self._temporary_home.name)
+        _TEST_CLOUD_ENV_FILE = home / ".codex" / ".env"
+        _TEST_CLOUD_ENV_FILE.parent.mkdir()
+        os.mkfifo(_TEST_CLOUD_ENV_FILE)
+        self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home)
+        self._home_patch.start()
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def tearDown(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
+        self._home_patch.stop()
+        self._temporary_home.cleanup()
+        _TEST_CLOUD_ENV_FILE = None
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def _schema_status_guard(self, preflight: dict[str, object]) -> object:

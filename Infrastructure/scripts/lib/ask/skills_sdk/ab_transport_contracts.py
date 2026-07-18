@@ -15,7 +15,8 @@ def is_actual_opaque_env_reference(value: str) -> bool:
         return False
     try:
         path = Path(value).expanduser()
-        return path == Path.home() / ".codex" / ".env" and stat.S_ISFIFO(path.lstat().st_mode)
+        expected = Path.home() / ".codex" / ".env"
+        return path == expected and not expected.parent.is_symlink() and stat.S_ISFIFO(path.lstat().st_mode)
     except OSError:
         return False
 

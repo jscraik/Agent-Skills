@@ -215,6 +215,13 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
             self.assertEqual(blockers, [])
 
+            receipt_marker = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=receipt_marker)
+            evidence = {"command_argv": receipt_marker, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
             relative = ["evil/op", "run", "--env-file", str(env_file), *command_tail]
             blockers = []
             result = CodexJudgeResult(0, "", "", executed_argv=relative)

@@ -12,7 +12,6 @@ from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_exec
 from ask.skills_sdk.ab_transport_contracts import (
     is_actual_opaque_env_reference,
     is_approved_op_binary,
-    is_opaque_env_reference,
     opaque_env_identity_digest,
 )
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
@@ -219,7 +218,7 @@ def _validated_recorded_execution_argv(
     if declared_profile == "oss-cloud":
         if len(execution_argv) < 5:
             raise ValueError("cloud execution requires the approved op run wrapper")
-        if not is_opaque_env_reference(execution_argv[3]):
+        if not is_actual_opaque_env_reference(execution_argv[3]):
             raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     recorded = _redact_execution_argv(execution_argv)
     _validate_execution_argv(recorded, command_argv, declared_profile)

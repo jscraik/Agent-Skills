@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact, _cloud_catalog_fact  # noqa: E402
-from ask.skills_sdk.eval_ab_run import _execution_argv_for_run  # noqa: E402
+from ask.skills_sdk.eval_ab_run import _execution_argv_for_run, _validated_recorded_execution_argv  # noqa: E402
 from ask.skills_sdk.ab_transport_contracts import is_actual_opaque_env_reference, is_opaque_env_reference  # noqa: E402
 
 
@@ -119,6 +119,25 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
         marker = "<operator-approved-opaque-env-stream>"
         self.assertTrue(is_opaque_env_reference(marker))
         self.assertFalse(is_actual_opaque_env_reference(marker))
+
+    def test_recorded_runner_argv_rejects_receipt_only_stream_marker(self) -> None:
+        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
+        execution = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command]
+        with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
+            _validated_recorded_execution_argv(execution, command, "oss-cloud")
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support unavailable")
+    def test_runtime_stream_rejects_symlinked_codex_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            home = Path(temp_dir) / "home"
+            external = Path(temp_dir) / "external"
+            stream = external / ".env"
+            home.mkdir()
+            external.mkdir()
+            os.mkfifo(stream)
+            os.symlink(external, home / ".codex")
+            with patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home):
+                self.assertFalse(is_actual_opaque_env_reference(str(home / ".codex" / ".env")))
 
 
 if __name__ == "__main__":

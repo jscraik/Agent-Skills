@@ -43,12 +43,14 @@ IDENTITY_B = {
     "package_id": "skills-sdk-scenario-quality-fixture",
     "package_digest": f"sha256:{'2' * 64}",
 }
+_TEST_CLOUD_ENV_FILE: Path | None = None
 
 
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
-        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+        assert _TEST_CLOUD_ENV_FILE is not None
+        return ["op", "run", "--env-file", str(_TEST_CLOUD_ENV_FILE), "--", *command_argv]
     return list(command_argv)
 
 
@@ -56,9 +58,21 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
     evidence_root = ".harness/test-sdk-ab-run-profile-guards"
 
     def setUp(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
+        self._temporary_home = tempfile.TemporaryDirectory()
+        home = Path(self._temporary_home.name)
+        _TEST_CLOUD_ENV_FILE = home / ".codex" / ".env"
+        _TEST_CLOUD_ENV_FILE.parent.mkdir()
+        os.mkfifo(_TEST_CLOUD_ENV_FILE)
+        self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home)
+        self._home_patch.start()
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def tearDown(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
+        self._home_patch.stop()
+        self._temporary_home.cleanup()
+        _TEST_CLOUD_ENV_FILE = None
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def _receipt(self, runner):
