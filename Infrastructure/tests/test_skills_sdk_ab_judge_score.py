@@ -176,6 +176,16 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
                     codex_judge._codex_judge_command(profile, Path(directory) / "work", Path(directory) / "last-message.json")
 
+    def test_cloud_judge_rejects_receipt_only_stream_marker(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with (
+            patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
+            patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+        ):
+            self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                codex_judge._codex_judge_command(profile, Path("/private/tmp/work"), Path("/private/tmp/last-message.json"))
+
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
         command_tail = [

@@ -14,6 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact, _cloud_catalog_fact  # noqa: E402
+from ask.skills_sdk.eval_ab_run import _execution_argv_for_run  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import is_actual_opaque_env_reference, is_opaque_env_reference  # noqa: E402
 
 
 class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
@@ -101,6 +103,22 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                 )
         self.assertEqual(auth["status"], "blocked")
         self.assertEqual(fact["status"], "blocked")
+
+    def test_runtime_entrypoints_reject_receipt_only_stream_marker(self) -> None:
+        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
+        with (
+            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=True),
+            patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+        ):
+            auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+            with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
+                _execution_argv_for_run(command)
+        self.assertEqual(auth["status"], "blocked")
+
+    def test_receipt_only_stream_marker_is_never_a_runtime_path(self) -> None:
+        marker = "<operator-approved-opaque-env-stream>"
+        self.assertTrue(is_opaque_env_reference(marker))
+        self.assertFalse(is_actual_opaque_env_reference(marker))
 
 
 if __name__ == "__main__":

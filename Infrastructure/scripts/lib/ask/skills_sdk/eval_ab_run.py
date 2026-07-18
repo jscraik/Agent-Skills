@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
 from ask.skills_sdk.ab_transport_contracts import (
+    is_actual_opaque_env_reference,
     is_approved_op_binary,
     is_opaque_env_reference,
     opaque_env_identity_digest,
@@ -98,7 +99,7 @@ def _default_codex_runner(
 ) -> CodexRunResult:
     execution_argv = _execution_argv_for_run(command_argv)
     if _codex_profile_from_argv(command_argv) == "oss-cloud":
-        if len(execution_argv) < 5 or not is_opaque_env_reference(execution_argv[3]):
+        if len(execution_argv) < 5 or not is_actual_opaque_env_reference(execution_argv[3]):
             raise ValueError("cloud execution auth stream changed before Codex invocation")
         observed_identity = opaque_env_identity_digest(execution_argv[3])
         if observed_identity is None or (
@@ -129,7 +130,7 @@ def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     if profile == "oss-local":
         return list(command_argv)
     env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
-    if not is_opaque_env_reference(env_file):
+    if not is_actual_opaque_env_reference(env_file):
         raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     return ["op", "run", "--env-file", env_file, "--", *command_argv]
 
