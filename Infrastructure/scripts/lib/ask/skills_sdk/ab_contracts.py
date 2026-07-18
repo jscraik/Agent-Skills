@@ -10,6 +10,7 @@ from ask.skills_sdk.ab_contract_guards import (
     run_gate_is_completed,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
+    validate_argv_output_last_message_path,
     validate_run_receipt_status,
 )
 from ask.skills_sdk.ab_profile_contracts import (
@@ -288,10 +289,6 @@ class AbEvidencePlan(_SdkContractModel):
         return _validate_exact_decision_labels(value, message="winner_values must contain the exact A/B decision labels")
 
 
-def _exact_command_labels(rows: list[str]) -> bool:
-    return set(rows) == {"A", "B"}
-
-
 class AbPreviewReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-preview-receipt.v0"]
     schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"]
@@ -357,6 +354,7 @@ class AbCodexCommandPlan(_SdkContractModel):
         _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
         if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != self.approval_policy:
             raise ValueError("Codex command argv must prove the declared approval policy")
+        validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="Codex command argv must prove output_last_message_path")
         return self
 
 
@@ -427,7 +425,7 @@ class AbPlanReceipt(_SdkContractModel):
     def _validate_planned_packet(self) -> None:
         if self.blockers or not self._has_plan_evidence():
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
-        if not _exact_variant_labels(self.command_plan) or not _exact_command_labels(self.command_variant_labels):
+        if not _exact_variant_labels(self.command_plan) or set(self.command_variant_labels) != {"A", "B"}:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
         if [gate.lane for gate in self.runtime_profile_gates] != ["oss-local", "oss-cloud"]:
             raise ValueError("A/B plan must require ordered oss-local then oss-cloud gates")
@@ -472,6 +470,7 @@ class AbVariantRunResult(_SdkContractModel):
             _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
         if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != "on-request":
             raise ValueError("executed Codex argv must prove on-request approval")
+        validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="executed Codex argv must prove output_last_message_path")
         if bool(self.blockers) != (self.status == "blocked"):
             raise ValueError("A/B variant blocker status is inconsistent")
         return self

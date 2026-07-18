@@ -1658,6 +1658,10 @@
         "type": "string"
       },
       "maxItems": 2,
+      "prefixItems": [
+        {"const": "A"},
+        {"const": "B"}
+      ],
       "uniqueItems": true,
       "title": "Command Variant Labels",
       "type": "array"
@@ -1813,8 +1817,8 @@
             "minItems": 2,
             "maxItems": 2,
             "prefixItems": [
-              {"properties": {"status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["status", "exit_code", "blockers"]},
-              {"properties": {"status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["status", "exit_code", "blockers"]}
+              {"properties": {"variant_label": {"const": "A"}, "status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["variant_label", "status", "exit_code", "blockers"]},
+              {"properties": {"variant_label": {"const": "B"}, "status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["variant_label", "status", "exit_code", "blockers"]}
             ]
           },
           "mutation_performed": {"const": true},
@@ -1825,6 +1829,10 @@
           }
         }
       }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]},
+      "then": {"properties": {"blockers": {"minItems": 1}}}
     },
     {
       "if": {
@@ -1838,9 +1846,6 @@
       },
       "then": {
         "properties": {
-          "blockers": {
-            "minItems": 1
-          },
           "runtime_profile_gates": {
             "minItems": 1,
             "anyOf": [
@@ -1860,18 +1865,6 @@
             ]
           }
         }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "status": {"const": "blocked"},
-          "runtime_profile_gates": {"maxItems": 0}
-        },
-        "required": ["status", "runtime_profile_gates"]
-      },
-      "then": {
-        "properties": {"blockers": {"minItems": 1}}
       }
     }
   ]

@@ -9,6 +9,20 @@ def exact_variant_labels(rows: list[Any], *, attr: str = "variant_label") -> boo
     return len(rows) == 2 and {getattr(row, attr) for row in rows} == {"A", "B"}
 
 
+def argv_output_last_message_path(argv: list[str]) -> str | None:
+    if argv.count("--output-last-message") != 1:
+        return None
+    option_index = argv.index("--output-last-message")
+    if option_index + 1 >= len(argv):
+        return None
+    return argv[option_index + 1]
+
+
+def validate_argv_output_last_message_path(argv: list[str], path: str, *, message: str) -> None:
+    if argv_output_last_message_path(argv) != path:
+        raise ValueError(message)
+
+
 def validate_plan_gate_identity(gate: Any) -> None:
     expected_order = 1 if gate.lane == "oss-local" else 2
     if gate.lane != gate.codex_profile or gate.order != expected_order:
