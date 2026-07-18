@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import os
+import pwd
 import stat
 from pathlib import Path
 
@@ -9,13 +11,29 @@ def is_approved_op_binary(value: str) -> bool:
     return value == "op" or (Path(value).is_absolute() and Path(value).name == "op")
 
 
+def operator_account_home() -> Path | None:
+    """Return the uid-owned account home without trusting the ambient HOME variable."""
+    try:
+        return Path(pwd.getpwuid(os.getuid()).pw_dir)
+    except (KeyError, OSError):
+        return None
+
+
+def actual_opaque_env_path() -> Path | None:
+    """Return the only env stream path an op subprocess may open."""
+    home = operator_account_home()
+    return None if home is None else home / ".codex" / ".env"
+
+
 def is_actual_opaque_env_reference(value: str) -> bool:
     """Return whether value names the one runtime stream an op process may open."""
     if value.startswith("~"):
         return False
     try:
         path = Path(value).expanduser()
-        expected = Path.home() / ".codex" / ".env"
+        expected = actual_opaque_env_path()
+        if expected is None:
+            return False
         return path == expected and not expected.parent.is_symlink() and stat.S_ISFIFO(path.lstat().st_mode)
     except OSError:
         return False

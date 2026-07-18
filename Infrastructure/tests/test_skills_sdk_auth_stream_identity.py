@@ -43,7 +43,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             os.mkfifo(env_file)
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
                 patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
@@ -91,7 +91,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             os.mkfifo(unapproved_env)
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(unapproved_env)}, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
                 patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
@@ -136,8 +136,32 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             external.mkdir()
             os.mkfifo(stream)
             os.symlink(external, home / ".codex")
-            with patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home):
+            with patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home):
                 self.assertFalse(is_actual_opaque_env_reference(str(home / ".codex" / ".env")))
+
+    def test_runtime_stream_ignores_ambient_home_override(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            actual_home = Path(temp_dir) / "account-home"
+            attacker_home = Path(temp_dir) / "attacker-home"
+            actual_stream = actual_home / ".codex" / ".env"
+            attacker_stream = attacker_home / ".codex" / ".env"
+            actual_stream.parent.mkdir(parents=True)
+            attacker_stream.parent.mkdir(parents=True)
+            os.mkfifo(actual_stream)
+            os.mkfifo(attacker_stream)
+            command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
+            with (
+                patch.dict(
+                    os.environ,
+                    {"HOME": str(attacker_home), "SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(attacker_stream)},
+                    clear=False,
+                ),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=actual_home),
+            ):
+                self.assertTrue(is_actual_opaque_env_reference(str(actual_stream)))
+                self.assertFalse(is_actual_opaque_env_reference(str(attacker_stream)))
+                with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
+                    _execution_argv_for_run(command)
 
 
 if __name__ == "__main__":

@@ -148,7 +148,7 @@ def _run_codex_with_captured_subprocess(
             )
             with (
                 patch.dict(os.environ, {**base_env, **env}, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(profile_dir)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
                 op_patch,
             ):
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
@@ -169,7 +169,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             os.mkfifo(unapproved_stream)
             with (
                 patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(unapproved_stream)}, clear=False),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=actual_home),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=actual_home),
                 patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
             ):
                 self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
@@ -193,7 +193,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             "--ask-for-approval", "on-request", "-",
         ]
         with tempfile.TemporaryDirectory() as directory, patch(
-            "ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)
+            "ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)
         ):
             env_dir = Path(directory) / ".codex"
             env_dir.mkdir()
@@ -385,7 +385,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             os.mkfifo(op_env_file)
             with (
                 patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(profile_dir)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 receipt = build_ab_judge_score_receipt(
                     REPO_ROOT,
@@ -1121,7 +1121,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             os.mkfifo(op_env_file)
             with (
                 patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(profile_dir)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(
                     {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
@@ -1193,7 +1193,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             with (
                 env_patch,
                 bin_patch,
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(profile_dir)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[1:5], ["run", "--env-file", str(op_env_file), "--"])

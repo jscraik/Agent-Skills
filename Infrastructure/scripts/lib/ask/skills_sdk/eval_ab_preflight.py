@@ -17,7 +17,11 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
-from ask.skills_sdk.ab_transport_contracts import is_actual_opaque_env_reference, opaque_env_identity_digest
+from ask.skills_sdk.ab_transport_contracts import (
+    actual_opaque_env_path,
+    is_actual_opaque_env_reference,
+    opaque_env_identity_digest,
+)
 
 
 PreflightProbe = Callable[[dict[str, Any]], dict[str, Any]]
@@ -205,7 +209,8 @@ def _cloud_runtime_fact(selected_model: str, profile_path: Path) -> dict[str, An
 
 
 def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
-    path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
     source = "operator-approved-op-env-stream"
     approved = is_actual_opaque_env_reference(str(path))
     source_kind = "op_fifo" if approved else "missing_or_invalid"
@@ -572,7 +577,8 @@ def _cloud_catalog_fact(
     selected_model: str, profile_path: Path, auth_fact: dict[str, Any],
     runner: CloudCatalogRunner = _run_cloud_catalog,
 ) -> dict[str, Any]:
-    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
     op_binary = shutil.which("op")
     evidence = {
         "profile_path": str(profile_path), "selected_model_digest": _digest(selected_model),

@@ -466,7 +466,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             environment = {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}
             with (
                 patch.dict(os.environ, environment, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
                 patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
                 patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")),
             ):

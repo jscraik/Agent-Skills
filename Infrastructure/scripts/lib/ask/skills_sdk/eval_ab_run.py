@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
 from ask.skills_sdk.ab_transport_contracts import (
+    actual_opaque_env_path,
     is_actual_opaque_env_reference,
     is_approved_op_binary,
     opaque_env_identity_digest,
@@ -128,7 +129,8 @@ def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     profile = _codex_profile_from_argv(command_argv)
     if profile == "oss-local":
         return list(command_argv)
-    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "")
     if not is_actual_opaque_env_reference(env_file):
         raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     return ["op", "run", "--env-file", env_file, "--", *command_argv]
@@ -530,7 +532,8 @@ def _runner_bound_to_auth_identity(gate: dict[str, Any], runner: CodexRunner) ->
     expected_identity = gate["preflight"]["auth"].get("auth_stream_identity_digest")
     if expected_identity is None:
         return runner
-    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "")
 
     def bound_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
         if opaque_env_identity_digest(env_file) != expected_identity:

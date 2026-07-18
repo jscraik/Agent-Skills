@@ -52,7 +52,7 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
             with (
                 patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)),
             ):
                 result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
         self.assertEqual(captured[0][:5], ["op", "run", "--env-file", str(env_file), "--"])
@@ -66,7 +66,7 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
             env_file.write_text("plaintext must not be read", encoding="utf-8")
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
-                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)),
             ):
                 with self.assertRaisesRegex(ValueError, "opaque environment stream"):
                     _default_codex_runner(command, "prompt", REPO_ROOT, 1)

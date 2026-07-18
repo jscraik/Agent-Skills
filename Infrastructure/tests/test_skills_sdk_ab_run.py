@@ -131,7 +131,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         _TEST_CLOUD_ENV_FILE = home / ".codex" / ".env"
         _TEST_CLOUD_ENV_FILE.parent.mkdir()
         os.mkfifo(_TEST_CLOUD_ENV_FILE)
-        self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home)
+        self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home)
         self._home_patch.start()
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.ab_transport_contracts import is_actual_opaque_env_reference
+from ask.skills_sdk.ab_transport_contracts import actual_opaque_env_path, is_actual_opaque_env_reference
 from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
 
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
@@ -165,7 +165,8 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     if not judge_profile.get("secret_env_names"):
         return None
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
-    candidate = configured if configured is not None else str(Path.home() / ".codex" / ".env")
+    default_stream = actual_opaque_env_path()
+    candidate = configured if configured is not None else str(default_stream) if default_stream else ""
     if not is_actual_opaque_env_reference(candidate):
         return None
     return Path(candidate)
