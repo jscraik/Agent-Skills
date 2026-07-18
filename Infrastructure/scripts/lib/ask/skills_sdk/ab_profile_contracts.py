@@ -158,6 +158,9 @@ class AbAuthPreflightFact(AbPreflightFact):
     auth_source: Literal["not_applicable", "missing_or_invalid", "op_fifo", "op_opaque_env_file"] = (
         "not_applicable"
     )
+    auth_stream_identity_digest: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
 
 
 class AbCatalogPreflightFact(AbPreflightFact):

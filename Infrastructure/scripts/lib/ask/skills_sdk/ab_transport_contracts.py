@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import stat
 from pathlib import Path
 
@@ -18,6 +19,19 @@ def is_opaque_env_reference(value: str) -> bool:
         return path.name == ".env" and path.parent.name == ".codex" and stat.S_ISFIFO(path.lstat().st_mode)
     except OSError:
         return False
+
+
+def opaque_env_identity_digest(value: str | Path) -> str | None:
+    """Return a non-secret identity for the exact approved FIFO inode."""
+    try:
+        path = Path(value).expanduser()
+        metadata = path.lstat()
+    except OSError:
+        return None
+    if not stat.S_ISFIFO(metadata.st_mode):
+        return None
+    identity = f"{metadata.st_dev}:{metadata.st_ino}:{metadata.st_mode & 0o7777}"
+    return f"sha256:{hashlib.sha256(identity.encode('ascii')).hexdigest()}"
 
 
 def redact_opaque_env_reference(value: str) -> str:

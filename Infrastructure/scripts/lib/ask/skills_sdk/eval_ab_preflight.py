@@ -18,6 +18,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
+from ask.skills_sdk.ab_transport_contracts import opaque_env_identity_digest
 
 
 PreflightProbe = Callable[[dict[str, Any]], dict[str, Any]]
@@ -221,6 +222,7 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "op_binary_resolved": op_binary is not None,
         "credential_presence": "delegated_to_op_run" if approved else "unavailable",
         "env_stream_content_observed": False,
+        "auth_stream_identity_digest": opaque_env_identity_digest(path),
     }
     if not approved or op_binary is None:
         return _blocked_fact(
@@ -233,6 +235,7 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "auth_reference": "codex_cli_auth",
         "secret_value_observed": False,
         "auth_source": source_kind,
+        "auth_stream_identity_digest": evidence["auth_stream_identity_digest"],
     }
 
 
@@ -568,31 +571,29 @@ def _catalog_fact_from_payload(
     )
 
 
+def _auth_blocked_catalog(selected_model: str, evidence: dict[str, Any], reason: str) -> dict[str, Any]:
+    return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", reason, network_accessed=False)
+
+
 def _cloud_catalog_fact(
-    selected_model: str,
-    profile_path: Path,
-    auth_fact: dict[str, Any],
+    selected_model: str, profile_path: Path, auth_fact: dict[str, Any],
     runner: CloudCatalogRunner = _run_cloud_catalog,
 ) -> dict[str, Any]:
     env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
     op_binary = shutil.which("op")
     evidence = {
-        "profile_path": str(profile_path),
-        "selected_model_digest": _digest(selected_model),
+        "profile_path": str(profile_path), "selected_model_digest": _digest(selected_model),
         "probe_url": DEFAULT_CATALOG_URL,
-        "safe_non_generation_catalog_probe": True,
-        "auth_source": auth_fact.get("auth_source", "missing_or_invalid"),
-        "secret_value_observed": False,
-        "generation_performed": False,
-        "provider_invoked": False,
-        "codex_exec_invoked": False,
+        "safe_non_generation_catalog_probe": True, "auth_source": auth_fact.get("auth_source", "missing_or_invalid"),
+        "secret_value_observed": False, "generation_performed": False,
+        "provider_invoked": False, "codex_exec_invoked": False,
     }
     if auth_fact.get("status") != "pass" or op_binary is None:
-        return _blocked_catalog_probe(
-            selected_model, evidence, "cloud_auth_unavailable",
-            "cloud catalog probe requires the approved op-run auth boundary", network_accessed=False,
-        )
-    if "evidence_source" in auth_fact and _approved_cloud_auth_fact(selected_model).get("status") != "pass":
+        return _auth_blocked_catalog(selected_model, evidence, "cloud catalog probe requires the approved op-run auth boundary")
+    expected_identity = auth_fact.get("auth_stream_identity_digest")
+    if expected_identity is not None and opaque_env_identity_digest(env_file) != expected_identity:
+        return _auth_blocked_catalog(selected_model, evidence, "approved opaque auth stream identity changed before catalog execution")
+    if "evidence_source" in auth_fact and expected_identity is None and _approved_cloud_auth_fact(selected_model).get("status") != "pass":
         return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", "approved opaque auth stream changed or became unavailable before catalog execution", network_accessed=False)
     command = _cloud_catalog_command(op_binary, env_file, selected_model)
     evidence["probe_command_shape"] = _safe_command_shape(command)
@@ -600,8 +601,7 @@ def _cloud_catalog_fact(
     evidence.update(child_evidence)
     if payload is None:
         return _blocked_catalog_probe(
-            selected_model, evidence, "cloud_catalog_unavailable",
-            f"cloud catalog probe failed: {failure}",
+            selected_model, evidence, "cloud_catalog_unavailable", f"cloud catalog probe failed: {failure}",
             network_accessed=failure != "network_or_runtime_failure",
         )
     return _catalog_fact_from_payload(selected_model, evidence, payload)

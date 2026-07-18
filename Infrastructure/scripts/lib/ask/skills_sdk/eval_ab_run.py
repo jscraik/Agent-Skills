@@ -9,7 +9,11 @@ import subprocess
 from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
-from ask.skills_sdk.ab_transport_contracts import is_approved_op_binary, is_opaque_env_reference
+from ask.skills_sdk.ab_transport_contracts import (
+    is_approved_op_binary,
+    is_opaque_env_reference,
+    opaque_env_identity_digest,
+)
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 
@@ -88,11 +92,23 @@ def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
     return resolved
 
 
-def _default_codex_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+def _default_codex_runner(
+    command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int,
+    *, expected_auth_stream_identity: str | None = None,
+) -> CodexRunResult:
     execution_argv = _execution_argv_for_run(command_argv)
     if _codex_profile_from_argv(command_argv) == "oss-cloud":
         if len(execution_argv) < 5 or not is_opaque_env_reference(execution_argv[3]):
             raise ValueError("cloud execution auth stream changed before Codex invocation")
+        observed_identity = opaque_env_identity_digest(execution_argv[3])
+        if observed_identity is None or (
+            expected_auth_stream_identity is not None
+            and observed_identity != expected_auth_stream_identity
+        ):
+            raise ValueError("cloud execution auth stream identity changed before Codex invocation")
+        expected_auth_stream_identity = observed_identity
+        if opaque_env_identity_digest(execution_argv[3]) != expected_auth_stream_identity:
+            raise ValueError("cloud execution auth stream identity changed before subprocess start")
     proc = subprocess.run(
         execution_argv,
         cwd=repo_root,
@@ -494,17 +510,39 @@ def _preflight_blocked_gate(gate: dict[str, Any]) -> dict[str, Any]:
 def _execute_runtime_gate(
     repo_root: Path, plan: dict[str, Any], gate: dict[str, Any], timeout: int, runner: CodexRunner,
 ) -> list[dict[str, Any]]:
+    gate_runner = _runner_bound_to_auth_identity(gate, runner)
     results = []
     for command_plan in gate["command_plan"]:
         result = _execute_variant(
             repo_root, command_plan=command_plan,
             prompt=_variant_prompt(_variant_for_plan(plan, command_plan), plan["fixture"]),
-            timeout_seconds=timeout, runner=runner,
+            timeout_seconds=timeout, runner=gate_runner,
         )
         if result["codex_profile"] is not None and result["codex_profile"] != gate["codex_profile"]:
             raise ValueError("executed Codex argv profile does not match runtime gate")
         results.append(result)
     return results
+
+
+def _runner_bound_to_auth_identity(gate: dict[str, Any], runner: CodexRunner) -> CodexRunner:
+    if gate["lane"] != "oss-cloud":
+        return runner
+    expected_identity = gate["preflight"]["auth"].get("auth_stream_identity_digest")
+    if expected_identity is None:
+        return runner
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+
+    def bound_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+        if opaque_env_identity_digest(env_file) != expected_identity:
+            raise ValueError("cloud execution auth stream identity changed before runner start")
+        if runner is _default_codex_runner:
+            return _default_codex_runner(
+                command_argv, prompt, repo_root, timeout_seconds,
+                expected_auth_stream_identity=expected_identity,
+            )
+        return runner(command_argv, prompt, repo_root, timeout_seconds)
+
+    return bound_runner
 
 
 def _variant_for_plan(plan: dict[str, Any], command_plan: dict[str, Any]) -> dict[str, str]:

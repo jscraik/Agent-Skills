@@ -58,6 +58,20 @@
           ],
           "title": "Auth Source",
           "type": "string"
+        },
+        "auth_stream_identity_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Auth Stream Identity Digest"
         }
       },
       "required": [

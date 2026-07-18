@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -16,7 +17,13 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk import schema_validation  # noqa: E402
-from ask.skills_sdk.eval_ab_run import CodexRunResult, _execute_variant, build_ab_run_receipt  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import opaque_env_identity_digest  # noqa: E402
+from ask.skills_sdk.eval_ab_run import (  # noqa: E402
+    CodexRunResult,
+    _default_codex_runner,
+    _execute_variant,
+    build_ab_run_receipt,
+)
 from ask.skills_sdk.eval_ab_preflight import _cloud_catalog_fact  # noqa: E402
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt  # noqa: E402
@@ -294,3 +301,35 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         self.assertEqual(fact["status"], "blocked")
         self.assertTrue(fact["network_accessed"])
         self.assertIn("timeout", fact["blocker"]["reason"])
+
+
+    def test_default_cloud_runner_blocks_same_path_fifo_replacement(self) -> None:
+        captured: list[list[str]] = []
+
+        def forbidden_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured.append(argv)
+            raise AssertionError("subprocess must not receive a replacement auth stream")
+
+        command = [
+            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
+            "--sandbox", "read-only", "--json", "-",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            os.mkfifo(env_file)
+            original_identity = opaque_env_identity_digest(env_file)
+            env_file.unlink()
+            os.mkfifo(env_file)
+            with (
+                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=forbidden_run),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+            ):
+                with self.assertRaisesRegex(ValueError, "identity changed"):
+                    _default_codex_runner(
+                        command, "prompt", REPO_ROOT, 1,
+                        expected_auth_stream_identity=original_identity,
+                    )
+
+        self.assertEqual(captured, [])
