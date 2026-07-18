@@ -334,6 +334,7 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             with (
                 patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=forbidden_run),
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)),
             ):
                 with self.assertRaisesRegex(ValueError, "identity changed"):
                     _default_codex_runner(

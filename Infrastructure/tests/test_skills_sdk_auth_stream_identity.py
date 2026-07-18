@@ -78,6 +78,30 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
         self.assertEqual(fact["status"], "blocked")
         self.assertEqual(fact["blocker"]["blocker_class"], "cloud_auth_unavailable")
 
+    def test_auth_rejects_another_home_codex_fifo_before_catalog_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            home = Path(temp_dir) / "actual-home"
+            approved_env = home / ".codex" / ".env"
+            unapproved_env = Path(temp_dir) / "other-home" / ".codex" / ".env"
+            approved_env.parent.mkdir(parents=True)
+            unapproved_env.parent.mkdir(parents=True)
+            os.mkfifo(approved_env)
+            os.mkfifo(unapproved_env)
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(unapproved_env)}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home),
+                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+            ):
+                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                fact = _cloud_catalog_fact(
+                    "minimax-m2.7:cloud",
+                    Path("/mock/oss-cloud.config.toml"),
+                    auth,
+                    lambda _command: self.fail("unapproved home FIFO must not reach the catalog runner"),
+                )
+        self.assertEqual(auth["status"], "blocked")
+        self.assertEqual(fact["status"], "blocked")
+
 
 if __name__ == "__main__":
     unittest.main()

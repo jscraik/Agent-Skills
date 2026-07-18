@@ -160,7 +160,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             "--", "codex", "exec", "--profile", "oss-cloud",
             "--ask-for-approval", "on-request", "-",
         ]
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)
+        ):
             env_dir = Path(directory) / ".codex"
             env_dir.mkdir()
             env_file = env_dir / ".env"
@@ -342,7 +344,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_dir.mkdir()
             op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(profile_dir)),
+            ):
                 receipt = build_ab_judge_score_receipt(
                     REPO_ROOT,
                     run_receipt=RUN_RECEIPT,

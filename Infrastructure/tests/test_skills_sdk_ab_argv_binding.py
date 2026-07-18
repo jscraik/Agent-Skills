@@ -1,19 +1,76 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_PATH = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.skills_sdk.eval_ab_run import _codex_runner_env, _default_codex_runner  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt  # noqa: E402
 
 
 class TestSkillsSdkAbArgvBinding(unittest.TestCase):
+    def test_codex_runner_env_keeps_secret_names_out_of_skill_execution(self) -> None:
+        env = _codex_runner_env(
+            {
+                "PATH": "/usr/bin",
+                "HOME": "/tmp/home",
+                "OLLAMA_API_KEY": "secret",
+                "OPENAI_API_KEY": "secret",
+                "SESSION_TOKEN": "secret",
+                "CODEX_HOME": "/tmp/codex",
+            }
+        )
+        self.assertEqual(env["PATH"], "/usr/bin")
+        self.assertEqual(env["HOME"], "/tmp/home")
+        self.assertEqual(env["CODEX_HOME"], "/tmp/codex")
+        self.assertNotIn("OLLAMA_API_KEY", env)
+        self.assertNotIn("OPENAI_API_KEY", env)
+        self.assertNotIn("SESSION_TOKEN", env)
+
+    def test_default_cloud_runner_uses_only_actual_home_fifo(self) -> None:
+        captured: list[list[str]] = []
+        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "--sandbox", "read-only", "--json", "-"]
+
+        def fake_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured.append(argv)
+            return subprocess.CompletedProcess(argv, 0, stdout='{"type":"item.completed","item":{"type":"agent_message"}}\n', stderr="")
+
+        with tempfile.TemporaryDirectory() as directory:
+            env_file = Path(directory) / ".codex" / ".env"
+            env_file.parent.mkdir()
+            os.mkfifo(env_file)
+            with (
+                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)),
+            ):
+                result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
+        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", str(env_file), "--"])
+        self.assertEqual(result.executed_argv, captured[0])
+
+    def test_default_cloud_runner_rejects_non_fifo_stream_before_subprocess(self) -> None:
+        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "--sandbox", "read-only", "--json", "-"]
+        with tempfile.TemporaryDirectory() as directory:
+            env_file = Path(directory) / ".codex" / ".env"
+            env_file.parent.mkdir()
+            env_file.write_text("plaintext must not be read", encoding="utf-8")
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=Path(directory)),
+            ):
+                with self.assertRaisesRegex(ValueError, "opaque environment stream"):
+                    _default_codex_runner(command, "prompt", REPO_ROOT, 1)
+
     def test_v1_reader_rejects_output_path_not_proven_by_argv(self) -> None:
         candidate = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
         candidate["command_plan"][0]["output_last_message_path"] = "evidence/forged-last-message.json"
@@ -24,6 +81,18 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
         candidate = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
         result = candidate["runtime_profile_gates"][0]["variant_results"][0]
         result["command_argv"].extend(["--output-last-message", "evidence/forged-last-message.json"])
+
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+
+    def test_v1_reader_rejects_reversed_a_b_receipt_order(self) -> None:
+        candidate = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+        candidate["command_variant_labels"] = ["B", "A"]
+        candidate["command_plan"].reverse()
+        candidate["variant_results"].reverse()
+        for gate in candidate["runtime_profile_gates"]:
+            gate["command_plan"].reverse()
+            gate["variant_results"].reverse()
 
         with self.assertRaises(ValueError):
             validate_ab_run_receipt(candidate)

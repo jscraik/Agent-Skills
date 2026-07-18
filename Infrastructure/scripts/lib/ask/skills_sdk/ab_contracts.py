@@ -425,7 +425,7 @@ class AbPlanReceipt(_SdkContractModel):
     def _validate_planned_packet(self) -> None:
         if self.blockers or not self._has_plan_evidence():
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
-        if not _exact_variant_labels(self.command_plan) or set(self.command_variant_labels) != {"A", "B"}:
+        if not _exact_variant_labels(self.command_plan) or self.command_variant_labels != ["A", "B"]:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
         if [gate.lane for gate in self.runtime_profile_gates] != ["oss-local", "oss-cloud"]:
             raise ValueError("A/B plan must require ordered oss-local then oss-cloud gates")

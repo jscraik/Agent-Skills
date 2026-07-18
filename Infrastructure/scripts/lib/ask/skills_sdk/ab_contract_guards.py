@@ -6,7 +6,7 @@ from ask.skills_sdk.ab_profile_contracts import runtime_preflight_identity_match
 
 
 def exact_variant_labels(rows: list[Any], *, attr: str = "variant_label") -> bool:
-    return len(rows) == 2 and {getattr(row, attr) for row in rows} == {"A", "B"}
+    return [getattr(row, attr) for row in rows] == ["A", "B"]
 
 
 def argv_output_last_message_path(argv: list[str]) -> str | None:
@@ -136,7 +136,7 @@ def _validate_completed_run_packets(receipt: Any) -> None:
         raise ValueError("completed A/B run receipts must include exactly one command plan per variant")
     if not exact_variant_labels(receipt.variant_results):
         raise ValueError("completed A/B run receipts must include exactly one result per variant")
-    if set(receipt.command_variant_labels) != {"A", "B"}:
+    if receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("completed A/B run receipts must include exact command variant labels")
     if not _run_has_consistent_runtime_gates(receipt):
         raise ValueError("A/B run must preserve ordered runtime gates and matching oss-local results")

@@ -16,7 +16,7 @@ def is_opaque_env_reference(value: str) -> bool:
         return False
     try:
         path = Path(value).expanduser()
-        return path.name == ".env" and path.parent.name == ".codex" and stat.S_ISFIFO(path.lstat().st_mode)
+        return path == Path.home() / ".codex" / ".env" and stat.S_ISFIFO(path.lstat().st_mode)
     except OSError:
         return False
 
