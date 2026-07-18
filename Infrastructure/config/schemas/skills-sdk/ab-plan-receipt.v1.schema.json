@@ -347,6 +347,24 @@
         {
           "if": {
             "properties": {
+              "admission": {"properties": {"status": {"const": "pass"}}, "required": ["status"]}
+            },
+            "required": ["admission"]
+          },
+          "then": {
+            "properties": {
+              "admission": {"properties": {"blockers": {"maxItems": 0}}, "required": ["blockers"]},
+              "auth": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "catalog": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "model_catalog": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "profile_config": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "runtime": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
               "admission": {
                 "properties": {"status": {"const": "pass"}},
                 "required": ["status"]
@@ -1419,6 +1437,7 @@
         "type": "string"
       },
       "maxItems": 2,
+      "uniqueItems": true,
       "title": "Command Variant Labels",
       "type": "array"
     },
@@ -1427,6 +1446,10 @@
         "$ref": "#/$defs/AbCodexCommandPlan"
       },
       "maxItems": 2,
+      "prefixItems": [
+        {"properties": {"variant_label": {"const": "A"}}, "required": ["variant_label"]},
+        {"properties": {"variant_label": {"const": "B"}}, "required": ["variant_label"]}
+      ],
       "title": "Command Plan",
       "type": "array"
     },
@@ -1542,7 +1565,8 @@
           },
           "command_variant_labels": {
             "maxItems": 2,
-            "minItems": 2
+            "minItems": 2,
+            "uniqueItems": true
           },
           "runtime_profile_gates": {
             "items": {

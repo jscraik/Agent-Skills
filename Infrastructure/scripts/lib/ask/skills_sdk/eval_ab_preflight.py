@@ -592,6 +592,8 @@ def _cloud_catalog_fact(
             selected_model, evidence, "cloud_auth_unavailable",
             "cloud catalog probe requires the approved op-run auth boundary", network_accessed=False,
         )
+    if "evidence_source" in auth_fact and _approved_cloud_auth_fact(selected_model).get("status") != "pass":
+        return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", "approved opaque auth stream changed or became unavailable before catalog execution", network_accessed=False)
     command = _cloud_catalog_command(op_binary, env_file, selected_model)
     evidence["probe_command_shape"] = _safe_command_shape(command)
     payload, failure, child_evidence = _catalog_probe_result(command, runner)
@@ -600,7 +602,7 @@ def _cloud_catalog_fact(
         return _blocked_catalog_probe(
             selected_model, evidence, "cloud_catalog_unavailable",
             f"cloud catalog probe failed: {failure}",
-            network_accessed=False,
+            network_accessed=failure != "network_or_runtime_failure",
         )
     return _catalog_fact_from_payload(selected_model, evidence, payload)
 

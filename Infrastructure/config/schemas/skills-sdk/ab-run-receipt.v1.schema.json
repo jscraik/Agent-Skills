@@ -347,6 +347,24 @@
         {
           "if": {
             "properties": {
+              "admission": {"properties": {"status": {"const": "pass"}}, "required": ["status"]}
+            },
+            "required": ["admission"]
+          },
+          "then": {
+            "properties": {
+              "admission": {"properties": {"blockers": {"maxItems": 0}}, "required": ["blockers"]},
+              "auth": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "catalog": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "model_catalog": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "profile_config": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]},
+              "runtime": {"properties": {"blocker": {"type": "null"}}, "required": ["blocker"]}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
               "admission": {
                 "properties": {"status": {"const": "pass"}},
                 "required": ["status"]
@@ -1626,6 +1644,7 @@
         "type": "string"
       },
       "maxItems": 2,
+      "uniqueItems": true,
       "title": "Command Variant Labels",
       "type": "array"
     },
@@ -1634,6 +1653,10 @@
         "$ref": "#/$defs/AbCodexCommandPlan"
       },
       "maxItems": 2,
+      "prefixItems": [
+        {"properties": {"variant_label": {"const": "A"}}, "required": ["variant_label"]},
+        {"properties": {"variant_label": {"const": "B"}}, "required": ["variant_label"]}
+      ],
       "title": "Command Plan",
       "type": "array"
     },
@@ -1642,6 +1665,10 @@
         "$ref": "#/$defs/AbVariantRunResult"
       },
       "maxItems": 2,
+      "prefixItems": [
+        {"properties": {"variant_label": {"const": "A"}}, "required": ["variant_label"]},
+        {"properties": {"variant_label": {"const": "B"}}, "required": ["variant_label"]}
+      ],
       "title": "Variant Results",
       "type": "array"
     },
@@ -1770,8 +1797,15 @@
           },
           "variant_results": {
             "minItems": 2,
-            "maxItems": 2
+            "maxItems": 2,
+            "prefixItems": [
+              {"properties": {"status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["status", "exit_code", "blockers"]},
+              {"properties": {"status": {"const": "pass"}, "exit_code": {"const": 0}, "blockers": {"maxItems": 0}}, "required": ["status", "exit_code", "blockers"]}
+            ]
           },
+          "mutation_performed": {"const": true},
+          "provider_invoked": {"const": true},
+          "network_accessed": {"const": true},
           "codex_exec_invoked": {
             "const": true
           }
@@ -1783,6 +1817,7 @@
         "properties": {
           "status": {"const": "blocked"},
           "runtime_profile_gates": {
+            "minItems": 1,
             "prefixItems": [
               {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
             ]
@@ -1804,6 +1839,18 @@
             ]
           }
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "runtime_profile_gates": {"maxItems": 0}
+        },
+        "required": ["status", "runtime_profile_gates"]
+      },
+      "then": {
+        "properties": {"blockers": {"minItems": 1}}
       }
     }
   ]

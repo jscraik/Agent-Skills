@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -16,6 +17,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.eval_ab_run import CodexRunResult, _execute_variant, build_ab_run_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_preflight import _cloud_catalog_fact  # noqa: E402
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt  # noqa: E402
 from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
@@ -251,3 +253,44 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             self._receipt(forbidden_runner)
         self.assertEqual(calls, [])
         self.assertFalse((REPO_ROOT / self.evidence_root).exists())
+
+    def test_v1_schema_rejects_completed_receipts_without_side_effects(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        for field in ("mutation_performed", "provider_invoked", "network_accessed"):
+            candidate = json.loads(fixture_path.read_text())
+            candidate[field] = False
+            self.assertEqual(self._schema_result(candidate).status, "fail", field)
+
+    def test_v1_schema_rejects_duplicate_labels_and_failed_completed_variants(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        duplicated = json.loads(fixture_path.read_text())
+        duplicated["command_variant_labels"] = ["A", "A"]
+        self.assertEqual(self._schema_result(duplicated).status, "fail")
+
+        failed = json.loads(fixture_path.read_text())
+        failed["variant_results"][0].update({"status": "blocked", "exit_code": 1, "blockers": ["failed"]})
+        self.assertEqual(self._schema_result(failed).status, "fail")
+
+    def test_v1_schema_allows_zero_gate_blocked_receipt(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        blocked = json.loads(fixture_path.read_text())
+        blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
+        self.assertEqual(self._schema_result(blocked).status, "pass")
+
+    def test_v1_schema_rejects_passing_preflight_with_blockers(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        preflight = candidate["runtime_profile_gates"][0]["preflight"]
+        preflight["admission"]["blockers"] = [{"blocker_class": "preflight_evidence_missing", "reason": "contradictory"}]
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+    def test_cloud_catalog_probe_failure_preserves_network_attempt(self) -> None:
+        approved = {"status": "pass", "auth_source": "op_fifo", "auth_reference": "codex_cli_auth", "secret_value_observed": False}
+        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
+            fact = _cloud_catalog_fact(
+                "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                lambda _command: (_ for _ in ()).throw(subprocess.TimeoutExpired(["op", "run"], 1)),
+            )
+        self.assertEqual(fact["status"], "blocked")
+        self.assertTrue(fact["network_accessed"])
+        self.assertIn("timeout", fact["blocker"]["reason"])

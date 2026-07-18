@@ -90,6 +90,9 @@ def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
 
 def _default_codex_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
     execution_argv = _execution_argv_for_run(command_argv)
+    if _codex_profile_from_argv(command_argv) == "oss-cloud":
+        if len(execution_argv) < 5 or not is_opaque_env_reference(execution_argv[3]):
+            raise ValueError("cloud execution auth stream changed before Codex invocation")
     proc = subprocess.run(
         execution_argv,
         cwd=repo_root,

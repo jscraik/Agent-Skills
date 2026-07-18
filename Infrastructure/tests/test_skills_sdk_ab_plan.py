@@ -71,6 +71,15 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         result = self._managed_v1_result(payload)
         self.assertEqual(result.status, "pass", result.diagnostics)
 
+    def test_v1_schema_rejects_duplicate_command_variant_labels(self) -> None:
+        payload = json.loads(
+            (REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        payload["command_variant_labels"] = ["A", "A"]
+        self.assertEqual(self._managed_v1_result(payload).status, "fail")
+
     def test_managed_v1_validator_rejects_invalid_json_numbers(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.v1.json"
         for invalid_number in (-0.5, float("nan"), float("inf"), float("-inf"), False):
