@@ -5,7 +5,6 @@ import json
 import os
 from pathlib import Path
 import shutil
-import stat
 import subprocess
 import sys
 import tomllib
@@ -18,7 +17,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
-from ask.skills_sdk.ab_transport_contracts import opaque_env_identity_digest
+from ask.skills_sdk.ab_transport_contracts import is_opaque_env_reference, opaque_env_identity_digest
 
 
 PreflightProbe = Callable[[dict[str, Any]], dict[str, Any]]
@@ -208,14 +207,8 @@ def _cloud_runtime_fact(selected_model: str, profile_path: Path) -> dict[str, An
 def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
     path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
     source = "operator-approved-op-env-stream"
-    approved = False
-    source_kind = "missing_or_invalid"
-    try:
-        mode = path.lstat().st_mode
-        if stat.S_ISFIFO(mode):
-            approved, source_kind = True, "op_fifo"
-    except OSError:
-        pass
+    approved = is_opaque_env_reference(str(path))
+    source_kind = "op_fifo" if approved else "missing_or_invalid"
     op_binary = shutil.which("op")
     evidence = {
         "auth_source": source_kind,
@@ -590,6 +583,8 @@ def _cloud_catalog_fact(
     }
     if auth_fact.get("status") != "pass" or op_binary is None:
         return _auth_blocked_catalog(selected_model, evidence, "cloud catalog probe requires the approved op-run auth boundary")
+    if not is_opaque_env_reference(str(env_file)):
+        return _auth_blocked_catalog(selected_model, evidence, "cloud catalog probe requires the exact approved opaque auth stream")
     expected_identity = auth_fact.get("auth_stream_identity_digest")
     if expected_identity is not None and opaque_env_identity_digest(env_file) != expected_identity:
         return _auth_blocked_catalog(selected_model, evidence, "approved opaque auth stream identity changed before catalog execution")

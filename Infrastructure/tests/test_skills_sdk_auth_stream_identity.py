@@ -35,10 +35,13 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
 
     def test_catalog_probe_blocks_same_path_fifo_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            env_file = Path(temp_dir) / "cloud-env"
+            home = Path(temp_dir)
+            env_file = home / ".codex" / ".env"
+            env_file.parent.mkdir()
             os.mkfifo(env_file)
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.Path.home", return_value=home),
                 patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
@@ -49,6 +52,28 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                     lambda _command: subprocess.CompletedProcess(
                         ["op", "run"], 0, stdout=json.dumps(self._catalog_payload()), stderr="",
                     ),
+                )
+        self.assertEqual(fact["status"], "blocked")
+        self.assertEqual(fact["blocker"]["blocker_class"], "cloud_auth_unavailable")
+
+    def test_catalog_probe_rejects_arbitrary_fifo_before_runner_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / "unapproved-cloud-env"
+            os.mkfifo(env_file)
+            auth = {
+                "status": "pass",
+                "auth_source": "op_fifo",
+                "auth_stream_identity_digest": "sha256:" + "a" * 64,
+            }
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
+                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+            ):
+                fact = _cloud_catalog_fact(
+                    "minimax-m2.7:cloud",
+                    Path("/mock/oss-cloud.config.toml"),
+                    auth,
+                    lambda _command: self.fail("unapproved FIFO must not reach the catalog runner"),
                 )
         self.assertEqual(fact["status"], "blocked")
         self.assertEqual(fact["blocker"]["blocker_class"], "cloud_auth_unavailable")
