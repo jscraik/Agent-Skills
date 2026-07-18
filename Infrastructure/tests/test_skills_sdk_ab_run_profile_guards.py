@@ -284,6 +284,15 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
         self.assertEqual(self._schema_result(blocked).status, "pass")
 
+    def test_v1_schema_rejects_blocked_receipt_when_all_gates_completed(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        blocked = json.loads(fixture_path.read_text())
+        blocked.update({"status": "blocked", "blockers": ["contradictory_status"]})
+        self.assertEqual(self._schema_result(blocked).status, "fail")
+
+        blocked["blockers"] = []
+        self.assertEqual(self._schema_result(blocked).status, "fail")
+
     def test_v1_schema_rejects_passing_preflight_with_blockers(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         candidate = json.loads(fixture_path.read_text())

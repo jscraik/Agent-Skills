@@ -1831,10 +1831,7 @@
         "properties": {
           "status": {"const": "blocked"},
           "runtime_profile_gates": {
-            "minItems": 1,
-            "prefixItems": [
-              {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
-            ]
+            "minItems": 1
           }
         },
         "required": ["status", "runtime_profile_gates"]
@@ -1845,11 +1842,21 @@
             "minItems": 1
           },
           "runtime_profile_gates": {
-            "minItems": 2,
-            "maxItems": 2,
-            "prefixItems": [
-              {},
-              {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
+            "minItems": 1,
+            "anyOf": [
+              {
+                "maxItems": 1,
+                "prefixItems": [
+                  {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
+                ]
+              },
+              {
+                "minItems": 2,
+                "prefixItems": [
+                  {},
+                  {"properties": {"status": {"enum": ["blocked", "not_run_with_reason"]}}, "required": ["status"]}
+                ]
+              }
             ]
           }
         }
