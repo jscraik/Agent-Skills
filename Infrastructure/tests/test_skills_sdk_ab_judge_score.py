@@ -1103,7 +1103,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
         self.assertTrue(captured_command[0].endswith("/op") or captured_command[0] == "op")
-        self.assertEqual(captured_command[1:5], ["run", "--env-file", str(op_env_file), "--"])
+        self.assertEqual(captured_command[1:3], ["run", "--env-file"])
+        self.assertRegex(captured_command[3], r"^/dev/fd/\d+$")
+        self.assertEqual(captured_command[4], "--")
         codex_segments = [captured_command[index:index + 4] for index in range(len(captured_command) - 3)]
         self.assertIn(["codex", "exec", "--profile", "oss-cloud"], codex_segments)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)

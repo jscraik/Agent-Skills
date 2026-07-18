@@ -15,7 +15,11 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact, _cloud_catalog_fact  # noqa: E402
 from ask.skills_sdk.eval_ab_run import _execution_argv_for_run, _validated_recorded_execution_argv  # noqa: E402
-from ask.skills_sdk.ab_transport_contracts import is_actual_opaque_env_reference, is_opaque_env_reference  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
+    approved_op_env_invocation,
+    is_actual_opaque_env_reference,
+    is_opaque_env_reference,
+)
 
 
 class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
@@ -44,7 +48,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
                 env_file.unlink()
@@ -69,7 +73,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             }
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
             ):
                 fact = _cloud_catalog_fact(
                     "minimax-m2.7:cloud",
@@ -92,7 +96,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(unapproved_env)}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
                 fact = _cloud_catalog_fact(
@@ -108,7 +112,8 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
         command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
         with (
             patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=True),
-            patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+            patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+            patch("ask.skills_sdk.eval_ab_run.approved_op_binary", return_value="/mock/bin/op"),
         ):
             auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
             with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
@@ -138,6 +143,69 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             os.symlink(external, home / ".codex")
             with patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home):
                 self.assertFalse(is_actual_opaque_env_reference(str(home / ".codex" / ".env")))
+
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support unavailable")
+    def test_runtime_stream_rejects_symlinked_account_home(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            real_home = root / "real-home"
+            linked_home = root / "linked-home"
+            env_file = real_home / ".codex" / ".env"
+            env_file.parent.mkdir(parents=True)
+            os.mkfifo(env_file)
+            os.symlink(real_home, linked_home)
+            with patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=linked_home):
+                self.assertFalse(is_actual_opaque_env_reference(str(linked_home / ".codex" / ".env")))
+
+    def test_descriptor_handoff_remains_bound_after_fifo_replacement(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            home = Path(temp_dir)
+            env_file = home / ".codex" / ".env"
+            env_file.parent.mkdir()
+            os.mkfifo(env_file)
+            with (
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
+                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
+            ):
+                with approved_op_env_invocation(env_file) as invocation:
+                    original = os.fstat(invocation.env_fd)
+                    env_file.unlink()
+                    os.mkfifo(env_file)
+                    replacement = env_file.lstat()
+                    self.assertNotEqual((original.st_dev, original.st_ino), (replacement.st_dev, replacement.st_ino))
+                    self.assertEqual((os.fstat(invocation.env_fd).st_dev, os.fstat(invocation.env_fd).st_ino), (original.st_dev, original.st_ino))
+                    self.assertEqual(invocation.runtime_argv(["child"])[3], f"/dev/fd/{invocation.env_fd}")
+                    self.assertEqual(invocation.receipt_argv(["child"])[3], str(env_file))
+
+    def test_default_catalog_runner_hands_only_the_open_descriptor_to_op(self) -> None:
+        captured: list[tuple[list[str], tuple[int, ...]]] = []
+
+        def fake_run(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured.append((argv, tuple(kwargs["pass_fds"])))
+            return subprocess.CompletedProcess(
+                argv, 0, stdout=json.dumps(self._catalog_payload()), stderr="",
+            )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            home = Path(temp_dir)
+            env_file = home / ".codex" / ".env"
+            env_file.parent.mkdir()
+            os.mkfifo(env_file)
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
+                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.subprocess.run", side_effect=fake_run),
+            ):
+                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                fact = _cloud_catalog_fact(
+                    "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), auth,
+                )
+        self.assertEqual(fact["status"], "pass")
+        self.assertEqual(captured[0][0][:3], ["/mock/bin/op", "run", "--env-file"])
+        self.assertRegex(captured[0][0][3], r"^/dev/fd/\d+$")
+        self.assertEqual(captured[0][1], (int(captured[0][0][3].removeprefix("/dev/fd/")),))
 
     def test_runtime_stream_ignores_ambient_home_override(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

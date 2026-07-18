@@ -467,7 +467,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             with (
                 patch.dict(os.environ, environment, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
                 patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")

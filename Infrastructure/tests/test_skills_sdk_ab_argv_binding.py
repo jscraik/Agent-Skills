@@ -53,10 +53,13 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
                 patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)),
+                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
             ):
                 result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
-        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", str(env_file), "--"])
-        self.assertEqual(result.executed_argv, captured[0])
+        self.assertEqual(captured[0][:3], ["/mock/bin/op", "run", "--env-file"])
+        self.assertRegex(captured[0][3], r"^/dev/fd/\d+$")
+        self.assertEqual(captured[0][4], "--")
+        self.assertEqual(result.executed_argv[:5], ["/mock/bin/op", "run", "--env-file", str(env_file), "--"])
 
     def test_default_cloud_runner_rejects_non_fifo_stream_before_subprocess(self) -> None:
         command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "--sandbox", "read-only", "--json", "-"]

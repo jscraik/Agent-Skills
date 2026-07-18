@@ -10,7 +10,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.ab_transport_contracts import actual_opaque_env_path, is_actual_opaque_env_reference
+from ask.skills_sdk.ab_transport_contracts import (
+    actual_opaque_env_path,
+    approved_op_binary,
+    approved_op_env_invocation,
+    is_actual_opaque_env_reference,
+)
 from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
 
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
@@ -46,15 +51,8 @@ def _run_codex_judge(
             codex_home = Path(codex_home_raw)
             sqlite_home = Path(sqlite_home_raw)
             _copy_codex_profile_config(judge_profile, codex_home)
-            completed = subprocess.run(
-                command,
-                input=prompt,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-                timeout=timeout_seconds,
-                env=_codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
+            completed, command = _execute_codex_judge_command(
+                command, prompt, judge_profile, timeout_seconds, repo_root, codex_home, sqlite_home,
             )
     return CodexJudgeResult(
         exit_code=completed.returncode,
@@ -63,6 +61,26 @@ def _run_codex_judge(
         output_text=completed.stdout,
         executed_argv=command,
     )
+
+
+def _execute_codex_judge_command(
+    command: list[str], prompt: str, judge_profile: dict[str, Any], timeout_seconds: int,
+    repo_root: Path, codex_home: Path, sqlite_home: Path,
+) -> tuple[subprocess.CompletedProcess[str], list[str]]:
+    kwargs: dict[str, Any] = {
+        "input": prompt, "text": True, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE,
+        "check": False, "timeout": timeout_seconds,
+        "env": _codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
+    }
+    if _codex_profile_id(judge_profile) != "oss-cloud":
+        return subprocess.run(command, **kwargs), command
+    op_env_file = _codex_op_env_file_path(judge_profile)
+    if op_env_file is None:
+        raise CodexProfileConfigError("oss-cloud judge execution requires the approved op run env boundary")
+    with approved_op_env_invocation(op_env_file) as invocation:
+        kwargs["pass_fds"] = invocation.pass_fds
+        completed = subprocess.run(invocation.runtime_argv(command[5:]), **kwargs)
+        return completed, invocation.receipt_argv(command[5:])
 
 
 def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
@@ -153,10 +171,7 @@ def _codex_op_env_file_available(judge_profile: dict[str, Any]) -> bool:
 
 
 def _codex_op_bin() -> str | None:
-    homebrew_op = Path("/opt/homebrew/bin/op")
-    if homebrew_op.is_file():
-        return str(homebrew_op)
-    return shutil.which("op")
+    return approved_op_binary()
 
 
 def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
