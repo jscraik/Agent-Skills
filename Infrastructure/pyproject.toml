@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Infrastructure-only Python dependency environment for Agent Skills Kit validation and SDK contracts."
 requires-python = ">=3.12"
 dependencies = [
+  "jsonschema>=4.25,<5",
   "pydantic>=2.13,<3",
   "PyYAML>=6.0.2,<7",
 ]
