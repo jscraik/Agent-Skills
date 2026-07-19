@@ -61,7 +61,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ledger", type=Path, required=True)
     args = parser.parse_args()
-    ledger = json.loads(args.ledger.read_text(encoding="utf-8"))
+    try:
+        ledger = json.loads(args.ledger.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(json.dumps({"status": "fail", "findings": [f"failed to read ledger: {exc}"]}))
+        return 1
     errors = validate_ledger(ledger)
     print(json.dumps({"status": "fail" if errors else "pass", "findings": errors}))
     return 1 if errors else 0
