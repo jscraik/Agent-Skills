@@ -42,13 +42,7 @@ def _ledger(*, occurrences: int = 2, guardrail_status: str = "validated", merge_
         "classes": [
             {
                 "finding_class_id": "finding_latest_head_validation",
-def test_fingerprint_normalizes_invariant_before_hashing():
-    invariant = "  Latest Head Must Be Validated Before Merge  "
-    normalized = "latest head must be validated before merge"
-    ledger = _ledger()
-    ledger["classes"][0]["normalized_invariant"] = invariant
-    ledger["classes"][0]["fingerprint_sha256"] = hashlib.sha256(normalized.encode()).hexdigest()
-    assert MODULE.validate_ledger(ledger) == []
+                "fingerprint_sha256": hashlib.sha256(invariant.encode()).hexdigest(),
                 "normalized_invariant": invariant,
                 "root_cause": "stale hosted evidence",
                 "occurrences": occurrence_rows,
@@ -57,6 +51,15 @@ def test_fingerprint_normalizes_invariant_before_hashing():
             }
         ],
     }
+
+
+def test_fingerprint_normalizes_invariant_before_hashing():
+    invariant = "  Latest Head Must Be Validated Before Merge  "
+    normalized = "latest head must be validated before merge"
+    ledger = _ledger()
+    ledger["classes"][0]["normalized_invariant"] = invariant
+    ledger["classes"][0]["fingerprint_sha256"] = hashlib.sha256(normalized.encode()).hexdigest()
+    assert MODULE.validate_ledger(ledger) == []
 
 
 def test_repeated_finding_with_validated_guardrail_is_merge_eligible():
