@@ -263,8 +263,11 @@ def _validate_external_effect_routes() -> list[Finding]:
     findings: list[Finding] = []
     source = _read(EVALS_PATH)
     start = source.find("def _run_tessl_live_private_eval(")
-    end = source.find("\ndef ", start + 1) if start >= 0 else -1
-    live_body = source[start:end] if start >= 0 and end >= 0 else ""
+    if start < 0:
+        live_body = ""
+    else:
+        end = source.find("\ndef ", start + 1)
+        live_body = source[start:] if end < 0 else source[start:end]
     if not live_body:
         findings.append(Finding("missing_live_tessl_route", "Live Tessl evaluator source is missing or unreadable.", _relative(EVALS_PATH)))
     elif "_ensure_tessl_project_link(" in live_body:
