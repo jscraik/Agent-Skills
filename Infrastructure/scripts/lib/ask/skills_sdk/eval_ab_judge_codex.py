@@ -4,13 +4,18 @@ import hashlib
 import json
 import os
 import shutil
-import stat
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.ab_transport_contracts import (
+    actual_opaque_env_path,
+    approved_op_binary,
+    approved_op_env_invocation,
+    is_actual_opaque_env_reference,
+)
 from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
 
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
@@ -46,15 +51,8 @@ def _run_codex_judge(
             codex_home = Path(codex_home_raw)
             sqlite_home = Path(sqlite_home_raw)
             _copy_codex_profile_config(judge_profile, codex_home)
-            completed = subprocess.run(
-                command,
-                input=prompt,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-                timeout=timeout_seconds,
-                env=_codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
+            completed, command = _execute_codex_judge_command(
+                command, prompt, judge_profile, timeout_seconds, repo_root, codex_home, sqlite_home,
             )
     return CodexJudgeResult(
         exit_code=completed.returncode,
@@ -63,6 +61,26 @@ def _run_codex_judge(
         output_text=completed.stdout,
         executed_argv=command,
     )
+
+
+def _execute_codex_judge_command(
+    command: list[str], prompt: str, judge_profile: dict[str, Any], timeout_seconds: int,
+    repo_root: Path, codex_home: Path, sqlite_home: Path,
+) -> tuple[subprocess.CompletedProcess[str], list[str]]:
+    kwargs: dict[str, Any] = {
+        "input": prompt, "text": True, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE,
+        "check": False, "timeout": timeout_seconds,
+        "env": _codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
+    }
+    if _codex_profile_id(judge_profile) != "oss-cloud":
+        return subprocess.run(command, **kwargs), command
+    op_env_file = _codex_op_env_file_path(judge_profile)
+    if op_env_file is None:
+        raise CodexProfileConfigError("oss-cloud judge execution requires the approved op run env boundary")
+    with approved_op_env_invocation(op_env_file) as invocation:
+        kwargs["pass_fds"] = invocation.pass_fds
+        completed = subprocess.run(invocation.runtime_argv(command[5:]), **kwargs)
+        return completed, invocation.receipt_argv(command[5:])
 
 
 def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
@@ -153,10 +171,7 @@ def _codex_op_env_file_available(judge_profile: dict[str, Any]) -> bool:
 
 
 def _codex_op_bin() -> str | None:
-    homebrew_op = Path("/opt/homebrew/bin/op")
-    if homebrew_op.is_file():
-        return str(homebrew_op)
-    return shutil.which("op")
+    return approved_op_binary()
 
 
 def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
@@ -165,20 +180,11 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     if not judge_profile.get("secret_env_names"):
         return None
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
-    candidate = Path(configured).expanduser() if configured else Path.home() / ".codex" / ".env"
-    try:
-        safe_candidate = _safe_existing_env_file(candidate, candidate.parent)
-    except OSError:
+    default_stream = actual_opaque_env_path()
+    candidate = configured if configured is not None else str(default_stream) if default_stream else ""
+    if not is_actual_opaque_env_reference(candidate):
         return None
-    if safe_candidate is None:
-        return None
-    return safe_candidate if _has_required_op_references(safe_candidate, judge_profile) else None
-
-
-def _has_required_op_references(path: Path, judge_profile: dict[str, Any]) -> bool:
-    # The operator-owned source is an opaque FIFO; never read credential
-    # material in the parent process to decide whether the boundary is valid.
-    return stat.S_ISFIFO(path.stat().st_mode)
+    return Path(candidate)
 
 
 def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) -> Path:
@@ -230,16 +236,6 @@ def _safe_regular_file(path: Path, root: Path) -> Path | None:
 def _codex_profile_model(judge_profile: dict[str, Any]) -> str | None:
     model = judge_profile.get("model")
     return model if isinstance(model, str) and model else None
-
-
-def _safe_existing_env_file(path: Path, root: Path) -> Path | None:
-    root_real = os.path.realpath(root)
-    path_real = os.path.realpath(path)
-    if os.path.commonpath([root_real, path_real]) != root_real:
-        return None
-    if path.is_symlink() or path.is_dir() or not path.exists():
-        return None
-    return path
 
 
 def _codex_temp_parent() -> str | None:

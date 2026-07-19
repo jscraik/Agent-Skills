@@ -459,12 +459,15 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
 
     def test_cloud_auth_fifo_is_never_read_and_op_run_is_the_only_catalog_path(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            env_file = Path(temp_dir) / "cloud-env"
+            home = Path(temp_dir)
+            env_file = home / ".codex" / ".env"
+            env_file.parent.mkdir()
             os.mkfifo(env_file)
             environment = {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}
             with (
                 patch.dict(os.environ, environment, clear=True),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
+                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
                 patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")),
             ):
                 auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")

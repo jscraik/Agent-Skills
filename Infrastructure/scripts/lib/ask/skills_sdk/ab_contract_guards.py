@@ -6,7 +6,21 @@ from ask.skills_sdk.ab_profile_contracts import runtime_preflight_identity_match
 
 
 def exact_variant_labels(rows: list[Any], *, attr: str = "variant_label") -> bool:
-    return len(rows) == 2 and {getattr(row, attr) for row in rows} == {"A", "B"}
+    return [getattr(row, attr) for row in rows] == ["A", "B"]
+
+
+def argv_output_last_message_path(argv: list[str]) -> str | None:
+    if argv.count("--output-last-message") != 1:
+        return None
+    option_index = argv.index("--output-last-message")
+    if option_index + 1 >= len(argv):
+        return None
+    return argv[option_index + 1]
+
+
+def validate_argv_output_last_message_path(argv: list[str], path: str, *, message: str) -> None:
+    if argv_output_last_message_path(argv) != path:
+        raise ValueError(message)
 
 
 def validate_plan_gate_identity(gate: Any) -> None:
@@ -69,6 +83,8 @@ def _fact_status_admitted(gate: Any, key: str, status: str) -> bool:
 
 
 def validate_run_receipt_status(receipt: Any) -> None:
+    if receipt.command_variant_labels and receipt.command_variant_labels != ["A", "B"]:
+        raise ValueError("A/B run receipts must preserve ordered command variant labels")
     if receipt.status == "completed":
         _validate_completed_run_receipt(receipt)
         return
@@ -122,7 +138,7 @@ def _validate_completed_run_packets(receipt: Any) -> None:
         raise ValueError("completed A/B run receipts must include exactly one command plan per variant")
     if not exact_variant_labels(receipt.variant_results):
         raise ValueError("completed A/B run receipts must include exactly one result per variant")
-    if set(receipt.command_variant_labels) != {"A", "B"}:
+    if receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("completed A/B run receipts must include exact command variant labels")
     if not _run_has_consistent_runtime_gates(receipt):
         raise ValueError("A/B run must preserve ordered runtime gates and matching oss-local results")

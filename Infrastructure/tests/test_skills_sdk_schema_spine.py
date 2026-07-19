@@ -629,6 +629,39 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
+    def test_ab_run_schema_rejects_completed_receipt_without_ordered_variant_proof(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["command_variant_labels"] = ["B", "A"]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["variant_results"][0]["variant_label"] = "B"
+        payload["variant_results"][1]["variant_label"] = "A"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_ab_run_schema_rejects_completed_receipt_without_execution_side_effects(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["provider_invoked"] = False
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
     def test_ab_run_schema_allows_preflight_blocked_empty_command_plan(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.json")
         payload["status"] = "blocked"
@@ -647,6 +680,20 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
             {**self.schemas, **self.schemas_by_file},
         )
 
+    def test_ab_run_schema_requires_top_level_blocker_after_cloud_gate_blocks(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["status"] = "blocked"
+        payload["blockers"] = []
+        payload["runtime_profile_gates"][1]["status"] = "blocked"
+        payload["runtime_profile_gates"][1]["blockers"] = ["cloud_auth_unavailable"]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
     def test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input(self) -> None:
         payload = self.assert_valid("ab-judge-preview-receipt", "ab-judge-preview-receipt.json")
 
@@ -659,6 +706,25 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["network_accessed"])
         self.assertFalse(payload["mutation_performed"])
         self.assertNotIn("command_argv", payload["comparison_payload"]["variant_results"][0])
+
+    def test_judge_schemas_accept_versioned_experiment_identifiers(self) -> None:
+        preview = _json(FIXTURE_DIR / "valid" / "ab-judge-preview-receipt.json")
+        preview["experiment_id"] = "ex_0123456789abcdef"
+        preview["comparison_payload"]["experiment_id"] = "ex_0123456789abcdef"
+        _validate_schema_subset(
+            self.schemas["ab-judge-preview-receipt"],
+            preview,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
+        score = _json(FIXTURE_DIR / "valid" / "ab-judge-score-receipt.json")
+        score["experiment_id"] = "ex_0123456789abcdef"
+        score["decision"]["experiment_id"] = "ex_0123456789abcdef"
+        _validate_schema_subset(
+            self.schemas["ab-judge-score-receipt"],
+            score,
+            {**self.schemas, **self.schemas_by_file},
+        )
 
     def test_ab_judge_preview_schema_rejects_duplicate_result_variants(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-judge-preview-receipt.json")
