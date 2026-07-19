@@ -271,6 +271,7 @@ validation:
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck
+  - uncommitted_local_review_before_merge
   - heartbeat_target_refreshed_before_rotation
   - current_head_and_metadata_provenance_before_source_patch
   - artifact_receipt_context_checked_before_closeout_claim

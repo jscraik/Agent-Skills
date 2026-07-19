@@ -224,4 +224,3 @@ npython3
 
 # Captured Codex homes contain local runtime databases, install IDs, and temp wrappers.
 .harness/evidence/**/codex-home/
-.codex/config.toml

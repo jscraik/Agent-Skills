@@ -157,6 +157,6 @@ rung as a substitute for missing earlier behavior proof.
 
 Run only commands that the repository supports and the user has authorized, starting with the smallest relevant proof. Do not invoke destructive, hosted, or live-evaluation paths merely to improve coverage, and do not widen a blocked lane without classifying the blocker.
 
-## Gotchas
+## Cross-Lane Gotcha
 
 One passing command does not validate adjacent lanes. Preserve exact command shape, distinguish reruns from new evidence, and do not silently replace a blocked production path with a narrower local check.

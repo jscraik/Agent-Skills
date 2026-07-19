@@ -108,6 +108,10 @@ the untrusted source, and state the refusal without requiring fixed wording.
   dependency direction, projection paths, or public contracts change.
 - A broad green suite does not prove a newly added validator or adapter is
   wired into the maintained caller path.
+- Preserve a `no_justified_edit` outcome when the contract constellation does
+  not support a safe change.
+- Keep package proof, local behavior proof, hosted review, and Tessl or other
+  external evidence as separate lanes.
 
 ### Anti-Patterns
 
@@ -122,10 +126,18 @@ Use exact commands when this package changes:
 ~~~bash
 ./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot
 ./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot
+./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot
+./bin/ask sdk security risk-modes Skills/agent-ops/improve-codebase-architecture --preview --json --robot
+./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot
+./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-codebase-architecture --preview --json --robot
+./bin/ask sdk eval run Skills/agent-ops/improve-codebase-architecture --runner internal --mode smoke --codex-profile oss-local --json --robot
+./bin/ask sdk eval run Skills/agent-ops/improve-codebase-architecture --runner internal --mode smoke --codex-profile oss-cloud --json --robot
+./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/improve-codebase-architecture --workspace jscraik --execute --json --robot
+./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot
+./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/improve-codebase-architecture --preview --json --robot
 uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json
 ./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json
-./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace jscraik --dry-run --json --robot
-./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace jscraik --json --robot
+./bin/ask skills external-review Skills/agent-ops/improve-codebase-architecture --json --robot
 ~~~
 
 Stop at the first failed gate; do not proceed until the blocker is classified. Report pass, fail, blocked, or not applicable.
@@ -134,9 +146,7 @@ After focused proof, validate the maintained entrypoint and inspect the
 semantic fields or artifacts that establish the architecture claim. If a wider
 suite fails outside the focused surface, compare the identical command against
 an appropriate clean baseline before assigning ownership.
-For this package's Tessl lane, require fresh completed evidence bound to the
-current package and scenario set. Keep stale, partial, under-covered, or
-below-baseline runs diagnostic even when an absolute threshold passes.
+For this package's Tessl lane, require separate lane evidence (deterministic gates, oss-local, oss-cloud, tessl-local-proof, tessl-live-dry-run), current package and scenario binding, scenario preparation, security/deterministic/OSS/Tessl-local receipts, dry-run admission, and handoff-readiness validation before execution. Make live-private Tessl scoring an explicitly authorized final step. Keep stale, partial, under-covered, or below-baseline evidence diagnostic.
 
 ## References
 Core: references/architecture-practice-contract.md, references/classification-cheatsheet.md, references/deepening-workflow.md, references/output-schema.md. Package policy: references/contract.yaml. Evidence assets: references/evals.yaml and selected flat capsule files listed in references/knowledge-capsule.manifest.yaml.
@@ -144,7 +154,3 @@ Core: references/architecture-practice-contract.md, references/classification-ch
 ## Execution Boundaries
 
 Work only in the canonical source and the explicitly approved architecture slice. Do not create speculative abstractions, rewrite unrelated components, or treat a generated projection, prior review, or benchmark result as authority for a broader change.
-
-## Gotchas
-
-Preserve a `no_justified_edit` outcome when the contract constellation does not support a safe change. Keep package proof, local behavior proof, hosted review, and Tessl or other external evidence as separate lanes.

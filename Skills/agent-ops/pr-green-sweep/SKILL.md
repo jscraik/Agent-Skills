@@ -125,7 +125,9 @@ verification.
     producer artifact, classify `blocked_artifact_context`; do not relabel it as
     passing proof.
 12. Before merge, verify latest-head required checks, unresolved threads, branch
-   protection, and mergeability from live GitHub state.
+   protection, and mergeability from live GitHub state. Run
+   `codex review --uncommitted` and record the outcome as pre-merge evidence;
+   merge readiness includes this local review.
 13. Before claiming the parent PR/worktree lane is closed, or before switching
     the primary checkout to `main`, run
     `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json --require-clean`

@@ -127,9 +127,9 @@ cases:
   prompt: A review worker says the fix and focused test receipt live in another linked worktree. Before relying on it, record the target SHA and owner worktree, verify the artifact there, and classify it as blocked_context_mismatch if that context is unavailable. Do not call the receipt passing just because the current checkout is clean.
   acceptance:
   - type: regex
-    value: (?i)(worktree|owner checkout|reviewed SHA|blocked_context_mismatch|artifact)
+    value: (?i)(?=.*reviewed SHA)(?=.*owner worktree)(?=.*artifact.*verif)(?=.*blocked_context_mismatch)
   - type: expected_signal
-    value: records review context, verifies the repair artifact in its owner worktree, and reports a context blocker rather than false passing evidence when that verification is unavailable
+    value: records the reviewed SHA and owner worktree, attempts artifact verification in that context, and reports blocked_context_mismatch when that verification is unavailable rather than false passing evidence
   unit: linked-worktree receipt must be verified in its owner context
   given: Review repairs and receipts can be produced in a linked worktree while the current checkout cannot see or validate them.
   should: The response should keep owner-worktree evidence explicit and avoid treating an inaccessible artifact as proof.
@@ -146,9 +146,9 @@ cases:
   prompt: The helper reported no accepted findings and focused local tests passed, but this PR's head changed after the last hosted review and GitHub still has unresolved threads. I asked for PR-readiness follow-through, not thread mutation. Report the autoreview, local-proof, and hosted-review lanes separately, query current-head hosted state if available, and do not claim merge readiness.
   acceptance:
   - type: regex
-    value: (?i)(autoreview lane|local proof|hosted review|current.head|unresolved|merge readiness|separate)
+    value: (?i)(?=.*autoreview.*lane)(?=.*local.*proof.*lane)(?=.*hosted.*review.*lane)(?=.*current.head)(?=.*unresolved)(?!.*\bmerge.ready\b)
   - type: expected_signal
-    value: reports the clean helper result only for autoreview, keeps hosted threads and current-head review as a separate lane, and routes mutation rather than claiming readiness
+    value: reports separate lane statuses for autoreview, local proof, and hosted review; queries current-head hosted state and unresolved threads; explicitly refuses to claim merge readiness
   unit: clean autoreview does not close hosted review
   given: A local structured review can be clean while the PR head has changed or hosted review threads remain unresolved.
   should: The response should preserve per-lane evidence and avoid treating a clean local review as merge approval.

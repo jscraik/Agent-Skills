@@ -202,8 +202,8 @@ install, sync, publish, live Tessl, or readiness claim:
 1. `./bin/ask skills audit <skill-path> --level strict --json --robot`
 1a. `./bin/ask skills package verify <skill-path> --json --robot`
     - `reference_quality` must include no `reference_heading_invocable` blockers.
-2. `./bin/ask sdk security risk-modes <skill-path> --preview --json --robot`
-3. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+2. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+3. `./bin/ask sdk security risk-modes <skill-path> --preview --json --robot`
 4. `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 5. `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
 6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`

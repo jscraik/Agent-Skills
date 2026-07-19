@@ -10462,16 +10462,18 @@ def external_review_skill(
     result = CallResult()
     result.status = "success"
 
-    if with_tessl_review and skip_tessl_review:
+    if with_tessl_review and (skip_tessl_review or skip_tessl):
         result.status = "error"
+        blocker_flag = "--skip-tessl-review" if skip_tessl_review else "--skip-tessl"
+        blocker_message = f"--with-tessl-review cannot be combined with {blocker_flag}."
         result.data["external_review"] = {
             "status": "blocked",
             "blocker_class": "blocked_validation",
-            "blocker": "--with-tessl-review cannot be combined with --skip-tessl-review.",
+            "blocker": blocker_message,
         }
         result.errors.append(ErrorObject(
             code="ERR_VALIDATION",
-            message="--with-tessl-review cannot be combined with --skip-tessl-review.",
+            message=blocker_message,
         ))
         return result
 
