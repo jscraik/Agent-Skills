@@ -1,16 +1,46 @@
 schema_version: "2.0"
 skill_name: "goal-governor"
 last_updated: "2026-05-26"
+claims:
+  - id: receipt-is-bounded-task-evidence
+    statement: "A receipt records bounded task evidence; it does not by itself close a durable goal."
+    source: "SKILL.md#Workflow, references/goal-contract.md#Receipt Closure Ledger"
+    claim_type: governance
+    risk: high
+    hard_gate: true
+    evidence_required:
+      - "role and closure eligibility"
+      - "pending recheck or blocker when present"
+    covered_by:
+      - receipt-post-push-recheck-is-not-goal-closure
+      - judge-checkpoint-with-blockers-is-not-final-closure
+  - id: final-judge-pm-completion-required
+    statement: "Final goal closure requires a Judge or PM decision=complete and current completion-contract evidence."
+    source: "SKILL.md#Workflow, references/goal-contract.md#Receipt Rules"
+    claim_type: execution
+    risk: high
+    hard_gate: true
+    evidence_required:
+      - "final Judge or PM decision=complete"
+      - "current verifier outcome"
+      - "all board-required tasks accounted for"
+    covered_by:
+      - pressure-skip-audit
+      - receipt-post-push-recheck-is-not-goal-closure
+      - judge-checkpoint-with-blockers-is-not-final-closure
 
-x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: true}
-x_smoke: &smoke {eval_modes: [smoke], should_trigger: true, prepend_skill: true}
-x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
+x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: true, task: "Classify the governed goal state and return the required durable decision contract.", given: "A durable-goal request provides only the stated board, receipt, native-runtime, or validation facts.", should: "Use Goal Governor to preserve evidence lanes, scope boundaries, and the next safe action."}
+x_smoke: &smoke {eval_modes: [smoke], should_trigger: true, prepend_skill: true, task: "Classify the governed goal state and return the required durable decision contract.", given: "A durable-goal request provides only the stated board, receipt, native-runtime, or validation facts.", should: "Use Goal Governor to preserve evidence lanes, scope boundaries, and the next safe action."}
+x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false, task: "Decide whether Goal Governor applies.", given: "The request is outside durable goal-board governance.", should: "Do not select Goal Governor or emit its governed artifacts."}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]}
 
 cases:
   - id: smoke-discovery-contract
     name: "Discovery Smoke Contract"
     category: happy
+    task: "Ask the smallest useful discovery question for an underspecified durable goal request."
+    given: "No board, project root, audit document, or native-runtime truth is supplied."
+    should: "Route to discovery without starting governed implementation."
     realistic: true
     why_realistic: "A user often asks Goal Governor to handle goal work before naming the exact board, authority boundary, runtime truth, or implementation-notes proof surface."
     eval_modes: [smoke]
@@ -346,6 +376,32 @@ cases:
       - {type: regex, value: "(?is)(refus|does not|cannot|can.t).*(completion|complete|mark).*(without|skip).*(Judge|PM).*(audit receipt|receipt)"}
       - {type: regex, value: "(?is)goal-governor-output\\.yaml|schema_version:\\s*1"}
       - {type: regex, value: "(?is)(missing|requires).*(completion evidence|evidence|final Judge|PM audit receipt|decision: complete)"}
+  - id: receipt-post-push-recheck-is-not-goal-closure
+    <<: *common
+    name: "Post-Push Recheck Receipt Is Not Goal Closure"
+    category: edge
+    realistic: true
+    prompt: "Continue a durable goal board. Worker receipt R017 says pass_with_post_push_recheck_required after local tests pass, but the remote PR checks have not been rechecked. Leave the governed decision artifact required by the Goal Governor skill. Preserve the Worker task result, record the remote recheck as pending, and do not mark the goal complete."
+    deterministic_checks: *safe
+    expected_route: "continue"
+    acceptance:
+      - {type: regex, value: "(?is)(receipt_closure_ledger|receipt closure ledger|R017)"}
+      - {type: regex, value: "(?is)(pass_with_post_push_recheck_required|post.push recheck).*(pending|not complete|not closure|remote)"}
+      - {type: regex, value: "(?is)(remote_pr_checks|remote PR checks).*(pending|unknown|not_rechecked|blocked)"}
+      - {type: not_regex, value: '(?is)decision:\s*complete|marked complete'}
+  - id: judge-checkpoint-with-blockers-is-not-final-closure
+    <<: *common
+    name: "Judge Checkpoint With Blockers Is Not Final Closure"
+    category: edge
+    realistic: true
+    prompt: "A durable goal has a Judge receipt R005 with decision pass_with_recorded_blockers and evidence for local validation. More Worker work and an external review recheck remain. Leave the governed decision artifact required by the Goal Governor skill. Classify the receipt as a checkpoint, keep both follow-ups visible in their truth lanes, and refuse to close the goal without a final Judge or PM decision complete."
+    deterministic_checks: *safe
+    expected_route: "continue"
+    acceptance:
+      - {type: regex, value: "(?is)(R005|pass_with_recorded_blockers).*(checkpoint|pending|not final|not closure)"}
+      - {type: regex, value: "(?is)(receipt_closure_ledger|receipt closure ledger).*(pending_recheck|blocked|goal_close_eligible|closure)"}
+      - {type: regex, value: "(?is)(Worker|external review|review_threads|remote_pr_checks).*(remain|pending|unknown|blocked)"}
+      - {type: not_regex, value: '(?is)decision:\s*complete|marked complete'}
   - id: ordinary-one-file-fix
     <<: *negative
     name: "Ordinary One File Fix"

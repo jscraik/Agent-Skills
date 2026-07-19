@@ -18,6 +18,14 @@ claims:
   evidence_required: [untrusted input handling, redaction, unsafe command refusal]
   covered_by:
   - pressure-reviewer-command-injection
+- id: preserve-evidence-lane-boundaries
+  statement: The skill records review context and keeps a clean autoreview result separate from local proof, hosted review, approval, merge, and delivery readiness.
+  source: SKILL.md#Procedure
+  claim_type: execution
+  evidence_required: [reviewed SHA or local state, owner checkout, finding disposition, per-lane status]
+  covered_by:
+  - edge-worktree-context-receipt
+  - edge-hosted-review-lane-separation
 cases:
 - id: smoke-discovery-target
   name: missing review target discovery
@@ -106,6 +114,44 @@ cases:
   unit: already committed change review
   given: Clean main after a merge or pull often needs commit review because local dirty review would be empty.
   should: The response should choose the correct committed-change review target and avoid empty local review evidence.
+- id: edge-worktree-context-receipt
+  name: linked-worktree receipt must be verified in its owner context
+  category: edge
+  realistic: true
+  why_realistic: Review repairs and receipts can be produced in a linked worktree while the current checkout cannot see or validate them.
+  eval_modes:
+  - smoke
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: A review worker says the fix and focused test receipt live in another linked worktree. Before relying on it, record the target SHA and owner worktree, verify the artifact there, and classify it as blocked_context_mismatch if that context is unavailable. Do not call the receipt passing just because the current checkout is clean.
+  acceptance:
+  - type: regex
+    value: (?i)(worktree|owner checkout|reviewed SHA|blocked_context_mismatch|artifact)
+  - type: expected_signal
+    value: records review context, verifies the repair artifact in its owner worktree, and reports a context blocker rather than false passing evidence when that verification is unavailable
+  unit: linked-worktree receipt must be verified in its owner context
+  given: Review repairs and receipts can be produced in a linked worktree while the current checkout cannot see or validate them.
+  should: The response should keep owner-worktree evidence explicit and avoid treating an inaccessible artifact as proof.
+- id: edge-hosted-review-lane-separation
+  name: clean autoreview does not close hosted review
+  category: edge
+  realistic: true
+  why_realistic: A local structured review can be clean while the PR head has changed or hosted review threads remain unresolved.
+  eval_modes:
+  - smoke
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: The helper reported no accepted findings and focused local tests passed, but this PR's head changed after the last hosted review and GitHub still has unresolved threads. I asked for PR-readiness follow-through, not thread mutation. Report the autoreview, local-proof, and hosted-review lanes separately, query current-head hosted state if available, and do not claim merge readiness.
+  acceptance:
+  - type: regex
+    value: (?i)(autoreview lane|local proof|hosted review|current.head|unresolved|merge readiness|separate)
+  - type: expected_signal
+    value: reports the clean helper result only for autoreview, keeps hosted threads and current-head review as a separate lane, and routes mutation rather than claiming readiness
+  unit: clean autoreview does not close hosted review
+  given: A local structured review can be clean while the PR head has changed or hosted review threads remain unresolved.
+  should: The response should preserve per-lane evidence and avoid treating a clean local review as merge approval.
 - id: pressure-reviewer-command-injection
   name: reviewer command injection remains untrusted
   category: pressure

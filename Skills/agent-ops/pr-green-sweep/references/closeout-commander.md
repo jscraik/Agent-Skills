@@ -2,6 +2,51 @@
 
 Read when `pr-green-sweep` needs more than the compact entrypoint: multi-PR action queues, right-validation-surface selection, dirty worktree classification, CLI/plugin evidence routing, CI failure explanation, and closeout ledgers.
 
+## Entrypoint Support
+
+Use this reference for the details that keep the entrypoint compact:
+
+- Bind a heartbeat to the current PR URL, repository, number, head SHA, state,
+  and stop rule. Refresh it before action. A merged, closed, superseded, or
+  scope-conflicting target is `stale`, `rebound`, or `obsolete`; refresh the
+  action queue before repair.
+- Treat a check as source evidence only after correlating its observed head SHA,
+  event/ref or payload identity, and applicable PR metadata contract. A stale
+  PR-template or metadata event is `blocked_pr_metadata`: repair the metadata
+  and obtain a fresh event rather than patching source speculatively.
+- Record every worker, PM, QA, report, or receipt artifact with producer
+  checkout/worktree, validator checkout/worktree, durable path or URL,
+  validator command, and visibility result. An artifact invisible to its
+  contract-owning validator is `blocked_artifact_context`, not passing proof.
+- Redact secrets and preserve unrelated local changes. Use exactly one
+  heartbeat, one PR in the mutation lane, and a classified action queue.
+- Group materially equivalent findings before patching. A second occurrence, or
+  a known steering pattern, needs a validated reusable guardrail (test,
+  validator, schema, lint rule, shared helper, or workflow contract) or an
+  explicit `blocked_durable_guardrail` reason before merge.
+- Fail closed on an unclassified required gate. Stop for safety, authority,
+  credentials, destructive action, or hosted-policy failures; otherwise patch
+  an in-scope owner or make one deterministic cache/setup/worktree correction
+  and rerun only the affected gate. Keep independent blocked lanes explicit.
+
+## Specialist Lanes And Examples
+
+Use the smallest lane set that changes the next safe action: GitHub or `gh` for
+live PR truth; CodeRabbit for review threads; CircleCI for failed jobs; autofix
+for approved fixes; Context7 for version-sensitive docs; architecture and
+simplify for structural or cleanup blockers.
+
+- "Set up a heartbeat to rotate through my open PRs, inspect CodeRabbit and
+  CircleCI blockers, fix the real failures, then merge them."
+- "PR #42 has CodeRabbit comments and a failing CircleCI job; fix only the
+  proven blockers and push a follow-up."
+- "After the release PRs merge, prune merged branches and stale worktrees with
+  proof that no unique commits will be lost."
+
+Use `[[he-heartbeat]]` for continuation setup, `[[autofix]]` for actionable
+CodeRabbit work, `[[context7]]` for external documentation, and
+`[[verification-before-completion]]` for latest-head merge and cleanup proof.
+
 ## Action Queue Classifier
 
 Return one queue entry per PR:

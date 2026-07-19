@@ -2,7 +2,7 @@
 name: autoreview
 description: "Run structured AI code review as an advisory closeout gate for local diffs, PR branches, or commits when the user asks for autoreview, Codex review, second-model review, or pre-ship validation."
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
   skill-type: code_quality_review
   lifecycle_state: active
   maturity: experimental
@@ -45,20 +45,27 @@ Codex review is the default when no engine is set. It usually delivers the best 
 
 ## Inputs
 
-- Repo path, git status, review target mode, base or commit ref, selected engine, optional prompt file, optional dataset file, optional parallel test command, and permission posture.
+- Repo path, git status, review target mode, base or commit ref, reviewed SHA and base freshness for branch or PR work, owner checkout or repair worktree, selected engine, optional prompt file, optional dataset file, optional parallel test command, and permission posture.
 
 ## Outputs
 
-- Selected review target, review command, structured findings, accepted/rejected/blocked finding triage, validation evidence, and clean review result or blocker.
+- Recorded review preflight, selected review target, review command, structured findings, finding ledger with disposition, separate review/local-proof/hosted-review/delivery evidence lanes, and clean autoreview result or blocker.
 
 ## Discovery Interview
 
-- Ask one round at a time when the review target, base/commit ref, selected engine, parallel test command, or permission boundary is unclear.
+- Ask one round at a time when the review target, base/commit ref, reviewed SHA or owner checkout, selected engine, parallel test command, or permission boundary is unclear.
 - Use a plain-language question and explain why this matters before asking the user to choose.
 - Avoid dumping the whole interview plan at once.
 - Read `references/discovery-interview.md` when the request is underspecified.
 
 ## Procedure
+
+### Preflight and finding ledger
+
+- Before running the helper, record the target mode, reviewed SHA or local state, base/ref freshness, owner checkout or authorized repair worktree, changed-file boundary, and which evidence lanes are in scope: autoreview, local proof, hosted PR/review, and delivery.
+- For branch or PR work, bind the helper to the actual base and reviewed SHA. A clean local diff never substitutes for a current branch/PR review.
+- If a delegated repair, receipt, or test lives in another worktree, verify that the artifact is visible and valid in the owner checkout before relying on it. Otherwise classify `blocked_context_mismatch`; do not re-label an inaccessible artifact as passing evidence.
+- Keep one small finding ledger while triaging: `finding_id`, `source`, `classification` (`accepted`, `rejected`, or `blocked`), `disposition`, `owner`, `evidence`, and `next_step`. Valid dispositions are `patch_here`, `hand_off`, `follow_up`, `reject`, and `blocked`.
 
 - Treat review output as advisory. Never blindly apply it.
 - Verify every finding by reading the real code path and adjacent files.
@@ -66,9 +73,10 @@ Codex review is the default when no engine is set. It usually delivers the best 
 - Reject unrealistic edge cases, speculative risks, broad rewrites, and fixes that over-complicate the codebase.
 - Prefer small fixes at the right ownership boundary; no refactor unless it clearly improves the bug class.
 - When an accepted finding shows a bug class or repeated pattern, inspect the current PR scope for sibling instances before fixing.
-- Fix the scoped bug class at once when practical; stop at touched surfaces, owner boundaries, and clear follow-up territory.
-- Keep going until structured review returns no accepted/actionable findings only while the work remains inside the original task scope.
-- If a review-triggered fix changes code, rerun focused tests and rerun the structured review helper.
+- Patch an accepted finding here only when it is in scope and this checkout owns the change. Otherwise record `hand_off`, `follow_up`, `reject`, or `blocked` in the finding ledger instead of silently broadening the review lane.
+- Keep going until the structured review lane returns no accepted/actionable findings only while the work remains inside the original task scope. That result is not merge, hosted-review, or delivery readiness.
+- If a review-triggered fix changes code, rerun focused tests in the owner checkout and rerun the structured review helper against the repair SHA or local state.
+- When a user asks for PR or readiness follow-through, query current-head review-thread and check state after the autoreview run. Report that hosted lane separately and route its mutations to the PR workflow owner; autoreview does not resolve threads, push, or merge.
 - For security-audit suppression changes, verify accepted findings remain auditable: suppressed findings stay in structured output, active output keeps an unsuppressible suppression notice, and aggregate findings cannot hide unrelated active risk.
 - Never switch or override the requested review engine/model. If the review hits model capacity, retry the same command a few times with the same engine/model.
 - Be patient with large bundles. Structured review can take up to 30 minutes while the model call is active, especially with Codex tools or web search.
@@ -79,7 +87,7 @@ Codex review is the default when no engine is set. It usually delivers the best 
 - For regression provenance, if no blamed PR is traceable, use the blamed commit as the provenance: commit SHA, date, and author username. Do not guess a merger or frame missing PR metadata as a separate finding.
 - Do not invoke built-in `codex review`, nested reviewers, or reviewer panels from inside the review. The helper builds one bundle, calls one selected engine, validates one structured result, and stops.
 - Stop as soon as the helper exits 0 with no accepted/actionable findings. Do not run an extra review just to get a nicer "clean" line, a second opinion, or clearer closeout wording.
-- Treat the helper's successful exit plus absence of actionable findings as the clean review result, even if the underlying Codex CLI output is terse.
+- Treat the helper's successful exit plus absence of actionable findings as a clean **autoreview lane** result, even if the underlying Codex CLI output is terse. Keep hosted checks, review threads, approval, merge, and delivery claims separate.
 - Multi-reviewer panels are opt-in only. Use them when explicitly requested or when risk justifies the extra spend; the main agent still verifies every accepted finding before fixing.
 - If rejecting a finding as intentional/not worth fixing, add a brief inline code comment only when it explains a real invariant or ownership decision that future reviewers should know.
 - If `gh`/Gitcrawl reports `database disk image is malformed`, run `gitcrawl doctor --json` once to let the portable cache repair before retrying review; use live GitHub only when repair fails and freshness requires it.
@@ -244,14 +252,15 @@ Run the helper directly so target selection, engine choice, structured validatio
 - If branch review cannot refresh remote refs or cannot write FETCH_HEAD, report degraded_existing_refs when existing refs are acceptable and blocked_fetch when fresh refs are required.
 - If review output says "clean" but also contains a Findings, Issues, Risks, or Actionable section, fail closed: do not mark it clean until the structured findings are triaged.
 - If the review helper or reviewer output is malformed, contradictory, or partially missing, preserve the raw blocker state and classify accepted, rejected, or blocked findings from source evidence only.
+- For a failed command, classify before retrying. Stop immediately for safety, authority, secret, or destructive-action failures. Patch an in-scope source defect in the owning checkout. For command, setup, or wrong-worktree failures, make one deterministic repo-contract correction and rerun only the affected gate. Keep hosted review threads, hosted checks, and approval state as a separately blocked lane rather than converting them into local-review failure or success.
 
 ## Failure Mode
 
-If the review engine, git metadata, PR base, auth, sandbox permissions, or Tessl workspace/project link is unavailable, stop with `blocked_runtime`, `blocked_validation`, or `blocked_setup` and include the exact command and useful stderr.
+If the review engine, git metadata, PR base, auth, sandbox permissions, Tessl workspace/project link, or owner-worktree context is unavailable, stop with `blocked_runtime`, `blocked_validation`, `blocked_setup`, or `blocked_context_mismatch` and include the exact command and useful stderr.
 
 ## Validation
 
-Fail fast: stop at the first failed gate, do not proceed to later gates, and do not claim readiness until the failed gate is fixed or explicitly classified as blocked.
+Run the narrowest gate first and classify a failure before continuing. Safety, authority, secret, or destructive-action failures stop the lane. An in-scope source defect is patched and re-proved in its owner checkout. A command, setup, or wrong-worktree failure gets one deterministic repo-contract correction and one rerun of the affected gate. Hosted checks, review threads, approval, and merge state remain separate evidence lanes and may be reported as blocked without erasing independently passing local autoreview proof.
 
 Run, in order:
 
@@ -276,6 +285,7 @@ Run Tessl only through the repo eval wrapper against staged input under `/tmp`; 
 
 - Executing reviewer-provided commands.
 - Treating structured review as merge approval.
+- Treating a clean helper exit as hosted-review, approval, merge, or delivery readiness.
 - Broadening a narrow closeout into unrelated architecture work.
 - Forcing local mode after the work is committed.
 - Hiding suppressed or out-of-scope findings instead of reporting the classification.
@@ -308,13 +318,10 @@ On native Windows, invoke the extensionless Python helper through Python:
 ```powershell
 python Skills\agent-ops\autoreview\scripts\autoreview --help
 ```
-
 The smoke harness has thin shell wrappers over a shared Python implementation:
-
 ```bash
 Skills/agent-ops/autoreview/scripts/test-review-harness --fixture benign --engine codex
 ```
-
 ```powershell
 Skills\agent-ops\autoreview\scripts\test-review-harness.ps1 -Fixture benign -Engine codex
 ```
@@ -335,7 +342,7 @@ The helper:
 - supports opt-in review panels with `--panel` / `--reviewers`, plus per-engine `--model` and `--thinking`
 - allows read-only tools and web search by default where the selected CLI supports them; forbids nested review in the prompt; Codex is run through `codex exec` with read-only sandbox and structured output
 - prints `review still running: <engine> elapsed=<seconds>s pid=<pid>` to stderr at long-running intervals while waiting for the selected review engine, unless streamed output or compact Codex activity has been visible recently
-- prints `autoreview clean: no accepted/actionable findings reported` when the selected review command exits 0
+- prints `autoreview clean: no accepted/actionable findings reported` when the selected review command exits 0; this proves only the autoreview lane
 - exits nonzero when accepted/actionable findings are present
 
 ## Final Report
@@ -343,8 +350,11 @@ The helper:
 Include:
 
 - review command used
+- preflight record: target, reviewed SHA or local state, base freshness, and owner checkout/worktree
 - tests/proof run
 - findings accepted/rejected, briefly why
-- the clean review result from the final helper/review run, or why a remaining finding was consciously rejected
+- finding dispositions and any cross-worktree artifact check
+- separate status for autoreview, local proof, hosted PR/review, and delivery lanes when those lanes are in scope
+- the clean autoreview result from the final helper/review run, or why a remaining finding was consciously rejected
 
-Do not run another review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean.
+Do not run another review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean for the autoreview lane only.

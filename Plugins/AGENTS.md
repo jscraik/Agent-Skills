@@ -24,8 +24,19 @@ schema_version: 1
 ## Context Pointers
 
 - Plugin readiness rules: [../Docs/agents/17-skill-management.md#plugin-desktop-readiness](../Docs/agents/17-skill-management.md#plugin-desktop-readiness).
+- Skill Factory lifecycle and routing: [../Plugins/skill-factory/README.md](../Plugins/skill-factory/README.md).
 - Path ownership: [../Docs/agents/14-path-ownership-boundaries.md](../Docs/agents/14-path-ownership-boundaries.md).
 - Repository vocabulary: [../UBIQUITOUS_LANGUAGE.md](../UBIQUITOUS_LANGUAGE.md).
+
+For plugin creation, hardening, or hook changes, apply the
+`plugin-factory:plugin-builder` contract and run its `plugin_builder.pyw
+validate` gate before handoff. Bundled hooks belong at `hooks/hooks.json` and
+are declared from `plugin.json` as `./hooks/hooks.json`; use a top-level
+`hooks` object with matcher-level `hooks` arrays, command-hook `timeout` in
+seconds, and `${PLUGIN_ROOT}` or `${PLUGIN_DATA}` for plugin-owned commands.
+Only command hooks are currently executable in the plugin runtime; prompt,
+agent, and async hook forms are parsed but not runtime-supported. Enable
+`plugin_hooks` alongside plugins and hooks before relying on bundled hooks.
 
 ## Validation
 

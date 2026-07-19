@@ -1,112 +1,54 @@
-# Agent Skills PR #313 Post-Merge Follow-Up QA Disproof
+# PR #345 Candidate `db50255` Independent QA Disproof
 
 schema_version: qa-proof/v1
-status: accepted_with_broader_suite_gap
-agent_id: 019f3468-2091-7bb2-bd5e-ecad35647e4d
-repo: /Users/jamiecraik/dev/agent-skills
-branch: codex/pr313-postmerge-review-followups
+status: rejected
+agent_id: 019f753b-4f48-7c30-858b-1831cdd94631
+candidate: db50255eb80917362b9a8d60e3fcc72b70ba041b
+candidate_worktree: /private/tmp/agent-skills-jsc389-approved-auth-stream
 
 ## Scope
 
-Independent QA Disproof lane for the Project PM canary. I inspected the real branch output and tried to disprove the two Worker claims:
+Independent, immutable-commit review of PR #345 candidate `db50255eb80917362b9a8d60e3fcc72b70ba041b`. I inspected only its parent/diff and relevant runtime/schema contracts. I did not edit, stage, commit, push, create or update a PR, mutate hosted reviews, or run a provider-backed eval or judge.
 
-- schema blocks pass/review intake-review receipts when package-security-signature evidence is missing or null, while preserving the blocked null route.
-- local-score blocks the impact lane when scenario-quality emits suite-level blockers or blocked status even when row-level `blocked_count` is 0.
+## Verdict
 
-I did not edit implementation files.
+Reject the candidate as a complete closeout of the six findings. Four contract repairs are substantiated locally, but two high-impact defects remain:
 
-## Repo Contract Read
+1. **P1 — the claimed approved cloud-auth path is still only shape-checked.** `is_opaque_env_reference` accepts any FIFO whose trailing components are `.codex/.env`; it does not require that the path equals `Path.home() / ".codex" / ".env"` or another explicit allowlisted operator reference. Because `_approved_cloud_auth_fact` takes `SKILLS_SDK_OSS_CLOUD_ENV_FILE` directly and `_cloud_catalog_fact` repeats the same predicate, an arbitrary temporary `.../.codex/.env` FIFO is admitted and reaches the catalog-runner boundary. The parent commit `5a55b745` introduced the weaker basename/parent predicate; `db50255` does not modify it.
 
-- Read `AGENTS.md`.
-- Read `CODESTYLE.md`.
-- Read `Docs/agents/19-high-signal-steering-feedback.md`.
-- Read `Docs/agents/04-validation.md`.
-- Read `artifacts/AGENTS.md`.
+2. **P1 — the typed receipt reader still accepts an unordered completed A/B receipt.** The candidate makes the JSON Schema require `command_variant_labels == ["A", "B"]` and ordered top-level `variant_results`, but `validate_ab_run_receipt` delegates to `AbRunReceipt`, whose completed validators use set equality / `exact_variant_labels`. An otherwise valid receipt with labels `["B", "A"]` and both runtime gates/results reversed is accepted by the typed reader, while the authoritative JSON Schema rejects it. This contradicts the candidate's stated ordered-A/B receipt contract and leaves a public reader bypass.
 
-Key applied constraints: use repo wrappers, keep local proof separate from hosted PR/review truth, treat review output as bounded evidence, and report exact command outcomes.
+## Six-Finding Matrix
 
-## Branch And Dirty State
+| Hosted finding | Independent result | Evidence |
+| --- | --- | --- |
+| Cloud approved opaque env path (parent P1) | **Not disproved; persists.** | Arbitrary temporary `.../.codex/.env` FIFO produced `auth=pass` and `catalog=pass` through a fake non-provider runner. |
+| Blocked receipts require top-level blockers | **Disproved.** | The v1 JSON Schema has a root-required `blockers` field and a `status=blocked` `minItems: 1` conditional; focused schema test passes. |
+| Completed receipt proves side effects | **Disproved.** | Both schema and `validate_run_receipt_status` require mutation, provider, network, and Codex-exec side-effect flags for `completed`; focused schema test passes. |
+| Judge schema accepts versioned `ex_` identifiers | **Disproved.** | Both judge schemas accept `^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$`; focused test passes. |
+| `--output-last-message` binds to receipt path | **Disproved.** | Candidate's guard requires exactly one flag and an adjacent matching value; focused test rejects forged/multiple path cases. |
+| Exact ordered A/B labels | **Partially fixed; not disproved overall.** | JSON Schema rejects reversed A/B order, but the typed reader accepts the same reversed completed receipt. |
 
-Command: `git status --short --branch --untracked-files=all` -> pass (branch `codex/pr313-postmerge-review-followups`; five intended implementation/test files modified; two Worker handoff JSON files untracked)
+## Scope And Churn
 
-Changed files inspected:
+`db50255` changes seven files only: the two judge schemas, the v1 run schema, two Skills SDK contract modules, and two focused tests. The diff is coherent with the named receipt-contract work and has no whitespace errors. I found no unrelated churn.
 
-- `Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json`
-- `Infrastructure/scripts/lib/ask/skills_sdk/local_score.py`
-- `Infrastructure/tests/test_skills_sdk_schema_spine.py`
-- `Infrastructure/tests/test_skills_sdk_skill_intake_review.py`
-- `Infrastructure/tests/test_skills_sdk_local_score.py`
+## Exact Evidence
 
-Worker handoffs inspected:
+Command: `git -C /private/tmp/agent-skills-jsc389-approved-auth-stream status --short --branch` -> pass (candidate checkout was clean on `codex/jsc-389-approved-auth-stream`, ahead of `origin/main` by two commits)
 
-- `.harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-01-skill-intake-review-receipt.json`
-- `.harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-02-local-score.json`
+Command: `git -C /private/tmp/agent-skills-jsc389-approved-auth-stream rev-parse HEAD` -> pass (`db50255eb80917362b9a8d60e3fcc72b70ba041b`)
 
-## Findings
+Command: `git -C /private/tmp/agent-skills-jsc389-approved-auth-stream diff --no-ext-diff --check db50255eb80917362b9a8d60e3fcc72b70ba041b^ db50255eb80917362b9a8d60e3fcc72b70ba041b` -> pass (no whitespace errors)
 
-### No Blocking Defect Found In Focused Patch
+Command: `XDG_CACHE_HOME=/private/tmp/codex-xdg-cache XDG_STATE_HOME=/private/tmp/codex-xdg-state PYTHONDONTWRITEBYTECODE=1 bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_auth_stream_identity.py tests/test_skills_sdk_ab_argv_binding.py tests/test_skills_sdk_schema_spine.py tests/test_skills_sdk_ab_run.py tests/test_skills_sdk_ab_judge.py tests/test_skills_sdk_ab_judge_score.py` -> pass (202 passed, 89 subtests passed)
 
-The schema now has `package_security_signature_receipt` in top-level `required`, requires the package-security signature schema for `status: pass` and `status: review`, and permits only `null` for `status: blocked`.
+Command: `XDG_CACHE_HOME=/private/tmp/codex-xdg-cache XDG_STATE_HOME=/private/tmp/codex-xdg-state PYTHONDONTWRITEBYTECODE=1 bash Infrastructure/scripts/run-infrastructure-python.sh - <<'PY' ... validate_ab_run_receipt(reversed_completed_receipt); schema_validation.validate_payload_against_schema(reversed_completed_receipt, ...) ... PY` -> pass (typed reader accepted the reversed completed receipt; JSON Schema returned `fail`)
 
-The local-score impact lane now combines row-level blocked count, suite-level blocker count, and receipt status before allowing impact to pass.
+Command: `XDG_CACHE_HOME=/private/tmp/codex-xdg-cache XDG_STATE_HOME=/private/tmp/codex-xdg-state PYTHONDONTWRITEBYTECODE=1 bash Infrastructure/scripts/run-infrastructure-python.sh - <<'PY' ... create arbitrary temporary .codex/.env FIFO; _approved_cloud_auth_fact(...); _cloud_catalog_fact(..., fake_runner) ... PY` -> pass (`arbitrary_dot_codex_fifo_auth=pass`; `arbitrary_dot_codex_fifo_catalog=pass`; no provider or judge invoked)
 
-### P3: Focused Tests Are Narrower Than The Full Disproof Matrix
+## Limitations
 
-The checked-in regression tests cover the main review/null schema case and the suite-level local-score blocker. They do not explicitly encode every disproof probe I ran manually, especially missing signature for review, missing/null signature for pass, and positive acceptance for blocked/null.
-
-This is not a rejection because the current schema behavior passed those probes. It is an advisory: if this PR follow-up becomes the durable guardrail, the manual probes should be converted into unit tests so future changes cannot regress the matrix invisibly.
-
-### Broader Suite Gap Remains
-
-The full `tests.test_skills_sdk_skill_intake_review` suite still fails five tests because the current `valid_skill` fixture is blocked by an intake quarantine issue involving `README.md`. This matches the Worker handoff boundary that the full skill-intake review suite is not green.
-
-I did not prove this failure is pre-existing by checking out/running the base branch in this QA lane. The current diff does not modify the fixture or the production intake quarantine path that emits that blocker, but the evidence here only proves the broader suite is still failing on the current branch.
-
-## Deterministic Checks
-
-Command: `sed -n '1,220p' AGENTS.md` -> pass (repo operating contract read)
-Command: `sed -n '1,240p' CODESTYLE.md` -> pass (first codestyle section read)
-Command: `sed -n '241,520p' CODESTYLE.md` -> pass (remaining codestyle section read)
-Command: `sed -n '1,260p' Docs/agents/19-high-signal-steering-feedback.md` -> pass (steering uptake/systemic scope contract read)
-Command: `sed -n '1,260p' Docs/agents/04-validation.md` -> pass (repo validation contract read)
-Command: `git diff -- Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json` -> pass (schema diff inspected)
-Command: `git diff -- Infrastructure/scripts/lib/ask/skills_sdk/local_score.py` -> pass (local-score diff inspected)
-Command: `jq '.' .harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-01-skill-intake-review-receipt.json` -> pass (Worker 01 handoff inspected)
-Command: `jq '.' .harness/reports/worker-handoffs/pr313-postmerge-review-followups/worker-02-local-score.json` -> pass (Worker 02 handoff inspected)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine.TestSkillsSdkSchemaSpine.test_skill_intake_review_receipt_schema_rejects_review_without_package_signature` -> pass (1 test OK)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review.TestSkillsSdkSkillIntakeReview.test_schema_fixture_consumes_risk_mode_receipt` -> pass (1 test OK)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_local_score.TestSkillsSdkLocalScore.test_builder_honors_suite_level_scenario_quality_blockers` -> pass (1 test OK)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_local_score` -> pass (7 tests OK)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh - <<'PY' ... PY` -> pass (manual matrix rejected review missing signature, review null signature, pass missing signature, pass null signature; accepted blocked null signature; verified local-score suite blocker blocks impact)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine` -> pass (96 tests OK)
-Command: `XDG_CACHE_HOME=/tmp/agent-skills-test-cache XDG_STATE_HOME=/tmp/agent-skills-test-state MISE_CACHE_DIR=/tmp/agent-skills-test-mise-cache MISE_STATE_DIR=/tmp/agent-skills-test-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/tmp/agent-skills-test-uv-cache PYTHONPATH=/Users/jamiecraik/dev/agent-skills/Infrastructure/tests bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_skill_intake_review` -> fail (27 tests ran; 5 failures remain around `valid_skill` being blocked by intake quarantine, including `approved_top_level_paths` evidence for `README.md`)
-Command: `git diff --check` -> pass (no whitespace errors reported)
-
-## Decision
-
-accept_with_advisory
-
-I could not disprove the focused Worker fixes. The implementation satisfies the two review-thread concerns in local deterministic proof.
-
-Do not claim the broader skill-intake review suite is green. Do not claim hosted GitHub review threads are resolved. Do not claim PR readiness, mergeability, cleanup safety, release readiness, or project completion from this QA lane.
-
-## Claims Boundary
-
-Proves:
-
-- Current branch schema rejects pass/review receipts when `package_security_signature_receipt` is missing or null.
-- Current branch schema still accepts the blocked/null route.
-- Current branch local-score impact lane blocks suite-level scenario-quality blockers even when row-level `blocked_count` is 0.
-- Focused schema/local-score tests pass locally through the repo Infrastructure wrapper.
-- Full schema spine suite passes locally.
-
-Does not prove:
-
-- Hosted PR #313 review-thread resolution.
-- Any new PR is ready, green, mergeable, reviewed, or safe to clean up.
-- Full skill-intake review suite health.
-- Base-branch/pre-existing classification for the remaining skill-intake review failures.
-- Linear, CircleCI, CodeRabbit, or external tracker state.
-- Project completion.
+This is local deterministic contract evidence only. It does not prove hosted review-thread state, current CI, mergeability, provider availability, cloud credential validity, actual Codex execution, a provider-backed eval/judge result, or release readiness.
 
 WROTE: artifacts/reviews/default.md

@@ -167,6 +167,8 @@ Worker receipts require:
 - `changed_files`
 - `commands`
 
+Worker success can close only its scoped task. It cannot close the parent goal.
+
 Judge receipts require:
 
 - `task_id`
@@ -179,6 +181,38 @@ Goal completion requires a final Judge or PM receipt with:
 ```json
 {"decision":"complete"}
 ```
+
+## Receipt Closure Ledger
+
+Before selecting the next task or calling a goal complete, build a ledger entry
+for each receipt relevant to the current board state:
+
+| Field | Meaning |
+| --- | --- |
+| `task_id`, `receipt_id`, `role`, `decision` | Identifies the task and decision-maker. |
+| `evidence_refs_or_explicit_gap` | Durable evidence references, or an explicit absence/gap. |
+| `current_verifier_outcome_or_not_applicable` | The current result for the verification surface this receipt relies on. |
+| `pending_recheck_or_blocker` | Any named post-push, external, review, CI, tracker, or owner follow-up. |
+| `closure_eligibility` | `task_only`, `recovery_only`, `blocked`, `pending_recheck`, or `goal_close_eligible`. |
+
+Apply these semantics conservatively:
+
+- Scout, Worker, and Governor receipts are `task_only` or `recovery_only`, even
+  when their decision is `pass`.
+- A `pass_with_*` receipt remains `pending_recheck`; its suffix identifies work
+  that must be resolved or expressly classified nonblocking by the board's
+  completion contract.
+- A `blocked_*` or `requires_*` receipt is `blocked`; it preserves the named
+  blocker and never becomes a completed task by inference.
+- A Judge or PM `pass_with_recorded_blockers` receipt is a checkpoint, not final
+  goal closure, unless it is followed by a final `decision: complete` receipt
+  that accounts for each blocker under the completion contract.
+- Only a final Judge or PM `decision: complete`, with every board-required task
+  accounted for and current verification evidence, is `goal_close_eligible`.
+
+Keep external review, CI, tracker, and merge rechecks in their matching truth
+lanes. A local Worker pass cannot satisfy an external recheck, and a recorded
+external blocker cannot be silently dropped from a closeout claim.
 
 ## Verification Freshness
 

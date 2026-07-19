@@ -1,4 +1,4 @@
-# Marker Pack
+# Exact Goal Governor Decision Markers
 
 Load this only when a Goal Governor condition needs an exact marker string.
 

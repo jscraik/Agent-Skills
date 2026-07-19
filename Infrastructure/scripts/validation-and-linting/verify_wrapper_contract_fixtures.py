@@ -242,15 +242,15 @@ def _assert_runtime_separation_fixtures(repo_root: Path, timeout_seconds: int) -
     	timeout_seconds (int): Maximum time in seconds to wait for each command to complete.
     """
     commands = [
-        ["Infrastructure/bin/ask", "repo", "status", "--json"],
-        ["Infrastructure/bin/ask", "skills", "list", "--json"],
-        ["Infrastructure/bin/ask", "plugins", "doctor", "--json"],
+        ["bin/ask", "repo", "status", "--json"],
+        ["bin/ask", "skills", "list", "--json"],
+        ["bin/ask", "plugins", "doctor", "--json"],
     ]
     for command in commands:
         _assert_envelope(repo_root, command, timeout_seconds)
 
     plugin_name: str | None = None
-    exit_code, plugins_payload = _run_json(repo_root, ["Infrastructure/bin/ask", "plugins", "list", "--json"], timeout_seconds)
+    exit_code, plugins_payload = _run_json(repo_root, ["bin/ask", "plugins", "list", "--json"], timeout_seconds)
     if exit_code == 0:
         plugins = plugins_payload.get("data", {}).get("installed_state", {}).get("plugins", [])
         if isinstance(plugins, list) and plugins:
@@ -259,7 +259,7 @@ def _assert_runtime_separation_fixtures(repo_root: Path, timeout_seconds: int) -
                 plugin_name = candidate.strip()
 
     if plugin_name:
-        _assert_envelope(repo_root, ["Infrastructure/bin/ask", "plugins", "status", plugin_name, "--json"], timeout_seconds)
+        _assert_envelope(repo_root, ["bin/ask", "plugins", "status", plugin_name, "--json"], timeout_seconds)
 
 
 def _assert_runtime_proof_fixtures(

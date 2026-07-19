@@ -4,6 +4,7 @@ purpose: "Convert fuzzy or overloaded project language into a durable UBIQUITOUS
 triggers:
   - "Use when the user request matches the skill scope."
   - "Use when the user asks for a relentless domain-language grill or plan stress-test against code and documented decisions."
+  - "Use when a specific implementation correction may encode a broader engineering preference, invariant, or architecture rule."
 non_goals:
   - "Route unrelated work away from this skill."
 inputs:
@@ -13,6 +14,7 @@ inputs:
   - "nearby repo docs"
   - "domain evidence"
   - "ambiguities"
+  - "specific corrective feedback and the visible implementation example"
 outputs:
   - "canonical terms"
   - "aliases to avoid"
@@ -21,10 +23,16 @@ outputs:
   - "flagged ambiguities"
   - "integration note"
   - "domain-grill question, recommendation, and resolved-term capture when requested"
+  - "feedback intent radius when corrective feedback is the source"
+  - "generalized feedback rule without incidental implementation identifiers"
+  - "bounded pattern sweep with a similar-case disposition for each relevant sibling"
+  - "enforcement handoff when terminology reveals a missing mechanical invariant"
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - local_only_correction
+  - unbounded_systemic_churn
 safety:
   untrusted_inputs: true
   redact_secrets: true

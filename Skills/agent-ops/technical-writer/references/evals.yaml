@@ -225,7 +225,7 @@ cases:
       - type: discovery_question
         value: "Asks exactly one question before inspection."
       - type: expected_signal
-        value: "Asks for the package source path or editable scope."
+        value: "Missing target surface, reader, and job-to-be-done."
       - type: not_contains
         value: "I changed"
   - id: reader-state-glossary-citations
@@ -737,11 +737,11 @@ cases:
         - nc
     acceptance:
       - type: expected_signal
-        value: "Asks which documentation surface to inspect."
+        value: "Which documentation surface should we improve first?"
       - type: expected_signal
-        value: "Identifies canonical source or editable owner."
+        value: "Missing target surface, reader, and job-to-be-done."
       - type: expected_signal
-        value: "Blocks edits until the surface is chosen."
+        value: "Does not draft or rewrite docs while the workflow is underspecified."
       - type: not_contains
         value: "I will edit"
       - type: not_contains

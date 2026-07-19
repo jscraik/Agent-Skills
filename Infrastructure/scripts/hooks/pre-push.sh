@@ -8,6 +8,8 @@ cd "$REPO_ROOT"
 
 source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"
 
+python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
+
 changed_files_file="$(mktemp "$TMPDIR/agent-skills-pre-push.XXXXXX")"
 trap 'rm -f "$changed_files_file"' EXIT
 

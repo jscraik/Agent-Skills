@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+"""Regression tests for the git-metadata-preflight/v1 adapter."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+SCRIPT = (
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "validation-and-linting"
+    / "git_metadata_preflight.py"
+)
+
+
+def git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env.update(
+        {
+            "GIT_AUTHOR_NAME": "preflight-test",
+            "GIT_AUTHOR_EMAIL": "preflight-test@example.invalid",
+            "GIT_COMMITTER_NAME": "preflight-test",
+            "GIT_COMMITTER_EMAIL": "preflight-test@example.invalid",
+        }
+    )
+    return subprocess.run(
+        ["git", *args], cwd=repo, env=env, text=True, capture_output=True, check=False
+    )
+
+
+def make_repo(root: Path) -> Path:
+    repo = root / "repo"
+    repo.mkdir()
+    assert git(repo, "init", "-q").returncode == 0
+    (repo / "README.md").write_text("preflight\n", encoding="utf-8")
+    assert git(repo, "add", "README.md").returncode == 0
+    assert git(repo, "commit", "-qm", "initial").returncode == 0
+    return repo
+
+
+def run_preflight(repo: Path, **env_overrides: str) -> tuple[int, dict[str, object]]:
+    env = os.environ.copy()
+    env.update(env_overrides)
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), "--repo-root", str(repo), "--json"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return proc.returncode, json.loads(proc.stdout)
+
+
+class GitMetadataPreflightTests(unittest.TestCase):
+    def test_clean_checkout_passes_and_reports_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            code, payload = run_preflight(repo)
+
+            self.assertEqual(code, 0, payload)
+            self.assertEqual(payload["contract"], "git-metadata-preflight/v1")
+            self.assertEqual(payload["status"], "pass")
+            self.assertTrue(payload["write_probe"])
+
+    def test_current_index_lock_blocks_without_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["index_lock_path"]))
+            lock_path.touch()
+            code, payload = run_preflight(
+                repo, GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0"
+            )
+
+            self.assertEqual(code, 78, payload)
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+            self.assertTrue(lock_path.exists(), "preflight must never remove locks")
+
+    def test_expected_current_index_lock_is_advisory_for_pre_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["index_lock_path"]))
+            lock_path.touch()
+            code, payload = run_preflight(
+                repo,
+                GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS="0",
+            )
+
+            self.assertEqual(code, 78, payload)
+            self.assertIn("stale_index_lock_candidate", payload["reason_codes"])
+
+            allowed = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--repo-root",
+                    str(repo),
+                    "--allow-current-index-lock",
+                    "--json",
+                ],
+                env={**os.environ, "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0"},
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            allowed_payload = json.loads(allowed.stdout)
+            self.assertEqual(allowed.returncode, 0, allowed_payload)
+            self.assertEqual(allowed_payload["status"], "pass")
+            self.assertNotIn("stale_index_lock_candidate", allowed_payload["reason_codes"])
+            self.assertIn("expected_current_index_lock", allowed_payload["advisories"])
+            self.assertTrue(lock_path.exists(), "preflight must never remove locks")
+
+    def test_linked_worktree_and_locked_metadata_are_visible(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "linked"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "linked")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            code, payload = run_preflight(linked)
+            self.assertEqual(code, 0, payload)
+            self.assertTrue(payload["linked_worktree"])
+            self.assertIn("/worktrees/", str(payload["index_path"]))
+
+            locked = git(repo, "worktree", "lock", "--reason", "initializing", str(linked))
+            self.assertEqual(locked.returncode, 0, locked.stderr)
+            code, payload = run_preflight(linked)
+            self.assertEqual(code, 78, payload)
+            self.assertIn("locked_current_worktree", payload["reason_codes"])
+
+    def test_prunable_worktree_is_advisory_until_explicit_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "prunable"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "prunable")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            shutil.rmtree(linked)
+
+            code, payload = run_preflight(repo)
+            self.assertEqual(code, 0, payload)
+            self.assertEqual(payload["status"], "pass")
+            self.assertTrue(payload["prunable_worktrees"])
+            self.assertEqual(payload["advisories"], ["prunable_worktree"])
+
+    def test_metadata_permission_denial_is_fail_closed_when_enforced(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            metadata_dir = Path(str(clean["git_dir"]))
+            original_mode = metadata_dir.stat().st_mode & 0o777
+            try:
+                metadata_dir.chmod(0o555)
+                if os.access(metadata_dir, os.W_OK):
+                    self.skipTest("filesystem permits writes despite chmod(0555)")
+                code, payload = run_preflight(repo)
+                self.assertEqual(code, 78, payload)
+                self.assertIn("metadata_write_denied", payload["reason_codes"])
+            finally:
+                metadata_dir.chmod(original_mode)
+
+
+if __name__ == "__main__":
+    unittest.main()

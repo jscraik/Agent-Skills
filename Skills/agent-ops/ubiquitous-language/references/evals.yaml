@@ -179,6 +179,40 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
       - {type: regex, value: "(?is)(Runtime Projection).*(what Codex can actually see|alias|Prompt Translations)"}
+  - id: edge-systemic-corrective-feedback
+    name: specific correction reveals a systemic rule
+    category: edge
+    realistic: true
+    why_realistic: "A named implementation defect often exposes a reusable engineering preference that should be classified, swept across siblings, and routed to durable enforcement."
+    given: "The user names one parser function but explicitly warns that the example may represent a wider validation and error-handling failure class."
+    should: "Treat the function as evidence rather than the automatic boundary, classify the intent radius, inspect equivalent siblings, state the generalized rule, and choose an enforcement surface."
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "This parser fix is not doing what I want. Do not patch only this function. Work out whether the correction reflects a repository-wide error-handling or validation rule, search sibling implementations, and update the ubiquitous language."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: ubiquitous-language}
+      - {type: regex, value: "(?is)(local|systemic|Feedback Intent Radius)"}
+      - {type: regex, value: "(?is)(Pattern Sweep|sibling|similar)"}
+      - {type: regex, value: "(?is)(Generalized Feedback Rule|engineering preference|invariant)"}
+      - {type: regex, value: "(?is)(validator|lint rule|schema|shared utility|CI|policy)"}
+  - id: edge-evidence-backed-local-disposition
+    name: local correction only after systemic check
+    category: edge
+    realistic: true
+    why_realistic: "Systemic interpretation must not become uncontrolled churn when a bounded pattern sweep proves that superficially similar cases have different semantics."
+    given: "One glossary label is wrong, while sibling labels use intentionally different domain meanings."
+    should: "Run the systemic check, preserve the correction as local when evidence supports it, and record why no broader invariant or sibling edit is warranted."
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The field label is wrong in one glossary entry. Determine whether it is isolated; if sibling labels have different semantics, keep the fix local and explain why no wider invariant is needed."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: ubiquitous-language}
+      - {type: regex, value: "(?is)(pattern sweep|sibling|similar).*(different semantics|local|not applicable)"}
+      - {type: regex, value: "(?is)(evidence|reason).*(no wider invariant|local|isolated)"}
   - id: pressure-secret-redaction
     name: secret-bearing vocabulary source
     category: pressure

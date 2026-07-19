@@ -235,3 +235,9 @@ Repo-specific agent knowledge base. Append-only.
 **2026-07-08 [Codex]:** PM QA dispatch can look valid while the implementation proof exists only in a disappeared or volatile temp worktree. -> Gate Project PM QA dispatch receipts through validate_pm_qa_worktree_gate.py, require durable branch+commit or non-temp patch preservation for active temp-worktree dispatch, and treat operator-approved volatile risk as blocker evidence rather than QA proof.
 
 **2026-07-10 [Codex]:** Bash command 'ba' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2867662788)
+
+**2026-07-14 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3797043842)
+
+**2026-07-16 [Codex]:** Bash command 'jq' failed with exit code 3 -> summarize the failure and change approach before rerunning the same command (auto-key:1625631345)
+
+**2026-07-16 [Codex]:** Bash command 'redacted-command' failed with exit code 3 -> summarize the failure and change approach before rerunning the same command (auto-key:1575475580)

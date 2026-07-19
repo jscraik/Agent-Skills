@@ -25,8 +25,18 @@ schema_version: 1
 ## Context Pointers
 
 - Skill lifecycle rules: [../Docs/agents/17-skill-management.md](../Docs/agents/17-skill-management.md).
+- Skill Factory routing and lifecycle map: [../Plugins/skill-factory/README.md](../Plugins/skill-factory/README.md).
 - Path ownership: [../Docs/agents/14-path-ownership-boundaries.md](../Docs/agents/14-path-ownership-boundaries.md).
 - Skill templates: `Infrastructure/templates/**`.
+
+Route skill work through the Skill Factory lanes: use
+`skill-factory:skill-creator` for first usable package shape,
+`skill-factory:skillify` for repeatable-workflow capture,
+`skill-factory:skill-builder` for audit and hardening,
+`skill-factory:skill-refactor` for evidence-based keep/merge/split/retire
+decisions, and `skill-factory:skill-installer` for install, sync, and runtime
+visibility. Use `skill-factory:skill-factory-router` when the request needs
+classification before one of those lanes.
 
 ## Validation
 

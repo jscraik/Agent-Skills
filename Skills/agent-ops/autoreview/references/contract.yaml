@@ -1,7 +1,7 @@
 schema_version: 1
 skill: autoreview
 purpose: Run structured AI code review as an advisory closeout gate for local dirty work, branch diffs, PR branches, or single commits.
-version: "0.1.1"
+version: "0.2.0"
 triggers:
   - autoreview
   - Codex review
@@ -26,19 +26,25 @@ inputs:
   - base_ref
   - commit_ref
   - selected_engine
+  - reviewed_sha_or_local_state
+  - base_ref_freshness
+  - owner_checkout_or_repair_worktree
   - optional_prompt_file
   - optional_dataset
   - optional_parallel_test_command
   - permission_posture
 outputs:
   - selected_review_target
+  - review_preflight_record
   - review_command
   - structured_review_report
+  - finding_ledger_with_disposition
   - accepted_findings
   - rejected_findings
   - blocked_findings
   - validation_evidence
-  - clean_review_result_or_blocker
+  - separate_evidence_lane_status
+  - clean_autoreview_result_or_blocker
 risks:
   - untrusted_reviewer_output
   - prompt_file_or_dataset_injection
@@ -51,6 +57,8 @@ risks:
   - trusting_clean_prose_that_contradicts_findings
   - stale_or_degraded_branch_refs
   - selecting_autoreview_for_thread_mutation
+  - using_an_artifact_from_the_wrong_worktree
+  - collapsing_autoreview_proof_into_hosted_readiness
 routing:
   local_dirty_closeout: Use local mode only for unstaged, staged, or untracked work in the current checkout.
   branch_pr_base_review: Use branch mode with the PR base for committed branch work, PR updates, or before-push review.
@@ -62,6 +70,8 @@ failure_classification:
   blocked_runtime: App-server startup, sandbox launch, nested reviewer startup, or model CLI initialization failed.
   degraded_existing_refs: Remote refs cannot be refreshed but existing refs are acceptable for the review.
   blocked_fetch: Fresh refs are required but FETCH_HEAD or remote fetch cannot be updated.
+  blocked_context_mismatch: The target, repair, test, or receipt belongs to another checkout and its artifact cannot be verified in the owner context.
+  blocked_setup: A deterministic repo-contract setup correction is required before rerunning the affected gate.
   contradictory_clean_output: Clean prose is contradicted by Findings, Issues, Risks, or Actionable sections; fail closed.
 safety:
   untrusted_inputs: true
@@ -72,11 +82,12 @@ safety:
   reviewer_findings_are_advisory: true
   operator_parallel_test_command_required: false
 validation:
+  - classified_narrowest_gate_first
   - helper_scripts_compile
   - helper_help_runs
   - helper_commit_dry_run
   - strict_skill_audit
   - smoke_evals
   - tessl_staged_eval_when_workspace_project_link_available
-observability: Report target selection, command used, engine, findings accepted or rejected, validation outcomes, and blockers.
+observability: Report recorded target and owner context, reviewed SHA or local state, base freshness, command used, engine, finding classifications and dispositions, per-lane validation outcomes, and blockers.
 rollback_procedure: Remove Skills/agent-ops/autoreview and rerun workspace skill sync.

@@ -3,8 +3,8 @@
 ## Scope and Sources
 
 - Scope: `agent-skills` repository operations, Skills SDK product direction, skill authoring, skill sync, and runtime visibility.
-- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-07-01
+- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, `Skills/agent-ops/ubiquitous-language/SKILL.md`, `/Users/jamiecraik/dev/configs/codex/projection-map.json`, `/Users/jamiecraik/dev/configs/codex/scripts/reconcile-config-projection.sh`, and `/Users/jamiecraik/dev/configs/codex/launchd/com.jamiecraik.config-projection-reconciler.plist`.
+- Last updated: 2026-07-17
 
 ## Canonical Terms
 
@@ -44,6 +44,13 @@
 | **Canonical Skill Source** | The editable source of a skill under `Skills/<topic-cluster>/<skill-name>/` or a plugin-owned skill path. | runtime skill, synced copy | High |
 | **Canonical Source Inspection** | Directly reading a skill's `SKILL.md` or package files for repair, audit, source review, or authoring when runtime skill use is not being claimed. | using the skill, running the skill | High |
 | **Runtime Projection** | The generated skill view under `.agents/skills/**` that Codex and agent runtimes consume. | canonical skill, source skill | High |
+| **Tracked Policy Source** | The reviewed repository file that declares policy for a runtime system; for Codex configuration this is the tracked `codex/config.toml`, distinct from the mutable home runtime copy. | canonical config, live config, global config | High |
+| **Runtime Config Copy** | The regular mutable `~/.codex/config.toml` file materialized from the tracked policy source so Codex Desktop may persist runtime-owned settings without rewriting reviewed repository policy. | global config symlink, standalone policy source, copied config drift | High |
+| **Projection Reconciler** | The repository-owned `codex/scripts/reconcile-config-projection.sh` path, normally invoked by `com.jamiecraik.config-projection-reconciler`, that applies `codex/projection-map.json` to home targets on a bounded schedule. | symlink fixer, config watcher, auto-repair daemon | High |
+| **Runtime Projection Strategy** | The explicit map contract for a projected target: `symlink`, `copy`, or `copy-runtime`; `copy-runtime` preserves a regular runtime config while rejecting symlink replacement. | projection mode, link type, repair behavior | High |
+| **Approval Routing** | The Codex configuration path selected by `approvals_reviewer = "auto_review"` for eligible interactive tool or sandbox approvals. It evaluates an approval request; it does not create user authority for a new commit, publication, or review-state mutation. | auto-approve everything, commit permission, user authorization | High |
+| **Commit Authorization Boundary** | The user-approved repository, action, and file scope that permits staging and committing; once explicitly named, it should not be requested again unless ownership, risk, destination, or scope expands. | create-commits confirmation, broad staging permission, portfolio prompt | High |
+| **Duplicate Commit Authorization Prompt** | A redundant request to reconfirm a commit or PR scope already explicitly authorized by Jamie. It is a workflow defect; preserve unrelated or unknown-owned files and ask only for the unresolved boundary. | “Please explicitly confirm Create the portfolio commits”, approval loop | High |
 | **Runtime Skill Activation** | Using a skill through the active runtime-visible route/projection after proof gates pass. | reading source, source fallback | High |
 | **Agent Skills Standard** | The cross-client package format defined by agentskills.io: a skill directory with one `SKILL.md` manifest and optional `scripts/`, `references/`, `assets/`, and eval files. It defines package contents, not a mandatory filesystem root. | OpenAI-only skill format, Codex-only skill format | High |
 | **Interoperable Skill Root** | A `.agents/skills/` directory scanned by compatible clients for cross-client project or user skills. It is a convention for discovery; ownership still depends on the current repository contract. | always-canonical `.agents`, generated source | High |
@@ -107,6 +114,7 @@
 | "you are failing to operate effectively" | Trigger the steering override halt. | "Stop the active lane, close stale child agents, classify the blocker, make a durable environment refinement, validate the mechanism, and prove it before resuming ordinary work." |
 | "do not proceed until you prove it" | Require validated environment-refinement evidence before task continuation. | "Run the steering uptake protocol, update docs/tests/validators/ledger as needed, and report blocker, mechanism, proof, and remaining limit before returning to the implementation lane." |
 | "this is how I think about the problem generally" | Treat the named issue as a transferable rule until proven local. | "Run a bounded pattern sweep, classify similar cases, and preserve the rule in the owning doc, glossary, skill, or validator." |
+| "this implementation detail is not doing what I want" | Treat the visible defect as evidence of a potentially broader **Generalized Feedback Rule**, not as the automatic correction boundary. | "Classify the **Feedback Intent Radius**, run a bounded **Pattern Sweep**, record each **Similar-Case Disposition**, state the engineering preference or invariant, and route recurrence prevention to the owning validator, lint rule, schema, shared utility, convention, CI check, or architecture policy." |
 | "agents need to OODA across the stack" | Expand orientation beyond the current turn. | "Check horizontal organizational context and vertical stacked trajectories before deciding the action radius." |
 | "make the unsafe use hard to express" | Apply **Misuse-Resistant Interface Design**. | "Shape the API around narrow authority, owned schemas, typed invariants, contextual errors, and policy-like tests." |
 | "drop agents into the workspace with zero setup" | Apply **Zero-Setup Agent Workspace**. | "Design agent-facing setup as discoverable, idempotent, validated workspace self-setup with explicit blocker classification." |
@@ -118,10 +126,15 @@
 | "pass with not_run refs" | Distinguish **Evidence Inventory** from **Evidence Replay**. | "Treat `sdk evidence verify` as inventory/classification; run or plan replay receipts before claiming command behavior is proven." |
 | "make the atlas clearer" | Use the **Canonical Skills SDK Pipeline** and recurring lifecycle cycles. | "Redesign or review atlas visuals around Foundry, SDK entry, sandboxed oss-security, SDK early, oss-local proof, SDK middle, oss-cloud proof, SDK pre-release with Tessl dry run, external Tessl distribution, and local runtime truth." |
 | "feed it in at the start of the pipeline" | Use the **Upstream Feedback Loop** and **Pipeline Ratchet**. | "Classify the recurring failure, patch the source fixture, adapter, validator, route checklist, or package before `oss-local`, and prove scenario-quality blocks the old shape before widening to `oss-cloud` or Tessl." |
+| "auto-review should approve this for me" | Distinguish **Approval Routing** from the **Commit Authorization Boundary**. | "Use `auto_review` for the eligible tool or sandbox approval; treat an explicit repository/action/scope request as the commit authority, do not ask for a **Duplicate Commit Authorization Prompt**, and stop only for unknown ownership or a real scope expansion." |
+| "Please explicitly confirm: Create the portfolio commits" | Classify whether the user already named and authorized the repository and commit scope before asking again. | "Triage the portfolio files and ownership first. If Jamie already authorized that exact repository and scope, continue without a second confirmation; preserve unrelated or unknown-owned files and ask only about the unresolved boundary." |
+| "who keeps changing my config.toml?" | Trace the **Projection Reconciler** and inspect the **Runtime Projection Strategy** before blaming the desktop runtime. | "Check the launchd reconciler command, interval, recent log, map strategy, and live target type; use **Runtime Config Copy** for the mutable main config and keep profiles or other targets on their declared strategies." |
 
 ## Relationships
 
 - A **Canonical Skill Source** may produce one **Runtime Projection** entry after **Workspace Sync**.
+- A tracked policy source may produce a **Runtime Config Copy** when the **Runtime Projection Strategy** is `copy-runtime`; the **Projection Reconciler** must preserve that regular file rather than restore a symlink.
+- **Approval Routing** may auto-review an eligible tool request, but only the **Commit Authorization Boundary** authorizes a new commit scope; a **Duplicate Commit Authorization Prompt** signals that the agent has confused those concepts.
 - The **agent-skills Foundry** supplies source packages, fixtures, and governance memory to the **Skills SDK**; it should not be described as the finished product, registry, or runtime truth.
 - **Skills SDK** professionalizes foundry source through the **Professional Lifecycle Contract** before any **Tessl Distribution Stage** or **Local Runtime Truth Stage** claim is made.
 - The **Canonical Skills SDK Pipeline** is the shared route for roadmap, atlas, route-map, and capability language. Backlog cards should name one of the ten ordered steps and the entry, early, middle, pre-release, or runtime cycle before they become implementation slices.
@@ -164,6 +177,10 @@
 >
 > **Domain expert:** "Because the runtime projection was still using a legacy curated flat surface. The deterministic SDK shape projects first-party canonical skills by type and ownership; sync, then verify with `./bin/ask skills load-preview --json`."
 
+> **Dev:** "Why did the agent ask me to confirm portfolio commits again when I already said to commit the repository changes?"
+>
+> **Domain expert:** "That was a **Duplicate Commit Authorization Prompt**. **Approval Routing** is for eligible tool or sandbox requests; your explicit repository and file scope already established the **Commit Authorization Boundary**. The agent should triage ownership, preserve unrelated files, and continue unless the scope actually expands."
+
 ## Flagged Ambiguities
 
 - "Skill" can mean **Canonical Skill Source**, **Runtime Projection**, or a skill advertised in the session prompt. Recommendation: use **Canonical Skill Source** for editable files, **Runtime Projection** for `.agents/skills/**`, and **available skill** for what the active Codex session can invoke.
@@ -178,6 +195,8 @@
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
 - "Make it visible" can mean adding files to source control, refreshing runtime projection, or enabling the plugin runtime root. Recommendation: verify with `./bin/ask skills list --json` and `./bin/ask skills load-preview --json`, not only `find`.
 - "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable metadata routes and reserve "stub" for test doubles or temporary executable placeholders.
+- "Auto-review" is overloaded. Recommendation: use **Approval Routing** for the configured reviewer and **Commit Authorization Boundary** for the user's explicit mutation authority; never use `auto_review` as a synonym for “approve every commit or publication.”
+- "Config" is overloaded. Recommendation: use **Tracked Policy Source** for the reviewed repo file, **Runtime Config Copy** for the mutable home file, and **Projection Reconciler** for the scheduled mechanism that materializes the map.
 
 ## Agent Integration
 

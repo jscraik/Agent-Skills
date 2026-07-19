@@ -24,17 +24,22 @@ inputs:
   - merge_strategy
   - approval_posture
   - cli_auth_context
+  - heartbeat_target_identity
 outputs:
   - capability
   - heartbeat_status_first
   - pr_inventory
   - heartbeat_status
+  - heartbeat_target_status
   - action_queue
+  - recurring_finding_classes
   - waived_external_ci_ledger
   - fix_ledger
   - dirty_worktree_ledger
   - validation_surface_decisions
   - validation_evidence
+  - artifact_receipt_ledger
+  - per_pr_evidence_lane_matrix
   - url_first_merge_ledger
   - cleanup_ledger
   - decision_ready_blockers
@@ -95,17 +100,37 @@ quality_criteria:
       "3": Dirty paths are listed but the distinction between clean checkout authority and ledger accounting is unclear.
       "2": Ledger-only validation is treated as enough to switch branches despite primary checkout dirt.
       "1": The sweep attempts branch movement with unclassified dirty work.
+  recurring_finding_prevention:
+    purpose: Convert repeated review and CI findings into reusable prevention before merge.
+    why_it_matters: Prevents the same defect class from consuming multiple PR review cycles and repeated Jamie steering.
+    observable_evidence:
+      - recurring_finding_classes
+      - occurrence_count_and_affected_repositories
+      - root_cause
+      - durable_guardrail_or_blocker
+      - guardrail_validation
+    scoring:
+      "5": Every repeated class is grouped before edits and the second occurrence is blocked from merge until a reusable guardrail is validated or explicitly blocked.
+      "4": Repeated classes and guardrails are correct but one secondary provenance field is incomplete.
+      "3": Repetition is noticed but root cause or guardrail proof is incomplete.
+      "2": Similar findings are fixed independently without a recurrence decision.
+      "1": The same finding class reaches merge review repeatedly with no durable prevention.
 automatic_failure_conditions:
   - Claims waived external CI as green.
   - Stops the sweep on waived external CI while merge, review, draft, or cleanup lanes remain.
   - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
   - Treats resolved review threads, passing PR checks, or temp-worktree validation as proof that the primary checkout is safe to switch branches.
+  - Merges a second occurrence of the same review or CI finding class without validated durable-guardrail evidence or an explicit blocked_durable_guardrail classification.
 evidence_requirements:
   - exact_command_or_tool_outcome_for_each_claim
   - url_first_pr_card_for_each_target_pr
   - stale_check_boundary_for_latest_head_sha
+  - check_run_head_event_and_pr_metadata_provenance
+  - heartbeat_target_refreshed_before_action
+  - producer_and_validator_worktree_for_receipt_artifacts
   - primary_worktree_dirty_closeout_validation_before_branch_movement
   - decision_ready_blocker_when_user_action_is_next
+  - recurring_finding_classification_and_guardrail_proof
 risks:
   - stale_github_state
   - interesting_status_without_action
@@ -115,8 +140,12 @@ risks:
   - duplicate_automation
   - accidental_staging_of_unrelated_or_temp_material
   - sandbox_network_or_cache_misclassification
+  - stale_heartbeat_target
+  - stale_pr_metadata_event
+  - artifact_validator_worktree_mismatch
   - unsafe_branch_or_worktree_deletion
   - policy_override_without_approval
+  - repeated_point_fixes_without_prevention
 safety:
   untrusted_inputs: true
   redact_secrets: true
@@ -127,6 +156,7 @@ safety:
   destructive_cleanup_requires_merge_proof: true
   preserve_unrelated_changes: true
   one_pr_at_a_time: true
+  repeated_finding_requires_guardrail_before_merge: true
   url_first_pr_reporting: true
   decision_ready_blocker_briefs: true
   waived_external_checks_do_not_stop_rotation: true
@@ -153,6 +183,9 @@ current_state_contract:
   - unresolved_review_threads
   - required_check_names_statuses_and_urls
   - heartbeat_id_status_and_stop_rule
+  - heartbeat_target_url_number_head_and_state
+  - required_check_head_event_and_metadata_provenance
+  - artifact_receipt_producer_validator_context
   - worktree_upstream_and_unique_commit_evidence_before_cleanup
 capability_selection:
   default_entrypoint: closeout-commander
@@ -219,6 +252,8 @@ validation:
   - heartbeat_created_or_reused_before_rotation
   - heartbeat_blocker_reported_before_rotation
   - action_queue_classified_before_edits
+  - recurring_finding_classes_grouped_before_edits
+  - repeated_finding_guardrail_validated_before_merge
   - waived_external_ci_does_not_stop_rotation
   - dirty_merge_state_routes_to_merge_conflict_strategy
   - current_repo_scope_confirmed_before_broadening
@@ -233,6 +268,9 @@ validation:
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck
+  - heartbeat_target_refreshed_before_rotation
+  - current_head_and_metadata_provenance_before_source_patch
+  - artifact_receipt_context_checked_before_closeout_claim
   - branch_worktree_merge_proof
   - strict_skill_audit_for_skill_changes
 observability: "Report exact commands, tool outcomes, PR numbers, head SHAs, check names, thread status, blockers, and cleanup decisions."
