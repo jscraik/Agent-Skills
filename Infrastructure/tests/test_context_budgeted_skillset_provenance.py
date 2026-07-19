@@ -27,7 +27,12 @@ class TestSkillsetProvenance(unittest.TestCase):
         self.temp_dir = Path(tempfile.mkdtemp(prefix="skillset-provenance-"))
 
     def tearDown(self) -> None:
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        try:
+            shutil.rmtree(self.temp_dir)
+        except OSError as exc:
+            raise RuntimeError(
+                f"Failed to remove temporary directory {self.temp_dir}"
+            ) from exc
 
     def test_rejects_stale_source_hash(self) -> None:
         repo_root = self.temp_dir / "repo"
