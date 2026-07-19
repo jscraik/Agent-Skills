@@ -59,6 +59,7 @@ import os
 import stat
 import sys
 from pathlib import Path
+from typing import Optional
 
 MARKER_NAME = ".agent-skills-hook-cache"
 MARKER_CONTENT = "agent-skills-hook-cache/v1\n"
@@ -93,7 +94,7 @@ def validate_parent_chain(candidate: Path) -> None:
 
 validate_parent_chain(path)
 
-def marker_root(candidate: Path) -> Path | None:
+def marker_root(candidate: Path) -> Optional[Path]:
     for parent in (candidate, *candidate.parents):
         marker = parent / MARKER_NAME
         if marker.is_symlink():
