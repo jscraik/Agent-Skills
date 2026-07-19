@@ -10,8 +10,11 @@ from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
 from ask.skills_sdk.ab_transport_contracts import (
+    actual_opaque_env_path,
+    approved_op_binary,
+    approved_op_env_invocation,
+    is_actual_opaque_env_reference,
     is_approved_op_binary,
-    is_opaque_env_reference,
     opaque_env_identity_digest,
 )
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
@@ -96,29 +99,38 @@ def _default_codex_runner(
     command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int,
     *, expected_auth_stream_identity: str | None = None,
 ) -> CodexRunResult:
-    execution_argv = _execution_argv_for_run(command_argv)
     if _codex_profile_from_argv(command_argv) == "oss-cloud":
-        if len(execution_argv) < 5 or not is_opaque_env_reference(execution_argv[3]):
-            raise ValueError("cloud execution auth stream changed before Codex invocation")
-        observed_identity = opaque_env_identity_digest(execution_argv[3])
-        if observed_identity is None or (
-            expected_auth_stream_identity is not None
-            and observed_identity != expected_auth_stream_identity
-        ):
-            raise ValueError("cloud execution auth stream identity changed before Codex invocation")
-        expected_auth_stream_identity = observed_identity
-        if opaque_env_identity_digest(execution_argv[3]) != expected_auth_stream_identity:
-            raise ValueError("cloud execution auth stream identity changed before subprocess start")
-    proc = subprocess.run(
-        execution_argv,
-        cwd=repo_root,
-        input=prompt,
-        text=True,
-        capture_output=True,
-        check=False,
-        timeout=timeout_seconds,
-        env=_codex_runner_env(),
-    )
+        default_stream = actual_opaque_env_path()
+        env_file = os.environ.get(
+            "SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "",
+        )
+        with approved_op_env_invocation(
+            env_file, expected_identity_digest=expected_auth_stream_identity,
+        ) as invocation:
+            proc = subprocess.run(
+                invocation.runtime_argv(command_argv),
+                cwd=repo_root,
+                input=prompt,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=timeout_seconds,
+                env=_codex_runner_env(),
+                pass_fds=invocation.pass_fds,
+            )
+            execution_argv = invocation.receipt_argv(command_argv)
+    else:
+        execution_argv = _execution_argv_for_run(command_argv)
+        proc = subprocess.run(
+            execution_argv,
+            cwd=repo_root,
+            input=prompt,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout_seconds,
+            env=_codex_runner_env(),
+        )
     return CodexRunResult(
         exit_code=proc.returncode, stdout=proc.stdout, stderr=proc.stderr, executed_argv=execution_argv,
     )
@@ -128,10 +140,14 @@ def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     profile = _codex_profile_from_argv(command_argv)
     if profile == "oss-local":
         return list(command_argv)
-    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
-    if not is_opaque_env_reference(env_file):
+    default_stream = actual_opaque_env_path()
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "")
+    if not is_actual_opaque_env_reference(env_file):
         raise ValueError("cloud execution requires an operator-approved opaque environment stream")
-    return ["op", "run", "--env-file", env_file, "--", *command_argv]
+    op_binary = approved_op_binary()
+    if op_binary is None:
+        raise ValueError("cloud execution requires an approved 1Password CLI binary")
+    return [op_binary, "run", "--env-file", env_file, "--", *command_argv]
 
 
 def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
@@ -218,7 +234,7 @@ def _validated_recorded_execution_argv(
     if declared_profile == "oss-cloud":
         if len(execution_argv) < 5:
             raise ValueError("cloud execution requires the approved op run wrapper")
-        if not is_opaque_env_reference(execution_argv[3]):
+        if not is_actual_opaque_env_reference(execution_argv[3]):
             raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     recorded = _redact_execution_argv(execution_argv)
     _validate_execution_argv(recorded, command_argv, declared_profile)
@@ -530,7 +546,8 @@ def _runner_bound_to_auth_identity(gate: dict[str, Any], runner: CodexRunner) ->
     expected_identity = gate["preflight"]["auth"].get("auth_stream_identity_digest")
     if expected_identity is None:
         return runner
-    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "")
 
     def bound_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
         if opaque_env_identity_digest(env_file) != expected_identity:

@@ -146,7 +146,11 @@ def _run_codex_with_captured_subprocess(
                 if op_env_file is not None
                 else patch.object(codex_judge, "_codex_op_bin", return_value=None)
             )
-            with patch.dict(os.environ, {**base_env, **env}, clear=True), op_patch:
+            with (
+                patch.dict(os.environ, {**base_env, **env}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+                op_patch,
+            ):
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
             return result, captured_command, captured_env, captured_profile_text, op_env_file
     finally:
@@ -155,12 +159,42 @@ def _run_codex_with_captured_subprocess(
 
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
+    def test_cloud_judge_rejects_fifo_outside_actual_codex_home(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as directory:
+            actual_home = Path(directory) / "actual-home"
+            other_home = Path(directory) / "other-home"
+            unapproved_stream = other_home / ".codex" / ".env"
+            unapproved_stream.parent.mkdir(parents=True)
+            os.mkfifo(unapproved_stream)
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(unapproved_stream)}, clear=False),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=actual_home),
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+            ):
+                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+                with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                    codex_judge._codex_judge_command(profile, Path(directory) / "work", Path(directory) / "last-message.json")
+
+    def test_cloud_judge_rejects_receipt_only_stream_marker(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with (
+            patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
+            patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+        ):
+            self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                codex_judge._codex_judge_command(profile, Path("/private/tmp/work"), Path("/private/tmp/last-message.json"))
+
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
         command_tail = [
             "--", "codex", "exec", "--profile", "oss-cloud",
             "--ask-for-approval", "on-request", "-",
         ]
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)
+        ):
             env_dir = Path(directory) / ".codex"
             env_dir.mkdir()
             env_file = env_dir / ".env"
@@ -180,6 +214,13 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             evidence = {"command_argv": fifo_argv, "codex_profile": "oss-cloud"}
             self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
             self.assertEqual(blockers, [])
+
+            receipt_marker = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=receipt_marker)
+            evidence = {"command_argv": receipt_marker, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
 
             relative = ["evil/op", "run", "--env-file", str(env_file), *command_tail]
             blockers = []
@@ -342,7 +383,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_dir.mkdir()
             op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 receipt = build_ab_judge_score_receipt(
                     REPO_ROOT,
                     run_receipt=RUN_RECEIPT,
@@ -1059,7 +1103,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
         self.assertTrue(captured_command[0].endswith("/op") or captured_command[0] == "op")
-        self.assertEqual(captured_command[1:5], ["run", "--env-file", str(op_env_file), "--"])
+        self.assertEqual(captured_command[1:3], ["run", "--env-file"])
+        self.assertRegex(captured_command[3], r"^/dev/fd/\d+$")
+        self.assertEqual(captured_command[4], "--")
         codex_segments = [captured_command[index:index + 4] for index in range(len(captured_command) - 3)]
         self.assertIn(["codex", "exec", "--profile", "oss-cloud"], codex_segments)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
@@ -1075,7 +1121,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_dir.mkdir()
             op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 command = _codex_judge_command(
                     {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
                     codex_judge._codex_judge_work_dir(output_file),
@@ -1143,7 +1192,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             os.mkfifo(op_env_file)
             env_patch = patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)})
             bin_patch = patch.object(codex_judge, "_codex_op_bin", return_value="/opt/homebrew/bin/op")
-            with env_patch, bin_patch:
+            with (
+                env_patch,
+                bin_patch,
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[1:5], ["run", "--env-file", str(op_env_file), "--"])
         self.assertEqual(command[5:9], ["codex", "exec", "--profile", "oss-cloud"])

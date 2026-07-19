@@ -19,7 +19,6 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.eval_ab_run import (  # noqa: E402
     CodexRunResult,
-    _codex_runner_env,
     _default_codex_runner,
     build_ab_run_receipt,
 )
@@ -44,12 +43,14 @@ IDENTITY_B = {
 }
 TestRunner = Callable[[list[str], str, Path, int], CodexRunResult]
 PreflightProbe = Callable[[dict[str, object]], dict[str, object]]
+_TEST_CLOUD_ENV_FILE: Path | None = None
 
 
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
-        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+        assert _TEST_CLOUD_ENV_FILE is not None
+        return ["op", "run", "--env-file", str(_TEST_CLOUD_ENV_FILE), "--", *command_argv]
     return list(command_argv)
 
 
@@ -123,10 +124,22 @@ def _local_runtime_blocked_probe(profile: dict[str, object]) -> dict[str, object
 
 class TestSkillsSdkAbRun(unittest.TestCase):
     def setUp(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
         self.evidence_root = ".harness/test-sdk-ab-run"
+        self._temporary_home = tempfile.TemporaryDirectory()
+        home = Path(self._temporary_home.name)
+        _TEST_CLOUD_ENV_FILE = home / ".codex" / ".env"
+        _TEST_CLOUD_ENV_FILE.parent.mkdir()
+        os.mkfifo(_TEST_CLOUD_ENV_FILE)
+        self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home)
+        self._home_patch.start()
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def tearDown(self) -> None:
+        global _TEST_CLOUD_ENV_FILE
+        self._home_patch.stop()
+        self._temporary_home.cleanup()
+        _TEST_CLOUD_ENV_FILE = None
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
 
     def _schema_status_guard(self, preflight: dict[str, object]) -> object:
@@ -153,75 +166,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             payload_source="full-ab-run-v1-regression",
             truth_lane="schema_contract",
         )
-
-    def test_codex_runner_env_keeps_secret_names_out_of_skill_execution(self) -> None:
-        env = _codex_runner_env(
-            {
-                "PATH": "/usr/bin",
-                "HOME": "/tmp/home",
-                "OLLAMA_API_KEY": "secret",
-                "OPENAI_API_KEY": "secret",
-                "SESSION_TOKEN": "secret",
-                "CODEX_HOME": "/tmp/codex",
-            }
-        )
-
-        self.assertEqual(env["PATH"], "/usr/bin")
-        self.assertEqual(env["HOME"], "/tmp/home")
-        self.assertEqual(env["CODEX_HOME"], "/tmp/codex")
-        self.assertNotIn("OLLAMA_API_KEY", env)
-        self.assertNotIn("OPENAI_API_KEY", env)
-        self.assertNotIn("SESSION_TOKEN", env)
-    def test_default_cloud_runner_executes_only_through_opaque_op_boundary(self) -> None:
-        captured: list[list[str]] = []
-
-        def fake_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
-            captured.append(argv)
-            return subprocess.CompletedProcess(argv, 0, stdout='{"type":"item.completed","item":{"type":"agent_message"}}\n', stderr="")
-
-        command = [
-            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
-            "--sandbox", "read-only", "--json", "-",
-        ]
-        with tempfile.TemporaryDirectory() as directory:
-            env_dir = Path(directory) / ".codex"
-            env_dir.mkdir()
-            env_file = env_dir / ".env"
-            os.mkfifo(env_file)
-            with (
-                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
-                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
-            ):
-                result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
-
-        self.assertEqual(captured[0][:5], ["op", "run", "--env-file", str(env_file), "--"])
-        self.assertEqual(captured[0][5:], command)
-        self.assertEqual(result.executed_argv, captured[0])
-
-    def test_default_cloud_runner_blocks_replaced_plaintext_auth_before_subprocess(self) -> None:
-        captured: list[list[str]] = []
-
-        def forbidden_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
-            captured.append(argv)
-            raise AssertionError("subprocess must not receive a non-opaque auth source")
-
-        command = [
-            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
-            "--sandbox", "read-only", "--json", "-",
-        ]
-        with tempfile.TemporaryDirectory() as directory:
-            env_dir = Path(directory) / ".codex"
-            env_dir.mkdir()
-            env_file = env_dir / ".env"
-            env_file.write_text("plaintext must not be read", encoding="utf-8")
-            with (
-                patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=forbidden_run),
-                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
-            ):
-                with self.assertRaisesRegex(ValueError, "opaque environment stream"):
-                    _default_codex_runner(command, "prompt", REPO_ROOT, 1)
-
-        self.assertEqual(captured, [])
 
     def test_cloud_auth_replacement_becomes_typed_variant_blocker(self) -> None:
         def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:

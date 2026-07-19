@@ -5,7 +5,6 @@ import json
 import os
 from pathlib import Path
 import shutil
-import stat
 import subprocess
 import sys
 import tomllib
@@ -18,7 +17,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
-from ask.skills_sdk.ab_transport_contracts import opaque_env_identity_digest
+from ask.skills_sdk.ab_transport_contracts import actual_opaque_env_path, approved_op_binary, is_actual_opaque_env_reference, opaque_env_identity_digest, run_with_approved_op_env
 
 
 PreflightProbe = Callable[[dict[str, Any]], dict[str, Any]]
@@ -204,19 +203,13 @@ def _cloud_runtime_fact(selected_model: str, profile_path: Path) -> dict[str, An
         "codex_executable_identity": identity,
     }
 
-
 def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
-    path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
+    default_stream = actual_opaque_env_path()
+    path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
     source = "operator-approved-op-env-stream"
-    approved = False
-    source_kind = "missing_or_invalid"
-    try:
-        mode = path.lstat().st_mode
-        if stat.S_ISFIFO(mode):
-            approved, source_kind = True, "op_fifo"
-    except OSError:
-        pass
-    op_binary = shutil.which("op")
+    approved = is_actual_opaque_env_reference(str(path))
+    source_kind = "op_fifo" if approved else "missing_or_invalid"
+    op_binary = approved_op_binary()
     evidence = {
         "auth_source": source_kind,
         "op_binary_resolved": op_binary is not None,
@@ -238,28 +231,17 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "auth_stream_identity_digest": evidence["auth_stream_identity_digest"],
     }
 
-
 def _cloud_catalog_command(op_binary: str, env_file: Path, selected_model: str) -> list[str]:
-    return [
-        op_binary, "run", "--env-file", str(env_file), "--", sys.executable,
-        str(_CLOUD_CATALOG_PROBE), "--url", DEFAULT_CATALOG_URL, "--model", selected_model,
-        "--timeout-seconds", "10",
-    ]
+    return [op_binary, "run", "--env-file", str(env_file), "--", sys.executable, str(_CLOUD_CATALOG_PROBE), "--url", DEFAULT_CATALOG_URL, "--model", selected_model, "--timeout-seconds", "10"]
 
-
-def _run_cloud_catalog(command: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        command, capture_output=True, check=False, text=True, timeout=15,
-        env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}},
-    )
-
+def _run_cloud_catalog(command: list[str], *, pass_fds: tuple[int, ...] = ()) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, capture_output=True, check=False, text=True, timeout=15, env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}}, pass_fds=pass_fds)
 
 def _safe_command_shape(command: list[str]) -> list[str]:
     safe = list(command)
     env_index = safe.index("--env-file") + 1
     safe[env_index] = "<operator-approved-opaque-env-stream>"
     return safe
-
 
 def _catalog_probe_result(command: list[str], runner: CloudCatalogRunner) -> CatalogProbeResult:
     try:
@@ -570,17 +552,28 @@ def _catalog_fact_from_payload(
         DEFAULT_CATALOG_URL, safe_evidence, **fields,
     )
 
-
 def _auth_blocked_catalog(selected_model: str, evidence: dict[str, Any], reason: str) -> dict[str, Any]:
     return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", reason, network_accessed=False)
 
 
-def _cloud_catalog_fact(
-    selected_model: str, profile_path: Path, auth_fact: dict[str, Any],
-    runner: CloudCatalogRunner = _run_cloud_catalog,
-) -> dict[str, Any]:
-    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", Path.home() / ".codex" / ".env"))
-    op_binary = shutil.which("op")
+def _catalog_auth_admission(
+    selected_model: str, auth_fact: dict[str, Any], env_file: Path, op_binary: str | None,
+) -> tuple[str | None, str | None]:
+    if auth_fact.get("status") != "pass" or op_binary is None:
+        return "cloud catalog probe requires the approved op-run auth boundary", None
+    if not is_actual_opaque_env_reference(str(env_file)):
+        return "cloud catalog probe requires the exact approved opaque auth stream", None
+    expected_identity = auth_fact.get("auth_stream_identity_digest")
+    if isinstance(expected_identity, str) and opaque_env_identity_digest(env_file) != expected_identity:
+        return "approved opaque auth stream identity changed before catalog execution", None
+    if "evidence_source" in auth_fact and expected_identity is None and _approved_cloud_auth_fact(selected_model).get("status") != "pass":
+        return "approved opaque auth stream changed or became unavailable before catalog execution", None
+    return None, expected_identity if isinstance(expected_identity, str) else None
+
+def _cloud_catalog_fact(selected_model: str, profile_path: Path, auth_fact: dict[str, Any], runner: CloudCatalogRunner = _run_cloud_catalog) -> dict[str, Any]:
+    default_stream = actual_opaque_env_path()
+    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
+    op_binary = approved_op_binary()
     evidence = {
         "profile_path": str(profile_path), "selected_model_digest": _digest(selected_model),
         "probe_url": DEFAULT_CATALOG_URL,
@@ -588,16 +581,24 @@ def _cloud_catalog_fact(
         "secret_value_observed": False, "generation_performed": False,
         "provider_invoked": False, "codex_exec_invoked": False,
     }
-    if auth_fact.get("status") != "pass" or op_binary is None:
-        return _auth_blocked_catalog(selected_model, evidence, "cloud catalog probe requires the approved op-run auth boundary")
-    expected_identity = auth_fact.get("auth_stream_identity_digest")
-    if expected_identity is not None and opaque_env_identity_digest(env_file) != expected_identity:
-        return _auth_blocked_catalog(selected_model, evidence, "approved opaque auth stream identity changed before catalog execution")
-    if "evidence_source" in auth_fact and expected_identity is None and _approved_cloud_auth_fact(selected_model).get("status") != "pass":
-        return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", "approved opaque auth stream changed or became unavailable before catalog execution", network_accessed=False)
+    auth_error, expected_identity = _catalog_auth_admission(selected_model, auth_fact, env_file, op_binary)
+    if auth_error is not None:
+        return _auth_blocked_catalog(selected_model, evidence, auth_error)
     command = _cloud_catalog_command(op_binary, env_file, selected_model)
     evidence["probe_command_shape"] = _safe_command_shape(command)
-    payload, failure, child_evidence = _catalog_probe_result(command, runner)
+    try:
+        payload, failure, child_evidence = (
+            run_with_approved_op_env(
+                env_file, command[5:],
+                lambda argv, fds: _catalog_probe_result(argv, lambda command: _run_cloud_catalog(command, pass_fds=fds)),
+                expected_identity_digest=expected_identity,
+            ) if runner is _run_cloud_catalog else _catalog_probe_result(command, runner)
+        )
+    except (OSError, ValueError) as exc:
+        return _auth_blocked_catalog(
+            selected_model, evidence,
+            f"approved opaque auth stream could not be descriptor-bound: {type(exc).__name__}",
+        )
     evidence.update(child_evidence)
     if payload is None:
         return _blocked_catalog_probe(

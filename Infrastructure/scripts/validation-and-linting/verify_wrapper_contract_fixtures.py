@@ -15,6 +15,12 @@ from typing import Any
 DEFAULT_RUNTIME_PROOF_HANDLE = "he-phase-work"
 DEFAULT_RUNTIME_PROOF_EVIDENCE_DIR = ""
 DARWIN_CONFSTR_WARNING = "warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead"
+PUBLIC_ASK_COMMAND: tuple[str, ...] = ("bin/ask",)
+
+
+def _public_ask_command(*args: str) -> list[str]:
+    """Build a public ask command that selects the repository's locked runtime."""
+    return [*PUBLIC_ASK_COMMAND, *args]
 
 
 def parse_args() -> argparse.Namespace:
@@ -242,15 +248,19 @@ def _assert_runtime_separation_fixtures(repo_root: Path, timeout_seconds: int) -
     	timeout_seconds (int): Maximum time in seconds to wait for each command to complete.
     """
     commands = [
-        ["Infrastructure/bin/ask", "repo", "status", "--json"],
-        ["Infrastructure/bin/ask", "skills", "list", "--json"],
-        ["Infrastructure/bin/ask", "plugins", "doctor", "--json"],
+        _public_ask_command("repo", "status", "--json"),
+        _public_ask_command("skills", "list", "--json"),
+        _public_ask_command("plugins", "doctor", "--json"),
     ]
     for command in commands:
         _assert_envelope(repo_root, command, timeout_seconds)
 
     plugin_name: str | None = None
-    exit_code, plugins_payload = _run_json(repo_root, ["Infrastructure/bin/ask", "plugins", "list", "--json"], timeout_seconds)
+    exit_code, plugins_payload = _run_json(
+        repo_root,
+        _public_ask_command("plugins", "list", "--json"),
+        timeout_seconds,
+    )
     if exit_code == 0:
         plugins = plugins_payload.get("data", {}).get("installed_state", {}).get("plugins", [])
         if isinstance(plugins, list) and plugins:
@@ -259,7 +269,11 @@ def _assert_runtime_separation_fixtures(repo_root: Path, timeout_seconds: int) -
                 plugin_name = candidate.strip()
 
     if plugin_name:
-        _assert_envelope(repo_root, ["Infrastructure/bin/ask", "plugins", "status", plugin_name, "--json"], timeout_seconds)
+        _assert_envelope(
+            repo_root,
+            _public_ask_command("plugins", "status", plugin_name, "--json"),
+            timeout_seconds,
+        )
 
 
 def _assert_runtime_proof_fixtures(
@@ -281,7 +295,7 @@ def _assert_runtime_proof_fixtures(
     Raises:
     	SystemExit: If any command times out, emits non-JSON output, returns a malformed envelope, fails required status/schema checks, contains invalid enumerated values, or when required blocker structures are missing or malformed.
     """
-    explain_command = ["Infrastructure/bin/ask", "skills", "explain", handle, "--json", "--robot"]
+    explain_command = _public_ask_command("skills", "explain", handle, "--json", "--robot")
     explain_payload = _assert_envelope(repo_root, explain_command, timeout_seconds)
     _assert_string_field(
         explain_payload,
@@ -296,8 +310,7 @@ def _assert_runtime_proof_fixtures(
         f"./bin/ask skills proof {handle} --json --robot",
     )
 
-    proof_command = [
-        "Infrastructure/bin/ask",
+    proof_command = _public_ask_command(
         "skills",
         "proof",
         handle,
@@ -305,7 +318,7 @@ def _assert_runtime_proof_fixtures(
         "any",
         "--json",
         "--robot",
-    ]
+    )
     proof_payload = _assert_envelope(repo_root, proof_command, timeout_seconds, require_success=False)
     _assert_non_error_status(proof_payload, "skills proof")
     _assert_string_field(proof_payload, "skills proof", ["data", "proof", "schema_version"], "command-handle-proof.v2")
@@ -317,8 +330,7 @@ def _assert_runtime_proof_fixtures(
     if not isinstance(_assert_path(proof_payload, "skills proof", ["data", "proof", "gate_policy"]), dict):
         raise SystemExit("skills proof gate_policy is not an object")
 
-    conformance_command = [
-        "Infrastructure/bin/ask",
+    conformance_command = _public_ask_command(
         "skills",
         "conformance",
         "run",
@@ -328,7 +340,7 @@ def _assert_runtime_proof_fixtures(
         evidence_dir,
         "--json",
         "--robot",
-    ]
+    )
     conformance_payload = _assert_envelope(repo_root, conformance_command, timeout_seconds, require_success=False)
     _assert_non_error_status(conformance_payload, "skills conformance run")
     _assert_string_field(
