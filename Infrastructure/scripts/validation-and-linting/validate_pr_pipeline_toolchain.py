@@ -88,7 +88,7 @@ def _uv_install_index(steps: list[dict[str, Any]], uv_package: str) -> int | Non
             for index, step in enumerate(steps)
             if isinstance(step.get("run"), str)
             and "python -m pip install" in step["run"]
-            and uv_package in step["run"]
+            and re.search(rf'\b{re.escape(uv_package)}(?:\s|$)', step["run"])
         ),
         None,
     )

@@ -88,7 +88,7 @@ def _run_validator(workflow_text: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_toolchain_validator_rejects_wrong_version_and_late_uv_install() -> None:
-    workflow = """\
+    workflow = f"""\
 jobs:
   audit:
     steps:
@@ -102,7 +102,7 @@ jobs:
       - uses: actions/setup-python@abc
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip uv==0.10.0 pyyaml pytest jsonschema
+      - run: python -m pip install --upgrade pip uv=={UV_VERSION}0 pyyaml pytest jsonschema
       - run: ./bin/ask repo validate --scope=check
 """
 
@@ -114,3 +114,4 @@ jobs:
     messages = "\n".join(payload["violations"])
     assert "audit: missing actions/setup-python with python-version 3.12" in messages
     assert f"audit: missing uv=={UV_VERSION} installation before validation" in messages
+    assert f"check: missing uv=={UV_VERSION} installation before validation" in messages
