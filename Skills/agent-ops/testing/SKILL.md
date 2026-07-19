@@ -110,7 +110,7 @@ rung as a substitute for missing earlier behavior proof.
 
 ## Failure Mode
 
-### Gotchas
+## Gotchas
 
 - A broad green suite does not prove a touched path unless the command exercises it.
 - A process exit code is not enough when the JSON receipt says `status: error`.
