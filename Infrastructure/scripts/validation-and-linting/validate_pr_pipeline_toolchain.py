@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-import tomllib
+import re
 from typing import Any
 
 import yaml
@@ -21,12 +21,24 @@ PYTHON_VERSION = "3.12"
 
 def _uv_package() -> str:
     """Read the canonical uv version from the repository toolchain contract."""
-    with MISE_CONFIG.open("rb") as handle:
-        config = tomllib.load(handle)
-    tools = config.get("tools")
-    if not isinstance(tools, dict) or not isinstance(tools.get("uv"), str):
-        raise ValueError(".mise.toml must define tools.uv as a version string")
-    return f"uv=={tools['uv']}"
+    try:
+        config = MISE_CONFIG.read_text(encoding="utf-8")
+    except OSError as error:
+        raise ValueError(f"could not read {MISE_CONFIG.name}: {error}") from error
+
+    in_tools = False
+    for line in config.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_tools = stripped == "[tools]"
+            continue
+        if not in_tools:
+            continue
+        uv_version = re.fullmatch(r'"?uv"?\s*=\s*"(?P<version>[^"]+)"', stripped)
+        if uv_version is not None:
+            return f"uv=={uv_version.group('version')}"
+
+    raise ValueError(".mise.toml must define tools.uv as a version string")
 
 
 def parse_args() -> argparse.Namespace:
@@ -87,7 +99,7 @@ def validate(workflow: dict[str, Any]) -> list[str]:
     violations: list[str] = []
     try:
         uv_package = _uv_package()
-    except (OSError, tomllib.TOMLDecodeError, ValueError) as error:
+    except ValueError as error:
         return [f"toolchain contract load failed: {error}"]
 
     for scope in REQUIRED_SCOPES:
