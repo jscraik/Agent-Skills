@@ -59,10 +59,11 @@ with `auto_fixable_now`, `needs_merge_conflict_strategy`,
 `blocked_policy_or_approval`, `blocked_external_ci`, `waived_external_ci`,
 `needs_user_decision`, and `cleanup_only`; include dirty-worktree,
 validation, merge, cleanup, and remaining-blocker ledgers. Include a
+Include a
 `recurring_finding_classes` ledger that groups materially equivalent review or
-CI findings across the active queue and records `first_seen`, `occurrences`,
-`affected_repositories`, `root_cause`, `durable_guardrail`, and
-`guardrail_validation`.
+CI findings across the active queue and records `finding_class_id`,
+`fingerprint_sha256`, `normalized_invariant`, `occurrences`, `root_cause`,
+`guardrail`, and `merge_eligible`.
 
 ## Current-State And Authority
 
