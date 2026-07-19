@@ -50,10 +50,13 @@ SCHEMA_NAMES = {
     "ab-preview-receipt": "ab-preview-receipt.v0.schema.json",
     "ab-plan-receipt": "ab-plan-receipt.v0.schema.json",
     "ab-run-receipt": "ab-run-receipt.v0.schema.json",
+    "ab-plan-receipt-v1": "ab-plan-receipt.v1.schema.json",
+    "ab-run-receipt-v1": "ab-run-receipt.v1.schema.json",
     "ab-judge-preview-receipt": "ab-judge-preview-receipt.v0.schema.json",
     "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
+    "phoenix-eval-trace-receipt": "phoenix-eval-trace-receipt.v1.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
     "review-plan-receipt": "sdk-review-plan-receipt.v1.schema.json",
@@ -103,6 +106,13 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 self.assertIn("/skills-sdk/", schema["$id"])
                 self.assertRegex(schema["$id"], r"\.v[01]\.schema\.json$")
                 self.assertFalse(schema["additionalProperties"])
+
+    def test_phoenix_eval_trace_receipt_fixture_is_valid(self) -> None:
+        payload = self.assert_valid("phoenix-eval-trace-receipt", "phoenix-eval-trace-receipt.json")
+
+        self.assertEqual(payload["observability_status"], "not_run")
+        self.assertEqual(payload["eval_status"], "pass")
+        self.assertEqual(payload["project_name"], "agent-skills-skills-sdk-evals")
 
     def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
         schema = {"type": "number", "minimum": 1}
@@ -511,7 +521,10 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["operation"], "ab_plan")
         self.assertEqual(payload["execution_profile"]["id"], "codex-read-only")
         self.assertEqual(payload["command_variant_labels"], ["A", "B"])
-        self.assertEqual(payload["command_plan"][0]["command_argv"][:4], ["codex", "exec", "--sandbox", "read-only"])
+        self.assertEqual(
+            payload["command_plan"][0]["command_argv"][:8],
+            ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", "."],
+        )
         self.assertEqual(payload["command_plan"][0]["approval_policy"], "on-request")
         self.assertIn("--ask-for-approval", payload["command_plan"][0]["command_argv"])
         self.assertEqual(payload["command_plan"][0]["runner_stdout_capture_path"], payload["command_plan"][0]["event_log_path"])
@@ -521,6 +534,41 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["provider_invoked"])
         self.assertFalse(payload["network_accessed"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_ab_v1_fixtures_require_typed_ordered_preflight(self) -> None:
+        plan = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+        run = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        self.assertEqual([gate["lane"] for gate in plan["runtime_profile_gates"]], ["oss-local", "oss-cloud"])
+        self.assertTrue(all(gate["preflight"]["admission"]["status"] == "pass" for gate in plan["runtime_profile_gates"]))
+        self.assertEqual([gate["lane"] for gate in run["runtime_profile_gates"]], ["oss-local", "oss-cloud"])
+        self.assertTrue(all(gate["status"] == "completed" for gate in run["runtime_profile_gates"]))
+
+    def test_ab_v1_full_receipts_are_valid_against_their_versioned_schemas(self) -> None:
+        plan = self.assert_valid("ab-plan-receipt-v1", "ab-plan-receipt.v1.json")
+        run = self.assert_valid("ab-run-receipt-v1", "ab-run-receipt.v1.json")
+        self.assertEqual(plan["schema_version"], "skills-sdk.ab-plan-receipt.v1")
+        self.assertEqual(run["schema_version"], "skills-sdk.ab-run-receipt.v1")
+
+    def test_ab_plan_v1_schema_rejects_status_packet_contradictions(self) -> None:
+        schema = _json(SCHEMA_DIR / "ab-plan-receipt.v1.schema.json")
+        status_packet_guard = {"allOf": schema["allOf"]}
+        planned = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+
+        planned["command_plan"] = []
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(status_packet_guard, planned, {})
+
+        blocked = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")
+        blocked.update(
+            {
+                "status": "blocked",
+                "blockers": ["typed_preflight_blocker"],
+                "command_variant_labels": [],
+                "command_plan": [],
+            }
+        )
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(status_packet_guard, blocked, {})
 
     def test_ab_plan_schema_rejects_duplicate_command_variant_labels(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.json")
@@ -581,6 +629,39 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
+    def test_ab_run_schema_rejects_completed_receipt_without_ordered_variant_proof(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["command_variant_labels"] = ["B", "A"]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["variant_results"][0]["variant_label"] = "B"
+        payload["variant_results"][1]["variant_label"] = "A"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_ab_run_schema_rejects_completed_receipt_without_execution_side_effects(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["provider_invoked"] = False
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
     def test_ab_run_schema_allows_preflight_blocked_empty_command_plan(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.json")
         payload["status"] = "blocked"
@@ -599,6 +680,20 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
             {**self.schemas, **self.schemas_by_file},
         )
 
+    def test_ab_run_schema_requires_top_level_blocker_after_cloud_gate_blocks(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.v1.json")
+        payload["status"] = "blocked"
+        payload["blockers"] = []
+        payload["runtime_profile_gates"][1]["status"] = "blocked"
+        payload["runtime_profile_gates"][1]["blockers"] = ["cloud_auth_unavailable"]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-run-receipt-v1"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
     def test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input(self) -> None:
         payload = self.assert_valid("ab-judge-preview-receipt", "ab-judge-preview-receipt.json")
 
@@ -611,6 +706,25 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["network_accessed"])
         self.assertFalse(payload["mutation_performed"])
         self.assertNotIn("command_argv", payload["comparison_payload"]["variant_results"][0])
+
+    def test_judge_schemas_accept_versioned_experiment_identifiers(self) -> None:
+        preview = _json(FIXTURE_DIR / "valid" / "ab-judge-preview-receipt.json")
+        preview["experiment_id"] = "ex_0123456789abcdef"
+        preview["comparison_payload"]["experiment_id"] = "ex_0123456789abcdef"
+        _validate_schema_subset(
+            self.schemas["ab-judge-preview-receipt"],
+            preview,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
+        score = _json(FIXTURE_DIR / "valid" / "ab-judge-score-receipt.json")
+        score["experiment_id"] = "ex_0123456789abcdef"
+        score["decision"]["experiment_id"] = "ex_0123456789abcdef"
+        _validate_schema_subset(
+            self.schemas["ab-judge-score-receipt"],
+            score,
+            {**self.schemas, **self.schemas_by_file},
+        )
 
     def test_ab_judge_preview_schema_rejects_duplicate_result_variants(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "ab-judge-preview-receipt.json")

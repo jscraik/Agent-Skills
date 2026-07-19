@@ -2,11 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+source "$SCRIPT_DIR/_sandbox_env.sh"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
+fi
+export MISE_TRUSTED_CONFIG_PATHS="${MISE_TRUSTED_CONFIG_PATHS:-$REPO_ROOT}"
 
 cd "$REPO_ROOT"
 
-source "$REPO_ROOT/scripts/hooks/_sandbox_env.sh"
+python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
 
 python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
 
@@ -21,9 +27,9 @@ fi
 
 changed_file_count="$(wc -l <"$changed_files_file" | tr -d " ")"
 if [[ "$changed_file_count" -gt 0 ]]; then
-	bash Infrastructure/scripts/validate_all.sh --ephemeral --changed-files-from "$changed_files_file"
+	bash Infrastructure/scripts/validate_all.sh --ephemeral --head-source --changed-files-from "$changed_files_file"
 else
-	bash Infrastructure/scripts/validate_all.sh --ephemeral
+	bash Infrastructure/scripts/validate_all.sh --ephemeral --head-source
 fi
 
 python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_changed_skills.py "$changed_files_file"

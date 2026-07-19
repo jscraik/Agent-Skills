@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import tempfile
 import time
@@ -19,12 +20,20 @@ PHOENIX_MIRROR_SCHEMA_VERSION = "skills-sdk.phoenix-mirror-receipt.v0"
 PHOENIX_MIRROR_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-mirror-receipt.v0.schema.json"
 PHOENIX_SMOKE_SCHEMA_VERSION = "skills-sdk.phoenix-smoke-receipt.v0"
 PHOENIX_SMOKE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-smoke-receipt.v0.schema.json"
-PHOENIX_EVAL_TRACE_SCHEMA_VERSION = "skills-sdk.phoenix-eval-trace-receipt.v0"
-PHOENIX_EVAL_TRACE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v0.schema.json"
+PHOENIX_EVAL_TRACE_SCHEMA_VERSION = "skills-sdk.phoenix-eval-trace-receipt.v1"
+PHOENIX_EVAL_TRACE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v1.schema.json"
 PHOENIX_ACCEPTANCE_TRACE = ["phoenix-oss-eval-observability-workflow-2026-07-08", "PU-026"]
-PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT = 0
-PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT = 5
-SUPPORTED_SOURCE_KINDS = frozenset({"eval_closeout", "eval_run_receipt", "observability_receipt"})
+PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT = 10
+PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT = 20
+SUPPORTED_SOURCE_KINDS = frozenset(
+    {
+        "eval_closeout",
+        "eval_run_receipt",
+        "ab_run_receipt",
+        "ab_judge_score_receipt",
+        "observability_receipt",
+    }
+)
 OSS_CODEX_PROFILES = frozenset({"oss-local", "oss-cloud"})
 ALLOWED_ROW_TYPES = frozenset(
     {
@@ -151,6 +160,10 @@ def _raw_key_paths(value: Any, *, prefix: str = "$") -> list[str]:
 def _source_kind(receipt: dict[str, Any]) -> str:
     schema_version = str(receipt.get("schema_version") or "")
     operation = str(receipt.get("operation") or "")
+    if "ab-judge-score" in schema_version or operation == "ab_judge_score":
+        return "ab_judge_score_receipt"
+    if "ab-run" in schema_version or operation == "ab_run":
+        return "ab_run_receipt"
     if "eval-closeout" in schema_version or "eval_closeout" in operation:
         return "eval_closeout"
     if "eval-run" in schema_version or "eval_run" in operation:
@@ -192,10 +205,12 @@ def _mirror_contract_errors(rows: list[dict[str, Any]]) -> list[str]:
 
 
 def _oss_profile_errors(receipt: dict[str, Any]) -> list[str]:
-    profile = receipt.get("codex_profile")
-    if profile in OSS_CODEX_PROFILES and receipt.get("codex_exec_invoked") is not True:
-        return [f"codex_profile:{profile}:codex_exec_invoked_not_true"]
-    return []
+    from ask.skills_sdk.phoenix_trace_plan import build_eval_trace_plan  # noqa: PLC0415
+
+    source_kind = _source_kind(receipt)
+    if source_kind not in {"eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"}:
+        return []
+    return list(build_eval_trace_plan(receipt)["blockers"])
 
 
 def _case_rows(receipt: dict[str, Any], trace_id: str) -> list[dict[str, Any]]:
@@ -303,7 +318,14 @@ def build_phoenix_status_receipt(
         except HTTPError as exc:
             http_status = int(exc.code)
         except (OSError, URLError, TimeoutError) as exc:
-            checks.append(_check("phoenix_http", "blocker", "Phoenix UI endpoint must respond before traces can be trusted.", [type(exc).__name__, str(exc)]))
+            checks.append(
+                _check(
+                    "phoenix_http",
+                    "blocker",
+                    "Phoenix UI endpoint must respond before traces can be trusted.",
+                    [f"error_class:{type(exc).__name__}"],
+                )
+            )
         else:
             checks.append(_check("phoenix_http", "pass", "Phoenix UI endpoint responded.", [f"status:{http_status}"]))
     blockers = [check for check in checks if check["status"] == "blocker"]
@@ -475,8 +497,7 @@ try:
     with urllib.request.urlopen(http_request, timeout=cfg["timeout_seconds"]) as response:
         print(json.dumps({"status": "pass", "http_status": response.status}))
 except urllib.error.HTTPError as exc:
-    body = exc.read().decode("utf-8", errors="replace")[:1000]
-    print(json.dumps({"status": "blocked", "http_status": exc.code, "error": body}))
+    print(json.dumps({"status": "blocked", "http_status": exc.code, "error_class": type(exc).__name__}))
     raise SystemExit(2)
 '''
         assert otel_python is not None
@@ -515,19 +536,17 @@ except urllib.error.HTTPError as exc:
                 export_result = {"status": "blocked", "error": "missing_json_export_result"}
             emitted = process.returncode == 0 and export_result.get("status") == "pass"
             if not emitted:
-                export_error = "; ".join(
-                    part
-                    for part in (
-                        f"returncode:{process.returncode}",
-                        f"stdout:{process.stdout.strip()}",
-                        f"stderr:{process.stderr.strip()}",
+                export_error = ":".join(
+                    (
+                        "ExportProcessFailed",
+                        str(process.returncode),
+                        str(export_result.get("error_class") or "ExportRejected"),
                     )
-                    if part
                 )
-        except subprocess.TimeoutExpired as exc:
-            export_error = f"timeout:{timeout_seconds + 1.0:.1f}s; stdout:{exc.stdout or ''}; stderr:{exc.stderr or ''}"
+        except subprocess.TimeoutExpired:
+            export_error = "TimeoutExpired"
         except OSError as exc:
-            export_error = f"{type(exc).__name__}: {exc}"
+            export_error = type(exc).__name__
         checks.append(
             _check(
                 "phoenix_otlp_export",
@@ -611,15 +630,31 @@ def _config_bool(value: Any) -> bool:
     return False
 
 
-def _phoenix_enabled(repo_root: Path) -> bool:
+def _phoenix_config(repo_root: Path) -> dict[str, Any]:
     config_path = repo_root / "Infrastructure" / "config" / "observability" / "phoenix.json"
     if not config_path.is_file():
-        return False
+        return {}
     try:
         payload = json.loads(config_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return False
-    return isinstance(payload, dict) and _config_bool(payload.get("enabled"))
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _phoenix_eval_enabled(config: dict[str, Any]) -> bool:
+    env_value = os.environ.get("ASK_PHOENIX_EVAL_TRACE")
+    if env_value is not None:
+        return _config_bool(env_value)
+    if "eval_tracing_enabled" in config:
+        return _config_bool(config.get("eval_tracing_enabled"))
+    return _config_bool(config.get("enabled"))
+
+
+def _config_path(config: dict[str, Any], key: str) -> Path | None:
+    value = config.get(key)
+    if not isinstance(value, str) or not value:
+        return None
+    return Path(value).expanduser()
 
 
 def build_phoenix_eval_trace_receipt(
@@ -632,19 +667,29 @@ def build_phoenix_eval_trace_receipt(
     otel_python_path: str | None = None,
     timeout_seconds: float = 2.0,
     enabled: bool | None = None,
-    trace_case_spans: bool = False,
+    trace_case_spans: bool = True,
     case_span_limit: int = PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT,
 ) -> dict[str, Any]:
+    from ask.skills_sdk.phoenix_trace_plan import (  # noqa: PLC0415
+        build_eval_trace_plan,
+        emit_eval_trace_plan,
+    )
+
+    config = _phoenix_config(repo_root)
+    bounded_case_span_limit = max(0, min(case_span_limit, PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT))
     source_digest = _sha256_json(eval_receipt)
-    trace_seed = source_digest.removeprefix("sha256:")[:32]
-    case_rows = _case_rows(eval_receipt, trace_seed)
+    plan_receipt = dict(eval_receipt)
+    cases = eval_receipt.get("cases")
+    if isinstance(cases, list):
+        plan_receipt["cases"] = cases[:bounded_case_span_limit] if trace_case_spans else []
+    plan = build_eval_trace_plan(plan_receipt, source_digest=source_digest)
     raw_paths = _raw_key_paths(eval_receipt)
     source_kind = _source_kind(eval_receipt)
     checks = [
         _check(
             "source_kind_supported",
-            "pass" if source_kind == "eval_run_receipt" else "blocker",
-            "Phoenix eval tracing accepts eval-run receipts only.",
+            "pass" if source_kind in {"eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"} else "blocker",
+            "Phoenix eval tracing accepts eval_run_receipt, ab_run_receipt, and ab_judge_score_receipt.",
             [source_kind],
         ),
         _check(
@@ -653,40 +698,68 @@ def build_phoenix_eval_trace_receipt(
             "Eval trace receipts must not contain raw prompts, outputs, transcripts, tool calls, stdout, or stderr.",
             [f"raw_keys_seen:{len(raw_paths)}"],
         ),
+        _check(
+            "codex_profile_argv_proof",
+            "blocker" if plan["blockers"] else "pass",
+            "Provider-backed eval traces must derive each Codex runtime profile from the executed argv.",
+            list(plan["blockers"]),
+        ),
     ]
-    profile_value = profile or str(eval_receipt.get("codex_profile") or eval_receipt.get("profile") or "oss-local")
-    if profile_value not in OSS_CODEX_PROFILES:
-        profile_value = "oss-local"
-    emitted_receipts: list[dict[str, Any]] = []
-    bounded_case_span_limit = max(0, min(int(case_span_limit), PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT))
-    selected_case_rows = case_rows[:bounded_case_span_limit] if trace_case_spans else []
-    should_emit = _phoenix_enabled(repo_root) if enabled is None else enabled
-    if not [check for check in checks if check["status"] == "blocker"] and should_emit:
-        emitted_receipts.append(
-            build_phoenix_smoke_receipt(
-                repo_root,
-                base_url=base_url,
-                profile=profile_value,
-                timeout_seconds=timeout_seconds,
-                otel_python_path=otel_python_path,
-                command_name=f"{command_name} eval.run",
-                command_status=str(eval_receipt.get("status") or "unknown"),
+    if profile is not None:
+        derived_profiles = [
+            row.get("derived_codex_profile")
+            for row in plan["profile_evidence"]
+            if row.get("derived_codex_profile") is not None
+        ]
+        override_matches = not derived_profiles or derived_profiles == [profile]
+        checks.append(
+            _check(
+                "profile_argument_matches_argv",
+                "pass" if override_matches else "blocker",
+                "The optional observer profile argument must not contradict argv-derived runtime profile evidence.",
+                [f"observer_profile:{profile}", f"argv_profiles:{','.join(derived_profiles)}"],
             )
         )
-        for row in selected_case_rows:
-            emitted_receipts.append(
-                build_phoenix_smoke_receipt(
-                    repo_root,
-                    base_url=base_url,
-                    profile=profile_value,
-                    timeout_seconds=timeout_seconds,
-                    otel_python_path=otel_python_path,
-                    command_name=f"{command_name} eval.case {row.get('case_id')}",
-                    command_status=str(row.get("status") or "unknown"),
-                )
+    should_emit = _phoenix_eval_enabled(config) if enabled is None else enabled
+    configured_base_url = config.get("base_url") if isinstance(config.get("base_url"), str) else None
+    resolved_base_url = configured_base_url if base_url == "http://localhost:6006" and configured_base_url else base_url
+    endpoint = resolved_base_url.rstrip("/") + "/v1/traces"
+    otel_python = Path(otel_python_path).expanduser() if otel_python_path else _config_path(config, "otel_python")
+    if should_emit:
+        checks.append(
+            _check(
+                "otel_python_available",
+                "pass" if otel_python is not None and otel_python.is_file() else "blocker",
+                "Phoenix eval trace emission requires the configured OpenTelemetry Python runtime.",
+                [otel_python.as_posix()] if otel_python is not None else ["missing_otel_python"],
             )
+        )
+    export_result: dict[str, Any] | None = None
+    pre_export_blockers = [check for check in checks if check["status"] == "blocker"]
+    if should_emit and not pre_export_blockers and otel_python is not None:
+        export_result = emit_eval_trace_plan(
+            plan,
+            endpoint=endpoint,
+            otel_python=otel_python,
+            timeout_seconds=timeout_seconds,
+        )
+        checks.append(
+            _check(
+                "phoenix_otlp_export",
+                "pass" if export_result.get("status") == "pass" else "blocker",
+                "Phoenix must accept the deterministic nested eval trace in the configured project.",
+                [
+                    f"project:{plan['project_name']}",
+                    f"endpoint:{endpoint}",
+                    f"error_class:{export_result.get('error_class') or 'none'}",
+                ],
+            )
+        )
     blockers = [check for check in checks if check["status"] == "blocker"]
     status = "blocked" if blockers else "pass"
+    observability_status = "blocked" if blockers else ("emitted" if export_result else "not_run")
+    emitted = export_result is not None and export_result.get("status") == "pass"
+    case_span_count = sum(1 for span in plan["spans"] if span["name"] == "skills-sdk.eval.scenario")
     return {
         "schema_version": PHOENIX_EVAL_TRACE_SCHEMA_VERSION,
         "schema_uri": PHOENIX_EVAL_TRACE_SCHEMA_URI,
@@ -695,34 +768,49 @@ def build_phoenix_eval_trace_receipt(
         "source_receipt_digest": source_digest,
         "source_kind": source_kind,
         "eval_status": eval_receipt.get("status"),
+        "observability_status": observability_status,
         "runner": eval_receipt.get("runner"),
         "mode": eval_receipt.get("mode"),
-        "profile": profile_value,
+        "profile": profile,
+        "profile_evidence": plan["profile_evidence"],
         "target_path": _safe_path_value(repo_root, eval_receipt.get("target_path")),
         "package_id": eval_receipt.get("package_id"),
         "package_digest": eval_receipt.get("package_digest"),
-        "case_count": int(eval_receipt.get("case_count") or len(case_rows)),
+        "case_count": int(eval_receipt.get("case_count") or len(cases or [])),
         "passed_count": int(eval_receipt.get("passed_count") or 0),
         "failed_count": int(eval_receipt.get("failed_count") or 0),
-        "emitted_span_count": len(emitted_receipts),
+        "project_name": plan["project_name"],
+        "trace_id": plan["trace_id"],
+        "root_span_id": plan["root_span_id"],
+        "span_plan": plan["spans"],
+        "planned_span_count": len(plan["spans"]),
+        "emitted_span_count": len(plan["spans"]) if emitted else 0,
         "case_span_trace_enabled": trace_case_spans,
         "case_span_limit": bounded_case_span_limit,
-        "case_span_count": len(selected_case_rows),
+        "case_span_count": case_span_count,
         "enabled": should_emit,
         "emitted_spans": [
             {
-                "span_name": item.get("span_name"),
-                "trace_id": item.get("trace_id"),
-                "command_name": item.get("command_name"),
-                "command_status": item.get("command_status"),
+                "span_name": span["name"],
+                "trace_id": plan["trace_id"],
+                "span_id": span["span_id"],
+                "parent_span_id": span["parent_span_id"],
+                "command_name": command_name,
+                "command_status": span["status"],
             }
-            for item in emitted_receipts
-        ],
+            for span in plan["spans"]
+        ]
+        if emitted
+        else [],
         "checks": checks,
         "blockers": blockers,
-        "mutation_performed": bool(emitted_receipts),
+        "mutation_performed": emitted,
         "acceptance_trace": PHOENIX_ACCEPTANCE_TRACE,
-        "agent_summary": f"Phoenix eval trace emitted {len(emitted_receipts)} span(s) for {int(eval_receipt.get('case_count') or len(case_rows))} eval case(s).",
+        "agent_summary": (
+            f"Phoenix emitted {len(plan['spans'])} nested span(s) to project {plan['project_name']}."
+            if emitted
+            else f"Phoenix eval observability is {observability_status}; eval status remains {eval_receipt.get('status')}."
+        ),
     }
 
 
@@ -761,7 +849,7 @@ def build_phoenix_mirror_receipt(
             _check(
                 "source_kind_supported",
                 "pass" if source_kind in SUPPORTED_SOURCE_KINDS else "blocker",
-                "Phoenix mirror accepts only eval closeout, eval run, or observability receipts.",
+                "Phoenix mirror accepts eval_closeout, eval_run_receipt, ab_run_receipt, ab_judge_score_receipt, and observability_receipt.",
                 [source_kind],
             )
         )

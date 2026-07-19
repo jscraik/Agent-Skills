@@ -24,116 +24,49 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          if [[ -f trusted-base/.github/scripts/validate_pr_template_body.py ]]; then
-            python3 trusted-base/.github/scripts/validate_pr_template_body.py \
-              --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
-              --body-env PR_BODY
-            exit 0
+          if [[ ! -f trusted-base/.github/scripts/validate_pr_template_body.py ]]; then
+            echo "::error::trusted base is missing the canonical PR template validator" >&2
+            exit 1
           fi
           python3 - <<'PY'
           import os
           import re
           import sys
-          from pathlib import Path
 
-          section_re = re.compile(r"^## (?P<title>.+?)\s*$", re.MULTILINE)
-          checkbox_re = re.compile(r"^- \[[ xX]\] (?P<label>.+?)\s*$", re.MULTILINE)
-          field_re = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE)
-          placeholder_re = re.compile(r"<[^>\n]+>")
-          status_re = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
-
-          def section_blocks(markdown):
-              matches = list(section_re.finditer(markdown))
-              blocks = {}
-              for index, match in enumerate(matches):
-                  end = matches[index + 1].start() if index + 1 < len(matches) else len(markdown)
-                  blocks[match.group("title").strip()] = markdown[match.end():end]
-              return blocks
-
-          def checklist_label(label):
-              return status_re.sub("", label.strip()).strip()
-
-          def field_values(block):
-              matches = list(field_re.finditer(block))
-              values = {}
-              duplicates = []
-              for index, match in enumerate(matches):
-                  next_start = matches[index + 1].start() if index + 1 < len(matches) else len(block)
-                  continuation = block[match.end():next_start].strip()
-                  label = match.group("label").strip()
-                  if label in values and label not in duplicates:
-                      duplicates.append(label)
-                  values[label] = f"{match.group('value').strip()}\n{continuation}".strip()
-              return values, duplicates
-
-          template = Path("trusted-base/.github/PULL_REQUEST_TEMPLATE.md").read_text(encoding="utf-8")
           body = os.environ.get("PR_BODY", "")
-          if not body.strip():
-              print("PR body is empty. Fill out the full PR template.")
-              sys.exit(1)
-
-          template_blocks = section_blocks(template)
-          body_blocks = section_blocks(body)
-          template_sections = [match.group("title").strip() for match in section_re.finditer(template)]
-          body_sections = [match.group("title").strip() for match in section_re.finditer(body)]
-          errors = []
-          if body_sections != template_sections:
-              errors.append(f"PR body sections must match .github/PULL_REQUEST_TEMPLATE.md exactly. expected={template_sections!r} actual={body_sections!r}")
-          for section in template_sections:
-              if section not in body_blocks:
-                  errors.append(f"Missing required section: ## {section}")
-
-          for section, block in template_blocks.items():
-              if section in {"Checklist", "Notes"}:
-                  continue
-              expected_fields = [match.group("label").strip() for match in field_re.finditer(block)]
-              if not expected_fields:
-                  continue
-              body_fields, duplicate_fields = field_values(body_blocks.get(section, ""))
-              for field in duplicate_fields:
-                  if expected_fields.count(field) == 1:
-                      errors.append(f"Duplicate field in ## {section}: {field}:")
-              for field in expected_fields:
-                  if field not in body_fields:
-                      errors.append(f"Missing required field in ## {section}: {field}:")
-                  elif body_fields[field] == "":
-                      errors.append(f"Required field in ## {section} is empty: {field}:")
-              for field in body_fields:
-                  if field not in expected_fields:
-                      errors.append(f"Unexpected field in ## {section}: {field}:")
-
-          expected_checklist = [checklist_label(match.group("label")) for match in checkbox_re.finditer(template_blocks.get("Checklist", ""))]
-          actual_checklist = [checklist_label(match.group("label")) for match in checkbox_re.finditer(body_blocks.get("Checklist", ""))]
-          if actual_checklist != expected_checklist:
-              errors.append(f"Checklist item text/order must match .github/PULL_REQUEST_TEMPLATE.md exactly. expected={expected_checklist!r} actual={actual_checklist!r}")
-          for match in checkbox_re.finditer(body_blocks.get("Checklist", "")):
-              item = match.group(0).strip()
-              if item.startswith("- [ ]") and not re.search(r"\*\*\((pending|n/a|not applicable)\)\*\*", item, re.IGNORECASE):
-                  errors.append(f"Checklist has unchecked item without explicit status marker ((Pending) or (N/A)): {item}")
-
-          template_tokens = set(placeholder_re.findall(template))
-          placeholders = [
-              "pass/fail",
-              "Add one-paragraph merge rationale here.",
-              "describe the observable behavior, issue, or n.a. reason",
-              "list exact commands run here",
-              "record pass/fail/blocked for each command here",
-          ]
-          for placeholder in placeholders:
-              if placeholder in body:
-                  errors.append(f"Replace template placeholder: {placeholder}")
-          for token in placeholder_re.findall(body):
-              if token in template_tokens:
-                  errors.append(f"Replace unresolved placeholder token: {token}")
-
-          if errors:
-              print("PR template validation failed:")
-              for error in errors:
-                  print(f"- {error}")
-              sys.exit(1)
-          print("PR template validation passed.")
+          author = os.environ.get("PR_AUTHOR", "")
+          lines = [line.strip() for line in body.splitlines() if line.strip()]
+          grouped = re.compile(
+              r"^Bumps the .+ group with \d+ update(?:s)? in the .+ directory: "
+              r"\[[^\]]+\]\(https://github\.com/[^)\s]+\)\.$",
+              re.IGNORECASE,
+          )
+          single = re.compile(r"^Bumps \S+ from \S+ to \S+$", re.IGNORECASE)
+          if (
+              lines
+              and (grouped.fullmatch(lines[0]) or single.fullmatch(lines[0]))
+              and "Dependabot will resolve any conflicts with this PR" in body
+              and author not in {"dependabot[bot]", "dependabot"}
+          ):
+              print(
+                  "::error::Dependabot-shaped PR bodies require the trusted Dependabot author.",
+                  file=sys.stderr,
+              )
+              raise SystemExit(1)
           PY
+          validator=trusted-base/.github/scripts/validate_pr_template_body.py
+          if python3 "$validator" --help 2>&1 | grep -q -- "--author"; then
+            python3 "$validator" \
+              --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
+              --body-env PR_BODY \
+              --author "$PR_AUTHOR"
+          else
+            python3 "$validator" \
+              --template trusted-base/.github/PULL_REQUEST_TEMPLATE.md \
+              --body-env PR_BODY
+          fi
       - name: Skip PR template enforcement for merge queue
         if: github.event_name == 'merge_group'
         run: echo "merge_group event detected; PR template enforcement is pull_request-only."
@@ -145,6 +78,8 @@ jobs:
     if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template.result == 'success') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -193,6 +128,13 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout trusted risk policy gate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: true
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          path: trusted-base
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -221,25 +163,24 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BASE_SHA="$PR_BASE_SHA"
             HEAD_SHA="$PR_HEAD_SHA"
-            BASE_REF="$PR_BASE_REF"
-            # Load contract from the trusted base branch, not the PR checkout.
-            # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
-            CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
-            if ! git show "origin/$BASE_REF:harness.contract.json" > "$CONTRACT_PATH"; then
-              echo "::error::Unable to load trusted harness.contract.json from origin/$BASE_REF"
-              exit 1
-            fi
+            CONTRACT_PATH="trusted-base/harness.contract.json"
           else
             BASE_SHA="$MERGE_GROUP_BASE_SHA"
             HEAD_SHA="$MERGE_GROUP_HEAD_SHA"
-            # Merge queue: contract is committed and protected by branch rules.
-            CONTRACT_PATH="harness.contract.json"
+            CONTRACT_PATH="trusted-base/harness.contract.json"
           fi
-          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
+          if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            git -C trusted-base fetch --no-tags --depth=1 origin "$HEAD_SHA"
+          fi
+          if ! git -C trusted-base cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null; then
+            echo "::error::trusted-base could not resolve the event head ${HEAD_SHA}" >&2
+            exit 1
+          fi
+          CHANGED_FILES="$(git -C trusted-base diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
           if [[ -z "$CHANGED_FILES" ]]; then
-            CHANGED_FILES="$(git ls-files | paste -sd, -)"
+            CHANGED_FILES="$(git -C trusted-base ls-files | paste -sd, -)"
           fi
-          bash Infrastructure/scripts/harness-cli.sh preflight-gate \
+          bash trusted-base/Infrastructure/scripts/harness-cli.sh preflight-gate \
             --contract "$CONTRACT_PATH" \
             --max-tier medium \
             --files "${CHANGED_FILES}" \
@@ -254,6 +195,8 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - name: Detect dependency review support
         id: dependency-review-support
         if: github.event_name == 'pull_request'
@@ -284,6 +227,8 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - name: Enforce pinned GitHub Actions
         shell: bash
         run: |
@@ -311,6 +256,8 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -411,6 +358,8 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
@@ -538,6 +487,9 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=lint
 
@@ -547,6 +499,9 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=typecheck
 
@@ -556,6 +511,9 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.12"
@@ -570,6 +528,9 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=audit
 
@@ -579,6 +540,9 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.12"
@@ -593,5 +557,7 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - name: Validate memory.json
         run: test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null

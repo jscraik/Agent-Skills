@@ -8,4 +8,6 @@ else
   repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
 fi
 
-exec python3 "$repo_root/Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py" "$@"
+exec bash "$repo_root/Infrastructure/scripts/run-infrastructure-python.sh" \
+  "scripts/validation-and-linting/verify_wrapper_contract_fixtures.py" \
+  "$@"

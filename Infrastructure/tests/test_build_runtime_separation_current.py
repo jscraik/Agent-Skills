@@ -93,6 +93,14 @@ class TestBuildRuntimeSeparationCurrent(unittest.TestCase):
         self.assertTrue(self.module._command_check_passed_or_skipped(skipped))
         self.assertFalse(self.module._command_check_passed_or_skipped(failed))
 
+    def test_runtime_commands_use_public_python_selecting_wrapper(self) -> None:
+        self.assertEqual(
+            self.module._public_ask_command("repo", "status", "--json"),
+            ["bin/ask", "repo", "status", "--json"],
+        )
+        source = SCRIPT_PATH.read_text(encoding="utf-8")
+        self.assertNotIn('["Infrastructure/bin/ask"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

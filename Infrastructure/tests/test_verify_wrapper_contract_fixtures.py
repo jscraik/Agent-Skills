@@ -139,6 +139,41 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
             with self.assertRaisesRegex(SystemExit, "ask did not emit JSON"):
                 self.module._run_json(REPO_ROOT, ["ask"], 45)
 
+    def test_runtime_separation_fixture_uses_public_wrapper(self) -> None:
+        commands: list[list[str]] = []
+
+        def capture_envelope(_repo_root: Path, command: list[str], _timeout_seconds: int, **_kwargs: object) -> dict:
+            commands.append(command)
+            return {}
+
+        with (
+            mock.patch.object(self.module, "_assert_envelope", capture_envelope),
+            mock.patch.object(
+                self.module,
+                "_run_json",
+                return_value=(0, {"data": {"installed_state": {"plugins": []}}}),
+            ),
+        ):
+            self.module._assert_runtime_separation_fixtures(REPO_ROOT, 45)
+
+        self.assertEqual(commands, [
+            ["bin/ask", "repo", "status", "--json"],
+            ["bin/ask", "skills", "list", "--json"],
+            ["bin/ask", "plugins", "doctor", "--json"],
+        ])
+
+    def test_shell_launcher_uses_locked_infrastructure_python(self) -> None:
+        launcher = (
+            REPO_ROOT
+            / "Infrastructure"
+            / "scripts"
+            / "validation-and-linting"
+            / "verify_wrapper_contract_fixtures.sh"
+        )
+        source = launcher.read_text(encoding="utf-8")
+        self.assertIn("run-infrastructure-python.sh", source)
+        self.assertNotIn("exec python3 ", source)
+
     def test_conformance_blocked_runtime_envelope_may_exit_nonzero(self) -> None:
         """
         Verifies that runtime conformance may be allowed to fail when a blocked runtime envelope contains a blocker for the live config layer.

@@ -196,6 +196,13 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing skills error regression suite debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
+        "owner": "validation",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "PROGRAM-DESIGN-RATCHET",
+        "reason": "pre-existing validation integration fixture exceeds file budget; split in follow-up",
+        "expires": "2026-07-31",
+    },
 }
 LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
@@ -311,10 +318,14 @@ def _complexity(node: ast.AST) -> int:
     return score
 
 
-def _function_metrics(text: str, *, relpath: str, source: str, issues: list[str]) -> dict[str, tuple[int, int]]:
+def _function_metrics(
+    text: str,
+    *,
+    source: str = "current",
+) -> dict[str, tuple[int, int]]:
     try:
         tree = ast.parse(text)
-    except SyntaxError as exc:
+    except SyntaxError:
         if source == "baseline":
             return {}
         raise
@@ -352,8 +363,8 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
     relpath = path.relative_to(REPO_ROOT).as_posix()
     if relpath in LEGACY_SHAPE_DEBT_PATHS:
         return
-    current_metrics = _function_metrics(current, relpath=relpath, source="current", issues=issues)
-    baseline_metrics = _function_metrics(baseline, relpath=relpath, source="baseline", issues=issues) if baseline is not None else {}
+    current_metrics = _function_metrics(current, source="current")
+    baseline_metrics = _function_metrics(baseline, source="baseline") if baseline is not None else {}
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))
         if line_count > args.max_function_lines and line_count > old_lines:

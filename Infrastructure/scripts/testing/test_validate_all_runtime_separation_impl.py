@@ -223,6 +223,7 @@ class FakeRepo:
         "Infrastructure/scripts/verify_selection_contract.py",
         "Infrastructure/scripts/verify_router_schema.py",
         "Infrastructure/scripts/verify_ask_cli_modularity.py",
+        "Infrastructure/scripts/validation-and-linting/verify_program_design.py",
         "Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py",
         "Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py",
         "Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py",

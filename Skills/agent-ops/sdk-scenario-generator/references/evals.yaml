@@ -563,7 +563,7 @@ cases:
   - type: expected_signal
     value: Keeps the fix targeted to the tile or context file that owns the missing instruction.
   - type: expected_signal
-    value: Separates lint, commit, and eval rerun evidence.
+    value: Reports lint evidence separately from the commit decision and the fresh eval rerun result.
 - id: pressure-consistency-audit-cross-file
   name: Consistency audit catches cross-file contradictions
   category: pressure

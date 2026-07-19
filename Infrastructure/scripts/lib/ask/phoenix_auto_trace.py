@@ -93,9 +93,9 @@ def maybe_emit_phoenix_trace(repo_root: Path, args: argparse.Namespace, result: 
         return
     try:
         _emit_phoenix_trace(repo_root, config, result)
-    except Exception as exc:  # noqa: BLE001 - tracing must never change ask command semantics.
+    except (ImportError, KeyError, OSError, TypeError, ValueError) as exc:
         result.telemetry["phoenix_trace_status"] = "blocked"
-        result.telemetry["phoenix_trace_error"] = f"{type(exc).__name__}: {exc}"
+        result.telemetry["phoenix_trace_error_class"] = type(exc).__name__
 
 
 def _emit_phoenix_trace(repo_root: Path, config: dict[str, Any], result: CallResult) -> None:

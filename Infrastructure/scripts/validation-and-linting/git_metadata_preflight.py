@@ -9,6 +9,7 @@ validation.  It reports stale or active locks but never removes them.
 from __future__ import annotations
 
 import argparse
+from enum import Enum
 import json
 import os
 from pathlib import Path
@@ -24,22 +25,52 @@ EXIT_BLOCKED = 78
 EXIT_INTERNAL = 70
 EXIT_USAGE = 64
 DEFAULT_LOCK_MAX_AGE_SECONDS = 900
+SUBPROCESS_TIMEOUT_SECONDS = 5
+GIT_CONTEXT_ENV_VARS = frozenset({
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_DIR",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_WORK_TREE",
+})
+
+
+class CurrentIndexLockPolicy(Enum):
+    STRICT = "strict"
+    ALLOW_PARENT_OWNED = "allow_parent_owned"
+
+
+class UsageError(ValueError):
+    """Raised for invalid command-line input."""
+
+
+class UsageArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise UsageError(message)
 
 
 def _run_git(repo_root: Path, *args: str) -> tuple[int, str, str]:
-    proc = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    env = os.environ.copy()
+    for name in GIT_CONTEXT_ENV_VARS:
+        env.pop(name, None)
+    git_binary = shutil.which("git") or "git"
+    try:
+        proc = subprocess.run(
+            [git_binary, *args], cwd=repo_root, env=env, text=True,
+            capture_output=True, check=False, timeout=SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, "", f"git {' '.join(args)} timed out after {SUBPROCESS_TIMEOUT_SECONDS}s"
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
-def _resolve_git_path(repo_root: Path, value: str) -> Path:
+def _resolve_git_path(repo_root: Path, value: str, *, preserve_leaf: bool = False) -> Path:
     path = Path(value)
-    return (path if path.is_absolute() else repo_root / path).resolve()
+    path = path if path.is_absolute() else repo_root / path
+    if preserve_leaf:
+        return path.parent.resolve() / path.name
+    return path.resolve()
 
 
 def _probe_write(path: Path) -> dict[str, Any]:
@@ -76,18 +107,27 @@ def _probe_write(path: Path) -> dict[str, Any]:
     return result
 
 
+def _lsof_binary() -> str | None:
+    discovered = shutil.which("lsof")
+    if discovered:
+        return discovered
+    for candidate in (Path("/usr/sbin/lsof"), Path("/usr/bin/lsof")):
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
 def _lock_owner(path: Path) -> str | None:
-    lsof = shutil.which("lsof")
+    lsof = _lsof_binary()
     if lsof is None:
         return None
     try:
         proc = subprocess.run(
             [lsof, "-nP", "--", str(path)],
-            text=True,
-            capture_output=True,
-            check=False,
+            text=True, capture_output=True, check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     if proc.returncode != 0:
         return None
@@ -95,7 +135,56 @@ def _lock_owner(path: Path) -> str | None:
     return " | ".join(lines[:4]) if lines else None
 
 
-def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
+def _lock_owner_pids(path: Path) -> set[int] | None:
+    lsof = _lsof_binary()
+    if lsof is None:
+        return None
+    try:
+        proc = subprocess.run(
+            [lsof, "-nP", "-t", "--", str(path)],
+            text=True, capture_output=True, check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    pids: set[int] = set()
+    for line in proc.stdout.splitlines():
+        try:
+            pids.add(int(line.strip()))
+        except ValueError:
+            continue
+    return pids
+
+
+def _parent_process_ids() -> set[int]:
+    ancestors: set[int] = set()
+    pid = os.getppid()
+    while pid > 1 and pid not in ancestors:
+        ancestors.add(pid)
+        try:
+            proc = subprocess.run(
+                ["ps", "-o", "ppid=", "-p", str(pid)],
+                text=True, capture_output=True, check=False,
+                timeout=SUBPROCESS_TIMEOUT_SECONDS,
+            )
+            pid = int(proc.stdout.strip())
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            break
+    return ancestors
+
+
+def _lock_owned_by_parent(path: Path) -> bool:
+    owner_pids = _lock_owner_pids(path)
+    return owner_pids is not None and bool(owner_pids & _parent_process_ids())
+
+
+def _classify_lock(path: Path, max_age_seconds: int, kind: str) -> dict[str, Any]:
+    prefix = "index" if kind == "index" else "git_metadata"
+    if not path.is_file():
+        return {
+            "path": str(path),
+            "classification": f"{prefix}_lock_non_regular",
+        }
     now = time.time()
     try:
         age_seconds = max(0, int(now - path.stat().st_mtime))
@@ -108,11 +197,11 @@ def _classify_lock(path: Path, max_age_seconds: int) -> dict[str, Any]:
 
     owner = _lock_owner(path)
     if owner:
-        classification = "active_index_lock"
+        classification = f"active_{prefix}_lock"
     elif age_seconds >= max_age_seconds:
-        classification = "stale_index_lock_candidate"
+        classification = f"stale_{prefix}_lock_candidate"
     else:
-        classification = "recent_index_lock_unknown"
+        classification = f"recent_{prefix}_lock_unknown"
 
     result: dict[str, Any] = {
         "path": str(path),
@@ -159,203 +248,385 @@ def _unique_paths(paths: list[Path]) -> list[Path]:
     return result
 
 
-def _initial_result(repo_root: Path) -> dict[str, Any]:
-    return {
-        "schema_version": 1,
-        "contract": CONTRACT,
-        "status": "blocked",
-        "repo_root": str(repo_root),
-        "reason_codes": [],
-        "locks": [],
-        "locked_worktrees": [],
-        "prunable_worktrees": [],
-    }
+class MetadataPreflightError(RuntimeError):
+    """Raised when Git metadata cannot be resolved."""
 
 
-def _resolve_toplevel(repo_root: Path, result: dict[str, Any]) -> Path | None:
-    code, toplevel, stderr = _run_git(repo_root, "rev-parse", "--show-toplevel")
-    if code == 0 and toplevel:
-        resolved = Path(toplevel).resolve()
-        result["repo_root"] = str(resolved)
-        return resolved
-    result["reason_codes"] = ["not_git_worktree"]
-    result["diagnostic"] = stderr or "git rev-parse --show-toplevel failed"
-    result["next_action"] = "run the hook from a Git worktree"
-    return None
-
-
-def _resolve_metadata_paths(repo_root: Path, result: dict[str, Any]) -> dict[str, Path] | None:
+def _resolve_metadata(repo_root: Path) -> dict[str, Path]:
     commands = {
         "git_common_dir": ("rev-parse", "--git-common-dir"),
         "git_dir": ("rev-parse", "--git-dir"),
         "index_path": ("rev-parse", "--git-path", "index"),
         "index_lock_path": ("rev-parse", "--git-path", "index.lock"),
+        "head_lock_path": ("rev-parse", "--git-path", "HEAD.lock"),
+        "objects_dir": ("rev-parse", "--git-path", "objects"),
     }
     resolved: dict[str, Path] = {}
     for key, args in commands.items():
         code, value, stderr = _run_git(repo_root, *args)
         if code != 0 or not value:
-            result["reason_codes"] = ["git_metadata_unavailable"]
-            result["diagnostic"] = stderr or f"git {' '.join(args)} failed"
-            result["next_action"] = "repair the Git checkout or use a writable clone"
-            return None
-        resolved[key] = _resolve_git_path(repo_root, value)
-        result[key] = str(resolved[key])
+            raise MetadataPreflightError(stderr or f"git {' '.join(args)} failed")
+        resolved[key] = _resolve_git_path(
+            repo_root,
+            value,
+            preserve_leaf=key.endswith("_lock_path"),
+        )
+    resolved.update(_resolve_head_metadata(repo_root))
     return resolved
 
 
-def _write_probe_records(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str, Any]]:
+def _resolve_head_metadata(repo_root: Path) -> dict[str, Path]:
+    code, head_ref, _ = _run_git(repo_root, "symbolic-ref", "-q", "HEAD")
+    resolved: dict[str, Path] = {}
+    if code == 0 and head_ref:
+        code, value, stderr = _run_git(repo_root, "rev-parse", "--git-path", f"{head_ref}.lock")
+        if code != 0 or not value:
+            raise MetadataPreflightError(stderr or "git could not resolve the current ref lock")
+        resolved["ref_lock_path"] = _resolve_git_path(
+            repo_root, value, preserve_leaf=True
+        )
+        code, value, stderr = _run_git(
+            repo_root, "rev-parse", "--git-path", f"logs/{head_ref}"
+        )
+        if code != 0 or not value:
+            raise MetadataPreflightError(stderr or "git could not resolve the current reflog")
+        resolved["ref_log_path"] = _resolve_git_path(
+            repo_root, value, preserve_leaf=True
+        )
+    else:
+        code, value, stderr = _run_git(repo_root, "rev-parse", "--git-path", "logs/HEAD")
+        if code != 0 or not value:
+            raise MetadataPreflightError(stderr or "git could not resolve the detached HEAD reflog")
+        resolved["ref_log_path"] = _resolve_git_path(
+            repo_root, value, preserve_leaf=True
+        )
+    return resolved
+
+
+def _write_probes(metadata_dirs: list[Path], probe_write: bool) -> list[dict[str, Any]]:
     if probe_write:
         return [_probe_write(path) for path in metadata_dirs]
-    return [{"path": str(path), "status": "skipped"} for path in metadata_dirs]
+    return [
+        {"path": str(path), "status": "blocked", "reason": "write_probe_disabled"}
+        for path in metadata_dirs
+    ]
 
 
-def _lock_records(index_lock_path: Path, worktrees_dir: Path, max_age_seconds: int) -> list[dict[str, Any]]:
-    lock_paths = [index_lock_path] if index_lock_path.is_file() else []
-    if worktrees_dir.is_dir():
-        lock_paths.extend(sorted(worktrees_dir.glob("*/index.lock")))
-    return [_classify_lock(path, max_age_seconds) for path in _unique_paths(lock_paths)]
+def _metadata_dirs(
+    resolved: dict[str, Path], git_dir: Path, common_dir: Path
+) -> list[Path]:
+    paths = [resolved["index_path"].parent, resolved["objects_dir"], git_dir, common_dir]
+    ref_lock_path = resolved.get("ref_lock_path")
+    if ref_lock_path is not None:
+        paths.append(_nearest_existing_directory(ref_lock_path.parent))
+    ref_log_path = resolved.get("ref_log_path")
+    if ref_log_path is not None:
+        paths.append(_nearest_existing_directory(ref_log_path.parent))
+    return _unique_paths(paths)
 
 
-def _locked_worktree_records(worktrees_dir: Path, git_dir: Path) -> list[dict[str, Any]]:
+def _non_directory_path_components(paths: list[Path]) -> list[str]:
+    blocked: list[str] = []
+    for path in paths:
+        candidate = path
+        while not candidate.exists() and candidate.parent != candidate:
+            candidate = candidate.parent
+        if candidate.exists() and not candidate.is_dir():
+            blocked.append(str(candidate))
+    return list(dict.fromkeys(blocked))
+
+
+def _nearest_existing_directory(path: Path) -> Path:
+    """Return the deepest existing parent Git can use for a packed ref."""
+    candidate = path
+    while not candidate.is_dir():
+        parent = candidate.parent
+        if parent == candidate:
+            return candidate
+        candidate = parent
+    return candidate
+
+
+def _lock_records(
+    index_lock_path: Path,
+    head_lock_path: Path,
+    ref_lock_path: Path | None,
+    lock_max_age_seconds: int,
+) -> list[dict[str, Any]]:
+    candidates = [("index", index_lock_path), ("head", head_lock_path)]
+    if ref_lock_path is not None:
+        candidates.append(("current_ref", ref_lock_path))
     records: list[dict[str, Any]] = []
-    for locked_path in sorted(worktrees_dir.glob("*/locked")) if worktrees_dir.is_dir() else []:
-        try:
-            reason = locked_path.read_text(encoding="utf-8").strip()
-        except OSError as exc:
-            reason = f"unreadable: {exc}"
-        metadata_dir = locked_path.parent.resolve()
-        records.append({"metadata_dir": str(metadata_dir), "reason": reason, "current": metadata_dir == git_dir})
+    for kind, path in candidates:
+        if not (path.exists() or path.is_symlink()):
+            continue
+        record = _classify_lock(path, lock_max_age_seconds, kind)
+        record["kind"] = kind
+        records.append(record)
     return records
 
 
-def _record_prunable_worktrees(repo_root: Path, result: dict[str, Any]) -> None:
+def _worktree_state(
+    repo_root: Path, worktrees_dir: Path, git_dir: Path
+) -> tuple[list[dict[str, Any]], list[dict[str, str]], str | None]:
+    locked: list[dict[str, Any]] = []
+    if worktrees_dir.is_dir():
+        for locked_path in sorted(worktrees_dir.glob("*/locked")):
+            try:
+                reason = locked_path.read_text(encoding="utf-8").strip()
+            except OSError as exc:
+                reason = f"unreadable: {exc}"
+            locked.append(
+                {
+                    "metadata_dir": str(locked_path.parent.resolve()),
+                    "reason": reason,
+                    "current": locked_path.parent.resolve() == git_dir,
+                }
+            )
+        for index_lock in sorted(worktrees_dir.glob("*/index.lock")):
+            locked.append(
+                {
+                    "metadata_dir": str(index_lock.parent.resolve()),
+                    "reason": "index.lock exists",
+                    "current": index_lock.parent.resolve() == git_dir,
+                    "index_lock": str(index_lock),
+                }
+            )
     code, output, stderr = _run_git(repo_root, "worktree", "list", "--porcelain")
-    if code == 0:
-        result["prunable_worktrees"] = [
-            record for record in _parse_worktree_records(output) if "prunable_reason" in record
-        ]
-    elif stderr:
-        result["worktree_list_diagnostic"] = stderr
+    prunable = [
+        record
+        for record in _parse_worktree_records(output)
+        if "prunable_reason" in record
+    ] if code == 0 else []
+    return locked, prunable, stderr if code != 0 else None
 
 
-def _write_reason_codes(write_results: list[dict[str, Any]]) -> list[str]:
-    reasons = []
+def _apply_worktree_state(
+    result: dict[str, Any], repo_root: Path, worktrees_dir: Path, git_dir: Path
+) -> str | None:
+    locked, prunable, error = _worktree_state(repo_root, worktrees_dir, git_dir)
+    result.update(locked_worktrees=locked, prunable_worktrees=prunable)
+    if error:
+        result["worktree_list_diagnostic"] = error
+    return error
+
+
+def _metadata_reasons(write_results: list[dict[str, Any]]) -> list[str]:
+    reasons: list[str] = []
     if any(item.get("reason") == "path_missing" for item in write_results):
         reasons.append("metadata_path_missing")
     if any(item.get("reason") in {"write_denied", "cleanup_denied"} for item in write_results):
         reasons.append("metadata_write_denied")
+    if any(item.get("reason") == "write_probe_disabled" for item in write_results):
+        reasons.append("metadata_write_probe_disabled")
+    if any(item.get("reason") == "path_component_not_directory" for item in write_results):
+        reasons.append("metadata_path_component_not_directory")
     return reasons
 
 
-def _lock_reason_codes(lock_records: list[dict[str, Any]]) -> list[str]:
-    if any(item.get("classification") == "lock_stat_failed" for item in lock_records):
-        return ["metadata_lock_uninspectable"]
-    return []
-
-
-def _current_lock_reason(
+def _lock_reasons(
+    result: dict[str, Any],
     lock_records: list[dict[str, Any]],
     index_lock_path: Path,
     allow_current_index_lock: bool,
-    result: dict[str, Any],
-) -> str | None:
-    current_lock = next((item for item in lock_records if item.get("path") == str(index_lock_path)), None)
-    if current_lock is None:
-        return None
-    if allow_current_index_lock:
-        result.setdefault("advisories", []).append("expected_current_index_lock")
-        return None
-    return str(current_lock.get("classification", "index_lock"))
+) -> tuple[list[str], list[str]]:
+    reasons: list[str] = []
+    advisories: list[str] = []
+    if any(item.get("classification") == "lock_stat_failed" for item in lock_records):
+        reasons.append("metadata_lock_uninspectable")
+    for record in lock_records:
+        path = Path(str(record.get("path", "")))
+        classification = str(record.get("classification", "index_lock"))
+        is_current = path == index_lock_path
+        if is_current and allow_current_index_lock:
+            owner_pids = _lock_owner_pids(index_lock_path)
+            if owner_pids is None:
+                reasons.append("lock_owner_detector_unavailable")
+            elif owner_pids & _parent_process_ids():
+                advisories.append("expected_current_index_lock")
+            else:
+                reasons.append(classification)
+        else:
+            reasons.append(classification)
+    reasons.extend(_worktree_lock_reasons(result["locked_worktrees"]))
+    if result["prunable_worktrees"]:
+        advisories.append("prunable_worktree")
+    return list(dict.fromkeys(reasons)), advisories
+
+
+def _worktree_lock_reasons(locked_worktrees: list[dict[str, Any]]) -> list[str]:
+    reasons: list[str] = []
+    if any(item.get("current") for item in locked_worktrees):
+        reasons.append("current_worktree_locked")
+    if any(not item.get("current") for item in locked_worktrees):
+        reasons.append("related_worktree_locked")
+    return reasons
 
 
 def _reason_codes(
+    result: dict[str, Any],
     write_results: list[dict[str, Any]],
     lock_records: list[dict[str, Any]],
     index_lock_path: Path,
-    locked_worktrees: list[dict[str, Any]],
     allow_current_index_lock: bool,
-    result: dict[str, Any],
-) -> list[str]:
-    reasons = _write_reason_codes(write_results) + _lock_reason_codes(lock_records)
-    current_lock_reason = _current_lock_reason(
-        lock_records, index_lock_path, allow_current_index_lock, result
+) -> tuple[list[str], list[str]]:
+    reasons = _metadata_reasons(write_results)
+    lock_reasons, advisories = _lock_reasons(
+        result, lock_records, index_lock_path, allow_current_index_lock
     )
-    if current_lock_reason:
-        reasons.append(current_lock_reason)
-    if any(item.get("current") for item in locked_worktrees):
-        reasons.append("locked_current_worktree")
-    return list(dict.fromkeys(reasons))
+    reasons.extend(lock_reasons)
+    return list(dict.fromkeys(reasons)), advisories
 
 
-def _finish_result(result: dict[str, Any]) -> None:
-    reasons = result["reason_codes"]
+def _next_action(reasons: list[str]) -> str:
     if not reasons:
-        result["status"] = "pass"
-        result["next_action"] = "Git metadata is writable and no current-worktree lock blocks the hook"
-    elif any(reason in reasons for reason in ("active_index_lock", "recent_index_lock_unknown")):
-        result["next_action"] = "wait for the lock owner or stop the owning process; do not delete the lock"
-    elif "stale_index_lock_candidate" in reasons:
-        result["next_action"] = "prove no owner, then use explicit Git worktree recovery; this preflight never removes locks"
-    elif "metadata_write_denied" in reasons:
-        result["next_action"] = "grant write access to the exact Git metadata directories or use a writable checkout"
-    elif "locked_current_worktree" in reasons:
-        result["next_action"] = "inspect the owning worktree and unlock it deliberately; do not delete metadata"
-    else:
-        result["next_action"] = "repair Git metadata authority before running the hook again"
+        return "Git metadata is writable and no current-worktree lock blocks the hook"
+    if any(reason.startswith(("active_", "recent_")) for reason in reasons):
+        return "wait for the lock owner or stop the owning process; do not delete the lock"
+    if any(reason.startswith("stale_") for reason in reasons):
+        return "prove no owner, then use explicit Git worktree recovery; this preflight never removes locks"
+    if "metadata_write_denied" in reasons:
+        return "grant write access to the exact Git metadata directories or use a writable checkout"
+    return "repair Git metadata authority before running the hook again"
+
+
+def _finalize(
+    result: dict[str, Any],
+    write_results: list[dict[str, Any]],
+    lock_records: list[dict[str, Any]],
+    index_lock_path: Path,
+    allow_current_index_lock: bool,
+) -> None:
+    reasons, advisories = _reason_codes(
+        result, write_results, lock_records, index_lock_path, allow_current_index_lock
+    )
+    if advisories:
+        result.setdefault("advisories", []).extend(advisories)
+    result["reason_codes"] = reasons
+    result["status"] = "blocked" if reasons else "pass"
+    result["next_action"] = _next_action(reasons)
+
+
+def _finalize_inspection(
+    result: dict[str, Any],
+    write_results: list[dict[str, Any]],
+    index_lock_path: Path,
+    lock_policy: CurrentIndexLockPolicy,
+    worktree_error: str | None,
+) -> None:
+    _finalize(
+        result,
+        write_results,
+        result["locks"],
+        index_lock_path,
+        lock_policy is CurrentIndexLockPolicy.ALLOW_PARENT_OWNED,
+    )
+    if worktree_error:
+        result["reason_codes"] = list(
+            dict.fromkeys([*result["reason_codes"], "worktree_state_unavailable"])
+        )
+        result["status"] = "blocked"
+        result["next_action"] = _next_action(result["reason_codes"])
+
+
+def _initial_result(repo_root: Path) -> dict[str, Any]:
+    return {
+        "schema_version": 1, "contract": CONTRACT, "status": "blocked",
+        "repo_root": str(repo_root.resolve()), "reason_codes": [],
+        "locks": [], "locked_worktrees": [], "prunable_worktrees": [],
+    }
+
+
+def _prepare_metadata_inspection(
+    result: dict[str, Any], resolved: dict[str, Path], probe_write: bool
+) -> tuple[list[dict[str, Any]], Path, Path]:
+    common_dir, git_dir = resolved["git_common_dir"], resolved["git_dir"]
+    result.update({key: str(path) for key, path in resolved.items()})
+    result.update(
+        worktrees_dir=str(common_dir / "worktrees"),
+        linked_worktree=git_dir != common_dir,
+    )
+    metadata_dirs = _metadata_dirs(resolved, git_dir, common_dir)
+    result["metadata_dirs"] = [str(path) for path in metadata_dirs]
+    write_results = _write_probes(metadata_dirs, probe_write)
+    invalid_components = _non_directory_path_components([
+        resolved["index_path"].parent,
+        resolved["objects_dir"],
+        resolved.get("ref_lock_path", common_dir).parent,
+        resolved.get("ref_log_path", common_dir).parent,
+    ])
+    if invalid_components:
+        result["non_directory_path_components"] = invalid_components
+        write_results.append({
+            "path": invalid_components[0], "status": "blocked",
+            "reason": "path_component_not_directory",
+        })
+    return write_results, common_dir, git_dir
 
 
 def inspect(
     repo_root: Path,
     probe_write: bool,
     lock_max_age_seconds: int,
-    allow_current_index_lock: bool = False,
+    current_index_lock_policy: CurrentIndexLockPolicy = CurrentIndexLockPolicy.STRICT,
 ) -> dict[str, Any]:
-    repo_root = repo_root.resolve()
     result = _initial_result(repo_root)
-    repo_root = _resolve_toplevel(repo_root, result)
-    if repo_root is None:
+    code, toplevel, stderr = _run_git(repo_root, "rev-parse", "--show-toplevel")
+    if code != 0 or not toplevel:
+        result.update(reason_codes=["not_git_worktree"], diagnostic=stderr or "git rev-parse --show-toplevel failed", next_action="run the hook from a Git worktree")
         return result
-    resolved = _resolve_metadata_paths(repo_root, result)
-    if resolved is None:
+    repo_root = Path(toplevel).resolve()
+    result["repo_root"] = str(repo_root)
+    try:
+        resolved = _resolve_metadata(repo_root)
+    except MetadataPreflightError as exc:
+        result.update(reason_codes=["git_metadata_unavailable"], diagnostic=str(exc), next_action="repair the Git checkout or use a writable clone")
         return result
-    common_dir, git_dir = resolved["git_common_dir"], resolved["git_dir"]
-    index_path, index_lock_path = resolved["index_path"], resolved["index_lock_path"]
-    worktrees_dir = common_dir / "worktrees"
-    result["worktrees_dir"] = str(worktrees_dir)
-    result["linked_worktree"] = git_dir != common_dir
-    metadata_dirs = _unique_paths([index_path.parent, git_dir, common_dir])
-    result["metadata_dirs"] = [str(path) for path in metadata_dirs]
-    write_results = _write_probe_records(metadata_dirs, probe_write)
-    result["write_probe"] = write_results
-    lock_records = _lock_records(index_lock_path, worktrees_dir, lock_max_age_seconds)
-    result["locks"] = lock_records
-    locked_worktrees = _locked_worktree_records(worktrees_dir, git_dir)
-    result["locked_worktrees"] = locked_worktrees
-    _record_prunable_worktrees(repo_root, result)
-    if result["prunable_worktrees"]:
-        result.setdefault("advisories", []).append("prunable_worktree")
-    result["reason_codes"] = _reason_codes(
-        write_results, lock_records, index_lock_path, locked_worktrees, allow_current_index_lock, result
+    write_results, common_dir, git_dir = _prepare_metadata_inspection(
+        result, resolved, probe_write
     )
-    _finish_result(result)
+    worktrees_dir = common_dir / "worktrees"
+    result["write_probe"] = write_results
+    result["locks"] = _lock_records(
+        resolved["index_lock_path"],
+        resolved["head_lock_path"],
+        resolved.get("ref_lock_path"),
+        lock_max_age_seconds,
+    )
+    worktree_error = _apply_worktree_state(result, repo_root, worktrees_dir, git_dir)
+    _finalize_inspection(
+        result, write_results, resolved["index_lock_path"], current_index_lock_policy,
+        worktree_error,
+    )
     return result
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    raw_lock_age = os.environ.get(
+        "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS",
+        str(DEFAULT_LOCK_MAX_AGE_SECONDS),
+    )
+    try:
+        default_lock_age = int(raw_lock_age)
+    except (TypeError, ValueError) as exc:
+        raise UsageError(
+            "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS must be an integer"
+        ) from exc
+    parser = UsageArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     parser.add_argument("--no-write-probe", action="store_true")
     parser.add_argument(
+        "--allow-parent-owned-index-lock",
         "--allow-current-index-lock",
+        dest="allow_parent_owned_index_lock",
         action="store_true",
-        help="treat the current index.lock as an expected parent Git transaction (pre-commit only)",
+        help="treat index.lock as expected only when its owner is a Git ancestor (pre-commit only)",
     )
     parser.add_argument(
         "--lock-max-age-seconds",
         type=int,
-        default=int(os.environ.get("GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS", DEFAULT_LOCK_MAX_AGE_SECONDS)),
+        default=default_lock_age,
     )
     return parser.parse_args()
 
@@ -364,13 +635,20 @@ def main() -> int:
     try:
         args = parse_args()
         if args.lock_max_age_seconds < 0:
-            raise ValueError("--lock-max-age-seconds must be non-negative")
+            raise UsageError("--lock-max-age-seconds must be non-negative")
         payload = inspect(
             args.repo_root,
             probe_write=not args.no_write_probe,
             lock_max_age_seconds=args.lock_max_age_seconds,
-            allow_current_index_lock=args.allow_current_index_lock,
+            current_index_lock_policy=(
+                CurrentIndexLockPolicy.ALLOW_PARENT_OWNED
+                if args.allow_parent_owned_index_lock
+                else CurrentIndexLockPolicy.STRICT
+            ),
         )
+    except UsageError as exc:
+        print(json.dumps({"schema_version": 1, "contract": CONTRACT, "status": "blocked", "reason_codes": ["invalid_usage"], "diagnostic": str(exc)}, sort_keys=True))
+        return EXIT_USAGE
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(json.dumps({"schema_version": 1, "contract": CONTRACT, "status": "blocked", "reason_codes": ["internal_error"], "diagnostic": str(exc)}, sort_keys=True))
         return EXIT_INTERNAL
