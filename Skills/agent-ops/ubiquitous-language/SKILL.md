@@ -1,6 +1,6 @@
 ---
 name: ubiquitous-language
-description: Build shared project vocabulary, glossary terms, aliases, prompt translations, domain-grill interviews, and agent instruction links when wording is fuzzy or overloaded.
+description: Builds a project glossary that maps everyday wording to canonical terms, repository actions, and reusable engineering rules. Use when a user asks "what does X mean here?", "define our terms", "standardize this naming", "turn this phrase into a repo action", "grill the domain language", or whether a local correction should apply to similar code.
 metadata:
   version: "0.1.0"
   skill-type: team_automation
@@ -10,120 +10,89 @@ metadata:
 
 Create or update a project vocabulary so users, domain experts, and agents mean the same thing without forcing the user to know specialist terms.
 
-## Philosophy
-
-Make the user's natural language more powerful instead of making the user sound more technical.
-
-## When To Use
-
-- User mentions glossary, naming, vocabulary, terminology, DDD, domain model, or shared language.
-- User says they do not know the technical term.
-- User wants a relentless domain-language grill or plan stress-test against code, project language, and documented decisions.
-- A repo has overloaded phrases that agents keep interpreting inconsistently.
-
-Do not use for ordinary symbol renaming, generic copyediting, or broad docs rewrites without reusable terminology.
-
-## Inputs
-
-- Current conversation and the user's natural wording.
-- Existing `UBIQUITOUS-MAP.md`, `UBIQUITOUS.md`, or legacy `UBIQUITOUS_LANGUAGE.md`, if present.
-- Nearby project guidance such as `AGENTS.md`, `README.md`, `docs/**`, `instructions/**`, or handoff files.
-- Session logs only when the user explicitly asks for history-backed vocabulary.
-
 ## Outputs
 
-The glossary should include context description, canonical language entries,
-aliases to avoid, relationships, example dialogue, flagged ambiguities, and
-source notes. Include prompt translations when informal user wording needs to
-map to repo-native actions. Structured output should include `schema_version: 1`
-when automation consumes it.
+Produce canonical terms, aliases, relationships, ambiguities, sources, and
+prompt translations. When corrective feedback is the source, also produce its
+intent radius, generalized rule, pattern sweep, dispositions, and enforcement
+handoff. Use `schema_version: 1` when automation consumes the output.
 
 ## Workflow
 
 1. Determine scope and output path.
-2. Infer the repository structure:
-   - If `UBIQUITOUS-MAP.md` exists, read it to find the relevant context glossary.
-   - If a root `UBIQUITOUS.md` or legacy `UBIQUITOUS_LANGUAGE.md` exists, treat the repo as a single context unless sources prove otherwise.
-   - If neither exists, create a root `UBIQUITOUS.md` lazily when the first term is resolved.
-   - When multiple contexts exist and the current topic is unclear, ask which context to update.
+2. Resolve the active glossary with the [output-format routing](references/output-format.md); ask only when multiple contexts remain ambiguous.
 3. Read any existing glossary first and preserve intentional choices.
 4. Extract domain nouns, workflow verbs, actor names, lifecycle states, aliases, and overloaded phrases.
-5. Choose canonical terms that improve execution; keep natural-language aliases when useful.
-6. Write or update the active ubiquitous-language file.
-7. Add a concise pointer in the nearest active agent instruction surface.
-8. Report the highest-value terms, prompt translations, sources, and skipped evidence.
+5. When the input is corrective feedback, run Corrective Feedback Mode before choosing scope.
+6. Choose canonical terms that improve execution; keep natural-language aliases when useful.
+7. Write or update the active ubiquitous-language file.
+8. Add a concise pointer in the nearest active agent instruction surface.
+9. Report the highest-value terms, prompt translations, sources, pattern-sweep dispositions, enforcement handoffs, and skipped evidence.
+
+## Corrective Feedback Mode
+
+Use this mode when the user corrects a specific line, function, file, command,
+API, workflow, or implementation detail and the correction may express wider
+engineering intent.
+
+1. Treat the visible example as evidence, not as the presumed scope boundary.
+2. Classify the **Feedback Intent Radius** as `line`, `function`, `file`,
+   `package`, `repository`, `architecture_rule`, or `durable_memory`.
+3. Run a bounded **Pattern Sweep** across structurally similar implementations,
+   glossary entries, prompt translations, validators, schemas, tests, and policy
+   surfaces. Do not equate textual similarity with equivalent semantics.
+4. State the **Generalized Feedback Rule** without the incidental identifier,
+   path, function, error, or example that exposed it.
+5. Give every relevant sibling a **Similar-Case Disposition**: align now,
+   different semantics, defer with reason, or not applicable.
+6. Decide whether language alone is sufficient. When recurrence needs mechanical
+   prevention, route the rule to the owning validator, lint rule, schema,
+   reusable abstraction, shared utility, repository convention, style rule, CI
+   check, or architecture policy.
+7. Preserve authority boundaries. Systemic intent justifies broader inspection,
+   not unrelated or cross-repository mutation; record or hand off out-of-scope
+   enforcement work explicitly.
+
+### Worked Corrective-Feedback Output
+
+Input: "This parser fix is not doing what I want; do not patch only this function."
+
+```text
+Feedback Intent Radius: repository
+Generalized Feedback Rule: Parse failures use typed results; callers never infer failure from missing values.
+Pattern Sweep: parsers/** and their direct callers
+Similar-Case Dispositions: 3 aligned now; 1 different semantics; 1 deferred to another owner
+Enforcement: schema constraint plus parser-contract regression test
+```
+
+### Worked Glossary Output
+
+Input: "What does 'make it available' mean in this repository?"
+
+```md
+**Runtime Projection**:
+The generated skill surface visible to the active agent runtime.
+_Avoid_: installed skill, copied source
+
+## Prompt Translations
+
+| User phrase | Canonical action |
+| --- | --- |
+| "make it available" | Run `./bin/ask skills sync --scope workspace --json`, then `./bin/ask skills sync --scope user --json`, and verify the runtime links. |
+```
 
 ## Domain Grill Mode
 
 Use this mode when the user asks to be grilled, challenged, interviewed deeply,
-or stress-tested against the project domain model.
+or stress-tested against the project domain model. Follow the focused
+[domain-grill procedure](references/domain-grill.md).
 
-- Be persistent. Walk the design tree branch by branch until the plan, language,
-  and decision boundaries are sharp enough to act on.
-- Ask one question at a time and wait for the user's answer unless the answer
-  can be found cheaply in the repository.
-- For each question, include a recommended answer and the trade-off it implies.
-- When a user term conflicts with the active glossary, call out the conflict
-  immediately and ask which meaning should win.
-- When a user term is vague or overloaded, propose a precise canonical term and
-  the aliases to avoid.
-- Use concrete scenarios and edge cases to test whether adjacent concepts are
-  truly separate.
-- Cross-check claims against code or docs when that is cheaper than asking the
-  user; surface contradictions as evidence, not as conclusions.
-- Capture resolved terms in the active glossary as they resolve. Do not batch
-  confirmed terminology until the end.
-- Stop or pivot when the remaining uncertainty is implementation detail,
-  architecture trade-off, tracker planning, or a decision-record question owned
-  by another skill.
+## Output Format
 
-## UBIQUITOUS.md Format
-
-For new glossaries, prefer this structure:
-
-```md
-# {Context Name}
-
-{One or two sentence description of what this context is and why it exists.}
-
-## Language
-
-**Order**:
-{A one or two sentence description of the term}
-_Avoid_: Purchase, transaction
-
-**Invoice**:
-A request for payment sent to a customer after delivery.
-_Avoid_: Bill, payment request
-
-**Customer**:
-A person or organization that places orders.
-_Avoid_: Client, buyer, account
-```
-
-If automation or an existing repo contract already consumes `UBIQUITOUS_LANGUAGE.md`, preserve that filename and existing required sections while aligning new term entries to the `## Language` style.
-
-If an external skill, repo, or user calls this surface `CONTEXT.md`, translate
-that to the active local glossary name (`UBIQUITOUS.md`, `UBIQUITOUS-MAP.md`, or
-legacy `UBIQUITOUS_LANGUAGE.md`) before writing.
-
-For multi-context repositories, create or update a root `UBIQUITOUS-MAP.md`:
-
-```md
-# Ubiquitous Map
-
-## Contexts
-
-- [Ordering](./src/ordering/UBIQUITOUS.md) - receives and tracks customer orders
-- [Billing](./src/billing/UBIQUITOUS.md) - generates invoices and processes payments
-- [Fulfillment](./src/fulfillment/UBIQUITOUS.md) - manages warehouse picking and shipping
-
-## Relationships
-
-- **Ordering -> Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
-- **Fulfillment -> Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
-- **Ordering <-> Billing**: Shared types for `CustomerId` and `Money`
-```
+Use [the output template](references/output-format.md) for new single-context or
+multi-context glossaries. Preserve `UBIQUITOUS_LANGUAGE.md` when an existing
+repository contract consumes that filename. Translate external `CONTEXT.md`
+wording to the active local glossary surface before writing.
 
 ## Term Rules
 
@@ -134,6 +103,7 @@ For multi-context repositories, create or update a root `UBIQUITOUS-MAP.md`:
 - Include only concepts specific to this project's context. General programming concepts do not belong just because the project uses them.
 - Group terms under subheadings when natural clusters emerge. Use a flat list when all terms belong to one cohesive area.
 - Write an example dialogue between a developer and a domain expert that demonstrates how terms interact and clarifies boundaries between related concepts.
+- Preserve the principle behind corrective feedback independently of the local example that revealed it.
 
 ## Safety
 
@@ -148,33 +118,14 @@ For multi-context repositories, create or update a root `UBIQUITOUS-MAP.md`:
 - Write only the active ubiquitous-language file, context map, and the smallest necessary agent-instruction pointer.
 - Do not run network commands, publish artifacts, change runtime projections, or edit unrelated docs for a terminology-only update.
 - Do not infer domain authority from generic code symbols; require project-specific source evidence or user wording before adding a term.
+- Do not use this skill for ordinary symbol renaming, generic copyediting, or broad documentation rewrites without reusable terminology.
 - Do not create ADRs, Linear notes, `.harness/decisions/**`, or architecture
   artifacts from this skill. Hand off to the repo's decision-record or
   architecture workflow after the terminology question is resolved.
 
-## Anti-Patterns
-
-- Turning the glossary into a generic programming dictionary.
-- Copying private transcripts or secrets into vocabulary docs.
-- Choosing impressive terms that make future prompts less clear.
-
-## Examples
-
-- "User says make it available, but in this repo that means workspace sync, user sync, and runtime-link verification; convert that wording into the glossary."
-- "Inspect how the word skill means source package, generated handle, and active runtime capability in different places; define the canonical terms and flag the ambiguity."
-- "User says feed the failure back into the start of the pipeline; define the term as an upstream feedback loop, distinguish it from after-the-fact patching, and add the validator or ratchet language that makes it enforceable."
-- "Validate whether billing and fulfillment language belong in one root UBIQUITOUS.md or need a UBIQUITOUS-MAP.md."
-- "Grill this plan against the existing domain model, challenge every fuzzy
-  term, check contradictions in code, and update the glossary as terms resolve."
-
 ## Failure Mode
 
 If the scope, source glossary, or authority for a terminology change is unclear, stop with one missing input rather than rewriting vocabulary by guesswork.
-
-## Gotchas
-
-- Natural user wording is evidence; do not erase it when choosing canonical terms.
-- Avoid broad docs rewrites when a glossary pointer would solve the routing problem.
 
 ## Validation
 
@@ -182,14 +133,29 @@ Confirm the active glossary exists, every canonical term has a one- or
 two-sentence definition, aliases to avoid are listed for terms with competing
 names, flagged ambiguities include a resolution, prompt translations include at
 least one user phrase when informal wording exists, and the agent instruction
-pointer references the active ubiquitous-language file. Fail fast: stop at the
-first failed gate and do not proceed until the blocker is fixed.
+pointer references the active ubiquitous-language file. For corrective feedback,
+also confirm the intent radius, generalized rule, searched scope, similar-case
+dispositions, and enforcement decision are explicit; a local-only result must be
+supported by the pattern sweep rather than assumed from the named example. Fail
+fast: stop at the first failed gate and do not proceed until the blocker is fixed.
 
 ## References
 
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
-- Output template: `references/output-format.md` when present; otherwise use
-  `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
+- Output template: [references/output-format.md](references/output-format.md)
+- Domain-grill procedure: [references/domain-grill.md](references/domain-grill.md)
 - Archived long-form workflow: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/`
+
+## When to use
+
+Use this skill when a named concept, boundary, or domain term is ambiguous across source, tests, interfaces, or operator language and a governed vocabulary decision is required.
+
+## Required Inputs
+
+Provide the target repository or product surface, the terminology under review, authoritative sources where available, and the intended consumer of the resulting vocabulary decision.
+
+## Gotchas
+
+Do not turn one naming preference into a global rule without an independent pattern sweep. Keep generated text, retrospective evidence, and user terminology distinct from canonical domain authority, and stop when ownership or approval is missing.

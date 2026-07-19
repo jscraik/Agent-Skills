@@ -7,7 +7,7 @@ Ask one round at a time; do not dump the full plan.
 
 Round 1 target question:
 
-What should this skill help you do?
+Which documentation surface should we improve first?
 
 What exact repo path, diff, PR, skill, or artifact should this skill inspect?
 

@@ -1050,6 +1050,78 @@ cases:
   unit: waived external CI does not stop PR rotation
   given: Snyk quota is explicitly waived while another PR remains dirty and another is draft with review work.
   should: Classify Snyk as waived_external_ci and continue to the non-waived action lanes before stopping.
+- id: edge-stale-heartbeat-rebinding
+  name: stale heartbeat target is rebound before repair
+  category: edge
+  eval_modes:
+  - smoke
+  - release
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: A scheduled heartbeat can point at an already merged PR while a user has moved the active follow-up lane.
+  expected_behavior: Select pr-green-sweep, refresh the heartbeat target from live PR state, and rebind or retire the heartbeat before repair work.
+  anti_overfit_notes: Do not repair the stale target merely because an automation exists.
+  prepend_skill: true
+  prompt: A heartbeat says to fix PR #273, but live GitHub shows it merged and I say the active follow-up is PR #275. Refresh the target before you repair anything and keep the sweep going on the correct PR.
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: regex
+    value: (?i)(heartbeat.*(stale|rebound|obsolete)|PR #273.*merged|PR #275.*active|target PR)
+  - type: expected_signal
+    value: refreshes the heartbeat target, classifies the old target as stale or obsolete, and does not repair the merged PR
+  unit: stale heartbeat target is rebound before repair
+  given: A scheduled heartbeat can point at an already merged PR while a user has moved the active follow-up lane.
+  should: Rebind or retire the stale heartbeat before building the active PR action queue.
+- id: edge-pr-metadata-check-provenance
+  name: PR metadata check is correlated to current head
+  category: edge
+  eval_modes:
+  - smoke
+  - release
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: A PR-template or metadata gate can report a failure from an earlier payload after the PR body and head have changed.
+  expected_behavior: Select pr-green-sweep, distinguish stale check-event evidence from a source defect, and request or observe a fresh current-head event after metadata repair.
+  anti_overfit_notes: Do not edit source to repair a stale PR-body payload.
+  prepend_skill: true
+  prompt: The PR-template check failed against an earlier PR body, but the current body is corrected. Determine whether the failure belongs to the current head and metadata before editing source, then get fresh validation for the corrected head.
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: regex
+    value: (?i)(PR.metadata|template|current head|event|payload|stale|fresh)
+  - type: expected_signal
+    value: records check provenance, classifies stale metadata evidence separately from source failure, and requires a fresh event for the corrected head
+  unit: PR metadata check is correlated to current head
+  given: A PR-template or metadata gate can report a failure from an earlier payload after the PR body and head have changed.
+  should: Correlate the failed check to current PR metadata before selecting a source repair.
+- id: edge-cross-worktree-receipt
+  name: cross-worktree receipt context remains explicit
+  category: edge
+  eval_modes:
+  - smoke
+  - release
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: A worker can produce a valid repair and focused test in an authorized linked worktree while a parent validator cannot resolve the artifact path.
+  expected_behavior: Select pr-green-sweep, record producer and validator contexts, preserve the focused proof, and block the receipt lane without claiming closeout.
+  anti_overfit_notes: Do not turn an inaccessible artifact into passing parent-checkout evidence.
+  prepend_skill: true
+  prompt: A worker repaired a PR in an authorized linked worktree and reports a passing focused test, but the parent checkout receipt validator cannot see the test path. Classify the receipt and PR evidence before calling the lane ready.
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: regex
+    value: (?i)(worktree|producer|validator|artifact|blocked_artifact_context|receipt)
+  - type: expected_signal
+    value: records both worktree contexts, preserves the real focused-test result, marks the parent receipt lane blocked, and avoids merge or cleanup readiness claims
+  unit: cross-worktree receipt context remains explicit
+  given: A worker can produce a valid repair and focused test in an authorized linked worktree while a parent validator cannot resolve the artifact path.
+  should: Keep the receipt context explicit and avoid claiming closeout from an inaccessible artifact.
 metadata:
   last_updated: '2026-06-30'
   author: Agent Ops Team

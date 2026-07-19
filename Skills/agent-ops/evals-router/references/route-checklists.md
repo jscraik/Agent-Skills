@@ -1,5 +1,26 @@
 # Route Checklists
 
+## Evaluation Preflight
+
+Before changing prompts, judges, scenarios, or score claims:
+
+- identify the candidate revision or digest, package identity, scenario set,
+  and rubric version;
+- inventory dirty, generated, and untracked state and isolate the lane when
+  ownership is uncertain;
+- identify the deterministic runner or executed provider/model/profile;
+- verify required credentials and runtime dependencies through the approved
+  path without exposing them;
+- record which artifact proves each lane and whether it existed before the run.
+
+For multi-lane work, use:
+
+`lane | claim | evidence_ref | identity | command | status | proves | does_not_prove | owner | next_check`
+
+Use `pass`, `fail`, `blocked`, or `not_run` per lane. A passing lane does not
+change the status of another lane unless a repository contract explicitly
+joins them.
+
 ## Judge Prompt Template
 
 Criterion: pass iff every factual sentence is supported by an exact `source_references[]` entry.
@@ -12,8 +33,34 @@ Return JSON with `sentence_results[]`, `overall_verdict`, `failure_reason`, and 
 - `validate-evaluator`: prove deterministic checks run before judges; require scorer id, version or digest, pass threshold, judge parameters, rationale audit, segmented analysis fields, and calibration probes for obvious correct, obvious wrong, verbosity bias, copied rubric text, skill-name mention, and evidence-lane overclaim.
 - `generate-synthetic-data`: tie each synthetic case to a gap id and keep it separate from representative traces.
 - `evaluate-rag`: verify retrieved chunks before judging answer support.
+- `repair-eval-contract`: when repeated invalid scenarios, receipts, packages,
+  or evidence shapes share a mechanism, repair the smallest schema, validator,
+  fixture, or pipeline guardrail. Prove the original invalid shape is rejected
+  before the downstream lane and run one sibling-pattern probe.
+
+## Preview, Apply, And Artifact Hygiene
+
+When tooling supports preview/apply or dry-run/write:
+
+1. Run preview against the exact candidate.
+2. Resolve every blocking finding or report it.
+3. Review the proposed artifact and path set.
+4. Apply only after preview is non-blocking and mutation authority is clear.
+5. Rerun the consumer-side check against the applied artifact.
+
+Snapshot relevant generated and untracked state before eval tooling. Classify
+new files as required evidence, expected cache, temporary staging, or
+unintended residue. Remove only residue created by the current run.
+
+For generated or knowledge-backed inputs, record producer validation, handoff
+identity or digest, consumer preview/apply, package/scenario acceptance, and
+runtime or judge proof separately.
 
 ## Skills SDK Scorer Check
+
+Run `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+when tasks, criteria, scenarios, or generated cases change. Scorer quality and
+calibration cannot substitute for scenario admissibility.
 
 Run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` for SDK-owned skill evals. A blocked receipt means score trends are advisory until `references/evals.yaml` declares calibrated `scorer_quality` metadata.
 
@@ -27,12 +74,37 @@ formatter. A live handoff is blocked while `receipt.feedback_loop.status` is
 assessments, usage below the live handoff threshold, or no aggregate lift.
 Every live Tessl regression must become an internal regression obligation, with
 owner classification and rerun evidence, before the next live handoff claim.
-If Tessl reports no response artifact, no raw response, or package-only
-solution contents, do not patch the skill blindly. First classify whether the
-scenario is supposed to score the installed package or a generated response.
-Package-scored generated fixtures must ask for package instructions and
-references, and scenario-quality must block `raw_response`, `final.json`,
-transcript, or chat-output expectations unless the runner creates them.
+Before staging or running Tessl, classify the scenario as a
+`package_scored_fixture` or `response_producing_scenario`. Check task text,
+criteria inputs, runner capability, staged paths, and expected artifacts as one
+contract. Package-scored fixtures must ask for package instructions and
+references. Response-producing scenarios must name an artifact the runner can
+create. Assign failures to `task`, `criteria`, `runner`, `staging`, or
+`pipeline_guardrail` before patching. Scenario-quality must block
+`raw_response`, `final.json`, transcript, or chat-output expectations unless
+the runner creates them.
+
+## Failure Ownership And Baseline Comparison
+
+Stop dependent promotion at the first failed prerequisite, but continue bounded
+diagnosis needed to assign ownership or repair and rerun that gate.
+
+When a broad check fails after focused proof passes, compare the same command,
+test selection, environment assumptions, and generated-state baseline against
+a clean or known-good revision when safe and practical. Record one of:
+
+- `introduced`
+- `pre_existing`
+- `environment`
+- `permission`
+- `toolchain_runtime`
+- `scenario_contract`
+- `generated_state`
+- `hosted_state`
+- `external_provider`
+- `unresolved`
+
+Fallback evidence may diagnose a blocker but cannot prove the blocked lane.
 
 ## Skills SDK Scenario Runtime Lanes
 

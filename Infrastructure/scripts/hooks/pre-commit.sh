@@ -17,6 +17,10 @@ cd "$REPO_ROOT"
 # Other metadata locks and write failures remain fail-closed.
 python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --allow-parent-owned-index-lock --json
 
+# Git legitimately holds the current index lock while invoking pre-commit.
+# Other metadata locks and write failures remain fail-closed.
+python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --allow-current-index-lock --json
+
 changed_files_file="$(mktemp "$TMPDIR/agent-skills-pre-commit.XXXXXX")"
 trap 'rm -f "$changed_files_file"' EXIT
 

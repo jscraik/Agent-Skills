@@ -229,7 +229,8 @@ def main():
     skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth")
     skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
     skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint and review")
-    skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Skip Tessl local best-practice review")
+    skills_external_review_parser.add_argument("--with-tessl-review", action="store_true", help="Explicitly run Tessl content review after local lint; disabled by default")
+    skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Compatibility flag; Tessl content review is disabled by default")
     skills_external_review_parser.add_argument("--include-snyk", action="store_true", help="Run optional Snyk CLI external security advisory")
     skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command")
     skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path")
@@ -326,7 +327,7 @@ def main():
     evals_run_parser.add_argument("--profile", help="Override the Codex config profile for codex-runner scenario proof")
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
     evals_run_parser.add_argument("--timeout-seconds", type=int, help="Override the internal eval runner timeout")
-    evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
+    evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Compatibility flag for an explicitly recorded local-only eval; Tessl is skipped by default")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
     evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")
@@ -341,10 +342,12 @@ def main():
     evals_macro_parser = evals_subparsers.add_parser("macro-report", help="Export deterministic macro-eval events from saved skill eval summaries", parents=[global_parser])
     evals_macro_parser.add_argument("--output-dir", default=None, help="Directory for macro-eval artifacts")
     evals_macro_parser.add_argument("--summaries-glob", default=None, help="Repo-relative glob for summary.json files")
-    evals_tessl_scenarios_parser = evals_subparsers.add_parser("prepare-tessl-scenarios", help="Stage a skill and install Tessl's scenario-generation tile in temp space", parents=[global_parser])
+    evals_tessl_scenarios_parser = evals_subparsers.add_parser("prepare-tessl-scenarios", help="Stage a skill and optionally install Tessl's scenario-generation tile in temp space", parents=[global_parser])
     evals_tessl_scenarios_parser.add_argument("path", help="Path to the skill directory")
     evals_tessl_scenarios_parser.add_argument("--tessl-workspace", required=True, help="Workspace namespace for the staged private tile")
-    evals_tessl_scenarios_parser.add_argument("--dry-run", action="store_true", help="Stage inputs and write the brief without invoking Tessl install")
+    tessl_scenarios_mode = evals_tessl_scenarios_parser.add_mutually_exclusive_group()
+    tessl_scenarios_mode.add_argument("--execute", action="store_true", help="Explicitly install Tessl's scenario-generation tile after staging")
+    tessl_scenarios_mode.add_argument("--dry-run", action="store_true", help="Compatibility flag; staging-only is the default and does not invoke Tessl install")
     add_workouts_parser(subparsers, global_parser)
     graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
     graph_subparsers = graph_parser.add_subparsers(dest="action")
@@ -704,7 +707,7 @@ def main():
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
         elif args.action == "external-review":
-            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, skip_tessl_review=args.skip_tessl_review, include_snyk=args.include_snyk, timeout_seconds=args.timeout_seconds, report_path=args.report_path, dashboard=args.dashboard, dashboard_path=args.dashboard_path)
+            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, with_tessl_review=args.with_tessl_review, skip_tessl_review=args.skip_tessl_review, include_snyk=args.include_snyk, timeout_seconds=args.timeout_seconds, report_path=args.report_path, dashboard=args.dashboard, dashboard_path=args.dashboard_path)
         elif args.action == "validate-skill-gate":
             result = skills_commands.validate_skill_gate(repo_root, skill_path=args.path)
         elif args.action == "validate-openai-format":
@@ -780,7 +783,7 @@ def main():
                 mode=args.mode,
                 dashboard=not args.no_dashboard,
                 runner=args.runner,
-                skip_tessl=args.skip_tessl,
+                skip_tessl=True if args.skip_tessl else None,
                 allow_tessl_project_save=args.allow_tessl_project_save,
                 tessl_live_private=args.tessl_live_private,
                 tessl_workspace=args.tessl_workspace,
@@ -806,7 +809,7 @@ def main():
                 repo_root,
                 path=args.path,
                 workspace=args.tessl_workspace,
-                dry_run=args.dry_run,
+                dry_run=not args.execute,
             )
         else:
             result = build_unknown_action_result(

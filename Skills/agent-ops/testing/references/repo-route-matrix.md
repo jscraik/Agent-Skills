@@ -24,6 +24,16 @@ Common routes:
 Use harness assurance layers for agent workflow, artifact, closeout, and
 governance changes.
 
+Focused regression examples:
+
+- `pnpm run test:related` for the repository-selected changed-file test lane.
+- `pnpm run test:related -- --grep closeout-receipt` when the repository's
+  current test runner supports that filter shape and the claim concerns
+  closeout-receipt rejection.
+
+Do not import these commands into another repository. Discover its package
+scripts and supported filter syntax first.
+
 ## agent-skills
 
 Common routes:

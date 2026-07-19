@@ -24,12 +24,14 @@ inputs:
   - merge_strategy
   - approval_posture
   - cli_auth_context
+  - heartbeat_target_identity
 outputs:
   - schema_version
   - capability
   - heartbeat_status_first
   - pr_inventory
   - heartbeat_status
+  - heartbeat_target_status
   - action_queue
   - recurring_finding_classes
   - waived_external_ci_ledger
@@ -37,6 +39,8 @@ outputs:
   - dirty_worktree_ledger
   - validation_surface_decisions
   - validation_evidence
+  - artifact_receipt_ledger
+  - per_pr_evidence_lane_matrix
   - url_first_merge_ledger
   - cleanup_ledger
   - decision_ready_blockers
@@ -107,7 +111,7 @@ quality_criteria:
       - durable_guardrail_or_blocker
       - guardrail_validation
     scoring:
-      "5": Every repeated class has a branded identity, normalized fingerprint, exact occurrence evidence, and the second occurrence is blocked from merge until a reusable guardrail is validated.
+      "5": Every repeated class has a branded identity, normalized fingerprint, exact occurrence evidence, and the second occurrence is blocked from merge until a reusable guardrail is validated; a blocked guardrail is never merge authority.
       "4": Repeated classes and guardrails are correct but one secondary provenance field is incomplete.
       "3": Repetition is noticed but root cause or guardrail proof is incomplete.
       "2": Similar findings are fixed independently without a recurrence decision.
@@ -123,6 +127,9 @@ evidence_requirements:
   - exact_command_or_tool_outcome_for_each_claim
   - url_first_pr_card_for_each_target_pr
   - stale_check_boundary_for_latest_head_sha
+  - check_run_head_event_and_pr_metadata_provenance
+  - heartbeat_target_refreshed_before_action
+  - producer_and_validator_worktree_for_receipt_artifacts
   - primary_worktree_dirty_closeout_validation_before_branch_movement
   - decision_ready_blocker_when_user_action_is_next
   - recurring_finding_classification_and_guardrail_proof
@@ -136,6 +143,9 @@ risks:
   - duplicate_automation
   - accidental_staging_of_unrelated_or_temp_material
   - sandbox_network_or_cache_misclassification
+  - stale_heartbeat_target
+  - stale_pr_metadata_event
+  - artifact_validator_worktree_mismatch
   - unsafe_branch_or_worktree_deletion
   - policy_override_without_approval
   - repeated_point_fixes_without_prevention
@@ -176,6 +186,9 @@ current_state_contract:
   - unresolved_review_threads
   - required_check_names_statuses_and_urls
   - heartbeat_id_status_and_stop_rule
+  - heartbeat_target_url_number_head_and_state
+  - required_check_head_event_and_metadata_provenance
+  - artifact_receipt_producer_validator_context
   - worktree_upstream_and_unique_commit_evidence_before_cleanup
 capability_selection:
   default_entrypoint: closeout-commander
@@ -258,6 +271,9 @@ validation:
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck
+  - heartbeat_target_refreshed_before_rotation
+  - current_head_and_metadata_provenance_before_source_patch
+  - artifact_receipt_context_checked_before_closeout_claim
   - branch_worktree_merge_proof
   - strict_skill_audit_for_skill_changes
 observability: "Report exact commands, tool outcomes, PR numbers, head SHAs, check names, thread status, blockers, and cleanup decisions."

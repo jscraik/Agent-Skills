@@ -51,6 +51,10 @@ these lanes separately when they matter:
    lint, test, and environment blockers separately from code findings.
 7. Close consumed child agents after their outputs are verified or their
    coverage gaps are recorded.
+8. Treat receipt roles and decisions as a closure ledger, not a flat success
+   stream. Worker/Scout/Governor receipts can prove bounded task progress;
+   `pass_with_*` retains a pending recheck; `blocked_*` and `requires_*` retain
+   a blocker; only a final Judge/PM `decision: complete` can close the goal.
 
 ## Output Shape
 

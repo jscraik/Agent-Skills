@@ -314,13 +314,9 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_handoff_readiness_receipt(payload)
 
-    def test_handoff_readiness_fixture_loads_through_dedicated_contract(self) -> None:
-        model = validate_handoff_readiness_receipt(_json(FIXTURE_DIR / "valid" / "handoff-readiness-receipt.json"))
-
-        self.assertEqual(model.model_config["extra"], "forbid")
-        self.assertTrue(model.model_config["strict"])
-        self.assertTrue(model.ready_for_live_tessl)
-        self.assertEqual([lane.id for lane in model.lanes], model.required_lanes)
+    def test_handoff_readiness_contract_rejects_legacy_partial_lane_receipt(self) -> None:
+        with self.assertRaises(ValidationError):
+            validate_handoff_readiness_receipt(_json(FIXTURE_DIR / "valid" / "handoff-readiness-receipt.json"))
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
@@ -343,6 +339,7 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             "decision": "pass",
             "passed": True,
             "promotion_eligible": None,
+            "case_count": 1,
             "blocked_cases": 0,
             "tier1_failures": 0,
             "tier2_findings": 0,

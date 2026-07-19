@@ -19,6 +19,7 @@ outputs:
   - "next safe action"
   - "validation evidence"
   - "truth lanes for local validation, generated artifacts, remote PR checks, review threads, tracker state, and merge readiness when closeout evidence is used"
+  - "receipt closure ledger that distinguishes task progress, pending external rechecks, and final goal-closure eligibility"
   - "MDX implementation notes artifact for governed implementation Worker lanes"
   - "XP operating artifacts: blackboard delta and slack policy for long-running continuation"
   - "receipts or repair proposal"
@@ -32,6 +33,8 @@ risks:
   - "native /goal objective can drift from the repo-visible board"
   - "native blocked and usage-limited stop states can be confused with ordinary validator or environment blockers"
   - "stale local collector or PR evidence can be mistaken for live delivery truth"
+  - "a Worker, Governor, or interim Judge/PM receipt can be mistaken for final goal-closure authority"
+  - "pass_with, blocked, or requires decisions can hide unfinished rechecks when their closure effect is implicit"
   - "implementation notes can drift from runtime truth when not enforced as a board artifact"
   - "goal tools may be unavailable for ephemeral or state-less turns even when source support exists"
   - "unscoped workers can edit outside the intended boundary"
@@ -83,8 +86,31 @@ output_contract:
     - "board_status"
     - "next_action"
     - "truth_lanes"
+    - "receipt_closure_ledger"
     - "validation_evidence"
     - "risks"
+receipt_closure_contract:
+  applies_when: "A board has receipts, task transitions, or any closeout claim."
+  required_fields_per_entry:
+    - "task_id"
+    - "receipt_id"
+    - "role"
+    - "decision"
+    - "evidence_refs_or_explicit_gap"
+    - "current_verifier_outcome_or_not_applicable"
+    - "pending_recheck_or_blocker"
+    - "closure_eligibility"
+  role_semantics:
+    scout: "Can establish discovery or recovery evidence; never closes the goal."
+    worker: "Can complete its scoped task when its task contract is met; never closes the goal."
+    governor: "Can reconcile the board and route recovery; never closes the goal."
+    judge_or_pm: "May close the goal only with final decision=complete, all required tasks accounted for, and current completion-contract verification evidence."
+  decision_semantics:
+    pass: "Task progress only unless the final Judge/PM closure criteria are also met."
+    pass_with_suffix: "Task progress with named pending recheck or remediation; goal closure is false until that item is resolved or explicitly classified nonblocking by the board completion contract."
+    blocked_or_requires_suffix: "Carry the named blocker or owner work forward; goal closure is false."
+    complete: "Eligible only for final Judge/PM closure after all board-required tasks and current verifier evidence are reconciled."
+  external_recheck_rule: "Keep external review, CI, tracker, and merge rechecks in their own truth lanes. A pending external recheck does not become local validation evidence and cannot be silently dropped from a closeout claim."
 review_mode_contract:
   trigger_phrases:
     - "check this prompt"
@@ -116,3 +142,22 @@ review_mode_contract:
     - "implementation edits"
 rollback_procedure: "Do not mutate implementation files during repair unless the active Worker task allows them; revert board-only changes if validation fails."
 observability: "Record exact command, outcome, and note for every verifier and guard."
+quality_criteria:
+  receipt_closure_truth:
+    purpose: "Keep bounded task progress, pending external rechecks, and final goal closure distinct."
+    observable_evidence:
+      - "receipt_closure_ledger"
+      - "receipt role and decision"
+      - "current verifier outcome"
+      - "pending recheck or blocker"
+      - "final Judge or PM decision=complete when closure is claimed"
+    scoring:
+      "5": "Every material receipt has a closure classification; final closure maps every board-required task and current verifier to the completion contract."
+      "3": "Receipt decisions are reported but task progress, rechecks, or final closure authority remain ambiguous."
+      "1": "A Worker, pass_with, or interim receipt is treated as implicit goal completion."
+evidence_requirements:
+  - "exact validator command and outcome before board-health claims"
+  - "receipt role, decision, task ID, and receipt ID for task-transition or closeout claims"
+  - "current verifier outcome or explicit not-applicable reason for closure candidates"
+  - "pending external rechecks retained in their matching truth lane"
+  - "final Judge or PM decision=complete plus completion-contract reconciliation before goal closure"

@@ -52,10 +52,16 @@ Also state that this is a prompt convention and Codex must read the file.
 11. If active task is Worker, enforce `allowed_files`, `verify`,
     `stop_if`, and the required MDX implementation notes artifact before
     implementation work continues.
-12. After task completion, append a receipt before selecting the next task.
+12. After task completion, append a receipt and update the receipt closure
+    ledger before selecting the next task. Keep task completion separate from
+    goal closure: Scout, Worker, and Governor receipts are never final closure;
+    `pass_with_*`, `blocked_*`, and `requires_*` decisions retain their named
+    recheck or blocker.
 13. For closeout, report local validation, generated artifacts, remote PR
     checks, review threads, tracker state, and merge readiness as separate truth
-    lanes when those surfaces are involved.
+    lanes when those surfaces are involved. Permit `decision: complete` only for
+    a final Judge or PM receipt that accounts for every board-required task,
+    pending recheck, and current verifier required by the completion contract.
 
 ## Doctor
 

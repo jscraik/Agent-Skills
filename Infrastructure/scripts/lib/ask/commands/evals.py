@@ -22,7 +22,7 @@ from ask.skills_sdk.tessl_eval_quality import (
     tessl_eval_quality_findings,
 )
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
-from ask.skills_sdk.handoff_readiness import default_handoff_readiness_path
+from ask.skills_sdk.handoff_readiness import build_candidate_identity, default_handoff_readiness_path
 from ask.skills_sdk.release_scenario_sets import (
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
@@ -485,6 +485,102 @@ def _write_tessl_live_submission_evidence(
     return str(submission_path.relative_to(repo_root))
 
 
+def _tessl_project_link_receipt_path(
+    repo_root: Path,
+    skill_path: str,
+    candidate: Mapping[str, str],
+) -> Path | None:
+    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
+    digest = candidate.get("candidate_digest")
+    if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+        return None
+    root = repo_root / ".harness" / "evidence" / "tessl-project-links"
+    if _path_has_symlink_component_under(root, repo_root):
+        return None
+    path = root / handle / f"{digest}.json"
+    try:
+        path.resolve(strict=False).relative_to(root.resolve(strict=False))
+    except ValueError:
+        return None
+    return path
+
+
+def _write_tessl_project_link_receipt(
+    repo_root: Path,
+    skill_path: str,
+    *,
+    workspace: str,
+    identity: Mapping[str, object],
+    project_link: Mapping[str, object],
+) -> str | None:
+    candidate = build_candidate_identity(repo_root, repo_root / skill_path)
+    path = _tessl_project_link_receipt_path(repo_root, skill_path, candidate)
+    if path is None:
+        return None
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        return None
+    payload = {
+        "schema_version": "skills-sdk.tessl-project-link.v1",
+        "status": "pass",
+        "workspace": workspace,
+        "project": identity.get("project"),
+        "candidate": candidate,
+        "action": project_link.get("action"),
+        "commands": project_link.get("commands", []),
+        "issued_at": _utc_now_iso(),
+        "purpose": "explicit_project_link_setup_before_live_eval",
+    }
+    try:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        descriptor = os.open(path, flags, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+    except OSError:
+        return None
+    return str(path.relative_to(repo_root))
+
+
+def _validate_tessl_project_link_receipt(
+    repo_root: Path,
+    skill_path: str,
+    workspace: str,
+    identity: Mapping[str, object],
+) -> dict[str, object]:
+    candidate = build_candidate_identity(repo_root, repo_root / skill_path)
+    path = _tessl_project_link_receipt_path(repo_root, skill_path, candidate)
+    if path is None or not path.is_file() or path.is_symlink():
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_validation",
+            "blocker": "Live Tessl requires a current explicit project-link receipt; the live evaluator does not repair, relink, update, or create Tessl projects.",
+            "receipt_path": str(path.relative_to(repo_root)) if path else None,
+        }
+    try:
+        parsed_payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        parsed_payload = None
+    payload = parsed_payload if isinstance(parsed_payload, dict) else None
+    expected_project = identity.get("project")
+    valid = (
+        isinstance(payload, dict)
+        and payload.get("schema_version") == "skills-sdk.tessl-project-link.v1"
+        and payload.get("status") == "pass"
+        and payload.get("workspace") == workspace
+        and payload.get("project") == expected_project
+        and payload.get("candidate") == candidate
+    )
+    return {
+        "status": "pass" if valid else "blocked",
+        "blocker_class": None if valid else "blocked_validation",
+        "blocker": None if valid else "Live Tessl requires a project-link receipt bound to the current source, scenarios, workspace, and project.",
+        "receipt_path": str(path.relative_to(repo_root)),
+    }
+
+
 def _tessl_live_evidence_file(repo_root: Path, skill_path: str, run_id: str, filename: str) -> Path | None:
     run_segment = _tessl_evidence_segment(run_id)
     if run_segment is None:
@@ -863,6 +959,11 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
         "pre_tessl_feedback_loop": {
             "required_order": [
+                "mechanical_validation",
+                "security_risk_modes",
+                "scenario_quality",
+                "scorer_quality",
+                "scorer_calibration",
                 "deterministic_local_gates",
                 "oss_local_internal_judge",
                 "patch_oss_local_failures",
@@ -875,11 +976,13 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             ],
             "deterministic_local_gates": [
                 "skills audit",
-                "sdk eval scenario-quality",
-                "sdk eval scorer-quality",
-                "sdk eval scorer-calibration",
                 "sdk eval regression-plan when prior Tessl or internal judge regressions exist",
             ],
+            "mechanical_validation": ["skills audit", "skills package verify"],
+            "security_risk_modes": ["sdk security risk-modes --preview"],
+            "scenario_quality": ["sdk eval scenario-quality --preview"],
+            "scorer_quality": ["sdk eval scorer-quality --preview"],
+            "scorer_calibration": ["sdk eval scorer-calibration --preview"],
             "internal_judge_sequence": [
                 {
                     "profile": "oss-local",
@@ -957,6 +1060,16 @@ def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
     )
 
 
+def _tessl_dry_run_admission(repo_root: Path, skill_path: str) -> dict:
+    from ask.skills_sdk.handoff_readiness import build_tessl_dry_run_admission  # noqa: PLC0415
+
+    return build_tessl_dry_run_admission(
+        repo_root,
+        source_path=repo_root / skill_path,
+        query=skill_path,
+    )
+
+
 def _tessl_scenario_generation_root_template() -> str:
     """Return the human-readable template for Tessl scenario-generation staging."""
     return str(Path(tempfile.gettempdir()) / "ask-tessl-scenario-generation" / "<skill-path>-<sha12>")
@@ -966,7 +1079,9 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
     """Return the repo's Tessl scenario-generation safety contract."""
     return {
         "enabled_by": "ask evals prepare-tessl-scenarios",
-        "purpose": "stage a target tile and install Tessl's public scenario-generation skill without installing Tessl state into the repo root",
+        "purpose": "stage a target tile and, only when explicitly requested, install Tessl's public scenario-generation skill without installing Tessl state into the repo root",
+        "default_mode": "staging_only",
+        "execution_requires": "--execute",
         "agent_must_generate_scenarios_after_prepare": True,
         "workspace_required": True,
         "workspace": workspace,
@@ -4031,12 +4146,31 @@ def prepare_tessl_scenario_generation(
     path: str,
     *,
     workspace: str | None,
-    dry_run: bool = False,
+    dry_run: bool = True,
 ) -> CallResult:
-    """Prepare a temp Tessl scenario-generation workspace for a skill."""
+    """Prepare a temp Tessl scenario-generation workspace for a skill.
+
+    Staging-only is the safe default. Callers must explicitly opt into the
+    Tessl tile install because that command can alter the staged project state.
+    """
     policy = _tessl_scenario_generation_policy(workspace)
     tool_spec = f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}"
     command_display = f"tessl install {tool_spec} --agent codex --yes"
+    if not dry_run and os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny":
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                "command": command_display,
+                "source_path": path,
+                "raw_output": "",
+                "raw_error": "",
+                "blocker": "Tessl project setup is blocked by the hermetic test effect policy; use --dry-run in test lanes.",
+                "blocker_class": "blocked_validation",
+                "policy": policy,
+            },
+            errors=[ErrorObject(code="ERR_VALIDATION", message="Tessl project setup is blocked by the hermetic test effect policy.")],
+        )
     try:
         normalized_workspace = _validate_tessl_workspace(workspace)
         staged_root = _stable_tessl_scenario_generation_parent(path)
@@ -4147,6 +4281,29 @@ def prepare_tessl_scenario_generation(
                 message=str(project_link.get("blocker") or "Tessl project link check failed."),
             )],
         )
+
+    project_link_receipt = _write_tessl_project_link_receipt(
+        repo_root,
+        path,
+        workspace=normalized_workspace,
+        identity=common["project_identity"],
+        project_link=project_link,
+    )
+    if project_link_receipt is None:
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                **common,
+                "command": command_display,
+                "raw_output": "",
+                "raw_error": "",
+                "blocker": "Tessl project link completed but a current project-link receipt could not be written.",
+                "blocker_class": "blocked_validation",
+            },
+            errors=[ErrorObject(code="ERR_VALIDATION", message="Tessl project link receipt could not be written.")],
+        )
+    common["project_link_receipt"] = project_link_receipt
 
     cmd = [tessl_path, "install", tool_spec, "--agent", "codex", "--yes"]
     tessl_env = dict(os.environ)
@@ -4279,6 +4436,23 @@ def _run_tessl_live_private_eval(
 ) -> dict:
     """Run or preview the opt-in private Tessl plugin eval lane."""
     command_display = "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
+    test_process_without_mock = (
+        os.environ.get("PYTEST_CURRENT_TEST")
+        and type(subprocess.run).__module__ != "unittest.mock"
+    )
+    if not dry_run and (test_process_without_mock or os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny"):
+        return {
+            "status": "blocked",
+            "command": command_display,
+            "source_path": path,
+            "raw_output": "",
+            "raw_error": "",
+            "blocker": "Tessl live evaluation is blocked by the hermetic test effect policy; pytest requires an in-process subprocess mock and provider submission requires a separately authorised operator process.",
+            "blocker_class": "blocked_validation",
+            "policy": _tessl_live_private_policy(workspace),
+            "live_private": True,
+            "dry_run": dry_run,
+        }
     try:
         normalized_workspace = _validate_tessl_workspace(workspace)
         staged_source, copied_files = _stage_tessl_live_private_source(repo_root, path, normalized_workspace)
@@ -4355,9 +4529,10 @@ def _run_tessl_live_private_eval(
             "blocker_class": "blocked_runtime",
         }
 
-    project_link = _ensure_tessl_project_link(
-        tessl_path,
-        staged_source,
+    project_link = _validate_tessl_project_link_receipt(
+        repo_root,
+        path,
+        normalized_workspace,
         common["project_identity"],
     )
     common["project_link"] = project_link
@@ -4594,164 +4769,6 @@ def _run_tessl_live_private_eval(
         "blocker": blocker,
         "blocker_class": blocker_class,
     }
-
-
-def _run_tessl_eval(
-    repo_root: Path,
-    path: str,
-    *,
-    allow_project_save: bool = False,
-    workspace: str | None = None,
-) -> dict:
-    """Run the local Tessl eval lane without any registry publish/upload command."""
-    _ = allow_project_save  # Compatibility flag retained; temp-staged local runs are default-safe.
-    tessl_path = shutil.which("tessl")
-    command_display = "tessl eval run --json <staged-temp-source>"
-    if not tessl_path:
-        return {
-            "status": "blocked",
-            "command": command_display,
-            "blocker": "Installed native tessl CLI was not found on PATH.",
-            "blocker_class": "blocked_runtime",
-            "policy": _tessl_policy(),
-        }
-
-    try:
-        normalized_workspace = _validate_tessl_workspace(workspace) if workspace else None
-        staged_source, copied_files = _stage_tessl_eval_source(repo_root, path, workspace=normalized_workspace)
-        project_identity = _tessl_project_identity((repo_root / path).resolve(), normalized_workspace)
-        project_link = _ensure_tessl_project_link(tessl_path, staged_source, project_identity)
-        if project_link.get("status") == "blocked":
-            return {
-                "status": "blocked",
-                "command": command_display,
-                "source_path": path,
-                "staged_source": str(staged_source),
-                "staged_files": copied_files,
-                "staging_policy": "stable_tmp_evidence",
-                "tessl_project_marker": str(staged_source / "tessl.json"),
-                "project_identity": project_identity,
-                "project_link": project_link,
-                "workspace": normalized_workspace,
-                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": project_link.get("blocker"),
-                "blocker_class": project_link.get("blocker_class"),
-                "policy": _tessl_policy(),
-            }
-        command_display = f"tessl eval run --json {staged_source}"
-        cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
-        tessl_env = dict(os.environ)
-        tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
-        try:
-            process = subprocess.run(
-                cmd,
-                cwd=str(staged_source),
-                capture_output=True,
-                text=True,
-                timeout=600,
-                env=tessl_env,
-            )
-        except subprocess.TimeoutExpired as e:
-            return {
-                "status": "blocked",
-                "command": command_display,
-                "source_path": path,
-                "staged_source": str(staged_source),
-                "staged_files": copied_files,
-                "staging_policy": "stable_tmp_evidence",
-                "tessl_project_marker": str(staged_source / "tessl.json"),
-                "project_identity": project_identity,
-                "project_link": project_link,
-                "workspace": normalized_workspace,
-                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
-                "raw_output": _as_text(e.stdout),
-                "raw_error": _as_text(e.stderr),
-                "blocker": "Tessl eval timed out after 600 seconds.",
-                "blocker_class": "blocked_runtime",
-                "policy": _tessl_policy(),
-            }
-        except OSError as e:
-            return {
-                "status": "blocked",
-                "command": command_display,
-                "source_path": path,
-                "staged_source": str(staged_source),
-                "staged_files": copied_files,
-                "staging_policy": "stable_tmp_evidence",
-                "tessl_project_marker": str(staged_source / "tessl.json"),
-                "project_identity": project_identity,
-                "project_link": project_link,
-                "workspace": normalized_workspace,
-                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
-                "raw_output": "",
-                "raw_error": str(e),
-                "blocker": f"Failed to run Tessl eval: {e}",
-                "blocker_class": "blocked_runtime",
-                "policy": _tessl_policy(),
-            }
-
-        raw_output = process.stdout
-        raw_error = process.stderr
-        auth_text = f"{raw_output}\n{raw_error}".lower()
-        if signal_blocker := _tessl_signal_blocker(process, lane="eval"):
-            status = "blocked"
-            blocker = signal_blocker
-            blocker_class = "blocked_runtime"
-        elif process.returncode != 0 and "authenticate with tessl" in auth_text:
-            status = "blocked"
-            blocker = "Tessl CLI is installed locally, but authentication is required before evals can run."
-            blocker_class = "blocked_auth"
-        elif process.returncode != 0 and "no existing project safely matches this directory" in auth_text:
-            status = "blocked"
-            blocker = (
-                "Tessl CLI is authenticated, but no Tessl project/workspace is linked for the "
-                "temp-staged eval directory. Create or link a Tessl project/workspace before rerunning."
-            )
-            blocker_class = "blocked_validation"
-        elif process.returncode != 0 and "no tessl project found" in auth_text:
-            status = "blocked"
-            blocker = "Tessl CLI could not find a tessl.json project marker in the staged eval directory."
-            blocker_class = "blocked_validation"
-        else:
-            status = "pass" if process.returncode == 0 else "fail"
-            blocker = None
-            blocker_class = None
-
-        return {
-            "status": status,
-            "command": command_display,
-            "source_path": path,
-            "staged_source": str(staged_source),
-            "staged_files": copied_files,
-            "staging_policy": "stable_tmp_evidence",
-            "tessl_project_marker": str(staged_source / "tessl.json"),
-            "project_identity": project_identity,
-            "project_link": project_link,
-            "workspace": normalized_workspace,
-            "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
-            "exit_code": process.returncode,
-            "raw_output": raw_output,
-            "raw_error": raw_error,
-            "blocker": blocker,
-            "blocker_class": blocker_class,
-            "policy": _tessl_policy(),
-        }
-    except (OSError, ValueError) as e:
-        blocker_class = "blocked_validation" if isinstance(e, FileNotFoundError) else "blocked_runtime"
-        if isinstance(e, ValueError):
-            blocker_class = "blocked_validation"
-        return {
-            "status": "blocked",
-            "command": command_display,
-            "source_path": path,
-            "raw_output": "",
-            "raw_error": str(e),
-            "blocker": f"Failed to stage Tessl eval source: {e}",
-            "blocker_class": blocker_class,
-            "policy": _tessl_policy(),
-        }
 
 
 def _repo_relative_text(repo_root: Path, text: str) -> str:
@@ -5899,8 +5916,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                     "status": "not_run_in_eval_only_dashboard",
                 },
                 "tessl_review": {
-                    "command": "./bin/ask skills external-review <path> --json --robot",
-                    "role": "local best-practice/content review for private or work-in-progress skills",
+                    "command": "./bin/ask skills external-review <path> --with-tessl-review --json --robot",
+                    "role": "explicitly requested model-backed content review for private or work-in-progress skills",
                     "status": "not_run_in_eval_only_dashboard",
                 },
                 "snyk": {
@@ -5928,7 +5945,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "status": "not_run",
                 "stdout": (
                     "Tessl review was not run for this eval-only dashboard. "
-                    "Run ./bin/ask skills external-review <path> --json --robot for the local best-practice review lane."
+                    "Run ./bin/ask skills external-review <path> --with-tessl-review --json --robot "
+                    "for the explicit content-review lane."
                 ),
             },
         },
@@ -5967,7 +5985,7 @@ def run_evals(
     mode: str = "smoke",
     dashboard: bool = True,
     runner: str = "codex",
-    skip_tessl: bool = False,
+    skip_tessl: bool | None = None,
     allow_tessl_project_save: bool = False,
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
@@ -5979,6 +5997,7 @@ def run_evals(
 ) -> CallResult:
     """Runs evaluation cases for a skill."""
     result = CallResult()
+    effective_skip_tessl = not tessl_live_private if skip_tessl is None else skip_tessl
     requested_path = path
     path = _resolve_eval_skill_path(repo_root, path)
     if path != requested_path:
@@ -5986,12 +6005,12 @@ def run_evals(
         result.data["resolved_skill_path"] = path
     effective_tessl_workspace = None
     tessl_workspace_source = None
-    if tessl_workspace:
-        try:
-            effective_tessl_workspace = _validate_tessl_workspace(tessl_workspace)
-            tessl_workspace_source = "argument"
-        except ValueError as e:
-            if not skip_tessl or tessl_live_private:
+    if tessl_live_private:
+        if tessl_workspace:
+            try:
+                effective_tessl_workspace = _validate_tessl_workspace(tessl_workspace)
+                tessl_workspace_source = "argument"
+            except ValueError as e:
                 result.status = "error"
                 result.data["raw_output"] = ""
                 result.data["raw_error"] = str(e)
@@ -6006,11 +6025,10 @@ def run_evals(
                 }
                 result.errors.append(ErrorObject(code="ERR_VALIDATION", message=str(e)))
                 return result
-    if not effective_tessl_workspace:
-        try:
-            effective_tessl_workspace, tessl_workspace_source = _default_tessl_workspace_from_env()
-        except ValueError as e:
-            if not skip_tessl or tessl_live_private:
+        if not effective_tessl_workspace:
+            try:
+                effective_tessl_workspace, tessl_workspace_source = _default_tessl_workspace_from_env()
+            except ValueError as e:
                 result.status = "error"
                 result.data["raw_output"] = ""
                 result.data["raw_error"] = str(e)
@@ -6025,24 +6043,22 @@ def run_evals(
                 }
                 result.errors.append(ErrorObject(code="ERR_VALIDATION", message=str(e)))
                 return result
-            effective_tessl_workspace = None
-            tessl_workspace_source = None
-    if tessl_live_private and not effective_tessl_workspace:
-        message = "Tessl live-private evals require --tessl-workspace <workspace> or an explicit Tessl workspace environment variable."
-        result.status = "error"
-        result.data["raw_output"] = ""
-        result.data["raw_error"] = message
-        result.data["eval_status"] = "blocked_validation"
-        result.data["blocker_class"] = "blocked_validation"
-        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
-        result.data["tessl_eval"] = {
-            "status": "blocked",
-            "blocker": message,
-            "blocker_class": "blocked_validation",
-            "workspace_source": "missing",
-        }
-        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message))
-        return result
+        if not effective_tessl_workspace:
+            message = "Tessl live-private evals require --tessl-workspace <workspace> or an explicit Tessl workspace environment variable."
+            result.status = "error"
+            result.data["raw_output"] = ""
+            result.data["raw_error"] = message
+            result.data["eval_status"] = "blocked_validation"
+            result.data["blocker_class"] = "blocked_validation"
+            result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+            result.data["tessl_eval"] = {
+                "status": "blocked",
+                "blocker": message,
+                "blocker_class": "blocked_validation",
+                "workspace_source": "missing",
+            }
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message))
+            return result
     result.data["tessl_workspace"] = effective_tessl_workspace
     result.data["tessl_workspace_source"] = tessl_workspace_source
     result.data["validation_commands"] = [
@@ -6090,6 +6106,43 @@ def run_evals(
         ))
         return result
 
+    if effective_skip_tessl and tessl_live_private:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = ""
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": "--skip-tessl cannot be combined with --tessl-live-private.",
+            "blocker_class": "blocked_validation",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="--skip-tessl cannot be combined with --tessl-live-private.",
+        ))
+        return result
+
+    if not effective_skip_tessl and not tessl_live_private:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = ""
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": "Direct Tessl eval submission is retired; use --tessl-live-private with the SDK handoff workflow.",
+            "blocker_class": "blocked_validation",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Direct Tessl eval submission is retired; use --tessl-live-private with the SDK handoff workflow.",
+            fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
+        ))
+        return result
+
     if tessl_live_private:
         _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
         result.status = "success"
@@ -6104,9 +6157,40 @@ def run_evals(
         if tessl_live_dry_run:
             result.data["tessl_dry_run_note"] = (
                 "Tessl live-private dry-run validates the staged private Tessl payload only. "
-                "Run without --tessl-live-dry-run only after deterministic local gates, oss-local, "
-                "oss-cloud, and this dry-run pass for the current candidate."
+                "It is blocked until the current mechanical, security, scenario/scorer, deterministic, "
+                "oss-local, oss-cloud, and Tessl-local receipts pass; a successful dry-run then becomes "
+                "required evidence for live scoring."
             )
+            dry_run_admission = _tessl_dry_run_admission(repo_root, path)
+            result.data["tessl_dry_run_admission"] = dry_run_admission
+            if not dry_run_admission.get("ready_for_tessl_dry_run"):
+                result.status = "error"
+                result.data["eval_status"] = "blocked_validation"
+                result.data["blocker_class"] = "blocked_validation"
+                result.data["tessl_eval_status"] = "blocked_validation"
+                result.data["tessl_blocker_class"] = "blocked_validation"
+                result.data["tessl_eval"] = {
+                    "status": "blocked",
+                    "blocker": dry_run_admission.get("agent_summary") or "Tessl dry-run admission is blocked",
+                    "blocker_class": "blocked_validation",
+                    "handoff_readiness_path": dry_run_admission.get("readiness_path"),
+                    "handoff_readiness_blockers": dry_run_admission.get("blockers", []),
+                    "required_next_actions": dry_run_admission.get("required_next_actions", []),
+                }
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Tessl live-private dry-run blocked: {result.data['tessl_eval']['blocker']}",
+                    fix_suggestion="Complete SDK pre-Tessl lanes and record their receipts before --tessl-live-dry-run.",
+                ))
+                _finish_eval_lifecycle(
+                    result,
+                    path=path,
+                    mode=mode,
+                    runner=runner,
+                    eval_status="blocked_validation",
+                    blocker_class="blocked_validation",
+                )
+                return result
         else:
             result.data["tessl_live_private_note"] = (
                 "Tessl live-private scoring uses the staged private Tessl payload directly. "
@@ -6347,27 +6431,19 @@ def run_evals(
         )
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=f"Failed to run evaluation: {e}"))
 
-    if skip_tessl:
+    if effective_skip_tessl:
         result.data["tessl_eval"] = {
             "status": "skipped",
-            "reason": "--skip-tessl",
+            "reason": "local_only_default" if skip_tessl is None else "--skip-tessl",
             "policy": _tessl_policy(),
         }
     else:
-        if tessl_live_private:
-            tessl_eval = _run_tessl_live_private_eval(
-                repo_root,
-                path,
-                workspace=effective_tessl_workspace,
-                dry_run=tessl_live_dry_run,
-            )
-        else:
-            tessl_eval = _run_tessl_eval(
-                repo_root,
-                path,
-                allow_project_save=allow_tessl_project_save,
-                workspace=effective_tessl_workspace,
-            )
+        tessl_eval = _run_tessl_live_private_eval(
+            repo_root,
+            path,
+            workspace=effective_tessl_workspace,
+            dry_run=tessl_live_dry_run,
+        )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
             tessl_status = str(tessl_eval.get("status") or "fail")

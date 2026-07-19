@@ -20,6 +20,11 @@ the older tile-first 2026-06-21 summary. Use it as source evidence, not as proof
 that the local Tessl CLI, auth, project link, review run, eval run, registry
 publish, or install policy currently passes.
 
+The raw Tessl commands below are vendor-reference material, not an execution
+route for Skills SDK work. Use the Skills SDK wrapper for project setup and
+live evaluation; live scoring requires its candidate-bound project-link receipt
+and must not repair, relink, update, or create a Tessl project.
+
 ## First Principles Gate
 
 ```yaml
@@ -201,9 +206,10 @@ tessl change verify --dry-run --all --show-files
 
 - Use plugin-first language by default. Use tile language only for migration,
   legacy package diagnosis, or current docs that explicitly mention tiles.
-- Before Tessl evals, verify or repair the project link. Use `project create`
-  for a new link, `project link` for an existing project, and `project repair`
-  when the link is stale, missing, wrong, or inaccessible.
+- Before Tessl evals, use the explicit Skills SDK project-setup wrapper rather
+  than the raw commands in this reference. Its project-link receipt is bound to
+  the current source and scenario candidate; live scoring blocks on a missing,
+  stale, or mismatched receipt.
 - For Skill Factory-owned plugin skills, project identity should resolve to the
   plugin project, for example `jscraik/skill-factory`, not a leaf skill project.
 - For review quality, prefer `tessl review run` over deprecated

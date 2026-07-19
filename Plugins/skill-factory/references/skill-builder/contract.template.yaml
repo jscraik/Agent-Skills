@@ -63,8 +63,8 @@ operator_contract:
     retry: "Retry transient tool/UI/action failures once when the retry is cheap and safe."
     stop: "Stop after bounded retry and report exact blocker, attempted fallback, and next step."
   validation_tiers:
-    fast: "strict skill audit plus SDK scenario-quality, scorer-quality, and scorer-calibration previews"
-    standard: "oss-local, oss-cloud, Tessl local-proof --execute, Tessl live-private dry-run, handoff-readiness, then external-review when earlier gates pass"
+    fast: "strict audit/package verification, security risk modes, and SDK scenario/scorer previews"
+    standard: "oss-local, oss-cloud, Tessl local-proof --execute, Tessl live-private dry-run, handoff-readiness, then local external-review when earlier gates pass; model-backed Tessl review requires explicit operator authorization"
     deep: "release, projection, security, benchmark, or cross-plugin checks only for broad/package-impacting changes"
   eval_evidence_contract:
     codex_profile: "oss-local and oss-cloud for proof; fast ([profiles.fast]) only for quick smoke checks"

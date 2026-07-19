@@ -2,7 +2,7 @@
 name: pr-green-sweep
 description: "Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, Context7, autofix, heartbeat, and branch/worktree pruning."
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
   skill-type: team_automation
   lifecycle_state: active
   maturity: experimental
@@ -57,9 +57,9 @@ Emit `schema_version: 1` with structured sweep outputs. Start non-trivial
 responses with `heartbeat_status`. Include an action queue
 with `auto_fixable_now`, `needs_merge_conflict_strategy`,
 `blocked_policy_or_approval`, `blocked_external_ci`, `waived_external_ci`,
-`needs_user_decision`, and `cleanup_only`; include dirty-worktree,
-validation, merge, cleanup, and remaining-blocker ledgers. Include a
-Include a
+`blocked_pr_metadata`, `blocked_artifact_context`, `needs_user_decision`, and
+`cleanup_only`; include heartbeat-target, dirty-worktree, validation,
+artifact-receipt, merge, cleanup, and remaining-blocker ledgers. Include a
 `recurring_finding_classes` ledger that groups materially equivalent review or
 CI findings across the active queue and records `finding_class_id`,
 `fingerprint_sha256`, `normalized_invariant`, `occurrences`, `root_cause`,
@@ -88,8 +88,10 @@ verification.
    state dirs for tools such as `mise`, `uv`, and `gh`.
 3. Discover the current repo's open PRs unless the user explicitly asks for a
    broader scope. Build URL-first PR cards with head SHA, mergeability, required
-   checks, review-thread status, CI status, and local branch/worktree ownership.
-4. Create, update, or reuse one heartbeat and record the stop rule: all target
+   checks, review-thread status, CI status, check-run head/event provenance, and
+   local branch/worktree ownership.
+4. Create, update, or reuse one heartbeat only after binding it to the current
+   target PR cards. Record the stop rule: all target
    PRs merged to `main`, cleanup completed, or a concrete blocker needs the user.
 5. Apply explicit user or repo-policy waivers before stop-rule evaluation. Put waived external
    checks in `waived_external_ci`; do not patch source for them and do not let
@@ -111,11 +113,20 @@ verification.
 8. Rotate through the ranked action queue one PR at a time.
 9. For unresolved review threads, fix actionable items, classify stale or blocked
    items, validate the source path, refresh live thread state, then resolve.
-10. For CI failures, read exact failed job logs, classify the owner surface, patch
-   the smallest proven cause, and rerun or wait for affected checks.
-11. Before merge, verify latest-head required checks, unresolved threads, branch
+10. For CI failures, read exact failed job logs and record the observed head SHA,
+    event/ref or payload identity, and relevant PR metadata contract before
+    patching source. If a check is stale relative to the current PR body or head,
+    classify `blocked_pr_metadata`, make the smallest metadata repair, and obtain
+    a fresh event. Otherwise classify the owner surface, patch the smallest
+    proven cause, and rerun or wait for affected checks.
+11. Before relying on a worker, PM, QA, report, or receipt artifact, record its
+    producer checkout/worktree, validator checkout/worktree, durable path or URL,
+    validator command, and visibility result. If the validator cannot resolve the
+    producer artifact, classify `blocked_artifact_context`; do not relabel it as
+    passing proof.
+12. Before merge, verify latest-head required checks, unresolved threads, branch
    protection, and mergeability from live GitHub state.
-12. Before claiming the parent PR/worktree lane is closed, or before switching
+13. Before claiming the parent PR/worktree lane is closed, or before switching
     the primary checkout to `main`, run
     `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json --require-clean`
     from the primary checkout. Use `--ledger <path>` without `--require-clean`
@@ -123,11 +134,12 @@ verification.
     not authorize branch movement. If the clean check fails, block checkout-main
     until the checkout is clean. Review-thread closeout does not prove
     primary-worktree closeout.
-13. After target PRs merge, checkout `main`, pull with repo policy, and prune
+14. After target PRs merge, checkout `main`, pull with repo policy, and prune
    branches/worktrees only with merge proof, upstream state, unique-commit
    evidence, and primary-worktree dirty-closeout proof.
-14. End with a compact ledger of PRs merged, checks passed, review items closed,
-    branches/worktrees pruned, blockers, and exact validation evidence.
+15. End with a per-PR state matrix: local proof, hosted checks, hosted review,
+    artifact receipts, merge authority, cleanup authority, blockers, and exact
+    validation evidence. A passing lane never infers another lane.
 
 ## Constraints
 
@@ -158,6 +170,10 @@ next safe action and keep the repair loop explicit:
   a proposed strategy before branch movement.
 - blocked_dirty_worktree: primary checkout dirt is not clean for branch
   movement, or not ledgered for non-destructive closeout accounting.
+- blocked_pr_metadata: the PR body, head, event payload, or check provenance is
+  stale relative to the claim and needs a metadata repair plus a fresh event.
+- blocked_artifact_context: the artifact producer and validator contexts do not
+  provide accessible, durable evidence for the claim.
 - needs_user_decision: approval, credentials, draft state, or policy choice is
   required before edits, push, merge, or cleanup.
 

@@ -85,6 +85,38 @@ five minutes.
 - Rate the document against accuracy, skimmability, first-run success, safety,
   and evidence quality before rewriting.
 
+## Public Trust-Surface Preflight
+
+For public READMEs, portfolio pages, articles, badges, and external-facing
+runbooks, factual correctness is necessary but not sufficient. Before rewrite
+or publication, verify:
+
+- every linked repository, package, document, artifact, and command is
+  accessible to the intended reader;
+- advertised setup does not depend on private packages, credentials, or
+  unpublished infrastructure unless the limitation is explicit;
+- the wording distinguishes private work, planned work, local proof, published
+  behavior, and externally verified readiness;
+- dynamic badges, follower counts, images, or third-party status surfaces fail
+  safely enough that a reader still understands the document; and
+- the nearest real rendered surface has been inspected when layout, badges,
+  screenshots, tables, or visual recognition affect trust.
+
+Prefer durable labels and static evidence over volatile counts. A working source
+file does not prove public access or stable rendering.
+
+## Documentation Supply Chain
+
+When a document crosses more than one surface, record the path before editing:
+
+`producer -> canonical authoring source -> generator or sync -> generated artifact -> registry or publication -> reader-visible result -> validator`
+
+Name which edges have direct evidence and which are blocked. Edit the canonical
+authoring source only. For generated docs, prove the round trip by running the
+owner's generator or sync, inspecting the output, and checking the nearest
+reader-visible result. For a new or untracked file, inspect it directly and use
+repository status; `git diff` alone may be empty.
+
 ## Visuals Should Explain Relationships
 
 Use visuals when they reduce cognitive load. Do not add decoration.
@@ -109,8 +141,10 @@ Keep the entrypoint small; do the detailed shaping here.
 - Search the active glossary before introducing domain language. Prefer
   `UBIQUITOUS_LANGUAGE.md`, then repo-local `UBIQUITOUS.md`,
   `UBIQUITOUS-MAP.md`, or `glossary*` files when present.
-- Build a Reader-State Map:
-  `concept -> prerequisite | introduced here | cited evidence | missing foundation`.
+- Build a Reader-State Map only when prerequisite complexity, mixed audiences,
+  public trust, or repeated onboarding failures make hidden assumptions a
+  material risk: `concept -> prerequisite | introduced here | cited evidence |
+  missing foundation`.
 - Draft or patch one block at a time. For each block, state what it does for
   the reader, what concepts it assumes, what it introduces, and which citation
   or evidence source supports it.
@@ -165,6 +199,12 @@ For substantial new documents, gather:
 Build the document section by section. Ask targeted questions for the current
 section, draft only the chosen content, and revise surgically instead of
 reprinting the whole document.
+
+For editorial-review requests such as “what do you think?”, start with a candid
+verdict, the strongest element, the central risk, and a revision direction.
+Rewrite only after the user asks. For public technical and DevRel writing, lead
+with the concrete work, artifact, decision, failure, or inspected result; use
+identity or style only when it changes the reader's understanding.
 
 ## Reader Testing Finds Hidden Assumptions
 

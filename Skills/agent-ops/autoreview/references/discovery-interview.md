@@ -1,6 +1,6 @@
 # Autoreview Discovery Interview
 
-Use this only when the review target, proof command, engine, or permission boundary is underspecified.
+Use this only when the review target, target checkout, proof command, engine, or permission boundary is underspecified.
 
 Ask one round at a time. Use a plain-language question, explain why this matters, and avoid dumping the whole interview plan at once.
 
@@ -10,15 +10,15 @@ Round 1 target question:
 
 What should this skill help you do?
 
-What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect?
+What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect, and which checkout or worktree owns that state?
 
-Why this matters: wrong target selection can review an empty diff, stale patch, or the wrong commit.
+Why this matters: wrong target or worktree selection can review an empty diff, stale patch, the wrong commit, or an artifact that cannot prove the owner checkout.
 
 ## Copy-paste payload examples
 
 Ambiguous target:
 
-What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect?
+What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect, and which checkout or worktree owns that state?
 
 Ambiguous proof:
 
@@ -36,9 +36,9 @@ Should the helper use its normal sandbox and approval posture, or should it requ
 
 What should this skill help you do?
 
-What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect?
+What exact local diff, branch, PR, commit ref, or review artifact should the structured review inspect, and which checkout or worktree owns that state?
 
-Why this matters: target mode changes the helper path and prevents reviewing an empty diff, stale patch, or wrong commit.
+Why this matters: target mode and owner checkout change the helper path and prevent reviewing an empty diff, stale patch, wrong commit, or inaccessible repair artifact.
 
 ## Round 2: Proof
 

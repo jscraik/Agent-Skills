@@ -237,8 +237,9 @@ separately before rerunning the same wrapper lane.
 
 `ask skills external-review` is the durable second-check entrypoint for the
 external-review ladder. It runs strict audit, local Plugin Eval, and native
-Tessl review by default. Treat `tessl skill review` path shape as the skill
-directory containing `SKILL.md`; Tessl plugin lint expects a staged package with
+Tessl package lint by default. Tessl content review is model-backed and requires
+the explicit `--with-tessl-review` switch. Treat `tessl skill review` path shape
+as the skill directory containing `SKILL.md`; Tessl plugin lint expects a staged package with
 `.tessl-plugin/plugin.json` and is not interchangeable. Plugin Eval is acceptable at `B+` or
 better when it has zero failures and the local/Tessl gates pass. Tessl review
 must meet the `95` threshold and must run through the wrapper, which preserves

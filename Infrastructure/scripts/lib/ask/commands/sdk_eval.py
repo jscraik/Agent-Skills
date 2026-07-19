@@ -51,7 +51,7 @@ def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argpa
     run.add_argument("--scenario-set", help="Named release scenario set from references/evals.yaml.")
     run.add_argument("--codex-profile", help="Override the Codex config profile for the internal eval runner.")
     run.add_argument("--timeout-seconds", type=_positive_int, help="Override the internal eval runner timeout.")
-    run.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
+    run.add_argument("--with-tessl", action="store_true", help="Deprecated compatibility flag; direct Tessl continuation is rejected. Use the guarded live-private handoff route.")
 
 
 def _add_shard_aggregate_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:

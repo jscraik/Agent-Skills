@@ -77,9 +77,11 @@ skill:
 
     ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot
 
-Use --dry-run first when proving the package shape:
+Staging-only is the default and does not install the scenario-generation tile.
+Use `--execute` only after the staged brief has been reviewed and the operator
+has explicitly authorized the temporary Tessl install:
 
-    ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --dry-run --json --robot
+    ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot
 
 The command writes a stable evidence directory:
 
@@ -180,6 +182,20 @@ Start with a dry run when proving shape:
 
     ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot
 
+The dry-run route is not a shortcut around the SDK sequence. Before it stages
+the payload, the shared admission check requires current receipts for
+mechanical validation, security risk modes, scenario quality, scorer quality,
+scorer calibration, deterministic local gates, `oss-local`, `oss-cloud`, and
+executed Tessl-local proof. Record the successful dry-run receipt, then run
+`sdk eval handoff-readiness --preview` before an actual live Tessl submission.
+
+Project setup is a separate, explicit side-effect lane. Run
+`./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot`
+only with operator authority. It records a candidate-bound
+`.harness/evidence/tessl-project-links/<skill>/<candidate-digest>.json` receipt.
+The live evaluator only reads that receipt; it never repairs, relinks, updates,
+or creates a Tessl project as a side effect of scoring.
+
 The wrapper stages a private plugin package under:
 
     /tmp/ask-tessl-evals/<skill-path>-<sha12>/
@@ -250,9 +266,11 @@ Tessl plugin evals attach to a Tessl project using that same
 link before running live evals, relink an existing project first, and create the
 project only when the relink path proves it does not already exist:
 
-    tessl project repair --workspace <workspace>
-    tessl project link --workspace <workspace>
-    tessl project create --workspace <workspace> <plugin-name>
+    ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot
+
+The raw Tessl project commands are vendor-reference material only. Do not run
+them directly from a live-eval lane: the wrapper's project-setup receipt is the
+required boundary between project mutation and scoring.
 
 ## Reading Results
 
