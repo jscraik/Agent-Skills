@@ -33,6 +33,9 @@ Current local setup status:
   `/mnt/data`; `PHOENIX_ALLOWED_SANDBOX_PROVIDERS=NONE`.
 - The Phoenix docs index was fetched to a temporary file for current page
   discovery.
+- The current container's original Compose file no longer exists, so the
+  repository-owned service definition is now
+  `Infrastructure/config/observability/compose.phoenix.yaml`.
 
 ## Product Decision
 
@@ -130,6 +133,47 @@ Phoenix mapping:
 | `status`, `blocker_class` | evaluation annotation | Keep `blocked` distinct from `fail`. |
 | `eval_closeout_path` / receipt path | span attribute | Phoenix points back to repo-owned evidence. |
 
+### Durable workstation service
+
+For a Mac Studio with an always-attached external SSD, keep the Compose contract
+in the repository and put only Phoenix's mutable SQLite working directory on
+the SSD. The Compose file requires the operator to name the mounted data root,
+so it cannot silently fall back to an internal-disk directory:
+
+```bash
+export ASK_PHOENIX_DATA_DIR=/Volumes/ExternalSSD/jamiecraik-codex-storage/phoenix/data
+test -d /Volumes/ExternalSSD || { echo "External SSD not mounted; terminate before proceeding"; exit 1; }
+mkdir -p "$ASK_PHOENIX_DATA_DIR"
+docker compose -f Infrastructure/config/observability/compose.phoenix.yaml config --quiet
+docker compose -f Infrastructure/config/observability/compose.phoenix.yaml up -d
+./bin/ask sdk observability phoenix-status --base-url http://localhost:6006 --json --robot
+```
+
+The service is pinned to the observed Phoenix `17.12.0` image digest, binds both ports to localhost, and
+disables external UI resources and Phoenix sandbox providers. If the SSD is not
+mounted, the required environment variable or bind mount must block startup;
+do not create the same path on the internal disk as a fallback.
+
+To migrate an existing Docker volume, stop the old container, copy while the
+SQLite database is quiescent, and keep the old volume intact until the new
+service reports the same trace count. The current source volume is
+`evals-phoenix_phoenix-data`; no migration command may remove it. A suitable
+copy shape is:
+
+```bash
+docker stop evals-phoenix-phoenix-1
+docker run --rm \
+  -v evals-phoenix_phoenix-data:/from:ro \
+  -v "$ASK_PHOENIX_DATA_DIR":/to \
+  alpine:3.20 sh -c 'cp -a /from/. /to/'
+docker compose -f Infrastructure/config/observability/compose.phoenix.yaml up -d
+./bin/ask sdk observability phoenix-status --base-url http://localhost:6006 --json --robot
+```
+
+Do not remove the stopped container or source volume during this verification
+window. If the SSD is ever disconnected, stop Phoenix before unmounting it to
+avoid SQLite corruption.
+
 ### Lane 2: Instrumented OSS Runner Spans
 
 Goal: emit one Phoenix trace around each internal eval run while preserving the
@@ -147,6 +191,18 @@ Trace shape:
 
 Hard rule: traces must not include raw prompts, secrets, local absolute paths,
 or full model outputs unless a separate redaction policy explicitly allows them.
+
+The v1 trace contract uses one immutable receipt digest as the trace ID seed.
+It emits nested profile-preflight, scenario-selection, scenario,
+deterministic-evaluator, generation, judge-score, and receipt-validation spans.
+For provider-backed work, `codex_profile` is accepted only when derived from an
+executed `codex exec --profile <lane>` argv. `execution_profile` continues to
+describe sandbox/write/approval constraints, while `judge_profile` describes
+the scoring configuration. Neither can satisfy the runtime-profile proof.
+
+Individual `oss-local` and `oss-cloud` evals are separate traces. An A/B packet
+is one comparison trace containing ordered `oss-local` then `oss-cloud`
+generation spans, allowing comparison without merging their lane truth.
 
 ### Lane 3: Phoenix Experiments For Compare/Trend
 
@@ -194,8 +250,8 @@ The mirror now enforces these deterministic guardrails before writing output:
 
 ## Next Integration Slices
 
-1. Add optional OTLP span emission to `sdk eval run` behind an explicit
-   environment flag such as `ASK_PHOENIX_TRACE=1`; default remains off.
+1. Validate the v1 nested OTLP trace path with a live deterministic eval by
+   setting `ASK_PHOENIX_EVAL_TRACE=1`; default remains off.
 2. Add a report command that prints lane-separated status:
    `sdk-mechanical`, `oss-local`, `oss-cloud`, `tessl-local`,
    `tessl-external`, and `phoenix-observed`.

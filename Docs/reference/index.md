@@ -12,5 +12,7 @@ Good reference topics for this repo:
 - Managed asset lifecycle defaults in [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md).
 - Skills SDK release-readiness scoring in
   [skills-sdk-gold-standard-rubric.md](/Docs/reference/skills-sdk-gold-standard-rubric.md).
+- Program-design rules and the changed-file enforcement ratchet in
+  [program-design-enforcement.md](/Docs/reference/program-design-enforcement.md).
 
 - Back to [Docs index](/Docs)

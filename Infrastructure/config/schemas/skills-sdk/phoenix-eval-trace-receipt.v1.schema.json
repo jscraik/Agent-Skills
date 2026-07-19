@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v1.schema.json",
+  "title": "Skills SDK Phoenix Eval Trace Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.phoenix-eval-trace-receipt.v1"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v1.schema.json"},
+    "status": {"type": "string", "enum": ["pass", "blocked"]},
+    "operation": {"type": "string", "const": "phoenix_eval_trace"},
+    "source_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "source_kind": {"type": "string", "enum": ["eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt", "unsupported_receipt"]},
+    "eval_status": {"type": ["string", "null"]},
+    "observability_status": {"type": "string", "enum": ["not_run", "emitted", "blocked"]},
+    "runner": {"type": ["string", "null"]},
+    "mode": {"type": ["string", "null"]},
+    "profile": {"type": ["string", "null"], "enum": ["oss-local", "oss-cloud", null]},
+    "profile_evidence": {
+      "type": "array",
+      "minItems": 0,
+      "items": {"$ref": "#/$defs/profile_evidence"}
+    },
+    "target_path": {"type": ["string", "null"]},
+    "package_id": {"type": ["string", "null"]},
+    "package_digest": {"type": ["string", "null"]},
+    "case_count": {"type": "integer", "minimum": 0},
+    "passed_count": {"type": "integer", "minimum": 0},
+    "failed_count": {"type": "integer", "minimum": 0},
+    "project_name": {"type": "string", "const": "agent-skills-skills-sdk-evals"},
+    "trace_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "root_span_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "span_plan": {
+      "type": "array",
+      "minItems": 0,
+      "items": {"$ref": "#/$defs/span_plan"}
+    },
+    "planned_span_count": {"type": "integer", "minimum": 0},
+    "emitted_span_count": {"type": "integer", "minimum": 0},
+    "case_span_trace_enabled": {"type": "boolean"},
+    "case_span_limit": {"type": "integer", "minimum": 0, "maximum": 20},
+    "case_span_count": {"type": "integer", "minimum": 0, "maximum": 20},
+    "enabled": {"type": "boolean"},
+    "emitted_spans": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/emitted_span"}
+    },
+    "checks": {"type": "array", "minItems": 0, "items": {"$ref": "#/$defs/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/$defs/check"}},
+    "mutation_performed": {"type": "boolean"},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "source_receipt_digest",
+    "source_kind",
+    "eval_status",
+    "observability_status",
+    "runner",
+    "mode",
+    "profile",
+    "profile_evidence",
+    "target_path",
+    "package_id",
+    "package_digest",
+    "case_count",
+    "passed_count",
+    "failed_count",
+    "project_name",
+    "trace_id",
+    "root_span_id",
+    "span_plan",
+    "planned_span_count",
+    "emitted_span_count",
+    "case_span_trace_enabled",
+    "case_span_limit",
+    "case_span_count",
+    "enabled",
+    "emitted_spans",
+    "checks",
+    "blockers",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "$defs": {
+    "profile_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lane": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocked", "not_applicable"]},
+        "derived_codex_profile": {"type": ["string", "null"], "enum": ["oss-local", "oss-cloud", null]},
+        "claimed_codex_profile": {"type": ["string", "null"]},
+        "argv_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+        "profile_flag_index": {"type": ["integer", "null"], "minimum": 2},
+        "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["lane", "status", "derived_codex_profile", "claimed_codex_profile", "argv_digest", "profile_flag_index", "blockers"]
+    },
+    "span_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "span_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+        "parent_span_id": {"type": ["string", "null"], "pattern": "^[0-9a-f]{16}$"},
+        "name": {"type": "string", "minLength": 1},
+        "span_kind": {"type": "string", "enum": ["CHAIN", "RETRIEVER", "LLM", "EVALUATOR"]},
+        "status": {"type": "string", "minLength": 1},
+        "attributes": {"type": "object", "additionalProperties": {"type": ["string", "integer", "number", "boolean"]}}
+      },
+      "required": ["span_id", "parent_span_id", "name", "span_kind", "status", "attributes"]
+    },
+    "emitted_span": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "span_name": {"type": "string", "minLength": 1},
+        "trace_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+        "span_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+        "parent_span_id": {"type": ["string", "null"], "pattern": "^[0-9a-f]{16}$"},
+        "command_name": {"type": "string", "minLength": 1},
+        "command_status": {"type": "string", "minLength": 1}
+      },
+      "required": ["span_name", "trace_id", "span_id", "parent_span_id", "command_name", "command_status"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "enum": ["info", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

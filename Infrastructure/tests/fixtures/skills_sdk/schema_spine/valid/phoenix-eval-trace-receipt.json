@@ -1,0 +1,149 @@
+{
+  "schema_version": "skills-sdk.phoenix-eval-trace-receipt.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/phoenix-eval-trace-receipt.v1.schema.json",
+  "status": "pass",
+  "operation": "phoenix_eval_trace",
+  "source_receipt_digest": "sha256:5a13f898206158e6872ebf5552c5aa07c9a1c061e436c4f6c7628af88ad9fe12",
+  "source_kind": "eval_run_receipt",
+  "eval_status": "pass",
+  "observability_status": "not_run",
+  "runner": "deterministic_jsonl_v0",
+  "mode": null,
+  "profile": null,
+  "profile_evidence": [
+    {
+      "lane": "deterministic-evaluator",
+      "status": "not_applicable",
+      "derived_codex_profile": null,
+      "claimed_codex_profile": null,
+      "argv_digest": null,
+      "profile_flag_index": null,
+      "blockers": []
+    }
+  ],
+  "target_path": null,
+  "package_id": "testing",
+  "package_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "case_count": 1,
+  "passed_count": 1,
+  "failed_count": 0,
+  "project_name": "agent-skills-skills-sdk-evals",
+  "trace_id": "5a13f898206158e6872ebf5552c5aa07",
+  "root_span_id": "8c267fb9c9623c48",
+  "span_plan": [
+    {
+      "span_id": "8c267fb9c9623c48",
+      "parent_span_id": null,
+      "name": "skills-sdk.eval",
+      "span_kind": "CHAIN",
+      "status": "pass",
+      "attributes": {
+        "skills_sdk.source_kind": "eval_run_receipt",
+        "skills_sdk.source_schema_version": "skills-sdk.eval-run-receipt.v0",
+        "skills_sdk.source_receipt_digest": "sha256:5a13f898206158e6872ebf5552c5aa07c9a1c061e436c4f6c7628af88ad9fe12",
+        "skills_sdk.eval_status": "pass",
+        "skills_sdk.runner": "deterministic_jsonl_v0",
+        "skills_sdk.package_id": "testing",
+        "skills_sdk.package_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "skills_sdk.dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "skills_sdk.case_count": 1,
+        "skills_sdk.passed_count": 1,
+        "skills_sdk.failed_count": 0,
+        "skills_sdk.redacted": true
+      }
+    },
+    {
+      "span_id": "89e9dbe794bd306a",
+      "parent_span_id": "8c267fb9c9623c48",
+      "name": "skills-sdk.eval.profile-preflight",
+      "span_kind": "CHAIN",
+      "status": "not_applicable",
+      "attributes": {
+        "skills_sdk.lane": "deterministic-evaluator",
+        "skills_sdk.blocker_count": 0
+      }
+    },
+    {
+      "span_id": "0d3179e674e2aae2",
+      "parent_span_id": "8c267fb9c9623c48",
+      "name": "skills-sdk.eval.scenario-selection",
+      "span_kind": "RETRIEVER",
+      "status": "pass",
+      "attributes": {
+        "skills_sdk.dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "skills_sdk.case_count": 1
+      }
+    },
+    {
+      "span_id": "7cc00b69219032e8",
+      "parent_span_id": "0d3179e674e2aae2",
+      "name": "skills-sdk.eval.scenario",
+      "span_kind": "CHAIN",
+      "status": "pass",
+      "attributes": {
+        "skills_sdk.case_id": "exact-summary",
+        "skills_sdk.case_index": 0,
+        "skills_sdk.case_status": "pass",
+        "skills_sdk.oracle": "exact_match"
+      }
+    },
+    {
+      "span_id": "fa6e50a536b838a5",
+      "parent_span_id": "7cc00b69219032e8",
+      "name": "skills-sdk.eval.deterministic-evaluator",
+      "span_kind": "EVALUATOR",
+      "status": "pass",
+      "attributes": {
+        "skills_sdk.case_id": "exact-summary",
+        "skills_sdk.expected_digest": "sha256:60f758d383e1f303ba9df5872172408af29240c0b4a03bc56f52f84ac0c82f31",
+        "skills_sdk.actual_digest": "sha256:60f758d383e1f303ba9df5872172408af29240c0b4a03bc56f52f84ac0c82f31"
+      }
+    },
+    {
+      "span_id": "79402163141c943f",
+      "parent_span_id": "8c267fb9c9623c48",
+      "name": "skills-sdk.eval.receipt-validation",
+      "span_kind": "EVALUATOR",
+      "status": "pass",
+      "attributes": {
+        "skills_sdk.source_receipt_digest": "sha256:5a13f898206158e6872ebf5552c5aa07c9a1c061e436c4f6c7628af88ad9fe12",
+        "skills_sdk.blocker_count": 0,
+        "skills_sdk.redacted": true
+      }
+    }
+  ],
+  "planned_span_count": 6,
+  "emitted_span_count": 0,
+  "case_span_trace_enabled": true,
+  "case_span_limit": 10,
+  "case_span_count": 1,
+  "enabled": false,
+  "emitted_spans": [],
+  "checks": [
+    {
+      "id": "source_kind_supported",
+      "status": "pass",
+      "severity": "info",
+      "message": "Phoenix eval tracing accepts eval-run, A/B run, and A/B judge-score receipts.",
+      "evidence": ["eval_run_receipt"]
+    },
+    {
+      "id": "eval_trace_redaction",
+      "status": "pass",
+      "severity": "info",
+      "message": "Eval trace receipts must not contain raw prompts, outputs, transcripts, tool calls, stdout, or stderr.",
+      "evidence": ["raw_keys_seen:0"]
+    },
+    {
+      "id": "codex_profile_argv_proof",
+      "status": "pass",
+      "severity": "info",
+      "message": "Provider-backed eval traces must derive each Codex runtime profile from the executed argv.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "acceptance_trace": ["phoenix-oss-eval-observability-workflow-2026-07-08", "PU-026"],
+  "agent_summary": "Phoenix eval observability is not_run; eval status remains pass."
+}

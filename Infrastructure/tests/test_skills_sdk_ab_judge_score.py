@@ -24,6 +24,7 @@ from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     _parse_judge_decision,
     _run_codex_judge,
     _score_evidence_paths,
+    _validate_judge_execution_argv,
     _write_text_evidence,
     build_ab_judge_score_receipt,
 )
@@ -32,7 +33,27 @@ from ask.skills_sdk import eval_ab_judge_codex as codex_judge  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
 
 
-RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json"
+RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+
+
+def _judge_result(
+    judge_profile: dict[str, object],
+    *,
+    stdout: str,
+    stderr: str = "",
+    exit_code: int = 0,
+    output_file: Path | None = None,
+) -> CodexJudgeResult:
+    executed_argv = (
+        _codex_judge_command(judge_profile, codex_judge._codex_judge_work_dir(output_file), output_file)
+        if output_file is not None else None
+    )
+    return CodexJudgeResult(
+        exit_code=exit_code,
+        stdout=stdout,
+        stderr=stderr,
+        executed_argv=executed_argv,
+    )
 
 
 def _decision(experiment_id: str) -> dict[str, object]:
@@ -109,16 +130,27 @@ def _run_codex_with_captured_subprocess(
     original_run = subprocess.run
     try:
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env" if profile_id == "oss-cloud" else None
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
             if op_env_file is not None:
-                op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\\n", encoding="utf-8")
+                os.mkfifo(op_env_file)
             Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
             env = {"ASK_CODEX_PROFILE_SOURCE_DIR": profile_dir, **(extra_env or {})}
             if op_env_file is not None:
                 env["ASK_CODEX_OP_ENV_FILE"] = str(op_env_file)
             subprocess.run = fake_run  # type: ignore[assignment]
             base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
-            with patch.dict(os.environ, {**base_env, **env}, clear=True):
+            op_patch = (
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op")
+                if op_env_file is not None
+                else patch.object(codex_judge, "_codex_op_bin", return_value=None)
+            )
+            with (
+                patch.dict(os.environ, {**base_env, **env}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+                op_patch,
+            ):
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
             return result, captured_command, captured_env, captured_profile_text, op_env_file
     finally:
@@ -126,6 +158,77 @@ def _run_codex_with_captured_subprocess(
 
 
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
+    def test_cloud_judge_rejects_fifo_outside_actual_codex_home(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as directory:
+            actual_home = Path(directory) / "actual-home"
+            other_home = Path(directory) / "other-home"
+            unapproved_stream = other_home / ".codex" / ".env"
+            unapproved_stream.parent.mkdir(parents=True)
+            os.mkfifo(unapproved_stream)
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(unapproved_stream)}, clear=False),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=actual_home),
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+            ):
+                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+                with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                    codex_judge._codex_judge_command(profile, Path(directory) / "work", Path(directory) / "last-message.json")
+
+    def test_cloud_judge_rejects_receipt_only_stream_marker(self) -> None:
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with (
+            patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
+            patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+        ):
+            self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                codex_judge._codex_judge_command(profile, Path("/private/tmp/work"), Path("/private/tmp/last-message.json"))
+
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
+    def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
+        command_tail = [
+            "--", "codex", "exec", "--profile", "oss-cloud",
+            "--ask-for-approval", "on-request", "-",
+        ]
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)
+        ):
+            env_dir = Path(directory) / ".codex"
+            env_dir.mkdir()
+            env_file = env_dir / ".env"
+            regular = ["op", "run", "--env-file", str(env_file), *command_tail]
+            env_file.write_text("opaque reference only", encoding="utf-8")
+            blockers: list[str] = []
+            result = CodexJudgeResult(0, "", "", executed_argv=regular)
+            evidence = {"command_argv": regular, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
+            env_file.unlink()
+            os.mkfifo(env_file)
+            fifo_argv = ["op", "run", "--env-file", str(env_file), *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=fifo_argv)
+            evidence = {"command_argv": fifo_argv, "codex_profile": "oss-cloud"}
+            self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
+            self.assertEqual(blockers, [])
+
+            receipt_marker = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=receipt_marker)
+            evidence = {"command_argv": receipt_marker, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
+            relative = ["evil/op", "run", "--env-file", str(env_file), *command_tail]
+            blockers = []
+            result = CodexJudgeResult(0, "", "", executed_argv=relative)
+            evidence = {"command_argv": relative, "codex_profile": "oss-cloud"}
+            self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
+            self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
+
     def setUp(self) -> None:
         self.evidence_root = ".harness/test-sdk-ab-judge-score"
         self._remove_evidence_root()
@@ -146,10 +249,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             calls.append((prompt, str(judge_profile["model"]), timeout_seconds))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(
-                exit_code=0,
+            return _judge_result(
+                judge_profile,
+                output_file=output_file,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
-                stderr="",
             )
 
         receipt = build_ab_judge_score_receipt(
@@ -191,7 +294,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         ) -> CodexJudgeResult:
             calls.append(str(judge_profile["codex_profile"]))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -213,6 +316,25 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("oss-local-code", receipt["judge_command_argv"])
         validate_ab_judge_score_receipt(receipt)
 
+    def test_judge_metadata_alone_cannot_prove_executed_profile(self) -> None:
+        invalid_argvs = [
+            ["codex", "exec", "--sandbox", "read-only", "--json", "-"],
+            ["codex", "exec", "--sandbox", "read-only", "--profile", "oss-local"],
+        ]
+        for invalid_argv in invalid_argvs:
+            with self.subTest(invalid_argv=invalid_argv), patch(
+                "ask.skills_sdk.eval_ab_judge._codex_judge_command", return_value=invalid_argv
+            ):
+                receipt = build_ab_judge_score_receipt(
+                    REPO_ROOT,
+                    run_receipt=RUN_RECEIPT,
+                    evidence_root=self.evidence_root,
+                    judge_profile_id="oss-local",
+                )
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertIn("judge_command_profile_missing_or_invalid", receipt["blockers"])
+            self.assertIsNone(receipt["codex_profile"])
+
     def test_codex_command_uses_large_transcript_model_settings(self) -> None:
         judge_profile = {
             "id": "oss-local-large-transcript",
@@ -227,6 +349,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         )
 
         self.assertEqual(result.exit_code, 0)
+        self.assertEqual(command[:4], ["codex", "exec", "--profile", "oss-local"])
         self.assertIn("--profile", command)
         self.assertEqual(command[command.index("--profile") + 1], "oss-local")
         self.assertIn("model_settings.num_ctx=16384", command)
@@ -253,12 +376,17 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         ) -> CodexJudgeResult:
             calls.append((prompt, str(judge_profile["id"])))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
-            op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
+            os.mkfifo(op_env_file)
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 receipt = build_ab_judge_score_receipt(
                     REPO_ROOT,
                     run_receipt=RUN_RECEIPT,
@@ -334,7 +462,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
     def test_builder_blocks_invalid_judge_output(self) -> None:
         def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
-            return CodexJudgeResult(exit_code=0, stdout="not json", stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout="not json")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -358,8 +486,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             output_file: Path,
         ) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(
-                exit_code=0,
+            return _judge_result(
+                judge_profile,
+                output_file=output_file,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
                 stderr="warning: Model metadata for qwen3.5:9b-mlx not found. Defaulting to fallback metadata.",
             )
@@ -385,10 +514,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             output_file: Path,
         ) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(
-                exit_code=0,
+            return _judge_result(
+                judge_profile,
+                output_file=output_file,
                 stdout="<think>hidden chain should not leak</think>\n" + json.dumps(_decision(run_receipt["experiment_id"])),
-                stderr="",
             )
 
         receipt = build_ab_judge_score_receipt(
@@ -417,11 +546,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 "item": {"id": "item_1", "type": "reasoning", "text": "structured telemetry"},
             })
             output_file.write_text(json.dumps(_decision(run_receipt["experiment_id"])), encoding="utf-8")
-            return CodexJudgeResult(
-                exit_code=0,
-                stdout=reasoning_event,
-                stderr="",
-            )
+            return _judge_result(judge_profile, output_file=output_file, stdout=reasoning_event)
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -449,7 +574,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 "usage": {"input_tokens": 8231, "output_tokens": 53, "reasoning_output_tokens": 0},
             })
             stdout = json.dumps(_decision(run_receipt["experiment_id"])) + "\n" + usage_event + "\n"
-            return CodexJudgeResult(exit_code=0, stdout=stdout, stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=stdout)
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -568,7 +693,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["unexpected"] = "blocked"
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -584,7 +709,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_typed_contract_rejects_decision_for_different_experiment(self) -> None:
         def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -600,7 +725,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_typed_contract_rejects_persisted_score_arithmetic_mismatch(self) -> None:
         def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(_decision(run_receipt["experiment_id"])))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -629,7 +754,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["winner"] = "skill_a"
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -647,7 +772,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["confidence"] = "low"
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -682,7 +807,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             decision["normalized_score_a"] = 0.20
             decision["normalized_score_b"] = 0.90
             decision["winner"] = "skill_b"
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -700,7 +825,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["normalized_score_a"] = math.nan
-            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return _judge_result(judge_profile, output_file=output_file, stdout=json.dumps(decision))
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -978,7 +1103,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
         self.assertTrue(captured_command[0].endswith("/op") or captured_command[0] == "op")
-        self.assertEqual(captured_command[1:5], ["run", "--env-file", str(op_env_file), "--"])
+        self.assertEqual(captured_command[1:3], ["run", "--env-file"])
+        self.assertRegex(captured_command[3], r"^/dev/fd/\d+$")
+        self.assertEqual(captured_command[4], "--")
         codex_segments = [captured_command[index:index + 4] for index in range(len(captured_command) - 3)]
         self.assertIn(["codex", "exec", "--profile", "oss-cloud"], codex_segments)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
@@ -990,9 +1117,14 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
 
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
-            op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
+            os.mkfifo(op_env_file)
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 command = _codex_judge_command(
                     {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
                     codex_judge._codex_judge_work_dir(output_file),
@@ -1006,6 +1138,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(
             command[9:],
             [
+                "--ask-for-approval",
+                "on-request",
                 "--cd",
                 str(codex_judge._codex_judge_work_dir(output_file)),
                 "--sandbox",
@@ -1026,20 +1160,43 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_file.write_text("", encoding="utf-8")
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
                 self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+
+    def test_cloud_judge_rejects_direct_codex_when_opaque_op_boundary_is_missing(self) -> None:
+        output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
+        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as profile_dir:
+            env_file = Path(profile_dir) / "codex.env"
+            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            with (
+                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}, clear=True),
+                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+            ):
+                with self.assertRaises(codex_judge.CodexProfileConfigError):
+                    _codex_judge_command(
+                        profile,
+                        codex_judge._codex_judge_work_dir(output_file),
+                        output_file,
+                    )
             env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
-                self.assertEqual(codex_judge._codex_op_env_file_path(profile), env_file)
+                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
         profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
-            op_env_file = Path(profile_dir) / "codex.env"
+            env_dir = Path(profile_dir) / ".codex"
+            env_dir.mkdir()
+            op_env_file = env_dir / ".env"
             os.mkfifo(op_env_file)
             env_patch = patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)})
             bin_patch = patch.object(codex_judge, "_codex_op_bin", return_value="/opt/homebrew/bin/op")
-            with env_patch, bin_patch:
+            with (
+                env_patch,
+                bin_patch,
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+            ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[1:5], ["run", "--env-file", str(op_env_file), "--"])
         self.assertEqual(command[5:9], ["codex", "exec", "--profile", "oss-cloud"])

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$SCRIPT_DIR/lib/secure-hook-cache.sh"
 if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else
@@ -20,7 +21,7 @@ if [[ ! -f "$REPO_ROOT/prek.toml" ]]; then
 	exit 1
 fi
 
-git_common_dir="$(git rev-parse --git-common-dir)"
+git_common_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
 if [[ "$git_common_dir" = /* ]]; then
 	git_hooks_dir="$git_common_dir/hooks"
 else
@@ -34,8 +35,20 @@ if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 		hook_tmp_dir="/tmp"
 	fi
 fi
-prek_home="${PREK_HOME:-$hook_tmp_dir/agent-skills-hook-cache/prek}"
-mkdir -p "$prek_home"
+if [[ -n "${CODEX_HOOK_CACHE_ROOT:-}" ]]; then
+	hook_cache_root="$CODEX_HOOK_CACHE_ROOT"
+else
+	hook_cache_root="$(new_hook_cache_root "$hook_tmp_dir")"
+fi
+prek_home="${PREK_HOME:-$hook_cache_root/prek}"
+hook_cache_root="$(validate_hook_cache_path "$hook_cache_root" "$REPO_ROOT" "$git_common_dir")"
+prek_home="$(validate_hook_cache_path "$prek_home" "$REPO_ROOT" "$git_common_dir")"
+if [[ "$prek_home" != "$hook_cache_root/prek" ]]; then
+	echo "[install-prek-hooks] PREK_HOME must equal CODEX_HOOK_CACHE_ROOT/prek" >&2
+	exit 1
+fi
+secure_hook_cache_dir "$hook_cache_root"
+secure_hook_cache_dir "$prek_home"
 
 echo "[install-prek-hooks] installing prek hooks"
 PREK_HOME="$prek_home" prek install --overwrite
@@ -48,20 +61,29 @@ patch_hook() {
 		exit 1
 	fi
 
-python3 - "$hook_path" <<'PY'
+python3 - "$hook_path" "$hook_cache_root" "$prek_home" <<'PY'
+import shlex
 import sys
 from pathlib import Path
 
 hook_path = Path(sys.argv[1])
+hook_cache_root = sys.argv[2]
+prek_home = sys.argv[3]
 text = hook_path.read_text(encoding="utf-8")
 start = "# agent-skills prek home begin"
 end = "# agent-skills prek home end"
 block = (
     f"{start}\n"
     "# Keep prek logs/cache outside Git metadata and the worktree.\n"
-    'export CODEX_HOOK_CACHE_ROOT="${CODEX_HOOK_CACHE_ROOT:-${TMPDIR:-/tmp}/agent-skills-hook-cache}"\n'
-    'export PREK_HOME="${PREK_HOME:-$CODEX_HOOK_CACHE_ROOT/prek}"\n'
-    'mkdir -p "$PREK_HOME"\n'
+    f"export CODEX_HOOK_CACHE_ROOT={shlex.quote(hook_cache_root)}\n"
+    'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"\n'
+    'AGENT_SKILLS_REPO_ROOT="$(git rev-parse --show-toplevel)"\n'
+    'AGENT_SKILLS_GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"\n'
+    'source "$AGENT_SKILLS_REPO_ROOT/Infrastructure/scripts/lib/secure-hook-cache.sh"\n'
+    'CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"\n'
+    'PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"\n'
+    'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"\n'
+    'secure_hook_cache_dir "$PREK_HOME"\n'
     f"{end}\n"
 )
 if start in text:

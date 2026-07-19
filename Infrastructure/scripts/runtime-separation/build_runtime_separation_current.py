@@ -14,6 +14,12 @@ from typing import Any
 
 # Sentinel return code for skipped commands to distinguish from executed-success
 SKIPPED_RETURN_CODE = 2
+PUBLIC_ASK_COMMAND: tuple[str, ...] = ("bin/ask",)
+
+
+def _public_ask_command(*args: str) -> list[str]:
+    """Build a public ask command that selects the repository's locked runtime."""
+    return [*PUBLIC_ASK_COMMAND, *args]
 
 
 def parse_args() -> argparse.Namespace:
@@ -405,7 +411,7 @@ def main() -> int:
 
     command_checks: dict[str, Any] = {}
 
-    rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "repo", "status", "--json"])
+    rc, payload, evidence = _run_json(repo_root, _public_ask_command("repo", "status", "--json"))
     command_checks["repo_status"] = _command_check(
         command="bin/ask repo status --json",
         subject_id="repo",
@@ -414,7 +420,7 @@ def main() -> int:
         evidence_ref=evidence,
     )
 
-    rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "skills", "list", "--json"])
+    rc, payload, evidence = _run_json(repo_root, _public_ask_command("skills", "list", "--json"))
     command_checks["skills_list"] = _command_check(
         command="bin/ask skills list --json",
         subject_id="skills",
@@ -423,7 +429,7 @@ def main() -> int:
         evidence_ref=evidence,
     )
 
-    rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "plugins", "doctor", "--json"])
+    rc, payload, evidence = _run_json(repo_root, _public_ask_command("plugins", "doctor", "--json"))
     command_checks["plugins_doctor"] = _command_check(
         command="bin/ask plugins doctor --json",
         subject_id="plugins",
@@ -440,7 +446,7 @@ def main() -> int:
     for plugin in plugin_targets:
         rc, payload, evidence = _run_json(
             repo_root,
-            ["Infrastructure/bin/ask", "plugins", "status", plugin, "--json"],
+            _public_ask_command("plugins", "status", plugin, "--json"),
         )
         plugins_status_checks[plugin] = _command_check(
             command=f"bin/ask plugins status {plugin} --json",
@@ -466,7 +472,7 @@ def main() -> int:
             evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
         )
     else:
-        rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "repo", "validate", "--json"])
+        rc, payload, evidence = _run_json(repo_root, _public_ask_command("repo", "validate", "--json"))
         command_checks["repo_validate"] = _command_check(
             command="bin/ask repo validate --json",
             subject_id="repo",
@@ -477,7 +483,7 @@ def main() -> int:
 
     rc, payload, evidence = _run_json(
         repo_root,
-        ["Infrastructure/bin/ask", "repo", "doctor-catalog", "--strict", "--json"],
+        _public_ask_command("repo", "doctor-catalog", "--strict", "--json"),
     )
     command_checks["repo_doctor_catalog"] = _command_check(
         command="bin/ask repo doctor-catalog --strict --json",
