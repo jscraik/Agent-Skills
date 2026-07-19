@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/pr-green-sweep/recurring-finding-ledger.v1.schema.json",
+  "title": "PR Green Sweep Recurring Finding Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "classes"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "classes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding_class"}
+    }
+  },
+  "$defs": {
+    "evidence_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(https://github\\.com/[^/]+/[^/]+/(pull|actions/runs)/[0-9]+|[^/].+:[0-9]+|[a-z][a-z0-9_-]*:[^\\s]+)$"
+    },
+    "occurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "pull_request", "evidence_ref"],
+      "properties": {
+        "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+        "pull_request": {"type": "integer", "minimum": 1},
+        "evidence_ref": {"$ref": "#/$defs/evidence_ref"}
+      }
+    },
+    "validation_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "status"],
+      "properties": {
+        "command": {"type": "string", "minLength": 1},
+        "status": {"const": "pass"}
+      }
+    },
+    "validated_guardrail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "artifact_ref", "validation_commands"],
+      "properties": {
+        "status": {"const": "validated"},
+        "artifact_ref": {"$ref": "#/$defs/evidence_ref"},
+        "validation_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/validation_command"}
+        }
+      }
+    },
+    "blocked_guardrail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "owner", "blocker_ref", "expires_at", "next_review_at"],
+      "properties": {
+        "status": {"const": "blocked"},
+        "owner": {"type": "string", "minLength": 1},
+        "blocker_ref": {"$ref": "#/$defs/evidence_ref"},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "next_review_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "finding_class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finding_class_id", "fingerprint_sha256", "normalized_invariant", "root_cause", "occurrences", "guardrail", "merge_eligible"],
+      "properties": {
+        "finding_class_id": {"type": "string", "pattern": "^finding_[a-z0-9]+(?:_[a-z0-9]+)*$"},
+        "fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "normalized_invariant": {"type": "string", "minLength": 1},
+        "root_cause": {"type": "string", "minLength": 1},
+        "occurrences": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/occurrence"}},
+        "guardrail": {"oneOf": [{"$ref": "#/$defs/validated_guardrail"}, {"$ref": "#/$defs/blocked_guardrail"}]},
+        "merge_eligible": {"type": "boolean"}
+      }
+    }
+  }
+}

@@ -26,6 +26,7 @@ inputs:
   - cli_auth_context
   - heartbeat_target_identity
 outputs:
+  - schema_version
   - capability
   - heartbeat_status_first
   - pr_inventory
@@ -110,7 +111,7 @@ quality_criteria:
       - durable_guardrail_or_blocker
       - guardrail_validation
     scoring:
-      "5": Every repeated class is grouped before edits and the second occurrence is blocked from merge until a reusable guardrail is validated or explicitly blocked.
+      "5": Every repeated class has a branded identity, normalized fingerprint, exact occurrence evidence, and the second occurrence is blocked from merge until a reusable guardrail is validated; a blocked guardrail is never merge authority.
       "4": Repeated classes and guardrails are correct but one secondary provenance field is incomplete.
       "3": Repetition is noticed but root cause or guardrail proof is incomplete.
       "2": Similar findings are fixed independently without a recurrence decision.
@@ -120,7 +121,8 @@ automatic_failure_conditions:
   - Stops the sweep on waived external CI while merge, review, draft, or cleanup lanes remain.
   - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
   - Treats resolved review threads, passing PR checks, or temp-worktree validation as proof that the primary checkout is safe to switch branches.
-  - Merges a second occurrence of the same review or CI finding class without validated durable-guardrail evidence or an explicit blocked_durable_guardrail classification.
+  - Merges a second occurrence of the same review or CI finding class without schema-valid executable durable-guardrail evidence.
+  - Treats a blocked_durable_guardrail classification as merge authority.
 evidence_requirements:
   - exact_command_or_tool_outcome_for_each_claim
   - url_first_pr_card_for_each_target_pr
@@ -131,6 +133,7 @@ evidence_requirements:
   - primary_worktree_dirty_closeout_validation_before_branch_movement
   - decision_ready_blocker_when_user_action_is_next
   - recurring_finding_classification_and_guardrail_proof
+  - recurring_finding_ledger_schema_and_verifier_pass
 risks:
   - stale_github_state
   - interesting_status_without_action
