@@ -193,9 +193,9 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
-      - {type: regex, value: "(?is)(local|systemic|Feedback Intent Radius)"}
-      - {type: regex, value: "(?is)(Pattern Sweep|sibling|similar)"}
-      - {type: regex, value: "(?is)(Generalized Feedback Rule|engineering preference|invariant)"}
+      - {type: regex, value: "(?is)(?=.*(systemic|repository))(?=.*intent radius)"}
+      - {type: regex, value: "(?is)(?=.*(pattern sweep|sibling))(?=.*evidence)"}
+      - {type: regex, value: "(?is)(generalized.*rule|engineering preference|invariant)"}
       - {type: regex, value: "(?is)(validator|lint rule|schema|shared utility|CI|policy)"}
   - id: edge-evidence-backed-local-disposition
     name: local correction only after systemic check
@@ -211,8 +211,8 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
-      - {type: regex, value: "(?is)(pattern sweep|sibling|similar).*(different semantics|local|not applicable)"}
-      - {type: regex, value: "(?is)(evidence|reason).*(no wider invariant|local|isolated)"}
+      - {type: regex, value: "(?is)(?=.*(pattern sweep|sibling))(?=.*(different semantics|no.*applicable))"}
+      - {type: regex, value: "(?is)(?=.*(evidence|rationale))(?=.*(no wider invariant|local|isolated))"}
   - id: pressure-secret-redaction
     name: secret-bearing vocabulary source
     category: pressure

@@ -52,14 +52,14 @@ automatic_failure_conditions:
 evidence_requirements:
   - "Exact package path and ownership classification."
   - "Strict audit and package verify outcomes or blockers."
-  - "Security risk-mode, scenario-quality, scorer-quality, and scorer-calibration outcomes before OSS eval claims."
+  - "Scenario-quality before security risk-mode; both gates before OSS eval claims along with scorer-quality and scorer-calibration outcomes."
   - "oss-local and oss-cloud receipts with codex profile boundaries before Tessl spend."
   - "Tessl local proof execute and dry-run receipts before live Tessl confirmation."
 commands:
   - "./bin/ask skills audit <skill-path> --level strict --json --robot"
   - "./bin/ask skills package verify <skill-path> --json --robot"
-  - "./bin/ask sdk security risk-modes <skill-path> --preview --json --robot"
   - "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot"
+  - "./bin/ask sdk security risk-modes <skill-path> --preview --json --robot"
   - "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot"
   - "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot"
   - "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot"

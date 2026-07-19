@@ -836,6 +836,20 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["external_review"]["status"], "blocked")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
+    def test_external_review_rejects_with_tessl_review_when_skip_tessl_enabled(self):
+        result = external_review_skill(
+            repo_root=repo_root,
+            skill_path="Skills/backend-platform/example-skill",
+            with_tessl_review=True,
+            skip_tessl=True,
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.data["external_review"]["status"], "blocked")
+        self.assertEqual(result.data["external_review"]["blocker_class"], "blocked_validation")
+        self.assertIn("--skip-tessl", result.data["external_review"]["blocker"])
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+
 
 if __name__ == "__main__":
     unittest.main()

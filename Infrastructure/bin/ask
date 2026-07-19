@@ -327,7 +327,7 @@ def main():
     evals_run_parser.add_argument("--profile", help="Override the Codex config profile for codex-runner scenario proof")
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
     evals_run_parser.add_argument("--timeout-seconds", type=int, help="Override the internal eval runner timeout")
-    evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Compatibility flag for an explicitly recorded local-only eval; Tessl is skipped by default")
+    evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Explicitly skip the local Tessl lane that runs by default; only use for documented outage, policy block, or intentionally scoped debug run")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
     evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")

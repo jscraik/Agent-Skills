@@ -99,6 +99,7 @@ Template:
     8. ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot
     9. ./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot
     10. ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
+    11. ./bin/ask skills external-review <skill-path> --json --robot
 
     Fail fast at the first failed gate. Treat oss-local as the 70-75 internal discovery band, oss-cloud as the path to >=90 internal success, and Tessl live as external confirmation at >=90 and >= baseline. Do not treat ./bin/ask evals run --runner codex, preview-only Tessl local proof, or a dry-run command string as handoff evidence.
 

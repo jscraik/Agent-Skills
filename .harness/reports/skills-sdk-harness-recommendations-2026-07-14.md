@@ -235,8 +235,8 @@ python3 Infrastructure/scripts/validation-and-linting/validate_sdk_runtime_lane_
 python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --json
 ```
 
-3. Upload or print concise JSON summaries.
-4. Keep the command-evidence replay lane manual until the basic gate is stable.
+1. Upload or print concise JSON summaries.
+2. Keep the command-evidence replay lane manual until the basic gate is stable.
 
 ## Later Tessl Integration
 

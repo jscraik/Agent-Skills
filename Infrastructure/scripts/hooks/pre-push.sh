@@ -14,8 +14,6 @@ cd "$REPO_ROOT"
 
 python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
 
-python3 Infrastructure/scripts/validation-and-linting/git_metadata_preflight.py --repo-root "$REPO_ROOT" --json
-
 changed_files_file="$(mktemp "$TMPDIR/agent-skills-pre-push.XXXXXX")"
 trap 'rm -f "$changed_files_file"' EXIT
 

@@ -100,7 +100,9 @@ Route checks:
 - eval-audit: scorecard plus eval files -> claim-to-case map -> pass when every
   claim maps to a case or named gap.
 - error-analysis: failing traces plus latest run command -> failure-mode table
-  with owner -> pass when one patched failure has rerun evidence.
+  with owner -> pass when every accepted failing trace in the table has an owner,
+  disposition, and rerun evidence; allow failures explicitly classified as rejected
+  or blocked; do not pass based on a single patched failure's rerun alone.
 - write-judge-prompt: criterion plus labels -> binary prompt with strict JSON
   -> pass when pass and fail labels produce expected verdicts.
 - validate-evaluator: scorer config plus held-out labeled probes -> calibration

@@ -20,10 +20,7 @@ the older tile-first 2026-06-21 summary. Use it as source evidence, not as proof
 that the local Tessl CLI, auth, project link, review run, eval run, registry
 publish, or install policy currently passes.
 
-The raw Tessl commands below are vendor-reference material, not an execution
-route for Skills SDK work. Use the Skills SDK wrapper for project setup and
-live evaluation; live scoring requires its candidate-bound project-link receipt
-and must not repair, relink, update, or create a Tessl project.
+The raw Tessl commands documented below (including `tessl project create`, `tessl project link`, `tessl project repair`) are non-executable vendor reference for understanding Tessl's project model. Do not invoke these raw project mutation commands directly. The Skills SDK wrapper controls all project setup and live evaluation; live scoring requires the wrapper's candidate-bound project-link receipt and must not repair, relink, update, or create a Tessl project outside the wrapper's governance.
 
 ## First Principles Gate
 

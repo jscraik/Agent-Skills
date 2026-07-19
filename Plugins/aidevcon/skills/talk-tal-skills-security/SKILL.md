@@ -54,6 +54,8 @@ Use this checklist shape:
 
 Use `unknown` when evidence is unavailable or insufficient; it is not a permissive result. End with `Adopt`, `Adopt with constraints`, or `Do not adopt yet`, plus the smallest remediation list. For every remediation, name the owner or scope, the change needed, and the existing check or evidence required. If no check exists, say so.
 
+Local finding status values (`present`, `gap`, `unknown`) map to checklist verdicts as follows: `present` with no control gap maps to `pass`; `gap` maps to `review` when remediable or `block` when safety-critical; `unknown` maps to `unknown` verdict. Do not use status and verdict values interchangeably.
+
 ## Review a Repository or Existing Skill
 
 When Tal's model is one lens in a repository review, return a compact crosswalk:
