@@ -18,12 +18,30 @@ class HandoffReadinessCheck(_HandoffReadinessModel):
 
 
 HandoffReadinessLaneId = Literal[
+    "mechanical_validation",
+    "security_risk_modes",
+    "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
     "deterministic_local_gates",
     "oss-local",
     "oss-cloud",
     "tessl-local-proof",
     "tessl-live-dry-run",
 ]
+
+REQUIRED_HANDOFF_LANE_IDS: tuple[HandoffReadinessLaneId, ...] = (
+    "mechanical_validation",
+    "security_risk_modes",
+    "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
+    "deterministic_local_gates",
+    "oss-local",
+    "oss-cloud",
+    "tessl-local-proof",
+    "tessl-live-dry-run",
+)
 
 
 class HandoffReadinessLane(_HandoffReadinessModel):
@@ -55,15 +73,22 @@ class HandoffReadinessTesslScoreSummary(_HandoffReadinessModel):
     scenario_count: int | None = Field(default=None, ge=0)
 
 
+class HandoffReadinessCandidate(_HandoffReadinessModel):
+    source_path: str = Field(min_length=1)
+    candidate_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+    scenario_set_digest: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class HandoffReadinessReceipt(_HandoffReadinessModel):
-    schema_version: Literal["skills-sdk.eval-handoff-readiness.v0"]
+    schema_version: Literal["skills-sdk.eval-handoff-readiness.v1"]
     schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v1.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["eval_handoff_readiness_preview"]
     query: str = Field(min_length=1)
     skill_path: str = Field(min_length=1)
+    candidate: HandoffReadinessCandidate
     readiness_path: str = Field(min_length=1)
     tessl_score_path: str | None = None
     tessl_score_summary: HandoffReadinessTesslScoreSummary | None = None
@@ -85,6 +110,8 @@ class HandoffReadinessReceipt(_HandoffReadinessModel):
         lane_ids = [lane.id for lane in self.lanes]
         if lane_ids != self.required_lanes:
             raise ValueError("lane order must match required_lanes")
+        if tuple(self.required_lanes) != REQUIRED_HANDOFF_LANE_IDS:
+            raise ValueError("required_lanes must include the complete current SDK handoff sequence")
         if self.status == "preview" and (self.blockers or not self.ready_for_live_tessl):
             raise ValueError("preview handoff readiness receipts must be ready and have no blockers")
         if self.status == "blocked" and self.ready_for_live_tessl:

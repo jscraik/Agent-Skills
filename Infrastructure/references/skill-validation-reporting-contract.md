@@ -68,13 +68,13 @@ for another:
 | local evals | `./bin/ask evals run <path> --mode smoke\|release --json --robot` | dynamic skill behavior, run traces, command/artifact expectations, and release-mode gates | static readability or Tessl best-practice score |
 | Plugin Eval | `Infrastructure/bin/plugin-eval analyze <path> --format markdown` or `./bin/ask skills external-review <path> --json --robot` | budget, ergonomics, reviewability, and obvious packaging risks | runtime behavior, trigger realism, Snyk dependency posture, or Tessl quality |
 | Tessl lint | `./bin/ask skills external-review <path> --json --robot` | Tessl tile package-shape compatibility for a stable staged local wrapper | direct content quality for the canonical `SKILL.md` source |
-| Tessl review | `./bin/ask skills external-review <path> --json --robot` | local best-practice/content review for a copied work-in-progress skill | publishing readiness or registry upload success |
+| Tessl review | `./bin/ask skills external-review <path> --with-tessl-review --json --robot` | explicitly requested model-backed content review for a copied work-in-progress skill | publishing readiness or registry upload success |
 | Snyk dependency screening | `./bin/ask skills external-review <path> --include-snyk --json --robot` or release eval `security_dependency_screening` artifact | high-severity dependency vulnerability screening for supported manifests | prompt/security-policy correctness for pure instruction-only skills |
 | OTel-inspired observability | optional local eval observability artifacts or repo-owned export evidence | trace correlation, debugging, dataset creation, and scorer workflow support | skill correctness, deterministic pass/fail, local artifact existence, Braintrust integration, or release readiness unless explicitly required |
 
 `ask skills external-review` is local-first despite the name. It runs internal
 strict audit plus local second-review tools, never invokes `npx`, and never
-publishes or uploads a skill. Snyk is the only lane that may contact an external
+publishes or uploads a skill. Snyk and the explicit `--with-tessl-review` lane may contact an external
 service, and it runs only when explicitly requested in local review or when the
 release-eval policy requires dependency screening for a manifest-backed
 candidate.

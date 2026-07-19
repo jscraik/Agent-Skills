@@ -16,7 +16,7 @@ Use this when hardening skill-factory output or explaining why a skill run is bl
 9. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace jscraik --execute --json --robot`.
 10. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`.
 11. Run `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot`.
-12. Next, execute `./bin/ask skills external-review <target> --audit-level compat --json --robot`.
+12. Next, execute `./bin/ask skills external-review <target> --audit-level compat --json --robot` for the local lint and Plugin Eval review. Add `--with-tessl-review` only when the operator explicitly authorizes the model-backed Tessl content-review lane.
 
 Stop at the first failed required gate unless the user explicitly asks for a full matrix.
 
@@ -35,7 +35,7 @@ The `oss-local` and `oss-cloud` lanes must use `codex exec --profile oss-local` 
 
 ## Tessl Eval Evidence
 
-Tessl live-private dry-run must use the installed local `tessl` CLI after the SDK deterministic and OSS proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-evals/<skill-path>-<sha12>` and leaves that directory in place for inspection.
+Tessl live-private dry-run must use the installed local `tessl` CLI only after the mechanical, security, scenario/scorer, deterministic, OSS, and Tessl-local proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-evals/<skill-path>-<sha12>` and leaves that directory in place for inspection.
 
 The improve-skill Tessl lane uses the product workspace `jscraik`.
 If an operator or older example supplies `skills-sdk`, `skills-sdk-lab`, or
@@ -60,7 +60,7 @@ Never run Tessl against the live repo source tree, and never use `npx tessl`, pu
 
 Plugin Eval is a budget and ergonomics guardrail. Grade `B+` or better with zero failures is acceptable when strict audit, evals, and Tessl gates pass.
 
-Tessl is the content quality gate. Tessl review must run through the repo wrapper with `--json --threshold 90`; scores below `90` block Tessl acceptance. Scores `95+` remain the improvement target, not the minimum acceptance floor.
+Tessl is an opt-in content quality gate. When the operator requests it, run the model-backed review through the repo wrapper with `--with-tessl-review --json --threshold 90`; scores below `90` block Tessl acceptance. Scores `95+` remain the improvement target, not the minimum acceptance floor.
 
 The Tessl review wrapper is preserved under `/tmp/ask-tessl-reviews/<skill-path>-<sha12>/current` with `.tessl-plugin/plugin.json`, `tessl.json`, copied skill files, and included references. Reruns archive the previous `current` directory under `evidence-archive/` before refreshing staged inputs.
 

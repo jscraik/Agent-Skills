@@ -8363,6 +8363,28 @@ def skills_sdk_eval_run(
     """Run SDK evals through deterministic JSONL or the internal skill-builder backend."""
     result = CallResult()
     result.metadata["command"] = "sdk eval run"
+    if not skip_tessl:
+        result.status = "error"
+        result.data["skills_sdk_eval_run"] = {
+            "schema_version": "skills-sdk-eval-run.v0",
+            "status": "blocked",
+            "dataset": dataset,
+            "target": target,
+            "runner": runner,
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [
+                "./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
+                "./bin/ask evals run <skill> --tessl-live-private --tessl-workspace <workspace> --json --robot",
+            ],
+            "agent_summary": "sdk eval run is local-only; direct Tessl continuation is retired in favor of the guarded live-private handoff route.",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="sdk eval run does not submit Tessl evals; use the guarded live-private handoff route.",
+            fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
+        ))
+        return result
     resolved_runner = "deterministic-jsonl" if runner == "auto" and dataset else runner
     if resolved_runner == "auto":
         resolved_runner = "internal"
@@ -10372,6 +10394,7 @@ def external_review_skill(
     audit_level: str = "strict",
     skip_plugin_eval: bool = False,
     skip_tessl: bool = False,
+    with_tessl_review: bool = False,
     skip_tessl_review: bool = False,
     include_snyk: bool = False,
     timeout_seconds: int = 180,
@@ -10382,12 +10405,25 @@ def external_review_skill(
     """Run the local-only second-review lane for one skill.
 
     This command intentionally never publishes or registers a skill. Tessl is
-    used only as an installed local CLI, never through npx. Tessl describes
-    ``skill review`` as a local terminal review for private and work-in-progress
-    skills, so it is part of the default second-review lane.
+    used only as an installed local CLI, never through npx. Content review is
+    opt-in because it can invoke an external model-backed review service; the
+    default lane keeps the deterministic local audit and package lint only.
     """
     result = CallResult()
     result.status = "success"
+
+    if with_tessl_review and skip_tessl_review:
+        result.status = "error"
+        result.data["external_review"] = {
+            "status": "blocked",
+            "blocker_class": "blocked_validation",
+            "blocker": "--with-tessl-review cannot be combined with --skip-tessl-review.",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="--with-tessl-review cannot be combined with --skip-tessl-review.",
+        ))
+        return result
 
     _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
     if path_error:
@@ -10410,10 +10446,10 @@ def external_review_skill(
         "no_registry_upload": True,
         "uses_npx": False,
         "publish_policy": "never publish, register, upload, or invoke npx from this lane",
-        "tessl_review_default": "enabled_local_cli",
-        "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+        "tessl_review_default": "disabled_requires_explicit_opt_in",
+        "tessl_review_privacy_basis": "Tessl content review may use an external model-backed service; invoke it only with --with-tessl-review.",
         "primary_gate": "local_eval_ask_audit",
-        "external_quality_judge": "tessl_local_review",
+        "external_quality_judge": "tessl_review_opt_in",
         "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
         "tessl_review_target_score": TESSL_REVIEW_TARGET_SCORE,
         "tessl_review_threshold_policy": (
@@ -10475,7 +10511,8 @@ def external_review_skill(
         },
         "tessl_review": {
             "command": f"tessl skill review --json --threshold {TESSL_REVIEW_MIN_SCORE} <stable-skill-directory>",
-            "role": "local best-practice/content review for private or work-in-progress skills",
+            "role": "explicitly requested external content review for private or work-in-progress skills",
+            "default": "disabled_requires_--with-tessl-review",
             "minimum_score": TESSL_REVIEW_MIN_SCORE,
             "target_score": TESSL_REVIEW_TARGET_SCORE,
             "publishes": False,
@@ -10502,6 +10539,8 @@ def external_review_skill(
         validation_args.append("--skip-plugin-eval")
     if skip_tessl:
         validation_args.append("--skip-tessl")
+    if with_tessl_review:
+        validation_args.append("--with-tessl-review")
     if skip_tessl_review:
         validation_args.append("--skip-tessl-review")
     if include_snyk:
@@ -10645,7 +10684,7 @@ def external_review_skill(
                     fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
                 ))
 
-            if not skip_tessl_review:
+            if with_tessl_review:
                 review_command = [
                     tessl_bin,
                     "skill",
@@ -10687,7 +10726,7 @@ def external_review_skill(
             else:
                 result.data["tessl_review"] = {
                     "status": "skipped",
-                    "reason": "Skipped by --skip-tessl-review.",
+                    "reason": "Disabled by default; pass --with-tessl-review to run model-backed Tessl content review.",
                     "minimum_score": TESSL_REVIEW_MIN_SCORE,
                     "target_score": TESSL_REVIEW_TARGET_SCORE,
                 }

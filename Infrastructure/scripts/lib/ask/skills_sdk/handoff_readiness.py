@@ -1,16 +1,24 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 
-HANDOFF_READINESS_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness.v0"
-HANDOFF_READINESS_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
-HANDOFF_READINESS_INPUT_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness-input.v1"
+HANDOFF_READINESS_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness.v1"
+HANDOFF_READINESS_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v1.schema.json"
+HANDOFF_READINESS_INPUT_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness-input.v2"
+HANDOFF_READINESS_MAX_AGE = timedelta(hours=24)
 
 REQUIRED_LANE_IDS = (
+    "mechanical_validation",
+    "security_risk_modes",
+    "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
     "deterministic_local_gates",
     "oss-local",
     "oss-cloud",
@@ -18,7 +26,14 @@ REQUIRED_LANE_IDS = (
     "tessl-live-dry-run",
 )
 
+PRE_TESSL_DRY_RUN_LANE_IDS = REQUIRED_LANE_IDS[:-1]
+
 REQUIRED_ORDER = (
+    "mechanical_validation",
+    "security_risk_modes",
+    "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
     "deterministic_local_gates",
     "oss-local",
     "patch_oss_local_failures",
@@ -57,6 +72,48 @@ def default_handoff_readiness_path(repo_root: Path, source_path: Path) -> Path:
 
 def default_tessl_score_path(repo_root: Path, source_path: Path) -> Path:
     return repo_root / ".harness" / "evidence" / "handoff" / _safe_slug(_skill_dir(source_path).name) / "tessl-score-preview.json"
+
+
+def build_candidate_identity(repo_root: Path, source_path: Path) -> dict[str, str]:
+    """Return deterministic source and scenario identities for a live handoff."""
+    skill_dir = _skill_dir(source_path)
+    source_digest = _tree_digest(skill_dir)
+    scenario_digest = _scenario_digest(skill_dir)
+    return {
+        "source_path": _repo_relative(repo_root, _skill_md(source_path)),
+        "candidate_digest": source_digest,
+        "scenario_set_digest": scenario_digest,
+    }
+
+
+def _tree_digest(root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(item for item in root.rglob("*") if item.is_file() and not item.is_symlink()):
+        relative = path.relative_to(root).as_posix()
+        if relative.startswith(("__pycache__/", ".harness/", ".agents/", ".codex/")):
+            continue
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _scenario_digest(skill_dir: Path) -> str:
+    digest = hashlib.sha256()
+    scenario_paths = [skill_dir / "references" / "evals.yaml"]
+    evals_dir = skill_dir / "references" / "evals"
+    if evals_dir.is_dir():
+        scenario_paths.extend(sorted(path for path in evals_dir.rglob("*") if path.is_file() and not path.is_symlink()))
+    for path in scenario_paths:
+        if not path.is_file():
+            continue
+        relative = path.relative_to(skill_dir).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _load_json_object(path: Path) -> tuple[dict[str, Any] | None, str | None]:
@@ -248,6 +305,12 @@ def _load_lane_receipt(repo_root: Path, lane_id: str, receipt_value: Any) -> dic
 def _lane_profile_semantics(lane_id: str, lane: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
     profile = _receipt_profile(payload)
     expected_profile = None
+    if lane_id == "mechanical_validation":
+        return _mechanical_validation_semantics(lane, payload, profile)
+    if lane_id == "security_risk_modes":
+        return _security_risk_modes_semantics(lane, payload, profile)
+    if lane_id in {"scenario_quality", "scorer_quality", "scorer_calibration"}:
+        return _sdk_quality_gate_semantics(lane_id, lane, payload, profile)
     if lane_id in {"oss-local", "oss-cloud"}:
         expected_profile = lane_id
         codex_exec_invoked = _receipt_codex_exec_invoked(payload)
@@ -262,6 +325,42 @@ def _lane_profile_semantics(lane_id: str, lane: dict[str, Any], payload: dict[st
     if lane_id == "tessl-local-proof":
         return _tessl_local_proof_semantics(lane, payload, profile)
     return {"ok": True, "profile": profile, "expected": expected_profile}
+
+
+def _mechanical_validation_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
+    command = str(lane.get("command") or "")
+    command_ok = "skills audit" in command and "package verify" in command
+    return {
+        "ok": command_ok,
+        "profile": profile,
+        "expected": "command records both strict skills audit and package verify",
+    }
+
+
+def _security_risk_modes_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
+    command = str(lane.get("command") or "")
+    command_ok = "sdk security risk-modes" in command and "--preview" in command
+    return {
+        "ok": command_ok,
+        "profile": profile,
+        "expected": "command records sdk security risk-modes --preview",
+    }
+
+
+def _sdk_quality_gate_semantics(
+    lane_id: str,
+    lane: dict[str, Any],
+    payload: dict[str, Any],
+    profile: str | None,
+) -> dict[str, Any]:
+    command = str(lane.get("command") or "")
+    expected_command = lane_id.replace("_", "-")
+    command_ok = f"sdk eval {expected_command}" in command and "--preview" in command
+    return {
+        "ok": command_ok,
+        "profile": profile,
+        "expected": f"command records sdk eval {expected_command} --preview",
+    }
 
 
 def _tessl_live_dry_run_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
@@ -410,7 +509,7 @@ def _effective_lane_blocker(lane: dict[str, Any] | None, blockers: list[dict[str
 
 
 def _readiness_checks(repo_root: Path, path: Path, payload: dict[str, Any] | None, error: str | None) -> list[dict[str, Any]]:
-    return [
+    checks = [
         _check(
             "readiness_artifact_present",
             "pass" if payload is not None and error is None else "blocker",
@@ -424,6 +523,109 @@ def _readiness_checks(repo_root: Path, path: Path, payload: dict[str, Any] | Non
             [str(payload.get("schema_version"))] if payload else [HANDOFF_READINESS_INPUT_SCHEMA_VERSION],
         ),
     ]
+    if payload is None:
+        return checks
+
+    candidate = payload.get("candidate")
+    checks.append(
+        _check(
+            "candidate_identity_present",
+            "pass" if isinstance(candidate, dict) else "blocker",
+            "A handoff artifact must bind every live lane to one candidate identity.",
+            ["candidate"] if isinstance(candidate, dict) else ["missing_candidate"],
+        )
+    )
+    issued_at = payload.get("issued_at")
+    checks.append(_candidate_timestamp_check(issued_at))
+    return checks
+
+
+def _candidate_timestamp_check(value: Any) -> dict[str, Any]:
+    if not isinstance(value, str):
+        return _check(
+            "candidate_identity_fresh",
+            "blocker",
+            "A handoff artifact must record an RFC3339 issued_at timestamp no older than 24 hours.",
+            ["missing_issued_at"],
+        )
+    try:
+        issued_at = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if issued_at.tzinfo is None:
+            raise ValueError("timestamp_has_no_timezone")
+    except ValueError:
+        return _check(
+            "candidate_identity_fresh",
+            "blocker",
+            "A handoff artifact must record an RFC3339 issued_at timestamp no older than 24 hours.",
+            [value],
+        )
+    fresh = datetime.now(UTC) - issued_at.astimezone(UTC) <= HANDOFF_READINESS_MAX_AGE
+    return _check(
+        "candidate_identity_fresh",
+        "pass" if fresh else "blocker",
+        "A handoff artifact must record an RFC3339 issued_at timestamp no older than 24 hours.",
+        [value],
+    )
+
+
+def _candidate_binding_checks(
+    repo_root: Path,
+    source_path: Path,
+    readiness_path: Path,
+    payload: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if payload is None:
+        return []
+    expected = build_candidate_identity(repo_root, source_path)
+    observed = payload.get("candidate")
+    candidate_matches = isinstance(observed, dict) and all(observed.get(key) == value for key, value in expected.items())
+    checks = [
+        _check(
+            "candidate_identity_matches_source",
+            "pass" if candidate_matches else "blocker",
+            "Live handoff evidence must match the current canonical skill source and scenario set.",
+            [json.dumps(observed, sort_keys=True) if isinstance(observed, dict) else "missing_candidate"],
+        )
+    ]
+    if not candidate_matches:
+        return checks
+
+    evidence_root = readiness_path.parent.resolve(strict=False)
+    for lane in payload.get("lanes", []):
+        if not isinstance(lane, dict) or lane.get("status") != "pass":
+            continue
+        lane_id = str(lane.get("id") or "unknown")
+        receipt_path = _resolve_evidence_path(repo_root, lane.get("receipt_path"))
+        path_ok = receipt_path is not None and receipt_path.is_file() and not receipt_path.is_symlink()
+        if path_ok:
+            try:
+                receipt_path.resolve(strict=True).relative_to(evidence_root)
+            except ValueError:
+                path_ok = False
+        checks.append(
+            _check(
+                "lane_receipt_confined_to_handoff_bundle",
+                "pass" if path_ok else "blocker",
+                "Passed lane receipts must be regular files within the handoff evidence bundle.",
+                [lane_id, _repo_relative(repo_root, receipt_path)] if receipt_path is not None else [lane_id],
+            )
+        )
+        if not path_ok or receipt_path is None:
+            continue
+        receipt, receipt_error = _load_json_object(receipt_path)
+        receipt_candidate = receipt.get("candidate") if receipt else None
+        receipt_matches = receipt_error is None and isinstance(receipt_candidate, dict) and all(
+            receipt_candidate.get(key) == value for key, value in expected.items()
+        )
+        checks.append(
+            _check(
+                "lane_receipt_candidate_matches_source",
+                "pass" if receipt_matches else "blocker",
+                "Passed lane receipts must carry the same candidate identity as their handoff artifact.",
+                [lane_id],
+            )
+        )
+    return checks
 
 
 def _next_actions(
@@ -674,6 +876,17 @@ def _lane_effective_status(lanes: list[dict[str, Any]], lane_id: str) -> str | N
 
 
 def _blocked_next_gates(lanes: list[dict[str, Any]], blockers: list[dict[str, Any]]) -> list[str]:
+    for lane_id in (
+        "mechanical_validation",
+        "security_risk_modes",
+        "scenario_quality",
+        "scorer_quality",
+        "scorer_calibration",
+        "deterministic_local_gates",
+    ):
+        if _lane_effective_status(lanes, lane_id) != "pass" or _lane_receipt_semantics_blocked(lanes, lane_id):
+            return ["oss-local", "oss-cloud", "tessl-dry-run", "tessl-live"]
+
     oss_local_status = _lane_effective_status(lanes, "oss-local")
     if oss_local_status != "pass" or _lane_receipt_semantics_blocked(lanes, "oss-local"):
         return ["oss-cloud", "tessl-dry-run", "tessl-live"]
@@ -691,7 +904,10 @@ def _blocked_next_gates(lanes: list[dict[str, Any]], blockers: list[dict[str, An
 
 def _agent_summary(blockers: list[dict[str, Any]], query: str) -> str:
     if blockers:
-        return f"Handoff readiness for {query} is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
+        return (
+            f"Handoff readiness for {query} is blocked: live Tessl requires current mechanical, security, "
+            "scenario/scorer, deterministic, oss-local, oss-cloud, Tessl-local, and Tessl dry-run evidence."
+        )
     return f"Handoff readiness for {query} is complete for live Tessl."
 
 
@@ -752,6 +968,7 @@ def _handoff_receipt(
         "operation": "eval_handoff_readiness_preview",
         "query": query,
         "skill_path": _repo_relative(repo_root, skill_path),
+        "candidate": build_candidate_identity(repo_root, skill_path),
         "readiness_path": _repo_relative(repo_root, readiness_path),
         "tessl_score_path": _repo_relative(repo_root, tessl_score_path) if tessl_score_path else None,
         "tessl_score_summary": _tessl_score_summary(tessl_score_receipt),
@@ -786,6 +1003,7 @@ def build_handoff_readiness_receipt(
     lanes = [_lane_row(repo_root, lane_id, lane_map.get(lane_id)) for lane_id in REQUIRED_LANE_IDS]
     tessl_score_receipt = _load_tessl_score_receipt(actual_tessl_score_path)
     checks = _handoff_checks(repo_root, actual_readiness_path, payload, error, lane_map, actual_tessl_score_path, tessl_score_receipt)
+    checks.extend(_candidate_binding_checks(repo_root, skill_path, actual_readiness_path, payload))
     blockers = _handoff_blockers(checks, lanes)
     return _handoff_receipt(
         repo_root,
@@ -798,3 +1016,47 @@ def build_handoff_readiness_receipt(
         checks=checks,
         blockers=blockers,
     )
+
+
+def build_tessl_dry_run_admission(
+    repo_root: Path,
+    *,
+    source_path: Path,
+    query: str,
+    readiness_path: Path | None = None,
+) -> dict[str, Any]:
+    """Check the preconditions for a non-scoring private Tessl dry-run.
+
+    The dry-run itself creates the final lane needed by live Tessl. It cannot
+    require that evidence recursively, but it must require every prior SDK
+    proof lane from the same handoff artifact.
+    """
+    actual_readiness_path = readiness_path or default_handoff_readiness_path(repo_root, source_path)
+    payload, error = _readiness_payload(actual_readiness_path)
+    lane_map = _lane_index(payload or {})
+    lanes = [
+        _lane_row(repo_root, lane_id, lane_map.get(lane_id))
+        for lane_id in PRE_TESSL_DRY_RUN_LANE_IDS
+    ]
+    checks = _readiness_checks(repo_root, actual_readiness_path, payload, error)
+    checks.extend(_candidate_binding_checks(repo_root, _skill_md(source_path), actual_readiness_path, payload))
+    blockers = _handoff_blockers(checks, lanes)
+    ready = not blockers
+    return {
+        "schema_version": HANDOFF_READINESS_SCHEMA_VERSION,
+        "operation": "eval_tessl_dry_run_admission",
+        "query": query,
+        "readiness_path": _repo_relative(repo_root, actual_readiness_path),
+        "required_lanes": list(PRE_TESSL_DRY_RUN_LANE_IDS),
+        "lanes": lanes,
+        "checks": checks,
+        "blockers": blockers,
+        "ready_for_tessl_dry_run": ready,
+        "required_next_actions": _next_actions(repo_root, blockers, actual_readiness_path, lanes),
+        "mutation_performed": False,
+        "agent_summary": (
+            f"Tessl dry-run admission for {query} is ready."
+            if ready
+            else f"Tessl dry-run admission for {query} is blocked: complete the mechanical, security, scenario/scorer, deterministic, OSS, and Tessl-local lanes first."
+        ),
+    }

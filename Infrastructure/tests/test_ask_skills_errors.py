@@ -158,6 +158,7 @@ class TestAskSkillsErrors(unittest.TestCase):
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")
+    @patch.dict("ask.commands.skills_impl.os.environ", {"TMPDIR": "/tmp/codex-test"}, clear=True)
     def test_audit_skill_strict_normalizes_skill_file_for_strict_gates(self, mock_run, _mock_python):
         mock_run.side_effect = [
             subprocess.CompletedProcess(args=[], returncode=0, stdout="diagnostics ok", stderr=""),
@@ -272,7 +273,7 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
     @patch("ask.commands.skills_impl.subprocess.run")
-    def test_external_review_runs_tessl_review_by_default(
+    def test_external_review_runs_tessl_review_only_when_explicitly_requested(
         self,
         mock_run,
         mock_which,
@@ -329,7 +330,11 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "success")
         self.assertTrue(result.data["policy"]["no_publish"])
@@ -490,7 +495,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                 subprocess.CompletedProcess(args=[], returncode=0, stdout="Review Score: 90%", stderr=""),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                include_snyk=True,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["snyk"]["status"], "blocked_missing_binary")
@@ -531,7 +541,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                include_snyk=True,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "success")
@@ -577,7 +592,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                include_snyk=True,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "not_applicable")
@@ -617,7 +637,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                include_snyk=True,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["snyk"]["status"], "advisory")
@@ -657,7 +682,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True)
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                include_snyk=True,
+                with_tessl_review=True,
+            )
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["snyk"]["status"], "blocked_auth")
@@ -751,9 +781,9 @@ class TestAskSkillsErrors(unittest.TestCase):
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
-    def test_external_review_can_skip_tessl_review(self, mock_which, mock_audit):
+    def test_external_review_skips_tessl_content_review_by_default(self, mock_which, mock_audit):
         """
-        Verify that external_review_skill skips the tessl review when skip_tessl_review is True.
+        Verify that external_review_skill skips Tessl content review unless it is explicitly requested.
         
         Sets up a minimal skill directory, fakes plugin binaries and a successful audit, and asserts:
         - overall result status is "success"
@@ -787,12 +817,24 @@ class TestAskSkillsErrors(unittest.TestCase):
                 result = external_review_skill(
                     repo_root=repo_root,
                     skill_path=skill_dir,
-                    skip_tessl_review=True,
                 )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["tessl_review"]["status"], "skipped")
+        self.assertIn("Disabled by default", result.data["tessl_review"]["reason"])
         self.assertEqual(mock_run.call_count, 2)
+
+    def test_external_review_rejects_conflicting_tessl_review_flags(self):
+        result = external_review_skill(
+            repo_root=repo_root,
+            skill_path="Skills/backend-platform/example-skill",
+            with_tessl_review=True,
+            skip_tessl_review=True,
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.data["external_review"]["status"], "blocked")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
 
 if __name__ == "__main__":

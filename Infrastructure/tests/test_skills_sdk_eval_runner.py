@@ -40,6 +40,22 @@ TECHNICAL_WRITER_RELEASE_8 = [
 ]
 
 class TestSkillsSdkEvalRunner(unittest.TestCase):
+    def test_sdk_internal_runner_rejects_legacy_tessl_continuation(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals") as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/testing",
+                mode="smoke",
+                skip_tessl=False,
+            )
+
+        self.assertEqual(result.status, "error")
+        payload = result.data["skills_sdk_eval_run"]
+        self.assertEqual(payload["status"], "blocked")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertIn("does not submit Tessl", result.errors[0].message)
+        run.assert_not_called()
+
     def test_runner_passes_exact_match_jsonl_dataset(self) -> None:
         payload = run_deterministic_eval(REPO_ROOT, dataset=PASS_DATASET)
         model = validate_eval_run_receipt(payload)

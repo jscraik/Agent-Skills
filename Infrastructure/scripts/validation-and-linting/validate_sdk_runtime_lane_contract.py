@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[3]
 CONTRACT_PATH = ROOT / "Docs/agents/25-sdk-runtime-lane-contract.md"
 README_PATH = ROOT / "Docs/agents/README.md"
 VALIDATION_PATH = ROOT / "Docs/agents/04-validation.md"
+EVALS_PATH = ROOT / "Infrastructure/scripts/lib/ask/commands/evals.py"
 
 REQUIRED_LANES = {
     "SDK mechanical validation": [
@@ -34,16 +35,18 @@ REQUIRED_LANES = {
     ],
     "Tessl local flow": [
         "./bin/ask evals run <skill-path> --mode smoke or release --json --robot",
-        "./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --dry-run --json --robot",
+        "./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot",
+        "requires `--execute` for a temporary Tessl install",
         "/tmp/ask-tessl-*",
     ],
     "Tessl external flow": [
+        "./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot",
         "./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot",
         "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot",
         "tessl eval view --json",
         "Foundry package id",
         "private Tessl package id",
-        "project repair/link/create",
+        "candidate-bound project-link receipt",
     ],
 }
 
@@ -86,9 +89,8 @@ REQUIRED_PIPELINE_PHRASES = [
     "## First-Time Tessl Workspace Setup",
     "tessl install tessl-labs/tile-creator sharaf/migrate-to-tessl --agent codex --agent agents",
     "Do not use `pnpx tessl i ...` for SDK runtime lanes",
-    "tessl project repair --json",
-    "tessl project repair --relink --workspace <workspace> --project <name> --yes",
-    "tessl project create <name> --workspace <workspace>",
+    "candidate-bound project-link receipt",
+    "The live evaluator never repairs, relinks, updates, or creates a project.",
     "Do not run `tessl plugin publish`",
     "registry upload commands in runtime-lane proof",
     "staged-package lint",
@@ -257,8 +259,25 @@ def _validate_index_links() -> list[Finding]:
     return findings
 
 
+def _validate_external_effect_routes() -> list[Finding]:
+    findings: list[Finding] = []
+    source = _read(EVALS_PATH)
+    start = source.find("def _run_tessl_live_private_eval(")
+    end = source.find("\ndef ", start + 1) if start >= 0 else -1
+    live_body = source[start:end] if start >= 0 and end >= 0 else ""
+    if not live_body:
+        findings.append(Finding("missing_live_tessl_route", "Live Tessl evaluator source is missing or unreadable.", _relative(EVALS_PATH)))
+    elif "_ensure_tessl_project_link(" in live_body:
+        findings.append(Finding("live_eval_mutates_project", "Live Tessl evaluator must consume a receipt, not repair, relink, update, or create a Tessl project.", _relative(EVALS_PATH)))
+    elif "_validate_tessl_project_link_receipt(" not in live_body:
+        findings.append(Finding("missing_project_link_receipt_gate", "Live Tessl evaluator must require a candidate-bound project-link receipt.", _relative(EVALS_PATH)))
+    if "PYTEST_CURRENT_TEST" not in live_body or "unittest.mock" not in live_body or "ASK_ALLOW_TEST_TESSL_LIVE" in live_body:
+        findings.append(Finding("missing_hermetic_test_firewall", "Live Tessl evaluator must block pytest provider effects unless subprocess is an in-process mock, without a test-only opt-in escape hatch.", _relative(EVALS_PATH)))
+    return findings
+
+
 def validate() -> list[Finding]:
-    return [*_validate_contract(), *_validate_index_links()]
+    return [*_validate_contract(), *_validate_index_links(), *_validate_external_effect_routes()]
 
 
 def main() -> int:

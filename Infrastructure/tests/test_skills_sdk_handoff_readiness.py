@@ -6,18 +6,30 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import UTC, datetime
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: E402
+from ask.skills_sdk.handoff_readiness import build_candidate_identity, build_handoff_readiness_receipt  # noqa: E402
 from ask.skills_sdk.handoff_readiness_contracts import validate_handoff_readiness_receipt  # noqa: E402
 
 
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
-REQUIRED_LANES = ("deterministic_local_gates", "oss-local", "oss-cloud", "tessl-local-proof", "tessl-live-dry-run")
+REQUIRED_LANES = (
+    "mechanical_validation",
+    "security_risk_modes",
+    "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
+    "deterministic_local_gates",
+    "oss-local",
+    "oss-cloud",
+    "tessl-local-proof",
+    "tessl-live-dry-run",
+)
 
 
 def _command_env() -> dict[str, str]:
@@ -72,7 +84,15 @@ def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
 
 def _readiness_lane_command(lane_id: str) -> str:
     commands = {
-        "deterministic_local_gates": "./bin/ask skills package verify Skills/example --json --robot",
+        "mechanical_validation": (
+            "./bin/ask skills audit Skills/example --level strict --json --robot && "
+            "./bin/ask skills package verify Skills/example --json --robot"
+        ),
+        "security_risk_modes": "./bin/ask sdk security risk-modes Skills/example --preview --json --robot",
+        "scenario_quality": "./bin/ask sdk eval scenario-quality Skills/example --preview --json --robot",
+        "scorer_quality": "./bin/ask sdk eval scorer-quality Skills/example --preview --json --robot",
+        "scorer_calibration": "./bin/ask sdk eval scorer-calibration Skills/example --preview --json --robot",
+        "deterministic_local_gates": "./bin/ask sdk eval run Skills/example --runner internal --mode smoke --json --robot",
         "oss-local": (
             "./bin/ask sdk eval run Skills/example --runner internal "
             "--mode smoke --codex-profile oss-local --json --robot"
@@ -94,10 +114,13 @@ def _readiness_lane_command(lane_id: str) -> str:
 
 
 def _write_readiness_bundle(temp_dir: Path, *, status: str = "pass") -> Path:
+    candidate = build_candidate_identity(REPO_ROOT, REPO_ROOT / FIXTURE_SKILL)
     lanes = []
     for lane_id in REQUIRED_LANES:
         receipt_path = temp_dir / f"{lane_id}.json"
-        receipt_path.write_text(json.dumps(_readiness_receipt_payload(lane_id)) + "\n", encoding="utf-8")
+        receipt_payload = _readiness_receipt_payload(lane_id)
+        receipt_payload["candidate"] = candidate
+        receipt_path.write_text(json.dumps(receipt_payload) + "\n", encoding="utf-8")
         lanes.append({
             "id": lane_id,
             "status": status,
@@ -107,8 +130,9 @@ def _write_readiness_bundle(temp_dir: Path, *, status: str = "pass") -> Path:
     readiness_path = temp_dir / "eval-handoff-readiness.json"
     readiness_path.write_text(
         json.dumps({
-            "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
-            "candidate_id": "fixture-candidate",
+            "schema_version": "skills-sdk.eval-handoff-readiness-input.v2",
+            "candidate": candidate,
+            "issued_at": datetime.now(UTC).isoformat(),
             "lanes": lanes,
         }),
         encoding="utf-8",
@@ -315,6 +339,7 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
                 (temp_path / f"{lane_id}.json").write_text(
                     json.dumps({
                         "status": "pass",
+                        "candidate": build_candidate_identity(REPO_ROOT, REPO_ROOT / FIXTURE_SKILL),
                         "codex_profile": lane_id,
                         "codex_exec_invoked": True,
                         "case_count": 20,
@@ -375,6 +400,49 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         payload = envelope["data"]["skills_sdk_eval_handoff_readiness"]
         self.assertEqual(payload["status"], "preview")
         self.assertTrue(payload["ready_for_live_tessl"])
+
+    def test_handoff_readiness_blocks_missing_mechanical_lane_before_oss(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            payload = json.loads(readiness_path.read_text(encoding="utf-8"))
+            payload["lanes"] = [
+                lane for lane in payload["lanes"] if lane["id"] != "mechanical_validation"
+            ]
+            readiness_path.write_text(json.dumps(payload), encoding="utf-8")
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertIn("lane_present", {blocker["id"] for blocker in receipt["blockers"]})
+        self.assertEqual(receipt["blocked_next_gates"], ["oss-local", "oss-cloud", "tessl-dry-run", "tessl-live"])
+
+    def test_handoff_readiness_blocks_quality_lane_without_preview_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            payload = json.loads(readiness_path.read_text(encoding="utf-8"))
+            for lane in payload["lanes"]:
+                if lane["id"] == "scorer_calibration":
+                    lane["command"] = "./bin/ask sdk eval scorer-calibration Skills/example --json --robot"
+            readiness_path.write_text(json.dumps(payload), encoding="utf-8")
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
+        self.assertTrue(semantic_blockers)
+        self.assertIn("expected=command records sdk eval scorer-calibration --preview", semantic_blockers[0]["evidence"])
 
     def test_handoff_readiness_blocks_wrong_oss_profile_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -444,6 +512,7 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
             oss_local_receipt.write_text(
                 json.dumps({
                     "status": "success",
+                    "candidate": build_candidate_identity(REPO_ROOT, REPO_ROOT / FIXTURE_SKILL),
                     "data": {
                         "skills_sdk_eval_run": {
                             "receipt": {
@@ -614,6 +683,24 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertIn("before oss-cloud", receipt["required_next_actions"][0])
         self.assertIn("do not run live Tessl", receipt["required_next_actions"][0])
         validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_blocks_candidate_digest_after_source_change(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            payload = json.loads(readiness_path.read_text(encoding="utf-8"))
+            payload["candidate"]["candidate_digest"] = "0" * 64
+            readiness_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("candidate_identity_matches_source", {item["id"] for item in receipt["blockers"]})
 
     def test_handoff_readiness_blocks_placeholder_lane_commands(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

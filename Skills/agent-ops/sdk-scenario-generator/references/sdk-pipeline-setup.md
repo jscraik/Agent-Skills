@@ -34,10 +34,12 @@ Keep these lanes separate:
 - Tessl local proof: `./bin/ask sdk eval tessl-local-proof --skill <skill-path>
   --workspace <workspace> --execute --json --robot`. Preview receipts do not
   satisfy the live handoff lane.
-- Tessl scenario preparation: `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`.
+- Tessl scenario preparation is staging-only by default: `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`. Add `--execute` only after the operator explicitly authorizes the temporary Tessl install.
 - Tessl dry-run staging: `./bin/ask evals run <skill-path> --mode smoke --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot`.
-  Handoff readiness must verify both the command flag and a receipt payload with
-  `tessl_eval.dry_run=true`.
+  Before staging, the command requires current mechanical validation, security
+  risk-mode, scenario/scorer, deterministic, `oss-local`, `oss-cloud`, and
+  Tessl-local proof receipts. Handoff readiness then verifies both the command
+  flag and a receipt payload with `tessl_eval.dry_run=true` before live scoring.
 - Live Tessl scoring: only after scenario count, scenario quality, run-budget,
   dry-run, scenario-source gates, and any prior Tessl feedback-loop obligations
   are closed.
