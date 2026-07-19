@@ -311,7 +311,7 @@ check_matches_validation_scope() {
       ;;
     audit)
       case "$slug" in
-        skill-catalog|plugin-shadowing|provider-policy|repo-surface-inventory|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
+        ci-validation-toolchain|skill-catalog|plugin-shadowing|provider-policy|repo-surface-inventory|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
           return 0
           ;;
       esac
@@ -370,7 +370,7 @@ should_run_check() {
     steering-uptake)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_steering" -eq 1 ]]
       ;;
-    verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|selection-gate-severity)
+    ci-validation-toolchain|verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|selection-gate-severity)
       [[ "$scope_has_validation_core" -eq 1 ]]
       ;;
     repo-surface-inventory)
@@ -670,6 +670,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     case "$changed_file" in
       Infrastructure/scripts/validate_all.sh|\
       Infrastructure/bin/ask|\
+      .github/workflows/pr-pipeline.yml|\
       Infrastructure/scripts/lib/ask/*|\
       Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py|\
       Infrastructure/scripts/validation-and-linting/*)
@@ -705,6 +706,7 @@ fi
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
 schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
+schedule_check required ci-validation-toolchain "🧰 Verifying PR validation job toolchains..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_pr_pipeline_toolchain.py --json
 schedule_check required no-command-handles "🧭 Verifying command-handle guidance is retired..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_command_handles.py
 schedule_check required repo-surface-inventory "🧭 Enforcing repo surface ownership..." "${repo_surface_inventory_cmd[@]}"
 schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .

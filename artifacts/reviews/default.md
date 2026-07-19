@@ -52,3 +52,108 @@ Command: `XDG_CACHE_HOME=/private/tmp/codex-xdg-cache XDG_STATE_HOME=/private/tm
 This is local deterministic contract evidence only. It does not prove hosted review-thread state, current CI, mergeability, provider availability, cloud credential validity, actual Codex execution, a provider-backed eval/judge result, or release readiness.
 
 WROTE: artifacts/reviews/default.md
+
+---
+
+# JSC-468 CI Repair Adversarial Review
+
+schema_version: adversarial-ci-review/v1
+status: changes_requested
+agent_id: 019f7b91-c82b-7a12-a6fe-5d8938afa0df
+mode: read_only
+
+## Scope
+
+Reviewed the in-progress CI repair for the `audit`, `check`, and `lint` PR
+failures. I inspected the current candidate diff, the previously proposed
+single-commit CI remedy `140ca1b6c`, the maintained validation router, and the
+canonical manifest generator. I made no source, workflow, skill, Git, hosted,
+package-manager, or external-eval mutation.
+
+## Findings
+
+### P1 — New regression test is not in a CI-owned execution path
+
+`Infrastructure/tests/test_pr_pipeline_validation_dependencies.py` is a useful
+unit test, but no PR job currently selects it. `scripts/validate_all_impl.sh`
+limits `--scope=test` to `skill-lifecycle-tests`, `skill-authoring-family`,
+`skill-graph-profiles`, and `gotcha-store` (lines 305-310). The only selected
+pytest targets in
+`Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_impl.sh`
+are enumerated at lines 584-598, and this file is absent. The test therefore
+does not ratchet a future removal of `uv` from the workflow.
+
+Minimal remediation: add this exact test to a maintained CI test command, or
+move the assertion into an existing validator that `audit`/`check` already run.
+Prove both the direct test and its canonical CI-owned caller path.
+
+### P2 — Test accepts unsafe ordering and an unspecified Python runtime
+
+`_uses_python_setup` in
+`Infrastructure/tests/test_pr_pipeline_validation_dependencies.py:32-37` only
+checks for an `actions/setup-python` action, while `_installs_uv` at lines 40-46
+only checks that some step contains `uv`. Neither asserts a `python-version:
+"3.12"` nor that setup and installation precede the `repo validate` step. A
+workflow that installs `uv` after validation, or uses Python 3.11, would pass
+the test even though `Infrastructure/pyproject.toml:5` and
+`Infrastructure/uv.lock:3` require `>=3.12`.
+
+Minimal remediation: derive step indexes and assert, per scope, pinned Python
+3.12 setup < uv install < validation command.
+
+### P2 — Added CI tool version bypasses the repository tool pin
+
+The candidate uses `python -m pip install --upgrade pip uv pyyaml pytest
+jsonschema` in `.github/workflows/pr-pipeline.yml:538` and `:555`.
+`.mise.toml:5` declares the repository's `uv` version as `0.11.3`; the new
+unqualified `uv` install can change independently of the repo tool contract.
+This is not a root package-manager contract, but it is a CI toolchain
+reproducibility and supply-chain drift risk.
+
+Minimal remediation: install the repository-approved `uv` version (or a
+SHA-pinned `setup-uv` action admitted by the existing action-pinning policy),
+then update the test to assert the chosen mechanism.
+
+### P3 — Two unrelated heading-level edits should be removed
+
+The progressive-disclosure repair requires `## Gotchas`; it does not require
+changing `### Anti-Patterns`. The candidate also promotes that heading in
+`Skills/agent-ops/improve-codebase-architecture/SKILL.md:116` and
+`Skills/agent-ops/testing/SKILL.md:129`. Both strict package audits pass, so
+this is not a correctness blocker, but restoring the two headings to their
+original nesting keeps the approved repair minimal.
+
+### Confirmed non-finding — Full manifest rewrite is generator-owned
+
+The manifest change is broad because each row records `source_revision`.
+`Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py:113-122`
+writes every root manifest and the generated rows now bind to the current
+candidate revision. The repository explicitly identifies manifests as generated
+and forbids hand edits in
+`Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md:912`.
+Retain the complete generator output after reviewing it; do not trim it to the
+two edited skills.
+
+## Evidence
+
+Command: `git show --format= 140ca1b6c | git apply --check --verbose` -> pass (the proposed CI commit applies cleanly to the current workflow surface)
+
+Command: `bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_pr_pipeline_validation_dependencies.py --disable-warnings --maxfail=1` -> pass (the new test passes locally, but static routing evidence shows CI does not select it)
+
+Command: `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode strict` -> pass (the two required H2 Gotchas headings are now accepted; three unrelated warnings remain)
+
+Command: `./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot` -> pass (the candidate skill shape is accepted)
+
+Command: `./bin/ask skills audit Skills/agent-ops/testing --level strict --json --robot` -> pass (the candidate skill shape is accepted)
+
+Command: `bash Infrastructure/scripts/run-infrastructure-python.sh scripts/validation-and-linting/check_context_budget.py --projection rooted --json` -> fail (14 stale `SKILLSET_SOURCE_HASH_STALE` rows plus one local runtime-exposure finding before the candidate generator output; the 14 source paths match `origin/main`)
+
+Command: `git diff --quiet origin/main -- Skills/agent-ops/agents-md/SKILL.md Skills/agent-ops/autoreview/SKILL.md Skills/agent-ops/evals-router/SKILL.md Skills/agent-ops/goal-governor/SKILL.md Skills/agent-ops/improve-agent-native/SKILL.md Skills/agent-ops/improve-codebase-architecture/SKILL.md Skills/agent-ops/pr-green-sweep/SKILL.md Skills/agent-ops/simplify/SKILL.md Skills/agent-ops/technical-writer/SKILL.md Skills/agent-ops/testing/SKILL.md Skills/agent-ops/ubiquitous-language/SKILL.md Plugins/aidevcon/skills/talk-podjarny-skills-are-the-new-code/SKILL.md Plugins/aidevcon/skills/talk-tal-skills-security/SKILL.md Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md` -> pass (all 14 stale source paths were unchanged from `origin/main` before the approved repair)
+
+## Boundary
+
+No Tessl, provider-backed, cloud, or other live external evaluation was run.
+This review does not prove hosted CI, hosted review state, mergeability, or the
+future post-push check results.
+
+WROTE: artifacts/reviews/default.md
