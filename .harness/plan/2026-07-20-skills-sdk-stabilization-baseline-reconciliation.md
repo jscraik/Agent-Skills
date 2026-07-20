@@ -102,7 +102,7 @@ The candidate worktree evidence is revision-bound as follows:
 | --- | --- | --- |
 | PU-002 intake/package contract | `850a8997bcfe662e3b7d73aaa9c73634196a8855` plus `d6931630ce4217aa5045ee053a98693eec80591` | TDD positive/negative intake regressions pass; focused SDK suite is `102 passed, 2 skipped`; receipt: `.harness/evidence/skills-sdk-stabilization/pu002-readme-intake-repair-receipt.json`. |
 | PU-003 plugin-cache producer | `cb52cbbff1f034f08a9bca3a7572bee4a1cf6610` | Canonical producer dry run and authorized write pass; runtime/versioned roots contain one `plugin-router` identity; receipt: `.harness/evidence/skills-sdk-stabilization/pu003-plugin-cache-producer-receipt.json`. |
-| PU-004 capability replay | `3f0cb16fa` | All 43 replay-required references classified individually; receipt: `.harness/evidence/skills-sdk-stabilization/pu004-capability-replay-receipt.json`; status remains partial because failures, external blockers, unsafe boundaries, and stale references are preserved. |
+| PU-004 capability replay | `3f0cb16fa9238dd7494889f8eced9f62bd725aaf` | All 43 replay-required references classified individually; receipt: `.harness/evidence/skills-sdk-stabilization/pu004-capability-replay-receipt.json`; status remains partial because failures, external blockers, unsafe boundaries, and stale references are preserved. |
 | PU-005 stabilization receipt and QA | pending | No revision-bound `skills-sdk.stabilization-baseline-receipt.v1` or independent QA Disproof artifact exists yet. |
 
 The code tree therefore maps as follows:
