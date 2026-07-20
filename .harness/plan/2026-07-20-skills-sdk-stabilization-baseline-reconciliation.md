@@ -94,7 +94,7 @@ The topology preflight is now reduced to one external blocker: `~/dev/skills-fou
 
 The focused stabilization suite at the accepted head reports seven failures, ninety-five passes, two skips, and seven subtests passing. All failures are concentrated in intake and intake-review: `skill_intake.py` rejects the fixture's top-level `README.md`, while package hardening and project install explicitly allow/require that registry presentation file. The isolated candidate worktree repaired that contract with a focused failing-first regression and now passes the corrected suite; the accepted baseline remains unchanged and still records the original drift. The accepted clean worktree has no materialized plugin caches; the canonical plugin-cache producer dry run plans both runtime and versioned roots for all five marketplace entries with zero deletes and zero violations. A generated-cache write remains a separate authorized proof step, not a source defect or permission to edit cache projections directly.
 
-The capability evidence/status subset reports forty-five tests passing and seven subtests passing. The isolated candidate then recorded `pu004-capability-replay-receipt.json`, classifying all forty-three replay-required command references individually. That receipt is partial: it contains thirty-two passes, two deterministic failures, two external blockers, three unsafe-boundary stops, and four stale/placeholder references. It does not prove the stabilization baseline or independent QA.
+The capability evidence/status subset reports forty-five tests passing and seven subtests passing. The isolated candidate then recorded `pu004-capability-replay-receipt.json`, classifying all forty-three replay-required command references individually. After rebinding the signing fixture to the current package digest and the A/B judge reference to the completed v1 runtime-proof receipt, the revision-bound replay receipt contains thirty-four passes, zero deterministic failures, two external blockers, three unsafe-boundary stops, and four stale/placeholder references. It does not prove the stabilization baseline or independent QA.
 
 The candidate worktree evidence is revision-bound as follows:
 
@@ -103,7 +103,7 @@ The candidate worktree evidence is revision-bound as follows:
 | PU-001 topology and worktree | `26b93c23dd4367eff26f656104bb1dce745b3f32` (receipt) | Candidate identity/head/clean state and repo-layout contract pass; receipt `pu001-topology-reconciliation-receipt.json` records only the external Foundry Git-repository blocker. |
 | PU-002 intake/package contract | `850a8997bcfe662e3b7d73aaa9c73634196a8855` plus `d6931630ce4217aa5045ee053a98693eec80591` | TDD positive/negative intake regressions pass; focused SDK suite is `102 passed, 2 skipped`; receipt: `.harness/evidence/skills-sdk-stabilization/pu002-readme-intake-repair-receipt.json`. |
 | PU-003 plugin-cache producer | `cb52cbbff1f034f08a9bca3a7572bee4a1cf6610` | Canonical producer dry run and authorized write pass; runtime/versioned roots contain one `plugin-router` identity; receipt: `.harness/evidence/skills-sdk-stabilization/pu003-plugin-cache-producer-receipt.json`. |
-| PU-004 capability replay | `3f0cb16fa9238dd7494889f8eced9f62bd725aaf` | All 43 replay-required references classified individually; receipt: `.harness/evidence/skills-sdk-stabilization/pu004-capability-replay-receipt.json`; status remains partial because failures, external blockers, unsafe boundaries, and stale references are preserved. |
+| PU-004 capability replay | `12caa93b00c9d2b302cacf69033d440f66c3412a` (source/config) plus `5fff5567ab0c51a848f76f8d5c640960d74f0112` (receipt) | All 43 replay-required references classified individually; receipt: `.harness/evidence/skills-sdk-stabilization/pu004-capability-replay-receipt.json`; status remains partial because external blockers, unsafe boundaries, and stale references are preserved. |
 | PU-005 stabilization receipt and QA | pending | No revision-bound `skills-sdk.stabilization-baseline-receipt.v1` or independent QA Disproof artifact exists yet. |
 
 The code tree therefore maps as follows:
@@ -359,7 +359,7 @@ PU-006 is the current artifact write. PU-007 is a policy contract captured here 
 | Current topology | Foundry boundary and stale targets | Blocked on external state | Candidate source/config reconciliation passes; `/Users/jamiecraik/dev/skills-foundry` must become or be replaced by an explicit Git repository before the topology preflight can pass. |
 | PU-002/PU-003 focused suite | Intake/package/plugin behavior | Candidate evidence passes: 102 passed, 2 skipped, 7 subtests; accepted baseline still has 7 intake failures | Preserve candidate receipts and resolve topology before treating the repair as stabilization acceptance. |
 | Capability status subset | Existing evidence/status scaffold | Passed: 45 passed, 7 subtests | Inventory-only proof is superseded for replay purposes by the partial PU-004 receipt with 43 per-reference classifications. |
-| PU-004 replay receipt | Per-reference capability evidence | Partial: 32 pass, 2 fail, 2 blocked_external, 3 blocked_unsafe, 4 stale_reference | Resolve or explicitly accept the preserved blockers and bind the result into the revision-bound stabilization receipt. |
+| PU-004 replay receipt | Per-reference capability evidence | Partial: 34 pass, 0 fail, 2 blocked_external, 3 blocked_unsafe, 4 stale_reference | Resolve or explicitly accept the preserved external, unsafe-boundary, and stale-reference dispositions and bind the result into the revision-bound stabilization receipt. |
 | Stabilization receipt | Revision-bound aggregate evidence | Not evidenced | Produce and schema-validate `skills-sdk.stabilization-baseline-receipt.v1` from the accepted revision and candidate evidence. |
 | Independent QA | Current-head disproof | Not evidenced | QA must inspect the actual worktree and receipt, not this plan alone. |
 
@@ -446,7 +446,7 @@ These questions are implementation-time decisions. They do not authorize guessin
 
 This additive reconciliation plan records the current topology, test, and evidence blockers and establishes the selected-install policy boundary. Its artifact scope is authorized; implementation, baseline generation, Foundry initialization/extraction, runtime projection, plugin mutation, publication, and cleanup remain outside this stage.
 
-The plan remains `blocked` for implementation handoff until the current topology blocker is addressed, candidate PU-002/PU-003 evidence is reconciled against the accepted revision, preserved PU-004 failures/external/unsafe/stale references are dispositioned, the revision-bound baseline receipt is produced, and independent QA Disproof is recorded.
+The plan remains `blocked` for implementation handoff until the current topology blocker is addressed, candidate PU-002/PU-003 evidence is reconciled against the accepted revision, preserved PU-004 external/unsafe/stale references are dispositioned, the revision-bound baseline receipt is produced, and independent QA Disproof is recorded.
 
 `post_plan_handoff.state: awaiting_user_choice` because this request authorizes the additive plan artifact but does not authorize source/runtime/external mutation. The next safe action is a fresh PU-001 worktree and before-test receipt under a separate implementation authorization.
 
@@ -465,7 +465,7 @@ linear_mutation_status: not_applicable
 post_plan_handoff:
   state: candidate_evidence_recorded_pending_stabilization_acceptance
   next_stage: topology reconciliation, replay disposition, baseline receipt, and independent QA
-  required_input: current topology decision plus disposition of PU-004 fail/external/unsafe/stale classifications
+  required_input: current topology decision plus disposition of PU-004 external/unsafe/stale classifications
 authority_scope_boundary: plan artifact only
 runtime_persistence: this addendum, original plan, future receipt, future inventory, future QA artifact
 git_staging_status: not_staged
