@@ -10,7 +10,8 @@
 .kiro/
 .narrative/
 .skillsctl/
-.codex/
+.codex/*
+!.codex/workforce-control.json
 .playwright-mcp/
 .worktrees/
 
