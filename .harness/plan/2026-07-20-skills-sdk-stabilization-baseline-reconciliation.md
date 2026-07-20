@@ -88,14 +88,11 @@ Only `.harness/plan/2026-07-20-skills-sdk-stabilization-baseline-reconciliation.
 
 ## Current State / Evidence
 
-The current primary checkout is `main`, clean, and aligned with `origin/main` at `4f7075eee3ae8ea81ca4aed9b1e6e5ecd77e6a8e`. This is local repository evidence only.
+The accepted baseline is `origin/main` at `4f7075eee3ae8ea81ca4aed9b1e6e5ecd77e6a8e`. The primary `main` checkout now carries this plan plus the separately authorized Workforce projection commits and is therefore not the baseline worktree. PU-001 materialized a dedicated clean worktree at `/Users/jamiecraik/dev/wt-skills-sdk-stabilization-baseline` on `codex/skills-sdk-stabilization-baseline-pu001`, with before-test receipt `.harness/evidence/skills-sdk-stabilization/pu001-before-test-evidence-receipt.json` at commit `e96f4bc808459bfbdd35e26ab8fe9ddb4f42120f`.
 
 The topology preflight is blocked because `~/dev/skills-foundry` is not a Git repository and three stale in-repository targets remain in the older migration plan and `Infrastructure/config/repo-layout.v1.json`: `foundry/skills`, `foundry/plugins`, and `foundry/system-skills`. These are plan/config reconciliation blockers, not evidence that extraction should begin.
 
-The corrected focused stabilization suite reports nine failures and ninety-five passes, with seven subtests passing. The failures are concentrated in two contract families:
-
-1. intake and intake-review disagree with the package hardening/install contract over the top-level `README.md` path;
-2. the local plugin picker surface exposes duplicate `plugin-router` identity and lacks a versioned `harness-engineering` cache root.
+The focused stabilization suite at the accepted head reports seven failures, ninety-five passes, two skips, and seven subtests passing. All failures are concentrated in intake and intake-review: `skill_intake.py` rejects the fixture's top-level `README.md`, while package hardening and project install explicitly allow/require that registry presentation file. The clean accepted worktree has no materialized plugin caches; the canonical plugin-cache producer dry run plans both runtime and versioned roots for all five marketplace entries with zero deletes and zero violations. A generated-cache write remains a separate authorized proof step, not a source defect or permission to edit cache projections directly.
 
 The capability evidence/status subset reports forty-five tests passing and seven subtests passing. That proves the existing inventory/status scaffold is schema-backed; it does not prove exhaustive command replay or produce the required stabilization receipt.
 
@@ -103,15 +100,15 @@ The code tree therefore maps as follows:
 
 | Unit | Current state | Evidence boundary |
 | --- | --- | --- |
-| PU-001 clean worktree and before-test receipt | Not evidenced | The current clean `main` checkout is not the dedicated stabilization worktree. |
+| PU-001 clean worktree and before-test receipt | Evidenced (partial) | Dedicated clean worktree and receipt are recorded in `.harness/evidence/skills-sdk-stabilization/pu001-before-test-evidence-receipt.json` at `e96f4bc808459bfbdd35e26ab8fe9ddb4f42120f`; topology remains blocked. |
 | PU-002 README/intake/package reconciliation | Partial and blocked | Focused intake and intake-review tests fail on the `README.md` contract drift. |
-| PU-003 plugin-cache identity reconciliation | Partial and blocked | Focused plugin picker tests fail on duplicate `plugin-router` and missing `harness-engineering` versioned cache. |
+| PU-003 plugin-cache identity reconciliation | Producer characterized; write proof pending | The accepted clean head has no generated caches; `skills sync --plugin-cache-refresh only --dry-run` plans five runtime/versioned plugin roots and both marketplace manifests with zero deletes/violations. |
 | PU-004 exhaustive capability replay | Scaffolded/partial | Capability tests pass, but replay references remain unclassified and no replay receipt is present. |
 | PU-005 revision-bound baseline receipt and independent QA | Not evidenced | No current `skills-sdk.stabilization-baseline-receipt.v1` producer/receipt chain is present. |
 
 ## Implementation Strategy
 
-Treat the plan update as a contract reconciliation, not as permission to widen the stabilization slice. Resolve the selection/admission vocabulary first, then run the existing PU sequence in a clean worktree. Reuse current intake, package, lock, digest, receipt, journal, and plugin-reference mechanisms before adding new abstractions.
+Treat the plan update as a contract reconciliation, not as permission to widen the stabilization slice. Resolve the selection/admission vocabulary first, then run the existing PU sequence in a clean worktree. Reuse current intake, package, lock, digest, receipt, journal, and plugin-reference mechanisms before adding new abstractions. Apply TDD to each bounded repair: retain or add the smallest failing regression for the named invariant, make the smallest canonical-source change, rerun that same regression, and only then widen to the maintained wrapper and affected suite. A passing neighboring lane never substitutes for the focused failing-first proof.
 
 The key distinction is:
 
