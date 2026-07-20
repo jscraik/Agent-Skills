@@ -1,9 +1,9 @@
 {
   "schema_version": "workforce-project-control-projection/v1",
   "control_id": "risk-selected-review-fan-in-20260719",
-  "control_release_commit": "cb2df62c4fba505c88f1bad4fc9b08785f45e030",
+  "control_release_commit": "59d7cbda1eeb5dc1701647d33e72ace9b82400d6",
   "control_contract_path": "operating-system/controls/risk-selected-review-fan-in.v1.json",
-  "control_contract_sha256": "c5a039a15952c39a8255d47ed522a5677fc21056398f2c7e4e92c17ae9d26326",
+  "control_contract_sha256": "4c84e2250f5f39a9f5eaea89d58a2e6854c89afe2835fbdbe15f35640182b616",
   "mode_scope": "workforce_only",
   "controller_preflight_required": true,
   "direct_work_exempt": true
