@@ -3,10 +3,11 @@
   "completion_tokens": 0,
   "enabled": false,
   "eval_tracing_enabled": false,
-  "model": "qwen/qwen3-coder",
+  "model": "qwen3.5:9b-mlx",
   "otel_python": "~/.agents/otel-collector/.venv/bin/python",
+  "project_name": "agent-skills-skills-sdk-evals",
   "profile": "oss-local",
   "prompt_tokens": 0,
-  "provider": "local-oss",
+  "provider": "ollama",
   "timeout_seconds": 2.0
 }
