@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import pytest
@@ -116,6 +117,8 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
         self.assertFalse(config["enabled"])
         self.assertFalse(config["eval_tracing_enabled"])
         self.assertEqual(config["project_name"], "agent-skills-skills-sdk-evals")
+        self.assertEqual(config["model"], "qwen3.5:9b-mlx")
+        self.assertEqual(config["provider"], "ollama")
         self.assertEqual(config["otel_python"], "~/.agents/otel-collector/.venv/bin/python")
         self.assertIn("arizephoenix/phoenix@sha256:", compose)
         self.assertIn("ASK_PHOENIX_DATA_DIR:?", compose)
@@ -237,6 +240,7 @@ import sys
 payload = json.loads(sys.stdin.read())
 assert payload["endpoint"] == "http://127.0.0.1:6006/v1/traces"
 assert payload["profile"] == "oss-cloud"
+assert payload["project_name"] == "agent-skills-skills-sdk-evals"
 print(json.dumps({"status": "pass", "http_status": 200}))
 """,
                 encoding="utf-8",
@@ -253,8 +257,70 @@ print(json.dumps({"status": "pass", "http_status": 200}))
         self.assertEqual(receipt["status"], "pass")
         self.assertEqual(receipt["span_name"], "agent-skills.phoenix.smoke")
         self.assertEqual(receipt["profile"], "oss-cloud")
+        self.assertEqual(receipt["project_name"], "agent-skills-skills-sdk-evals")
         self.assertEqual(receipt["otel_python_path"], runtime.as_posix())
         self.assertTrue(receipt["mutation_performed"])
+        self.assertIn("agent-skills-skills-sdk-evals", receipt["agent_summary"])
+
+    def test_smoke_expands_user_otel_runtime_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            runtime = Path(temp_dir) / ".agents" / "otel-python"
+            runtime.parent.mkdir()
+            runtime.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+json.loads(sys.stdin.read())
+print(json.dumps({"status": "pass", "http_status": 200}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+            with patch.dict(os.environ, {"HOME": temp_dir}, clear=False):
+                receipt = build_phoenix_smoke_receipt(
+                    REPO_ROOT,
+                    base_url="http://127.0.0.1:6006",
+                    otel_python_path="~/.agents/otel-python",
+                )
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["otel_python_path"], runtime.as_posix())
+
+    def test_smoke_blocks_project_routing_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            config_dir = root / "Infrastructure" / "config" / "observability"
+            config_dir.mkdir(parents=True)
+            (config_dir / "phoenix.json").write_text(
+                json.dumps({"project_name": "wrong-project"}),
+                encoding="utf-8",
+            )
+            runtime = root / "fake-otel-python"
+            runtime.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+json.loads(sys.stdin.read())
+print(json.dumps({"status": "pass", "http_status": 200}))
+""",
+                encoding="utf-8",
+            )
+            runtime.chmod(0o755)
+
+            receipt = build_phoenix_smoke_receipt(
+                root,
+                base_url="http://127.0.0.1:6006",
+                otel_python_path=runtime.as_posix(),
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["project_name"], "agent-skills-skills-sdk-evals")
+        self.assertIn("phoenix_project_name", {check["id"] for check in receipt["blockers"]})
+        project_check = next(check for check in receipt["checks"] if check["id"] == "phoenix_project_name")
+        self.assertEqual(project_check["evidence"], ["wrong-project"])
+        self.assertFalse(receipt["mutation_performed"])
 
     def test_smoke_records_optional_llm_model_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
