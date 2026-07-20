@@ -316,7 +316,10 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             )
 
         self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["project_name"], "agent-skills-skills-sdk-evals")
         self.assertIn("phoenix_project_name", {check["id"] for check in receipt["blockers"]})
+        project_check = next(check for check in receipt["checks"] if check["id"] == "phoenix_project_name")
+        self.assertEqual(project_check["evidence"], ["wrong-project"])
         self.assertFalse(receipt["mutation_performed"])
 
     def test_smoke_records_optional_llm_model_metadata(self) -> None:

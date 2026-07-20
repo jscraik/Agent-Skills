@@ -374,7 +374,12 @@ def build_phoenix_smoke_receipt(
     endpoint = base_url.rstrip("/") + "/v1/traces"
     config = _phoenix_config(repo_root)
     configured_project_name = config.get("project_name")
-    project_name = str(configured_project_name or PHOENIX_PROJECT_NAME)
+    project_name = PHOENIX_PROJECT_NAME
+    project_name_evidence = (
+        [str(configured_project_name)]
+        if configured_project_name is not None
+        else [project_name]
+    )
     checks: list[dict[str, Any]] = []
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         checks.append(_check("phoenix_base_url", "blocker", "Phoenix base URL must be an absolute http(s) URL.", [base_url]))
@@ -387,7 +392,7 @@ def build_phoenix_smoke_receipt(
             if "project_name" not in config or configured_project_name == PHOENIX_PROJECT_NAME
             else "blocker",
             "Phoenix traces must target the Skills SDK eval project.",
-            [project_name],
+            project_name_evidence,
         )
     )
     checks.append(
