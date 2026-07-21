@@ -8,6 +8,7 @@ from ask.cli_errors import build_unknown_action_result
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.sdk_receipts import receipt_result
 from ask.skills_sdk.command_evidence_plan import build_command_evidence_plan_receipt
+from ask.skills_sdk.evidence_status import EvidenceStatusError, build_evidence_status_receipt
 from ask.skills_sdk.lifecycle_route_map import build_lifecycle_route_map_receipt
 
 
@@ -34,6 +35,19 @@ def add_sdk_evidence_parser(
     )
     command_plan.add_argument("--scope", choices=["capability-matrix"], default="capability-matrix")
     command_plan.add_argument("--preview", action="store_true", help="Emit a non-mutating command evidence plan receipt")
+    status = subparsers.add_parser(
+        "status",
+        help="Report independent local-build, acceptance, and integration evidence lanes",
+        parents=[global_parser],
+    )
+    status.add_argument("--mode", choices=["local-build", "acceptance", "integration", "all"], default="all")
+    status.add_argument(
+        "--require",
+        choices=["local-build", "acceptance", "integration"],
+        help="Select one lane's status while still reporting the other lanes",
+    )
+    status.add_argument("--receipt", help="Optional revision-bound stabilization receipt path")
+    status.add_argument("--qa-dispatch-record", help="Optional controller-owned QA dispatch record path")
 
 
 def add_sdk_route_map_parser(
@@ -53,6 +67,8 @@ def dispatch_sdk_evidence(repo_root: Path, args: argparse.Namespace) -> CallResu
         return skills_commands.skills_sdk_capability_evidence(repo_root, scope=args.scope)
     if args.evidence_action == "command-plan":
         return _dispatch_command_plan(repo_root, args)
+    if args.evidence_action == "status":
+        return _dispatch_status(repo_root, args)
     return build_unknown_action_result("sdk evidence", args.evidence_action)
 
 
@@ -85,6 +101,33 @@ def _dispatch_command_plan(repo_root: Path, args: argparse.Namespace) -> CallRes
         build_command_evidence_plan_receipt(repo_root, scope=args.scope),
         blocked_statuses={"blocked"},
         fix_suggestion="Inspect receipt.commands and run the listed command refs through their own proof lane.",
+    )
+
+
+def _dispatch_status(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    try:
+        receipt = build_evidence_status_receipt(
+            repo_root,
+            mode=args.mode,
+            required_mode=args.require,
+            stabilization_receipt_path=args.receipt,
+            qa_dispatch_record_path=args.qa_dispatch_record,
+        )
+    except EvidenceStatusError as exc:
+        return _validation_error(
+            "sdk evidence status",
+            f"Skills SDK evidence status could not be built: {exc}",
+            "Inspect the source/receipt binding and rerun ask sdk evidence status --mode all --json --robot.",
+        )
+    return receipt_result(
+        "sdk evidence status",
+        "skills_sdk_evidence_status",
+        receipt,
+        blocked_statuses={"blocked"},
+        fix_suggestion=(
+            "Select a specific lane with --mode or --require; repair only the blockers in that lane "
+            "before crossing into acceptance or integration work."
+        ),
     )
 
 

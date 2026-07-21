@@ -1,0 +1,333 @@
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+from typing import Any
+
+from ask.skills_sdk.capability_status import CapabilityStatusError, build_capability_status
+
+
+EVIDENCE_STATUS_SCHEMA_VERSION = "skills-sdk.evidence-status.v1"
+EVIDENCE_STATUS_SCHEMA_URI = (
+    "https://agent-skills.local/schemas/skills-sdk/evidence-status.v1.schema.json"
+)
+QA_DISPATCH_SCHEMA_VERSION = "skills-sdk.qa-dispatch-record.v1"
+DEFAULT_STABILIZATION_RECEIPT = Path(
+    ".harness/evidence/skills-sdk-stabilization/skills-sdk.stabilization-baseline-receipt.v1.json"
+)
+LANE_MODES = ("local-build", "acceptance", "integration", "all")
+
+
+class EvidenceStatusError(ValueError):
+    """Raised when an evidence status input cannot be bound safely."""
+
+
+def build_evidence_status_receipt(
+    repo_root: Path,
+    *,
+    mode: str = "all",
+    required_mode: str | None = None,
+    stabilization_receipt_path: str | Path | None = None,
+    qa_dispatch_record_path: str | Path | None = None,
+) -> dict[str, Any]:
+    _validate_mode(mode, "mode")
+    if required_mode is not None:
+        _validate_mode(required_mode, "required_mode", allow_all=False)
+
+    source_revision = _git_head(repo_root)
+    dirty_state = _dirty_state(repo_root)
+    receipt_path = Path(stabilization_receipt_path) if stabilization_receipt_path else DEFAULT_STABILIZATION_RECEIPT
+    qa_dispatch = _load_or_build_qa_dispatch_record(repo_root, source_revision, qa_dispatch_record_path)
+
+    lanes = [
+        _build_local_build_lane(repo_root),
+        _build_acceptance_lane(repo_root, source_revision, receipt_path),
+        _build_integration_lane(),
+    ]
+    lane_by_id = {lane["id"]: lane for lane in lanes}
+    selected_lane = required_mode or (None if mode == "all" else mode)
+    selected_blockers = (
+        [blocker for lane in lanes for blocker in lane["blockers"]]
+        if selected_lane is None
+        else list(lane_by_id[selected_lane]["blockers"])
+    )
+    ignored_blockers = []
+    if selected_lane is not None:
+        ignored_blockers = [
+            {**blocker, "ignored_by": selected_lane}
+            for lane in lanes
+            if lane["id"] != selected_lane
+            for blocker in lane["blockers"]
+        ]
+
+    return {
+        "schema_version": EVIDENCE_STATUS_SCHEMA_VERSION,
+        "schema_uri": EVIDENCE_STATUS_SCHEMA_URI,
+        "status": "pass" if not selected_blockers else "blocked",
+        "operation": "evidence_status",
+        "mode": mode,
+        "selected_lane": selected_lane or "all",
+        "source_context": {
+            "head_sha": source_revision,
+            "dirty_state": dirty_state,
+        },
+        "lanes": lanes,
+        "blockers": selected_blockers,
+        "ignored_blockers": ignored_blockers,
+        "qa_dispatch_record": qa_dispatch,
+        "mutation_performed": False,
+        "agent_summary": _agent_summary(mode, selected_lane, lanes, selected_blockers),
+        "claims_boundary": (
+            "Read-only lane status does not execute tests, external providers, runtime projections, "
+            "generated caches, Foundry operations, hosted CI, reviews, or merge actions."
+        ),
+    }
+
+
+def build_qa_dispatch_record(
+    repo_root: Path,
+    *,
+    source_revision: str | None = None,
+    expected_revision: str | None = None,
+    receipt_sha256: str | None = None,
+    qa_artifact_ref: str | None = None,
+    qa_artifact_sha256: str | None = None,
+    task_id: str | None = None,
+    subagent_id: str | None = None,
+    state: str = "not_requested",
+) -> dict[str, Any]:
+    selected_revision = source_revision or _git_head(repo_root)
+    if expected_revision is not None and selected_revision != expected_revision:
+        raise EvidenceStatusError(
+            "qa dispatch source_revision does not match expected source revision"
+        )
+    if state not in {"not_requested", "planned", "dispatched", "blocked", "accepted"}:
+        raise EvidenceStatusError(f"unknown qa dispatch state: {state}")
+    return {
+        "schema_version": QA_DISPATCH_SCHEMA_VERSION,
+        "record_kind": "controller_owned_qa_dispatch",
+        "controller_owned": True,
+        "source_revision": selected_revision,
+        "candidate_receipt_sha256": receipt_sha256,
+        "qa_artifact_ref": qa_artifact_ref,
+        "qa_artifact_sha256": qa_artifact_sha256,
+        "task_id": task_id,
+        "subagent_id": subagent_id,
+        "state": state,
+        "dispatch_performed": state in {"dispatched", "accepted"},
+        "claims_boundary": (
+            "This record describes controller-owned QA routing only; it does not dispatch a reviewer "
+            "or prove QA, receipt acceptance, hosted state, or release readiness."
+        ),
+    }
+
+
+def _build_local_build_lane(repo_root: Path) -> dict[str, Any]:
+    blockers: list[dict[str, Any]] = []
+    evidence: list[dict[str, Any]] = []
+    try:
+        status = build_capability_status(repo_root)
+    except (CapabilityStatusError, OSError, json.JSONDecodeError) as exc:
+        blockers.append(_blocker("capability_matrix_invalid", "local-build", str(exc), ["capability-matrix"]))
+    else:
+        evidence.append(
+            _evidence(
+                "capability_matrix",
+                "pass",
+                f"validated {status['summary']['total']} capability rows without executing a command",
+                ["Infrastructure/config/skills-sdk/capability-matrix.v1.json"],
+            )
+        )
+    return {
+        "id": "local-build",
+        "status": "pass" if not blockers else "blocked",
+        "blockers": blockers,
+        "evidence": evidence,
+    }
+
+
+def _build_acceptance_lane(
+    repo_root: Path,
+    source_revision: str,
+    receipt_path: Path,
+) -> dict[str, Any]:
+    blockers: list[dict[str, Any]] = []
+    evidence: list[dict[str, Any]] = []
+    candidate = receipt_path if receipt_path.is_absolute() else repo_root / receipt_path
+    if not _is_within_repo(repo_root, candidate):
+        blocker = _blocker(
+            "stabilization_receipt_outside_source",
+            "acceptance",
+            "receipt path must stay inside the current Skills SDK source worktree",
+            [str(candidate)],
+        )
+        return {"id": "acceptance", "status": "blocked", "blockers": [blocker], "evidence": []}
+    evidence_ref = _relative_or_absolute(repo_root, candidate)
+    if not candidate.is_file():
+        blockers.append(
+            _blocker(
+                "stabilization_receipt_missing",
+                "acceptance",
+                "revision-bound stabilization receipt is missing",
+                [evidence_ref],
+            )
+        )
+        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+    try:
+        receipt = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        blockers.append(_blocker("stabilization_receipt_invalid", "acceptance", str(exc), [evidence_ref]))
+        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+    if not isinstance(receipt, dict):
+        blockers.append(_blocker("stabilization_receipt_invalid", "acceptance", "receipt root is not an object", [evidence_ref]))
+        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+    if receipt.get("implementation_sha") != source_revision:
+        blockers.append(
+            _blocker(
+                "stabilization_receipt_source_mismatch",
+                "acceptance",
+                "receipt implementation_sha does not match the current source revision",
+                [evidence_ref, source_revision],
+            )
+        )
+    if not receipt.get("qa_artifact_ref"):
+        blockers.append(
+            _blocker(
+                "qa_artifact_missing",
+                "acceptance",
+                "receipt does not bind an independent QA artifact",
+                [evidence_ref],
+            )
+        )
+    if not receipt.get("qa_artifact_digest"):
+        blockers.append(
+            _blocker(
+                "qa_artifact_digest_missing",
+                "acceptance",
+                "receipt does not bind a QA artifact SHA-256",
+                [evidence_ref],
+            )
+        )
+    if receipt.get("claim_status") != "accepted":
+        blockers.append(
+            _blocker(
+                "stabilization_claim_not_accepted",
+                "acceptance",
+                f"receipt claim_status is {receipt.get('claim_status', 'missing')!r}",
+                [evidence_ref],
+            )
+        )
+    if not blockers:
+        evidence.append(_evidence("stabilization_receipt", "pass", "receipt is revision and QA bound", [evidence_ref]))
+    return {
+        "id": "acceptance",
+        "status": "pass" if not blockers else "blocked",
+        "blockers": blockers,
+        "evidence": evidence,
+    }
+
+
+def _build_integration_lane() -> dict[str, Any]:
+    blockers = [
+        _blocker("runtime_projection_not_run", "integration", "runtime projection lane is intentionally read-only and not run", ["runtime projection"]),
+        _blocker("generated_cache_not_run", "integration", "generated cache lane is intentionally not mutated", ["generated caches"]),
+        _blocker("foundry_not_run", "integration", "Foundry extraction/initialization is outside this status command", ["Foundry"]),
+        _blocker("provider_external_not_run", "integration", "provider and external-service proof requires a separate receipt", ["external providers"]),
+        _blocker("hosted_review_merge_not_run", "integration", "hosted CI, review, and merge state are not local evidence", ["hosted state"]),
+    ]
+    return {"id": "integration", "status": "blocked", "blockers": blockers, "evidence": []}
+
+
+def _load_or_build_qa_dispatch_record(
+    repo_root: Path,
+    source_revision: str,
+    record_path: str | Path | None,
+) -> dict[str, Any]:
+    if record_path is None:
+        return build_qa_dispatch_record(repo_root, source_revision=source_revision)
+    candidate = Path(record_path)
+    if not candidate.is_absolute():
+        candidate = repo_root / candidate
+    if not _is_within_repo(repo_root, candidate):
+        raise EvidenceStatusError("QA dispatch record path must stay inside the current source worktree")
+    try:
+        payload = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise EvidenceStatusError(f"QA dispatch record could not be read: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise EvidenceStatusError("QA dispatch record root must be an object")
+    if payload.get("source_revision") != source_revision:
+        raise EvidenceStatusError("QA dispatch source_revision does not match current source revision")
+    return payload
+
+
+def _validate_mode(mode: str, field: str, *, allow_all: bool = True) -> None:
+    choices = LANE_MODES if allow_all else LANE_MODES[:-1]
+    if mode not in choices:
+        raise EvidenceStatusError(f"{field} must be one of: {', '.join(choices)}")
+
+
+def _git_head(repo_root: Path) -> str:
+    process = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    head = process.stdout.strip()
+    if process.returncode != 0 or len(head) != 40:
+        raise EvidenceStatusError("could not resolve current source revision")
+    return head
+
+
+def _dirty_state(repo_root: Path) -> str:
+    process = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=repo_root,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if process.returncode != 0:
+        return "unknown"
+    return "dirty" if process.stdout.strip() else "clean"
+
+
+def _blocker(identifier: str, lane: str, message: str, evidence: list[str]) -> dict[str, Any]:
+    return {"id": identifier, "lane": lane, "message": message, "evidence": evidence}
+
+
+def _evidence(identifier: str, status: str, message: str, evidence: list[str]) -> dict[str, Any]:
+    return {"id": identifier, "status": status, "message": message, "evidence": evidence}
+
+
+def _relative_or_absolute(repo_root: Path, candidate: Path) -> str:
+    try:
+        return candidate.resolve(strict=False).relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return str(candidate)
+
+
+def _is_within_repo(repo_root: Path, candidate: Path) -> bool:
+    try:
+        candidate.resolve(strict=False).relative_to(repo_root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def _agent_summary(
+    mode: str,
+    selected_lane: str | None,
+    lanes: list[dict[str, Any]],
+    blockers: list[dict[str, Any]],
+) -> str:
+    lane_summary = ", ".join(f"{lane['id']}={lane['status']}" for lane in lanes)
+    selection = selected_lane or "all"
+    if blockers:
+        return f"Skills SDK evidence status selected {selection} ({mode}); lanes: {lane_summary}; {len(blockers)} blocker(s) remain."
+    return f"Skills SDK evidence status selected {selection} ({mode}); lanes: {lane_summary}; no selected-lane blockers."

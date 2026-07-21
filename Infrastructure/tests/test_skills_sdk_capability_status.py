@@ -254,6 +254,10 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             COMMAND_EXAMPLES[("sdk", "evidence")],
         )
         self.assertIn(
+            "ask sdk evidence status --mode all --json --robot",
+            COMMAND_EXAMPLES[("sdk", "evidence")],
+        )
+        self.assertIn(
             "skills-sdk evidence verify --scope capability-matrix --json --robot",
             COMMAND_EXAMPLES[("sdk", "evidence")],
         )

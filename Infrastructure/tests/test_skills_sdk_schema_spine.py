@@ -16,6 +16,7 @@ SCHEMA_NAMES = {
     "manifest-source": "manifest-source.v1.schema.json",
     "check-receipt": "check-receipt.v1.schema.json",
     "capability-evidence-receipt": "capability-evidence-receipt.v0.schema.json",
+    "evidence-status": "evidence-status.v1.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
     "risk-mode-taxonomy-receipt": "risk-mode-taxonomy-receipt.v0.schema.json",
     "skill-intake-review-receipt": "skill-intake-review-receipt.v0.schema.json",
@@ -113,6 +114,11 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["observability_status"], "not_run")
         self.assertEqual(payload["eval_status"], "pass")
         self.assertEqual(payload["project_name"], "agent-skills-skills-sdk-evals")
+
+    def test_evidence_status_fixture_is_valid(self) -> None:
+        payload = self.assert_valid("evidence-status", "evidence-status.json")
+        self.assertEqual(payload["selected_lane"], "local-build")
+        self.assertTrue(payload["qa_dispatch_record"]["controller_owned"])
 
     def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
         schema = {"type": "number", "minimum": 1}
