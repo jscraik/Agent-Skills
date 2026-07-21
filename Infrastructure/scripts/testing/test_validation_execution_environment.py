@@ -26,6 +26,65 @@ def _run(*command: str, cwd: Path, env: dict[str, str]) -> subprocess.CompletedP
     )
 
 
+def _create_hook_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    repo = tmp_path / "repository"
+    _run("git", "init", "-q", str(repo), cwd=tmp_path, env=os.environ.copy()).check_returncode()
+    script_dir = repo / "Infrastructure/scripts"
+    script_dir.mkdir(parents=True)
+    shutil.copy2(INSTALL_PREK_HOOKS, script_dir / "install-prek-hooks.sh")
+    helper_target = script_dir / "lib/secure-hook-cache.sh"
+    helper_target.parent.mkdir(parents=True)
+    shutil.copy2(REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh", helper_target)
+    (repo / "prek.toml").write_text("repos = []\n", encoding="utf-8")
+    return repo, script_dir
+
+
+def _common_hooks_dir(repo: Path) -> Path:
+    result = _run(
+        "git",
+        "rev-parse",
+        "--path-format=absolute",
+        "--git-common-dir",
+        cwd=repo,
+        env=os.environ.copy(),
+    )
+    return Path(result.stdout.strip()) / "hooks"
+
+
+def _write_fake_prek(tmp_path: Path) -> Path:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_prek = fake_bin / "prek"
+    fake_prek.write_text(
+        """#!/usr/bin/env bash
+set -euo pipefail
+if git config --get core.hooksPath >/dev/null; then
+  echo 'Cowardly refusing to install hooks with core.hooksPath set.' >&2
+  exit 19
+fi
+hooks_dir="$(git rev-parse --path-format=absolute --git-common-dir)/hooks"
+mkdir -p "$hooks_dir"
+for hook in pre-commit commit-msg pre-push; do
+  cat > "$hooks_dir/$hook" <<'HOOK'
+#!/usr/bin/env bash
+HERE="$(cd "$(dirname "$0")" && pwd)"
+HOOK
+done
+""",
+        encoding="utf-8",
+    )
+    fake_prek.chmod(0o755)
+    return fake_bin
+
+
+def _hook_env(tmp_path: Path, fake_bin: Path) -> dict[str, str]:
+    return {
+        **os.environ,
+        "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+        "CODEX_HOOK_CACHE_ROOT": str(tmp_path / "hook-cache"),
+    }
+
+
 def test_validate_all_uses_locked_infrastructure_python() -> None:
     """The broad validator must use its locked project environment, not ambient Python."""
     env = {key: value for key, value in os.environ.items() if key != "PYTHON_BIN"}
@@ -49,27 +108,8 @@ def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(
     tmp_path: Path,
 ) -> None:
     """Hook refresh must be idempotent when prepare-worktree configured common hooks."""
-    repo = tmp_path / "repository"
-    _run("git", "init", "-q", str(repo), cwd=tmp_path, env=os.environ.copy()).check_returncode()
-    script_dir = repo / "Infrastructure/scripts"
-    script_dir.mkdir(parents=True)
-    shutil.copy2(INSTALL_PREK_HOOKS, script_dir / "install-prek-hooks.sh")
-    helper_source = REPO_ROOT / "Infrastructure/scripts/lib/secure-hook-cache.sh"
-    helper_target = script_dir / "lib/secure-hook-cache.sh"
-    helper_target.parent.mkdir(parents=True)
-    shutil.copy2(helper_source, helper_target)
-    (repo / "prek.toml").write_text("repos = []\n", encoding="utf-8")
-
-    hooks_dir = Path(
-        _run(
-            "git",
-            "rev-parse",
-            "--path-format=absolute",
-            "--git-common-dir",
-            cwd=repo,
-            env=os.environ.copy(),
-        ).stdout.strip()
-    ) / "hooks"
+    repo, script_dir = _create_hook_fixture(tmp_path)
+    hooks_dir = _common_hooks_dir(repo)
     _run(
         "git",
         "config",
@@ -80,33 +120,7 @@ def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(
         env=os.environ.copy(),
     ).check_returncode()
 
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_prek = fake_bin / "prek"
-    fake_prek.write_text(
-        """#!/usr/bin/env bash
-set -euo pipefail
-if git config --get core.hooksPath >/dev/null; then
-  echo 'Cowardly refusing to install hooks with core.hooksPath set.' >&2
-  exit 19
-fi
-hooks_dir=\"$(git rev-parse --path-format=absolute --git-common-dir)/hooks\"
-mkdir -p \"$hooks_dir\"
-for hook in pre-commit commit-msg pre-push; do
-  cat > \"$hooks_dir/$hook\" <<'HOOK'
-#!/usr/bin/env bash
-HERE=\"$(cd \"$(dirname \"$0\")\" && pwd)\"
-HOOK
-done
-""",
-        encoding="utf-8",
-    )
-    fake_prek.chmod(0o755)
-    env = {
-        **os.environ,
-        "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
-        "CODEX_HOOK_CACHE_ROOT": str(tmp_path / "hook-cache"),
-    }
+    env = _hook_env(tmp_path, _write_fake_prek(tmp_path))
 
     result = _run("bash", str(script_dir / "install-prek-hooks.sh"), cwd=repo, env=env)
 

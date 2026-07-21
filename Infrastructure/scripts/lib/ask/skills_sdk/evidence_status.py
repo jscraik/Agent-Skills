@@ -54,31 +54,72 @@ def build_evidence_status_receipt(
         _validate_mode(required_mode, "required_mode", allow_all=False)
 
     source_revision = _git_head(repo_root)
-    dirty_state = _dirty_state(repo_root)
-    receipt_path = Path(stabilization_receipt_path) if stabilization_receipt_path else DEFAULT_STABILIZATION_RECEIPT
+    receipt_path = _stabilization_receipt_path(stabilization_receipt_path)
     qa_dispatch = _load_or_build_qa_dispatch_record(repo_root, source_revision, qa_dispatch_record_path)
+    lanes = _build_evidence_lanes(repo_root, source_revision, receipt_path)
+    selected_lane = required_mode or (None if mode == "all" else mode)
+    selected_blockers, ignored_blockers = _select_blockers(lanes, selected_lane)
+    return _evidence_status_payload(
+        repo_root,
+        mode,
+        selected_lane,
+        source_revision,
+        lanes,
+        selected_blockers,
+        ignored_blockers,
+        qa_dispatch,
+    )
 
-    lanes = [
+
+def _stabilization_receipt_path(value: str | Path | None) -> Path:
+    return Path(value) if value else DEFAULT_STABILIZATION_RECEIPT
+
+
+def _build_evidence_lanes(
+    repo_root: Path,
+    source_revision: str,
+    receipt_path: Path,
+) -> list[dict[str, Any]]:
+    return [
         _build_local_build_lane(repo_root),
         _build_acceptance_lane(repo_root, source_revision, receipt_path),
         _build_integration_lane(),
     ]
+
+
+def _select_blockers(
+    lanes: list[dict[str, Any]],
+    selected_lane: str | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     lane_by_id = {lane["id"]: lane for lane in lanes}
-    selected_lane = required_mode or (None if mode == "all" else mode)
     selected_blockers = (
         [blocker for lane in lanes for blocker in lane["blockers"]]
         if selected_lane is None
         else list(lane_by_id[selected_lane]["blockers"])
     )
-    ignored_blockers = []
-    if selected_lane is not None:
-        ignored_blockers = [
+    ignored_blockers = (
+        []
+        if selected_lane is None
+        else [
             {**blocker, "ignored_by": selected_lane}
             for lane in lanes
             if lane["id"] != selected_lane
             for blocker in lane["blockers"]
         ]
+    )
+    return selected_blockers, ignored_blockers
 
+
+def _evidence_status_payload(
+    repo_root: Path,
+    mode: str,
+    selected_lane: str | None,
+    source_revision: str,
+    lanes: list[dict[str, Any]],
+    selected_blockers: list[dict[str, Any]],
+    ignored_blockers: list[dict[str, Any]],
+    qa_dispatch: dict[str, Any],
+) -> dict[str, Any]:
     return {
         "schema_version": EVIDENCE_STATUS_SCHEMA_VERSION,
         "schema_uri": EVIDENCE_STATUS_SCHEMA_URI,
@@ -88,7 +129,7 @@ def build_evidence_status_receipt(
         "selected_lane": selected_lane or "all",
         "source_context": {
             "head_sha": source_revision,
-            "dirty_state": dirty_state,
+            "dirty_state": _dirty_state(repo_root),
         },
         "lanes": lanes,
         "blockers": selected_blockers,
@@ -166,8 +207,6 @@ def _build_acceptance_lane(
     source_revision: str,
     receipt_path: Path,
 ) -> dict[str, Any]:
-    blockers: list[dict[str, Any]] = []
-    evidence: list[dict[str, Any]] = []
     candidate = receipt_path if receipt_path.is_absolute() else repo_root / receipt_path
     if not _is_within_repo(repo_root, candidate):
         blocker = _blocker(
@@ -178,26 +217,44 @@ def _build_acceptance_lane(
         )
         return {"id": "acceptance", "status": "blocked", "blockers": [blocker], "evidence": []}
     evidence_ref = _relative_or_absolute(repo_root, candidate)
+    receipt, blockers = _load_stabilization_receipt(candidate, evidence_ref)
+    if receipt is None:
+        return _acceptance_lane_result(blockers, None, evidence_ref)
+    blockers.extend(_receipt_binding_blockers(receipt, source_revision, evidence_ref))
+    blockers.extend(_qa_artifact_blockers(repo_root, receipt, evidence_ref))
+    return _acceptance_lane_result(blockers, receipt, evidence_ref)
+
+
+def _load_stabilization_receipt(
+    candidate: Path,
+    evidence_ref: str,
+) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     if not candidate.is_file():
-        blockers.append(
+        return None, [
             _blocker(
                 "stabilization_receipt_missing",
                 "acceptance",
                 "revision-bound stabilization receipt is missing",
                 [evidence_ref],
             )
-        )
-        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+        ]
     try:
         receipt = json.loads(candidate.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        blockers.append(_blocker("stabilization_receipt_invalid", "acceptance", str(exc), [evidence_ref]))
-        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+        return None, [_blocker("stabilization_receipt_invalid", "acceptance", str(exc), [evidence_ref])]
     if not isinstance(receipt, dict):
-        blockers.append(_blocker("stabilization_receipt_invalid", "acceptance", "receipt root is not an object", [evidence_ref]))
-        return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+        return None, [
+            _blocker("stabilization_receipt_invalid", "acceptance", "receipt root is not an object", [evidence_ref])
+        ]
+    return receipt, []
 
-    # Verify receipt authenticity: must be controller-owned or signed
+
+def _receipt_binding_blockers(
+    receipt: dict[str, Any],
+    source_revision: str,
+    evidence_ref: str,
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
     if not receipt.get("controller_owned") and not receipt.get("signature"):
         blockers.append(
             _blocker(
@@ -207,7 +264,6 @@ def _build_acceptance_lane(
                 [evidence_ref],
             )
         )
-
     if receipt.get("implementation_sha") != source_revision:
         blockers.append(
             _blocker(
@@ -217,10 +273,18 @@ def _build_acceptance_lane(
                 [evidence_ref, source_revision],
             )
         )
+    return blockers
+
+
+def _qa_artifact_blockers(
+    repo_root: Path,
+    receipt: dict[str, Any],
+    evidence_ref: str,
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
 
     qa_artifact_ref = receipt.get("qa_artifact_ref")
     qa_artifact_digest = receipt.get("qa_artifact_digest")
-
     if not qa_artifact_ref:
         blockers.append(
             _blocker(
@@ -239,53 +303,38 @@ def _build_acceptance_lane(
                 [evidence_ref],
             )
         )
-
-    # Recompute QA artifact SHA-256 and verify it matches
     if qa_artifact_ref and qa_artifact_digest:
-        qa_artifact_path = Path(qa_artifact_ref)
-        if not qa_artifact_path.is_absolute():
-            qa_artifact_path = repo_root / qa_artifact_path
-        if not _is_within_repo(repo_root, qa_artifact_path):
-            blockers.append(
-                _blocker(
-                    "qa_artifact_outside_source",
-                    "acceptance",
-                    "QA artifact path must stay inside the current source worktree",
-                    [str(qa_artifact_path)],
-                )
-            )
-        elif not qa_artifact_path.is_file():
-            blockers.append(
-                _blocker(
-                    "qa_artifact_file_missing",
-                    "acceptance",
-                    "QA artifact file does not exist at referenced path",
-                    [str(qa_artifact_path)],
-                )
-            )
-        else:
-            try:
-                actual_digest = _sha256_file(qa_artifact_path)
-                if actual_digest != qa_artifact_digest:
-                    blockers.append(
-                        _blocker(
-                            "qa_artifact_digest_mismatch",
-                            "acceptance",
-                            f"QA artifact SHA-256 mismatch; expected {qa_artifact_digest}, computed {actual_digest}",
-                            [str(qa_artifact_path)],
-                        )
-                    )
-            except (OSError, ValueError) as exc:
-                blockers.append(
-                    _blocker(
-                        "qa_artifact_digest_computation_failed",
-                        "acceptance",
-                        f"could not compute QA artifact SHA-256: {exc}",
-                        [str(qa_artifact_path)],
-                    )
-                )
+        blockers.extend(_verify_qa_artifact(repo_root, qa_artifact_ref, qa_artifact_digest))
+    return blockers
 
-    if receipt.get("claim_status") != "accepted":
+
+def _verify_qa_artifact(
+    repo_root: Path,
+    qa_artifact_ref: str,
+    qa_artifact_digest: str,
+) -> list[dict[str, Any]]:
+    qa_artifact_path = Path(qa_artifact_ref)
+    if not qa_artifact_path.is_absolute():
+        qa_artifact_path = repo_root / qa_artifact_path
+    if not _is_within_repo(repo_root, qa_artifact_path):
+        return [_blocker("qa_artifact_outside_source", "acceptance", "QA artifact path must stay inside the current source worktree", [str(qa_artifact_path)])]
+    if not qa_artifact_path.is_file():
+        return [_blocker("qa_artifact_file_missing", "acceptance", "QA artifact file does not exist at referenced path", [str(qa_artifact_path)])]
+    try:
+        actual_digest = _sha256_file(qa_artifact_path)
+    except (OSError, ValueError) as exc:
+        return [_blocker("qa_artifact_digest_computation_failed", "acceptance", f"could not compute QA artifact SHA-256: {exc}", [str(qa_artifact_path)])]
+    if actual_digest == qa_artifact_digest:
+        return []
+    return [_blocker("qa_artifact_digest_mismatch", "acceptance", f"QA artifact SHA-256 mismatch; expected {qa_artifact_digest}, computed {actual_digest}", [str(qa_artifact_path)])]
+
+
+def _acceptance_lane_result(
+    blockers: list[dict[str, Any]],
+    receipt: dict[str, Any] | None,
+    evidence_ref: str,
+) -> dict[str, Any]:
+    if receipt is not None and receipt.get("claim_status") != "accepted":
         blockers.append(
             _blocker(
                 "stabilization_claim_not_accepted",
@@ -294,13 +343,11 @@ def _build_acceptance_lane(
                 [evidence_ref],
             )
         )
-    if not blockers:
-        evidence.append(_evidence("stabilization_receipt", "pass", "receipt is revision and QA bound with verified authenticity and digest", [evidence_ref]))
     return {
         "id": "acceptance",
         "status": "pass" if not blockers else "blocked",
         "blockers": blockers,
-        "evidence": evidence,
+        "evidence": [] if blockers else [_evidence("stabilization_receipt", "pass", "receipt is revision and QA bound with verified authenticity and digest", [evidence_ref])],
     }
 
 
@@ -322,21 +369,38 @@ def _load_or_build_qa_dispatch_record(
 ) -> dict[str, Any]:
     if record_path is None:
         return build_qa_dispatch_record(repo_root, QaDispatchRequest(source_revision=source_revision))
+    candidate = _qa_dispatch_record_path(repo_root, record_path)
+    payload = _read_qa_dispatch_record(candidate)
+    if payload.get("source_revision") != source_revision:
+        raise EvidenceStatusError("QA dispatch source_revision does not match current source revision")
+    _validate_qa_dispatch_record(repo_root, candidate, payload)
+    return payload
+
+
+def _qa_dispatch_record_path(repo_root: Path, record_path: str | Path) -> Path:
     candidate = Path(record_path)
     if not candidate.is_absolute():
         candidate = repo_root / candidate
     if not _is_within_repo(repo_root, candidate):
         raise EvidenceStatusError("QA dispatch record path must stay inside the current source worktree")
+    return candidate
+
+
+def _read_qa_dispatch_record(candidate: Path) -> dict[str, Any]:
     try:
         payload = json.loads(candidate.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise EvidenceStatusError(f"QA dispatch record could not be read: {exc}") from exc
     if not isinstance(payload, dict):
         raise EvidenceStatusError("QA dispatch record root must be an object")
-    if payload.get("source_revision") != source_revision:
-        raise EvidenceStatusError("QA dispatch source_revision does not match current source revision")
+    return payload
 
-    # Validate the loaded payload against the QA dispatch schema
+
+def _validate_qa_dispatch_record(
+    repo_root: Path,
+    candidate: Path,
+    payload: dict[str, Any],
+) -> None:
     try:
         schema_file = repo_root / EVIDENCE_STATUS_SCHEMA_PATH
         evidence_schema = json.loads(schema_file.read_text(encoding="utf-8"))
@@ -356,8 +420,6 @@ def _load_or_build_qa_dispatch_record(
             raise EvidenceStatusError(f"QA dispatch record schema validation failed: {diagnostics}")
     except (OSError, json.JSONDecodeError, KeyError) as exc:
         raise EvidenceStatusError(f"QA dispatch record schema validation could not be performed: {exc}") from exc
-
-    return payload
 
 
 def _validate_mode(mode: str, field: str, *, allow_all: bool = True) -> None:

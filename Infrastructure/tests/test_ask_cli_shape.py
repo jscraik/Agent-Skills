@@ -84,6 +84,28 @@ def sample(value):
 
         self.assertEqual(metrics["sample"], (4, 2))
 
+    def test_skills_sdk_evidence_status_and_hook_fixture_fit_shape_budget(self) -> None:
+        validator = _load_validator()
+        targets = {
+            "Infrastructure/scripts/lib/ask/skills_sdk/evidence_status.py": {
+                "build_evidence_status_receipt": (40, 12),
+                "_build_acceptance_lane": (40, 12),
+                "_load_or_build_qa_dispatch_record": (40, 12),
+            },
+            "Infrastructure/scripts/testing/test_validation_execution_environment.py": {
+                "test_prek_reinstalls_when_expected_hooks_path_is_already_configured": (40, 12),
+            },
+        }
+
+        for relative_path, functions in targets.items():
+            metrics = validator._function_metrics(
+                (REPO_ROOT / relative_path).read_text(encoding="utf-8")
+            )
+            for name, (max_lines, max_complexity) in functions.items():
+                line_count, complexity = metrics[name]
+                self.assertLessEqual(line_count, max_lines, f"{relative_path}:{name}")
+                self.assertLessEqual(complexity, max_complexity, f"{relative_path}:{name}")
+
     def test_file_size_ratchet_allows_existing_oversized_file_only_when_it_shrinks(self) -> None:
         validator = _load_validator()
         args = SimpleNamespace(max_file_lines=3)
