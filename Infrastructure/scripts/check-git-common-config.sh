@@ -2,7 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+# This script is also reached through the root scripts/ symlink. Its physical
+# directory is Infrastructure/scripts, so the checkout root is two levels up.
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd -P)"
 
 # usage prints the script's usage/help text, including the `--repair` option.
 usage() {

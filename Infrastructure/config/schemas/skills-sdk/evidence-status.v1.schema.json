@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/evidence-status.v1.schema.json",
+  "title": "Skills SDK Evidence Status v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "skills-sdk.evidence-status.v1"},
+    "schema_uri": {"const": "https://agent-skills.local/schemas/skills-sdk/evidence-status.v1.schema.json"},
+    "status": {"enum": ["pass", "blocked"]},
+    "operation": {"const": "evidence_status"},
+    "mode": {"enum": ["local-build", "acceptance", "integration", "all"]},
+    "selected_lane": {"enum": ["local-build", "acceptance", "integration", "all"]},
+    "source_context": {"$ref": "#/definitions/sourceContext"},
+    "lanes": {"type": "array", "minItems": 3, "items": {"$ref": "#/definitions/lane"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/blocker"}},
+    "ignored_blockers": {"type": "array", "items": {"$ref": "#/definitions/ignoredBlocker"}},
+    "qa_dispatch_record": {"$ref": "#/definitions/qaDispatchRecord"},
+    "mutation_performed": {"const": false},
+    "agent_summary": {"type": "string", "minLength": 1},
+    "claims_boundary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version", "schema_uri", "status", "operation", "mode", "selected_lane",
+    "source_context", "lanes", "blockers", "ignored_blockers", "qa_dispatch_record",
+    "mutation_performed", "agent_summary", "claims_boundary"
+  ],
+  "definitions": {
+    "sourceContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "dirty_state": {"enum": ["clean", "dirty", "unknown"]}
+      },
+      "required": ["head_sha", "dirty_state"]
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"enum": ["local-build", "acceptance", "integration"]},
+        "status": {"enum": ["pass", "blocked"]},
+        "blockers": {"type": "array", "items": {"$ref": "#/definitions/blocker"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/definitions/evidence"}}
+      },
+      "required": ["id", "status", "blockers", "evidence"]
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "lane": {"enum": ["local-build", "acceptance", "integration"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["id", "lane", "message", "evidence"]
+    },
+    "ignoredBlocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "lane": {"enum": ["local-build", "acceptance", "integration"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "ignored_by": {"enum": ["local-build", "acceptance", "integration"]}
+      },
+      "required": ["id", "lane", "message", "evidence", "ignored_by"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"const": "pass"},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["id", "status", "message", "evidence"]
+    },
+    "qaDispatchRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": "skills-sdk.qa-dispatch-record.v1"},
+        "record_kind": {"const": "controller_owned_qa_dispatch"},
+        "controller_owned": {"const": true},
+        "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "candidate_receipt_sha256": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "qa_artifact_ref": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "qa_artifact_sha256": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+        "task_id": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "subagent_id": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "state": {"enum": ["not_requested", "planned", "dispatched", "blocked", "accepted"]},
+        "dispatch_performed": {"type": "boolean"},
+        "claims_boundary": {"type": "string", "minLength": 1}
+      },
+      "required": [
+        "schema_version", "record_kind", "controller_owned", "source_revision",
+        "candidate_receipt_sha256", "qa_artifact_ref", "qa_artifact_sha256", "task_id",
+        "subagent_id", "state", "dispatch_performed", "claims_boundary"
+      ]
+    }
+  }
+}

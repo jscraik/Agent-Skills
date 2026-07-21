@@ -26,6 +26,23 @@ def _workflow_jobs() -> dict[str, object]:
     return workflow["jobs"]
 
 
+def _workflow_triggers() -> dict[str, object]:
+    workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    triggers = workflow.get("on", workflow.get(True))
+    assert isinstance(triggers, dict)
+    return triggers
+
+
+def test_pr_template_revalidates_when_pull_request_description_changes() -> None:
+    triggers = _workflow_triggers()
+
+    pull_request = triggers["pull_request"]
+
+    assert isinstance(pull_request, dict)
+    assert set(pull_request["types"]) == {"opened", "reopened", "synchronize", "edited"}
+    assert triggers["merge_group"] is None
+
+
 def _job_steps(job: object) -> list[dict[str, object]]:
     assert isinstance(job, dict)
     steps = job["steps"]

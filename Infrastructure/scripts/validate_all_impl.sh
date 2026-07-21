@@ -149,49 +149,21 @@ scope_reason=""
 python_cmd=(python3)
 python_cmd_display="python3"
 
-use_uv_python_launcher() {
+use_locked_infrastructure_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1 || return 1
-  python_cmd=(uv run --python 3.12 python)
-  python_cmd_display="uv run --python 3.12 python"
-  return 0
-}
-
-use_mise_python_launcher() {
-  command -v mise >/dev/null 2>&1 || return 1
-  command -v uv >/dev/null 2>&1 || return 1
-  mise exec -- uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1 || return 1
-  python_cmd=(mise exec -- uv run --python 3.12 python)
-  python_cmd_display="mise exec -- uv run --python 3.12 python"
-  return 0
-}
-
-use_system_python_launcher() {
-  python3 -c "import sys, tomllib, yaml" >/dev/null 2>&1 || return 1
-  python_cmd=(python3)
-  python_cmd_display="python3"
+  uv run --frozen --project Infrastructure --group test --group lint python -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --frozen --project Infrastructure --group test --group lint python)
+  python_cmd_display="uv run --frozen --project Infrastructure --group test --group lint python"
   return 0
 }
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
-elif [[ "$output_mode" == "ephemeral" ]]; then
-  if use_uv_python_launcher; then
-    :
-  elif use_system_python_launcher; then
-    echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
-  elif [[ "${VALIDATE_ALL_ALLOW_MISE_PROBE:-0}" == "1" ]] && use_mise_python_launcher; then
-    echo "⚠️  Python launcher fallback: uv/python3 probes failed, using mise because VALIDATE_ALL_ALLOW_MISE_PROBE=1"
-  fi
-else
-  if use_mise_python_launcher; then
-    :
-  elif use_uv_python_launcher; then
-    echo "⚠️  Python launcher fallback: mise probe failed, using uv directly"
-  elif use_system_python_launcher; then
-    echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
-  fi
+elif ! use_locked_infrastructure_python_launcher; then
+  echo "[validate-all] locked Infrastructure Python with PyYAML is required" >&2
+  echo "[validate-all] run bash scripts/bootstrap-ask.sh --json before validation" >&2
+  exit 1
 fi
 
 if [[ "$output_mode" == "ephemeral" ]]; then

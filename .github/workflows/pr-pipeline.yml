@@ -2,6 +2,7 @@ name: Harness PR Pipeline
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize, edited]
   merge_group:
 
 permissions:

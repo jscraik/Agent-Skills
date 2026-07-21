@@ -2,7 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+# The canonical script lives under Infrastructure/scripts and is projected at
+# scripts/ through a symlink; resolve the repository root from that physical
+# location rather than treating Infrastructure as the checkout root.
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd -P)"
 
 # usage prints help text describing the required <issue-key>-<slug> positional argument and supported options for creating a task-specific git worktree and branch and for optionally bootstrapping it.
 usage() {

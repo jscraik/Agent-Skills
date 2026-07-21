@@ -99,6 +99,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk ir build Skills/agent-ops/autofix --json --robot",
         "ask sdk docs verify --json --robot",
         "ask sdk evidence verify --scope capability-matrix --json --robot",
+        "ask sdk evidence status --mode all --json --robot",
         "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --json --robot",
         "ask sdk eval profiles --preview --json --robot",
@@ -292,6 +293,7 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("sdk", "evidence"): [
         "ask sdk evidence verify --scope capability-matrix --json --robot",
+        "ask sdk evidence status --mode all --json --robot",
         "skills-sdk evidence verify --scope capability-matrix --json --robot",
     ],
     ("sdk", "eval"): [

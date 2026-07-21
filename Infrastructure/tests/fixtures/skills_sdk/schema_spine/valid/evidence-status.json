@@ -1,0 +1,48 @@
+{
+  "schema_version": "skills-sdk.evidence-status.v1",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/evidence-status.v1.schema.json",
+  "status": "pass",
+  "operation": "evidence_status",
+  "mode": "local-build",
+  "selected_lane": "local-build",
+  "source_context": {
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "dirty_state": "clean"
+  },
+  "lanes": [
+    {
+      "id": "local-build",
+      "status": "pass",
+      "blockers": [],
+      "evidence": [
+        {
+          "id": "capability_matrix",
+          "status": "pass",
+          "message": "capability matrix is structurally valid",
+          "evidence": ["Infrastructure/config/skills-sdk/capability-matrix.v1.json"]
+        }
+      ]
+    },
+    {"id": "acceptance", "status": "blocked", "blockers": [], "evidence": []},
+    {"id": "integration", "status": "blocked", "blockers": [], "evidence": []}
+  ],
+  "blockers": [],
+  "ignored_blockers": [],
+  "qa_dispatch_record": {
+    "schema_version": "skills-sdk.qa-dispatch-record.v1",
+    "record_kind": "controller_owned_qa_dispatch",
+    "controller_owned": true,
+    "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "candidate_receipt_sha256": null,
+    "qa_artifact_ref": null,
+    "qa_artifact_sha256": null,
+    "task_id": null,
+    "subagent_id": null,
+    "state": "not_requested",
+    "dispatch_performed": false,
+    "claims_boundary": "This fixture does not prove QA or release state."
+  },
+  "mutation_performed": false,
+  "agent_summary": "local-build is structurally valid",
+  "claims_boundary": "This fixture proves schema shape only."
+}
