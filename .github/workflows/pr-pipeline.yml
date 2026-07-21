@@ -491,6 +491,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
+        with:
+          python-version: "3.12"
+      - name: Install locked Python validation deps
+        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
+      - name: Bootstrap locked Infrastructure Python
+        run: bash scripts/bootstrap-ask.sh --json
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=lint
 
@@ -503,6 +510,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
+        with:
+          python-version: "3.12"
+      - name: Install locked Python validation deps
+        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
+      - name: Bootstrap locked Infrastructure Python
+        run: bash scripts/bootstrap-ask.sh --json
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=typecheck
 
@@ -518,8 +532,10 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
         with:
           python-version: "3.12"
-      - name: Install Python validation deps
-        run: python -m pip install --upgrade pip pyyaml pytest jsonschema
+      - name: Install locked Python validation deps
+        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
+      - name: Bootstrap locked Infrastructure Python
+        run: bash scripts/bootstrap-ask.sh --json
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=test
 
