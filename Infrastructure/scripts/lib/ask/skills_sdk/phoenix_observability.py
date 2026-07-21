@@ -13,6 +13,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from ask.skills_sdk.phoenix_trace_plan import PHOENIX_PROJECT_NAME
+
 
 PHOENIX_STATUS_SCHEMA_VERSION = "skills-sdk.phoenix-status-receipt.v0"
 PHOENIX_STATUS_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/phoenix-status-receipt.v0.schema.json"
@@ -370,11 +372,29 @@ def build_phoenix_smoke_receipt(
 ) -> dict[str, Any]:
     parsed = urlparse(base_url)
     endpoint = base_url.rstrip("/") + "/v1/traces"
+    config = _phoenix_config(repo_root)
+    configured_project_name = config.get("project_name")
+    project_name = PHOENIX_PROJECT_NAME
+    project_name_evidence = (
+        [str(configured_project_name)]
+        if configured_project_name is not None
+        else [project_name]
+    )
     checks: list[dict[str, Any]] = []
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         checks.append(_check("phoenix_base_url", "blocker", "Phoenix base URL must be an absolute http(s) URL.", [base_url]))
     else:
         checks.append(_check("phoenix_base_url", "pass", "Phoenix base URL is absolute.", [base_url]))
+    checks.append(
+        _check(
+            "phoenix_project_name",
+            "pass"
+            if "project_name" not in config or configured_project_name == PHOENIX_PROJECT_NAME
+            else "blocker",
+            "Phoenix traces must target the Skills SDK eval project.",
+            project_name_evidence,
+        )
+    )
     checks.append(
         _check(
             "oss_profile_supported",
@@ -403,7 +423,7 @@ def build_phoenix_smoke_receipt(
     span_name = f"agent-skills.phoenix.{model_name}" if model_name else "agent-skills.phoenix.smoke"
     emitted = False
     export_error: str | None = None
-    otel_python = Path(otel_python_path) if otel_python_path else None
+    otel_python = Path(otel_python_path).expanduser() if otel_python_path else None
     checks.append(
         _check(
             "otel_python_available",
@@ -482,7 +502,10 @@ span = Span(
 request = ExportTraceServiceRequest(
     resource_spans=[
         ResourceSpans(
-            resource=Resource(attributes=[kv("service.name", "agent-skills")]),
+            resource=Resource(attributes=[
+                kv("service.name", "agent-skills"),
+                kv("openinference.project.name", cfg["project_name"]),
+            ]),
             scope_spans=[ScopeSpans(spans=[span])],
         )
     ]
@@ -490,7 +513,10 @@ request = ExportTraceServiceRequest(
 http_request = urllib.request.Request(
     cfg["endpoint"],
     data=request.SerializeToString(),
-    headers={"content-type": "application/x-protobuf"},
+    headers={
+        "content-type": "application/x-protobuf",
+        "x-project-name": cfg["project_name"],
+    },
     method="POST",
 )
 try:
@@ -507,6 +533,7 @@ except urllib.error.HTTPError as exc:
                 input=json.dumps(
                     {
                         "endpoint": endpoint,
+                        "project_name": project_name,
                         "trace_id": trace_id,
                         "span_id": span_id,
                         "span_name": span_name,
@@ -564,6 +591,7 @@ except urllib.error.HTTPError as exc:
         "operation": "phoenix_smoke_trace",
         "base_url": base_url,
         "otlp_http_endpoint": endpoint,
+        "project_name": project_name,
         "span_name": span_name,
         "span_kind": span_kind,
         "trace_id": trace_id,
@@ -584,7 +612,7 @@ except urllib.error.HTTPError as exc:
         "mutation_performed": emitted and not blockers,
         "acceptance_trace": PHOENIX_ACCEPTANCE_TRACE,
         "agent_summary": (
-            f"Phoenix {span_kind.lower()} smoke trace emitted to {endpoint}; refresh the default project's Tracing view."
+            f"Phoenix {span_kind.lower()} smoke trace emitted to project {project_name} at {endpoint}; refresh that project's Tracing view."
             if status == "pass"
             else f"Phoenix smoke trace is blocked for {endpoint}."
         ),

@@ -57,6 +57,7 @@ SCHEMA_NAMES = {
     "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
+    "phoenix-smoke-receipt": "phoenix-smoke-receipt.v0.schema.json",
     "phoenix-eval-trace-receipt": "phoenix-eval-trace-receipt.v1.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
@@ -119,6 +120,16 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         payload = self.assert_valid("evidence-status", "evidence-status.json")
         self.assertEqual(payload["selected_lane"], "local-build")
         self.assertTrue(payload["qa_dispatch_record"]["controller_owned"])
+
+    def test_phoenix_smoke_receipt_fixture_is_valid(self) -> None:
+        payload = self.assert_valid("phoenix-smoke-receipt", "phoenix-smoke-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["project_name"], "agent-skills-skills-sdk-evals")
+        self.assertTrue(payload["mutation_performed"])
+
+    def test_phoenix_smoke_receipt_rejects_wrong_project(self) -> None:
+        self.assert_invalid("phoenix-smoke-receipt", "phoenix-smoke-receipt-wrong-project.json")
 
     def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
         schema = {"type": "number", "minimum": 1}
