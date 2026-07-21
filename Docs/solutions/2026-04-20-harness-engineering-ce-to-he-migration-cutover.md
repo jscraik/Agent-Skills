@@ -3,8 +3,8 @@ title: Harness-engineering CE to HE migration cutover and gate repair
 asset_family: harness-engineering stage naming and routing governance
 owner: Agent Skills Team
 source_artifact: Plugins/harness-engineering/.codex-plugin/plugin.json
-freshness_reviewed_on: 2026-04-20
-last_updated: 2026-04-20
+freshness_reviewed_on: 2026-07-21
+last_updated: 2026-07-21
 review_after_days: 90
 ---
 
@@ -54,6 +54,12 @@ Result: HE naming is now the active canonical path in skills, archive fixtures, 
 - Branch and PR:
   - branch: `codex/agent-skills-worktree-c81e0239`
   - PR: `https://github.com/jscraik/Agent-Skills/pull/127`
+- Freshness re-review (2026-07-21):
+  - `Plugins/harness-engineering/.codex-plugin/plugin.json` still identifies the
+    canonical `harness-engineering` plugin.
+  - `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
+    passed, including the active HE routing, reference-integrity, and structural
+    family checks.
 
 ## Follow-up
 

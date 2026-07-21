@@ -27,6 +27,26 @@ if [[ "$git_common_dir" = /* ]]; then
 else
 	git_hooks_dir="$REPO_ROOT/$git_common_dir/hooks"
 fi
+configured_hooks_path="$(git config --local --get core.hooksPath 2>/dev/null || true)"
+configured_hooks_dir="$(git rev-parse --path-format=absolute --git-path hooks)"
+restore_hooks_path=0
+if [[ -n "$configured_hooks_path" ]]; then
+	if [[ "$configured_hooks_dir" != "$git_hooks_dir" ]]; then
+		echo "[install-prek-hooks] unexpected core.hooksPath: $configured_hooks_path" >&2
+		echo "[install-prek-hooks] expected common hooks directory: $git_hooks_dir" >&2
+		exit 1
+	fi
+	restore_hooks_path=1
+	git config --local --unset-all core.hooksPath
+fi
+
+restore_configured_hooks_path() {
+	if [[ "$restore_hooks_path" -eq 1 ]]; then
+		git config --local --replace-all core.hooksPath "$configured_hooks_path"
+	fi
+}
+
+trap restore_configured_hooks_path EXIT
 hook_tmp_dir="${TMPDIR:-/tmp}"
 if [[ ! -d "$hook_tmp_dir" || ! -w "$hook_tmp_dir" ]]; then
 	if [[ -d "/private/tmp" && -w "/private/tmp" ]]; then
