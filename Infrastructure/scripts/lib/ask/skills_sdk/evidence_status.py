@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 from dataclasses import dataclass
@@ -7,12 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.capability_status import CapabilityStatusError, build_capability_status
+from ask.skills_sdk.schema_validation import validate_payload_against_schema
 
 
 EVIDENCE_STATUS_SCHEMA_VERSION = "skills-sdk.evidence-status.v1"
 EVIDENCE_STATUS_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/evidence-status.v1.schema.json"
 )
+EVIDENCE_STATUS_SCHEMA_PATH = Path("Infrastructure/config/schemas/skills-sdk/evidence-status.v1.schema.json")
 QA_DISPATCH_SCHEMA_VERSION = "skills-sdk.qa-dispatch-record.v1"
 DEFAULT_STABILIZATION_RECEIPT = Path(
     ".harness/evidence/skills-sdk-stabilization/skills-sdk.stabilization-baseline-receipt.v1.json"
@@ -193,6 +196,18 @@ def _build_acceptance_lane(
     if not isinstance(receipt, dict):
         blockers.append(_blocker("stabilization_receipt_invalid", "acceptance", "receipt root is not an object", [evidence_ref]))
         return {"id": "acceptance", "status": "blocked", "blockers": blockers, "evidence": evidence}
+
+    # Verify receipt authenticity: must be controller-owned or signed
+    if not receipt.get("controller_owned") and not receipt.get("signature"):
+        blockers.append(
+            _blocker(
+                "receipt_authenticity_missing",
+                "acceptance",
+                "receipt is neither controller-owned nor signed; forged receipts are rejected",
+                [evidence_ref],
+            )
+        )
+
     if receipt.get("implementation_sha") != source_revision:
         blockers.append(
             _blocker(
@@ -202,7 +217,11 @@ def _build_acceptance_lane(
                 [evidence_ref, source_revision],
             )
         )
-    if not receipt.get("qa_artifact_ref"):
+
+    qa_artifact_ref = receipt.get("qa_artifact_ref")
+    qa_artifact_digest = receipt.get("qa_artifact_digest")
+
+    if not qa_artifact_ref:
         blockers.append(
             _blocker(
                 "qa_artifact_missing",
@@ -211,7 +230,7 @@ def _build_acceptance_lane(
                 [evidence_ref],
             )
         )
-    if not receipt.get("qa_artifact_digest"):
+    if not qa_artifact_digest:
         blockers.append(
             _blocker(
                 "qa_artifact_digest_missing",
@@ -220,6 +239,52 @@ def _build_acceptance_lane(
                 [evidence_ref],
             )
         )
+
+    # Recompute QA artifact SHA-256 and verify it matches
+    if qa_artifact_ref and qa_artifact_digest:
+        qa_artifact_path = Path(qa_artifact_ref)
+        if not qa_artifact_path.is_absolute():
+            qa_artifact_path = repo_root / qa_artifact_path
+        if not _is_within_repo(repo_root, qa_artifact_path):
+            blockers.append(
+                _blocker(
+                    "qa_artifact_outside_source",
+                    "acceptance",
+                    "QA artifact path must stay inside the current source worktree",
+                    [str(qa_artifact_path)],
+                )
+            )
+        elif not qa_artifact_path.is_file():
+            blockers.append(
+                _blocker(
+                    "qa_artifact_file_missing",
+                    "acceptance",
+                    "QA artifact file does not exist at referenced path",
+                    [str(qa_artifact_path)],
+                )
+            )
+        else:
+            try:
+                actual_digest = _sha256_file(qa_artifact_path)
+                if actual_digest != qa_artifact_digest:
+                    blockers.append(
+                        _blocker(
+                            "qa_artifact_digest_mismatch",
+                            "acceptance",
+                            f"QA artifact SHA-256 mismatch; expected {qa_artifact_digest}, computed {actual_digest}",
+                            [str(qa_artifact_path)],
+                        )
+                    )
+            except (OSError, ValueError) as exc:
+                blockers.append(
+                    _blocker(
+                        "qa_artifact_digest_computation_failed",
+                        "acceptance",
+                        f"could not compute QA artifact SHA-256: {exc}",
+                        [str(qa_artifact_path)],
+                    )
+                )
+
     if receipt.get("claim_status") != "accepted":
         blockers.append(
             _blocker(
@@ -230,7 +295,7 @@ def _build_acceptance_lane(
             )
         )
     if not blockers:
-        evidence.append(_evidence("stabilization_receipt", "pass", "receipt is revision and QA bound", [evidence_ref]))
+        evidence.append(_evidence("stabilization_receipt", "pass", "receipt is revision and QA bound with verified authenticity and digest", [evidence_ref]))
     return {
         "id": "acceptance",
         "status": "pass" if not blockers else "blocked",
@@ -270,6 +335,28 @@ def _load_or_build_qa_dispatch_record(
         raise EvidenceStatusError("QA dispatch record root must be an object")
     if payload.get("source_revision") != source_revision:
         raise EvidenceStatusError("QA dispatch source_revision does not match current source revision")
+
+    # Validate the loaded payload against the QA dispatch schema
+    try:
+        schema_file = repo_root / EVIDENCE_STATUS_SCHEMA_PATH
+        evidence_schema = json.loads(schema_file.read_text(encoding="utf-8"))
+        qa_dispatch_schema = evidence_schema.get("definitions", {}).get("qaDispatchRecord")
+        if not qa_dispatch_schema:
+            raise EvidenceStatusError("QA dispatch schema not found in evidence-status schema")
+        validation_result = validate_payload_against_schema(
+            payload,
+            qa_dispatch_schema,
+            {"evidence-status": evidence_schema},
+            schema_path=EVIDENCE_STATUS_SCHEMA_PATH,
+            payload_source=str(candidate),
+            truth_lane="acceptance",
+        )
+        if validation_result.status != "pass":
+            diagnostics = "; ".join(d.message for d in validation_result.diagnostics)
+            raise EvidenceStatusError(f"QA dispatch record schema validation failed: {diagnostics}")
+    except (OSError, json.JSONDecodeError, KeyError) as exc:
+        raise EvidenceStatusError(f"QA dispatch record schema validation could not be performed: {exc}") from exc
+
     return payload
 
 
@@ -329,6 +416,14 @@ def _is_within_repo(repo_root: Path, candidate: Path) -> bool:
     except ValueError:
         return False
     return True
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _agent_summary(

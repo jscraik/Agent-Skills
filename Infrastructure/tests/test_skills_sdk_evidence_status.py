@@ -95,6 +95,34 @@ class TestSkillsSdkEvidenceStatus(unittest.TestCase):
                 QaDispatchRequest(source_revision="b" * 40, expected_revision="a" * 40),
             )
 
+    def test_conflicting_mode_and_require_is_rejected(self) -> None:
+        process = subprocess.run(
+            [
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "evidence",
+                "status",
+                "--mode",
+                "integration",
+                "--require",
+                "acceptance",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            env=_command_env(),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertNotEqual(process.returncode, 0)
+        payload = json.loads(process.stdout)
+        self.assertEqual(payload["status"], "error")
+        self.assertIn("Conflicting selectors", payload["errors"][0]["message"])
+
     def test_status_receipt_matches_schema_and_cli_envelope(self) -> None:
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         receipt = build_evidence_status_receipt(REPO_ROOT, mode="local-build")

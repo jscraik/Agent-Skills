@@ -45,7 +45,7 @@ This plan is a planning artifact, not an implementation authorization and not a 
 | Jamie Brain bounded implementation specification | Product and lifecycle authority | FR-001 through FR-018 govern standalone and plugin state; FR-019 through FR-027 govern stabilization; FR-038 through FR-042 govern later extraction; FR-057 through FR-063 govern pilots and retirement; FR-065 through FR-071 govern command/service rationalization; FR-081 governs Codex plugin authority. |
 | Jamie Brain architecture decision | Topology authority | `agent-skills` is the current foundry/dogfood source; `skills-foundry` is the separate Foundry source destination; Skills SDK and runtime projections are separate lanes. |
 | `AGENTS.md`, `CODESTYLE.md`, `UBIQUITOUS_LANGUAGE.md` | Repository operating authority | Plan files are durable contracts; generated artifacts are not hand-edited; local, hosted, runtime, registry, and release evidence remain separate. |
-| Current wrappers and focused tests | Executable behavior authority | The current checkout is clean at `4f7075eee3ae8ea81ca4aed9b1e6e5ecd77e6a8e`; intake/package and plugin-cache drift remain observable. |
+| Current wrappers and focused tests | Executable behavior authority | The accepted baseline is `4f7075eee3ae8ea81ca4aed9b1e6e5ecd77e6a8e`. The current checkout identity carries this plan plus separately authorized Workforce projection commits. Intake/package and plugin-cache drift remain observable at the accepted baseline. |
 
 ## Scope and Boundaries
 
@@ -127,7 +127,7 @@ Foundry source admission  ->  SDK release/selection lock  ->  runtime projection
 foundry.toml              ->  selected standalone IDs or plugin refs            ->  copied Codex installs
 ```
 
-Foundry admission says which authored release units are governed. Runtime selection says which of those admitted units the operator actually wants installed. Neither decision is inferred from directory presence.
+Foundry admission says which authored release units are governed. Runtime selection says which of those admitted units the operator actually wants to install. Neither decision is inferred from directory presence.
 
 ## Runtime Persistence and State
 

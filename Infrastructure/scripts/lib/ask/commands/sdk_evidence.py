@@ -105,6 +105,15 @@ def _dispatch_command_plan(repo_root: Path, args: argparse.Namespace) -> CallRes
 
 
 def _dispatch_status(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    # Reject conflicting non-default combinations of --mode and --require
+    if args.require is not None and args.mode != "all" and args.mode != args.require:
+        return _validation_error(
+            "sdk evidence status",
+            f"Conflicting selectors: --mode {args.mode} and --require {args.require} do not match. "
+            f"Use matching selectors or the default mode=all.",
+            "Either use --mode all --require <lane> or --mode <lane> without --require.",
+        )
+
     try:
         receipt = build_evidence_status_receipt(
             repo_root,
