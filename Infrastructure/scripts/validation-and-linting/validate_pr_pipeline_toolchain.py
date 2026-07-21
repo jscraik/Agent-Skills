@@ -15,7 +15,8 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "pr-pipeline.yml"
 MISE_CONFIG = REPO_ROOT / ".mise.toml"
-REQUIRED_SCOPES = ("audit", "check")
+UV_BACKED_VALIDATION_SCOPES = ("audit", "check")
+LOCKED_PYTHON_VALIDATION_SCOPES = ("lint", "typecheck", "test")
 PYTHON_VERSION = "3.12"
 
 
@@ -94,39 +95,84 @@ def _uv_install_index(steps: list[dict[str, Any]], uv_package: str) -> int | Non
     )
 
 
+def _bootstrap_index(steps: list[dict[str, Any]]) -> int | None:
+    return next(
+        (
+            index
+            for index, step in enumerate(steps)
+            if step.get("run") == "bash scripts/bootstrap-ask.sh --json"
+        ),
+        None,
+    )
+
+
+def _required_before(
+    index: int | None,
+    boundary: int,
+    missing_message: str,
+    late_message: str | None = None,
+    predecessor: int | None = None,
+    predecessor_message: str | None = None,
+) -> str | None:
+    if index is None:
+        return missing_message
+    if index >= boundary:
+        return late_message or missing_message
+    if predecessor is not None and predecessor >= index:
+        return predecessor_message
+    return None
+
+
+def _scope_violations(scope: str, steps: list[dict[str, Any]], uv_package: str) -> list[str]:
+    if not steps:
+        return [f"{scope}: missing job steps"]
+    validation = _validation_index(steps, scope)
+    if validation is None:
+        return [f"{scope}: missing validation command"]
+
+    python_setup = _python_setup_index(steps)
+    uv_install = _uv_install_index(steps, uv_package)
+    messages = [
+        _required_before(
+            python_setup,
+            validation,
+            f"{scope}: missing actions/setup-python with python-version {PYTHON_VERSION} before validation",
+            f"{scope}: Python {PYTHON_VERSION} setup must precede validation",
+        ),
+        _required_before(
+            uv_install,
+            validation,
+            f"{scope}: missing {uv_package} installation before validation",
+            predecessor=python_setup,
+            predecessor_message=f"{scope}: Python {PYTHON_VERSION} setup must precede {uv_package} installation",
+        ),
+    ]
+    if scope in LOCKED_PYTHON_VALIDATION_SCOPES:
+        messages.append(
+            _required_before(
+                _bootstrap_index(steps),
+                validation,
+                f"{scope}: missing locked Python bootstrap before validation",
+                predecessor=uv_install,
+                predecessor_message=f"{scope}: {uv_package} installation must precede locked Python bootstrap",
+            )
+        )
+    return [message for message in messages if message]
+
+
 def validate(workflow: dict[str, Any]) -> list[str]:
     """Return prerequisite violations for each uv-backed validation job."""
-    violations: list[str] = []
     try:
         uv_package = _uv_package()
     except ValueError as error:
         return [f"toolchain contract load failed: {error}"]
 
-    for scope in REQUIRED_SCOPES:
-        steps = _steps_for_job(workflow, scope)
-        if not steps:
-            violations.append(f"{scope}: missing job steps")
-            continue
-
-        validation = _validation_index(steps, scope)
-        if validation is None:
-            violations.append(f"{scope}: missing validation command")
-            continue
-
-        python_setup = _python_setup_index(steps)
-        if python_setup is None:
-            violations.append(
-                f"{scope}: missing actions/setup-python with python-version {PYTHON_VERSION} before validation"
-            )
-        elif python_setup >= validation:
-            violations.append(f"{scope}: Python {PYTHON_VERSION} setup must precede validation")
-
-        uv_install = _uv_install_index(steps, uv_package)
-        if uv_install is None or uv_install >= validation:
-            violations.append(f"{scope}: missing {uv_package} installation before validation")
-        elif python_setup is not None and python_setup >= uv_install:
-            violations.append(f"{scope}: Python {PYTHON_VERSION} setup must precede {uv_package} installation")
-    return violations
+    scopes = (*UV_BACKED_VALIDATION_SCOPES, *LOCKED_PYTHON_VALIDATION_SCOPES)
+    return [
+        violation
+        for scope in scopes
+        for violation in _scope_violations(scope, _steps_for_job(workflow, scope), uv_package)
+    ]
 
 
 def main() -> int:
