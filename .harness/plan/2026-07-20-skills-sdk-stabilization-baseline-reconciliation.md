@@ -351,10 +351,10 @@ PU-006 is the current artifact write. PU-007 is a policy contract captured here 
 
 | Gate | Scope | Status/evidence | Required next proof |
 | --- | --- | --- | --- |
-| Artifact identity | New plan path and frontmatter | Required now | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan>` |
-| Frontmatter safety | Parser-safe metadata | Required now | `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <plan>` |
-| BLUF structure | Reader-first opening | Required now | `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan> --json` |
-| Generated plan shape | Execution-first sections, PU units, authority, lenses, visual decision | Required now | `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan> --kind plan --json` |
+| Artifact identity | New plan path and frontmatter | Required now | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-07-20-skills-sdk-stabilization-baseline-reconciliation.md` |
+| Frontmatter safety | Parser-safe metadata | Required now | `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py .harness/plan/2026-07-20-skills-sdk-stabilization-baseline-reconciliation.md` |
+| BLUF structure | Reader-first opening | Required now | `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-07-20-skills-sdk-stabilization-baseline-reconciliation.md --json` |
+| Generated plan shape | Execution-first sections, PU units, authority, lenses, visual decision | Required now | `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-07-20-skills-sdk-stabilization-baseline-reconciliation.md --kind plan --json` |
 | Plan graph | Repository plan graph surface | Required now; scope is repository-wide | `bash scripts/validate_plan_graphs.sh` |
 | Current topology | Foundry boundary and stale targets | Blocked on external state | Candidate source/config reconciliation passes; `/Users/jamiecraik/dev/skills-foundry` must become or be replaced by an explicit Git repository before the topology preflight can pass. |
 | PU-002/PU-003 focused suite | Intake/package/plugin behavior | Candidate evidence passes: 102 passed, 2 skipped, 7 subtests; accepted baseline still has 7 intake failures | Preserve candidate receipts and resolve topology before treating the repair as stabilization acceptance. |
