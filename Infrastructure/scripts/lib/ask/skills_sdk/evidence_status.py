@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,20 @@ LANE_MODES = ("local-build", "acceptance", "integration", "all")
 
 class EvidenceStatusError(ValueError):
     """Raised when an evidence status input cannot be bound safely."""
+
+
+@dataclass(frozen=True)
+class QaDispatchRequest:
+    """Controller-owned QA dispatch inputs bound to one source revision."""
+
+    source_revision: str | None = None
+    expected_revision: str | None = None
+    receipt_sha256: str | None = None
+    qa_artifact_ref: str | None = None
+    qa_artifact_sha256: str | None = None
+    task_id: str | None = None
+    subagent_id: str | None = None
+    state: str = "not_requested"
 
 
 def build_evidence_status_receipt(
@@ -87,35 +102,31 @@ def build_evidence_status_receipt(
 
 def build_qa_dispatch_record(
     repo_root: Path,
-    *,
-    source_revision: str | None = None,
-    expected_revision: str | None = None,
-    receipt_sha256: str | None = None,
-    qa_artifact_ref: str | None = None,
-    qa_artifact_sha256: str | None = None,
-    task_id: str | None = None,
-    subagent_id: str | None = None,
-    state: str = "not_requested",
+    request: QaDispatchRequest | None = None,
 ) -> dict[str, Any]:
-    selected_revision = source_revision or _git_head(repo_root)
-    if expected_revision is not None and selected_revision != expected_revision:
+    selected_request = request or QaDispatchRequest()
+    selected_revision = selected_request.source_revision or _git_head(repo_root)
+    if (
+        selected_request.expected_revision is not None
+        and selected_revision != selected_request.expected_revision
+    ):
         raise EvidenceStatusError(
             "qa dispatch source_revision does not match expected source revision"
         )
-    if state not in {"not_requested", "planned", "dispatched", "blocked", "accepted"}:
-        raise EvidenceStatusError(f"unknown qa dispatch state: {state}")
+    if selected_request.state not in {"not_requested", "planned", "dispatched", "blocked", "accepted"}:
+        raise EvidenceStatusError(f"unknown qa dispatch state: {selected_request.state}")
     return {
         "schema_version": QA_DISPATCH_SCHEMA_VERSION,
         "record_kind": "controller_owned_qa_dispatch",
         "controller_owned": True,
         "source_revision": selected_revision,
-        "candidate_receipt_sha256": receipt_sha256,
-        "qa_artifact_ref": qa_artifact_ref,
-        "qa_artifact_sha256": qa_artifact_sha256,
-        "task_id": task_id,
-        "subagent_id": subagent_id,
-        "state": state,
-        "dispatch_performed": state in {"dispatched", "accepted"},
+        "candidate_receipt_sha256": selected_request.receipt_sha256,
+        "qa_artifact_ref": selected_request.qa_artifact_ref,
+        "qa_artifact_sha256": selected_request.qa_artifact_sha256,
+        "task_id": selected_request.task_id,
+        "subagent_id": selected_request.subagent_id,
+        "state": selected_request.state,
+        "dispatch_performed": selected_request.state in {"dispatched", "accepted"},
         "claims_boundary": (
             "This record describes controller-owned QA routing only; it does not dispatch a reviewer "
             "or prove QA, receipt acceptance, hosted state, or release readiness."
@@ -245,7 +256,7 @@ def _load_or_build_qa_dispatch_record(
     record_path: str | Path | None,
 ) -> dict[str, Any]:
     if record_path is None:
-        return build_qa_dispatch_record(repo_root, source_revision=source_revision)
+        return build_qa_dispatch_record(repo_root, QaDispatchRequest(source_revision=source_revision))
     candidate = Path(record_path)
     if not candidate.is_absolute():
         candidate = repo_root / candidate

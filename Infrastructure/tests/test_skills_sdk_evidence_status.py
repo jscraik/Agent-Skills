@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.evidence_status import (  # noqa: E402
     EvidenceStatusError,
+    QaDispatchRequest,
     build_evidence_status_receipt,
     build_qa_dispatch_record,
 )
@@ -80,7 +81,7 @@ class TestSkillsSdkEvidenceStatus(unittest.TestCase):
         self.assertEqual(receipt["blockers"][0]["id"], "stabilization_receipt_outside_source")
 
     def test_qa_dispatch_record_is_controller_owned_and_revision_bound(self) -> None:
-        record = build_qa_dispatch_record(REPO_ROOT, source_revision="a" * 40)
+        record = build_qa_dispatch_record(REPO_ROOT, QaDispatchRequest(source_revision="a" * 40))
 
         self.assertEqual(record["schema_version"], "skills-sdk.qa-dispatch-record.v1")
         self.assertTrue(record["controller_owned"])
@@ -89,7 +90,10 @@ class TestSkillsSdkEvidenceStatus(unittest.TestCase):
         self.assertEqual(record["source_revision"], "a" * 40)
 
         with self.assertRaisesRegex(EvidenceStatusError, "source_revision"):
-            build_qa_dispatch_record(REPO_ROOT, source_revision="b" * 40, expected_revision="a" * 40)
+            build_qa_dispatch_record(
+                REPO_ROOT,
+                QaDispatchRequest(source_revision="b" * 40, expected_revision="a" * 40),
+            )
 
     def test_status_receipt_matches_schema_and_cli_envelope(self) -> None:
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
