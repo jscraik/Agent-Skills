@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from hashlib import sha256
 from pathlib import Path
 from unittest import mock
 
@@ -16,6 +17,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.evidence_status import (  # noqa: E402
     EvidenceStatusError,
     QaDispatchRequest,
+    _verify_qa_artifact,
     build_evidence_status_receipt,
     build_qa_dispatch_record,
 )
@@ -79,6 +81,17 @@ class TestSkillsSdkEvidenceStatus(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["blockers"][0]["id"], "stabilization_receipt_outside_source")
+
+    def test_qa_artifact_digest_comparison_is_case_insensitive(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            repo_root = Path(temporary_directory)
+            artifact = repo_root / "qa-artifact.json"
+            artifact.write_text('{"verdict":"accepted"}\n', encoding="utf-8")
+            digest = sha256(artifact.read_bytes()).hexdigest().upper()
+
+            blockers = _verify_qa_artifact(repo_root, str(artifact), digest)
+
+        self.assertEqual(blockers, [])
 
     def test_qa_dispatch_record_is_controller_owned_and_revision_bound(self) -> None:
         record = build_qa_dispatch_record(REPO_ROOT, QaDispatchRequest(source_revision="a" * 40))

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -48,7 +49,27 @@ def _common_hooks_dir(repo: Path) -> Path:
         cwd=repo,
         env=os.environ.copy(),
     )
+    result.check_returncode()
     return Path(result.stdout.strip()) / "hooks"
+
+
+def test_common_hooks_dir_fails_when_git_common_dir_cannot_be_resolved(
+    tmp_path: Path,
+) -> None:
+    failed = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "--git-common-dir"],
+        returncode=17,
+        stdout="",
+        stderr="not a git repository",
+    )
+
+    with mock.patch(__name__ + "._run", return_value=failed):
+        try:
+            _common_hooks_dir(tmp_path)
+        except subprocess.CalledProcessError:
+            return
+
+    raise AssertionError("expected git common-directory resolution to fail")
 
 
 def _write_fake_prek(tmp_path: Path) -> Path:
