@@ -48,6 +48,7 @@ def _common_hooks_dir(repo: Path) -> Path:
         cwd=repo,
         env=os.environ.copy(),
     )
+    result.check_returncode()
     return Path(result.stdout.strip()) / "hooks"
 
 

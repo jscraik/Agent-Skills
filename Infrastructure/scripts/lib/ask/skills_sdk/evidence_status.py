@@ -324,7 +324,7 @@ def _verify_qa_artifact(
         actual_digest = _sha256_file(qa_artifact_path)
     except (OSError, ValueError) as exc:
         return [_blocker("qa_artifact_digest_computation_failed", "acceptance", f"could not compute QA artifact SHA-256: {exc}", [str(qa_artifact_path)])]
-    if actual_digest == qa_artifact_digest:
+    if actual_digest.lower() == qa_artifact_digest.lower():
         return []
     return [_blocker("qa_artifact_digest_mismatch", "acceptance", f"QA artifact SHA-256 mismatch; expected {qa_artifact_digest}, computed {actual_digest}", [str(qa_artifact_path)])]
 
