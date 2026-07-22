@@ -15,7 +15,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "pr-pipeline.yml"
 VALIDATOR_PATH = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "validate_pr_pipeline_toolchain.py"
-UV_BACKED_VALIDATION_SCOPES = ("audit", "check")
+LOCKED_PYTHON_VALIDATION_SCOPES = ("lint", "typecheck", "test")
 PYTHON_VERSION = "3.12"
 with (REPO_ROOT / ".mise.toml").open("rb") as handle:
     UV_VERSION = tomllib.load(handle)["tools"]["uv"]
@@ -76,19 +76,28 @@ def _uv_install_index(steps: list[dict[str, object]]) -> int:
     )
 
 
-def test_uv_backed_validation_jobs_materialize_uv_before_execution() -> None:
+def _bootstrap_index(steps: list[dict[str, object]]) -> int:
+    return next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("run") == "bash scripts/bootstrap-ask.sh --json"
+    )
+
+
+def test_locked_python_validation_jobs_bootstrap_before_execution() -> None:
     jobs = _workflow_jobs()
 
-    for scope in UV_BACKED_VALIDATION_SCOPES:
+    for scope in LOCKED_PYTHON_VALIDATION_SCOPES:
         steps = _job_steps(jobs[scope])
 
         python_setup = _python_setup_index(steps)
         uv_install = _uv_install_index(steps)
+        bootstrap = _bootstrap_index(steps)
         validation = _validation_step_index(steps, scope)
 
-        assert python_setup < uv_install < validation, (
-            f"{scope} must set up Python {PYTHON_VERSION} and install uv=={UV_VERSION} "
-            "before its validation command"
+        assert python_setup < uv_install < bootstrap < validation, (
+            f"{scope} must set up Python {PYTHON_VERSION}, install uv=={UV_VERSION}, and "
+            "bootstrap the locked Infrastructure Python before its validation command"
         )
 
 
@@ -132,3 +141,39 @@ jobs:
     assert "audit: missing actions/setup-python with python-version 3.12" in messages
     assert f"audit: missing uv=={UV_VERSION} installation before validation" in messages
     assert f"check: missing uv=={UV_VERSION} installation before validation" in messages
+
+
+def test_toolchain_validator_rejects_missing_locked_python_bootstrap() -> None:
+    workflow = f"""\
+jobs:
+  lint:
+    steps:
+      - uses: actions/setup-python@abc
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
+      - run: ./bin/ask repo validate --scope=lint
+  typecheck:
+    steps:
+      - uses: actions/setup-python@abc
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
+      - run: ./bin/ask repo validate --scope=typecheck
+  test:
+    steps:
+      - uses: actions/setup-python@abc
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
+      - run: ./bin/ask repo validate --scope=test
+"""
+
+    result = _run_validator(workflow)
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "fail"
+    messages = "\n".join(payload["violations"])
+    for scope in LOCKED_PYTHON_VALIDATION_SCOPES:
+        assert f"{scope}: missing locked Python bootstrap before validation" in messages
