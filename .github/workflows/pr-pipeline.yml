@@ -491,15 +491,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
-        with:
-          python-version: "3.12"
-      - name: Install locked Python validation deps
-        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
-      - name: Bootstrap locked Infrastructure Python
-        run: bash scripts/bootstrap-ask.sh --json
+      - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=lint
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=lint
 
   typecheck:
     name: typecheck
@@ -510,15 +504,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
-        with:
-          python-version: "3.12"
-      - name: Install locked Python validation deps
-        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
-      - name: Bootstrap locked Infrastructure Python
-        run: bash scripts/bootstrap-ask.sh --json
+      - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=typecheck
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=typecheck
 
   test:
     name: test
@@ -529,15 +517,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
-        with:
-          python-version: "3.12"
-      - name: Install locked Python validation deps
-        run: python -m pip install --upgrade pip uv==0.11.3 pyyaml pytest jsonschema
-      - name: Bootstrap locked Infrastructure Python
-        run: bash scripts/bootstrap-ask.sh --json
+      - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=test
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=test
 
   audit:
     name: audit
