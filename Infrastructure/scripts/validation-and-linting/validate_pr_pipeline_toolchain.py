@@ -14,9 +14,11 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "pr-pipeline.yml"
+DEFAULT_BOOTSTRAP_ACTION = REPO_ROOT / ".github" / "actions" / "bootstrap-locked-python" / "action.yml"
 MISE_CONFIG = REPO_ROOT / ".mise.toml"
 UV_BACKED_VALIDATION_SCOPES = ("audit", "check")
 LOCKED_PYTHON_VALIDATION_SCOPES = ("lint", "typecheck", "test")
+BOOTSTRAP_ACTION_USES = "./.github/actions/bootstrap-locked-python"
 PYTHON_VERSION = "3.12"
 
 
@@ -46,6 +48,7 @@ def parse_args() -> argparse.Namespace:
     """Parse the workflow path and optional machine-readable output flag."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workflow", type=Path, default=DEFAULT_WORKFLOW)
+    parser.add_argument("--bootstrap-action", type=Path, default=DEFAULT_BOOTSTRAP_ACTION)
     parser.add_argument("--json", action="store_true", dest="as_json")
     return parser.parse_args()
 
@@ -106,6 +109,13 @@ def _bootstrap_index(steps: list[dict[str, Any]]) -> int | None:
     )
 
 
+def _bootstrap_action_index(steps: list[dict[str, Any]]) -> int | None:
+    return next(
+        (index for index, step in enumerate(steps) if step.get("uses") == BOOTSTRAP_ACTION_USES),
+        None,
+    )
+
+
 def _required_before(
     index: int | None,
     boundary: int,
@@ -130,6 +140,14 @@ def _scope_violations(scope: str, steps: list[dict[str, Any]], uv_package: str) 
     if validation is None:
         return [f"{scope}: missing validation command"]
 
+    if scope in LOCKED_PYTHON_VALIDATION_SCOPES:
+        message = _required_before(
+            _bootstrap_action_index(steps),
+            validation,
+            f"{scope}: missing {BOOTSTRAP_ACTION_USES} before validation",
+        )
+        return [message] if message else []
+
     python_setup = _python_setup_index(steps)
     uv_install = _uv_install_index(steps, uv_package)
     messages = [
@@ -147,28 +165,56 @@ def _scope_violations(scope: str, steps: list[dict[str, Any]], uv_package: str) 
             predecessor_message=f"{scope}: Python {PYTHON_VERSION} setup must precede {uv_package} installation",
         ),
     ]
-    if scope in LOCKED_PYTHON_VALIDATION_SCOPES:
-        messages.append(
-            _required_before(
-                _bootstrap_index(steps),
-                validation,
-                f"{scope}: missing locked Python bootstrap before validation",
-                predecessor=uv_install,
-                predecessor_message=f"{scope}: {uv_package} installation must precede locked Python bootstrap",
-            )
-        )
     return [message for message in messages if message]
 
 
-def validate(workflow: dict[str, Any]) -> list[str]:
-    """Return prerequisite violations for each uv-backed validation job."""
+def _bootstrap_action_violations(action: dict[str, Any], uv_package: str) -> list[str]:
+    runs = action.get("runs")
+    if not isinstance(runs, dict) or runs.get("using") != "composite":
+        return ["bootstrap action: runs.using must be composite"]
+    steps = runs.get("steps")
+    if not isinstance(steps, list):
+        return ["bootstrap action: runs.steps must be a list"]
+    action_steps = [step for step in steps if isinstance(step, dict)]
+    python_setup = _python_setup_index(action_steps)
+    uv_install = _uv_install_index(action_steps, uv_package)
+    bootstrap = _bootstrap_index(action_steps)
+    messages = [
+        _required_before(
+            python_setup,
+            len(action_steps),
+            f"bootstrap action: missing actions/setup-python with python-version {PYTHON_VERSION}",
+        ),
+        _required_before(
+            uv_install,
+            len(action_steps),
+            f"bootstrap action: missing {uv_package} installation",
+            predecessor=python_setup,
+            predecessor_message=f"bootstrap action: Python {PYTHON_VERSION} setup must precede {uv_package} installation",
+        ),
+        _required_before(
+            bootstrap,
+            len(action_steps),
+            "bootstrap action: missing locked Python bootstrap",
+            predecessor=uv_install,
+            predecessor_message=f"bootstrap action: {uv_package} installation must precede locked Python bootstrap",
+        ),
+    ]
+    for index in (uv_install, bootstrap):
+        if index is not None and action_steps[index].get("shell") != "bash":
+            messages.append("bootstrap action: run steps must declare shell: bash")
+    return [message for message in messages if message]
+
+
+def validate(workflow: dict[str, Any], bootstrap_action: dict[str, Any]) -> list[str]:
+    """Return prerequisite violations for uv-backed and locked-Python validation jobs."""
     try:
         uv_package = _uv_package()
     except ValueError as error:
         return [f"toolchain contract load failed: {error}"]
 
     scopes = (*UV_BACKED_VALIDATION_SCOPES, *LOCKED_PYTHON_VALIDATION_SCOPES)
-    return [
+    return _bootstrap_action_violations(bootstrap_action, uv_package) + [
         violation
         for scope in scopes
         for violation in _scope_violations(scope, _steps_for_job(workflow, scope), uv_package)
@@ -180,10 +226,16 @@ def main() -> int:
     args = parse_args()
     try:
         loaded = yaml.safe_load(args.workflow.read_text(encoding="utf-8"))
+        bootstrap_action = yaml.safe_load(args.bootstrap_action.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError) as error:
-        violations = [f"workflow load failed: {error}"]
+        violations = [f"workflow or bootstrap action load failed: {error}"]
     else:
-        violations = validate(loaded) if isinstance(loaded, dict) else ["workflow root must be a mapping"]
+        if not isinstance(loaded, dict):
+            violations = ["workflow root must be a mapping"]
+        elif not isinstance(bootstrap_action, dict):
+            violations = ["bootstrap action root must be a mapping"]
+        else:
+            violations = validate(loaded, bootstrap_action)
 
     payload = {"status": "pass" if not violations else "fail", "violations": violations}
     if args.as_json:
