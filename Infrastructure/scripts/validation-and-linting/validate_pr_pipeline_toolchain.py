@@ -20,6 +20,11 @@ UV_BACKED_VALIDATION_SCOPES = ("audit", "check")
 LOCKED_PYTHON_VALIDATION_SCOPES = ("lint", "typecheck", "test")
 BOOTSTRAP_ACTION_USES = "./.github/actions/bootstrap-locked-python"
 PYTHON_VERSION = "3.12"
+LOCKED_BOOTSTRAP_COMMAND = (
+    "uv run --frozen --project Infrastructure --group test --group lint "
+    "bash scripts/bootstrap-ask.sh --json"
+)
+LOCKED_VALIDATION_PREFIX = "uv run --frozen --project Infrastructure --group test --group lint ./bin/ask"
 
 
 def _uv_package() -> str:
@@ -67,7 +72,8 @@ def _steps_for_job(workflow: dict[str, Any], scope: str) -> list[dict[str, Any]]
 
 
 def _validation_index(steps: list[dict[str, Any]], scope: str) -> int | None:
-    command = f"./bin/ask repo validate --scope={scope}"
+    prefix = LOCKED_VALIDATION_PREFIX if scope in LOCKED_PYTHON_VALIDATION_SCOPES else "./bin/ask"
+    command = f"{prefix} repo validate --scope={scope}"
     return next((index for index, step in enumerate(steps) if step.get("run") == command), None)
 
 
@@ -77,7 +83,7 @@ def _python_setup_index(steps: list[dict[str, Any]]) -> int | None:
         with_values = step.get("with")
         if (
             isinstance(uses, str)
-            and uses.startswith("actions/setup-python@")
+            and re.fullmatch(r"actions/setup-python@[0-9a-f]{40}", uses) is not None
             and isinstance(with_values, dict)
             and str(with_values.get("python-version")) == PYTHON_VERSION
         ):
@@ -103,7 +109,7 @@ def _bootstrap_index(steps: list[dict[str, Any]]) -> int | None:
         (
             index
             for index, step in enumerate(steps)
-            if step.get("run") == "bash scripts/bootstrap-ask.sh --json"
+        if step.get("run") == LOCKED_BOOTSTRAP_COMMAND
         ),
         None,
     )

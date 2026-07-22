@@ -493,7 +493,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=lint
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=lint
 
   typecheck:
     name: typecheck
@@ -506,7 +506,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=typecheck
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=typecheck
 
   test:
     name: test
@@ -519,7 +519,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/bootstrap-locked-python
       - name: Run repo validation
-        run: ./bin/ask repo validate --scope=test
+        run: uv run --frozen --project Infrastructure --group test --group lint ./bin/ask repo validate --scope=test
 
   audit:
     name: audit

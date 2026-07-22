@@ -19,6 +19,11 @@ VALIDATOR_PATH = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-lint
 LOCKED_PYTHON_VALIDATION_SCOPES = ("lint", "typecheck", "test")
 BOOTSTRAP_ACTION_USES = "./.github/actions/bootstrap-locked-python"
 PYTHON_VERSION = "3.12"
+LOCKED_BOOTSTRAP_COMMAND = (
+    "uv run --frozen --project Infrastructure --group test --group lint "
+    "bash scripts/bootstrap-ask.sh --json"
+)
+LOCKED_VALIDATION_PREFIX = "uv run --frozen --project Infrastructure --group test --group lint ./bin/ask"
 with (REPO_ROOT / ".mise.toml").open("rb") as handle:
     UV_VERSION = tomllib.load(handle)["tools"]["uv"]
 
@@ -63,8 +68,13 @@ def _job_steps(job: object) -> list[dict[str, object]]:
     return [step for step in steps if isinstance(step, dict)]
 
 
+def _validation_command(scope: str) -> str:
+    prefix = LOCKED_VALIDATION_PREFIX if scope in LOCKED_PYTHON_VALIDATION_SCOPES else "./bin/ask"
+    return f"{prefix} repo validate --scope={scope}"
+
+
 def _validation_step_index(steps: list[dict[str, object]], scope: str) -> int:
-    expected = f"./bin/ask repo validate --scope={scope}"
+    expected = _validation_command(scope)
     return next(index for index, step in enumerate(steps) if step.get("run") == expected)
 
 
@@ -93,7 +103,7 @@ def _bootstrap_index(steps: list[dict[str, object]]) -> int:
     return next(
         index
         for index, step in enumerate(steps)
-        if step.get("run") == "bash scripts/bootstrap-ask.sh --json"
+        if step.get("run") == LOCKED_BOOTSTRAP_COMMAND
     )
 
 
@@ -112,6 +122,10 @@ def test_locked_python_validation_jobs_bootstrap_before_execution() -> None:
         "the shared bootstrap action must set up Python, install uv, and bootstrap "
         "the locked Infrastructure environment in that order"
     )
+    assert action_steps[uv_install]["run"] == (
+        f"python -m pip install --disable-pip-version-check uv=={UV_VERSION}"
+    )
+    assert action_steps[bootstrap]["run"] == LOCKED_BOOTSTRAP_COMMAND
 
     for scope in LOCKED_PYTHON_VALIDATION_SCOPES:
         steps = _job_steps(jobs[scope])
@@ -156,7 +170,7 @@ def _workflow_with_shared_bootstrap_action() -> str:
             "steps": [
                 {"uses": "actions/setup-python@abc", "with": {"python-version": PYTHON_VERSION}},
                 {"run": f"python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema"},
-                {"run": f"./bin/ask repo validate --scope={scope}"},
+                {"run": _validation_command(scope)},
             ]
         }
         for scope in ("audit", "check")
@@ -164,7 +178,7 @@ def _workflow_with_shared_bootstrap_action() -> str:
     jobs.update(
         {
             scope: {
-                "steps": [{"uses": BOOTSTRAP_ACTION_USES}, {"run": f"./bin/ask repo validate --scope={scope}"}]
+                "steps": [{"uses": BOOTSTRAP_ACTION_USES}, {"run": _validation_command(scope)}]
             }
             for scope in LOCKED_PYTHON_VALIDATION_SCOPES
         }
@@ -211,21 +225,21 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
-      - run: ./bin/ask repo validate --scope=lint
+      - run: {LOCKED_VALIDATION_PREFIX} repo validate --scope=lint
   typecheck:
     steps:
       - uses: actions/setup-python@abc
         with:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
-      - run: ./bin/ask repo validate --scope=typecheck
+      - run: {LOCKED_VALIDATION_PREFIX} repo validate --scope=typecheck
   test:
     steps:
       - uses: actions/setup-python@abc
         with:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip uv=={UV_VERSION} pyyaml pytest jsonschema
-      - run: ./bin/ask repo validate --scope=test
+      - run: {LOCKED_VALIDATION_PREFIX} repo validate --scope=test
 """
 
     result = _run_validator(workflow)
@@ -257,5 +271,6 @@ runs:
     payload = json.loads(result.stdout)
     assert payload["status"] == "fail"
     messages = "\n".join(payload["violations"])
+    assert "bootstrap action: missing actions/setup-python with python-version 3.12" in messages
     assert f"bootstrap action: missing uv=={UV_VERSION} installation" in messages
     assert "bootstrap action: missing locked Python bootstrap" in messages
