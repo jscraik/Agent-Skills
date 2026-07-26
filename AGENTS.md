@@ -35,25 +35,23 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   a separate installed-behavior lane.
 - Edit canonical sources, not runtime projections. See
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
-- Treat every Jamie steering or review feedback item as high-signal operating
-  evidence until classified otherwise. If the same command, tool failure,
-  approval error, missing permission, or user correction happens twice, stop
-  the active task lane before retrying. Classify the failure pattern, refine the
-  environment or repo contract that allowed it, validate the refinement, and
-  report the proof before resuming ordinary implementation or PR work.
-  Record the failure category and durable improvement type; an acknowledgement
-  without a repo artifact plus validation evidence is not uptake.
-  During complex workflow lanes, including Skills SDK intake, evidence replay,
-  adoption, Tessl handoff, docs verification, or package-readiness work, keep a
-  dedicated temporary papercut log such as
-  `/tmp/agent-skills-feedback/<slice>-papercuts.md`. Use it as scratch evidence
-  for surprises, stale assumptions, blocked commands, and workflow friction;
-  promote only recurring or durable lessons into repo docs, skills, tests,
-  validators, or the steering ledger.
-  Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
-  by opening and reading it in the current turn before continuing ordinary
-  implementation or PR work. Record uptake in `.harness/quality/steering-uptake.md`; validate with
-  `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
+- Finish the named outcome through the smallest local change and focused proof.
+  Feedback is diagnostic evidence, not automatic authority to stop delivery or
+  add process. Prefer no system change, a local implementation repair, or an
+  existing test or instruction improvement. Select the
+  [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
+  route only when Jamie asks for system improvement, a consequential boundary
+  is involved, the failure recurs across three independent tasks, or two named
+  consumers need a contract the repository does not already provide. That
+  selected route may use the existing ledger and validator; routine work does
+  not require a papercut log, ledger row, or new artifact. Selected work
+  requires opening and reading it in the current turn, an appropriate
+  `.harness/quality/steering-uptake.md` entry, and
+  `validate_steering_uptake.py --json` evidence.
+- Runtime-handle safety is independent of steering selection: wait, poll, or
+  resume only an active handle returned by the immediately preceding tool
+  result. Re-discover state with direct repository commands when no such handle
+  exists; never probe a guessed or stale identifier.
 - For networked repo operations in Codex sandboxed sessions, do not diagnose
   `gh`, CircleCI, Snyk, package registry, or other API failures as service
   outages until the same command has been retried with explicit network
@@ -64,10 +62,13 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   applicable for the command family. In temp worktrees with a repo `.mise.toml`,
   set `MISE_STATE_DIR` before launching the shell so mise tracked-config writes
   do not fall back to `~/.local/state/mise`.
-- Systems-thinking posture: a fix is not complete when the named symptom is
-  gone. Identify the mechanism that allowed the symptom, encode the smallest
-  durable guardrail in docs, skills, scripts, or validation, and prove the
-  guardrail prevents the same class of failure from reaching Jamie again.
+- For selected system improvement, identify the mechanism and improve the
+  smallest existing surface that serves a named consumer. State its carrying
+  cost, proof, and the overlapping surface it consolidates or replaces.
+- Jamie Brain, SSM, and CO provide outcomes and cross-project constraints. The
+  Agent Skills OC and this repository own project-specific discovery, technical
+  design, specifications, implementation plans, and delivery. Backbriefs to
+  Jamie Brain are compact evidence pointers, not duplicated technical plans.
 - Skills SDK PM thread coordination: when Jamie designates one thread as the
   Skills SDK PM decision surface, delegated execution threads must report back
   through a validated `thread-report/v1` artifact and a PM delivery receipt
@@ -106,6 +107,12 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   upload root.
 
 ## Common Commands
+
+## Project-specific correction boundary
+
+Routine local skill corrections use existing local checks and do not invoke
+cloud, Tessl, runtime, review, or release machinery unless promotion is
+explicitly selected.
 
 ```bash
 ./bin/ask repo doctor --json --robot
