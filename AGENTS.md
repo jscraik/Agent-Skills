@@ -42,7 +42,7 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
   route only when Jamie asks for system improvement, a consequential boundary
   is involved, the failure recurs across three independent tasks, or two named
-  consumers need a contract the repository does not already provide, or
+  active consumers require a contract that no existing surface can provide, or
   current executable contracts contradict one another. That
   selected route may use the existing ledger and validator; routine work does
   not require a papercut log, ledger row, or new artifact. Selected work

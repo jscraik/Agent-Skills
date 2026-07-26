@@ -24,7 +24,7 @@ of these conditions is true:
 - the work crosses a security, privacy, credential, destructive, irreversible,
   external-commitment, release, or public-claim boundary;
 - the same failure recurs in three independent tasks;
-- two named active consumers need a contract that no existing surface can
+- two named active consumers require a contract that no existing surface can
   provide; or
 - current executable contracts contradict one another.
 
