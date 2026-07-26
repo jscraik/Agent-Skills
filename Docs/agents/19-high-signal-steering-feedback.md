@@ -10,6 +10,11 @@ existing proof. A routine correction does not require a papercut log, steering
 ledger row, sibling census, Workforce admission, fan-in, or promotion receipt.
 Keep local source proof separate from review, runtime, external, distribution,
 and release claims.
+The direct retry-stop and validation requirements in
+[Workflow and Safety Guidance](/Docs/agents/13-workflow-and-safety-guidance.md) and
+[Validation and Checks](/Docs/agents/04-validation.md) remain in force when the same
+command fails twice; relaxing the selected system-improvement route does not
+permit unchanged retries.
 
 ## Selected System-Improvement Route
 
@@ -76,7 +81,9 @@ and evidence that an implementation is not doing what Jamie wants.
 
 Selected work records the feedback signal, root operational failure, chosen
 existing mechanism, durable system improvement, validation outcome, and any
-explicit remaining proof. Ledger rows continue to use known taxonomy values.
+explicit remaining proof. Ledger rows continue to use known taxonomy values
+from the accepted list defined by
+[`validate_steering_uptake.py`](/Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py).
 The `validate_steering_uptake.py` validator proves a chosen ledger entry; it
 does not make routine work wait for one.
 

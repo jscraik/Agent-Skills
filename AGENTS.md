@@ -42,7 +42,8 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
   route only when Jamie asks for system improvement, a consequential boundary
   is involved, the failure recurs across three independent tasks, or two named
-  consumers need a contract the repository does not already provide. That
+  consumers need a contract the repository does not already provide, or
+  current executable contracts contradict one another. That
   selected route may use the existing ledger and validator; routine work does
   not require a papercut log, ledger row, or new artifact. Selected work
   requires opening and reading it in the current turn, an appropriate
@@ -105,6 +106,9 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   reruns must archive prior temp contents to a sibling evidence archive rather
   than deleting generated payloads or keeping stale scenarios under the current
   upload root.
+- Routine corrections do not invoke external Tessl distribution or live
+  promotion. A named local eval command that requires the installed Tessl CLI
+  remains local proof and is governed by the eval contract above.
 
 ## Common Commands
 
