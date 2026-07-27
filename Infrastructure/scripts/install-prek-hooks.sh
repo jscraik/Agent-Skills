@@ -120,8 +120,21 @@ hook_path.write_text(text, encoding="utf-8")
 PY
 }
 
-patch_hook pre-commit
 patch_hook pre-push
+
+write_pre_commit_hook() {
+	local hook_path="$git_hooks_dir/pre-commit"
+	cat >"$hook_path" <<'HOOK'
+#!/bin/sh
+# Agent Skills direct pre-commit shim.
+# Git owns the current worktree index lock while invoking pre-commit. Prek's
+# changed-file discovery writes a tree before it can run the repository hook,
+# so invoke the fail-closed repository validation directly.
+REPO_ROOT="$(git rev-parse --show-toplevel)" || exit 1
+exec bash "$REPO_ROOT/scripts/hooks/pre-commit.sh" "$@"
+HOOK
+	chmod +x "$hook_path"
+}
 
 write_commit_msg_hook() {
 	local hook_path="$git_hooks_dir/commit-msg"
@@ -136,6 +149,7 @@ HOOK
 	chmod +x "$hook_path"
 }
 
+write_pre_commit_hook
 write_commit_msg_hook
 
 echo "[install-prek-hooks] using PREK_HOME=$prek_home"
