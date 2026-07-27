@@ -84,7 +84,7 @@ cases:
   - type: expected_signal
     value: Names reverting the unnecessary loop to the existing list comprehension as the bounded cleanup.
   - type: expected_signal
-    value: Requires a focused render_summary test command and leaves other changes outside the supplied patch.
+    value: Run the render_summary test command and leave no other changes.
 - id: happy-polish
   name: final polish
   category: happy
@@ -128,7 +128,7 @@ cases:
   - type: expected_signal
     value: Combines the duplicate enabled guards using evidence from the supplied diff.
   - type: expected_signal
-    value: Names focused tests and keeps other cleanup outside the stated boundary.
+    value: Run focused retry_delay tests before merge.
 - id: edge-risky
   name: risky dedupe
   category: edge
