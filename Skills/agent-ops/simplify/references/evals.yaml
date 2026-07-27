@@ -292,7 +292,7 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: One named snapshot replaces two identical lookups.
+    value: Reuse checked store value with focused source validation.
   - type: expected_signal
     value: Focused test emits an active value and calls store.get(key) once.
   - type: not_contains
