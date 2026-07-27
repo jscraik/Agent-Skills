@@ -7,9 +7,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-MIN_PYTHON = (3, 12)
-
-
 def _uv_executable() -> Optional[str]:
     discovered = shutil.which("uv")
     if discovered:
@@ -26,17 +23,16 @@ def _is_executable_file(candidate: str) -> bool:
 
 
 def _exec_target(repo_root: Path, target: Path, args: list[str]) -> None:
-    if sys.version_info >= MIN_PYTHON:
-        os.execv(sys.executable, [sys.executable, str(target), *args])
     uv = _uv_executable()
     if uv is None:
-        print("error: ./bin/ask requires Python 3.12+ or uv on PATH to select the repo Python.", file=sys.stderr)
+        print("error: ./bin/ask requires uv on PATH to select the locked Infrastructure environment.", file=sys.stderr)
         raise SystemExit(127)
     os.execv(
         uv,
         [
             uv,
             "run",
+            "--frozen",
             "--project",
             str(repo_root / "Infrastructure"),
             "--python",
