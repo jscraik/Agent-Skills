@@ -12238,6 +12238,7 @@ def _append_user_runtime_relinks(
     skills_dir: Path,
     *,
     dry_run: bool,
+    include_plugin_mirrors: bool = True,
 ) -> None:
     home = Path.home()
     targets = [
@@ -12248,6 +12249,9 @@ def _append_user_runtime_relinks(
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
         logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+    if not include_plugin_mirrors:
+        logs.append("Skipped home plugin mirror refresh for links-only user sync.")
+        return
     user_plugins = home / ".agents" / "plugins"
     personal_plugins_action = _clear_symlinked_personal_plugin_root(
         repo_root,
@@ -12428,6 +12432,8 @@ def _finalize_skill_sync_result(
         validation_args.append("--dry-run")
     if projection_decision.mode_source in {"cli", "env"}:
         validation_args.extend(["--projection", projection_decision.requested_mode])
+    if scope == "user" and plan.get("user_sync_mode") == "links-only":
+        validation_args.extend(["--user-sync-mode", "links-only"])
     if plugin_cache_refresh != "auto":
         validation_args.extend(["--plugin-cache-refresh", plugin_cache_refresh])
     result.data["validation_commands"] = [_skills_validation_command("sync", *validation_args)]
@@ -12540,12 +12546,20 @@ def _refresh_home_plugin_mirrors(
 
 
 
+@dataclass(frozen=True)
+class SkillSyncOptions:
+    """Optional user-sync behavior while preserving the existing sync call shape."""
+
+    plugin_cache_refresh: str = "auto"
+    user_sync_mode: str = "full"
+
+
 def sync_skills(
     repo_root: Path,
     scope: str = "workspace",
     dry_run: bool = False,
     projection: Optional[str] = None,
-    plugin_cache_refresh: str = "auto",
+    plugin_cache_refresh: str | SkillSyncOptions = "auto",
 ) -> CallResult:
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
@@ -12558,10 +12572,11 @@ def sync_skills(
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
             SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
-        plugin_cache_refresh (str): Plugin runtime cache refresh mode:
+        plugin_cache_refresh (str | SkillSyncOptions): Plugin runtime cache refresh mode:
             "auto" refreshes best-effort during workspace sync, "skip" runs
             normal projection sync without cache mutation, and "only" refreshes
-            plugin runtime caches without changing skill projections.
+            plugin runtime caches without changing skill projections. The typed
+            form can additionally select links-only user sync.
 
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -12574,6 +12589,13 @@ def sync_skills(
           - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
     """
     result = CallResult()
+    sync_options = (
+        plugin_cache_refresh
+        if isinstance(plugin_cache_refresh, SkillSyncOptions)
+        else SkillSyncOptions(plugin_cache_refresh=str(plugin_cache_refresh))
+    )
+    plugin_cache_refresh = sync_options.plugin_cache_refresh
+    user_sync_mode = sync_options.user_sync_mode
     try:
         projection_decision = normalize_projection_mode(projection)
     except ProjectionModeError as exc:
@@ -12601,12 +12623,30 @@ def sync_skills(
         ))
         return result
 
+    if user_sync_mode not in {"full", "links-only"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid user sync mode: '{user_sync_mode}'.",
+            fix_suggestion="Use --user-sync-mode links-only or full.",
+        ))
+        return result
+
     if scope not in {"workspace", "user"}:
         result.status = "error"
         result.errors.append(ErrorObject(
             code="ERR_INVALID_SCOPE",
             message=f"Invalid scope: '{scope}'. Must be 'workspace' or 'user'.",
             fix_suggestion="Use --scope workspace or --scope user"
+        ))
+        return result
+
+    if scope != "user" and user_sync_mode != "full":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_INVALID_SCOPE",
+            message="User sync mode is available only with --scope user.",
+            fix_suggestion="Use --scope user --user-sync-mode links-only.",
         ))
         return result
 
@@ -12626,6 +12666,7 @@ def sync_skills(
             "symlinks": 0,
         },
         "warnings": [],
+        "user_sync_mode": user_sync_mode,
         "plugin_cache_refresh": plugin_cache_permission_declaration(repo_root, mode=plugin_cache_refresh),
     }
     logs = []
@@ -12804,7 +12845,14 @@ def sync_skills(
                     status="error",
                     plugin_cache_refresh=plugin_cache_refresh,
                 )
-            _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
+            _append_user_runtime_relinks(
+                plan,
+                logs,
+                repo_root,
+                skills_dir,
+                dry_run=dry_run,
+                include_plugin_mirrors=user_sync_mode == "full",
+            )
             relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
             if relink_errors:
                 plan["validation_status"] = "fail"
