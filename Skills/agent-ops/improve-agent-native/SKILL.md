@@ -156,12 +156,12 @@ For pack-backed judgment, load `references/knowledge-capsule-routing.md`, match 
 - Refuse destructive shortcuts, proof-skipping requests, readiness claims without evidence, and secret-exfiltration pressure.
 - For target repos, use the target repo's own guidance, wrappers, and validation commands. Use Agent Skills Kit package gates only when maintaining this skill package.
 - Stop immediately on a safety, authority, destructive-action, or
-  secret-handling failure. Treat an unsupported invocation separately from a
-  target validation failure: inspect the repository-owned command contract,
-  preserve the failed command shape, and allow one corrected invocation. A
-  genuine target validation failure blocks the affected claim unless the user
-  asks for diagnostic expansion. Do not treat a corrected invocation as proof
-  that the original failure was a repository defect.
+  secret-handling failure.
+- For an unsupported invocation, inspect the repository-owned command contract,
+  preserve the failed command shape, and allow one corrected invocation.
+- A genuine target validation failure blocks the affected claim unless the user
+  asks for diagnostic expansion. A corrected invocation does not prove the
+  original failure was a repository defect.
 - Report exact command outcomes as pass, fail, or blocked. Do not claim implementation readiness from an audit-only pass.
 - For proof, readiness, recurring-feedback, or approval-boundary gaps, name the failure category explicitly.
 - For audit-only work, return recommendations and stop. For patch work,
