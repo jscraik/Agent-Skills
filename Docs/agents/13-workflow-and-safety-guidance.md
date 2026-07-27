@@ -49,10 +49,13 @@ When modifying shell scripts or configuration files, always use non-interactive 
 ## Repeated Steering and Environment Refinement
 
 Treat repeated user steering as operating evidence, not conversation history.
-When a user has to point out the same failure class twice, stop the current
-task lane and repair the mechanism that allowed the repeat before proceeding.
+Select this system-improvement route only when Jamie asks for it, a
+consequential boundary is involved, a failure recurs across three independent
+tasks, two named active consumers need an unavailable contract, or executable
+contracts contradict one another. Routine work does not stop solely because a
+failure or correction repeats.
 
-Use this loop:
+When the route is selected, stop before another unchanged retry and use this loop:
 
 1. Name the exact failure pattern and the command or behavior that exposed it.
 2. Separate symptom from mechanism. For example, `error connecting to

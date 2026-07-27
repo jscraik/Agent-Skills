@@ -48,7 +48,8 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   not require a papercut log, ledger row, or new artifact. Selected work
   requires opening and reading it in the current turn, an appropriate
   `.harness/quality/steering-uptake.md` entry, and
-  `validate_steering_uptake.py --json` evidence.
+  `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`
+  evidence.
 - Runtime-handle safety is independent of steering selection: wait, poll, or
   resume only an active handle returned by the immediately preceding tool
   result. Re-discover state with direct repository commands when no such handle
