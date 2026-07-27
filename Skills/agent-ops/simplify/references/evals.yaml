@@ -82,7 +82,7 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Names reverting the unnecessary loop to the existing list comprehension as the bounded cleanup.
+    value: Revert the patch and retain the list comprehension.
   - type: expected_signal
     value: Run the render_summary test command and leave no other changes.
 - id: happy-polish
