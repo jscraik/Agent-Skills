@@ -84,7 +84,7 @@ cases:
   - type: expected_signal
     value: Names reverting the unnecessary loop to the existing list comprehension as the bounded cleanup.
   - type: expected_signal
-    value: Names focused validation before a behavior-preservation claim and excludes a broader refactor.
+    value: Requires a focused render_summary test command and leaves other changes outside the supplied patch.
 - id: happy-polish
   name: final polish
   category: happy
