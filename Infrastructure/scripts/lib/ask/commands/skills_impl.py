@@ -11,6 +11,7 @@ import sys
 import importlib.util
 import tempfile
 import difflib
+import tomllib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -7751,6 +7752,27 @@ def _skills_sdk_eval_execution_identity(evals_path: Path, lane: str | None) -> d
     return eval_lane_execution_identity(payload, lane)
 
 
+def _skills_sdk_eval_profile_execution_identity(codex_profile: str | None) -> dict[str, str] | None:
+    """Read the executed OSS profile identity when a skill has no lane-policy override."""
+    if codex_profile not in {"oss-local", "oss-cloud"}:
+        return None
+    profile_path = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / f"{codex_profile}.config.toml"
+    try:
+        profile = tomllib.loads(profile_path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    model = profile.get("model")
+    provider = profile.get("model_provider")
+    if not isinstance(model, str) or not model.strip() or not isinstance(provider, str) or not provider.strip():
+        return None
+    return {
+        "model": model.strip(),
+        "model_family": model.split(":", 1)[0].strip(),
+        "provider": provider.strip(),
+        "identity_source": "codex-profile-config",
+    }
+
+
 def _skills_sdk_eval_identity_fields(identity: dict[str, str] | None) -> dict[str, str | None]:
     return {
         "execution_model": identity.get("model") if identity else None,
@@ -8353,6 +8375,8 @@ def skills_sdk_eval_run(
             else Path(""),
             eval_lane,
         )
+        if execution_identity is None:
+            execution_identity = _skills_sdk_eval_profile_execution_identity(codex_profile)
         profile_blockers: list[str] = []
         if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
             profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")

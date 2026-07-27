@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -15,7 +16,11 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates, run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.scenario_quality import _load_minimal_evals_yaml  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt, validate_robot_envelope  # noqa: E402
-from ask.commands.skills_impl import _load_release_scenario_sets, skills_sdk_eval_run  # noqa: E402
+from ask.commands.skills_impl import (  # noqa: E402
+    _load_release_scenario_sets,
+    _skills_sdk_eval_profile_execution_identity,
+    skills_sdk_eval_run,
+)
 from eval_runner_helpers import (  # noqa: E402
     blocked_internal_result_with_passing_scorecard,
     command_env,
@@ -40,6 +45,51 @@ TECHNICAL_WRITER_RELEASE_8 = [
 ]
 
 class TestSkillsSdkEvalRunner(unittest.TestCase):
+    def test_profile_execution_identity_reads_selected_oss_local_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            profile_home = Path(temp_dir)
+            profile_home.joinpath("oss-local.config.toml").write_text(
+                'model = "qwen3.5:9b-mlx"\nmodel_provider = "ollama"\n',
+                encoding="utf-8",
+            )
+            with mock.patch.dict(os.environ, {"CODEX_HOME": str(profile_home)}):
+                identity = _skills_sdk_eval_profile_execution_identity("oss-local")
+
+        self.assertEqual(
+            identity,
+            {
+                "model": "qwen3.5:9b-mlx",
+                "model_family": "qwen3.5",
+                "provider": "ollama",
+                "identity_source": "codex-profile-config",
+            },
+        )
+
+    def test_internal_oss_eval_uses_profile_identity_when_skill_has_no_lane_policy(self) -> None:
+        profile_identity = {
+            "model": "qwen3.5:9b-mlx",
+            "model_family": "qwen3.5",
+            "provider": "ollama",
+            "identity_source": "codex-profile-config",
+        }
+        with (
+            mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")),
+            mock.patch("ask.commands.skills_impl._skills_sdk_eval_execution_identity", return_value=None),
+            mock.patch("ask.commands.skills_impl._skills_sdk_eval_profile_execution_identity", return_value=profile_identity),
+        ):
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/testing",
+                mode="smoke",
+                runner="internal",
+                codex_profile="oss-local",
+            )
+
+        receipt = validate_eval_run_receipt(result.data["skills_sdk_eval_run"]["receipt"])
+        self.assertEqual(result.status, "success")
+        self.assertEqual(receipt.execution_model, "qwen3.5:9b-mlx")
+        self.assertEqual(receipt.execution_model_provider, "ollama")
+
     def test_sdk_internal_runner_rejects_legacy_tessl_continuation(self) -> None:
         with mock.patch("ask.commands.evals.run_evals") as run:
             result = skills_sdk_eval_run(
