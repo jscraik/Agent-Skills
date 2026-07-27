@@ -82,9 +82,9 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Identifies one bounded cleanup candidate in the supplied diff and pairs it with a repository-native validation command or file evidence before claiming preserved behavior.
+    value: Names reverting the unnecessary loop to the existing list comprehension as the bounded cleanup.
   - type: expected_signal
-    value: Reports skipped high-risk changes and states the remaining behavior boundary in the final cleanup note.
+    value: Names focused validation before a behavior-preservation claim and excludes a broader refactor.
 - id: happy-polish
   name: final polish
   category: happy
@@ -126,9 +126,9 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Keeps the review within the supplied changed scope and cites the diff or file evidence for every proposed cleanup.
+    value: Combines the duplicate enabled guards using evidence from the supplied diff.
   - type: expected_signal
-    value: Reports skipped risky candidates and names the validation command or artifact needed before claiming behavior preservation.
+    value: Names focused tests and keeps other cleanup outside the stated boundary.
 - id: edge-risky
   name: risky dedupe
   category: edge
