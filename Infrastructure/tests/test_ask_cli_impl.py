@@ -4378,6 +4378,55 @@ class TestAskCLI(unittest.TestCase):
             ["./bin/ask skills sync --dry-run --json --robot"],
         )
 
+    def test_skills_user_sync_defaults_to_links_only(self):
+        """User sync must not refresh plugin mirrors without an explicit full mode."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "user",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        plan = output["data"]["plan"]
+        self.assertEqual(plan["user_sync_mode"], "links-only")
+        self.assertNotIn("runtime_plugin_mirrors", plan)
+        self.assertEqual(plan["mutation_counts"]["writes"], 0)
+        self.assertEqual(plan["mutation_counts"]["deletes"], 0)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --scope user --dry-run --user-sync-mode links-only --json --robot"],
+        )
+
+    def test_skills_user_sync_full_mode_keeps_plugin_mirror_route_explicit(self):
+        """The legacy plugin-mirror route remains available only with explicit full mode."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "user",
+            "--user-sync-mode",
+            "full",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)["data"]["plan"]
+        self.assertEqual(plan["user_sync_mode"], "full")
+        self.assertIn("runtime_plugin_mirrors", plan)
+
     def test_skills_sync_human_output_exposes_validation(self):
         """Verify ask skills sync renders its validation command in dry-run mode."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "sync", "--dry-run", "--robot"]

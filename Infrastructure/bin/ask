@@ -223,7 +223,7 @@ def main():
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
     skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat")
     skills_sync_parser.add_argument("--plugin-cache-refresh", choices=["auto", "skip", "only"], default="auto", help="Plugin runtime cache refresh mode")
-    skills_sync_parser.add_argument("--user-sync-mode", choices=["full", "links-only"], default="full", help="For user scope, refresh plugin mirrors or runtime links only")
+    skills_sync_parser.add_argument("--user-sync-mode", choices=["full", "links-only"], default="links-only", help="For user scope, sync runtime links only; use full to refresh plugin mirrors")
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
