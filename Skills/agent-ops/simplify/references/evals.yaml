@@ -57,7 +57,7 @@ cases:
   expected_artifact: SKILL.md
   reproduce: ./bin/ask evals run Skills/agent-ops/simplify --mode release --runner codex --case happy-diff --skip-tessl --no-dashboard --json --robot
   should_trigger: true
-  prepend_skill: false
+  prepend_skill: true
   claim_ids:
   - simplify.behavior-preservation
   prompt: |-
@@ -101,7 +101,7 @@ cases:
   expected_artifact: SKILL.md
   reproduce: ./bin/ask evals run Skills/agent-ops/simplify --mode release --runner codex --case happy-polish --skip-tessl --no-dashboard --json --robot
   should_trigger: true
-  prepend_skill: false
+  prepend_skill: true
   claim_ids:
   - simplify.behavior-preservation
   prompt: |-
