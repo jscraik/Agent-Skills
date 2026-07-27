@@ -64,7 +64,10 @@ api.github.com` may be a Codex sandbox network-permission issue even when it
 3. Apply the smallest durable refinement to the environment contract, docs,
    skill instructions, scripts, or validation surface.
 4. Run the smallest proof that exercises the refined path.
-5. Report the proof before resuming the original implementation, PR, or
+5. Record the selected route in `.harness/quality/steering-uptake.md` and run
+   `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
+   A failed validator keeps the selected route blocked.
+6. Report the proof before resuming the original implementation, PR, or
    automation lane.
 
 For Codex sandboxed network operations, retry API commands with explicit
