@@ -144,7 +144,7 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Combine duplicate condition from supplied diff and preserve execution order with source evidence.
+    value: Combine duplicate condition with behavior evidence.
   - type: expected_signal
     value: Run focused retry_delay tests covering enabled states.
 - id: edge-risky
