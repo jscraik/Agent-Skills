@@ -92,7 +92,10 @@ def compact_skill_prove_payload(data: dict[str, Any]) -> None:
             "structural_quality", ("status", "audit_level", "audit_command")
         ),
         "runtime_reachability": selected("reachability", ("status", "command")),
-        "outcome_proof": selected("outcome_proof", ("status", "evidence_class")),
+        "outcome_proof": selected(
+            "outcome_proof",
+            ("status", "evidence_class", "evidence_ref", "evidence_digest", "scenario_set", "case_count"),
+        ),
         "next_command": proof.get("next_command"),
         "validation_commands": proof.get("validation_commands"),
         "claims_boundary": (

@@ -1018,6 +1018,162 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skill_proof["next_command"], "./bin/ask workouts run 'outcome proof' --json --robot")
         self.assertEqual(skill_proof["validation_commands"], [skill_proof["next_command"]])
 
+    def test_skills_prove_accepts_current_identity_bound_shard_aggregate(self):
+        """A current local aggregate is outcome proof rather than a legacy workout."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                source = repo_root / "Skills" / "agent-ops" / "demo" / "SKILL.md"
+                source.parent.mkdir(parents=True)
+                source.write_text("---\nname: demo\n---\n", encoding="utf-8")
+                aggregate_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "proof" / "aggregate.json"
+                aggregate_path.parent.mkdir(parents=True)
+                aggregate_path.write_text(
+                    json.dumps(
+                        {
+                            "status": "success",
+                            "data": {
+                                "skills_sdk_eval_shard_aggregate": {
+                                    "status": "pass",
+                                    "receipt": {
+                                        "status": "pass",
+                                        "package_id": "demo",
+                                        "package_digest": "sha256:current",
+                                        "scenario_set_id": "demo-release-8-v1",
+                                        "case_count": 8,
+                                        "checks": [
+                                            {"id": "shards_match_current_package", "status": "pass"},
+                                            {"id": "all_case_results_pass", "status": "pass"},
+                                        ],
+                                    },
+                                },
+                            },
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                reachable = CallResult()
+                reachable.data["proof"] = {
+                    "status": "pass",
+                    "handle": "demo",
+                    "resolution": {"status": "ok", "handle": "demo", "source_path": source.relative_to(repo_root).as_posix()},
+                }
+                with mock.patch.object(skills_commands, "skills_proof", return_value=reachable), mock.patch.object(
+                    skills_commands, "audit_skill", return_value=CallResult()
+                ), mock.patch.object(
+                    skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
+                ), mock.patch.object(
+                    skills_commands, "_skill_workout_candidates", return_value=[]
+                ), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(proof["proof_status"], "proved_local")
+        self.assertEqual(proof["outcome_proof"]["status"], "pass")
+        self.assertEqual(proof["outcome_proof"]["evidence_ref"], "Infrastructure/artifacts/skills/demo/proof/aggregate.json")
+        self.assertEqual(proof["next_command"], None)
+        self.assertEqual(proof["validation_commands"], [])
+
+    def test_skills_prove_rejects_stale_shard_aggregate_package_digest(self):
+        """A passing aggregate for an earlier package must not prove the current source."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                source = repo_root / "Skills" / "agent-ops" / "demo" / "SKILL.md"
+                source.parent.mkdir(parents=True)
+                source.write_text("---\nname: demo\n---\n", encoding="utf-8")
+                aggregate_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "proof" / "aggregate.json"
+                aggregate_path.parent.mkdir(parents=True)
+                aggregate_path.write_text(
+                    json.dumps(
+                        {"status": "success", "data": {"skills_sdk_eval_shard_aggregate": {"status": "pass", "receipt": {
+                            "status": "pass", "package_id": "demo", "package_digest": "sha256:stale",
+                            "checks": [{"id": "shards_match_current_package", "status": "pass"}, {"id": "all_case_results_pass", "status": "pass"}],
+                        }}}}
+                    ),
+                    encoding="utf-8",
+                )
+                reachable = CallResult()
+                reachable.data["proof"] = {
+                    "status": "pass",
+                    "handle": "demo",
+                    "resolution": {"status": "ok", "handle": "demo", "source_path": source.relative_to(repo_root).as_posix()},
+                }
+                with mock.patch.object(skills_commands, "skills_proof", return_value=reachable), mock.patch.object(
+                    skills_commands, "audit_skill", return_value=CallResult()
+                ), mock.patch.object(
+                    skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
+                ), mock.patch.object(
+                    skills_commands, "_skill_workout_candidates", return_value=[]
+                ), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
+        self.assertEqual(proof["outcome_proof"]["status"], "missing")
+
+    def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
+        """The compact proof facade retains the identity-bound outcome reference."""
+        from ask.cli_output import compact_skill_prove_payload
+
+        payload = {
+            "skill_proof": {
+                "schema_version": "skill-proof-scorecard.v1",
+                "query": "demo",
+                "handle": "demo",
+                "proof_status": "proved_local",
+                "agent_summary": "demo has current local outcome proof.",
+                "reachability": {"status": "pass", "command": "./bin/ask skills proof demo --json --robot"},
+                "structural_quality": {"status": "pass", "audit_level": "compat", "audit_command": "audit demo"},
+                "outcome_proof": {
+                    "status": "pass",
+                    "evidence_class": "oss_local_release_aggregate",
+                    "evidence_ref": "Infrastructure/artifacts/skills/demo/proof/aggregate.json",
+                    "evidence_digest": "sha256:current",
+                    "scenario_set": "demo-release-8-v1",
+                    "case_count": 8,
+                },
+                "next_command": None,
+                "validation_commands": [],
+            }
+        }
+
+        compact_skill_prove_payload(payload)
+
+        self.assertEqual(
+            payload["skill_proof"]["outcome_proof"],
+            {
+                "status": "pass",
+                "evidence_class": "oss_local_release_aggregate",
+                "evidence_ref": "Infrastructure/artifacts/skills/demo/proof/aggregate.json",
+                "evidence_digest": "sha256:current",
+                "scenario_set": "demo-release-8-v1",
+                "case_count": 8,
+            },
+        )
+
     def test_skill_invocation_analytics_resolves_relative_telemetry_dir_from_repo_root(self):
         """Verify relative SKILL_TELEMETRY_DIR overrides are repo-root relative."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")

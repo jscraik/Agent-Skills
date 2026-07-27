@@ -1868,6 +1868,59 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     return candidates
 
 
+def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
+    """Return one current, identity-bound local shard aggregate when available."""
+    identity = _skills_sdk_eval_package_identity(repo_root, handle)
+    package_id = str((identity or {}).get("package_id") or "").strip()
+    package_digest = str((identity or {}).get("package_digest") or "").strip()
+    if not package_id or not package_digest or Path(package_id).name != package_id:
+        return {"status": "missing", "evidence_class": "outcome_proof"}
+
+    artifacts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
+    accepted: list[tuple[int, dict[str, Any]]] = []
+    for candidate in artifacts_root.glob("**/aggregate.json"):
+        relative_path = _repo_relative_path(repo_root, candidate)
+        if relative_path is None:
+            continue
+        try:
+            envelope = json.loads(candidate.read_text(encoding="utf-8"))
+            aggregate = envelope["data"]["skills_sdk_eval_shard_aggregate"]
+            receipt = aggregate["receipt"]
+        except (KeyError, OSError, TypeError, json.JSONDecodeError):
+            continue
+        if not isinstance(receipt, dict):
+            continue
+        checks = receipt.get("checks")
+        check_statuses = {
+            str(check.get("id")): check.get("status")
+            for check in checks
+            if isinstance(check, dict)
+        } if isinstance(checks, list) else {}
+        if (
+            envelope.get("status") == "success"
+            and aggregate.get("status") == "pass"
+            and receipt.get("status") == "pass"
+            and receipt.get("package_id") == package_id
+            and receipt.get("package_digest") == package_digest
+            and check_statuses.get("shards_match_current_package") == "pass"
+            and check_statuses.get("all_case_results_pass") == "pass"
+        ):
+            accepted.append(
+                (
+                    candidate.stat().st_mtime_ns,
+                    {
+                        "status": "pass",
+                        "evidence_class": "oss_local_release_aggregate",
+                        "evidence_ref": relative_path,
+                        "evidence_digest": _skills_sdk_digest_file(candidate),
+                        "scenario_set": receipt.get("scenario_set_id"),
+                        "case_count": receipt.get("case_count"),
+                    },
+                )
+            )
+    return max(accepted, key=lambda item: item[0])[1] if accepted else {"status": "missing", "evidence_class": "outcome_proof"}
+
+
 def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
     """Return a repo-relative POSIX path when *path* is inside *repo_root*."""
     try:
@@ -9677,6 +9730,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
 
     analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
+    evaluation_proof = _eval_shard_outcome_proof(repo_root, normalized)
     outcome_status = "missing"
     next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
@@ -9703,6 +9757,10 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     elif structural_detail["status"] != "pass":
         proof_status = "blocked_structural_quality"
         next_command = structural_detail.get("audit_command") or next_command
+    elif evaluation_proof["status"] == "pass":
+        proof_status = "proved_local"
+        outcome_status = "pass"
+        next_command = None
     elif workouts:
         proof_status = "reachable_without_outcome_proof"
         outcome_status = "available_not_run"
@@ -9719,6 +9777,8 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "agent_summary": (
             f"{normalized} is reachable and structurally valid, but outcome proof is not present."
             if proof_status == "reachable_without_outcome_proof"
+            else f"{normalized} is structurally valid, reachable, and has current local outcome proof."
+            if proof_status == "proved_local"
             else f"{normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
         ),
         "reachability": {
@@ -9732,9 +9792,10 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "status": outcome_status,
             "workout_candidates": workouts,
             "evidence_class": "outcome_proof",
+            **({key: value for key, value in evaluation_proof.items() if key != "status"} if outcome_status == "pass" else {}),
         },
         "next_command": next_command,
-        "validation_commands": [next_command],
+        "validation_commands": [next_command] if next_command else [],
     }
     if goal_resolution:
         scorecard["goal_resolution"] = goal_resolution
