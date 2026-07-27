@@ -15,7 +15,7 @@ import tomllib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Optional, Protocol
+from typing import Any, List, Literal, Optional, Protocol
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
@@ -3943,6 +3943,7 @@ def skills_doctor(
     target: str,
     strict: bool = False,
     codex_parity: bool = False,
+    validation_scope: Literal["runtime", "source"] = "runtime",
 ) -> CallResult:
     """Run a compact per-capability diagnostic for a skill handle or source path."""
     result = CallResult()
@@ -4118,7 +4119,12 @@ def skills_doctor(
 
     audit_level = "strict" if strict else "compat"
     if audit_target and source_exists:
-        audit_result = audit_skill(repo_root, audit_target, level=audit_level)
+        audit_result = audit_skill(
+            repo_root,
+            audit_target,
+            level=audit_level,
+            validation_scope=validation_scope,
+        )
         diagnostics = audit_result.data.get("diagnostics", {})
         checks["structural_audit"] = _doctor_check(
             "pass" if audit_result.status == "success" else "fail",
@@ -4299,6 +4305,7 @@ def skills_sdk_check(
         target=target,
         strict=strict,
         codex_parity=codex_parity,
+        validation_scope="source",
     )
     doctor = result.data.pop("skill_doctor", {})
     doctor_status = doctor.get("status") if isinstance(doctor, dict) else None
@@ -10147,7 +10154,12 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
 
     return result
 
-def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> CallResult:
+def audit_skill(
+    repo_root: Path,
+    skill_path: str,
+    level: str = "compat",
+    validation_scope: Literal["runtime", "source"] = "runtime",
+) -> CallResult:
     """
     Run structural and (optionally) strict security audits for a skill directory.
 
@@ -10178,7 +10190,12 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         child_results: list[dict[str, Any]] = []
         failed_children: list[str] = []
         for child in external_skill_children:
-            child_result = audit_skill(repo_root, child.as_posix(), level=level)
+            child_result = audit_skill(
+                repo_root,
+                child.as_posix(),
+                level=level,
+                validation_scope=validation_scope,
+            )
             child_errors = [getattr(error, "__dict__", error) for error in child_result.errors]
             child_results.append({
                 "target": child.as_posix(),
@@ -10219,6 +10236,8 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", audit_target_path]
+    if validation_scope == "source":
+        diag_cmd.append("--source-only")
     audit_env = _subprocess_env_with_uv_cache()
 
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)

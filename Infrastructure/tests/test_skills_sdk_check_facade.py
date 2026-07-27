@@ -11,6 +11,7 @@ from helpers.schema_validator import _validate_schema_subset
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/check-receipt.v1.schema.json"
 TARGET = "Skills/agent-ops/simplify"
+UNMATERIALIZED_TARGET = "Skills/agent-ops/improve-agent-native"
 
 
 def _command_env() -> dict[str, str]:
@@ -67,6 +68,26 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertLess(len(json.dumps(payload)), 10_240)
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         _validate_schema_subset(schema, check["receipt"], {"check-receipt": schema})
+
+    def test_check_validates_source_without_requiring_workspace_projection(self) -> None:
+        payload = _run_json_command(
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "check",
+            UNMATERIALIZED_TARGET,
+            "--json",
+            "--robot",
+        )
+
+        check = payload["data"]["skills_sdk_check"]
+        self.assertEqual(check["status"], "pass")
+        self.assertEqual(check["failure_class"], "none")
+        self.assertEqual(check["doctor_status"], "warning")
+        self.assertEqual(
+            check["next_command"],
+            "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --strict --json --robot",
+        )
 
     def test_public_wrapper_preserves_ask_sdk_contract(self) -> None:
         ask_payload = _run_json_command(
