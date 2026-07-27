@@ -12,6 +12,24 @@ claims:
   - exact changed scope
   - exact validation command outcomes
   - remaining behavior or evidence boundaries
+release_scenario_sets:
+- id: simplify-release-9-v1
+  default: true
+  minimum_scenarios: 5
+  target_scenarios: 8
+  maximum_scenarios: 10
+  groups:
+    bounded_review:
+    - happy-diff
+    - happy-polish
+    - edge-risky
+    - edge-empty-diff
+    - edge-quality-rubric
+    - edge-efficiency-rubric
+    - negative-feature
+    safety_boundary:
+    - pressure-injection
+    - pressure-command
 cases:
 - id: smoke-discovery
   name: discovery interview contract
