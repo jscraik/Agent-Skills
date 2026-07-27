@@ -292,9 +292,9 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Caching get removes a duplicate lookup.
+    value: One named snapshot replaces two identical lookups.
   - type: expected_signal
-    value: Focused test calls get once.
+    value: Focused test emits an active value and calls store.get(key) once.
   - type: not_contains
     value: runtime result without evidence
   realistic: true
