@@ -1,13 +1,14 @@
 ---
-title: Rooted Projection Sync Ownership Guard
-asset_family: rooted skill runtime projection
+title: Legacy Skillset Metadata Ownership Guard
+asset_family: legacy skillset metadata and context-budget validation
 owner: Agent Skills Team
-source_artifact: Docs/plans/2026-04-24-feat-context-budgeted-skill-trees-plan.md
-freshness_reviewed_on: 2026-04-25
+source_artifact: Docs/runbooks/migrate-flat-projection-to-rooted.md
+freshness_reviewed_on: 2026-07-26
+last_updated: 2026-07-26
 review_after_days: 90
 ---
 
-# Rooted Projection Sync Ownership Guard
+# Legacy Skillset Metadata Ownership Guard
 
 ## Table of Contents
 - [Problem](#problem)
@@ -17,53 +18,49 @@ review_after_days: 90
 
 ## Problem
 
-Rooted projection mutation can become misleading when it validates only the
-freshly generated in-memory reports and ignores stale files that already exist
-on disk. A hand-written file under `.skillsets/**` can make
-`check_context_budget.py --projection rooted` fail with
-`UNOWNED_SKILLSET_FILE` even if `ask skills sync --scope workspace
---projection rooted` reports success.
+The word `rooted` is retained for legacy `.skillsets/**` metadata and
+context-budget validation. It is not a supported runtime projection mode.
+Hand-written or stale files under `.skillsets/**` make
+`check_context_budget.py --projection rooted --json` fail with
+`UNOWNED_SKILLSET_FILE`; that is an ownership signal for metadata, not evidence
+that a runtime sync failed.
 
-User-scope rooted sync has a related runtime risk: relinking home directories to
-`.agents/skills` is only safe when the repo-local workspace is already the
-generated rooted runtime surface. If the workspace is stale, flat, missing, or
-rolled back, user sync can expose the wrong runtime while still reporting
-`projection_mode: rooted`.
+The old rooted runtime route is retired. Runtime users must not interpret a
+legacy metadata result as a reason to relink `~/.agents/skills`,
+`~/.codex/skills`, or a workspace runtime surface.
 
 ## Resolution
 
-Treat rooted workspace sync as the owner of the generated `.skillsets/**`
-surface. During rooted workspace mutation, prune files that are not canonical
-`<root>/manifest.jsonl` outputs before writing the generated manifests. This
-keeps the mutation command and the context-budget validation gate aligned.
+Treat `generate_skillset_manifests.py` as the owner of generated
+`.skillsets/**/manifest.jsonl` metadata. The rooted context-budget check
+validates that legacy metadata surface and rejects unowned entries rather than
+silently treating them as generated output.
 
-Treat rooted user sync as a relink-only step that depends on a valid rooted
-workspace runtime. Before relinking `~/.agents/skills` or `~/.codex/skills`,
-verify that repo-local `.agents/skills` contains only expected first-level root
-skill sets and that those roots are generated rooted projection directories. If
-the check fails, return `ERR_VALIDATION` and tell the operator to run workspace
-rooted sync first.
+For installed runtime projection, use the supported `flat` or `hybrid` routes
+in [the flat/hybrid projection runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md).
+Those commands and their current ownership checks determine runtime state. A
+successful legacy `.skillsets` check does not prove installed skills, profile
+links, cache freshness, or activation.
 
 ## Evidence
 
-- `Infrastructure/scripts/lib/ask/commands/skills.py` prunes unowned
-  `.skillsets/**` files during rooted workspace sync.
-- `Infrastructure/scripts/lib/ask/commands/skills.py` rejects rooted user sync
-  when the workspace runtime surface is missing, flat, stale, or non-generated.
-- `Infrastructure/tests/test_ask_skills_sync_security.py` covers unowned
-  `.skillsets` pruning, valid rooted user relink, and invalid rooted workspace
-  rejection.
-- `python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/tests/test_ask_skills_sync_security.py`
-  passed.
-- `ruff check Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/tests/test_ask_skills_sync_security.py`
-  passed.
-- `python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py Infrastructure/tests/test_context_budgeted_skillsets.py -q`
-  passed with `37 passed`.
+- `Docs/runbooks/migrate-flat-projection-to-rooted.md` records that rooted
+  runtime projection is retired and identifies `flat` and `hybrid` as the
+  supported runtime modes.
+- `Infrastructure/scripts/validation-and-linting/generate_skillset_manifests.py`
+  owns the legacy manifest projection.
+- `Infrastructure/scripts/validation-and-linting/check_context_budget.py
+  --projection rooted --json` checks legacy metadata ownership and context
+  budgets.
+- `Infrastructure/tests/test_context_budgeted_skillsets.py` covers the legacy
+  budget/ownership surface; `Infrastructure/tests/test_ask_skills_sync_security.py`
+  covers supported runtime sync boundaries.
 
 ## Follow-up
 
-- Keep rooted sync regression tests paired with context-budget tests whenever
-  `.skillsets/**`, `.agents/skills/**`, or user-scope relink behavior changes.
-- If the rooted workspace/user sync contract changes, update
-  `Docs/runbooks/migrate-flat-projection-to-rooted.md` and this solution entry
-  together.
+- Keep legacy `.skillsets` generator and context-budget regressions paired
+  whenever that metadata contract changes.
+- Do not reintroduce `skills sync --projection rooted`. Any future runtime-mode
+  change requires a separately authorised projection contract decision.
+- When runtime behavior is the question, follow the current flat/hybrid
+  runbook, not this legacy-metadata guard.

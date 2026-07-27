@@ -226,6 +226,31 @@ def test_hook_adapters_do_not_call_hook_runners() -> None:
         assert re.search(r"bash .*validate_all\.sh|node scripts/validate-commit-msg\.js", text)
 
 
+def test_hook_sandbox_env_replaces_unusable_inherited_cache_only(tmp_path: Path) -> None:
+    """Hooks must not inherit a desktop cache path that they cannot use."""
+    helper = REPO_ROOT / "scripts/hooks/_sandbox_env.sh"
+    command = [
+        "bash",
+        "-c",
+        'source "$1"; printf "%s\\n%s\\n" "$UV_CACHE_DIR" "$XDG_CACHE_HOME"',
+        "bash",
+        str(helper),
+    ]
+    unusable = "/dev/null/agent-skills-uv-cache"
+    environment = {
+        **os.environ,
+        "TMPDIR": str(tmp_path),
+        "UV_CACHE_DIR": unusable,
+        "XDG_CACHE_HOME": str(tmp_path / "explicit-xdg-cache"),
+    }
+    result = subprocess.run(command, capture_output=True, text=True, check=False, env=environment)
+
+    assert result.returncode == 0, result.stderr
+    uv_cache, xdg_cache = result.stdout.splitlines()
+    assert uv_cache == str(tmp_path / "agent-skills-uv-cache")
+    assert xdg_cache == str(tmp_path / "explicit-xdg-cache")
+
+
 def test_hook_adapters_resolve_root_without_inherited_git_context() -> None:
     for rel_path in [
         "Infrastructure/scripts/hooks/pre-commit.sh",
