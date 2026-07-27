@@ -1085,6 +1085,61 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(proof["next_command"], None)
         self.assertEqual(proof["validation_commands"], [])
 
+    def test_skills_prove_keeps_outcome_proof_when_runtime_is_blocked(self):
+        """Runtime reachability must not hide current local outcome evidence."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                source = repo_root / "Skills" / "agent-ops" / "demo" / "SKILL.md"
+                source.parent.mkdir(parents=True)
+                source.write_text("---\nname: demo\n---\n", encoding="utf-8")
+                blocked = CallResult(status="error")
+                blocked.data["proof"] = {
+                    "status": "fail",
+                    "handle": "demo",
+                    "resolution": {"status": "ok", "handle": "demo", "source_path": source.relative_to(repo_root).as_posix()},
+                    "runtime_diagnostics": {
+                        "recovery_commands": [
+                            {"kind": "preview_user_runtime_sync", "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot"}
+                        ]
+                    },
+                }
+                outcome_proof = {
+                    "status": "pass",
+                    "evidence_class": "oss_local_release_aggregate",
+                    "evidence_ref": "Infrastructure/artifacts/skills/demo/proof/aggregate.json",
+                    "evidence_digest": "sha256:current",
+                    "scenario_set": "demo-release-8-v1",
+                    "case_count": 8,
+                }
+                with mock.patch.object(skills_commands, "skills_proof", return_value=blocked), mock.patch.object(
+                    skills_commands, "audit_skill", return_value=CallResult()
+                ), mock.patch.object(
+                    skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
+                ), mock.patch.object(
+                    skills_commands, "_skill_workout_candidates", return_value=[]
+                ), mock.patch.object(skills_commands._impl, "_eval_shard_outcome_proof", return_value=outcome_proof):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["proof_status"], "blocked_reachability")
+        self.assertEqual(proof["outcome_proof"]["status"], "pass")
+        self.assertEqual(proof["outcome_proof"]["workout_candidates"], [])
+        for key, value in outcome_proof.items():
+            self.assertEqual(proof["outcome_proof"][key], value)
+        self.assertEqual(
+            proof["next_command"],
+            "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        )
+
     def test_skills_prove_rejects_stale_shard_aggregate_package_digest(self):
         """A passing aggregate for an earlier package must not prove the current source."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")

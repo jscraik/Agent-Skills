@@ -9738,7 +9738,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
     evaluation_proof = _eval_shard_outcome_proof(repo_root, normalized)
-    outcome_status = "missing"
+    outcome_status = "pass" if evaluation_proof["status"] == "pass" else "missing"
     next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
