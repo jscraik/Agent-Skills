@@ -251,7 +251,7 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Removes the duplicate enabled guard.
+    value: Removing the duplicated enabled condition preserves return behavior.
   - type: expected_signal
     value: Run focused render tests before merge.
   - type: not_contains
