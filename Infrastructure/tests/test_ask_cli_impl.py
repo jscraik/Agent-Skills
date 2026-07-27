@@ -562,22 +562,35 @@ class TestAskCLI(unittest.TestCase):
             self.fail(f"Unexpected return code {result.returncode}, stderr: {result.stderr}")
 
     def test_skills_prove_json_contract(self):
-        """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
+        """Verify ask skills prove keeps its three user-facing truths compact."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "Skills/agent-ops/autofix", "--json"]
         result = _run_cli(cmd)
 
         self.assertTrue(result.stdout.strip(), result.stderr)
+        self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
         skill_proof = output["data"]["skill_proof"]
         self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
         self.assertEqual(skill_proof["handle"], "autofix")
-        self.assertIn("reachability", skill_proof)
+        self.assertIn("runtime_reachability", skill_proof)
         self.assertIn("structural_quality", skill_proof)
-        self.assertIn("analytics", skill_proof)
         self.assertIn("outcome_proof", skill_proof)
-        self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
-        self.assertIn("sdk_skill_proof", output["data"])
-        self.assertIn("runtime_evidence", output["data"]["sdk_skill_proof"])
+        self.assertIn("claims_boundary", skill_proof)
+        self.assertNotIn("sdk_skill_proof", output["data"])
+
+    def test_skills_prove_reachability_blocker_names_a_non_repeating_preview(self):
+        """Verify a blocked proof points to the prerequisite instead of itself."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "simplify", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["proof_status"], "blocked_reachability")
+        self.assertEqual(
+            skill_proof["next_command"],
+            "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        )
 
     def test_skills_prove_human_output(self):
         """Verify ask skills prove renders the scorecard in non-JSON mode."""
@@ -606,17 +619,14 @@ class TestAskCLI(unittest.TestCase):
         skill_proof = output["data"]["skill_proof"]
         self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
         self.assertEqual(skill_proof["handle"], "autofix")
-        self.assertIn(skill_proof["reachability"]["status"], {"pass", "fail"})
-        self.assertEqual(skill_proof["reachability"]["source"], "sdk_skill_proof")
+        self.assertIn(skill_proof["runtime_reachability"]["status"], {"pass", "fail"})
         self.assertEqual(skill_proof["structural_quality"]["status"], "pass")
-        self.assertEqual(skill_proof["analytics"]["evidence_class"], "native_skill_invocation_projection")
         self.assertEqual(skill_proof["outcome_proof"]["evidence_class"], "outcome_proof")
         self.assertIn(
             skill_proof["proof_status"],
             {"blocked_reachability", "reachable_without_outcome_proof", "pass"},
         )
-        self.assertIn("sdk_skill_proof", output["data"])
-        self.assertIn("runtime_evidence", output["data"]["sdk_skill_proof"])
+        self.assertNotIn("sdk_skill_proof", output["data"])
 
     def test_skills_prove_uses_skill_invocation_projection(self):
         """Verify ask skills prove consumes ASK-local skill invocation analytics."""
@@ -1995,25 +2005,29 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
 
-    def test_skills_package_verify_rejects_package_only_flags(self):
-        """Verify package-only flags cannot be ignored by verify mode."""
+    def test_skills_package_verify_accepts_strict_compatibility_flag_with_compact_json(self):
+        """Verify the stable strict journey remains accepted and decision-sized."""
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
             "skills",
             "package",
             "verify",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "simplify",
             "--strict",
             "--json",
             "--robot",
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "error")
-        self.assertIn("unexpected package-only arguments", output["errors"][0]["message"])
+        verification = output["data"]["skill_package_verification"]
+        self.assertEqual(verification["status"], "pass")
+        self.assertIsNone(verification["next_command"])
+        self.assertNotIn("sdk_contract", verification)
+        self.assertIn("runtime-root mutation", verification["claims_boundary"])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""

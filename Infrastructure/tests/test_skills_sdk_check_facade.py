@@ -58,6 +58,8 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertEqual(check["receipt"]["command"], "skills-sdk check")
         self.assertEqual(check["receipt"]["failure_class"], "none")
         self.assertIn(check["receipt"]["status"], {"pass", "warning"})
+        self.assertNotIn("skill_doctor", check)
+        self.assertLess(len(json.dumps(payload)), 10_240)
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         _validate_schema_subset(schema, check["receipt"], {"check-receipt": schema})
 

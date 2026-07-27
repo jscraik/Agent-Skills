@@ -1,5 +1,6 @@
 schema_version: 1
 skill: simplify
+rubric_profile: skills-sdk.gold-standard.v1
 purpose: "Improve changed code while preserving behavior and proving equivalence where risk matters."
 triggers:
   - "Use when the user request matches the skill scope."
@@ -25,4 +26,7 @@ validation:
   - plugin_eval_grade_a
   - strict_skill_audit
 observability: "Report validation commands and outcomes."
+evidence_requirements:
+  - "Report the changed scope and exact validation command outcomes."
+  - "Name remaining behavior or evidence boundaries before claiming simplification."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

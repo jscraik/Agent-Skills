@@ -5,6 +5,7 @@ metadata:
   skill-type: code_quality_review
   version: 0.2.0
   triggers: "simplify.?code, simplify.?changes, simplify.?pass, simplify.?refactor"
+  provenance: frontmatter:agent-skills:canonical-source
 ---
 
 # Simplify

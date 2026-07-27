@@ -855,6 +855,14 @@ def _normalize_package_verification(
             "source": source,
         }
 
+    blockers = _package_verify_blockers(verification)
+    next_command: str | None = None
+    if verification.get("status") == "blocked" and target_kind == "skill_directory":
+        source_root = Path(str(target_path)).parent.as_posix()
+        next_command = _skills_validation_command("audit", source_root, "--level", "strict")
+    elif verification.get("status") == "blocked":
+        next_command = validation_command
+
     normalized = {
         **verification,
         "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
@@ -868,12 +876,12 @@ def _normalize_package_verification(
         "archive_identity": archive_identity,
         "provenance_identity": provenance_identity,
         "rule_evidence": _package_verify_rule_evidence(verification),
-        "blockers": _package_verify_blockers(verification),
+        "blockers": blockers,
         "mutation_status": _package_verify_mutation_status(verification),
         "rollback_hint": verification.get("rollback_hint")
         or "No rollback is required because verification did not install, extract, or mutate runtime roots.",
         "validation_commands": [validation_command],
-        "next_command": validation_command,
+        "next_command": next_command,
     }
     normalized["agent_summary"] = (
         f"Package verification blocked: {normalized['blockers'][0].get('message', 'validation failed')}"
@@ -3519,7 +3527,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
             "resolution": None,
         }, Path(source_rel).parent.as_posix() if source_rel else target_path.as_posix()
 
-    resolution = resolve_skill_handle(query, repo_root_path=repo_root)
+    resolution = resolve_skill_handle(query.casefold(), repo_root_path=repo_root)
     audit_target = _skill_audit_target(repo_root, resolution) if resolution.get("status") == "ok" else None
     return {
         "target_kind": "command_handle",
@@ -4238,7 +4246,7 @@ def skills_sdk_check(
         strict=strict,
         codex_parity=codex_parity,
     )
-    doctor = result.data.get("skill_doctor", {})
+    doctor = result.data.pop("skill_doctor", {})
     doctor_status = doctor.get("status") if isinstance(doctor, dict) else None
     blockers = doctor.get("blockers", []) if isinstance(doctor, dict) else []
     first_blocker = blockers[0] if blockers and isinstance(blockers[0], dict) else {}
@@ -4261,7 +4269,7 @@ def skills_sdk_check(
     result.metadata["command"] = "sdk check"
     receipt = {
         "schema_version": "skills-sdk.check-receipt.v1",
-        "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/check-receipt.v1.schema.json",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/check-receipt.v1.schema.json",
         "command": facade_command,
         "command_version": "skills-sdk.v1",
         "status": status,
@@ -4292,7 +4300,6 @@ def skills_sdk_check(
         "canonical_command": command,
         "facade_command": facade_command,
         "receipt": receipt,
-        "skill_doctor": doctor,
         "agent_summary": (
             f"skills-sdk check blocked for {target}: {first_blocker.get('message')}"
             if status == "blocked"
@@ -4314,24 +4321,6 @@ def skills_sdk_check(
 
 SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
 SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
-SDK_START_BLOCKED_DOWNSTREAM_LANES = [
-    "security_risk_modes",
-    "scenario_quality",
-    "scorer_quality",
-    "scorer_calibration",
-    "oss_local_eval",
-    "oss_local_repair_loop",
-    "oss_cloud_eval",
-    "oss_cloud_repair_loop",
-    "tessl_local_proof_execute",
-    "tessl_live_dry_run",
-    "handoff_readiness",
-    "tessl_live_confirmation",
-    "registry_or_private_workspace_decision",
-    "runtime_doctor",
-]
-
-
 def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, Any]) -> str:
     if target_info.get("target_kind") == "project_local_source_path":
         return "project_local_skill"
@@ -4346,62 +4335,6 @@ def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, An
     return "unknown"
 
 
-def _sdk_start_command_args(target: str, project_root: str | None) -> list[str]:
-    args = ["sdk", "start", target]
-    if project_root:
-        args.extend(["--project-root", project_root])
-    return args
-
-
-def _sdk_start_mechanical_commands(target: str) -> list[str]:
-    return [
-        _skills_validation_command("audit", target, "--level", "strict"),
-        _skills_validation_command("package", "verify", target),
-    ]
-
-
-def _sdk_eval_run_command(target: str, profile: str) -> str:
-    return _ask_validation_command(
-        "sdk",
-        "eval",
-        "run",
-        target,
-        "--runner",
-        "internal",
-        "--mode",
-        "smoke",
-        "--codex-profile",
-        profile,
-    )
-
-
-def _sdk_tessl_dry_run_command(target: str) -> str:
-    return _ask_validation_command(
-        "evals",
-        "run",
-        target,
-        "--mode",
-        "smoke",
-        "--runner",
-        "discovery-smoke",
-        "--tessl-live-private",
-        "--tessl-workspace",
-        "jscraik",
-        "--tessl-live-dry-run",
-    )
-
-
-def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
-    inferred_root = target_info.get("project_root")
-    return {
-        "provided_project_root": project_root,
-        "inferred_project_root": inferred_root,
-        "project_root": project_root or inferred_root,
-        "project_manifest": target_info.get("project_manifest"),
-        "project_source_root": target_info.get("project_source_root"),
-    }
-
-
 def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> str | None:
     if not isinstance(source_path_value, str) or not source_path_value.strip():
         return None
@@ -4409,106 +4342,6 @@ def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> 
     if not source_path.is_absolute():
         return source_path.as_posix()
     return _repo_relative_path(repo_root, source_path)
-
-
-def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
-    start_command = _ask_validation_command("sdk", "start", mechanical_target)
-    lanes: list[dict[str, Any]] = [
-        {"id": "sdk_start", "status": "pass", "command": start_command, "proves": "target classified and next command selected"},
-        {"id": "target_classification", "status": "pass", "command": start_command, "proves": "skill lifecycle target class and scope"},
-        {
-            "id": "mechanical_validation",
-            "status": "required_not_run",
-            "commands": _sdk_start_mechanical_commands(mechanical_target),
-            "proves": "SKILL.md, frontmatter, layout, references, README, fixtures, and package shape",
-        },
-    ]
-    lanes.extend(
-        [
-            {
-                "id": "security_risk_modes",
-                "status": "blocked_until_mechanical_validation",
-                "command": _ask_validation_command("sdk", "security", "risk-modes", mechanical_target, "--preview"),
-                "proves": "security-sensitive behavior, permissions, secrets, network, filesystem, and publication risk modes are explicit before eval or registry lanes",
-            },
-            {
-                "id": "scenario_quality",
-                "status": "blocked_until_security_risk_modes",
-                "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
-                "proves": "gold-standard scenarios, concrete artifacts, behavioral rubrics, Tessl parity checks, and scoreable failure conditions",
-            },
-            {
-                "id": "scorer_quality",
-                "status": "blocked_until_scenario_quality",
-                "command": _ask_validation_command("sdk", "eval", "scorer-quality", mechanical_target, "--preview"),
-                "proves": "LLM judge or hybrid scorer measures the skill requirement rather than keyword or skill-name artifacts",
-            },
-            {
-                "id": "scorer_calibration",
-                "status": "blocked_until_scorer_quality",
-                "command": _ask_validation_command("sdk", "eval", "scorer-calibration", mechanical_target, "--preview"),
-                "proves": "rubric calibration distinguishes correct, wrong, concise, verbose, and unsupported answers",
-            },
-            {"id": "oss_local_eval", "status": "blocked_until_scenario_quality", "command": _sdk_eval_run_command(mechanical_target, "oss-local")},
-            {
-                "id": "oss_local_repair_loop",
-                "status": "blocked_until_oss_local_eval",
-                "command": "owner-classify oss-local failures, patch skill/scenarios/rubrics/validators, then rerun oss-local",
-                "target_success_rate": "70-75 internal success after mechanical and scenario gates",
-            },
-            {"id": "oss_cloud_eval", "status": "blocked_until_oss_local_repair_loop", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
-            {
-                "id": "oss_cloud_repair_loop",
-                "status": "blocked_until_oss_cloud_eval",
-                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun oss-local only if classification shows a local skill regression",
-                "target_success_rate": ">=90 internal success before Tessl spend",
-            },
-            {
-                "id": "tessl_local_proof_execute",
-                "status": "blocked_until_oss_cloud_repair_loop",
-                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "jscraik", "--execute"),
-                "proves": "controlled /tmp Tessl staging, package lint, pack/install mechanics, and workspace identity without live scoring spend",
-            },
-            {
-                "id": "tessl_live_dry_run",
-                "status": "blocked_until_tessl_local_proof_execute",
-                "command": _sdk_tessl_dry_run_command(mechanical_target),
-                "proves": "external Tessl staging shape without consuming the live confirmation lane",
-            },
-            {
-                "id": "handoff_readiness",
-                "status": "blocked_until_tessl_live_dry_run",
-                "command": _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", mechanical_target, "--preview"),
-                "proves": "deterministic, oss-local, oss-cloud, Tessl local proof, and Tessl dry-run receipts are current and ordered",
-            },
-            {
-                "id": "tessl_live_confirmation",
-                "status": "blocked_until_handoff_readiness",
-                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "jscraik"),
-                "target_success_rate": ">=90 and >= baseline; Tessl is confirmational, not the discovery loop",
-            },
-            {
-                "id": "registry_or_private_workspace_decision",
-                "status": "blocked_until_tessl_live_confirmation",
-                "command": "choose private workspace retention or public registry publication from current Tessl and SDK receipts",
-                "proves": "single paid workspace publication/private-state decision is explicit before registry claims",
-            },
-            {"id": "runtime_doctor", "status": "blocked_until_registry_or_private_workspace_decision", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
-        ]
-    )
-    return lanes
-
-
-def _sdk_start_score_policy() -> dict[str, Any]:
-    return {
-        "schema_version": "skills-sdk.pipeline-score-policy.v1",
-        "oss_local_target": "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening",
-        "oss_cloud_target": ">=90 internal success rate after iterative skill, scenario, rubric, validator, and judge repair",
-        "tessl_live_target": ">=90 and >= baseline as external confirmation only",
-        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
-        "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
-        "workspace_policy": "Use the operator-approved Tessl workspace jscraik for all SDK Tessl projects; staged plugin manifests start private until a separate publish lane changes visibility.",
-    }
 
 
 def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list[str]]:
@@ -4519,41 +4352,39 @@ def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list
     return "blocked", [blocker]
 
 
-def _sdk_start_receipt(
+def _sdk_start_local_receipt(
     query: str,
-    target_info: dict[str, Any],
-    ownership: dict[str, Any],
+    source_path: str | None,
     target_class: str,
-    project_root: str | None,
-    mechanical_target: str,
     status: str,
     blockers: list[str],
 ) -> dict[str, Any]:
-    current_lane = "mechanical_validation" if status == "pass" else "target_classification"
-    receipt = {
+    """Build the compact default result for the local author journey."""
+    next_command = _ask_validation_command("sdk", "check", query)
+    return {
         "schema_version": SDK_PIPELINE_START_SCHEMA_VERSION,
         "schema_uri": SDK_PIPELINE_START_SCHEMA_URI,
         "status": status,
         "target": query,
         "target_class": target_class,
-        "target_info": target_info,
-        "source_ownership": ownership,
-        "project_context": _sdk_start_project_context(target_info, project_root),
-        "current_lane": current_lane,
-        "lanes": _sdk_start_lanes(mechanical_target),
-        "blocked_downstream_lanes": SDK_START_BLOCKED_DOWNSTREAM_LANES,
-        "score_policy": _sdk_start_score_policy(),
+        "source_path": source_path,
+        "current_lane": "local_check" if status == "pass" else "target_classification",
+        "lanes": [
+            {
+                "id": "local_check",
+                "status": "required_not_run",
+                "command": next_command,
+            }
+        ],
+        "next_action": {
+            "command": next_command,
+            "why": "Check the resolved local source before package verification or proof.",
+        },
+        "blocked_downstream_lanes": [],
         "blockers": blockers,
-        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command in the shared create, update, install, refactor, skillify, and skill-builder pipeline.",
-        "what_this_does_not_prove": "Format, layout, references, security posture, eval behavior, internal score bands, registry promotion, Tessl confirmation, and runtime reachability have not run yet.",
-        "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
+        "what_this_proves": "The named target resolves to a canonical local skill source.",
+        "what_this_does_not_prove": "Structural validity, package readiness, runtime reachability, and outcome proof have not run.",
     }
-    receipt["next_action"] = {
-        "lane": current_lane,
-        "command": _sdk_start_mechanical_commands(mechanical_target)[0],
-        "why": "Mechanical validation must pass before scenario-quality, eval, registry, or runtime lanes.",
-    }
-    return receipt
 
 
 def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = None) -> CallResult:
@@ -4569,8 +4400,16 @@ def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = No
     mechanical_target = audit_target or query
     source_exists = bool(target_info.get("source_exists")) if isinstance(target_info, dict) else False
     status, blockers = _sdk_start_status(source_exists, target_class)
-    receipt = _sdk_start_receipt(query, target_info, ownership, target_class, project_root, mechanical_target, status, blockers)
-    result.data["skills_sdk_start"] = {"status": status, "receipt": receipt, "agent_summary": receipt["next_action"]["why"]}
+    display_source = source_rel or (str(source_path_value) if source_path_value else None)
+    receipt = _sdk_start_local_receipt(query, display_source, target_class, status, blockers)
+    result.data["skills_sdk_start"] = {
+        "status": status,
+        "receipt": receipt,
+        "agent_summary": (
+            f"{query}: {display_source or 'source unavailable'}; next action: {receipt['next_action']['command']}. "
+            "This does not prove structural validity, package readiness, runtime reachability, or outcome proof."
+        ),
+    }
     if status != "pass":
         result.status = "error"
         result.errors.append(
@@ -9816,6 +9655,25 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
+        runtime_diagnostics = command_proof.get("runtime_diagnostics")
+        recovery_commands = (
+            runtime_diagnostics.get("recovery_commands")
+            if isinstance(runtime_diagnostics, dict)
+            else None
+        )
+        if isinstance(recovery_commands, list):
+            preview = next(
+                (
+                    item.get("command")
+                    for item in recovery_commands
+                    if isinstance(item, dict)
+                    and item.get("kind") == "preview_user_runtime_sync"
+                    and isinstance(item.get("command"), str)
+                ),
+                None,
+            )
+            if preview:
+                next_command = preview
     elif structural_detail["status"] != "pass":
         proof_status = "blocked_structural_quality"
         next_command = structural_detail.get("audit_command") or next_command

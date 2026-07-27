@@ -24,6 +24,8 @@ from ask.cli_errors import (
 from ask.cli_args import build_global_parser, prepare_args
 from ask.cli_exit import exit_code_for_errors
 from ask.cli_output import (
+    compact_package_verify_payload,
+    compact_skill_prove_payload,
     print_first_validation_command,
     print_readiness_overview,
     replay_command,
@@ -635,10 +637,9 @@ def main():
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
             verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
-            package_flags_present = args.strict or args.checkout_test
             if args.target == "verify" and not args.verify_target:
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
-            elif args.target == "verify" and package_flags_present:
+            elif args.target == "verify" and args.checkout_test:
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
@@ -1055,6 +1056,10 @@ def main():
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
     maybe_emit_phoenix_trace(repo_root, args, result)
+    if args.topic == "skills" and args.action == "package" and args.target == "verify":
+        compact_package_verify_payload(result.data)
+    if args.json and args.topic == "skills" and args.action == "prove":
+        compact_skill_prove_payload(result.data)
     if args.json:
         print(result.to_json(repo_root=str(repo_root)))
     else:

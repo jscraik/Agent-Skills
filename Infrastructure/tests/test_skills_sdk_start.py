@@ -79,7 +79,7 @@ def _write_project_local_skill(project_root: Path) -> Path:
 
 
 class TestSkillsSdkStart(unittest.TestCase):
-    def test_start_routes_global_skill_to_mechanical_validation(self) -> None:
+    def test_start_returns_one_compact_local_next_action(self) -> None:
         payload = _run_json_command(
             sys.executable,
             "Infrastructure/bin/ask",
@@ -94,24 +94,12 @@ class TestSkillsSdkStart(unittest.TestCase):
         self.assertEqual(payload["status"], "success")
         self.assertEqual(receipt["schema_version"], "skills-sdk.pipeline-start.v1")
         self.assertEqual(receipt["target_class"], "global_skill")
-        self.assertEqual(receipt["current_lane"], "mechanical_validation")
-        self.assertEqual(receipt["next_action"]["lane"], "mechanical_validation")
-        self.assertIn("skills audit Skills/agent-ops/testing --level strict", receipt["next_action"]["command"])
-        self.assertIn("scenario_quality", receipt["blocked_downstream_lanes"])
-        mechanical_lane = next(lane for lane in receipt["lanes"] if lane["id"] == "mechanical_validation")
-        self.assertIn("skills package verify Skills/agent-ops/testing", mechanical_lane["commands"][1])
-        lane_ids = [lane["id"] for lane in receipt["lanes"]]
-        self.assertIn("security_risk_modes", lane_ids)
-        self.assertIn("scorer_quality", lane_ids)
-        self.assertIn("scorer_calibration", lane_ids)
-        self.assertIn("tessl_local_proof_execute", lane_ids)
-        self.assertIn("tessl_live_dry_run", lane_ids)
-        self.assertIn("handoff_readiness", lane_ids)
-        self.assertIn("tessl_live_confirmation", lane_ids)
-        self.assertIn("registry_or_private_workspace_decision", lane_ids)
-        self.assertEqual(receipt["score_policy"]["oss_local_target"], "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening")
-        self.assertIn(">=90 internal success rate", receipt["score_policy"]["oss_cloud_target"])
-        self.assertIn("external confirmation only", receipt["score_policy"]["tessl_live_target"])
+        self.assertEqual(receipt["current_lane"], "local_check")
+        self.assertEqual(receipt["next_action"]["command"], "./bin/ask sdk check Skills/agent-ops/testing --json --robot")
+        self.assertEqual(receipt["blocked_downstream_lanes"], [])
+        self.assertEqual(receipt["lanes"], [{"id": "local_check", "status": "required_not_run", "command": receipt["next_action"]["command"]}])
+        self.assertNotIn("tessl", json.dumps(receipt).casefold())
+        self.assertLess(len(json.dumps(payload)), 10_240)
 
     def test_start_classifies_manifest_declared_project_local_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -134,15 +122,11 @@ class TestSkillsSdkStart(unittest.TestCase):
 
             self.assertEqual(payload["status"], "success")
             self.assertEqual(receipt["target_class"], "project_local_skill")
-            self.assertEqual(receipt["project_context"]["project_root"], str(project_root))
-            self.assertEqual(receipt["project_context"]["project_source_root"], ".codex/skills")
-            self.assertIn(str(skill_md.parent), receipt["next_action"]["command"])
-            self.assertIn("oss_cloud_eval", receipt["blocked_downstream_lanes"])
-            self.assertIn("security posture", receipt["what_this_does_not_prove"])
-            self.assertIn("jscraik", receipt["score_policy"]["workspace_policy"])
-            self.assertIn("private", receipt["score_policy"]["workspace_policy"])
+            self.assertIn(str(skill_md), receipt["source_path"])
+            self.assertEqual(receipt["blocked_downstream_lanes"], [])
+            self.assertIn("runtime reachability", receipt["what_this_does_not_prove"])
 
-    def test_start_records_single_pipeline_for_all_lifecycle_entrypoints(self) -> None:
+    def test_start_does_not_expose_future_lifecycle_detail(self) -> None:
         payload = _run_json_command(
             sys.executable,
             "Infrastructure/bin/ask",
@@ -153,15 +137,9 @@ class TestSkillsSdkStart(unittest.TestCase):
             "--robot",
         )
         receipt = payload["data"]["skills_sdk_start"]["receipt"]
-        lanes = {lane["id"]: lane for lane in receipt["lanes"]}
-
-        self.assertIn("create, update, install, refactor, skillify, and skill-builder", receipt["what_this_proves"])
-        self.assertEqual(lanes["oss_local_repair_loop"]["target_success_rate"], "70-75 internal success after mechanical and scenario gates")
-        self.assertEqual(lanes["oss_cloud_repair_loop"]["target_success_rate"], ">=90 internal success before Tessl spend")
-        self.assertEqual(lanes["tessl_live_confirmation"]["target_success_rate"], ">=90 and >= baseline; Tessl is confirmational, not the discovery loop")
-        self.assertIn("--workspace jscraik", lanes["tessl_local_proof_execute"]["command"])
-        self.assertIn("--tessl-live-dry-run", lanes["tessl_live_dry_run"]["command"])
-        self.assertIn("private workspace retention or public registry publication", lanes["registry_or_private_workspace_decision"]["command"])
+        self.assertEqual(len(receipt["lanes"]), 1)
+        self.assertNotIn("score_policy", receipt)
+        self.assertNotIn("provider", json.dumps(receipt).casefold())
 
     def test_start_blocks_runtime_projection_targets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
