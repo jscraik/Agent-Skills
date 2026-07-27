@@ -60,7 +60,20 @@ cases:
   prepend_skill: false
   claim_ids:
   - simplify.behavior-preservation
-  prompt: A maintainer shares a patch before merge and asks for a concise final markdown review note about whether any change is prudent.
+  prompt: |-
+    A maintainer shares this patch before merge and asks for a concise final markdown review note about whether any change is prudent:
+
+    ```diff
+    diff --git a/src/summary.py b/src/summary.py
+    @@ def render_summary(items):
+    -    return [format_item(item) for item in items]
+    +    rendered = []
+    +    for item in items:
+    +        rendered.append(format_item(item))
+    +    return rendered
+    ```
+
+    Return a concise final markdown review note about whether any change is prudent.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -91,7 +104,20 @@ cases:
   prepend_skill: false
   claim_ids:
   - simplify.behavior-preservation
-  prompt: Perform a final cleanup review of the supplied change before merge. Return a concise note that identifies any justified improvement, explains skipped risks, and names the validation evidence still required.
+  prompt: |-
+    Perform a final cleanup review of this supplied change before merge:
+
+    ```diff
+    diff --git a/src/retry.py b/src/retry.py
+    @@ def retry_delay(attempt, enabled):
+    +    if enabled:
+    +        logger.debug("retry attempt %s", attempt)
+    +    if enabled:
+    +        metrics.increment("retry.attempt")
+         return min(attempt * 2, 30)
+    ```
+
+    Return a concise final cleanup review note.
   deterministic_checks:
     forbidden_commands:
     - curl
