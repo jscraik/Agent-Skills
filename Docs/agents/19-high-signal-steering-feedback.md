@@ -43,9 +43,9 @@ system-improvement work; they are not prerequisites for routine delivery.
 ## Stop Rule
 
 Stop a routine lane only for a direct safety, privacy, secret, destructive,
-external-commitment, or evidence boundary. Repeated feedback alone does not
-create a stop rule. A Selected System Improvement may stop its own work until
-its chosen existing mechanism has proof.
+external-commitment (including release or public-claim), or evidence boundary.
+Repeated feedback alone does not create a stop rule. A Selected System
+Improvement may stop its own work until its chosen existing mechanism has proof.
 
 ## Proof Before Proceeding
 
@@ -108,5 +108,7 @@ design, specifications, plans, implementation, and delivery. Jamie Brain
 receives compact summaries and evidence pointers, not duplicate technical
 artifacts.
 
-Cloud, Tessl, runtime, review, publication, and release actions remain explicit
-promotion decisions. Local evidence does not imply any of those claims.
+Cloud, external Tessl evaluation or distribution, runtime, review, publication,
+and release actions remain explicit promotion decisions. A locally selected
+evaluation using the installed Tessl CLI may serve as local proof; it does not
+imply external Tessl distribution or any of those claims.
