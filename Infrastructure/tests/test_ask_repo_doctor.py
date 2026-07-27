@@ -1018,37 +1018,36 @@ class TestAskRepoDoctor(unittest.TestCase):
         handles_mock.assert_not_called()
         surface_mock.assert_not_called()
 
-    def test_unsynced_projection_prioritizes_sync_before_downstream_checks(self) -> None:
-        with patch(
-            "ask.commands.repo_impl.repo_status",
-            return_value=_status_result(skills_synced=False, is_git=True),
-        ), patch(
-            "ask.commands.repo_impl.doctor_catalog",
-            side_effect=AssertionError("doctor_catalog should be gated"),
+    def test_runtime_projection_states_gate_or_skip_downstream_checks(self) -> None:
+        sync_command = "./bin/ask skills sync --scope workspace --projection flat --json --robot"
+        cases = tuple((state, "error", "block", sync_command) for state in (None, "corrupt")) + (("unmaterialized_linked_worktree", "success", "skipped", None),)
+        with patch("ask.commands.repo_impl.repo_status") as status_mock, patch(
+            "ask.commands.repo_impl.doctor_catalog", side_effect=AssertionError("catalog should be gated")
         ) as catalog_mock, patch(
-            "ask.commands.repo_impl.skills_budget",
-            side_effect=AssertionError("skills_budget should be gated"),
+            "ask.commands.repo_impl.skills_budget", side_effect=AssertionError("budget should be gated")
         ) as budget_mock, patch(
-            "ask.commands.repo_impl.skills_handles",
-            side_effect=AssertionError("skills_handles should be gated"),
+            "ask.commands.repo_impl.skills_handles", side_effect=AssertionError("handles should be gated")
         ) as handles_mock, patch(
-            "ask.commands.repo_impl.repo_surface",
-            side_effect=AssertionError("repo_surface should be gated"),
+            "ask.commands.repo_impl.repo_surface", side_effect=AssertionError("surface should be gated")
         ) as surface_mock:
-            result = repo_doctor(REPO_ROOT)
-
-        doctor = result.data["doctor"]
-        self.assertEqual(result.status, "error")
-        self.assertTrue(doctor["blocking"])
-        self.assertEqual(doctor["blockers"][0]["id"], "projection_sync")
-        self.assertEqual(
-            doctor["next_command"],
-            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-        )
-        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
-        self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
-        self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
-        self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
+            for state, expected_status, expected_signal, next_command in cases:
+                status = _status_result(skills_synced=False, is_git=True)
+                status.data.update({"skills_projection_state": state} if state else {})
+                status_mock.return_value = status
+                with self.subTest(state=state):
+                    result = repo_doctor(REPO_ROOT)
+                    doctor = result.data["doctor"]
+                    self.assertEqual(result.status, expected_status)
+                    self.assertEqual(doctor["signals"]["projection_sync"]["state"], expected_signal)
+                    self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+                    self.assertEqual(doctor["signals"]["projection_sync"]["details"]["projection_state"], state or "missing")
+                    if next_command is None:
+                        self.assertFalse(doctor["blocking"])
+                        self.assertEqual(doctor["signals"]["projection_sync"]["details"]["runtime_verification"], "not_run")
+                    else:
+                        self.assertTrue(doctor["blocking"])
+                        self.assertEqual(doctor["blockers"][0]["id"], "projection_sync")
+                        self.assertEqual(doctor["next_command"], next_command)
         catalog_mock.assert_not_called()
         budget_mock.assert_not_called()
         handles_mock.assert_not_called()

@@ -48,17 +48,7 @@ RUNTIME_EVIDENCE_VALIDATOR = Path("Infrastructure/scripts/validation-and-linting
 
 
 def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
-    """
-    Builds a shell command string to run the `./bin/ask repo <action> ...` CLI with provided arguments and boolean flags.
-    
-    Parameters:
-        action (str): The repo subcommand/action to invoke (e.g., "validate", "status").
-        *args (str): Positional CLI arguments to append after the action.
-        **flags (bool): Boolean flags to include as `--flag-name` when True; underscores in flag names are converted to hyphens.
-    
-    Returns:
-        str: A single shell-quoted command string that includes the action, any provided args, enabled `--<flag>` entries, and always appends `--json --robot`.
-    """
+    """Build a shell-quoted repository command with machine-readable output."""
     parts = ["./bin/ask", "repo", action, *args]
     for flag, enabled in flags.items():
         if enabled:
@@ -68,31 +58,45 @@ def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
 
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
-    """
-    Collect basic repository metadata and whether agent skills appear to be synced.
-
-    The returned CallResult's `data` includes:
-    - `repo_root` (str): contract-preserving repository root marker (`"."`).
-    - `repo_root_resolved` (str): absolute resolved repository root path.
-    - `is_git` (bool): `True` if a `.git` directory exists at `repo_root`, `False` otherwise.
-    - `skills_synced` (bool): `True` if `.agents/skills` exists and contains at least one entry, `False` otherwise.
-
-    Returns:
-        CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
-    """
+    """Return repository identity and the non-mutating workspace projection state."""
     result = CallResult()
     result.data["validation_commands"] = [_repo_validation_command("status", verbose=verbose)]
     result.data["repo_root"] = "."
     result.data["repo_root_resolved"] = str(repo_root.resolve())
     result.data["is_git"] = (repo_root / ".git").exists()
 
-    # Check if .agents/skills is synced
     skills_dir = repo_root / ".agents" / "skills"
-    is_synced = skills_dir.is_dir() and any(skills_dir.iterdir())
+    projection_state, is_synced = _skills_projection_state(repo_root, skills_dir)
     result.data["skills_synced"] = is_synced
+    result.data["skills_projection_state"] = projection_state
 
     result.status = "success"
     return result
+
+
+def _skills_projection_state(repo_root: Path, skills_dir: Path) -> tuple[str, bool]:
+    """Classify the workspace runtime projection without creating or repairing it."""
+    if skills_dir.is_dir():
+        try:
+            return ("synced", True) if any(skills_dir.iterdir()) else ("empty", False)
+        except OSError:
+            return "corrupt", False
+    if skills_dir.exists() or skills_dir.is_symlink():
+        return "corrupt", False
+    if _is_linked_worktree(repo_root):
+        return "unmaterialized_linked_worktree", False
+    return "missing", False
+
+
+def _is_linked_worktree(repo_root: Path) -> bool:
+    """Return whether Git represents this checkout with a gitdir pointer file."""
+    git_path = repo_root / ".git"
+    if not git_path.is_file():
+        return False
+    try:
+        return git_path.read_text(encoding="utf-8").startswith("gitdir: ")
+    except OSError:
+        return False
 
 
 def _can_import_yaml_with(command: List[str]) -> bool:
@@ -298,26 +302,7 @@ def repo_validate(
     scope: str = "all",
     changed_files: List[str] | None = None,
 ) -> CallResult:
-    """
-    Run the repository validation script and collect a structured result.
-
-    Executes the repository's Infrastructure/scripts/validate_all.sh with either `--ephemeral` or `--persistent`, optional fail-fast behavior, and optional changed-file scoping. Parses the script summary from stdout and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non-zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
-
-    Parameters:
-        repo_root (Path): Path to the repository root where the script will be executed.
-        ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
-        fail_fast (bool): When True stop after the first required failure.
-        scope (str): Named validation subset to run.
-        changed_files (List[str] | None): Optional repo-relative changed files to scope validations.
-
-    Returns:
-        CallResult: Contains `data` with keys:
-            - `required_failures` (int): Number of required failures reported by the validator.
-            - `warn_only_issues` (int): Number of warn-only issues reported by the validator.
-            - `raw_output` (str): Full stdout captured from the validation script.
-          The result's `status` is `"success"` when the script exits with code 0, otherwise `"error"`.
-          On error the result may include one or more `ErrorObject` entries with `code="ERR_VALIDATION"` and a `fix_suggestion`.
-    """
+    """Run the repository validation wrapper and return its parsed result."""
     result = CallResult()
 
     cmd = ["bash", "Infrastructure/scripts/validate_all.sh"]
@@ -412,23 +397,7 @@ def repo_validate(
 
 
 def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
-    """
-    Run catalog parity diagnostics and record the findings in a CallResult.
-
-    Performs parity checks for the catalog at `repo_root` (optionally using stricter rules when `strict` is True), stores the full parity report under `result.data["catalog_parity"]` and exposes `decision_status` and `policy_identity` in `result.data`. If no drift is detected the returned CallResult has `status` set to `"success"`. If drift is detected the CallResult has `status` set to `"error"` and includes an `ErrorObject` (code `"ERR_VALIDATION"`) whose message contains the detected drift class and whose `fix_suggestion` is taken from the report's `operator_action` or a default instruction.
-
-    Parameters:
-        repo_root (Path): Root path of the repository to analyse.
-        strict (bool): Apply stricter parity rules when True.
-
-    Returns:
-        CallResult: Result object containing:
-            - data["catalog_parity"]: full parity report object
-            - data["decision_status"]: decision status from the report (if present)
-            - data["policy_identity"]: policy identity from the report (if present)
-            - status: `"success"` when no drift, `"error"` when drift detected
-            - errors: may include an `ErrorObject` with code `"ERR_VALIDATION"` if drift is detected
-    """
+    """Run catalog parity diagnostics and expose the full report in a CallResult."""
     result = CallResult()
     report = compute_catalog_parity(repo_root, strict=strict)
     result.data["catalog_parity"] = report
@@ -516,22 +485,37 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
             "next_command": _repo_validation_command("status"),
             "details": {"is_git": False},
         }
-    if status_result.data.get("skills_synced"):
+    return _workspace_projection_signal(
+        status_result.data.get("skills_projection_state", "missing"),
+        bool(status_result.data.get("skills_synced")),
+    )
+
+
+def _workspace_projection_signal(projection_state: str, skills_synced: bool) -> dict[str, Any]:
+    """Render a projection verdict without treating an absent projection as healthy."""
+    if skills_synced:
         return {
-            "state": "pass",
-            "severity": "info",
-            "summary": "Workspace skill runtime appears synced.",
-            "source": "repo_status",
-            "details": {"skills_synced": True},
+            "state": "pass", "severity": "info", "summary": "Workspace skill runtime appears synced.",
+            "source": "repo_status", "details": {"skills_synced": True, "projection_state": projection_state},
         }
-    return {
-        "state": "block",
-        "severity": "blocker",
-        "summary": "Workspace skill runtime does not appear synced.",
-        "source": "repo_status",
-        "next_command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-        "details": {"skills_synced": False},
+    unmaterialized = projection_state == "unmaterialized_linked_worktree"
+    summaries = {
+        "corrupt": "Workspace skill runtime projection is corrupted or unreadable.",
+        "empty": "Workspace skill runtime projection is present but empty.",
+        "unmaterialized_linked_worktree": "Workspace skill runtime is intentionally unmaterialized in this linked worktree.",
     }
+    signal: dict[str, Any] = {
+        "state": "skipped" if unmaterialized else "block",
+        "severity": "info" if unmaterialized else "blocker",
+        "summary": summaries.get(projection_state, "Workspace skill runtime does not appear synced."),
+        "source": "repo_status",
+        "details": {"skills_synced": False, "projection_state": projection_state},
+    }
+    if unmaterialized:
+        signal["details"]["runtime_verification"] = "not_run"
+    else:
+        signal["next_command"] = SKILLS_SYNC_COMMAND
+    return signal
 
 
 def _ask_bootstrap_signal(repo_root: Path) -> dict[str, Any]:
@@ -1038,6 +1022,14 @@ def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
         return _unknown_signal_error_signal(exc)
 
 
+def _projection_skip_reason(signal_state: str | None, projection_state: str | None) -> str | None:
+    if signal_state == "block":
+        return "until workspace skill runtime projection is synced"
+    if projection_state == "unmaterialized_linked_worktree":
+        return "because this linked worktree intentionally has no runtime projection"
+    return None
+
+
 def repo_doctor(repo_root: Path) -> CallResult:
     """Compose repo health checks into one compact agent-facing doctor payload."""
     result = CallResult()
@@ -1073,12 +1065,10 @@ def repo_doctor(repo_root: Path) -> CallResult:
                     "until repository status is ready"
                 )
             )
-        elif projection_sync_signal.get("state") == "block":
-            signals.update(
-                _repo_status_skipped_downstream_signals(
-                    "until workspace skill runtime projection is synced"
-                )
-            )
+        elif skip_reason := _projection_skip_reason(
+            projection_sync_signal.get("state"), status_result.data.get("skills_projection_state")
+        ):
+            signals.update(_repo_status_skipped_downstream_signals(skip_reason))
         else:
             sdk_handles_signal = _safe_signal(
                 lambda: _sdk_handles_signal(
