@@ -252,6 +252,34 @@ def test_hook_sandbox_env_replaces_unusable_inherited_cache_only(tmp_path: Path)
     assert xdg_cache == str(tmp_path / "explicit-xdg-cache")
 
 
+def test_hook_sandbox_env_rejects_non_searchable_cache_directory(tmp_path: Path) -> None:
+    """Hooks need directory search permission as well as write permission for caches."""
+    helper = REPO_ROOT / "scripts/hooks/_sandbox_env.sh"
+    inaccessible_cache = tmp_path / "inaccessible-cache"
+    inaccessible_cache.mkdir()
+    inaccessible_cache.chmod(0o600)
+    command = [
+        "bash",
+        "-c",
+        'source "$1"; printf "%s" "$UV_CACHE_DIR"',
+        "bash",
+        str(helper),
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            env={**os.environ, "TMPDIR": str(tmp_path), "UV_CACHE_DIR": str(inaccessible_cache)},
+        )
+    finally:
+        inaccessible_cache.chmod(0o700)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == str(tmp_path / "agent-skills-uv-cache")
+
+
 def test_hook_adapters_resolve_root_without_inherited_git_context() -> None:
     for rel_path in [
         "Infrastructure/scripts/hooks/pre-commit.sh",

@@ -10,7 +10,8 @@ claims:
   hard_gate: true
   evidence_required:
   - exact changed scope
-  - validation outcome
+  - exact validation command outcomes
+  - remaining behavior or evidence boundaries
 cases:
 - id: smoke-discovery
   name: discovery interview contract

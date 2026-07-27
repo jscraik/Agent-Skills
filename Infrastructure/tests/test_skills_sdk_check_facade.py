@@ -111,6 +111,16 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
                 self.assertNotIn("\n    lifecycle", process.stdout)
                 self.assertNotIn("\n    status", process.stdout)
                 self.assertNotIn("\n    observability", process.stdout)
+                expert_help = subprocess.run(
+                    [command[0], *command[1:-1], "eval", "--help"],
+                    cwd=REPO_ROOT,
+                    env=_command_env(),
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=False,
+                )
+                self.assertEqual(expert_help.returncode, 0, expert_help.stderr)
 
 
 if __name__ == "__main__":

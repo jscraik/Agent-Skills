@@ -705,15 +705,18 @@ def main():
                 limit=args.limit,
             )
         elif args.action == "sync":
+            sync_options: str | skills_commands.SkillSyncOptions = args.plugin_cache_refresh
+            if args.scope == "user":
+                sync_options = skills_commands.SkillSyncOptions(
+                    plugin_cache_refresh=args.plugin_cache_refresh,
+                    user_sync_mode=args.user_sync_mode,
+                )
             result = skills_commands.sync_skills(
                 repo_root,
                 scope=args.scope,
                 dry_run=args.dry_run,
                 projection=args.projection,
-                plugin_cache_refresh=skills_commands.SkillSyncOptions(
-                    plugin_cache_refresh=args.plugin_cache_refresh,
-                    user_sync_mode=args.user_sync_mode,
-                ),
+                plugin_cache_refresh=sync_options,
             )
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
@@ -1066,7 +1069,7 @@ def main():
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
     maybe_emit_phoenix_trace(repo_root, args, result)
-    if args.topic == "skills" and args.action == "package" and args.target == "verify":
+    if args.json and args.topic == "skills" and args.action == "package" and args.target == "verify":
         compact_package_verify_payload(result.data)
     if args.json and args.topic == "skills" and args.action == "prove":
         compact_skill_prove_payload(result.data)

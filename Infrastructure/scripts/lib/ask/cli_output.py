@@ -101,4 +101,6 @@ def compact_skill_prove_payload(data: dict[str, Any]) -> None:
             "publication, review acceptance, or release readiness."
         ),
     }
+    if "goal_resolution" in proof:
+        data["skill_proof"]["goal_resolution"] = proof["goal_resolution"]
     data.pop("sdk_skill_proof", None)

@@ -47,7 +47,7 @@ links, cache freshness, or activation.
 - `Docs/runbooks/migrate-flat-projection-to-rooted.md` records that rooted
   runtime projection is retired and identifies `flat` and `hybrid` as the
   supported runtime modes.
-- `Infrastructure/scripts/validation-and-linting/generate_skillset_manifests.py`
+- `Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py`
   owns the legacy manifest projection.
 - `Infrastructure/scripts/validation-and-linting/check_context_budget.py
   --projection rooted --json` checks legacy metadata ownership and context

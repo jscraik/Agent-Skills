@@ -12432,8 +12432,8 @@ def _finalize_skill_sync_result(
         validation_args.append("--dry-run")
     if projection_decision.mode_source in {"cli", "env"}:
         validation_args.extend(["--projection", projection_decision.requested_mode])
-    if scope == "user" and plan.get("user_sync_mode") == "links-only":
-        validation_args.extend(["--user-sync-mode", "links-only"])
+    if scope == "user":
+        validation_args.extend(["--user-sync-mode", str(plan.get("user_sync_mode", "full"))])
     if plugin_cache_refresh != "auto":
         validation_args.extend(["--plugin-cache-refresh", plugin_cache_refresh])
     result.data["validation_commands"] = [_skills_validation_command("sync", *validation_args)]

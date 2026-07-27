@@ -54,7 +54,7 @@ does not name a next action:
 ```bash
 ./bin/ask sdk start <skill> --json --robot
 ./bin/ask sdk check <skill> --json --robot
-./bin/ask skills package verify <skill> --strict --json --robot
+./bin/ask skills package verify <skill> --json --robot
 ./bin/ask skills prove <skill> --json --robot
 ```
 
@@ -71,7 +71,7 @@ That path answers:
 | -------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | Start          | `./bin/ask sdk start <skill> --json --robot`                 | Resolves the target, local state, and one next action.                            |
 | Check          | `./bin/ask sdk check <skill> --json --robot`                 | Gives a compact structural summary and one actionable follow-up.                  |
-| Verify package | `./bin/ask skills package verify <skill> --strict --json --robot` | Verifies the requested package without installing or changing the runtime. |
+| Verify package | `./bin/ask skills package verify <skill> --json --robot` | Verifies the requested package without installing or changing the runtime. |
 | Prove          | `./bin/ask skills prove <skill> --json --robot`              | Keeps structural, runtime, and task-outcome truth separate.                       |
 
 Use `--robot` when an agent is driving the CLI. The wrapper corrects clear

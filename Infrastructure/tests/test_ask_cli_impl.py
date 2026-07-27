@@ -4423,9 +4423,37 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        plan = json.loads(result.stdout)["data"]["plan"]
+        output = json.loads(result.stdout)
+        plan = output["data"]["plan"]
         self.assertEqual(plan["user_sync_mode"], "full")
         self.assertIn("runtime_plugin_mirrors", plan)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --scope user --dry-run --user-sync-mode full --json --robot"],
+        )
+
+    def test_skills_workspace_sync_preserves_full_sync_contract(self):
+        """Workspace sync must not inherit the user-only links-only default."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["data"]["plan"]["user_sync_mode"], "full")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --dry-run --json --robot"],
+        )
 
     def test_skills_sync_human_output_exposes_validation(self):
         """Verify ask skills sync renders its validation command in dry-run mode."""
