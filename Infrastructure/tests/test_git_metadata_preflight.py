@@ -207,6 +207,215 @@ class GitMetadataPreflightTests(unittest.TestCase):
             self.assertEqual(owned.returncode, 0, owned_payload)
             self.assertIn("expected_current_index_lock", owned_payload["advisories"])
 
+    def test_owned_linked_worktree_index_lock_is_advisory_for_pre_commit(self) -> None:
+        if not lsof_available():
+            self.skipTest("lsof is required to prove parent lock ownership")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "linked"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "linked")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            _, clean = run_preflight(linked)
+            lock_path = Path(str(clean["index_lock_path"]))
+
+            with lock_path.open("w", encoding="utf-8"):
+                owned = subprocess.run(
+                    [
+                        sys.executable,
+                        str(SCRIPT),
+                        "--repo-root",
+                        str(linked),
+                        "--allow-parent-owned-index-lock",
+                        "--json",
+                    ],
+                    env={
+                        **os.environ,
+                        "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                    },
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+            owned_payload = json.loads(owned.stdout)
+            self.assertEqual(owned.returncode, 0, owned_payload)
+            self.assertIn("expected_current_index_lock", owned_payload["advisories"])
+            self.assertNotIn("current_worktree_locked", owned_payload["reason_codes"])
+
+    def test_lsof_parent_chain_waives_owned_lock_without_ps(self) -> None:
+        if not lsof_available():
+            self.skipTest("lsof is required to prove lock ownership")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            lock_path = Path(str(clean["index_lock_path"]))
+            tool_bin = Path(temp_dir) / "no-ps-bin"
+            tool_bin.mkdir()
+            git_binary = shutil.which("git")
+            self.assertIsNotNone(git_binary)
+            (tool_bin / "git").symlink_to(str(git_binary))
+            with lock_path.open("w", encoding="utf-8"):
+                owned = subprocess.run(
+                    [
+                        "/bin/bash",
+                        "-c",
+                        (
+                            f'"{sys.executable}" "{SCRIPT}" --repo-root "{repo}" '
+                            "--allow-parent-owned-index-lock --json"
+                        ),
+                    ],
+                    env={
+                        **os.environ,
+                        "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                        "PATH": str(tool_bin),
+                    },
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+            owned_payload = json.loads(owned.stdout)
+            self.assertEqual(owned.returncode, 0, owned_payload)
+            self.assertIn("expected_current_index_lock", owned_payload["advisories"])
+
+    def test_git_hook_transaction_waives_current_index_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            git_dir = Path(str(clean["git_dir"]))
+            lock_path = Path(str(clean["index_lock_path"]))
+            transaction_index = git_dir / "next-index-123.lock"
+            transaction_index.write_text("hook transaction\n", encoding="utf-8")
+            lock_path.write_text("current commit\n", encoding="utf-8")
+
+            allowed = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--repo-root",
+                    str(repo),
+                    "--allow-parent-owned-index-lock",
+                    "--json",
+                ],
+                env={
+                    **os.environ,
+                    "GIT_DIR": str(git_dir),
+                    "GIT_INDEX_FILE": str(transaction_index),
+                    "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                },
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            allowed_payload = json.loads(allowed.stdout)
+            self.assertEqual(allowed.returncode, 0, allowed_payload)
+            self.assertTrue(allowed_payload["expected_hook_transaction"])
+            self.assertIn("expected_current_index_lock", allowed_payload["advisories"])
+
+    def test_nontransaction_git_index_file_does_not_waive_current_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo = make_repo(Path(temp_dir))
+            _, clean = run_preflight(repo)
+            git_dir = Path(str(clean["git_dir"]))
+            lock_path = Path(str(clean["index_lock_path"]))
+            foreign_index = git_dir / "foreign-index.lock"
+            foreign_index.write_text("foreign transaction\n", encoding="utf-8")
+            lock_path.write_text("current commit\n", encoding="utf-8")
+
+            blocked = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--repo-root",
+                    str(repo),
+                    "--allow-parent-owned-index-lock",
+                    "--json",
+                ],
+                env={
+                    **os.environ,
+                    "GIT_DIR": str(git_dir),
+                    "GIT_INDEX_FILE": str(foreign_index),
+                    "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                },
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            blocked_payload = json.loads(blocked.stdout)
+            self.assertEqual(blocked.returncode, 78, blocked_payload)
+            self.assertFalse(blocked_payload["expected_hook_transaction"])
+            self.assertIn("stale_index_lock_candidate", blocked_payload["reason_codes"])
+
+    def test_unowned_linked_worktree_index_lock_is_not_waived_for_pre_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "linked"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "linked")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            _, clean = run_preflight(linked)
+            lock_path = Path(str(clean["index_lock_path"]))
+            lock_path.touch()
+
+            unowned = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--repo-root",
+                    str(linked),
+                    "--allow-parent-owned-index-lock",
+                    "--json",
+                ],
+                env={
+                    **os.environ,
+                    "GIT_METADATA_PREFLIGHT_LOCK_MAX_AGE_SECONDS": "0",
+                },
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            unowned_payload = json.loads(unowned.stdout)
+            self.assertEqual(unowned.returncode, 78, unowned_payload)
+            expected_reason = (
+                "stale_index_lock_candidate"
+                if lsof_available()
+                else "lock_owner_detector_unavailable"
+            )
+            self.assertIn(expected_reason, unowned_payload["reason_codes"])
+            self.assertTrue(lock_path.exists(), "preflight must never remove locks")
+
+    def test_explicit_current_worktree_lock_is_not_waived_for_pre_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo = make_repo(root)
+            linked = root / "linked"
+            created = git(repo, "worktree", "add", "-q", str(linked), "-b", "linked")
+            self.assertEqual(created.returncode, 0, created.stderr)
+            locked = git(repo, "worktree", "lock", "--reason", "manual", str(linked))
+            self.assertEqual(locked.returncode, 0, locked.stderr)
+
+            current = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--repo-root",
+                    str(linked),
+                    "--allow-parent-owned-index-lock",
+                    "--json",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            current_payload = json.loads(current.stdout)
+            self.assertEqual(current.returncode, 78, current_payload)
+            self.assertIn("current_worktree_locked", current_payload["reason_codes"])
+
     def test_non_regular_index_lock_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo = make_repo(Path(temp_dir))

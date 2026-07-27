@@ -376,9 +376,11 @@ def test_pre_commit_names_and_proves_current_index_lock_policy() -> None:
         "Infrastructure/scripts/hooks/pre-commit.sh",
     ]:
         text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        assert "--allow-current-index-lock" in text
-        assert "--allow-parent-owned-index-lock" not in text
-        assert "lock owner is a Git ancestor" in text
+        assert "--allow-parent-owned-index-lock" in text
+        assert "--allow-current-index-lock" not in text
+        assert 'hook_git_dir="${GIT_DIR:-}"' in text
+        assert 'hook_git_index_file="${GIT_INDEX_FILE:-}"' in text
+        assert 'GIT_DIR="$hook_git_dir" GIT_INDEX_FILE="$hook_git_index_file"' in text
 
 
 def test_harness_fallback_wrappers_share_supported_version() -> None:
