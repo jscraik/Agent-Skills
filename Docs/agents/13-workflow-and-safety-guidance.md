@@ -169,17 +169,11 @@ Always format markdown plan files cleanly before writing - avoid stray backticks
 
 ## Repeated Steering and Environment Refinement
 
-Jamie steering is operational evidence. When a user correction, review finding,
-approval failure, command failure, or live-state mismatch repeats in the same
-work lane, stop the lane before another retry and run this refinement loop:
-
-1. Name the repeated failure pattern in concrete terms.
-2. Separate the visible symptom from the mechanism that allowed it.
-3. Apply a durable refinement in the closest canonical surface: skill guidance,
-   AGENTS guidance, solution docs, wrappers, validation scripts, or repo memory.
-4. Validate the refinement with the smallest command that proves the corrected
-   behavior.
-5. Report the proof, then resume the original work.
+The selected-route criteria and refinement loop above govern repeated steering.
+Repeated feedback, review findings, approval failures, and live-state mismatches
+do not stop routine work by themselves. After two equivalent failures of the
+same command, change the command, environment, permission profile, or
+diagnostic path before retrying, then record the changed evidence.
 
 For sandboxed Codex runs, live PR and CI operations are networked operations.
 Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API

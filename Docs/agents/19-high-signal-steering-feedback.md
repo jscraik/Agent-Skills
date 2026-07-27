@@ -96,6 +96,10 @@ or placeholder identifier. When there is no live handle, rediscover state with
 a direct repository command. After invalid-handle use, continue with direct
 commands until a new asynchronous call returns a live handle.
 
+Stateful wait, poll, and resume calls are single-threaded: issue one call at a
+time and wait for its result before making another call for that handle. This
+prevents concurrent calls from consuming or invalidating the same live handle.
+
 After any fabricated runtime handle is attempted, do not make another wait,
 poll, or resume call until a new asynchronous tool result provides a live
 handle. This direct safety rule does not create a steering-ledger requirement.

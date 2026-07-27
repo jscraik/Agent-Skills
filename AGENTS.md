@@ -117,7 +117,10 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 
 Routine local skill corrections use existing local checks and do not invoke
 cloud, Tessl, runtime, review, or release machinery unless promotion is
-explicitly selected.
+explicitly selected. This source-only path does not waive the skill-management
+contract: runtime projection proof is required before claiming a skill is
+usable or using it as a runtime skill; that proof belongs to the separately
+selected runtime or promotion lane.
 
 ```bash
 ./bin/ask repo doctor --json --robot
