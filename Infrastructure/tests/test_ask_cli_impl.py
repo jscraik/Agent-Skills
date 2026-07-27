@@ -1119,7 +1119,7 @@ class TestAskCLI(unittest.TestCase):
                 }
                 with mock.patch.object(skills_commands, "skills_proof", return_value=blocked), mock.patch.object(
                     skills_commands, "audit_skill", return_value=CallResult()
-                ), mock.patch.object(
+                ) as audit_mock, mock.patch.object(
                     skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
                 ), mock.patch.object(
                     skills_commands, "_skill_workout_candidates", return_value=[]
@@ -1138,6 +1138,12 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(
             proof["next_command"],
             "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        )
+        audit_mock.assert_called_once_with(
+            repo_root,
+            "Skills/agent-ops/demo",
+            level="compat",
+            validation_scope="source",
         )
 
     def test_skills_prove_rejects_stale_shard_aggregate_package_digest(self):

@@ -9726,7 +9726,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "audit_command": None,
     }
     if audit_target:
-        audit_result = audit_skill(repo_root, audit_target, level="compat")
+        audit_result = audit_skill(repo_root, audit_target, level="compat", validation_scope="source")
         structural_detail = {
             "status": "pass" if audit_result.status == "success" else "fail",
             "audit_level": "compat",
