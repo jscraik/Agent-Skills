@@ -121,8 +121,22 @@ PY
 }
 
 patch_hook pre-commit
-patch_hook commit-msg
 patch_hook pre-push
+
+write_commit_msg_hook() {
+	local hook_path="$git_hooks_dir/commit-msg"
+	cat >"$hook_path" <<'HOOK'
+#!/bin/sh
+# Agent Skills direct commit-message shim.
+# Git holds the current index lock during this stage; invoking Prek here makes
+# its changed-file discovery attempt a second index write before validation.
+REPO_ROOT="$(git rev-parse --show-toplevel)" || exit 1
+exec bash "$REPO_ROOT/scripts/hooks/commit-msg.sh" "$@"
+HOOK
+	chmod +x "$hook_path"
+}
+
+write_commit_msg_hook
 
 echo "[install-prek-hooks] using PREK_HOME=$prek_home"
 echo "[install-prek-hooks] hooks ready"

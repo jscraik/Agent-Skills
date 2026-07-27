@@ -154,3 +154,6 @@ def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(
     assert "agent-skills prek home begin" in (hooks_dir / "pre-commit").read_text(
         encoding="utf-8"
     )
+    commit_msg_hook = (hooks_dir / "commit-msg").read_text(encoding="utf-8")
+    assert "Agent Skills direct commit-message shim." in commit_msg_hook
+    assert 'exec bash "$REPO_ROOT/scripts/hooks/commit-msg.sh" "$@"' in commit_msg_hook
