@@ -89,7 +89,7 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertEqual(wrapper_check["receipt"], ask_check["receipt"])
         self.assertEqual(wrapper_payload["metadata"]["command"], f"sdk check {TARGET} --json --robot")
 
-    def test_help_surfaces_expose_check_route(self) -> None:
+    def test_default_help_exposes_only_the_local_sdk_entrypoints(self) -> None:
         for command in (
             [sys.executable, "Infrastructure/bin/ask", "sdk", "--help"],
             [sys.executable, "bin/skills-sdk", "--help"],
@@ -107,6 +107,10 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
 
                 self.assertEqual(process.returncode, 0, process.stderr)
                 self.assertIn("check", process.stdout)
+                self.assertIn("start", process.stdout)
+                self.assertNotIn("\n    lifecycle", process.stdout)
+                self.assertNotIn("\n    status", process.stdout)
+                self.assertNotIn("\n    observability", process.stdout)
 
 
 if __name__ == "__main__":

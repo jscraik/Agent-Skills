@@ -41,6 +41,21 @@ from ask.skills_sdk.local_score import (
 )
 
 
+DEFAULT_SDK_ACTIONS = ("start", "check")
+
+
+def _limit_sdk_default_help(
+    sdk_subparsers: argparse._SubParsersAction,
+) -> None:
+    """Keep the author-facing SDK help focused without removing expert routes."""
+    sdk_subparsers.metavar = "{" + ",".join(DEFAULT_SDK_ACTIONS) + "}"
+    sdk_subparsers._choices_actions = [
+        action
+        for action in sdk_subparsers._choices_actions
+        if action.dest in DEFAULT_SDK_ACTIONS
+    ]
+
+
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     sdk_ir_parser = sdk_subparsers.add_parser(
         "ir",
@@ -376,6 +391,7 @@ def add_sdk_parser(
     _add_sdk_lenses_parser(sdk_subparsers, global_parser)
     _add_sdk_determinism_parser(sdk_subparsers, global_parser)
     _add_sdk_review_parser(sdk_subparsers, global_parser)
+    _limit_sdk_default_help(sdk_subparsers)
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
