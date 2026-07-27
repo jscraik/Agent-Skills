@@ -31,7 +31,7 @@ def _extract_commands(text: str) -> list[str]:
         for line in block.splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
-    if len(commands) != 9:
+    if len(commands) != 10:
         raise ValueError("generated hook cache prelude has an unexpected command count")
     return commands
 
@@ -95,6 +95,7 @@ def _expected_commands() -> list[str]:
         'PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"',
         'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"',
         'secure_hook_cache_dir "$PREK_HOME"',
+        'cd "$AGENT_SKILLS_REPO_ROOT"',
     ]
 
 

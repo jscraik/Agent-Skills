@@ -79,6 +79,7 @@ CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGE
 PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"
 secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"
 secure_hook_cache_dir "$PREK_HOME"
+cd "$AGENT_SKILLS_REPO_ROOT"
 # agent-skills prek home end
 """,
         encoding="utf-8",
@@ -341,14 +342,14 @@ def test_hook_sandbox_preserves_git_temporary_index(tmp_path: Path) -> None:
     assert result.stdout == temporary_index
 
 
-def test_pre_commit_names_and_proves_parent_owned_index_lock_policy() -> None:
+def test_pre_commit_names_and_proves_current_index_lock_policy() -> None:
     for rel_path in [
         "scripts/hooks/pre-commit.sh",
         "Infrastructure/scripts/hooks/pre-commit.sh",
     ]:
         text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
-        assert "--allow-parent-owned-index-lock" in text
-        assert "--allow-current-index-lock" not in text
+        assert "--allow-current-index-lock" in text
+        assert "--allow-parent-owned-index-lock" not in text
         assert "lock owner is a Git ancestor" in text
 
 
@@ -473,6 +474,7 @@ def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     assert 'agent-skills-hook-cache.XXXXXX' not in installer
     assert 'mkdir -p "$PREK_HOME"' not in installer
     assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in installer
+    assert 'cd "$AGENT_SKILLS_REPO_ROOT"' in installer
 
 
 def test_generated_hook_validator_accepts_shell_suffix_and_rejects_injection(tmp_path: Path) -> None:

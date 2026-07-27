@@ -104,6 +104,7 @@ block = (
     'PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"\n'
     'secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"\n'
     'secure_hook_cache_dir "$PREK_HOME"\n'
+    'cd "$AGENT_SKILLS_REPO_ROOT"\n'
     f"{end}\n"
 )
 if start in text:
