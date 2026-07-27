@@ -4250,11 +4250,9 @@ def skills_sdk_check(
     doctor_status = doctor.get("status") if isinstance(doctor, dict) else None
     blockers = doctor.get("blockers", []) if isinstance(doctor, dict) else []
     first_blocker = blockers[0] if blockers and isinstance(blockers[0], dict) else {}
-    status = {
-        "pass": "pass",
-        "warning": "warning",
-        "blocked": "blocked",
-    }.get(str(doctor_status or ""), "degraded")
+    status = "blocked" if doctor_status == "blocked" else "pass"
+    if doctor_status not in {"pass", "warning", "blocked"}:
+        status = "degraded"
     failure_class = "none"
     if status in {"blocked", "degraded"}:
         failure_class = "validation_failed"
@@ -4266,6 +4264,11 @@ def skills_sdk_check(
         doctor_command_args.append("--codex-parity")
     command = _skills_validation_command("doctor", *doctor_command_args)
     facade_command = "skills-sdk check"
+    next_command = (
+        str(doctor.get("next_command") or command)
+        if status in {"blocked", "degraded"} and isinstance(doctor, dict)
+        else _ask_validation_command("skills", "package", "verify", target, "--strict")
+    )
     result.metadata["command"] = "sdk check"
     receipt = {
         "schema_version": "skills-sdk.check-receipt.v1",
@@ -4313,7 +4316,7 @@ def skills_sdk_check(
             _ask_validation_command("sdk", "check", target),
             command,
         ],
-        "next_command": doctor.get("next_command") if isinstance(doctor, dict) else command,
+        "next_command": next_command,
     }
     result.data["skills_sdk_check"] = payload
     return result
@@ -4392,12 +4395,11 @@ def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = No
     result = CallResult()
     result.metadata["command"] = "sdk start"
     query = target.strip()
-    target_info, audit_target = _resolve_doctor_target(repo_root, query)
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
     source_rel = _sdk_start_repo_relative_source(repo_root, source_path_value)
     ownership = _skill_root_ownership_for_path(source_rel, repo_root=repo_root)
     target_class = _sdk_start_target_class(target_info, ownership)
-    mechanical_target = audit_target or query
     source_exists = bool(target_info.get("source_exists")) if isinstance(target_info, dict) else False
     status, blockers = _sdk_start_status(source_exists, target_class)
     display_source = source_rel or (str(source_path_value) if source_path_value else None)

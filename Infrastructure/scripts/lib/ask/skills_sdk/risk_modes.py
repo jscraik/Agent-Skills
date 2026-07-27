@@ -298,7 +298,8 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
         Refined indicator list.
     """
     has_impactful_action = any(indicator["id"] == "impactful_write_without_review" for indicator in indicators)
-    if has_impactful_action and not _has_safety_language(text):
+    has_safety_boundary = _has_safety_language(text)
+    if has_impactful_action and not has_safety_boundary:
         indicators.append(
             _indicator(
                 "no_boundary_language",
@@ -306,7 +307,10 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
                 "Impactful actions are present without approval, sandbox, preview, rollback, or redaction language.",
             )
         )
-    return [indicator for indicator in indicators if indicator["id"] != "missing_safety_language"]
+    ignored_ids = {"missing_safety_language"}
+    if has_safety_boundary:
+        ignored_ids.add("impactful_write_without_review")
+    return [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
 
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:

@@ -48,6 +48,7 @@ cases:
   given: A user has provided a current diff and asks for a behavior-preserving cleanup.
   should: Identify a small cleanup and state the validation needed before claiming equivalence.
   eval_modes:
+  - smoke
   - release
   realistic: true
   why_realistic: Maintainers routinely ask for a bounded cleanup of a current diff and need an evidence-backed equivalence boundary before merge.
@@ -78,6 +79,7 @@ cases:
   given: A user asks for a final cleanup pass before merge.
   should: Keep the review within the changed scope and report skipped risky candidates.
   eval_modes:
+  - smoke
   - release
   realistic: true
   why_realistic: A final pre-merge cleanup pass is a common maintenance request when the changed scope and validation evidence already exist.

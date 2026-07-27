@@ -57,7 +57,12 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertEqual(check["facade_command"], "skills-sdk check")
         self.assertEqual(check["receipt"]["command"], "skills-sdk check")
         self.assertEqual(check["receipt"]["failure_class"], "none")
-        self.assertIn(check["receipt"]["status"], {"pass", "warning"})
+        self.assertEqual(check["status"], "pass")
+        self.assertEqual(check["doctor_status"], "warning")
+        self.assertEqual(
+            check["next_command"],
+            "./bin/ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+        )
         self.assertNotIn("skill_doctor", check)
         self.assertLess(len(json.dumps(payload)), 10_240)
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
