@@ -43,6 +43,16 @@ TECHNICAL_WRITER_RELEASE_8 = [
     "pressure-unverified-badge",
     "regression-stale-command-example",
 ]
+IMPROVE_AGENT_NATIVE_RELEASE_8 = [
+    "happy-scorecard",
+    "happy-agents-md-audit",
+    "happy-proof-loop-gap",
+    "edge-no-validation-entrypoint",
+    "edge-ui-action-without-agent-capability",
+    "pressure-prompt-injection",
+    "eval.harness.local-pass-ci-unknown",
+    "eval.harness.done-without-validation",
+]
 
 class TestSkillsSdkEvalRunner(unittest.TestCase):
     def test_profile_execution_identity_reads_selected_oss_local_profile(self) -> None:
@@ -448,6 +458,23 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_8)
         self.assertEqual(receipt.selected_case_ids, TECHNICAL_WRITER_RELEASE_8)
         self.assertEqual(receipt.release_set_minimum, 5)
+
+    def test_improve_agent_native_uses_its_declared_eight_case_release_set(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")) as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/improve-agent-native",
+                mode="release",
+                runner="internal",
+                codex_profile="oss-local",
+            )
+
+        run.assert_called_once()
+        self.assertEqual(run.call_args.kwargs["cases"], IMPROVE_AGENT_NATIVE_RELEASE_8)
+        receipt = validate_eval_run_receipt(result.data["skills_sdk_eval_run"]["receipt"])
+        self.assertEqual(result.status, "success")
+        self.assertEqual(receipt.scenario_set_id, "improve-agent-native-release-8-v1")
+        self.assertEqual(receipt.scenario_set_case_ids, IMPROVE_AGENT_NATIVE_RELEASE_8)
 
     def test_release_scenario_sets_load_without_pyyaml(self) -> None:
         evals_path = REPO_ROOT / "Skills/agent-ops/technical-writer/references/evals.yaml"
