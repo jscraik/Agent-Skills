@@ -144,9 +144,9 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Merge duplicate if enabled blocks from supplied diff with source validation.
+    value: Combine duplicate condition from supplied diff and preserve execution order with source evidence.
   - type: expected_signal
-    value: Run focused retry_delay tests as validation before merge.
+    value: Run focused retry_delay tests covering enabled states.
 - id: edge-risky
   name: risky dedupe
   category: edge
