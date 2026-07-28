@@ -133,13 +133,6 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing repository doctor regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/scripts/testing/test_skill_lifecycle_validation_impl_catalog.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing lifecycle catalog regression fixture debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/tests/test_ask_evals_command.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",

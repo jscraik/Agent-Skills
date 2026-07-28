@@ -49,10 +49,13 @@ When modifying shell scripts or configuration files, always use non-interactive 
 ## Repeated Steering and Environment Refinement
 
 Treat repeated user steering as operating evidence, not conversation history.
-When a user has to point out the same failure class twice, stop the current
-task lane and repair the mechanism that allowed the repeat before proceeding.
+Select this system-improvement route only when Jamie asks for it, a
+consequential boundary is involved, a failure recurs across three independent
+tasks, two named active consumers need a contract that no existing surface can
+provide, or executable contracts contradict one another. Routine work does not
+stop solely because a failure or correction repeats.
 
-Use this loop:
+When the route is selected, stop before another unchanged retry and use this loop:
 
 1. Name the exact failure pattern and the command or behavior that exposed it.
 2. Separate symptom from mechanism. For example, `error connecting to
@@ -61,7 +64,10 @@ api.github.com` may be a Codex sandbox network-permission issue even when it
 3. Apply the smallest durable refinement to the environment contract, docs,
    skill instructions, scripts, or validation surface.
 4. Run the smallest proof that exercises the refined path.
-5. Report the proof before resuming the original implementation, PR, or
+5. Record the selected route in `.harness/quality/steering-uptake.md` and run
+   `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
+   A failed validator keeps the selected route blocked.
+6. Report the proof before resuming the original implementation, PR, or
    automation lane.
 
 For Codex sandboxed network operations, retry API commands with explicit
@@ -166,17 +172,11 @@ Always format markdown plan files cleanly before writing - avoid stray backticks
 
 ## Repeated Steering and Environment Refinement
 
-Jamie steering is operational evidence. When a user correction, review finding,
-approval failure, command failure, or live-state mismatch repeats in the same
-work lane, stop the lane before another retry and run this refinement loop:
-
-1. Name the repeated failure pattern in concrete terms.
-2. Separate the visible symptom from the mechanism that allowed it.
-3. Apply a durable refinement in the closest canonical surface: skill guidance,
-   AGENTS guidance, solution docs, wrappers, validation scripts, or repo memory.
-4. Validate the refinement with the smallest command that proves the corrected
-   behavior.
-5. Report the proof, then resume the original work.
+The selected-route criteria and refinement loop above govern repeated steering.
+Repeated feedback, review findings, approval failures, and live-state mismatches
+do not stop routine work by themselves. After two equivalent failures of the
+same command, change the command, environment, permission profile, or
+diagnostic path before retrying, then record the changed evidence.
 
 For sandboxed Codex runs, live PR and CI operations are networked operations.
 Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API

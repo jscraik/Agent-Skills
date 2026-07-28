@@ -59,7 +59,8 @@ _VALID_AGENTS = (
     "Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md) "
     "by opening and reading it in the current turn before continuing ordinary implementation or PR work. "
     "Record uptake in `.harness/quality/steering-uptake.md`; validate with "
-    "`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.\n"
+    "`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`. "
+    "Run stateful runtime-handle operations serially for that handle.\n"
 )
 
 
@@ -209,6 +210,22 @@ def test_rejects_agents_without_same_turn_read_rule(tmp_path: Path) -> None:
 
     weak = [finding for finding in findings if finding.code == "AGENTS_STEERING_ROUTING_WEAK"]
     assert any("opening and reading it in the current turn" in finding.message for finding in weak)
+
+
+def test_rejects_agents_without_serial_runtime_handle_rule(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "AGENTS.md",
+        "Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md) "
+        "by opening and reading it in the current turn before continuing ordinary implementation or PR work. "
+        "Record uptake in `.harness/quality/steering-uptake.md`; validate with "
+        "`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    weak = [finding for finding in findings if finding.code == "AGENTS_STEERING_ROUTING_WEAK"]
+    assert any("serially for that handle" in finding.message for finding in weak)
 
 
 # ---------------------------------------------------------------------------
