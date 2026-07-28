@@ -183,6 +183,37 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", family_cmd)
         self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", openclaw_cmd)
 
+    @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
+    @patch("ask.commands.skills_impl.subprocess.run")
+    @patch(
+        "ask.commands.skills_impl.resolve_skill_handle",
+        return_value={
+            "status": "ok",
+            "handle": "autofix",
+            "source_path": "Skills/agent-ops/autofix/SKILL.md",
+        },
+    )
+    def test_audit_skill_strict_resolves_handle_before_strict_gates(
+        self,
+        _mock_resolve,
+        mock_run,
+        _mock_python,
+    ):
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="diagnostics ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="security gate ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="family ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="openclaw ok", stderr=""),
+        ]
+
+        result = audit_skill(repo_root=repo_root, skill_path="autofix", level="strict")
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["target"], "Skills/agent-ops/autofix")
+        for call in mock_run.call_args_list:
+            self.assertIn("Skills/agent-ops/autofix", call.args[0])
+            self.assertNotIn("autofix", call.args[0][2:])
+
     @patch("ask.commands.skills_impl.subprocess.run")
     def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run):
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -10334,8 +10334,21 @@ def audit_skill(
     if path_error:
         return path_error
 
+    if not external_project_skill and (
+        resolved_skill_path is None or _resolve_existing_skill_path(resolved_skill_path) is None
+    ):
+        target_info, resolved_audit_target = _resolve_doctor_target(repo_root, skill_path)
+        if target_info.get("target_kind") == "command_handle" and target_info.get("source_exists") and resolved_audit_target:
+            resolved_skill_path = (repo_root / resolved_audit_target).resolve()
+
+    target_input = skill_path
+    if resolved_skill_path is not None:
+        if external_project_skill:
+            target_input = resolved_skill_path.as_posix()
+        else:
+            target_input = resolved_skill_path.relative_to(repo_root.resolve()).as_posix()
     audit_target, audit_target_path = _normalize_skill_target_path(
-        resolved_skill_path.as_posix() if external_project_skill and resolved_skill_path else skill_path
+        target_input
     )
     result.data["target"] = audit_target_path
     result.data["audit_scope"] = {
