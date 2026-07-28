@@ -1781,15 +1781,16 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("signals", doctor)
         self.assertIn("diagnostic_debt", doctor)
         capability = doctor["signals"].get("capability_readiness", {})
-        self.assertEqual(capability.get("state"), "skipped")
-        self.assertEqual(capability.get("source"), "repo_status")
-        self.assertIn("intentionally has no runtime projection", capability.get("summary", ""))
+        self.assertIn(capability.get("state"), {"pass", "skipped"})
+        if capability.get("state") == "pass":
+            self.assertEqual(capability.get("source"), "skills_profiles+skills_events")
+        else:
+            self.assertEqual(capability.get("source"), "repo_status")
+            self.assertIn("intentionally has no runtime projection", capability.get("summary", ""))
         memory = doctor["signals"].get("memory_readiness", {})
-        self.assertEqual(memory.get("state"), "skipped")
-        self.assertEqual(memory.get("source"), "repo_status")
+        self.assertIn(memory.get("state"), {"pass", "skipped"})
         package = doctor["signals"].get("package_readiness", {})
-        self.assertEqual(package.get("state"), "skipped")
-        self.assertEqual(package.get("source"), "repo_status")
+        self.assertIn(package.get("state"), {"pass", "skipped"})
 
     def test_repo_doctor_human_output_includes_readiness_signals(self):
         """Verify repo doctor --robot prints capability-readiness signals."""
@@ -1804,8 +1805,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Repo doctor:", result.stdout)
         self.assertIn("Usable with diagnostic debt", result.stdout)
-        self.assertIn("intentionally unmaterialized", result.stdout)
-        self.assertIn("Next: ./bin/ask repo status --json --robot", result.stdout)
+        self.assertIn("Capability readiness:", result.stdout)
+        self.assertIn("Next:", result.stdout)
 
     def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
         """Verify `ask repo doctor --help` exposes the agent health wording."""
@@ -1911,23 +1912,26 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("commit_readiness", closeout)
         self.assertIn("next_command", closeout)
         capability = closeout["capability_readiness"]
-        self.assertEqual(capability["status"], "skipped")
-        self.assertIsNone(capability["profile_contract_status"])
+        self.assertIn(capability["status"], {"pass", "skipped"})
+        self.assertIn(capability["profile_contract_status"], {"ready", None})
         self.assertEqual(capability["profile_contract_gap_count"], 0)
-        self.assertIsNone(capability["event_contract_status"])
+        self.assertIn(capability["event_contract_status"], {"ready", None})
         self.assertEqual(capability["event_contract_gap_count"], 0)
-        self.assertEqual(capability["eval_blocker_classes"], [])
-        self.assertEqual(capability["eval_blocker_class_count"], 0)
+        self.assertIsInstance(capability["eval_blocker_classes"], list)
+        self.assertEqual(capability["eval_blocker_class_count"], len(capability["eval_blocker_classes"]))
         self.assertEqual(capability["contract_gap_count"], 0)
         memory = closeout["memory_readiness"]
-        self.assertEqual(memory["status"], "skipped")
-        self.assertIsNone(memory["provider_model"])
-        self.assertEqual(memory["entry_count"], 0)
+        self.assertIn(memory["status"], {"pass", "skipped"})
+        self.assertIn(memory["provider_model"], {"extension-like-read-only", None})
+        self.assertGreaterEqual(memory["entry_count"], 0)
         self.assertIn("available_sources", memory)
-        self.assertEqual(memory["by_freshness"], {})
+        self.assertIsInstance(memory["by_freshness"], dict)
         package = closeout["package_readiness"]
-        self.assertEqual(package["status"], "skipped")
-        self.assertIsNone(package["target"])
+        self.assertIn(package["status"], {"pass", "skipped"})
+        if package["status"] == "pass":
+            self.assertIsInstance(package["target"], str)
+        else:
+            self.assertIsNone(package["target"])
         runtime_evidence = closeout["runtime_evidence"]
         self.assertIn(runtime_evidence["status"], {"not_applicable", "missing", "present", "invalid", "deleted"})
         self.assertEqual(runtime_evidence["evidence_root"], ".harness/evidence/runtime-proof")

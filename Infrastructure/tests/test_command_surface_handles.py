@@ -495,6 +495,7 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(proof["status"], "fail")
         self.assertFalse(proof["gates"]["user_runtime_alias_consistent"])
+        self.assertIn("user_runtime_alias_consistent", proof["gate_policy"]["required"])
         self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_alias_consistent")
         self.assertEqual(aliases["status"], "split_brain")
         self.assertEqual(aliases["distinct_runtime_identity_count"], 2)
