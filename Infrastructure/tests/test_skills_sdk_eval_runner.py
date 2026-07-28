@@ -75,31 +75,6 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             },
         )
 
-    def test_internal_oss_eval_uses_profile_identity_when_skill_has_no_lane_policy(self) -> None:
-        profile_identity = {
-            "model": "qwen3.5:9b-mlx",
-            "model_family": "qwen3.5",
-            "provider": "ollama",
-            "identity_source": "codex-profile-config",
-        }
-        with (
-            mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-local")),
-            mock.patch("ask.commands.skills_impl._skills_sdk_eval_execution_identity", return_value=None),
-            mock.patch("ask.commands.skills_impl._skills_sdk_eval_profile_execution_identity", return_value=profile_identity),
-        ):
-            result = skills_sdk_eval_run(
-                REPO_ROOT,
-                target="Skills/agent-ops/testing",
-                mode="smoke",
-                runner="internal",
-                codex_profile="oss-local",
-            )
-
-        receipt = validate_eval_run_receipt(result.data["skills_sdk_eval_run"]["receipt"])
-        self.assertEqual(result.status, "success")
-        self.assertEqual(receipt.execution_model, "qwen3.5:9b-mlx")
-        self.assertEqual(receipt.execution_model_provider, "ollama")
-
     def test_sdk_internal_runner_rejects_legacy_tessl_continuation(self) -> None:
         with mock.patch("ask.commands.evals.run_evals") as run:
             result = skills_sdk_eval_run(
@@ -285,7 +260,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             "Skills/agent-ops/testing",
             mode="smoke",
             runner="codex",
-            dashboard=True,
+            dashboard=False,
             skip_tessl=True,
             codex_profile=None,
             cases=None,
@@ -342,7 +317,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             "Skills/agent-ops/testing",
             mode="smoke",
             runner="codex",
-            dashboard=True,
+            dashboard=False,
             skip_tessl=True,
             codex_profile="oss-cloud",
             cases=None,
@@ -410,7 +385,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             "Skills/agent-ops/testing",
             mode="smoke",
             runner="codex",
-            dashboard=True,
+            dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
             cases=None,

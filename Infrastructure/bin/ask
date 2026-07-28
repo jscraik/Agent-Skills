@@ -644,12 +644,11 @@ def main():
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
             elif args.target == "verify" and args.checkout_test:
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
-            elif args.target == "verify" and args.strict:
-                result = build_argument_error("skills", "package", raw_args, parser_error="--strict is supported only for package readiness, not verify mode")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
             elif args.target == "verify":
-                result = skills_commands.skills_package_verify(
+                verify_command = skills_commands.skills_package_verify_strict if args.strict else skills_commands.skills_package_verify
+                result = verify_command(
                     repo_root,
                     target=args.verify_target,
                     expected_sha256=args.expected_sha256,

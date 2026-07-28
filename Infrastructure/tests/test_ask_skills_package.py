@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills_impl import skills_package, skills_package_verify  # noqa: E402
+from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402
 from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402
 
 
@@ -269,6 +269,54 @@ metadata:
         self.assertEqual(writing_quality["blockers"], [])
         self.assertEqual(writing_quality["advisories"], [])
         self.assertIn("writing_quality", [check["name"] for check in verification["checks"]])
+
+    def test_package_verify_strict_requires_package_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "packaged-skill"
+            _write_gold_quality_skill(skill_dir)
+            skill_path = skill_dir / "SKILL.md"
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8").replace(
+                    "  compatible_roles:\n    - worker\n  runtime_needs:\n    - filesystem\n  maturity: beta\n",
+                    "",
+                ).replace("  share_readiness: ready\n", ""),
+                encoding="utf-8",
+            )
+
+            non_strict = skills_package_verify(repo_root, "Skills/agent-ops/packaged-skill")
+            strict = skills_package_verify_strict(
+                repo_root,
+                "Skills/agent-ops/packaged-skill",
+            )
+
+        self.assertEqual(non_strict.status, "error", non_strict.data)
+        self.assertEqual(strict.status, "error", strict.data)
+        self.assertFalse(non_strict.data["skill_package_verification"]["strict"])
+        verification = strict.data["skill_package_verification"]
+        self.assertTrue(verification["strict"])
+        self.assertEqual(verification["status"], "blocked")
+        self.assertEqual(
+            verification["next_command"],
+            "./bin/ask skills package Skills/agent-ops/packaged-skill --strict --json --robot",
+        )
+        readiness = verification["strict_package_readiness"]
+        self.assertEqual(readiness["canonical_source_path"], "Skills/agent-ops/packaged-skill/SKILL.md")
+        self.assertEqual(
+            readiness["package_contract"]["required_fields"]["missing"],
+            ["compatible_roles", "maturity", "runtime_needs", "share_readiness"],
+        )
+
+    def test_package_verify_missing_target_starts_target_resolution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = skills_package_verify(Path(temp_dir), "missing-skill")
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertEqual(
+            verification["next_command"],
+            "./bin/ask sdk start missing-skill --json --robot",
+        )
 
     def test_package_verify_reports_writing_quality_advisories_without_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

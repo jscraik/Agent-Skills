@@ -41,16 +41,59 @@ def replay_command(*parts: object) -> str:
     return " ".join(shlex.quote(str(part)) for part in parts if part is not None)
 
 
+def _compact_package_blockers(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return []
+    return [
+        {
+            key: blocker.get(key)
+            for key in ("rule_id", "class", "status", "message", "path")
+            if blocker.get(key) is not None
+        }
+        for blocker in value
+        if isinstance(blocker, dict)
+    ]
+
+
+def _compact_strict_package_readiness(value: object) -> dict[str, object] | None:
+    if not isinstance(value, dict):
+        return None
+    package_contract = value.get("package_contract")
+    required_fields = package_contract.get("required_fields") if isinstance(package_contract, dict) else {}
+    install_gate = package_contract.get("install_gate") if isinstance(package_contract, dict) else {}
+    return {
+        "status": value.get("status"),
+        "canonical_source_path": value.get("canonical_source_path"),
+        "missing_fields": required_fields.get("missing", []),
+        "gate_blockers": install_gate.get("blocked_reasons", []),
+    }
+
+
+def _package_verify_claims_boundary(mutation_status: object) -> str:
+    if isinstance(mutation_status, dict) and mutation_status.get("mutated"):
+        return (
+            "Verification detected mutation; follow rollback_hint before treating "
+            "this result as safe. It does not prove runtime reachability, task "
+            "outcome, publication, or release readiness."
+        )
+    return (
+        "This verifies the requested package without install, extraction, or "
+        "runtime-root mutation; it does not prove runtime reachability, task "
+        "outcome, publication, or release readiness."
+    )
+
+
 def compact_package_verify_payload(data: dict[str, Any]) -> None:
     """Keep stable package verification decision-sized by default."""
     verification = data.get("skill_package_verification")
     if not isinstance(verification, dict):
         return
-    data["skill_package_verification"] = {
+    compact = {
         key: verification.get(key)
         for key in (
             "schema_version",
             "query",
+            "strict",
             "status",
             "target_identity",
             "archive_identity",
@@ -63,19 +106,12 @@ def compact_package_verify_payload(data: dict[str, Any]) -> None:
             "next_command",
         )
     }
-    mutation_status = data["skill_package_verification"].get("mutation_status")
-    if isinstance(mutation_status, dict) and mutation_status.get("mutated"):
-        data["skill_package_verification"]["claims_boundary"] = (
-            "Verification detected mutation; follow rollback_hint before treating "
-            "this result as safe. It does not prove runtime reachability, task "
-            "outcome, publication, or release readiness."
-        )
-    else:
-        data["skill_package_verification"]["claims_boundary"] = (
-            "This verifies the requested package without install, extraction, or "
-            "runtime-root mutation; it does not prove runtime reachability, task "
-            "outcome, publication, or release readiness."
-        )
+    compact["blockers"] = _compact_package_blockers(verification.get("blockers"))
+    strict_readiness = _compact_strict_package_readiness(verification.get("strict_package_readiness"))
+    if strict_readiness:
+        compact["strict_package_readiness"] = strict_readiness
+    data["skill_package_verification"] = compact
+    compact["claims_boundary"] = _package_verify_claims_boundary(compact.get("mutation_status"))
 
 
 def compact_skill_prove_payload(data: dict[str, Any]) -> None:

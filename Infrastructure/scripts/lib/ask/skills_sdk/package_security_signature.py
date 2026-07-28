@@ -50,16 +50,14 @@ RUNTIME_FETCH_RE = re.compile(
 INSECURE_CREDENTIAL_OUTPUT_RE = re.compile(
     r"(?i)\b(print|echo|log|stdout|stderr|trace)\b[^\n]{0,80}\b(secret|token|password|credential|api key)\b"
 )
-UNTRUSTED_CONTENT_RE = re.compile(
-    r"(?i)\b(untrusted|arbitrary url|third[- ]party|unknown website|social media|forum|reddit|browser content|web page)\b"
+UNTRUSTED_EXTERNAL_ACQUISITION_RE = re.compile(
+    r"(?is)\b(?:fetch|download|retrieve|browse|scrape|crawl|open|load|read|ingest)\b.{0,120}?"
+    r"\b(?:untrusted|arbitrary url|third[- ]party|unknown website|social media|forum|reddit|browser content|web page)\b"
 )
 SYSTEM_SERVICE_RE = re.compile(r"(?i)\b(launchctl|systemctl|crontab|sudo)\b|/Library/LaunchAgents|/etc/")
 DESTRUCTIVE_RE = re.compile(r"(?i)\brm\s+-rf\b|\bdelete all\b|\bdrop table\b|\bwipe\s+(?:the\s+)?(?:repo|disk|database)")
 EXTERNAL_WRITE_RE = re.compile(r"(?i)\b(webhook|post to|send to|upload|publish|deploy|push)\b")
-DEFENSIVE_UNTRUSTED_INPUT_RE = re.compile(
-    r"(?i)\btreat\b[^\n]{0,160}\b(?:review text|logs?|diffs?|links?|comments?|task text)\b"
-    r"[^\n]{0,160}\bas\s+untrusted\s+input\b"
-)
+DEFENSIVE_UNTRUSTED_INPUT_RE = re.compile(r"(?i)\b(treat|classif(?:y|ies)|mark)\b.{0,160}?\bas\s+untrusted\b")
 EVAL_SAFETY_FIELDS = (
     "id",
     "name",
@@ -203,20 +201,29 @@ def _pattern_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
 
 def _untrusted_content_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
     is_defensive_untrusted_input = bool(DEFENSIVE_UNTRUSTED_INPUT_RE.search(text))
-    has_untrusted_content = bool(UNTRUSTED_CONTENT_RE.search(text))
+    has_external_acquisition = bool(UNTRUSTED_EXTERNAL_ACQUISITION_RE.search(text))
     has_external_write = bool(EXTERNAL_WRITE_RE.search(text))
     has_secret_assignment = bool(SECRET_ASSIGNMENT_RE.search(text))
-    if not has_untrusted_content:
-        return []
-    if has_untrusted_content and is_defensive_untrusted_input and not (has_external_write or has_secret_assignment):
-        return [
-            _indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content."),
-            _indicator("untrusted_input_handling", evidence_ref, "Declares defensive handling of untrusted review input."),
-        ]
-    indicators = [_indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content.")]
-    if has_untrusted_content and (has_secret_assignment or has_external_write):
+    indicators: list[dict[str, str]] = []
+    if is_defensive_untrusted_input:
         indicators.append(
-            _indicator("composed_capability_risk", evidence_ref, "Combines untrusted content with secret handling or external writes.")
+            _indicator("untrusted_input_handling", evidence_ref, "Classifies supplied input as untrusted before use.")
+        )
+    if has_external_acquisition:
+        indicators.append(
+            _indicator(
+                "untrusted_external_content_acquisition",
+                evidence_ref,
+                "Acquires content from an untrusted external source.",
+            )
+        )
+    if has_external_acquisition and (has_secret_assignment or has_external_write):
+        indicators.append(
+            _indicator(
+                "composed_capability_risk",
+                evidence_ref,
+                "Combines untrusted external acquisition with secret handling or an external write.",
+            )
         )
     return indicators
 

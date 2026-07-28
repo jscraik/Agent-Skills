@@ -327,10 +327,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills events eval_blocked --json",
     ],
     ("skills", "package"): [
-        "ask skills package Skills/agent-ops/autofix --json",
-        "ask skills package Skills/agent-ops/autofix --checkout-test --json",
-        "ask skills package Skills/agent-ops/autofix --strict --json",
-        "ask skills package verify Skills/agent-ops/autofix --json",
+        "ask skills package Skills/agent-ops/simplify --json",
+        "ask skills package Skills/agent-ops/simplify --checkout-test --json",
+        "ask skills package Skills/agent-ops/simplify --strict --json",
+        "ask skills package verify Skills/agent-ops/simplify --json",
         "ask skills package verify ./package.zip --expected-sha256 <sha256> --json",
     ],
     ("skills", "conformance"): [

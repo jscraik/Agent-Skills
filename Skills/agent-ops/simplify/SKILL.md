@@ -4,8 +4,16 @@ description: "Review changed code for behavior-preserving simplification by remo
 metadata:
   skill-type: code_quality_review
   version: 0.2.0
+  lifecycle_state: active
+  maturity: validated
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  metadata_source: frontmatter
+  compatible_roles: "default, worker"
+  runtime_needs: "filesystem, shell, repo-validation"
   triggers: "simplify.?code, simplify.?changes, simplify.?pass, simplify.?refactor"
   provenance: frontmatter:agent-skills:canonical-source
+  share_readiness: ready
 ---
 
 # Simplify
@@ -87,6 +95,10 @@ Set `outcome` to `changed`, `no_justified_edit`, or `blocked`.
    when breadth, ownership, or risk warrants fan-out; never require reviewers
    merely to satisfy a workflow shape. Read `references/reviewer-rubric.md`
    when detailed lenses are useful.
+   - When adjacent statements repeat the same condition, combine the duplicate
+     condition into one guard only when ordering, side effects, and the false
+     path stay unchanged. State that behavior evidence and name the focused
+     test that proves it.
 4. Apply the smallest behavior-preserving edit. Record uncertain, low-value, or
    out-of-scope candidates under `skipped`. For contract changes, check:
    - current producer -> current consumer;
