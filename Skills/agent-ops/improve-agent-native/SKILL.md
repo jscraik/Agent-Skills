@@ -88,6 +88,9 @@ For that gap, write the literal classifications `non-authoritative` and
 name the applicable validation commands, receipts, or equivalent
 repository-owned proof rather than only a generic recheck.
 
+Conclude the assessment by saying that validation blocks false readiness and
+proof-skipping until those commands, receipts, or equivalent proof exist.
+
 When validation is absent or an input asks to skip it, include a `proof_gap`
 that blocks a false readiness or proof-skipping claim. Require the applicable
 validation commands, receipts, or equivalent repository-owned proof before
