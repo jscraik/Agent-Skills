@@ -1900,6 +1900,9 @@ def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
             envelope.get("status") == "success"
             and aggregate.get("status") == "pass"
             and receipt.get("status") == "pass"
+            and receipt.get("lane") == "oss-local"
+            and receipt.get("profile") == "oss-local"
+            and receipt.get("codex_profile") == "oss-local"
             and receipt.get("package_id") == package_id
             and receipt.get("package_digest") == package_digest
             and check_statuses.get("shards_match_current_package") == "pass"
@@ -4368,8 +4371,8 @@ def skills_sdk_check(
             f"skills-sdk check blocked for {target}: {first_blocker.get('message')}"
             if status == "blocked"
             else (
-                f"skills-sdk check completed for {target} with warnings."
-                if status == "warning"
+                f"skills-sdk check is degraded for {target}: doctor status '{doctor_status}' is not a recognized verdict."
+                if status == "degraded"
                 else f"skills-sdk check passed for {target}."
             )
         ),
@@ -4441,6 +4444,7 @@ def _sdk_start_local_receipt(
             }
         ],
         "next_action": {
+            "lane": "local_check",
             "command": next_command,
             "why": "Check the resolved local source before package verification or proof.",
         },
@@ -4469,8 +4473,15 @@ def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = No
         "status": status,
         "receipt": receipt,
         "agent_summary": (
-            f"{query}: {display_source or 'source unavailable'}; next action: {receipt['next_action']['command']}. "
-            "This does not prove structural validity, package readiness, runtime reachability, or outcome proof."
+            (
+                f"{query}: {display_source}; next action: {receipt['next_action']['command']}. "
+                "This does not prove structural validity, package readiness, runtime reachability, or outcome proof."
+            )
+            if status == "pass"
+            else (
+                f"{query}: source unavailable; blocked before local source resolution. "
+                f"Next action: {receipt['next_action']['command']}."
+            )
         ),
     }
     if status != "pass":

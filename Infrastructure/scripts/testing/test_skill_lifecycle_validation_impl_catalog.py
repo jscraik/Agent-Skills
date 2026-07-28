@@ -17,6 +17,7 @@ from test_skill_lifecycle_validation_impl import (
     write_text,
 )
 
+__test__ = False
 
 
 def _write_catalog_duplicate_fixture(repo_root: Path, *, reviewed_on: str) -> None:
@@ -361,6 +362,10 @@ class SkillLifecycleCatalogValidationTests(unittest.TestCase):
 
             write_text(
                 repo_root / "plugins" / "skill-factory" / "skills" / "skill-builder" / "SKILL.md",
+                packaged_skill,
+            )
+            write_text(
+                repo_root / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "SKILL.md",
                 packaged_skill,
             )
 

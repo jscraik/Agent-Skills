@@ -6,6 +6,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 from test_skill_lifecycle_validation_impl import (
@@ -16,6 +17,7 @@ from test_skill_lifecycle_validation_impl import (
     write_text,
 )
 
+__test__ = False
 
 
 def _write_preview_projection_fixture(repo: Path) -> None:
@@ -47,7 +49,7 @@ def _identified_runtime_source() -> dict[str, object]:
     }
 
 
-def _eligible_candidate(candidate_type, name: str, path: str, scope_rank: int):
+def _eligible_candidate(candidate_type: type[Any], name: str, path: str, scope_rank: int) -> Any:
     return candidate_type(
         name=name,
         path=path,
@@ -328,8 +330,11 @@ class SkillLifecycleRuntimeValidationTests(unittest.TestCase):
         plugin_source = _eligible_candidate(
             candidate,
             "plugin-creator",
-            "Plugins/plugin-factory/skills/plugin-creator",
-            skills_impl._scope_rank_for_path(REPO_ROOT, "Plugins/plugin-factory/skills/plugin-creator"),
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+            skills_impl._scope_rank_for_path(
+                REPO_ROOT,
+                "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+            ),
         )
         global_source = _eligible_candidate(
             candidate,

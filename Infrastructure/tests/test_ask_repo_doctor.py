@@ -1020,7 +1020,7 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_runtime_projection_states_gate_or_skip_downstream_checks(self) -> None:
         sync_command = "./bin/ask skills sync --scope workspace --projection flat --json --robot"
-        cases = tuple((state, "error", "block", sync_command) for state in (None, "corrupt")) + (("unmaterialized_linked_worktree", "success", "skipped", None),)
+        cases = tuple((state, "error", "block", sync_command) for state in (None, "corrupt")) + (("unmaterialized_linked_worktree", "success", "warn", sync_command),)
         with patch("ask.commands.repo_impl.repo_status") as status_mock, patch(
             "ask.commands.repo_impl.doctor_catalog", side_effect=AssertionError("catalog should be gated")
         ) as catalog_mock, patch(
@@ -1041,9 +1041,10 @@ class TestAskRepoDoctor(unittest.TestCase):
                     self.assertEqual(doctor["signals"]["projection_sync"]["state"], expected_signal)
                     self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
                     self.assertEqual(doctor["signals"]["projection_sync"]["details"]["projection_state"], state or "missing")
-                    if next_command is None:
+                    if state == "unmaterialized_linked_worktree":
                         self.assertFalse(doctor["blocking"])
                         self.assertEqual(doctor["signals"]["projection_sync"]["details"]["runtime_verification"], "not_run")
+                        self.assertEqual(doctor["next_command"], sync_command)
                     else:
                         self.assertTrue(doctor["blocking"])
                         self.assertEqual(doctor["blockers"][0]["id"], "projection_sync")

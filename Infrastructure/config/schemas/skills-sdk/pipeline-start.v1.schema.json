@@ -39,6 +39,9 @@
         "unknown"
       ]
     },
+    "source_path": {
+      "type": ["string", "null"]
+    },
     "current_lane": {
       "type": "string",
       "minLength": 1
@@ -53,8 +56,12 @@
           { "required": ["command"] },
           { "required": ["commands"] }
         ],
-        "properties": {
-          "id": {
+      "properties": {
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
             "type": "string",
             "minLength": 1
           },

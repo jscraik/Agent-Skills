@@ -382,7 +382,7 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
         # impactful_write_without_review may be present, but no_boundary_language should not be
         self.assertNotIn("no_boundary_language", indicator_ids)
 
-    def test_builder_does_not_classify_approved_write_as_negligent_instruction(self) -> None:
+    def test_builder_keeps_approved_write_visible_without_boundary_warning(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_md = _write_skill(
                 Path(temp_dir),
@@ -396,7 +396,9 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
             )
 
         negligent = next(row for row in receipt["mode_results"] if row["mode"] == "negligent_instruction")
-        self.assertEqual(negligent["status"], "not_detected")
+        indicator_ids = {indicator["id"] for indicator in negligent["indicators"]}
+        self.assertIn("impactful_write_without_review", indicator_ids)
+        self.assertNotIn("no_boundary_language", indicator_ids)
 
     def test_builder_keeps_defensive_untrusted_input_out_of_vulnerable_operation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

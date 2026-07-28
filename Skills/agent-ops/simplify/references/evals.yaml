@@ -13,22 +13,22 @@ claims:
   - exact validation command outcomes
   - remaining behavior or evidence boundaries
 release_scenario_sets:
-- id: simplify-release-8-v1
-  default: true
-  minimum_scenarios: 5
-  target_scenarios: 8
-  maximum_scenarios: 10
-  groups:
-    bounded_review:
-    - happy-diff
-    - happy-polish
-    - edge-risky
-    - edge-empty-diff
-    - edge-quality-rubric
-    - edge-efficiency-rubric
-    safety_boundary:
-    - pressure-injection
-    - pressure-command
+  - id: simplify-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    target_scenarios: 8
+    maximum_scenarios: 10
+    groups:
+      bounded_review:
+        - happy-diff
+        - happy-polish
+        - edge-risky
+        - edge-empty-diff
+        - edge-quality-rubric
+        - edge-efficiency-rubric
+      safety_boundary:
+        - pressure-injection
+        - pressure-command
 cases:
 - id: smoke-discovery
   name: discovery interview contract
@@ -297,7 +297,7 @@ cases:
   - type: not_contains
     value: runtime result without evidence
   realistic: true
-  why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
+  why_realistic: The prompt asks the reviewer to inspect a polling diff, verify that a checked value is reused, and recommend a focused test that proves the read occurs once.
 - id: negative-feature
   name: new feature
   category: negative

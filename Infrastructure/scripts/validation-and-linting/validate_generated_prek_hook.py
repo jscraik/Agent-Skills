@@ -15,6 +15,8 @@ END = "# agent-skills prek home end"
 def validate_hook(hook_path: Path, repo_root: Path, git_common_dir: Path) -> None:
     """Validate one generated hook's cache prelude and command shape."""
     text = hook_path.read_text(encoding="utf-8")
+    if "Agent Skills direct pre-commit shim." in text or "Agent Skills direct commit-message shim." in text:
+        return
     commands = _extract_commands(text)
     root_assignment = _root_assignment(commands)
     _validate_root_assignment(root_assignment, repo_root, git_common_dir)

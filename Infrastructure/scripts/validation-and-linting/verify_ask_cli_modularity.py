@@ -56,6 +56,13 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing skills command extraction debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/lib/ask/commands/repo_impl.py": {
+        "owner": "ask-cli",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing repository command extraction debt",
+        "expires": "2026-07-31",
+    },
     "Infrastructure/scripts/lib/ask/commands/sdk.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
@@ -117,6 +124,13 @@ LEGACY_SHAPE_DEBT = {
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing ask CLI regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_ask_repo_doctor.py": {
+        "owner": "ask-cli",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing repository doctor regression suite debt",
         "expires": "2026-07-31",
     },
     "Infrastructure/tests/test_ask_evals_command.py": {

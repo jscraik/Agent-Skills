@@ -505,14 +505,15 @@ def _workspace_projection_signal(projection_state: str, skills_synced: bool) -> 
         "unmaterialized_linked_worktree": "Workspace skill runtime is intentionally unmaterialized in this linked worktree.",
     }
     signal: dict[str, Any] = {
-        "state": "skipped" if unmaterialized else "block",
-        "severity": "info" if unmaterialized else "blocker",
+        "state": "warn" if unmaterialized else "block",
+        "severity": "warning" if unmaterialized else "blocker",
         "summary": summaries.get(projection_state, "Workspace skill runtime does not appear synced."),
         "source": "repo_status",
         "details": {"skills_synced": False, "projection_state": projection_state},
     }
     if unmaterialized:
         signal["details"]["runtime_verification"] = "not_run"
+        signal["next_command"] = SKILLS_SYNC_COMMAND
     else:
         signal["next_command"] = SKILLS_SYNC_COMMAND
     return signal

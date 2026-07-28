@@ -6,6 +6,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 from test_skill_lifecycle_validation_impl import (
@@ -15,6 +16,7 @@ from test_skill_lifecycle_validation_impl import (
     write_text,
 )
 
+__test__ = False
 
 
 def _write_discovery_skill(path: Path, name: str, description: str) -> None:
@@ -31,7 +33,9 @@ def _write_discovery_skill(path: Path, name: str, description: str) -> None:
     )
 
 
-def _discover_plugin_visibility(skill_discovery, repo_root: Path, skill_names: tuple[str, ...]):
+def _discover_plugin_visibility(
+    skill_discovery, repo_root: Path, skill_names: tuple[str, ...]
+) -> tuple[list[Any], list[Any]]:
     flat_root = repo_root / ".agents" / "skills"
     for name in skill_names:
         _write_discovery_skill(flat_root / name, name, f"{name} test skill")
@@ -50,7 +54,7 @@ def _discover_plugin_visibility(skill_discovery, repo_root: Path, skill_names: t
         )
 
 
-def _discover_advanced_plugin_lanes(skill_discovery, repo_root: Path):
+def _discover_advanced_plugin_lanes(skill_discovery, repo_root: Path) -> tuple[list[Any], list[Any]]:
     flat_root = repo_root / ".agents" / "skills"
     _write_discovery_skill(flat_root / "coderabbit", "coderabbit", "router")
     _write_discovery_skill(
@@ -98,7 +102,7 @@ def _write_local_cache_fixture(repo_root: Path) -> None:
     )
 
 
-def _discover_local_cache_entries(skill_discovery, repo_root: Path):
+def _discover_local_cache_entries(skill_discovery, repo_root: Path) -> tuple[list[Any], list[Any]]:
     flat_root = repo_root / ".agents" / "skills"
     with (
         mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
@@ -110,7 +114,7 @@ def _discover_local_cache_entries(skill_discovery, repo_root: Path):
         )
 
 
-def _discover_auto_default_entries(skill_discovery, repo_root: Path):
+def _discover_auto_default_entries(skill_discovery, repo_root: Path) -> tuple[list[Any], list[Any]]:
     flat_root = repo_root / ".agents" / "skills"
     _write_discovery_skill(flat_root / "autofix", "autofix", "default surface skill")
     _write_discovery_skill(
@@ -245,6 +249,7 @@ class SkillLifecycleDiscoveryValidationTests(unittest.TestCase):
             with (
                 mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
                 mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+                mock.patch.object(skill_discovery, "SYSTEM_LANE_DIR", flat_root / ".system"),
             ):
                 default_entries = skill_discovery.discover_skill_entries(
                     source="flat",

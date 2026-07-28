@@ -253,11 +253,9 @@ def test_hook_sandbox_env_replaces_unusable_inherited_cache_only(tmp_path: Path)
 
 
 def test_hook_sandbox_env_rejects_non_searchable_cache_directory(tmp_path: Path) -> None:
-    """Hooks need directory search permission as well as write permission for caches."""
+    """Hooks need a structurally usable cache path independent of effective uid."""
     helper = REPO_ROOT / "scripts/hooks/_sandbox_env.sh"
-    inaccessible_cache = tmp_path / "inaccessible-cache"
-    inaccessible_cache.mkdir()
-    inaccessible_cache.chmod(0o600)
+    inaccessible_cache = Path("/dev/null") / "agent-skills-inaccessible-cache"
     command = [
         "bash",
         "-c",
@@ -265,16 +263,13 @@ def test_hook_sandbox_env_rejects_non_searchable_cache_directory(tmp_path: Path)
         "bash",
         str(helper),
     ]
-    try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            check=False,
-            env={**os.environ, "TMPDIR": str(tmp_path), "UV_CACHE_DIR": str(inaccessible_cache)},
-        )
-    finally:
-        inaccessible_cache.chmod(0o700)
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "TMPDIR": str(tmp_path), "UV_CACHE_DIR": str(inaccessible_cache)},
+    )
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == str(tmp_path / "agent-skills-uv-cache")

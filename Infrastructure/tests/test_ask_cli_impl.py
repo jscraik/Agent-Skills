@@ -1195,7 +1195,12 @@ class TestAskCLI(unittest.TestCase):
 
     def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
         """The compact proof facade retains the identity-bound outcome reference."""
-        from ask.cli_output import compact_skill_prove_payload
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.cli_output import compact_skill_prove_payload
+        finally:
+            sys.path.remove(lib_path)
 
         payload = {
             "skill_proof": {
@@ -1781,16 +1786,18 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("signals", doctor)
         self.assertIn("diagnostic_debt", doctor)
         capability = doctor["signals"].get("capability_readiness", {})
-        self.assertIn(capability.get("state"), {"pass", "skipped"})
-        if capability.get("state") == "pass":
-            self.assertEqual(capability.get("source"), "skills_profiles+skills_events")
-        else:
+        projection = doctor["signals"].get("projection_sync", {})
+        if projection.get("state") == "warn":
+            self.assertEqual(capability.get("state"), "skipped")
             self.assertEqual(capability.get("source"), "repo_status")
             self.assertIn("intentionally has no runtime projection", capability.get("summary", ""))
+        else:
+            self.assertEqual(capability.get("state"), "pass")
+            self.assertEqual(capability.get("source"), "skills_profiles+skills_events")
         memory = doctor["signals"].get("memory_readiness", {})
-        self.assertIn(memory.get("state"), {"pass", "skipped"})
+        self.assertEqual(memory.get("state"), "skipped" if projection.get("state") == "warn" else "pass")
         package = doctor["signals"].get("package_readiness", {})
-        self.assertIn(package.get("state"), {"pass", "skipped"})
+        self.assertEqual(package.get("state"), "skipped" if projection.get("state") == "warn" else "pass")
 
     def test_repo_doctor_human_output_includes_readiness_signals(self):
         """Verify repo doctor --robot prints capability-readiness signals."""
@@ -1912,7 +1919,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("commit_readiness", closeout)
         self.assertIn("next_command", closeout)
         capability = closeout["capability_readiness"]
-        self.assertIn(capability["status"], {"pass", "skipped"})
+        self.assertEqual(capability["status"], "pass")
         self.assertIn(capability["profile_contract_status"], {"ready", None})
         self.assertEqual(capability["profile_contract_gap_count"], 0)
         self.assertIn(capability["event_contract_status"], {"ready", None})
@@ -1921,17 +1928,14 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(capability["eval_blocker_class_count"], len(capability["eval_blocker_classes"]))
         self.assertEqual(capability["contract_gap_count"], 0)
         memory = closeout["memory_readiness"]
-        self.assertIn(memory["status"], {"pass", "skipped"})
+        self.assertEqual(memory["status"], "pass")
         self.assertIn(memory["provider_model"], {"extension-like-read-only", None})
         self.assertGreaterEqual(memory["entry_count"], 0)
         self.assertIn("available_sources", memory)
         self.assertIsInstance(memory["by_freshness"], dict)
         package = closeout["package_readiness"]
-        self.assertIn(package["status"], {"pass", "skipped"})
-        if package["status"] == "pass":
-            self.assertIsInstance(package["target"], str)
-        else:
-            self.assertIsNone(package["target"])
+        self.assertEqual(package["status"], "pass")
+        self.assertIsInstance(package["target"], str)
         runtime_evidence = closeout["runtime_evidence"]
         self.assertIn(runtime_evidence["status"], {"not_applicable", "missing", "present", "invalid", "deleted"})
         self.assertEqual(runtime_evidence["evidence_root"], ".harness/evidence/runtime-proof")
@@ -2294,6 +2298,25 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
         self.assertEqual(package["package_contract"]["install_gate"]["blocked_reasons"], [])
         self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
+
+    def test_skills_package_verify_rejects_noop_strict_flag(self):
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "verify",
+            "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+            "--strict",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["errors"][0]["code"], "ERR_ARGUMENT")
+        self.assertIn("not verify mode", output["errors"][0]["message"])
 
     def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
         """Verify ask skills doctor exposes lifecycle and readiness contracts."""
@@ -4649,6 +4672,27 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["validation_commands"],
             ["./bin/ask skills sync --dry-run --json --robot"],
         )
+
+    def test_skills_workspace_sync_rejects_user_only_links_mode(self):
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--user-sync-mode",
+            "links-only",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["errors"][0]["code"], "ERR_INVALID_SCOPE")
+        self.assertIn("only with --scope user", output["errors"][0]["message"])
 
     def test_skills_sync_human_output_exposes_validation(self):
         """Verify ask skills sync renders its validation command in dry-run mode."""

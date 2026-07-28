@@ -287,7 +287,7 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
     """
     Refines negligent instruction indicators by validating boundary language presence.
     
-    Adds a boundary language indicator if impactful actions lack safeguard language (approval, sandbox, preview, rollback, or redaction). Removes missing_safety_language indicators.
+    Adds a boundary language indicator if impactful actions lack safeguard language (approval, sandbox, preview, rollback, or redaction). Removes only missing_safety_language; an impactful action remains visible even when boundary language is present.
     
     Parameters:
         indicators: Indicator list to refine.
@@ -307,10 +307,7 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
                 "Impactful actions are present without approval, sandbox, preview, rollback, or redaction language.",
             )
         )
-    ignored_ids = {"missing_safety_language"}
-    if has_safety_boundary:
-        ignored_ids.add("impactful_write_without_review")
-    return [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
+    return [indicator for indicator in indicators if indicator["id"] != "missing_safety_language"]
 
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:

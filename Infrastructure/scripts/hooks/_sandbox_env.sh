@@ -22,12 +22,17 @@ cache_path_is_usable() {
 	local candidate="$1"
 	local parent
 	[[ -n "$candidate" ]] || return 1
-	if [[ -e "$candidate" ]]; then
+	if [[ -n "${REPO_ROOT:-}" ]]; then
+		case "$candidate" in
+			"$REPO_ROOT"|"$REPO_ROOT"/*) return 1 ;;
+		esac
+	fi
+	if [[ -e "$candidate" || -L "$candidate" ]]; then
 		[[ -d "$candidate" && -w "$candidate" && -x "$candidate" ]]
 		return
 	fi
 	parent="$candidate"
-	while [[ ! -e "$parent" && "$parent" != "/" ]]; do
+	while [[ ! -e "$parent" && ! -L "$parent" && "$parent" != "/" ]]; do
 		parent="$(dirname "$parent")"
 	done
 	[[ -d "$parent" && -w "$parent" && -x "$parent" ]]

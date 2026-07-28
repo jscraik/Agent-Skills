@@ -25,8 +25,14 @@ def _is_executable_file(candidate: str) -> bool:
 def _exec_target(repo_root: Path, target: Path, args: list[str]) -> None:
     uv = _uv_executable()
     if uv is None:
-        print("error: ./bin/ask requires uv on PATH to select the locked Infrastructure environment.", file=sys.stderr)
-        raise SystemExit(127)
+        if sys.version_info < (3, 12):
+            print(
+                "error: ./bin/ask requires uv or Python 3.12+ for the documented fallback.",
+                file=sys.stderr,
+            )
+            raise SystemExit(127)
+        os.execv(sys.executable, [sys.executable, str(target), *args])
+        return
     os.execv(
         uv,
         [

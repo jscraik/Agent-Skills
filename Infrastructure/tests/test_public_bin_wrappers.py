@@ -102,11 +102,27 @@ class TestPublicBinWrappers(unittest.TestCase):
             ],
         )
 
-    def test_ask_fails_actionably_when_locked_environment_runner_is_unavailable(self) -> None:
+    def test_ask_uses_documented_python_fallback_when_uv_is_unavailable(self) -> None:
         wrapper = _load_wrapper("ask_wrapper_missing_uv", REPO_ROOT / "bin/ask")
 
         with (
             mock.patch.object(wrapper.sys, "version_info", (3, 12, 0)),
+            mock.patch.object(wrapper, "_uv_executable", return_value=None),
+            mock.patch.object(wrapper.os, "execv", side_effect=RuntimeError("exec called")) as execv,
+            self.assertRaisesRegex(RuntimeError, "exec called"),
+        ):
+            wrapper._exec_target(REPO_ROOT, REPO_ROOT / "Infrastructure/bin/ask", ["repo", "status"])
+
+        execv.assert_called_once_with(
+            wrapper.sys.executable,
+            [wrapper.sys.executable, str(REPO_ROOT / "Infrastructure/bin/ask"), "repo", "status"],
+        )
+
+    def test_ask_rejects_python_fallback_when_ambient_python_is_too_old(self) -> None:
+        wrapper = _load_wrapper("ask_wrapper_old_python", REPO_ROOT / "bin/ask")
+
+        with (
+            mock.patch.object(wrapper.sys, "version_info", (3, 11, 0)),
             mock.patch.object(wrapper, "_uv_executable", return_value=None),
             self.assertRaises(SystemExit) as raised,
         ):

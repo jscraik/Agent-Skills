@@ -80,7 +80,6 @@ EVAL_SAFETY_FIELDS = (
     "deterministic_checks",
     "acceptance",
 )
-EVAL_TOP_LEVEL_FIELDS = ("schema_version", "skill_name", "claims", "cases")
 
 
 def _sha256_file(path: Path) -> str:
@@ -164,28 +163,31 @@ def _is_refusal_case(case: dict[str, Any]) -> bool:
 
 def _eval_case_security_text(case: dict[str, Any]) -> str:
     values: list[str] = []
+    refusal_case = _is_refusal_case(case)
     for key, value in case.items():
-        if key in EVAL_SAFETY_FIELDS or (key == "prompt" and _is_refusal_case(case)):
+        if key in EVAL_SAFETY_FIELDS and key not in {"task", "given"}:
+            continue
+        if key == "prompt" and refusal_case:
             continue
         values.extend(_strings(value))
     return "\n".join(values)
 
 
-def _eval_yaml_security_text(text: str) -> str | None:
+def _eval_yaml_security_text(text: str) -> tuple[str | None, bool]:
     try:
         import yaml  # type: ignore
     except ModuleNotFoundError:
-        return None
+        return None, False
     try:
         payload = yaml.safe_load(text)
     except yaml.YAMLError:  # type: ignore[attr-defined]
-        return None
-    if not isinstance(payload, dict) or set(payload).difference(EVAL_TOP_LEVEL_FIELDS):
-        return None
+        return None, True
+    if not isinstance(payload, dict):
+        return None, False
     cases = payload.get("cases")
     if not isinstance(cases, list) or not all(isinstance(case, dict) for case in cases):
-        return None
-    return "\n".join(_eval_case_security_text(case) for case in cases)
+        return None, False
+    return "\n".join(_eval_case_security_text(case) for case in cases), False
 
 
 def _pattern_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
@@ -207,7 +209,10 @@ def _untrusted_content_indicators(text: str, evidence_ref: str) -> list[dict[str
     if not has_untrusted_content:
         return []
     if has_untrusted_content and is_defensive_untrusted_input and not (has_external_write or has_secret_assignment):
-        return [_indicator("untrusted_input_handling", evidence_ref, "Declares defensive handling of untrusted review input.")]
+        return [
+            _indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content."),
+            _indicator("untrusted_input_handling", evidence_ref, "Declares defensive handling of untrusted review input."),
+        ]
     indicators = [_indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content.")]
     if has_untrusted_content and (has_secret_assignment or has_external_write):
         indicators.append(
@@ -237,9 +242,19 @@ def _text_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
 
 def _security_indicators_for_file(path: Path, text: str, evidence_ref: str) -> list[dict[str, str]]:
     if path.name == "evals.yaml" and path.parent.name == "references":
-        structured_text = _eval_yaml_security_text(text)
+        structured_text, parse_error = _eval_yaml_security_text(text)
         if structured_text is not None:
             return _text_indicators(structured_text, evidence_ref)
+        indicators = _text_indicators(text, evidence_ref)
+        if parse_error:
+            indicators.append(
+                _indicator(
+                    "eval_yaml_parse_error",
+                    evidence_ref,
+                    "The evals.yaml file could not be parsed; raw text scanning was used as a fallback.",
+                )
+            )
+        return indicators
     return _text_indicators(text, evidence_ref)
 
 

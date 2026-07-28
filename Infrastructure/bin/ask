@@ -223,7 +223,7 @@ def main():
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
     skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat")
     skills_sync_parser.add_argument("--plugin-cache-refresh", choices=["auto", "skip", "only"], default="auto", help="Plugin runtime cache refresh mode")
-    skills_sync_parser.add_argument("--user-sync-mode", choices=["full", "links-only"], default="links-only", help="For user scope, sync runtime links only; use full to refresh plugin mirrors")
+    skills_sync_parser.add_argument("--user-sync-mode", choices=["full", "links-only"], default=None, help="For user scope, sync runtime links only; use full to refresh plugin mirrors")
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
@@ -642,6 +642,8 @@ def main():
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
             elif args.target == "verify" and args.checkout_test:
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
+            elif args.target == "verify" and args.strict:
+                result = build_argument_error("skills", "package", raw_args, parser_error="--strict is supported only for package readiness, not verify mode")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
             elif args.target == "verify":
@@ -705,12 +707,13 @@ def main():
                 limit=args.limit,
             )
         elif args.action == "sync":
-            sync_options: str | skills_commands.SkillSyncOptions = args.plugin_cache_refresh
-            if args.scope == "user":
-                sync_options = skills_commands.SkillSyncOptions(
-                    plugin_cache_refresh=args.plugin_cache_refresh,
-                    user_sync_mode=args.user_sync_mode,
-                )
+            user_sync_mode = args.user_sync_mode
+            if user_sync_mode is None:
+                user_sync_mode = "links-only" if args.scope == "user" else "full"
+            sync_options: str | skills_commands.SkillSyncOptions = skills_commands.SkillSyncOptions(
+                plugin_cache_refresh=args.plugin_cache_refresh,
+                user_sync_mode=user_sync_mode,
+            )
             result = skills_commands.sync_skills(
                 repo_root,
                 scope=args.scope,
