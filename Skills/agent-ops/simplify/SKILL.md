@@ -95,6 +95,10 @@ Set `outcome` to `changed`, `no_justified_edit`, or `blocked`.
    when breadth, ownership, or risk warrants fan-out; never require reviewers
    merely to satisfy a workflow shape. Read `references/reviewer-rubric.md`
    when detailed lenses are useful.
+   - When adjacent statements repeat the same condition, combine the duplicate
+     condition into one guard only when ordering, side effects, and the false
+     path stay unchanged. State that behavior evidence and name the focused
+     test that proves it.
 4. Apply the smallest behavior-preserving edit. Record uncertain, low-value, or
    out-of-scope candidates under `skipped`. For contract changes, check:
    - current producer -> current consumer;

@@ -101,7 +101,7 @@ cases:
   - type: expected_signal
     value: Revert the patch and retain the list comprehension.
   - type: expected_signal
-    value: Run focused render_summary tests with source validation; leave broader refactor outside scope.
+    value: Run focused render_summary tests and record validation evidence.
 - id: happy-polish
   name: final polish
   category: happy
