@@ -3,8 +3,8 @@ title: Skill picker duplicate elimination via local marketplace cache separation
 asset_family: skill discovery and runtime projection hygiene
 owner: Agent Skills Team
 source_artifact: Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
-freshness_reviewed_on: 2026-05-26
-last_updated: 2026-05-26
+freshness_reviewed_on: 2026-07-28
+last_updated: 2026-07-28
 review_after_days: 60
 ---
 
@@ -33,7 +33,11 @@ Apply a runtime/cache separation rule plus runtime-compatible plugin-root materi
 
 1. Keep local marketplace cache projection under hidden runtime cache path `.agents/plugins-runtime/cache/...`.
 2. Materialize every plugin at cache root (`<cache>/<marketplace>/<plugin>/.codex-plugin/plugin.json`) by flattening stale nested `local`/version/hash variants.
-3. During sync, remove legacy visible cache root `Plugins/cache/agent-skills-local` so stale duplicate mirrors cannot persist.
+3. Keep `Plugins/cache/agent-skills-local` as an ignored compatibility mirror
+   for repository parity checks, generated from canonical plugin sources and
+   never treated as authored source. The hidden
+   `.agents/plugins-runtime/cache/agent-skills-local` tree remains the
+   repository runtime cache.
 4. Project repaired cache + marketplace manifest into profile homes (for example `~/.codex-red/Plugins/cache` and `~/.codex-red/Plugins/marketplace.json`).
 5. For non-symlinked profile plugin directories (for example `~/.codex-red/plugins` as a real directory), also project plugin source mirrors at `~/.codex-red/Plugins/<plugin>` so marketplace `source.path` values like `./Plugins/<plugin>` resolve correctly.
 6. Force-prune stale nested version/cache directories during rsync sync (`--delete --force`) so obsolete `0.1.0/` trees cannot survive cache refreshes and create loader ambiguity.
@@ -48,7 +52,8 @@ This preserves canonical source ownership while keeping plugin runtime paths loa
 ## Evidence
 
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
-  - emits cache-root flattening/removal lines for nested plugin variants and removes legacy `Plugins/cache/agent-skills-local`.
+  - emits cache-root flattening/removal lines for nested plugin variants and
+    regenerates both the hidden runtime cache and ignored compatibility mirror.
 - `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home ~/.codex-red --strict --show-overlap`
   - reports overlap counts after reading plugin skills from repaired cache roots.
 - `python3 Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py --json`
@@ -59,7 +64,9 @@ This preserves canonical source ownership while keeping plugin runtime paths loa
 ## Follow-up
 
 - For one-time projection migrations that intentionally touch `Plugins/cache/**`, run validation with explicit projection intent (`PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1`) so path-ownership gates classify the lane correctly.
-- Keep local marketplace mirrors in hidden runtime paths only; do not reintroduce `Plugins/cache/agent-skills-local`.
+- Keep the hidden runtime cache authoritative for repository runtime use. If
+  `Plugins/cache/agent-skills-local` is present, treat it only as an ignored,
+  generated compatibility mirror and never edit or commit it as source.
 - Keep rsync cache sync paths on `--delete --force` in both runtime projection and overlap-remediation scripts so stale nested version folders cannot persist.
 - Keep `system_bridge_skill_names` scoped to the approved four skills only; do not add additional bridge skills without explicit policy approval.
 - Keep plugin families sourced from plugin scope in Codex profiles; do not reintroduce broad plugin-family projection into flat `.agents/skills`.

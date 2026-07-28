@@ -4,9 +4,9 @@ purpose: "Use when reviewing, creating, shrinking, or refactoring AGENTS.md inst
 triggers: ["Use when the user request matches the skill scope."]
 non_goals: ["Route unrelated work away from this skill."]
 inputs: [user_request, target_context, evidence]
-outputs: [result, evidence_summary, context_ledger, context_pointer_map, contradiction_notes, validation_status, subagent_contract_status, codestyle_fallback_status, steering_uptake_status, zero_setup_status, systems_mechanism_status, glossary_route_status, project_brain_memory_status]
+outputs: [schema_version, result, evidence_summary, context_ledger, context_pointer_map, contradiction_notes, validation_status, residual_risks]
 risks: [over_triggering, untrusted_input, validation_drift, context_loss, precedence_confusion, dead_context_pointers, unsafe_contract_deletion, missing_subagent_artifact_contract, missing_codestyle_fallback, steering_feedback_treated_as_chat_only, zero_setup_contract_scattered_across_docs, validation_claim_without_exact_path, project_brain_or_local_memory_dropped]
 safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
-validation: [plugin_eval_grade_a_or_documented_budget_risk, strict_skill_audit, smoke_eval_when_available, release_eval_when_behavior_changes]
+validation: [plugin_eval_b_plus_or_better_zero_failures, strict_skill_audit, smoke_eval_when_available, release_eval_when_behavior_changes]
 observability: "Report validation commands and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
