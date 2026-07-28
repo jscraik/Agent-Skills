@@ -7862,6 +7862,24 @@ def _skills_sdk_internal_eval_receipt_counts(
     }
 
 
+def _skills_sdk_persist_eval_run_receipt(repo_root: Path, receipt: dict[str, Any]) -> str | None:
+    """Persist an existing eval receipt only beside a repository-owned report."""
+    dataset_path = str(receipt.get("dataset_path") or "")
+    if not dataset_path or dataset_path.startswith("internal:"):
+        return None
+    candidate = Path(dataset_path)
+    if not candidate.is_absolute():
+        candidate = repo_root / candidate
+    try:
+        report_path = candidate.resolve(strict=True)
+        report_path.relative_to((repo_root / "Infrastructure" / "artifacts").resolve(strict=True))
+    except (OSError, ValueError):
+        return None
+    receipt_path = report_path.parent / "sdk-eval-run-receipt.json"
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return _skills_sdk_repo_relative(repo_root, receipt_path)
+
+
 def _skills_sdk_eval_run_validation_command(
     target: str,
     *,
@@ -8580,6 +8598,7 @@ def skills_sdk_eval_run(
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }
         status = receipt["status"]
+        receipt_path = _skills_sdk_persist_eval_run_receipt(repo_root, receipt)
         payload = {
             "schema_version": "skills-sdk-eval-run.v0",
             "status": status,
@@ -8588,6 +8607,7 @@ def skills_sdk_eval_run(
             "runner": "internal_skill_builder_v0",
             "mode": mode,
             "receipt": receipt,
+            "receipt_path": receipt_path,
             "internal_eval": internal.data,
             "mutation_performed": False,
             "validation_commands": [
