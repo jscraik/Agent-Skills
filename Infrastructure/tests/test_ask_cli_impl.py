@@ -606,8 +606,8 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("outcome_proof: missing", result.stdout)
             self.assertIn("Next:", result.stdout)
         else:
-            self.assertIn("SDK skill proof failed for 'autofix'", result.stdout)
-            self.assertIn("skills sync --scope user --projection flat --dry-run", result.stdout)
+            self.assertIn("Skill proof scorecard has no local outcome proof for 'autofix'.", result.stdout)
+            self.assertIn("skills audit Skills/agent-ops/autofix --level strict", result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_current_target(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -930,8 +930,8 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 2, f"skills prove output: {result.stdout}\nstderr: {result.stderr}")
-        self.assertIn("SDK skill proof failed for 'autofix'", result.stdout)
-        self.assertIn("skills sync --scope user --projection flat --dry-run", result.stdout)
+        self.assertIn("Skill proof scorecard has no local outcome proof for 'autofix'.", result.stdout)
+        self.assertIn("skills audit Skills/agent-ops/autofix --level strict", result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""
@@ -1014,6 +1014,7 @@ class TestAskCLI(unittest.TestCase):
             sys.path.remove(lib_path)
 
         skill_proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
         self.assertEqual(skill_proof["proof_status"], "reachable_without_outcome_proof")
         self.assertEqual(skill_proof["next_command"], "./bin/ask workouts run 'outcome proof' --json --robot")
         self.assertEqual(skill_proof["validation_commands"], [skill_proof["next_command"]])
@@ -1192,6 +1193,7 @@ class TestAskCLI(unittest.TestCase):
             sys.path.remove(lib_path)
 
         proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
         self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
         self.assertEqual(proof["outcome_proof"]["status"], "missing")
 

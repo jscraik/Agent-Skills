@@ -9819,6 +9819,15 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                     fix_suggestion=next_command,
                 )
             )
+    elif proof_status == "reachable_without_outcome_proof":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skill proof scorecard has no local outcome proof for '{normalized}'.",
+                fix_suggestion=next_command,
+            )
+        )
     return result
 
 
