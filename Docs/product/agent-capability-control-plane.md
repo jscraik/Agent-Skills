@@ -11,192 +11,76 @@ governing_plan: Docs/plans/2026-05-01-feat-agent-capability-control-plane-and-re
 
 # Agent Capability Control Plane
 
-## Promise
+This repository is the canonical source for skills and plugins. Its local
+Skills SDK journey helps an author answer four practical questions about one
+existing skill without requiring knowledge of the underlying implementation:
 
-Teach your coding agents how your work actually works, then prove they
-remembered.
+1. Is this the skill I meant?
+2. Is its source structurally sound?
+3. Can it be packaged without changing the runtime?
+4. What has actually been proved locally?
 
-Agent Skills Kit is not just a repo of prompt files. It is a control plane for
-agent capabilities:
+## Default Local Journey
 
-1. Author capabilities once in canonical source.
-2. Route user intent to the right skill, plugin, or runtime surface.
-3. Keep context small with root routers and command-surface metadata.
-4. Validate quality, drift, runtime projection, and repo surface ownership.
-5. Diagnose capability readiness from one namespace-first command.
-6. Preserve proof that a capability is reachable and useful.
-
-## Key Outcomes
-
-| Outcome            | What It Means                                                                                                              | Current Proof Surface                                                                              |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Remember workflows | Agents can reuse local review, validation, delivery, and operating standards.                                              | `Skills/**`, `Plugins/**`, `.agents/skills/**`, `ask skills resolve`, `ask skills goal`            |
-| Keep context small | Agents see routed front doors and command-surface handles instead of every full workflow body.                            | `ask runtime budget --json --robot`, rooted projection, `$handle` metadata surfaces                 |
-| Prevent drift      | Canonical source, generated manifests, runtime projections, plugin caches, and artifacts have distinct ownership.          | `ask repo surface --json`, `ask repo doctor-catalog --json --robot`, repo surface ownership policy |
-| Diagnose readiness | One capability can be checked for source ownership, handle resolution, runtime reachability, audit state, metadata gaps, and outcome-proof availability. | `ask skills doctor <handle-or-path> --json --robot` |
-| Package safely     | Skill promotion can check version, compatible roles, runtime needs, maturity, provenance, and share readiness before install/share claims. | `ask skills package <handle-or-path> --json --robot` |
-| Retrieve memory    | Agents can search repo learnings, wiki learnings, and skill lesson artifacts without prompt-stuffing the whole corpus. | `ask skills memory list/read/search --json --robot` |
-| Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills prove`, workouts, evals, validation logs, closeout evidence        |
-
-## First Five Minutes
-
-Use these commands to orient a human or coding agent:
+Start with one canonical skill and run only the command that advances the
+current result. The default journey is:
 
 ```bash
-./bin/ask repo status --json --robot
-./bin/ask repo doctor --json --robot
-./bin/ask skills improve "<goal>" --json --robot
-./bin/ask skills explain <handle> --json --robot
-./bin/ask skills doctor <handle> --json --robot
-./bin/ask skills package <handle> --json --robot
-./bin/ask skills memory search "<query>" --json --robot
-./bin/ask skills prove <handle> --json --robot
-./bin/ask repo closeout --changed --json --robot
+./bin/ask sdk start <skill> --json --robot
+./bin/ask sdk check <skill> --json --robot
+./bin/ask skills package verify <skill> --strict --json --robot
+./bin/ask skills prove <skill> --json --robot
 ```
 
-These are deliberately namespace-first. New product commands should stay under
-`repo` or `skills` until evidence proves a top-level alias reduces real
-operator friction.
+When strict package verification passes, its one next action is the same
+target's `skills prove` command. A passing package gate establishes source
+readiness; proof separately establishes runtime reachability and task outcome.
 
-Use the diagnostic commands directly when investigating one surface:
-`./bin/ask repo doctor-catalog --json --robot`,
-`./bin/ask repo surface --json --robot`,
-`./bin/ask runtime budget --json --robot`, and
-`./bin/ask skills handles --check --json --robot`.
+| Job | Result |
+| --- | --- |
+| Start | Resolves the target and reports its current local state. |
+| Check | Gives a compact structural and contract verdict with actionable failures. |
+| Verify package | Reports a target-bound strict package verdict without installing anything. |
+| Prove | Separates structural validity, runtime reachability, and local task outcome. |
 
-Use `./bin/ask skills doctor <handle-or-path> --json --robot` when one
-capability is in question. It composes resolver, runtime-reachability,
-canonical-source, compat/strict audit, metadata, package-readiness, and
-outcome-proof signals without replacing `skills prove` as the outcome-proof
-scorecard. The embedded package-readiness block uses the same contract fields as
-`skills package`, so diagnostics and promotion checks do not drift apart.
+Each result is target-bound, compact, and contains at most one next action. A
+passing structural or runtime check does not establish a successful task
+outcome; an outcome result does not establish installation, activation,
+publication, review acceptance, or release readiness.
 
-Use `./bin/ask skills package <handle-or-path> --json --robot` before treating a
-skill as installable, shareable, or role-compatible. It reports
-`skill-package-readiness.v1` with version, compatible roles, runtime needs,
-maturity, provenance, and share-readiness fields; `--strict` fails when those
-package metadata fields are incomplete.
+## Ownership And Boundaries
 
-Use `./bin/ask skills profiles [profile] --json --robot` before work where the
-agent needs an explicit runtime mode. Profiles currently cover `authoring`,
-`package-review`, `plugin-share`, `eval`, and `live-mutation`, each with
-allowed roots, write policy, permissions, required evidence, and stop
-conditions.
+Skill Factory owns creating, importing, refactoring, and retiring skill source.
+Skills SDK owns the local resolve, check, package, and proof journey. Runtime
+projection, cloud evaluation, Tessl distribution, publication, and versioned
+installation are explicit later boundaries; none is a default dependency of
+these four local commands.
 
-Eval runs now expose `eval_status`, `blocker_class`, and
-`blocker_taxonomy` in JSON output, so smoke-eval automation can distinguish
-`blocked_user_input`, `blocked_auth`, `blocked_runtime`,
-`timeout_no_output`, and `timeout_partial_output` from skill behavior
-failures.
+Canonical source remains under `Skills/**` and `Plugins/*/skills/**`. Generated
+projections under `.agents/**` and user-runtime links are derived surfaces, not
+alternative source authorities.
 
-Use `./bin/ask skills memory list/read/search --json --robot` when an agent needs
-durable repo learnings with provenance and freshness. The provider is read-only
-and searches `.harness/memory`, wiki learnings, canonical learning docs, and
-skill lesson artifacts without replacing the canonical wiki or Project Brain
-mutation paths.
+## Expert And Repository Operations
 
-and searches `.harness/memory`, `Wiki/wiki/learnings`, `Docs/solutions`, and
-skill lesson artifacts. These are the supported read roots; memory mutation
-continues through Project Brain and canonical wiki workflows instead of the
-read-only memory commands.
+The repository retains lower-level diagnostic, maintenance, and lifecycle
+operations for their named maintainers and integrations. They are deliberately
+not the default author journey. Use the owning runbook or command help when a
+specific investigation requires one, rather than treating a broad diagnostic
+report as a prerequisite for ordinary local skill work.
 
-The next command contracts are specified in
-[ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md):
+The underlying command contracts and implementation history remain available in
+[Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
+and the linked specifications. They document expert mechanisms; they do not
+expand the four-command local journey.
 
-- `ask repo doctor`
-- `ask repo onboard`
-- `ask skills improve`
-- `ask skills explain`
-- `ask skills doctor`
-- `ask skills package`
-- `ask skills profiles`
-- `ask skills memory`
-- `ask skills prove`
-- `ask repo next`
-- `ask repo closeout`
+## Local Proof
 
-## Minimum Outcome Proof
+Local proof is useful only when it distinguishes its constituent truths:
 
-Validation is necessary, but it is not the same as outcome proof. Outcome proof
-should show that a capability changed agent behavior on a realistic task.
+- structural quality: the source and declared contracts validate;
+- runtime reachability: the selected runtime can discover the skill; and
+- outcome proof: a bounded real task or evaluation has the claimed result.
 
-Minimum proof format:
-
-```json
-{
-  "proof_id": "skill-or-goal-date",
-  "capability": "he-code-review",
-  "goal": "review a tracked delivery slice against Linear/spec/plan evidence",
-  "before": {
-    "failure": "Agent could not identify missing traceability or validation evidence.",
-    "evidence": "transcript, workout, eval, or reviewer finding"
-  },
-  "after": {
-    "result": "Agent produced severity-ranked readiness findings with exact artifact evidence.",
-    "evidence": "workout run, eval result, validation log, or transcript artifact"
-  },
-  "commands": [
-    "./bin/ask skills audit <path> --level strict",
-    "./bin/ask runtime budget --json --robot",
-    "./bin/ask skills prove <handle> --json --robot"
-  ],
-  "status": "proven"
-}
-```
-
-Rules:
-
-- Separate reachability proof from quality proof.
-- Do not claim outcome proof from a structural audit alone.
-- Keep long transcripts and logs in generated artifacts or indexed references.
-- Link the proof back to the skill, plugin, Linear issue, plan acceptance ID, or
-  workout scenario that caused it.
-- Record the next command an agent should run when proof is incomplete.
-
-## Current Evidence From JSC-246
-
-The repo surface control-plane plan established the first infrastructure slice:
-
-- Surface ownership policy:
-  [Docs/agents/15-repo-surface-ownership.md](/Docs/agents/15-repo-surface-ownership.md)
-- Non-destructive inventory:
-  `Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py`
-- Public report route:
-  `./bin/ask repo surface --json`
-- Cleanup preparation:
-  `Infrastructure/scripts/validation-and-linting/prepare_repo_surface_cleanup.py`
-- Product command contracts:
-  [Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
-
-Baseline facts from the implementation:
-
-- `ask runtime budget --json --robot` passes while keeping
-  `advanced_visible_count: 173` and `first_level_default_count: 118` visible.
-- `ask repo surface --json` reports tracked-surface policy debt without deleting
-  files.
-- `ask repo doctor-catalog --json --robot` verifies the canonical skill count
-  `32` across README, `SKILL.md`, `ask skills list`, and route metadata.
-- `ask skills handles --json --no-handles --robot` reports `108` generated
-  command-surface metadata from rooted manifests with no command-surface violations.
-- `ask skills goal "use he-work to implement P5 product framing and outcome
-proof documentation for JSC-246" --json --robot` resolves to `he-work`.
-
-## Product Direction
-
-The durable product shape is:
-
-```text
-goal -> candidate capability -> explanation -> proof -> sync/closeout
-```
-
-That is why the next executable surface should prefer namespace-first commands
-such as `ask repo doctor`, `ask skills improve`, and `ask repo closeout` instead
-of exposing more one-off top-level commands.
-
-The product should feel simple even when the infrastructure is serious:
-
-- Humans ask what they want agents to get better at.
-- Agents receive one recommended next command.
-- Maintainers can trace every runtime surface back to canonical source.
-- Quality claims are backed by audit, projection, runtime, and outcome
-  evidence.
+Keep these facts separate in command output and in human conclusions. When any
+one is unavailable, report that boundary and the smallest target-bound next
+action rather than inferring a broader readiness claim.

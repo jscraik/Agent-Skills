@@ -307,6 +307,21 @@ metadata:
             ["compatible_roles", "maturity", "runtime_needs", "share_readiness"],
         )
 
+    def test_package_verify_strict_pass_advances_to_target_proof(self) -> None:
+        """A passing strict package gate advances the same target to outcome proof."""
+        result = skills_package_verify_strict(
+            REPO_ROOT,
+            "Skills/agent-ops/simplify",
+        )
+
+        self.assertEqual(result.status, "success", result.data)
+        verification = result.data["skill_package_verification"]
+        self.assertEqual(verification["status"], "pass")
+        self.assertEqual(
+            verification["next_command"],
+            "./bin/ask skills prove Skills/agent-ops/simplify --json --robot",
+        )
+
     def test_package_verify_missing_target_starts_target_resolution(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             result = skills_package_verify(Path(temp_dir), "missing-skill")

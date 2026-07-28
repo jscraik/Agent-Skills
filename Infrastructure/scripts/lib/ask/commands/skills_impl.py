@@ -867,6 +867,8 @@ def _normalize_package_verification(
         next_command = _skills_validation_command("audit", source_root, "--level", "strict")
     elif verification.get("status") == "blocked":
         next_command = _ask_validation_command("sdk", "start", query)
+    elif verification.get("status") == "pass" and strict and target_kind == "skill_directory":
+        next_command = _skills_validation_command("prove", query)
 
     normalized = {
         **verification,
