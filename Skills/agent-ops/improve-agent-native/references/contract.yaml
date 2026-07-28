@@ -44,6 +44,16 @@ commands:
   - "./bin/ask sdk security risk-modes Skills/agent-ops/improve-agent-native --preview --json --robot"
   - "./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
   - "./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot"
+permission_profile:
+  network: false
+  filesystem:
+    read:
+      - target repository path or diff
+      - repository guidance and validation commands
+      - selected skill-local knowledge capsules and reference files
+    write:
+      - approved target repository source, documentation, and tests when explicit edit authority exists
+      - repo-local evidence artifacts when recording validation
 package_reference_routes:
   - path: references/agent-native-primitives.md
     route: 'Progressively disclosed improve-agent-native reference or eval fixture.'
