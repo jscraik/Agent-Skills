@@ -52,8 +52,9 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   evidence.
 - Runtime-handle safety is independent of steering selection: wait, poll, or
   resume only an active handle returned by the immediately preceding tool
-  result. Re-discover state with direct repository commands when no such handle
-  exists; never probe a guessed or stale identifier.
+  result, and perform those stateful operations serially for that handle.
+  Re-discover state with direct repository commands when no such handle exists;
+  never probe a guessed or stale identifier.
 - For networked repo operations in Codex sandboxed sessions, do not diagnose
   `gh`, CircleCI, Snyk, package registry, or other API failures as service
   outages until the same command has been retried with explicit network
@@ -116,11 +117,12 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 ## Project-specific correction boundary
 
 Routine local skill corrections use existing local checks and do not invoke
-cloud, Tessl, runtime, review, or release machinery unless promotion is
-explicitly selected. This source-only path does not waive the skill-management
-contract: runtime projection proof is required before claiming a skill is
-usable or using it as a runtime skill; that proof belongs to the separately
-selected runtime or promotion lane.
+cloud execution, external Tessl distribution, live runtime mutation,
+publication, or release machinery unless promotion is explicitly selected.
+Pre-merge local review remains required for PR-bound changes. This source-only
+path does not waive the skill-management contract: runtime projection proof is
+required before claiming a skill is usable or using it as a runtime skill; that
+proof belongs to the separately selected runtime or promotion lane.
 
 ```bash
 ./bin/ask repo doctor --json --robot

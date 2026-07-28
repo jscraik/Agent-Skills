@@ -60,8 +60,10 @@ acceptance criteria as follow-up work. Jamie explicitly approves that scope
 change when narrowing is allowed. Whether Jamie explicitly approves that scope change
 is part of the selected scope decision. Before reporting full implementation, run a
 claim-vs-evidence closeout check that distinguishes completed requirements from
-an explicit remaining blocker. A closeout caveat is evidence to classify, not
-automatic authority to grow the operating system.
+an explicit remaining blocker. Any absent or blocked acceptance criterion that
+Jamie has not approved for deferral remains blocking, and the issue or goal
+stays open. A closeout caveat is evidence to classify, not automatic authority
+to grow the operating system.
 
 ## Uptake Loop
 

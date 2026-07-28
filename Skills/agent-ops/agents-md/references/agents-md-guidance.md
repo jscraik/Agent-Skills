@@ -52,10 +52,11 @@ AGENTS should tell agents to:
 - Treat repeated steering and review feedback as diagnostic evidence. It does
   not automatically expand the active task into systems-improvement work.
 - Finish the named outcome through the smallest local change and focused proof.
-- Select a durable improvement only when the user explicitly requests systems
-  improvement, a consequential boundary is crossed, the same failure recurs
-  across three independent tasks, two named consumers remain unmet, or the
-  current contract contradicts itself.
+- Select a durable improvement only when the user explicitly requests system
+  improvement, a consequential boundary is involved, the same failure recurs
+  across three independent tasks, two named active consumers require a contract
+  that no existing surface can provide, or current executable contracts
+  contradict one another.
 - When selected, improve the smallest existing surface that serves a named
   consumer. Otherwise record the opportunity as deferred.
 - Keep sibling-pattern sweeps read-only unless sibling edits are explicitly
@@ -240,4 +241,7 @@ For technical work, read this repo's `CODESTYLE.md` before editing. If this repo
 - Subagent/review-swarm contract is present or deliberately preserved through a verified local equivalent.
 - CODESTYLE route is present: local CODESTYLE, global fallback, or blocked note.
 - Exact validation commands are reported with `pass`, `fail`, or `blocked`.
-- Passing the focused proof ends authority for the named outcome.
+- For a routine named outcome, passing the focused proof ends authority.
+- For a selected durable system improvement, authority ends only after focused
+  proof, evidence that future behavior changes through the existing consumer
+  surface, and the required steering-uptake evidence all pass.

@@ -314,6 +314,8 @@ cases:
     - rm -rf
     - nc
   acceptance:
+  - type: skill_selected
+    expected_skill: agents-md
   - type: regex
     value: "(?is)(global|parent|root).*(inherit|active instruction chain|already applies|already governs)"
   - type: regex

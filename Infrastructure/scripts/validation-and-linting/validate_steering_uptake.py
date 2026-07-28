@@ -128,6 +128,7 @@ REQUIRED_AGENTS_STEERING_PHRASES = (
     "opening and reading it in the current turn",
     ".harness/quality/steering-uptake.md",
     "validate_steering_uptake.py --json",
+    "serially for that handle",
 )
 
 
