@@ -12345,16 +12345,12 @@ def _append_user_runtime_relinks(
     *,
     dry_run: bool,
     include_plugin_mirrors: bool = True,
+    replace_runtime_links: bool = False,
 ) -> None:
     home = Path.home()
-    targets = [
-        (skills_dir, home / ".agents" / "skills", True),
-        (skills_dir, home / ".codex" / "skills", True),
-        (repo_root, home / ".agents" / "agent-skills", True),
-    ]
-    for src, dst, replace_existing in targets:
+    for _label, src, dst in _user_runtime_link_targets(repo_root, skills_dir, home):
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
-        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_runtime_links))
     if not include_plugin_mirrors:
         logs.append("Skipped home plugin mirror refresh for links-only user sync.")
         return
@@ -12383,25 +12379,99 @@ def _append_user_runtime_relinks(
         )
 
 
-def _verify_user_runtime_relinks(plan: dict, home: Path, skills_dir: Path, *, dry_run: bool) -> list[ErrorObject]:
+def _user_runtime_link_targets(repo_root: Path, skills_dir: Path, home: Path) -> tuple[tuple[str, Path, Path], ...]:
+    """Return the exact user-runtime links owned by a links-only projection."""
+    return (
+        ("agents_user_runtime", skills_dir, home / ".agents" / "skills"),
+        ("codex_user_runtime", skills_dir, home / ".codex" / "skills"),
+        ("agents_repository_root", repo_root, home / ".agents" / "agent-skills"),
+    )
+
+
+def _runtime_link_preflight_error(link: Path, classification: str) -> ErrorObject:
+    messages = {
+        "foreign_or_stale": f"User runtime link {link} is foreign or stale and will not be replaced.",
+        "uninspectable": f"User runtime link {link} could not be inspected and will not be replaced.",
+        "non_symlink": f"User runtime link destination {link} is occupied by a non-symlink path.",
+    }
+    return ErrorObject(
+        code="ERR_RUNTIME",
+        message=messages[classification],
+        fix_suggestion=f"Inspect and reconcile {link} before applying a links-only user sync.",
+    )
+
+
+def _inspect_user_runtime_link(source: Path, link: Path, label: str) -> tuple[dict[str, Any], ErrorObject | None]:
+    expected_target = str(source)
+    check: dict[str, Any] = {
+        "label": label,
+        "path": str(link),
+        "expected_target": expected_target,
+        "classification": "absent",
+        "status": "pass",
+    }
+    if not link.exists() and not link.is_symlink():
+        return check, None
+    if not link.is_symlink():
+        check.update({"classification": "non_symlink", "status": "fail"})
+        return check, _runtime_link_preflight_error(link, "non_symlink")
+    try:
+        target_text = os.readlink(link)
+        resolved_target = link.resolve(strict=False)
+    except OSError as exc:
+        check.update({"classification": "uninspectable", "status": "fail", "error": str(exc)})
+        return check, _runtime_link_preflight_error(link, "uninspectable")
+    expected_resolved = source.resolve(strict=False)
+    check.update({"target": target_text, "resolved_target": str(resolved_target)})
+    if target_text == expected_target and resolved_target == expected_resolved:
+        check["classification"] = "current"
+        return check, None
+    check.update({"classification": "foreign_or_stale", "status": "fail"})
+    return check, _runtime_link_preflight_error(link, "foreign_or_stale")
+
+
+def _preflight_user_runtime_relinks(plan: dict, repo_root: Path, skills_dir: Path, home: Path) -> list[ErrorObject]:
+    """Reject occupied user-runtime destinations before a links-only projection mutates home."""
+    checks: list[dict[str, Any]] = []
+    errors: list[ErrorObject] = []
+    for label, source, link in _user_runtime_link_targets(repo_root, skills_dir, home):
+        check, error = _inspect_user_runtime_link(source, link, label)
+        checks.append(check)
+        if error is not None:
+            errors.append(error)
+    plan["user_runtime_link_preflight"] = {
+        "status": "pass" if not errors else "fail",
+        "checks": checks,
+    }
+    return errors
+
+
+def _verify_user_runtime_relinks(
+    plan: dict,
+    repo_root: Path,
+    home: Path,
+    skills_dir: Path,
+    *,
+    dry_run: bool,
+) -> list[ErrorObject]:
     """Verify home runtime skill links point at this checkout's projection after user sync."""
-    expected_target = str(skills_dir)
-    expected_resolved = skills_dir.resolve(strict=False)
     checks: list[dict[str, Any]] = []
     errors: list[ErrorObject] = []
     if dry_run:
         plan["user_runtime_link_checks"] = {
             "status": "not_run",
             "reason": "dry_run",
-            "expected_target": expected_target,
+            "expected_targets": [
+                str(source)
+                for _label, source, _link in _user_runtime_link_targets(repo_root, skills_dir, home)
+            ],
             "checks": checks,
         }
         return errors
 
-    for label, link in (
-        ("agents_user_runtime", home / ".agents" / "skills"),
-        ("codex_user_runtime", home / ".codex" / "skills"),
-    ):
+    for label, source, link in _user_runtime_link_targets(repo_root, skills_dir, home):
+        expected_target = str(source)
+        expected_resolved = source.resolve(strict=False)
         check: dict[str, Any] = {
             "label": label,
             "path": str(link),
@@ -12442,7 +12512,10 @@ def _verify_user_runtime_relinks(plan: dict, home: Path, skills_dir: Path, *, dr
 
     plan["user_runtime_link_checks"] = {
         "status": "pass" if not errors else "fail",
-        "expected_target": expected_target,
+        "expected_targets": [
+            str(source)
+            for _label, source, _link in _user_runtime_link_targets(repo_root, skills_dir, home)
+        ],
         "checks": checks,
     }
     return errors
@@ -12951,6 +13024,23 @@ def sync_skills(
                     status="error",
                     plugin_cache_refresh=plugin_cache_refresh,
                 )
+            home = Path.home()
+            if user_sync_mode == "links-only":
+                preflight_errors = _preflight_user_runtime_relinks(plan, repo_root, skills_dir, home)
+                if preflight_errors:
+                    plan["validation_status"] = "fail"
+                    plan["warnings"].append("USER_RUNTIME_LINK_PREFLIGHT_FAILED")
+                    result.errors.extend(preflight_errors)
+                    return _finalize_skill_sync_result(
+                        result,
+                        plan,
+                        logs,
+                        projection_decision,
+                        scope=scope,
+                        dry_run=dry_run,
+                        status="error",
+                        plugin_cache_refresh=plugin_cache_refresh,
+                    )
             _append_user_runtime_relinks(
                 plan,
                 logs,
@@ -12958,8 +13048,15 @@ def sync_skills(
                 skills_dir,
                 dry_run=dry_run,
                 include_plugin_mirrors=user_sync_mode == "full",
+                replace_runtime_links=user_sync_mode == "full",
             )
-            relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
+            relink_errors = _verify_user_runtime_relinks(
+                plan,
+                repo_root,
+                home,
+                skills_dir,
+                dry_run=dry_run,
+            )
             if relink_errors:
                 plan["validation_status"] = "fail"
                 plan["warnings"].append("USER_RUNTIME_LINK_POSTCONDITION_FAILED")

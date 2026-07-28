@@ -4608,7 +4608,10 @@ class TestAskCLI(unittest.TestCase):
             "--json",
             "--robot",
         ]
-        result = _run_cli(cmd)
+        with tempfile.TemporaryDirectory() as home:
+            result = _run_cli(cmd, env={**os.environ, "HOME": home})
+            self.assertFalse((Path(home) / ".agents").exists())
+            self.assertFalse((Path(home) / ".codex").exists())
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -4637,7 +4640,8 @@ class TestAskCLI(unittest.TestCase):
             "--json",
             "--robot",
         ]
-        result = _run_cli(cmd)
+        with tempfile.TemporaryDirectory() as home:
+            result = _run_cli(cmd, env={**os.environ, "HOME": home})
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
