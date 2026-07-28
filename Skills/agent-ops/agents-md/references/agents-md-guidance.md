@@ -49,18 +49,17 @@ workflow-skill miss exposes a reusable operating failure.
 
 AGENTS should tell agents to:
 
-- Treat repeated steering and review feedback as evidence about the operating
-  system, not disposable chat context.
-- Stop ordinary task work when the same failure is likely to repeat until the
-  correction is admitted into a durable surface or explicitly rejected with a
-  tracked reason.
-- Record the operating failure, blocker, mechanism, proof, and repeat-prevention
-  surface before closeout.
-- Run a bounded sibling-pattern sweep when feedback implies a transferable rule:
-  principle, searched scope, siblings fixed, siblings intentionally left, and
-  deferred follow-ups.
-- Mark wider context as `Unobserved Horizon` when horizontal, vertical, or
-  reflected OODA context cannot be checked.
+- Treat repeated steering and review feedback as diagnostic evidence. It does
+  not automatically expand the active task into systems-improvement work.
+- Finish the named outcome through the smallest local change and focused proof.
+- Select a durable improvement only when the user explicitly requests systems
+  improvement, a consequential boundary is crossed, the same failure recurs
+  across three independent tasks, two named consumers remain unmet, or the
+  current contract contradicts itself.
+- When selected, improve the smallest existing surface that serves a named
+  consumer. Otherwise record the opportunity as deferred.
+- Keep sibling-pattern sweeps read-only unless sibling edits are explicitly
+  authorized and necessary for the named outcome.
 
 Keep this compact in root AGENTS. Put long protocols behind a verified Context
 Pointer such as `docs/agents/high-signal-steering.md`, a validator, or a skill.
@@ -231,10 +230,14 @@ For technical work, read this repo's `CODESTYLE.md` before editing. If this repo
 
 ## Validation Checklist
 
+- Requested outcome, writable instruction surfaces, focused proof, and stop condition are named.
 - Active instruction scope and discovery order identified.
+- Inherited parent rules are not duplicated in project or nested instructions.
 - All moved pointers resolve.
 - Contradictions are resolved or explicitly blocked for user choice.
+- Sibling and consumer discovery remains read-only outside the authorized scope.
 - Binding memory, handoff, validation, approval, and security contracts are preserved.
 - Subagent/review-swarm contract is present or deliberately preserved through a verified local equivalent.
 - CODESTYLE route is present: local CODESTYLE, global fallback, or blocked note.
 - Exact validation commands are reported with `pass`, `fail`, or `blocked`.
+- Passing the focused proof ends authority for the named outcome.

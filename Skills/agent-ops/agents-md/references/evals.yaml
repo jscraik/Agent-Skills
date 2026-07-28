@@ -274,14 +274,14 @@ cases:
     value: "(?i)(CODESTYLE|global Codex CODESTYLE|configs/codex/instructions/CODESTYLE|verified path|blocked|local)"
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
 - id: edge-steering-uptake
-  name: repeated steering becomes durable mechanism
+  name: thresholded steering stays separate from delivery
   category: edge
   realistic: true
   eval_modes:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use agents-md to update a root AGENTS.md after Jamie says "don't make me say this again" about agents fixing review comments line-locally without checking sibling patterns. Preserve the rule as a durable operating mechanism, require a bounded pattern sweep, and explain the validator or proof future agents should run before resuming ordinary work.
+  prompt: After Jamie says "don't make me say this again" about agents fixing review comments line-locally without checking sibling patterns, review the applicable AGENTS.md guidance. Finish the named review fix through focused proof first. Treat a durable AGENTS.md change as a separate systems-improvement lane that requires explicit selection or the repository threshold, and keep any sibling sweep read-only unless sibling edits are authorized.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -292,8 +292,35 @@ cases:
   - type: skill_selected
     expected_skill: agents-md
   - type: regex
-    value: "(?i)(steering|durable|operating failure|pattern sweep|sibling|proof|validator|resume)"
-  why_realistic: Mirrors recent agent-skills and coding-harness guidance where repeated steering must become a durable mechanism rather than chat context.
+    value: "(?i)(named outcome|review fix|focused proof)"
+  - type: regex
+    value: "(?i)(steering|durable|systems.improvement).*(threshold|explicit|separate)"
+  - type: regex
+    value: "(?i)(sibling).*(read.only|authorized|defer)"
+  why_realistic: Mirrors the current direct-work boundary where feedback is diagnostic, the named outcome finishes first, and durable steering is separately admitted.
+- id: edge-inherited-global-rule-no-duplicate
+  name: inherited global rule is not copied into project instructions
+  category: edge
+  realistic: true
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Review a request to copy a proof-and-stop sentence from global AGENTS.md into `invoice-sync/AGENTS.md` and every nested AGENTS file. The project already inherits the global rule and no nearer instruction contradicts it. Confirm the active instruction chain, return no_justified_edit for the duplicate, and keep sibling inspection read-only.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: regex
+    value: "(?is)(global|parent|root).*(inherit|active instruction chain|already applies|already governs)"
+  - type: regex
+    value: "(?i)(no_justified_edit|already covered|do not duplicate)"
+  - type: regex
+    value: "(?i)(sibling).*(read.only|no edit|defer|unmodified)"
+  why_realistic: Prevents a global delivery rule from being copied into every project and drifting across nested instruction surfaces.
 - id: edge-zero-setup-workspace
   name: zero setup workspace dissemination
   category: edge

@@ -3,13 +3,14 @@ title: Rooted Projection Sync Ownership Guard
 asset_family: rooted skill runtime projection
 owner: Agent Skills Team
 source_artifact: Docs/plans/2026-04-24-feat-context-budgeted-skill-trees-plan.md
-freshness_reviewed_on: 2026-04-25
+freshness_reviewed_on: 2026-07-28
 review_after_days: 90
 ---
 
 # Rooted Projection Sync Ownership Guard
 
 ## Table of Contents
+
 - [Problem](#problem)
 - [Resolution](#resolution)
 - [Evidence](#evidence)
