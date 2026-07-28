@@ -33,8 +33,8 @@ already on disk. A hand-written file under `.skillsets/**` could make the
 compatibility context-budget check fail with `UNOWNED_SKILLSET_FILE` even after
 the historical rooted sync command reported success.
 
-The historical user-scope rooted sync also risked relinking home directories to
-an incorrect repo-local runtime surface when that surface was stale, flat,
+The historical rooted sync at user scope also risked relinking home directories
+to an incorrect repo-local runtime surface when that surface was stale, flat,
 missing, or rolled back.
 
 ## Resolution
@@ -55,9 +55,9 @@ Those behaviors are historical evidence only. Current operators must not run
 Use flat projection sync for normal workspace and user runtime materialization:
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection flat --json
-python3 bin/ask skills sync --scope user --projection flat --json
-python3 bin/ask skills handles --check --json
+./bin/ask skills sync --scope workspace --projection flat --json
+./bin/ask skills sync --scope user --projection flat --json
+./bin/ask skills handles --check --json
 ```
 
 Maintain legacy `.skillsets/**` compatibility metadata separately:
@@ -70,7 +70,8 @@ python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --
 ## Evidence
 
 - `Docs/runbooks/migrate-flat-projection-to-rooted.md` records the retirement,
-  supported `flat` and `hybrid` modes, and the current compatibility commands.
+  the supported `flat` mode, the deferred `hybrid` mode, and the current
+  compatibility commands.
 - `Infrastructure/scripts/lib/ask/commands/skills_impl.py` returns
   `ERR_INVALID_PROJECTION_MODE` for removed projection modes and directs SDK
   callers to `--projection flat`.

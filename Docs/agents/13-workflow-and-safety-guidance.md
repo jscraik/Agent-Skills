@@ -51,9 +51,9 @@ When modifying shell scripts or configuration files, always use non-interactive 
 Treat repeated user steering as operating evidence, not conversation history.
 Select this system-improvement route only when Jamie asks for it, a
 consequential boundary is involved, a failure recurs across three independent
-tasks, two named active consumers need an unavailable contract, or executable
-contracts contradict one another. Routine work does not stop solely because a
-failure or correction repeats.
+tasks, two named active consumers need a contract that no existing surface can
+provide, or executable contracts contradict one another. Routine work does not
+stop solely because a failure or correction repeats.
 
 When the route is selected, stop before another unchanged retry and use this loop:
 
