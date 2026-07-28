@@ -114,7 +114,9 @@ design, specifications, plans, implementation, and delivery. Jamie Brain
 receives compact summaries and evidence pointers, not duplicate technical
 artifacts.
 
-Cloud, external Tessl evaluation or distribution, runtime, review, publication,
-and release actions remain explicit promotion decisions. A locally selected
-evaluation using the installed Tessl CLI may serve as local proof; it does not
-imply external Tessl distribution or any of those claims.
+Cloud, external Tessl evaluation or distribution, runtime, hosted review,
+publication, and release actions remain explicit promotion decisions. Pre-merge
+local review remains required for PR-bound changes; it is not a promotion
+decision. A locally selected evaluation using the installed Tessl CLI may serve
+as local proof; it does not imply external Tessl distribution or any of those
+claims.
