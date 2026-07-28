@@ -79,12 +79,12 @@ an explicit selection-policy decision rather than a filesystem accident.
 - Do not delete `Plugins/cache/agent-skills-local` as a general duplicate fix:
   it is a supported versioned picker surface.
 - Do not edit generated runtime or picker cache entries directly. Use the owning
-  cache refresh/sync command only in a separately authorized runtime lane.
+  cache refresh/sync command only in a separately authorised runtime lane.
 - A new flat-router exception requires an explicit
   `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` policy change and focused shadowing
   validation.
 - A new same-name plugin skill requires an explicit collision classification;
   it must not be resolved by an ad hoc allowlist.
 - This entry documents source/cache ownership and policy only. It does not
-  prove current installed runtime behavior or authorize cache refresh, profile
+  prove current installed runtime behavior or authorise cache refresh, profile
   projection, or plugin activation.
