@@ -1585,13 +1585,12 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("Unknown action", output["errors"][0]["message"])
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
         self.assertEqual(
             output["data"]["candidate_commands"],
             [
-                'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain Skills/agent-ops/autofix --json --robot",
-                "ask skills doctor Skills/agent-ops/autofix --json --robot",
+                "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
             ],
         )
 
@@ -1602,7 +1601,17 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("Unknown action", result.stdout)
-        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
+        self.assertIn("Validation: ./bin/ask sdk start <skill> --json --robot", result.stdout)
+
+    def test_skills_default_help_hides_expert_routes_but_sync_remains_callable(self):
+        help_result = _run_cli([sys.executable, "Infrastructure/bin/ask", "skills", "--help"])
+        sync_result = _run_cli([sys.executable, "Infrastructure/bin/ask", "skills", "sync", "--help"])
+
+        self.assertEqual(help_result.returncode, 0, help_result.stderr)
+        self.assertIn("{package,prove}", help_result.stdout)
+        self.assertNotIn("Synchronize skill symlinks", help_result.stdout)
+        self.assertEqual(sync_result.returncode, 0, sync_result.stderr)
+        self.assertIn("--user-sync-mode {full,links-only}", sync_result.stdout)
 
     def test_sdk_unknown_action_keeps_expert_routes_out_of_default_recovery(self):
         cmd = [sys.executable, "Infrastructure/bin/ask", "sdk", "unsupported-action", "--json", "--robot"]

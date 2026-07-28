@@ -357,9 +357,11 @@ class TestRecoveryResultBuilders(unittest.TestCase):
 
         self.assert_recovery_data(
             result,
-            ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-phase-work --json"],
-            "Closest action guess: 'ask skills resolve'.",
+            ["./bin/ask sdk start <skill> --json --robot"],
+            [
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
+            ],
+            "Closest action guess: 'ask skills prove'.",
         )
 
     def test_sdk_unknown_action_recovers_only_author_facing_routes(self):
@@ -377,21 +379,23 @@ class TestRecoveryResultBuilders(unittest.TestCase):
     def test_helpful_error_includes_recovery_and_candidates(self):
         result = build_helpful_error("skills", "missing", ["skills", "missing"])
 
-        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
         self.assertEqual(
             result.data["candidate_commands"],
             [
-                'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-phase-work --json --robot",
-                "ask skills doctor he-phase-work --json --robot",
+                "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
             ],
         )
 
     def test_helpful_error_uses_inferred_topic_for_recovery(self):
         result = build_helpful_error(None, None, ["prove"])
 
-        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
-        self.assertEqual(result.data["candidate_commands"], ["ask skills prove he-phase-work --json"])
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
+        self.assertEqual(
+            result.data["candidate_commands"],
+            ["ask skills prove Skills/agent-ops/simplify --json --robot"],
+        )
 
     def test_helpful_error_uses_ambiguous_recovery_commands(self):
         for args in ((None, None, ["list"]), ("list", None, ["list"])):
@@ -401,7 +405,7 @@ class TestRecoveryResultBuilders(unittest.TestCase):
                 self.assert_recovery_data(
                     result,
                     [
-                        "./bin/ask skills list --json --robot",
+                        "./bin/ask sdk start <skill> --json --robot",
                         "./bin/ask plugins list --json --robot",
                         "./bin/ask graph list --json --robot",
                     ],
@@ -424,13 +428,12 @@ class TestRecoveryResultBuilders(unittest.TestCase):
     def test_helpful_error_uses_closest_topic_for_recovery(self):
         result = build_helpful_error("skils", None, ["skils"])
 
-        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
         self.assertEqual(
             result.data["candidate_commands"],
             [
-                'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-phase-work --json --robot",
-                "ask skills doctor he-phase-work --json --robot",
+                "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
             ],
         )
         self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
@@ -438,13 +441,12 @@ class TestRecoveryResultBuilders(unittest.TestCase):
     def test_helpful_error_uses_raw_closest_topic_for_recovery(self):
         result = build_helpful_error(None, None, ["skils"])
 
-        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
         self.assertEqual(
             result.data["candidate_commands"],
             [
-                'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-phase-work --json --robot",
-                "ask skills doctor he-phase-work --json --robot",
+                "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
             ],
         )
         self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
@@ -459,9 +461,9 @@ class TestRecoveryResultBuilders(unittest.TestCase):
             (
                 ("zzz", None, ["zzz"]),
                 [
-                    'ask skills improve "fix PR review comments faster" --json --robot',
-                    "ask skills explain he-phase-work --json --robot",
-                    "ask skills doctor he-phase-work --json --robot",
+                    "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                    "ask skills prove Skills/agent-ops/simplify --json --robot",
+                    "ask repo doctor --json --robot",
                 ],
             ),
             ((None, None, ["zzz"]), None),
@@ -472,13 +474,13 @@ class TestRecoveryResultBuilders(unittest.TestCase):
                 self.assert_recovery_data(
                     result,
                     [
-                        "./bin/ask skills list --json --robot",
+                        "./bin/ask sdk start <skill> --json --robot",
                         "./bin/ask repo status --json --robot",
                         "./bin/ask graph list --json --robot",
                     ],
                     expected_candidates,
                     (
-                        "Run a valid topic recovery command: './bin/ask skills list --json --robot', "
+                        "Run a valid topic recovery command: './bin/ask sdk start <skill> --json --robot', "
                         "'./bin/ask repo status --json --robot', './bin/ask graph list --json --robot'."
                     ),
                 )
@@ -496,25 +498,25 @@ class TestRecoveryResultBuilders(unittest.TestCase):
 
         self.assert_recovery_data(
             result,
-            ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-phase-work --json"],
-            "Closest action guess: 'ask skills resolve'.",
+            ["./bin/ask sdk start <skill> --json --robot"],
+            ["ask skills prove Skills/agent-ops/simplify --json --robot"],
+            "Closest action guess: 'ask skills prove'.",
         )
 
     def test_closest_action_fix_suggestion_matches_unknown_action_builders(self):
         helpful = build_helpful_error("skills", "reslove", ["skills", "reslove"])
         unknown = build_unknown_action_result("skills", "reslove")
 
-        self.assertEqual(helpful.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "resolve"))
-        self.assertEqual(unknown.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "resolve"))
+        self.assertEqual(helpful.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "prove"))
+        self.assertEqual(unknown.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "prove"))
 
     def test_argument_error_includes_recovery_and_candidates(self):
         result = build_argument_error("skills", "resolve", ["skills", "resolve"])
 
         self.assert_recovery_data(
             result,
-            ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-phase-work --json"],
+            ["./bin/ask skills resolve --help"],
+            ["ask skills resolve Skills/agent-ops/autofix --json"],
         )
 
 
@@ -579,9 +581,9 @@ class TestExampleCommands(unittest.TestCase):
         self.assertEqual(
             result,
             [
-                'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-phase-work --json --robot",
-                "ask skills doctor he-phase-work --json --robot",
+                "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+                "ask skills prove Skills/agent-ops/simplify --json --robot",
+                "ask repo doctor --json --robot",
             ],
         )
 

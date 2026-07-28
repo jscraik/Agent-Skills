@@ -13,6 +13,7 @@ from ask.command_metadata import (
     COMMAND_EXAMPLES,
     FUZZY_MATCHES,
     SDK_AUTHOR_FACING_ACTIONS,
+    SKILLS_AUTHOR_FACING_ACTIONS,
     TOPIC_EXAMPLES,
     VALID_ACTIONS,
     VALID_TOPICS,
@@ -22,7 +23,7 @@ from ask.envelope import CallResult, ErrorCode, ErrorObject
 
 TOPIC_RECOVERY_COMMANDS = {
     "repo": "./bin/ask repo status --json --robot",
-    "skills": "./bin/ask skills list --json --robot",
+    "skills": "./bin/ask sdk start <skill> --json --robot",
     "reviewers": "./bin/ask reviewers resolve skill-inspector --json --robot",
     "runtime": "./bin/ask runtime surface --json --robot",
     "plugins": "./bin/ask plugins list --json --robot",
@@ -39,6 +40,8 @@ FALLBACK_RECOVERY_TOPICS = ["skills", "repo", "graph"]
 def _recovery_actions(topic: str | None) -> List[str]:
     if topic == "sdk":
         return list(SDK_AUTHOR_FACING_ACTIONS)
+    if topic == "skills":
+        return list(SKILLS_AUTHOR_FACING_ACTIONS)
     return VALID_ACTIONS.get(topic, [])
 
 
@@ -361,7 +364,7 @@ def build_argument_error(
     entered = "ask " + " ".join(raw_args) if raw_args else f"ask {topic} {action}"
     parsed_error = _extract_argparse_error(parser_error) or "Argument syntax was invalid for this command."
     examples = _example_commands(topic, action, limit=3)
-    _attach_recovery_data(result, topic, examples)
+    _attach_recovery_data(result, topic, examples, validation_commands=[f"./bin/ask {topic} {action} --help"])
     message_lines = [
         "❌ Command intent was understood, but argument syntax is invalid.",
         "",

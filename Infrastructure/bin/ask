@@ -11,7 +11,7 @@ sys.path.insert(0, str(repo_root_path / "scripts"))
 sys.path.insert(0, str(repo_root_path / "scripts" / "lib"))
 from ask.envelope import CallResult, ErrorObject, ErrorCode
 from ask.context import find_repo_root
-from ask.command_metadata import VALID_ACTIONS, VALID_TOPICS
+from ask.command_metadata import SKILLS_AUTHOR_FACING_ACTIONS, VALID_ACTIONS, VALID_TOPICS
 from ask.cli_errors import (
     _merge_corrections,
     build_argument_error,
@@ -21,7 +21,7 @@ from ask.cli_errors import (
     parse_args_with_capture,
     try_fuzzy_parse,
 )
-from ask.cli_args import build_global_parser, prepare_args
+from ask.cli_args import FacadeActionChoices, build_global_parser, facade_help_action, prepare_args
 from ask.cli_exit import exit_code_for_errors
 from ask.cli_output import (
     compact_package_verify_payload,
@@ -132,7 +132,8 @@ def main():
     repo_surface_parser = repo_subparsers.add_parser("surface", help="Inventory tracked repo surface ownership", parents=[global_parser])
     repo_surface_parser.add_argument("--strict", action="store_true", help="Exit non-zero when blocking surface findings exist")
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
-    skills_subparsers = skills_parser.add_subparsers(dest="action")
+    skills_subparsers = skills_parser.add_subparsers(dest="action", action=facade_help_action(SKILLS_AUTHOR_FACING_ACTIONS))
+    skills_subparsers.metavar = "{" + ",".join(SKILLS_AUTHOR_FACING_ACTIONS) + "}"
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
     skills_list_parser.add_argument("--advanced", action="store_true", help="Compatibility alias; full repo inventory is now the default")
@@ -259,6 +260,7 @@ def main():
     skills_init_parser.add_argument("name", help="Name of the new skill")
     skills_init_parser.add_argument("--category", required=True, help="Category directory")
     skills_init_parser.add_argument("--description", required=True, help="Short routing description")
+    skills_subparsers.choices = FacadeActionChoices(skills_subparsers._name_parser_map, SKILLS_AUTHOR_FACING_ACTIONS)
     plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
     plugins_subparsers = plugins_parser.add_subparsers(dest="action")
     def _add_plugin_init_args(parser):
