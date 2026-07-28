@@ -236,7 +236,7 @@ PACKAGE_INDICATOR_MODE_MAP: dict[str, tuple[str, ...]] = {
     "vulnerable_operation": (
         "hardcoded_secret_literal",
         "insecure_credential_output",
-        "untrusted_content_ingestion",
+        "untrusted_external_content_acquisition",
         "composed_capability_risk",
     ),
 }
@@ -244,9 +244,6 @@ PACKAGE_INDICATOR_MODE_MAP: dict[str, tuple[str, ...]] = {
 
 def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, str]]) -> list[dict[str, str]]:
     wanted = set(PACKAGE_INDICATOR_MODE_MAP.get(mode, ()))
-    defensive_untrusted_input = {
-        indicator.get("id") for indicator in package_indicators
-    } >= {"untrusted_content_ingestion", "untrusted_input_handling"}
     return [
         _indicator(
             indicator["id"],
@@ -255,7 +252,6 @@ def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, s
         )
         for indicator in package_indicators
         if indicator["id"] in wanted
-        and not (defensive_untrusted_input and indicator["id"] == "untrusted_content_ingestion")
     ]
 
 
