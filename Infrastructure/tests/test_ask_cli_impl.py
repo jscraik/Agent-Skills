@@ -1195,7 +1195,12 @@ class TestAskCLI(unittest.TestCase):
 
     def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
         """The compact proof facade retains the identity-bound outcome reference."""
-        from ask.cli_output import compact_skill_prove_payload
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.cli_output import compact_skill_prove_payload
+        finally:
+            sys.path.remove(lib_path)
 
         payload = {
             "skill_proof": {
