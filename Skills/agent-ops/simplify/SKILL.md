@@ -4,8 +4,16 @@ description: "Review changed code for behavior-preserving simplification by remo
 metadata:
   skill-type: code_quality_review
   version: 0.2.0
+  lifecycle_state: active
+  maturity: validated
+  owner: Agent Skills Team
+  review_cadence: quarterly
+  metadata_source: frontmatter
+  compatible_roles: "default, worker"
+  runtime_needs: "filesystem, shell, repo-validation"
   triggers: "simplify.?code, simplify.?changes, simplify.?pass, simplify.?refactor"
   provenance: frontmatter:agent-skills:canonical-source
+  share_readiness: ready
 ---
 
 # Simplify

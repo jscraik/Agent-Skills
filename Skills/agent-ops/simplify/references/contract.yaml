@@ -25,6 +25,17 @@ safety:
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit
+commands:
+  - "./bin/ask skills audit Skills/agent-ops/simplify --level strict --json --robot"
+  - "./bin/ask skills package verify Skills/agent-ops/simplify --strict --json --robot"
+permission_profile:
+  network: false
+  filesystem:
+    read:
+      - target diff and source files
+      - repository guidance and validation commands
+    write:
+      - approved canonical source and test files
 observability: "Report validation commands and outcomes."
 evidence_requirements:
   - "Report the changed scope and exact validation command outcomes."
