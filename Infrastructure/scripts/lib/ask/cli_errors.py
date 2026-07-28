@@ -12,6 +12,7 @@ from ask.command_metadata import (
     ACTION_TO_TOPICS,
     COMMAND_EXAMPLES,
     FUZZY_MATCHES,
+    SDK_AUTHOR_FACING_ACTIONS,
     TOPIC_EXAMPLES,
     VALID_ACTIONS,
     VALID_TOPICS,
@@ -35,9 +36,15 @@ TOPIC_RECOVERY_COMMANDS = {
 FALLBACK_RECOVERY_TOPICS = ["skills", "repo", "graph"]
 
 
+def _recovery_actions(topic: str | None) -> List[str]:
+    if topic == "sdk":
+        return list(SDK_AUTHOR_FACING_ACTIONS)
+    return VALID_ACTIONS.get(topic, [])
+
+
 def _valid_actions_fix_suggestion(topic: str | None) -> str:
     if topic in VALID_ACTIONS:
-        return f"Valid actions: {', '.join(VALID_ACTIONS[topic])}"
+        return f"Valid actions: {', '.join(_recovery_actions(topic))}"
     return "Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
 
 
@@ -103,7 +110,7 @@ def build_unknown_action_result(
     result = CallResult()
     result.status = "error"
     examples = _example_commands(topic, action, limit=3)
-    valid_actions = VALID_ACTIONS.get(topic, [])
+    valid_actions = _recovery_actions(topic)
     closest_action = get_closest_match(action, valid_actions) if action else None
     if closest_action:
         examples = _example_commands(topic, closest_action, limit=3)
@@ -290,11 +297,11 @@ def build_helpful_error(
                 fix_suggestion_override = _fallback_topic_fix_suggestion()
     elif not action:
         error_msg = f"Missing action for 'ask {topic}'"
-        valid_actions = VALID_ACTIONS.get(topic, [])
+        valid_actions = _recovery_actions(topic)
         suggestions.append(f"Valid actions for '{topic}': {', '.join(valid_actions)}")
         examples = _example_commands(topic, None, limit=3)
     elif action not in VALID_ACTIONS.get(topic, []):
-        valid = VALID_ACTIONS.get(topic, [])
+        valid = _recovery_actions(topic)
         guess = get_closest_match(action, valid)
         if guess:
             error_msg = f"Unknown action: '{action}' for topic '{topic}'"

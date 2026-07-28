@@ -362,6 +362,18 @@ class TestRecoveryResultBuilders(unittest.TestCase):
             "Closest action guess: 'ask skills resolve'.",
         )
 
+    def test_sdk_unknown_action_recovers_only_author_facing_routes(self):
+        result = build_unknown_action_result("sdk", "unsupported-action")
+
+        self.assertEqual(
+            result.data["candidate_commands"],
+            [
+                "ask sdk start Skills/agent-ops/simplify --json --robot",
+                "ask sdk check Skills/agent-ops/simplify --json --robot",
+            ],
+        )
+        self.assertEqual(result.errors[0].fix_suggestion, "Valid actions: start, check")
+
     def test_helpful_error_includes_recovery_and_candidates(self):
         result = build_helpful_error("skills", "missing", ["skills", "missing"])
 

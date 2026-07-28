@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 from pathlib import Path
 
 import ask.commands.skills as skills_commands
+from ask.command_metadata import SDK_AUTHOR_FACING_ACTIONS
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
 from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
@@ -41,7 +43,7 @@ from ask.skills_sdk.local_score import (
 )
 
 
-DEFAULT_SDK_ACTIONS = ("start", "check")
+DEFAULT_SDK_ACTIONS = SDK_AUTHOR_FACING_ACTIONS
 
 
 class _SdkDefaultHelpSubparsersAction(argparse._SubParsersAction):
@@ -54,6 +56,22 @@ class _SdkDefaultHelpSubparsersAction(argparse._SubParsersAction):
             for action in super()._get_subactions()
             if action.dest in DEFAULT_SDK_ACTIONS
         ]
+
+
+class _SdkDefaultActionChoices(Mapping[str, argparse.ArgumentParser]):
+    """Accept expert routes while limiting unknown-action guidance to the facade."""
+
+    def __init__(self, actions: dict[str, argparse.ArgumentParser]) -> None:
+        self._actions = actions
+
+    def __getitem__(self, action: str) -> argparse.ArgumentParser:
+        return self._actions[action]
+
+    def __iter__(self):
+        return iter(DEFAULT_SDK_ACTIONS)
+
+    def __len__(self) -> int:
+        return len(self._actions)
 
 
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -395,6 +413,7 @@ def add_sdk_parser(
     _add_sdk_lenses_parser(sdk_subparsers, global_parser)
     _add_sdk_determinism_parser(sdk_subparsers, global_parser)
     _add_sdk_review_parser(sdk_subparsers, global_parser)
+    sdk_subparsers.choices = _SdkDefaultActionChoices(sdk_subparsers._name_parser_map)
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
