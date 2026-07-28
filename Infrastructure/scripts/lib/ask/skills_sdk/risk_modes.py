@@ -308,9 +308,12 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
             )
         )
     ignored_ids = {"missing_safety_language"}
+    retained = [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
     if has_safety_boundary:
-        ignored_ids.add("impactful_write_without_review")
-    return [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
+        for indicator in retained:
+            if indicator["id"] == "impactful_write_without_review":
+                indicator["mitigation"] = "safety_boundary_language_present"
+    return retained
 
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:
