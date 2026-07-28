@@ -39,3 +39,82 @@ def print_first_validation_command(payload: dict[str, Any]) -> None:
 
 def replay_command(*parts: object) -> str:
     return " ".join(shlex.quote(str(part)) for part in parts if part is not None)
+
+
+def compact_package_verify_payload(data: dict[str, Any]) -> None:
+    """Keep stable package verification decision-sized by default."""
+    verification = data.get("skill_package_verification")
+    if not isinstance(verification, dict):
+        return
+    data["skill_package_verification"] = {
+        key: verification.get(key)
+        for key in (
+            "schema_version",
+            "query",
+            "status",
+            "target_identity",
+            "archive_identity",
+            "provenance_identity",
+            "blockers",
+            "mutation_status",
+            "rollback_hint",
+            "agent_summary",
+            "validation_commands",
+            "next_command",
+        )
+    }
+    mutation_status = data["skill_package_verification"].get("mutation_status")
+    if isinstance(mutation_status, dict) and mutation_status.get("mutated"):
+        data["skill_package_verification"]["claims_boundary"] = (
+            "Verification detected mutation; follow rollback_hint before treating "
+            "this result as safe. It does not prove runtime reachability, task "
+            "outcome, publication, or release readiness."
+        )
+    else:
+        data["skill_package_verification"]["claims_boundary"] = (
+            "This verifies the requested package without install, extraction, or "
+            "runtime-root mutation; it does not prove runtime reachability, task "
+            "outcome, publication, or release readiness."
+        )
+
+
+def compact_skill_prove_payload(data: dict[str, Any]) -> None:
+    """Keep stable proof output separate from its lower-level runtime report."""
+    proof = data.get("skill_proof")
+    if not isinstance(proof, dict):
+        return
+    def selected(section: str, keys: tuple[str, ...]) -> dict[str, object]:
+        payload = proof.get(section)
+        if not isinstance(payload, dict):
+            return {"status": "missing"}
+        return {key: payload.get(key) for key in keys if key in payload}
+    analytics = selected(
+        "analytics",
+        ("status", "invocation_count", "matching_invocation_count", "parse_error_count"),
+    )
+    data["skill_proof"] = {
+        "schema_version": proof.get("schema_version"),
+        "query": proof.get("query"),
+        "handle": proof.get("handle"),
+        "proof_status": proof.get("proof_status"),
+        "agent_summary": proof.get("agent_summary"),
+        "structural_quality": selected(
+            "structural_quality", ("status", "audit_level", "audit_command")
+        ),
+        "runtime_reachability": selected("reachability", ("status", "command")),
+        "analytics": analytics,
+        "outcome_proof": selected(
+            "outcome_proof",
+            ("status", "evidence_class", "evidence_ref", "evidence_digest", "scenario_set", "case_count"),
+        ),
+        "next_command": proof.get("next_command"),
+        "validation_commands": proof.get("validation_commands"),
+        "claims_boundary": (
+            "Structural validation, runtime reachability, and task outcome are "
+            "separate facts. This result does not prove installation, activation, "
+            "publication, review acceptance, or release readiness."
+        ),
+    }
+    if "goal_resolution" in proof:
+        data["skill_proof"]["goal_resolution"] = proof["goal_resolution"]
+    data.pop("sdk_skill_proof", None)

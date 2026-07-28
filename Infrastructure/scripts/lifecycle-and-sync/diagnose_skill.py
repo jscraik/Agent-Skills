@@ -661,6 +661,11 @@ def main() -> int:
     p = argparse.ArgumentParser(description="Diagnose skill loading issues")
     p.add_argument("skill_name", nargs="?", help="Skill name to diagnose")
     p.add_argument("--all", action="store_true", help="Diagnose all skills")
+    p.add_argument(
+        "--source-only",
+        action="store_true",
+        help="Validate canonical source without requiring a generated workspace projection",
+    )
     args = p.parse_args()
 
     if args.all:
@@ -669,7 +674,10 @@ def main() -> int:
     if not args.skill_name:
         p.error("Specify a skill name or use --all")
 
-    results = diagnose_skill(args.skill_name)
+    results = diagnose_skill(
+        args.skill_name,
+        require_workspace_projection=not args.source_only,
+    )
     return print_report(args.skill_name, results)
 
 

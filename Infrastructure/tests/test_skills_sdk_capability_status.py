@@ -303,10 +303,10 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(payload["metadata"]["command"], "sdk status bogus --json --robot")
         self.assertIn("ask sdk status --json --robot", payload["data"]["candidate_commands"])
 
-    def test_help_surfaces_expose_status_route(self) -> None:
+    def test_status_route_remains_callable_while_default_help_is_compact(self) -> None:
         for command in (
-            [sys.executable, "Infrastructure/bin/ask", "sdk", "--help"],
-            [sys.executable, "bin/skills-sdk", "--help"],
+            [sys.executable, "Infrastructure/bin/ask", "sdk", "status", "--json", "--robot"],
+            [sys.executable, "bin/skills-sdk", "status", "--json", "--robot"],
         ):
             with self.subTest(command=command):
                 process = subprocess.run(
@@ -320,7 +320,9 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
                 )
 
                 self.assertEqual(process.returncode, 0, process.stderr)
-                self.assertIn("status", process.stdout)
+                payload = json.loads(process.stdout)
+                self.assertEqual(payload["status"], "success")
+                self.assertIn("skills_sdk_status", payload["data"])
 
     def test_matrix_file_is_deterministic_json(self) -> None:
         loaded = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))

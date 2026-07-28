@@ -24,6 +24,8 @@ from ask.cli_errors import (
 from ask.cli_args import build_global_parser, prepare_args
 from ask.cli_exit import exit_code_for_errors
 from ask.cli_output import (
+    compact_package_verify_payload,
+    compact_skill_prove_payload,
     print_first_validation_command,
     print_readiness_overview,
     replay_command,
@@ -221,6 +223,7 @@ def main():
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
     skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat")
     skills_sync_parser.add_argument("--plugin-cache-refresh", choices=["auto", "skip", "only"], default="auto", help="Plugin runtime cache refresh mode")
+    skills_sync_parser.add_argument("--user-sync-mode", choices=["full", "links-only"], default=None, help="For user scope, sync runtime links only; use full to refresh plugin mirrors")
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
@@ -635,11 +638,12 @@ def main():
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
             verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
-            package_flags_present = args.strict or args.checkout_test
             if args.target == "verify" and not args.verify_target:
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
-            elif args.target == "verify" and package_flags_present:
+            elif args.target == "verify" and args.checkout_test:
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
+            elif args.target == "verify" and args.strict:
+                result = build_argument_error("skills", "package", raw_args, parser_error="--strict is supported only for package readiness, not verify mode")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
             elif args.target == "verify":
@@ -703,7 +707,20 @@ def main():
                 limit=args.limit,
             )
         elif args.action == "sync":
-            result = skills_commands.sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection, plugin_cache_refresh=args.plugin_cache_refresh)
+            user_sync_mode = args.user_sync_mode
+            if user_sync_mode is None:
+                user_sync_mode = "links-only" if args.scope == "user" else "full"
+            sync_options: str | skills_commands.SkillSyncOptions = skills_commands.SkillSyncOptions(
+                plugin_cache_refresh=args.plugin_cache_refresh,
+                user_sync_mode=user_sync_mode,
+            )
+            result = skills_commands.sync_skills(
+                repo_root,
+                scope=args.scope,
+                dry_run=args.dry_run,
+                projection=args.projection,
+                plugin_cache_refresh=sync_options,
+            )
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
         elif args.action == "external-review":
@@ -1055,6 +1072,10 @@ def main():
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
     maybe_emit_phoenix_trace(repo_root, args, result)
+    if args.json and args.topic == "skills" and args.action == "package" and args.target == "verify":
+        compact_package_verify_payload(result.data)
+    if args.json and args.topic == "skills" and args.action == "prove":
+        compact_skill_prove_payload(result.data)
     if args.json:
         print(result.to_json(repo_root=str(repo_root)))
     else:

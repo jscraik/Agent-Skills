@@ -11,10 +11,11 @@ import sys
 import importlib.util
 import tempfile
 import difflib
+import tomllib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Optional, Protocol
+from typing import Any, List, Literal, Optional, Protocol
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
@@ -113,6 +114,7 @@ from ask.skills_sdk.package_build import build_package_digest_receipt as _build_
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.eval_shard_aggregate import _current_rubric_digest as _skills_sdk_current_rubric_digest  # noqa: E402
 from ask.skills_sdk.release_scenario_sets import (  # noqa: E402
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
@@ -855,6 +857,14 @@ def _normalize_package_verification(
             "source": source,
         }
 
+    blockers = _package_verify_blockers(verification)
+    next_command: str | None = None
+    if verification.get("status") == "blocked" and target_kind == "skill_directory":
+        source_root = Path(str(target_path)).parent.as_posix()
+        next_command = _skills_validation_command("audit", source_root, "--level", "strict")
+    elif verification.get("status") == "blocked":
+        next_command = validation_command
+
     normalized = {
         **verification,
         "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
@@ -868,12 +878,12 @@ def _normalize_package_verification(
         "archive_identity": archive_identity,
         "provenance_identity": provenance_identity,
         "rule_evidence": _package_verify_rule_evidence(verification),
-        "blockers": _package_verify_blockers(verification),
+        "blockers": blockers,
         "mutation_status": _package_verify_mutation_status(verification),
         "rollback_hint": verification.get("rollback_hint")
         or "No rollback is required because verification did not install, extract, or mutate runtime roots.",
         "validation_commands": [validation_command],
-        "next_command": validation_command,
+        "next_command": next_command,
     }
     normalized["agent_summary"] = (
         f"Package verification blocked: {normalized['blockers'][0].get('message', 'validation failed')}"
@@ -1857,6 +1867,65 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
         if normalized in explicit_values:
             candidates.append(workout_id)
     return candidates
+
+
+def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
+    """Return one current, identity-bound local shard aggregate when available."""
+    identity = _skills_sdk_eval_package_identity(repo_root, handle)
+    package_id = str((identity or {}).get("package_id") or "").strip()
+    package_digest = str((identity or {}).get("package_digest") or "").strip()
+    if not package_id or not package_digest or Path(package_id).name != package_id:
+        return {"status": "missing", "evidence_class": "outcome_proof"}
+
+    artifacts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
+    current_rubric_digest = _skills_sdk_current_rubric_digest(repo_root)
+    accepted: list[tuple[int, dict[str, Any]]] = []
+    for candidate in artifacts_root.glob("**/aggregate.json"):
+        relative_path = _repo_relative_path(repo_root, candidate)
+        if relative_path is None:
+            continue
+        try:
+            envelope = json.loads(candidate.read_text(encoding="utf-8"))
+            aggregate = envelope["data"]["skills_sdk_eval_shard_aggregate"]
+            receipt = aggregate["receipt"]
+        except (KeyError, OSError, TypeError, json.JSONDecodeError):
+            continue
+        if not isinstance(receipt, dict):
+            continue
+        checks = receipt.get("checks")
+        check_statuses = {
+            str(check.get("id")): check.get("status")
+            for check in checks
+            if isinstance(check, dict)
+        } if isinstance(checks, list) else {}
+        if (
+            envelope.get("status") == "success"
+            and aggregate.get("status") == "pass"
+            and receipt.get("status") == "pass"
+            and receipt.get("lane") == "oss-local"
+            and receipt.get("profile") == "oss-local"
+            and receipt.get("codex_profile") == "oss-local"
+            and current_rubric_digest is not None
+            and receipt.get("rubric_digest") == current_rubric_digest
+            and receipt.get("package_id") == package_id
+            and receipt.get("package_digest") == package_digest
+            and check_statuses.get("shards_match_current_package") == "pass"
+            and check_statuses.get("all_case_results_pass") == "pass"
+        ):
+            accepted.append(
+                (
+                    candidate.stat().st_mtime_ns,
+                    {
+                        "status": "pass",
+                        "evidence_class": "oss_local_release_aggregate",
+                        "evidence_ref": relative_path,
+                        "evidence_digest": _skills_sdk_digest_file(candidate),
+                        "scenario_set": receipt.get("scenario_set_id"),
+                        "case_count": receipt.get("case_count"),
+                    },
+                )
+            )
+    return max(accepted, key=lambda item: item[0])[1] if accepted else {"status": "missing", "evidence_class": "outcome_proof"}
 
 
 def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
@@ -3519,7 +3588,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
             "resolution": None,
         }, Path(source_rel).parent.as_posix() if source_rel else target_path.as_posix()
 
-    resolution = resolve_skill_handle(query, repo_root_path=repo_root)
+    resolution = resolve_skill_handle(query.casefold(), repo_root_path=repo_root)
     audit_target = _skill_audit_target(repo_root, resolution) if resolution.get("status") == "ok" else None
     return {
         "target_kind": "command_handle",
@@ -3881,6 +3950,7 @@ def skills_doctor(
     target: str,
     strict: bool = False,
     codex_parity: bool = False,
+    validation_scope: Literal["runtime", "source"] = "runtime",
 ) -> CallResult:
     """Run a compact per-capability diagnostic for a skill handle or source path."""
     result = CallResult()
@@ -4056,7 +4126,12 @@ def skills_doctor(
 
     audit_level = "strict" if strict else "compat"
     if audit_target and source_exists:
-        audit_result = audit_skill(repo_root, audit_target, level=audit_level)
+        audit_result = audit_skill(
+            repo_root,
+            audit_target,
+            level=audit_level,
+            validation_scope=validation_scope,
+        )
         diagnostics = audit_result.data.get("diagnostics", {})
         checks["structural_audit"] = _doctor_check(
             "pass" if audit_result.status == "success" else "fail",
@@ -4237,16 +4312,15 @@ def skills_sdk_check(
         target=target,
         strict=strict,
         codex_parity=codex_parity,
+        validation_scope="source",
     )
-    doctor = result.data.get("skill_doctor", {})
+    doctor = result.data.pop("skill_doctor", {})
     doctor_status = doctor.get("status") if isinstance(doctor, dict) else None
     blockers = doctor.get("blockers", []) if isinstance(doctor, dict) else []
     first_blocker = blockers[0] if blockers and isinstance(blockers[0], dict) else {}
-    status = {
-        "pass": "pass",
-        "warning": "warning",
-        "blocked": "blocked",
-    }.get(str(doctor_status or ""), "degraded")
+    status = "blocked" if doctor_status == "blocked" else "pass"
+    if doctor_status not in {"pass", "warning", "blocked"}:
+        status = "degraded"
     failure_class = "none"
     if status in {"blocked", "degraded"}:
         failure_class = "validation_failed"
@@ -4256,12 +4330,23 @@ def skills_sdk_check(
         doctor_command_args.append("--strict")
     if codex_parity:
         doctor_command_args.append("--codex-parity")
-    command = _skills_validation_command("doctor", *doctor_command_args)
+    doctor_command = _skills_validation_command("doctor", *doctor_command_args)
+    facade_command_parts = ["sdk", "check", target]
+    if strict:
+        facade_command_parts.append("--strict")
+    if codex_parity:
+        facade_command_parts.append("--codex-parity")
+    facade_replay_command = _ask_validation_command(*facade_command_parts)
     facade_command = "skills-sdk check"
+    next_command = (
+        str(doctor.get("next_command") or doctor_command)
+        if status in {"blocked", "degraded"} and isinstance(doctor, dict)
+        else _ask_validation_command("skills", "package", "verify", target, "--strict")
+    )
     result.metadata["command"] = "sdk check"
     receipt = {
         "schema_version": "skills-sdk.check-receipt.v1",
-        "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/check-receipt.v1.schema.json",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/check-receipt.v1.schema.json",
         "command": facade_command,
         "command_version": "skills-sdk.v1",
         "status": status,
@@ -4271,7 +4356,7 @@ def skills_sdk_check(
         "proof": {
             "type": "command_output",
             "evidence_kind": "receipt",
-            "evidence_ref": command,
+            "evidence_ref": facade_replay_command,
         },
         "sensor": {
             "id": "skills-sdk.check.facade",
@@ -4289,24 +4374,23 @@ def skills_sdk_check(
         "status": status,
         "failure_class": failure_class,
         "doctor_status": doctor_status,
-        "canonical_command": command,
+        "canonical_command": facade_replay_command,
         "facade_command": facade_command,
         "receipt": receipt,
-        "skill_doctor": doctor,
         "agent_summary": (
             f"skills-sdk check blocked for {target}: {first_blocker.get('message')}"
             if status == "blocked"
             else (
-                f"skills-sdk check completed for {target} with warnings."
-                if status == "warning"
+                f"skills-sdk check is degraded for {target}: doctor status '{doctor_status}' is not a recognized verdict."
+                if status == "degraded"
                 else f"skills-sdk check passed for {target}."
             )
         ),
         "validation_commands": [
-            _ask_validation_command("sdk", "check", target),
-            command,
+            facade_replay_command,
+            doctor_command,
         ],
-        "next_command": doctor.get("next_command") if isinstance(doctor, dict) else command,
+        "next_command": next_command,
     }
     result.data["skills_sdk_check"] = payload
     return result
@@ -4314,24 +4398,6 @@ def skills_sdk_check(
 
 SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
 SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
-SDK_START_BLOCKED_DOWNSTREAM_LANES = [
-    "security_risk_modes",
-    "scenario_quality",
-    "scorer_quality",
-    "scorer_calibration",
-    "oss_local_eval",
-    "oss_local_repair_loop",
-    "oss_cloud_eval",
-    "oss_cloud_repair_loop",
-    "tessl_local_proof_execute",
-    "tessl_live_dry_run",
-    "handoff_readiness",
-    "tessl_live_confirmation",
-    "registry_or_private_workspace_decision",
-    "runtime_doctor",
-]
-
-
 def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, Any]) -> str:
     if target_info.get("target_kind") == "project_local_source_path":
         return "project_local_skill"
@@ -4346,62 +4412,6 @@ def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, An
     return "unknown"
 
 
-def _sdk_start_command_args(target: str, project_root: str | None) -> list[str]:
-    args = ["sdk", "start", target]
-    if project_root:
-        args.extend(["--project-root", project_root])
-    return args
-
-
-def _sdk_start_mechanical_commands(target: str) -> list[str]:
-    return [
-        _skills_validation_command("audit", target, "--level", "strict"),
-        _skills_validation_command("package", "verify", target),
-    ]
-
-
-def _sdk_eval_run_command(target: str, profile: str) -> str:
-    return _ask_validation_command(
-        "sdk",
-        "eval",
-        "run",
-        target,
-        "--runner",
-        "internal",
-        "--mode",
-        "smoke",
-        "--codex-profile",
-        profile,
-    )
-
-
-def _sdk_tessl_dry_run_command(target: str) -> str:
-    return _ask_validation_command(
-        "evals",
-        "run",
-        target,
-        "--mode",
-        "smoke",
-        "--runner",
-        "discovery-smoke",
-        "--tessl-live-private",
-        "--tessl-workspace",
-        "jscraik",
-        "--tessl-live-dry-run",
-    )
-
-
-def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
-    inferred_root = target_info.get("project_root")
-    return {
-        "provided_project_root": project_root,
-        "inferred_project_root": inferred_root,
-        "project_root": project_root or inferred_root,
-        "project_manifest": target_info.get("project_manifest"),
-        "project_source_root": target_info.get("project_source_root"),
-    }
-
-
 def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> str | None:
     if not isinstance(source_path_value, str) or not source_path_value.strip():
         return None
@@ -4409,106 +4419,6 @@ def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> 
     if not source_path.is_absolute():
         return source_path.as_posix()
     return _repo_relative_path(repo_root, source_path)
-
-
-def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
-    start_command = _ask_validation_command("sdk", "start", mechanical_target)
-    lanes: list[dict[str, Any]] = [
-        {"id": "sdk_start", "status": "pass", "command": start_command, "proves": "target classified and next command selected"},
-        {"id": "target_classification", "status": "pass", "command": start_command, "proves": "skill lifecycle target class and scope"},
-        {
-            "id": "mechanical_validation",
-            "status": "required_not_run",
-            "commands": _sdk_start_mechanical_commands(mechanical_target),
-            "proves": "SKILL.md, frontmatter, layout, references, README, fixtures, and package shape",
-        },
-    ]
-    lanes.extend(
-        [
-            {
-                "id": "security_risk_modes",
-                "status": "blocked_until_mechanical_validation",
-                "command": _ask_validation_command("sdk", "security", "risk-modes", mechanical_target, "--preview"),
-                "proves": "security-sensitive behavior, permissions, secrets, network, filesystem, and publication risk modes are explicit before eval or registry lanes",
-            },
-            {
-                "id": "scenario_quality",
-                "status": "blocked_until_security_risk_modes",
-                "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
-                "proves": "gold-standard scenarios, concrete artifacts, behavioral rubrics, Tessl parity checks, and scoreable failure conditions",
-            },
-            {
-                "id": "scorer_quality",
-                "status": "blocked_until_scenario_quality",
-                "command": _ask_validation_command("sdk", "eval", "scorer-quality", mechanical_target, "--preview"),
-                "proves": "LLM judge or hybrid scorer measures the skill requirement rather than keyword or skill-name artifacts",
-            },
-            {
-                "id": "scorer_calibration",
-                "status": "blocked_until_scorer_quality",
-                "command": _ask_validation_command("sdk", "eval", "scorer-calibration", mechanical_target, "--preview"),
-                "proves": "rubric calibration distinguishes correct, wrong, concise, verbose, and unsupported answers",
-            },
-            {"id": "oss_local_eval", "status": "blocked_until_scenario_quality", "command": _sdk_eval_run_command(mechanical_target, "oss-local")},
-            {
-                "id": "oss_local_repair_loop",
-                "status": "blocked_until_oss_local_eval",
-                "command": "owner-classify oss-local failures, patch skill/scenarios/rubrics/validators, then rerun oss-local",
-                "target_success_rate": "70-75 internal success after mechanical and scenario gates",
-            },
-            {"id": "oss_cloud_eval", "status": "blocked_until_oss_local_repair_loop", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
-            {
-                "id": "oss_cloud_repair_loop",
-                "status": "blocked_until_oss_cloud_eval",
-                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun oss-local only if classification shows a local skill regression",
-                "target_success_rate": ">=90 internal success before Tessl spend",
-            },
-            {
-                "id": "tessl_local_proof_execute",
-                "status": "blocked_until_oss_cloud_repair_loop",
-                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "jscraik", "--execute"),
-                "proves": "controlled /tmp Tessl staging, package lint, pack/install mechanics, and workspace identity without live scoring spend",
-            },
-            {
-                "id": "tessl_live_dry_run",
-                "status": "blocked_until_tessl_local_proof_execute",
-                "command": _sdk_tessl_dry_run_command(mechanical_target),
-                "proves": "external Tessl staging shape without consuming the live confirmation lane",
-            },
-            {
-                "id": "handoff_readiness",
-                "status": "blocked_until_tessl_live_dry_run",
-                "command": _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", mechanical_target, "--preview"),
-                "proves": "deterministic, oss-local, oss-cloud, Tessl local proof, and Tessl dry-run receipts are current and ordered",
-            },
-            {
-                "id": "tessl_live_confirmation",
-                "status": "blocked_until_handoff_readiness",
-                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "jscraik"),
-                "target_success_rate": ">=90 and >= baseline; Tessl is confirmational, not the discovery loop",
-            },
-            {
-                "id": "registry_or_private_workspace_decision",
-                "status": "blocked_until_tessl_live_confirmation",
-                "command": "choose private workspace retention or public registry publication from current Tessl and SDK receipts",
-                "proves": "single paid workspace publication/private-state decision is explicit before registry claims",
-            },
-            {"id": "runtime_doctor", "status": "blocked_until_registry_or_private_workspace_decision", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
-        ]
-    )
-    return lanes
-
-
-def _sdk_start_score_policy() -> dict[str, Any]:
-    return {
-        "schema_version": "skills-sdk.pipeline-score-policy.v1",
-        "oss_local_target": "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening",
-        "oss_cloud_target": ">=90 internal success rate after iterative skill, scenario, rubric, validator, and judge repair",
-        "tessl_live_target": ">=90 and >= baseline as external confirmation only",
-        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
-        "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
-        "workspace_policy": "Use the operator-approved Tessl workspace jscraik for all SDK Tessl projects; staged plugin manifests start private until a separate publish lane changes visibility.",
-    }
 
 
 def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list[str]]:
@@ -4519,41 +4429,44 @@ def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list
     return "blocked", [blocker]
 
 
-def _sdk_start_receipt(
+def _sdk_start_local_receipt(
     query: str,
-    target_info: dict[str, Any],
-    ownership: dict[str, Any],
+    source_path: str | None,
     target_class: str,
-    project_root: str | None,
-    mechanical_target: str,
     status: str,
     blockers: list[str],
 ) -> dict[str, Any]:
-    current_lane = "mechanical_validation" if status == "pass" else "target_classification"
-    receipt = {
+    """Build the compact default result for the local author journey."""
+    next_command = _ask_validation_command("sdk", "check", query)
+    return {
         "schema_version": SDK_PIPELINE_START_SCHEMA_VERSION,
         "schema_uri": SDK_PIPELINE_START_SCHEMA_URI,
         "status": status,
         "target": query,
         "target_class": target_class,
-        "target_info": target_info,
-        "source_ownership": ownership,
-        "project_context": _sdk_start_project_context(target_info, project_root),
-        "current_lane": current_lane,
-        "lanes": _sdk_start_lanes(mechanical_target),
-        "blocked_downstream_lanes": SDK_START_BLOCKED_DOWNSTREAM_LANES,
-        "score_policy": _sdk_start_score_policy(),
+        "source_path": source_path,
+        "current_lane": "local_check" if status == "pass" else "target_classification",
+        "lanes": [
+            {
+                "id": "local_check",
+                "status": "required_not_run",
+                "command": next_command,
+            }
+        ],
+        "next_action": {
+            "lane": "local_check",
+            "command": next_command,
+            "why": "Check the resolved local source before package verification or proof.",
+        },
+        "blocked_downstream_lanes": [],
         "blockers": blockers,
-        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command in the shared create, update, install, refactor, skillify, and skill-builder pipeline.",
-        "what_this_does_not_prove": "Format, layout, references, security posture, eval behavior, internal score bands, registry promotion, Tessl confirmation, and runtime reachability have not run yet.",
-        "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
+        "what_this_proves": (
+            "The named target resolves to a canonical local skill source."
+            if status == "pass"
+            else "The named target could not be resolved to a canonical local skill source."
+        ),
+        "what_this_does_not_prove": "Structural validity, package readiness, runtime reachability, and outcome proof have not run.",
     }
-    receipt["next_action"] = {
-        "lane": current_lane,
-        "command": _sdk_start_mechanical_commands(mechanical_target)[0],
-        "why": "Mechanical validation must pass before scenario-quality, eval, registry, or runtime lanes.",
-    }
-    return receipt
 
 
 def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = None) -> CallResult:
@@ -4561,16 +4474,30 @@ def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = No
     result = CallResult()
     result.metadata["command"] = "sdk start"
     query = target.strip()
-    target_info, audit_target = _resolve_doctor_target(repo_root, query)
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
     source_rel = _sdk_start_repo_relative_source(repo_root, source_path_value)
     ownership = _skill_root_ownership_for_path(source_rel, repo_root=repo_root)
     target_class = _sdk_start_target_class(target_info, ownership)
-    mechanical_target = audit_target or query
     source_exists = bool(target_info.get("source_exists")) if isinstance(target_info, dict) else False
     status, blockers = _sdk_start_status(source_exists, target_class)
-    receipt = _sdk_start_receipt(query, target_info, ownership, target_class, project_root, mechanical_target, status, blockers)
-    result.data["skills_sdk_start"] = {"status": status, "receipt": receipt, "agent_summary": receipt["next_action"]["why"]}
+    display_source = source_rel or (str(source_path_value) if source_path_value else None)
+    receipt = _sdk_start_local_receipt(query, display_source, target_class, status, blockers)
+    result.data["skills_sdk_start"] = {
+        "status": status,
+        "receipt": receipt,
+        "agent_summary": (
+            (
+                f"{query}: {display_source}; next action: {receipt['next_action']['command']}. "
+                "This does not prove structural validity, package readiness, runtime reachability, or outcome proof."
+            )
+            if status == "pass"
+            else (
+                f"{query}: source unavailable; blocked before local source resolution. "
+                f"Next action: {receipt['next_action']['command']}."
+            )
+        ),
+    }
     if status != "pass":
         result.status = "error"
         result.errors.append(
@@ -7910,6 +7837,27 @@ def _skills_sdk_eval_execution_identity(evals_path: Path, lane: str | None) -> d
     return eval_lane_execution_identity(payload, lane)
 
 
+def _skills_sdk_eval_profile_execution_identity(codex_profile: str | None) -> dict[str, str] | None:
+    """Read the executed OSS profile identity when a skill has no lane-policy override."""
+    if codex_profile not in {"oss-local", "oss-cloud"}:
+        return None
+    profile_path = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / f"{codex_profile}.config.toml"
+    try:
+        profile = tomllib.loads(profile_path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    model = profile.get("model")
+    provider = profile.get("model_provider")
+    if not isinstance(model, str) or not model.strip() or not isinstance(provider, str) or not provider.strip():
+        return None
+    return {
+        "model": model.strip(),
+        "model_family": model.split(":", 1)[0].strip(),
+        "provider": provider.strip(),
+        "identity_source": "codex-profile-config",
+    }
+
+
 def _skills_sdk_eval_identity_fields(identity: dict[str, str] | None) -> dict[str, str | None]:
     return {
         "execution_model": identity.get("model") if identity else None,
@@ -8512,6 +8460,8 @@ def skills_sdk_eval_run(
             else Path(""),
             eval_lane,
         )
+        if execution_identity is None:
+            execution_identity = _skills_sdk_eval_profile_execution_identity(codex_profile)
         profile_blockers: list[str] = []
         if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
             profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
@@ -9801,7 +9751,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "audit_command": None,
     }
     if audit_target:
-        audit_result = audit_skill(repo_root, audit_target, level="compat")
+        audit_result = audit_skill(repo_root, audit_target, level="compat", validation_scope="source")
         structural_detail = {
             "status": "pass" if audit_result.status == "success" else "fail",
             "audit_level": "compat",
@@ -9812,13 +9762,37 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
 
     analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
-    outcome_status = "missing"
+    evaluation_proof = _eval_shard_outcome_proof(repo_root, normalized)
+    outcome_status = "pass" if evaluation_proof["status"] == "pass" else "missing"
     next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
+        runtime_diagnostics = command_proof.get("runtime_diagnostics")
+        recovery_commands = (
+            runtime_diagnostics.get("recovery_commands")
+            if isinstance(runtime_diagnostics, dict)
+            else None
+        )
+        if isinstance(recovery_commands, list):
+            preview = next(
+                (
+                    item.get("command")
+                    for item in recovery_commands
+                    if isinstance(item, dict)
+                    and item.get("kind") == "preview_user_runtime_sync"
+                    and isinstance(item.get("command"), str)
+                ),
+                None,
+            )
+            if preview:
+                next_command = preview
     elif structural_detail["status"] != "pass":
         proof_status = "blocked_structural_quality"
         next_command = structural_detail.get("audit_command") or next_command
+    elif evaluation_proof["status"] == "pass":
+        proof_status = "proved_local"
+        outcome_status = "pass"
+        next_command = None
     elif workouts:
         proof_status = "reachable_without_outcome_proof"
         outcome_status = "available_not_run"
@@ -9835,6 +9809,8 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "agent_summary": (
             f"{normalized} is reachable and structurally valid, but outcome proof is not present."
             if proof_status == "reachable_without_outcome_proof"
+            else f"{normalized} is structurally valid, reachable, and has current local outcome proof."
+            if proof_status == "proved_local"
             else f"{normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
         ),
         "reachability": {
@@ -9848,9 +9824,10 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "status": outcome_status,
             "workout_candidates": workouts,
             "evidence_class": "outcome_proof",
+            **({key: value for key, value in evaluation_proof.items() if key != "status"} if outcome_status == "pass" else {}),
         },
         "next_command": next_command,
-        "validation_commands": [next_command],
+        "validation_commands": [next_command] if next_command else [],
     }
     if goal_resolution:
         scorecard["goal_resolution"] = goal_resolution
@@ -9867,6 +9844,15 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                     fix_suggestion=next_command,
                 )
             )
+    elif proof_status == "reachable_without_outcome_proof":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skill proof scorecard has no local outcome proof for '{normalized}'.",
+                fix_suggestion=next_command,
+            )
+        )
     return result
 
 
@@ -10202,7 +10188,12 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
 
     return result
 
-def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> CallResult:
+def audit_skill(
+    repo_root: Path,
+    skill_path: str,
+    level: str = "compat",
+    validation_scope: Literal["runtime", "source"] = "runtime",
+) -> CallResult:
     """
     Run structural and (optionally) strict security audits for a skill directory.
 
@@ -10233,7 +10224,12 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         child_results: list[dict[str, Any]] = []
         failed_children: list[str] = []
         for child in external_skill_children:
-            child_result = audit_skill(repo_root, child.as_posix(), level=level)
+            child_result = audit_skill(
+                repo_root,
+                child.as_posix(),
+                level=level,
+                validation_scope=validation_scope,
+            )
             child_errors = [getattr(error, "__dict__", error) for error in child_result.errors]
             child_results.append({
                 "target": child.as_posix(),
@@ -10274,6 +10270,8 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", audit_target_path]
+    if validation_scope == "source":
+        diag_cmd.append("--source-only")
     audit_env = _subprocess_env_with_uv_cache()
 
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
@@ -12380,16 +12378,16 @@ def _append_user_runtime_relinks(
     skills_dir: Path,
     *,
     dry_run: bool,
+    include_plugin_mirrors: bool = True,
+    replace_runtime_links: bool = False,
 ) -> None:
     home = Path.home()
-    targets = [
-        (skills_dir, home / ".agents" / "skills", True),
-        (skills_dir, home / ".codex" / "skills", True),
-        (repo_root, home / ".agents" / "agent-skills", True),
-    ]
-    for src, dst, replace_existing in targets:
+    for _label, src, dst in _user_runtime_link_targets(repo_root, skills_dir, home):
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
-        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_runtime_links))
+    if not include_plugin_mirrors:
+        logs.append("Skipped home plugin mirror refresh for links-only user sync.")
+        return
     user_plugins = home / ".agents" / "plugins"
     personal_plugins_action = _clear_symlinked_personal_plugin_root(
         repo_root,
@@ -12415,25 +12413,99 @@ def _append_user_runtime_relinks(
         )
 
 
-def _verify_user_runtime_relinks(plan: dict, home: Path, skills_dir: Path, *, dry_run: bool) -> list[ErrorObject]:
+def _user_runtime_link_targets(repo_root: Path, skills_dir: Path, home: Path) -> tuple[tuple[str, Path, Path], ...]:
+    """Return the exact user-runtime links owned by a links-only projection."""
+    return (
+        ("agents_user_runtime", skills_dir, home / ".agents" / "skills"),
+        ("codex_user_runtime", skills_dir, home / ".codex" / "skills"),
+        ("agents_repository_root", repo_root, home / ".agents" / "agent-skills"),
+    )
+
+
+def _runtime_link_preflight_error(link: Path, classification: str) -> ErrorObject:
+    messages = {
+        "foreign_or_stale": f"User runtime link {link} is foreign or stale and will not be replaced.",
+        "uninspectable": f"User runtime link {link} could not be inspected and will not be replaced.",
+        "non_symlink": f"User runtime link destination {link} is occupied by a non-symlink path.",
+    }
+    return ErrorObject(
+        code="ERR_RUNTIME",
+        message=messages[classification],
+        fix_suggestion=f"Inspect and reconcile {link} before applying a links-only user sync.",
+    )
+
+
+def _inspect_user_runtime_link(source: Path, link: Path, label: str) -> tuple[dict[str, Any], ErrorObject | None]:
+    expected_target = str(source)
+    check: dict[str, Any] = {
+        "label": label,
+        "path": str(link),
+        "expected_target": expected_target,
+        "classification": "absent",
+        "status": "pass",
+    }
+    if not link.exists() and not link.is_symlink():
+        return check, None
+    if not link.is_symlink():
+        check.update({"classification": "non_symlink", "status": "fail"})
+        return check, _runtime_link_preflight_error(link, "non_symlink")
+    try:
+        target_text = os.readlink(link)
+        resolved_target = link.resolve(strict=False)
+    except OSError as exc:
+        check.update({"classification": "uninspectable", "status": "fail", "error": str(exc)})
+        return check, _runtime_link_preflight_error(link, "uninspectable")
+    expected_resolved = source.resolve(strict=False)
+    check.update({"target": target_text, "resolved_target": str(resolved_target)})
+    if target_text == expected_target and resolved_target == expected_resolved:
+        check["classification"] = "current"
+        return check, None
+    check.update({"classification": "foreign_or_stale", "status": "fail"})
+    return check, _runtime_link_preflight_error(link, "foreign_or_stale")
+
+
+def _preflight_user_runtime_relinks(plan: dict, repo_root: Path, skills_dir: Path, home: Path) -> list[ErrorObject]:
+    """Reject occupied user-runtime destinations before a links-only projection mutates home."""
+    checks: list[dict[str, Any]] = []
+    errors: list[ErrorObject] = []
+    for label, source, link in _user_runtime_link_targets(repo_root, skills_dir, home):
+        check, error = _inspect_user_runtime_link(source, link, label)
+        checks.append(check)
+        if error is not None:
+            errors.append(error)
+    plan["user_runtime_link_preflight"] = {
+        "status": "pass" if not errors else "fail",
+        "checks": checks,
+    }
+    return errors
+
+
+def _verify_user_runtime_relinks(
+    plan: dict,
+    repo_root: Path,
+    home: Path,
+    skills_dir: Path,
+    *,
+    dry_run: bool,
+) -> list[ErrorObject]:
     """Verify home runtime skill links point at this checkout's projection after user sync."""
-    expected_target = str(skills_dir)
-    expected_resolved = skills_dir.resolve(strict=False)
     checks: list[dict[str, Any]] = []
     errors: list[ErrorObject] = []
     if dry_run:
         plan["user_runtime_link_checks"] = {
             "status": "not_run",
             "reason": "dry_run",
-            "expected_target": expected_target,
+            "expected_targets": [
+                str(source)
+                for _label, source, _link in _user_runtime_link_targets(repo_root, skills_dir, home)
+            ],
             "checks": checks,
         }
         return errors
 
-    for label, link in (
-        ("agents_user_runtime", home / ".agents" / "skills"),
-        ("codex_user_runtime", home / ".codex" / "skills"),
-    ):
+    for label, source, link in _user_runtime_link_targets(repo_root, skills_dir, home):
+        expected_target = str(source)
+        expected_resolved = source.resolve(strict=False)
         check: dict[str, Any] = {
             "label": label,
             "path": str(link),
@@ -12474,7 +12546,10 @@ def _verify_user_runtime_relinks(plan: dict, home: Path, skills_dir: Path, *, dr
 
     plan["user_runtime_link_checks"] = {
         "status": "pass" if not errors else "fail",
-        "expected_target": expected_target,
+        "expected_targets": [
+            str(source)
+            for _label, source, _link in _user_runtime_link_targets(repo_root, skills_dir, home)
+        ],
         "checks": checks,
     }
     return errors
@@ -12570,6 +12645,8 @@ def _finalize_skill_sync_result(
         validation_args.append("--dry-run")
     if projection_decision.mode_source in {"cli", "env"}:
         validation_args.extend(["--projection", projection_decision.requested_mode])
+    if scope == "user":
+        validation_args.extend(["--user-sync-mode", str(plan.get("user_sync_mode", "full"))])
     if plugin_cache_refresh != "auto":
         validation_args.extend(["--plugin-cache-refresh", plugin_cache_refresh])
     result.data["validation_commands"] = [_skills_validation_command("sync", *validation_args)]
@@ -12682,12 +12759,20 @@ def _refresh_home_plugin_mirrors(
 
 
 
+@dataclass(frozen=True)
+class SkillSyncOptions:
+    """Optional user-sync behavior while preserving the existing sync call shape."""
+
+    plugin_cache_refresh: str = "auto"
+    user_sync_mode: str = "full"
+
+
 def sync_skills(
     repo_root: Path,
     scope: str = "workspace",
     dry_run: bool = False,
     projection: Optional[str] = None,
-    plugin_cache_refresh: str = "auto",
+    plugin_cache_refresh: str | SkillSyncOptions = "auto",
 ) -> CallResult:
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
@@ -12700,10 +12785,11 @@ def sync_skills(
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
             SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
-        plugin_cache_refresh (str): Plugin runtime cache refresh mode:
+        plugin_cache_refresh (str | SkillSyncOptions): Plugin runtime cache refresh mode:
             "auto" refreshes best-effort during workspace sync, "skip" runs
             normal projection sync without cache mutation, and "only" refreshes
-            plugin runtime caches without changing skill projections.
+            plugin runtime caches without changing skill projections. The typed
+            form can additionally select links-only user sync.
 
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -12716,6 +12802,13 @@ def sync_skills(
           - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
     """
     result = CallResult()
+    sync_options = (
+        plugin_cache_refresh
+        if isinstance(plugin_cache_refresh, SkillSyncOptions)
+        else SkillSyncOptions(plugin_cache_refresh=str(plugin_cache_refresh))
+    )
+    plugin_cache_refresh = sync_options.plugin_cache_refresh
+    user_sync_mode = sync_options.user_sync_mode
     try:
         projection_decision = normalize_projection_mode(projection)
     except ProjectionModeError as exc:
@@ -12743,12 +12836,30 @@ def sync_skills(
         ))
         return result
 
+    if user_sync_mode not in {"full", "links-only"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid user sync mode: '{user_sync_mode}'.",
+            fix_suggestion="Use --user-sync-mode links-only or full.",
+        ))
+        return result
+
     if scope not in {"workspace", "user"}:
         result.status = "error"
         result.errors.append(ErrorObject(
             code="ERR_INVALID_SCOPE",
             message=f"Invalid scope: '{scope}'. Must be 'workspace' or 'user'.",
             fix_suggestion="Use --scope workspace or --scope user"
+        ))
+        return result
+
+    if scope != "user" and user_sync_mode != "full":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_INVALID_SCOPE",
+            message="User sync mode is available only with --scope user.",
+            fix_suggestion="Use --scope user --user-sync-mode links-only.",
         ))
         return result
 
@@ -12768,6 +12879,7 @@ def sync_skills(
             "symlinks": 0,
         },
         "warnings": [],
+        "user_sync_mode": user_sync_mode,
         "plugin_cache_refresh": plugin_cache_permission_declaration(repo_root, mode=plugin_cache_refresh),
     }
     logs = []
@@ -12946,8 +13058,39 @@ def sync_skills(
                     status="error",
                     plugin_cache_refresh=plugin_cache_refresh,
                 )
-            _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
-            relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
+            home = Path.home()
+            if user_sync_mode == "links-only":
+                preflight_errors = _preflight_user_runtime_relinks(plan, repo_root, skills_dir, home)
+                if preflight_errors:
+                    plan["validation_status"] = "fail"
+                    plan["warnings"].append("USER_RUNTIME_LINK_PREFLIGHT_FAILED")
+                    result.errors.extend(preflight_errors)
+                    return _finalize_skill_sync_result(
+                        result,
+                        plan,
+                        logs,
+                        projection_decision,
+                        scope=scope,
+                        dry_run=dry_run,
+                        status="error",
+                        plugin_cache_refresh=plugin_cache_refresh,
+                    )
+            _append_user_runtime_relinks(
+                plan,
+                logs,
+                repo_root,
+                skills_dir,
+                dry_run=dry_run,
+                include_plugin_mirrors=user_sync_mode == "full",
+                replace_runtime_links=user_sync_mode == "full",
+            )
+            relink_errors = _verify_user_runtime_relinks(
+                plan,
+                repo_root,
+                home,
+                skills_dir,
+                dry_run=dry_run,
+            )
             if relink_errors:
                 plan["validation_status"] = "fail"
                 plan["warnings"].append("USER_RUNTIME_LINK_POSTCONDITION_FAILED")

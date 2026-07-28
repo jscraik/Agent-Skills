@@ -151,6 +151,14 @@ def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(
         "git", "config", "--local", "--get", "core.hooksPath", cwd=repo, env=env
     ).stdout.strip()
     assert configured == str(hooks_dir)
-    assert "agent-skills prek home begin" in (hooks_dir / "pre-commit").read_text(
+    assert "agent-skills prek home begin" in (hooks_dir / "pre-push").read_text(
         encoding="utf-8"
     )
+    pre_commit_hook = (hooks_dir / "pre-commit").read_text(encoding="utf-8")
+    assert "Agent Skills direct pre-commit shim." in pre_commit_hook
+    assert 'exec bash "$REPO_ROOT/scripts/hooks/pre-commit.sh" "$@"' in pre_commit_hook
+    assert os.access(hooks_dir / "pre-commit", os.X_OK)
+    commit_msg_hook = (hooks_dir / "commit-msg").read_text(encoding="utf-8")
+    assert "Agent Skills direct commit-message shim." in commit_msg_hook
+    assert 'exec bash "$REPO_ROOT/scripts/hooks/commit-msg.sh" "$@"' in commit_msg_hook
+    assert os.access(hooks_dir / "commit-msg", os.X_OK)

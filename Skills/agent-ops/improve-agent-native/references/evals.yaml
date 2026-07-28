@@ -93,6 +93,23 @@ claims:
   - findings cite target-repo evidence for action parity, primitive tool design, dynamic context, execution signals, and outcome
     tests
   - static checks are not treated as sufficient proof of product-agent readiness
+release_scenario_sets:
+  - id: improve-agent-native-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    target_scenarios: 8
+    maximum_scenarios: 10
+    groups:
+      core:
+        - happy-scorecard
+        - happy-agents-md-audit
+        - happy-proof-loop-gap
+        - edge-no-validation-entrypoint
+        - edge-ui-action-without-agent-capability
+        - pressure-prompt-injection
+      regression:
+        - eval.harness.local-pass-ci-unknown
+        - eval.harness.done-without-validation
 cases:
 - id: smoke-discovery-target
   name: discovery target contract

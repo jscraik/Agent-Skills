@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import subprocess
 
 
@@ -17,8 +17,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import repo_status, repo_yaml_inspect, check_hub_stability, provider_audit
-from ask.commands.repo_impl import _managed_pyyaml_python_command
+from ask.commands.repo import repo_status, repo_yaml_inspect, check_hub_stability, provider_audit  # noqa: E402
+from ask.commands.repo_impl import _managed_pyyaml_python_command  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -62,6 +62,30 @@ class TestRepoStatus(unittest.TestCase):
             repo = Path(tmpdir)
             result = repo_status(repo)
         self.assertFalse(result.data["skills_synced"])
+        self.assertEqual(result.data["skills_projection_state"], "missing")
+
+    def test_repo_status_classifies_linked_worktree_without_runtime_as_unmaterialized(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            (repo / ".git").write_text("gitdir: /tmp/example-worktree\n", encoding="utf-8")
+            result = repo_status(repo)
+
+        self.assertTrue(result.data["is_git"])
+        self.assertFalse(result.data["skills_synced"])
+        self.assertEqual(
+            result.data["skills_projection_state"],
+            "unmaterialized_linked_worktree",
+        )
+
+    def test_repo_status_does_not_treat_empty_linked_runtime_as_unmaterialized(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            (repo / ".git").write_text("gitdir: /tmp/example-worktree\n", encoding="utf-8")
+            (repo / ".agents" / "skills").mkdir(parents=True)
+            result = repo_status(repo)
+
+        self.assertFalse(result.data["skills_synced"])
+        self.assertEqual(result.data["skills_projection_state"], "empty")
 
     def test_repo_status_skills_synced_false_when_skills_dir_empty(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -100,7 +124,13 @@ class TestRepoStatus(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)
             result = repo_status(repo)
-        for key in ("repo_root", "repo_root_resolved", "is_git", "skills_synced"):
+        for key in (
+            "repo_root",
+            "repo_root_resolved",
+            "is_git",
+            "skills_synced",
+            "skills_projection_state",
+        ):
             with self.subTest(key=key):
                 self.assertIn(key, result.data)
 

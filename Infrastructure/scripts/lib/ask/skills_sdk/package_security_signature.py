@@ -56,6 +56,30 @@ UNTRUSTED_CONTENT_RE = re.compile(
 SYSTEM_SERVICE_RE = re.compile(r"(?i)\b(launchctl|systemctl|crontab|sudo)\b|/Library/LaunchAgents|/etc/")
 DESTRUCTIVE_RE = re.compile(r"(?i)\brm\s+-rf\b|\bdelete all\b|\bdrop table\b|\bwipe\s+(?:the\s+)?(?:repo|disk|database)")
 EXTERNAL_WRITE_RE = re.compile(r"(?i)\b(webhook|post to|send to|upload|publish|deploy|push)\b")
+DEFENSIVE_UNTRUSTED_INPUT_RE = re.compile(
+    r"(?i)\btreat\b[^\n]{0,160}\b(?:review text|logs?|diffs?|links?|comments?|task text)\b"
+    r"[^\n]{0,160}\bas\s+untrusted\s+input\b"
+)
+EVAL_SAFETY_FIELDS = (
+    "id",
+    "name",
+    "category",
+    "task",
+    "given",
+    "should",
+    "realistic",
+    "why_realistic",
+    "unit",
+    "actual_artifact",
+    "expected_artifact",
+    "eval_modes",
+    "smoke_mode",
+    "should_trigger",
+    "prepend_skill",
+    "claim_ids",
+    "deterministic_checks",
+    "acceptance",
+)
 
 
 def _sha256_file(path: Path) -> str:
@@ -120,44 +144,125 @@ def _has_hidden_unicode(text: str) -> bool:
     return False
 
 
-def _text_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
-    indicators: list[dict[str, str]] = []
-    if _has_hidden_unicode(text):
-        indicators.append(
-            _indicator("hidden_unicode_obfuscation", evidence_ref, "Contains invisible control or format characters.")
-        )
-    if PIPE_TO_SHELL_RE.search(text):
-        indicators.append(_indicator("pipe_to_shell_download", evidence_ref, "Downloads content and pipes it to an interpreter."))
-    if SUSPICIOUS_URL_RE.search(text):
-        indicators.append(_indicator("suspicious_download_url", evidence_ref, "References a high-risk download URL pattern."))
-    if RUNTIME_FETCH_RE.search(text):
-        indicators.append(
-            _indicator("runtime_instruction_fetch", evidence_ref, "Fetches remote content or instructions at runtime.")
-        )
-    if SECRET_ASSIGNMENT_RE.search(text):
-        indicators.append(_indicator("hardcoded_secret_literal", evidence_ref, "Contains a secret-like assignment pattern."))
-    if INSECURE_CREDENTIAL_OUTPUT_RE.search(text):
-        indicators.append(
-            _indicator("insecure_credential_output", evidence_ref, "Suggests printing or logging credential material.")
-        )
-    if UNTRUSTED_CONTENT_RE.search(text):
-        indicators.append(_indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content."))
-    if SYSTEM_SERVICE_RE.search(text):
-        indicators.append(_indicator("system_service_modification", evidence_ref, "Touches system service or privileged OS surfaces."))
-    if DESTRUCTIVE_RE.search(text):
-        indicators.append(_indicator("destructive_local_capability", evidence_ref, "Contains destructive local operation language."))
-    if UNTRUSTED_CONTENT_RE.search(text) and (SECRET_ASSIGNMENT_RE.search(text) or EXTERNAL_WRITE_RE.search(text)):
+def _strings(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [item for child in value.values() for item in _strings(child)]
+    if isinstance(value, list):
+        return [item for child in value for item in _strings(child)]
+    return []
+
+
+def _is_refusal_case(case: dict[str, Any]) -> bool:
+    if case.get("category") not in {"negative", "pressure"}:
+        return False
+    expectation_text = " ".join(_strings(case.get("should")) + _strings(case.get("acceptance"))).lower()
+    return any(token in expectation_text for token in ("refus", "reject", "declin", "cannot comply"))
+
+
+def _eval_case_security_text(case: dict[str, Any]) -> str:
+    values: list[str] = []
+    refusal_case = _is_refusal_case(case)
+    for key, value in case.items():
+        if key in EVAL_SAFETY_FIELDS and key not in {"task", "given"}:
+            continue
+        if key == "prompt" and refusal_case:
+            continue
+        values.extend(_strings(value))
+    return "\n".join(values)
+
+
+def _eval_yaml_security_text(text: str) -> tuple[str | None, bool]:
+    try:
+        import yaml  # type: ignore
+    except ModuleNotFoundError:
+        return None, False
+    try:
+        payload = yaml.safe_load(text)
+    except yaml.YAMLError:  # type: ignore[attr-defined]
+        return None, True
+    if not isinstance(payload, dict):
+        return None, False
+    cases = payload.get("cases")
+    if not isinstance(cases, list) or not all(isinstance(case, dict) for case in cases):
+        return None, False
+    return "\n".join(_eval_case_security_text(case) for case in cases), False
+
+
+def _pattern_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
+    indicators = (
+        (PIPE_TO_SHELL_RE, "pipe_to_shell_download", "Downloads content and pipes it to an interpreter."),
+        (SUSPICIOUS_URL_RE, "suspicious_download_url", "References a high-risk download URL pattern."),
+        (RUNTIME_FETCH_RE, "runtime_instruction_fetch", "Fetches remote content or instructions at runtime."),
+        (SECRET_ASSIGNMENT_RE, "hardcoded_secret_literal", "Contains a secret-like assignment pattern."),
+        (INSECURE_CREDENTIAL_OUTPUT_RE, "insecure_credential_output", "Suggests printing or logging credential material."),
+    )
+    return [_indicator(indicator_id, evidence_ref, reason) for pattern, indicator_id, reason in indicators if pattern.search(text)]
+
+
+def _untrusted_content_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
+    is_defensive_untrusted_input = bool(DEFENSIVE_UNTRUSTED_INPUT_RE.search(text))
+    has_untrusted_content = bool(UNTRUSTED_CONTENT_RE.search(text))
+    has_external_write = bool(EXTERNAL_WRITE_RE.search(text))
+    has_secret_assignment = bool(SECRET_ASSIGNMENT_RE.search(text))
+    if not has_untrusted_content:
+        return []
+    if has_untrusted_content and is_defensive_untrusted_input and not (has_external_write or has_secret_assignment):
+        return [
+            _indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content."),
+            _indicator("untrusted_input_handling", evidence_ref, "Declares defensive handling of untrusted review input."),
+        ]
+    indicators = [_indicator("untrusted_content_ingestion", evidence_ref, "Consumes untrusted third-party content.")]
+    if has_untrusted_content and (has_secret_assignment or has_external_write):
         indicators.append(
             _indicator("composed_capability_risk", evidence_ref, "Combines untrusted content with secret handling or external writes.")
         )
     return indicators
 
 
+def _operational_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
+    indicators = (
+        (SYSTEM_SERVICE_RE, "system_service_modification", "Touches system service or privileged OS surfaces."),
+        (DESTRUCTIVE_RE, "destructive_local_capability", "Contains destructive local operation language."),
+    )
+    return [_indicator(indicator_id, evidence_ref, reason) for pattern, indicator_id, reason in indicators if pattern.search(text)]
+
+
+def _text_indicators(text: str, evidence_ref: str) -> list[dict[str, str]]:
+    indicators = _pattern_indicators(text, evidence_ref)
+    if _has_hidden_unicode(text):
+        indicators.append(
+            _indicator("hidden_unicode_obfuscation", evidence_ref, "Contains invisible control or format characters.")
+        )
+    indicators.extend(_untrusted_content_indicators(text, evidence_ref))
+    indicators.extend(_operational_indicators(text, evidence_ref))
+    return indicators
+
+
+def _security_indicators_for_file(path: Path, text: str, evidence_ref: str) -> list[dict[str, str]]:
+    if path.name == "evals.yaml" and path.parent.name == "references":
+        structured_text, parse_error = _eval_yaml_security_text(text)
+        if structured_text is not None:
+            return _text_indicators(structured_text, evidence_ref)
+        indicators = _text_indicators(text, evidence_ref)
+        if parse_error:
+            indicators.append(
+                _indicator(
+                    "eval_yaml_parse_error",
+                    evidence_ref,
+                    "The evals.yaml file could not be parsed; raw text scanning was used as a fallback.",
+                )
+            )
+        return indicators
+    return _text_indicators(text, evidence_ref)
+
+
 def _file_security_record(repo_root: Path, path: Path) -> dict[str, Any]:
     evidence_ref = _repo_relative(repo_root, path)
     text, is_binary = _read_text(path)
     kind = _file_kind(path, is_binary)
-    indicators = [] if text is None else _text_indicators(text, evidence_ref)
+    indicators = [] if text is None else _security_indicators_for_file(path, text, evidence_ref)
     return {
         "path": evidence_ref,
         "kind": kind,

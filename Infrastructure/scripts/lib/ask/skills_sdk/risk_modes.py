@@ -244,6 +244,9 @@ PACKAGE_INDICATOR_MODE_MAP: dict[str, tuple[str, ...]] = {
 
 def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, str]]) -> list[dict[str, str]]:
     wanted = set(PACKAGE_INDICATOR_MODE_MAP.get(mode, ()))
+    defensive_untrusted_input = {
+        indicator.get("id") for indicator in package_indicators
+    } >= {"untrusted_content_ingestion", "untrusted_input_handling"}
     return [
         _indicator(
             indicator["id"],
@@ -252,6 +255,7 @@ def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, s
         )
         for indicator in package_indicators
         if indicator["id"] in wanted
+        and not (defensive_untrusted_input and indicator["id"] == "untrusted_content_ingestion")
     ]
 
 
@@ -287,7 +291,7 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
     """
     Refines negligent instruction indicators by validating boundary language presence.
     
-    Adds a boundary language indicator if impactful actions lack safeguard language (approval, sandbox, preview, rollback, or redaction). Removes missing_safety_language indicators.
+    Adds a boundary language indicator if impactful actions lack safeguard language (approval, sandbox, preview, rollback, or redaction). Removes only missing_safety_language; an impactful action remains visible even when boundary language is present.
     
     Parameters:
         indicators: Indicator list to refine.
@@ -298,7 +302,8 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
         Refined indicator list.
     """
     has_impactful_action = any(indicator["id"] == "impactful_write_without_review" for indicator in indicators)
-    if has_impactful_action and not _has_safety_language(text):
+    has_safety_boundary = _has_safety_language(text)
+    if has_impactful_action and not has_safety_boundary:
         indicators.append(
             _indicator(
                 "no_boundary_language",
@@ -306,7 +311,9 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
                 "Impactful actions are present without approval, sandbox, preview, rollback, or redaction language.",
             )
         )
-    return [indicator for indicator in indicators if indicator["id"] != "missing_safety_language"]
+    ignored_ids = {"missing_safety_language"}
+    retained = [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
+    return retained
 
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:

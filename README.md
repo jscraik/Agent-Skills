@@ -48,37 +48,31 @@ If the bootstrap wrapper is unavailable in your shell, use
 `python3 bin/ask repo status --json` as the fallback. After status passes,
 follow the next command reported by `repo doctor`.
 
-For AI coding agents, use this sequence:
+For a local skill journey, use this sequence and stop when the current result
+does not name a next action:
 
 ```bash
-./bin/ask repo doctor --json --robot
-./bin/ask sdk start "<skill-or-goal>" --project-root /path/to/project --json --robot
-./bin/ask skills improve "<goal>" --json --robot
-./bin/ask skills explain <recommended_capability> --json --robot
-./bin/ask skills prove <recommended_capability> --json --robot
-./bin/ask repo closeout --changed --json --robot
+./bin/ask sdk start <skill> --json --robot
+./bin/ask sdk check <skill> --json --robot
+./bin/ask skills package verify <skill> --json --robot
+./bin/ask skills prove <skill> --json --robot
 ```
 
 That path answers:
 
-- can I work safely here;
-- which SDK lifecycle lane should run first;
-- which capability matches the job;
-- how should I use it;
-- what proof exists;
-- what must pass before I claim done.
+- is this the skill I meant;
+- is its source structurally valid;
+- can it be packaged without changing the runtime;
+- what truth has, and has not, been proved locally.
 
 ## Pick the right path
 
-| Reader job              | Start here                                                    | Why                                                                                                     |
-| ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, SDK projection metadata, and surface diagnostics. |
-| Start an SDK skill lane | `./bin/ask sdk start <skill-or-goal> --json --robot`          | Classifies the target and returns the required mechanical-validation next action.                       |
-| Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                  |
-| Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                |
-| Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.          |
-| Audit a skill source    | `./bin/ask skills audit <path> --level strict --json --robot` | Runs the strict structural and policy check for one skill.                                              |
-| Close out current work  | `./bin/ask repo closeout --changed --json --robot`            | Reports changed-scope validation and readiness blockers.                                                |
+| Reader job     | Start here                                                   | Why                                                                                 |
+| -------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Start          | `./bin/ask sdk start <skill> --json --robot`                 | Resolves the target, local state, and one next action.                            |
+| Check          | `./bin/ask sdk check <skill> --json --robot`                 | Gives a compact structural summary and one actionable follow-up.                  |
+| Verify package | `./bin/ask skills package verify <skill> --json --robot` | Verifies the requested package without installing or changing the runtime. |
+| Prove          | `./bin/ask skills prove <skill> --json --robot`              | Keeps structural, runtime, and task-outcome truth separate.                       |
 
 Use `--robot` when an agent is driving the CLI. The wrapper corrects clear
 syntax mistakes and returns structured errors when intent is ambiguous.

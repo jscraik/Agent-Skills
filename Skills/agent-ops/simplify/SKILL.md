@@ -5,6 +5,7 @@ metadata:
   skill-type: code_quality_review
   version: 0.2.0
   triggers: "simplify.?code, simplify.?changes, simplify.?pass, simplify.?refactor"
+  provenance: frontmatter:agent-skills:canonical-source
 ---
 
 # Simplify
@@ -41,8 +42,15 @@ cleanup decision.
 
 ## Outputs
 
-For small interactive cleanups, return concise prose covering the outcome,
-edits, skipped candidates, validation, and remaining risk.
+For a small interactive cleanup, use four concise fields:
+
+- `Outcome`: `changed`, `no_justified_edit`, or `blocked`.
+- `Evidence`: the exact supplied diff or file fact supporting that outcome.
+- `Validation`: the focused command or artifact required before claiming preserved behavior.
+- `Skipped / boundary`: risky candidates left untouched and the remaining behavior boundary.
+
+Do not invent a validation result, a diff fact, or a cleanup candidate when the
+available evidence does not support one.
 
 Use a structured result for automation, handoff, risky deletion or extraction,
 or a broad multi-file cleanup. Include:

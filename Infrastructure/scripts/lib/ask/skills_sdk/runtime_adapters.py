@@ -1274,11 +1274,6 @@ def build_sdk_skill_proof(
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
     }
-    core_gates = (
-        gates["resolver"],
-        gates["canonical_source_exists"],
-        gates["direct_runtime_projection"],
-    )
     codex_runtime_ready = bool(codex_link["points_to_workspace_runtime"])
     agents_runtime_ready = bool(agents_link["points_to_workspace_runtime"])
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
@@ -1290,10 +1285,17 @@ def build_sdk_skill_proof(
         "codex": "codex_user_runtime_ready",
         "agents": "agents_user_runtime_ready",
     }[runtime_target]
-    required_runtime_ready = bool(gates[required_runtime_gate])
+    required_gate_ids = (
+        "resolver",
+        "canonical_source_exists",
+        "direct_runtime_projection",
+        required_runtime_gate,
+        "user_runtime_alias_consistent",
+    )
+    required_gates_passed = all(bool(gates[gate_id]) for gate_id in required_gate_ids)
     failed_check_id = (
         None
-        if all(core_gates) and required_runtime_ready
+        if required_gates_passed
         else next(
             (
                 check_id
@@ -1402,23 +1404,18 @@ def build_sdk_skill_proof(
         "schema_version": "sdk-skill-proof.v1",
         "handle": normalized,
         "runtime_target": runtime_target,
-        "status": "pass" if all(core_gates) and required_runtime_ready else "fail",
+        "status": "pass" if required_gates_passed else "fail",
         "validation_commands": [
             skills_validation_command("proof", *validation_args),
         ],
         "gates": gates,
         "gate_policy": {
-            "required": [
-                "resolver",
-                "canonical_source_exists",
-                "direct_runtime_projection",
-                required_runtime_gate,
-            ],
+            "required": list(required_gate_ids),
             "runtime_target": runtime_target,
             "required_semantics": (
-                "user_runtime_ready accepts either supported user runtime link."
+                "user_runtime_ready accepts either supported user runtime link, but both present aliases must resolve to the same workspace runtime."
                 if runtime_target == "any"
-                else f"{required_runtime_gate} must be true for runtime_target={runtime_target}."
+                else f"{required_runtime_gate} and user_runtime_alias_consistent must be true for runtime_target={runtime_target}."
             ),
             "supporting_runtime_diagnostics": [
                 "codex_user_link",

@@ -156,11 +156,36 @@ def _lock_owner_pids(path: Path) -> set[int] | None:
     return pids
 
 
+def _lsof_parent_pid(pid: int) -> int | None:
+    lsof = _lsof_binary()
+    if lsof is None:
+        return None
+    try:
+        proc = subprocess.run(
+            [lsof, "-nP", "-F", "pR", "-R", "-p", str(pid)],
+            text=True, capture_output=True, check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    for line in proc.stdout.splitlines():
+        if line.startswith("R"):
+            try:
+                return int(line[1:])
+            except ValueError:
+                return None
+    return None
+
+
 def _parent_process_ids() -> set[int]:
     ancestors: set[int] = set()
     pid = os.getppid()
     while pid > 1 and pid not in ancestors:
         ancestors.add(pid)
+        lsof_parent_pid = _lsof_parent_pid(pid)
+        if lsof_parent_pid is not None:
+            pid = lsof_parent_pid
+            continue
         try:
             proc = subprocess.run(
                 ["ps", "-o", "ppid=", "-p", str(pid)],
@@ -171,6 +196,26 @@ def _parent_process_ids() -> set[int]:
         except (OSError, ValueError, subprocess.TimeoutExpired):
             break
     return ancestors
+
+
+def _has_expected_git_hook_transaction(git_dir: Path) -> bool:
+    raw_git_dir = os.environ.get("GIT_DIR")
+    raw_index_file = os.environ.get("GIT_INDEX_FILE")
+    if not raw_git_dir or not raw_index_file:
+        return False
+    try:
+        expected_dir = git_dir.resolve()
+        hook_dir = Path(raw_git_dir).resolve()
+        temporary_index = Path(raw_index_file).resolve()
+    except OSError:
+        return False
+    return (
+        hook_dir == expected_dir
+        and temporary_index.parent == expected_dir
+        and temporary_index.name.startswith("next-index-")
+        and temporary_index.suffix == ".lock"
+        and temporary_index.is_file()
+    )
 
 
 def _lock_owned_by_parent(path: Path) -> bool:
@@ -429,6 +474,7 @@ def _lock_reasons(
     lock_records: list[dict[str, Any]],
     index_lock_path: Path,
     allow_current_index_lock: bool,
+    expected_hook_transaction: bool,
 ) -> tuple[list[str], list[str]]:
     reasons: list[str] = []
     advisories: list[str] = []
@@ -440,23 +486,44 @@ def _lock_reasons(
         is_current = path == index_lock_path
         if is_current and allow_current_index_lock:
             owner_pids = _lock_owner_pids(index_lock_path)
-            if owner_pids is None:
-                reasons.append("lock_owner_detector_unavailable")
-            elif owner_pids & _parent_process_ids():
+            if expected_hook_transaction or (
+                owner_pids is not None and owner_pids & _parent_process_ids()
+            ):
                 advisories.append("expected_current_index_lock")
+            elif owner_pids is None:
+                reasons.append("lock_owner_detector_unavailable")
             else:
                 reasons.append(classification)
         else:
             reasons.append(classification)
-    reasons.extend(_worktree_lock_reasons(result["locked_worktrees"]))
+    reasons.extend(
+        _worktree_lock_reasons(
+            result["locked_worktrees"],
+            index_lock_path=index_lock_path,
+            allow_current_index_lock=allow_current_index_lock,
+        )
+    )
     if result["prunable_worktrees"]:
         advisories.append("prunable_worktree")
     return list(dict.fromkeys(reasons)), advisories
 
 
-def _worktree_lock_reasons(locked_worktrees: list[dict[str, Any]]) -> list[str]:
+def _worktree_lock_reasons(
+    locked_worktrees: list[dict[str, Any]],
+    *,
+    index_lock_path: Path,
+    allow_current_index_lock: bool,
+) -> list[str]:
     reasons: list[str] = []
-    if any(item.get("current") for item in locked_worktrees):
+    has_blocking_current_worktree_lock = any(
+        item.get("current")
+        and (
+            not allow_current_index_lock
+            or item.get("index_lock") != str(index_lock_path)
+        )
+        for item in locked_worktrees
+    )
+    if has_blocking_current_worktree_lock:
         reasons.append("current_worktree_locked")
     if any(not item.get("current") for item in locked_worktrees):
         reasons.append("related_worktree_locked")
@@ -469,10 +536,12 @@ def _reason_codes(
     lock_records: list[dict[str, Any]],
     index_lock_path: Path,
     allow_current_index_lock: bool,
+    expected_hook_transaction: bool,
 ) -> tuple[list[str], list[str]]:
     reasons = _metadata_reasons(write_results)
     lock_reasons, advisories = _lock_reasons(
-        result, lock_records, index_lock_path, allow_current_index_lock
+        result, lock_records, index_lock_path, allow_current_index_lock,
+        expected_hook_transaction,
     )
     reasons.extend(lock_reasons)
     return list(dict.fromkeys(reasons)), advisories
@@ -496,9 +565,11 @@ def _finalize(
     lock_records: list[dict[str, Any]],
     index_lock_path: Path,
     allow_current_index_lock: bool,
+    expected_hook_transaction: bool,
 ) -> None:
     reasons, advisories = _reason_codes(
-        result, write_results, lock_records, index_lock_path, allow_current_index_lock
+        result, write_results, lock_records, index_lock_path, allow_current_index_lock,
+        expected_hook_transaction,
     )
     if advisories:
         result.setdefault("advisories", []).extend(advisories)
@@ -513,6 +584,7 @@ def _finalize_inspection(
     index_lock_path: Path,
     lock_policy: CurrentIndexLockPolicy,
     worktree_error: str | None,
+    expected_hook_transaction: bool,
 ) -> None:
     _finalize(
         result,
@@ -520,6 +592,7 @@ def _finalize_inspection(
         result["locks"],
         index_lock_path,
         lock_policy is CurrentIndexLockPolicy.ALLOW_PARENT_OWNED,
+        expected_hook_transaction,
     )
     if worktree_error:
         result["reason_codes"] = list(
@@ -594,9 +667,11 @@ def inspect(
         lock_max_age_seconds,
     )
     worktree_error = _apply_worktree_state(result, repo_root, worktrees_dir, git_dir)
+    expected_hook_transaction = _has_expected_git_hook_transaction(git_dir)
+    result["expected_hook_transaction"] = expected_hook_transaction
     _finalize_inspection(
         result, write_results, resolved["index_lock_path"], current_index_lock_policy,
-        worktree_error,
+        worktree_error, expected_hook_transaction,
     )
     return result
 

@@ -41,6 +41,21 @@ from ask.skills_sdk.local_score import (
 )
 
 
+DEFAULT_SDK_ACTIONS = ("start", "check")
+
+
+class _SdkDefaultHelpSubparsersAction(argparse._SubParsersAction):
+    """Render the author-facing SDK routes without removing expert commands."""
+
+    def _get_subactions(self) -> list[argparse.Action]:
+        """Limit only the help projection to the stable local journey."""
+        return [
+            action
+            for action in super()._get_subactions()
+            if action.dest in DEFAULT_SDK_ACTIONS
+        ]
+
+
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     sdk_ir_parser = sdk_subparsers.add_parser(
         "ir",
@@ -350,7 +365,11 @@ def add_sdk_parser(
     global_parser: argparse.ArgumentParser,
 ) -> None:
     sdk_parser = subparsers.add_parser("sdk", help="Skills SDK product facade", parents=[global_parser])
-    sdk_subparsers = sdk_parser.add_subparsers(dest="action")
+    sdk_subparsers = sdk_parser.add_subparsers(
+        dest="action",
+        action=_SdkDefaultHelpSubparsersAction,
+    )
+    sdk_subparsers.metavar = "{" + ",".join(DEFAULT_SDK_ACTIONS) + "}"
     _add_sdk_start_parser(sdk_subparsers, global_parser)
     _add_sdk_check_parser(sdk_subparsers, global_parser)
     _add_sdk_score_parser(sdk_subparsers, global_parser)

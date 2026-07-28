@@ -79,6 +79,7 @@ CODEX_HOOK_CACHE_ROOT="$(validate_hook_cache_path "$CODEX_HOOK_CACHE_ROOT" "$AGE
 PREK_HOME="$(validate_hook_cache_path "$PREK_HOME" "$AGENT_SKILLS_REPO_ROOT" "$AGENT_SKILLS_GIT_COMMON_DIR")"
 secure_hook_cache_dir "$CODEX_HOOK_CACHE_ROOT"
 secure_hook_cache_dir "$PREK_HOME"
+cd "$AGENT_SKILLS_REPO_ROOT"
 # agent-skills prek home end
 """,
         encoding="utf-8",
@@ -226,6 +227,54 @@ def test_hook_adapters_do_not_call_hook_runners() -> None:
         assert re.search(r"bash .*validate_all\.sh|node scripts/validate-commit-msg\.js", text)
 
 
+def test_hook_sandbox_env_replaces_unusable_inherited_cache_only(tmp_path: Path) -> None:
+    """Hooks must not inherit a desktop cache path that they cannot use."""
+    helper = REPO_ROOT / "scripts/hooks/_sandbox_env.sh"
+    command = [
+        "bash",
+        "-c",
+        'source "$1"; printf "%s\\n%s\\n" "$UV_CACHE_DIR" "$XDG_CACHE_HOME"',
+        "bash",
+        str(helper),
+    ]
+    unusable = "/dev/null/agent-skills-uv-cache"
+    environment = {
+        **os.environ,
+        "TMPDIR": str(tmp_path),
+        "UV_CACHE_DIR": unusable,
+        "XDG_CACHE_HOME": str(tmp_path / "explicit-xdg-cache"),
+    }
+    result = subprocess.run(command, capture_output=True, text=True, check=False, env=environment)
+
+    assert result.returncode == 0, result.stderr
+    uv_cache, xdg_cache = result.stdout.splitlines()
+    assert uv_cache == str(tmp_path / "agent-skills-uv-cache")
+    assert xdg_cache == str(tmp_path / "explicit-xdg-cache")
+
+
+def test_hook_sandbox_env_rejects_non_searchable_cache_directory(tmp_path: Path) -> None:
+    """Hooks need a structurally usable cache path independent of effective uid."""
+    helper = REPO_ROOT / "scripts/hooks/_sandbox_env.sh"
+    inaccessible_cache = Path("/dev/null") / "agent-skills-inaccessible-cache"
+    command = [
+        "bash",
+        "-c",
+        'source "$1"; printf "%s" "$UV_CACHE_DIR"',
+        "bash",
+        str(helper),
+    ]
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "TMPDIR": str(tmp_path), "UV_CACHE_DIR": str(inaccessible_cache)},
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == str(tmp_path / "agent-skills-uv-cache")
+
+
 def test_hook_adapters_resolve_root_without_inherited_git_context() -> None:
     for rel_path in [
         "Infrastructure/scripts/hooks/pre-commit.sh",
@@ -316,7 +365,7 @@ def test_hook_sandbox_preserves_git_temporary_index(tmp_path: Path) -> None:
     assert result.stdout == temporary_index
 
 
-def test_pre_commit_names_and_proves_parent_owned_index_lock_policy() -> None:
+def test_pre_commit_names_and_proves_current_index_lock_policy() -> None:
     for rel_path in [
         "scripts/hooks/pre-commit.sh",
         "Infrastructure/scripts/hooks/pre-commit.sh",
@@ -324,7 +373,9 @@ def test_pre_commit_names_and_proves_parent_owned_index_lock_policy() -> None:
         text = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
         assert "--allow-parent-owned-index-lock" in text
         assert "--allow-current-index-lock" not in text
-        assert "lock owner is a Git ancestor" in text
+        assert 'hook_git_dir="${GIT_DIR:-}"' in text
+        assert 'hook_git_index_file="${GIT_INDEX_FILE:-}"' in text
+        assert 'GIT_DIR="$hook_git_dir" GIT_INDEX_FILE="$hook_git_index_file"' in text
 
 
 def test_harness_fallback_wrappers_share_supported_version() -> None:
@@ -448,6 +499,7 @@ def test_generated_prek_hooks_reapply_secure_cache_contract() -> None:
     assert 'agent-skills-hook-cache.XXXXXX' not in installer
     assert 'mkdir -p "$PREK_HOME"' not in installer
     assert 'export PREK_HOME="$CODEX_HOOK_CACHE_ROOT/prek"' in installer
+    assert 'cd "$AGENT_SKILLS_REPO_ROOT"' in installer
 
 
 def test_generated_hook_validator_accepts_shell_suffix_and_rejects_injection(tmp_path: Path) -> None:
