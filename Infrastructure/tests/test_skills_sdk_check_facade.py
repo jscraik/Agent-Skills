@@ -60,6 +60,11 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertEqual(check["receipt"]["failure_class"], "none")
         self.assertEqual(check["status"], "pass")
         self.assertEqual(check["doctor_status"], "warning")
+        self.assertEqual(check["canonical_source_path"], "Skills/agent-ops/simplify/SKILL.md")
+        self.assertEqual(
+            check["claims_boundary"],
+            "This checks local source readiness; it does not prove package readiness, runtime reachability, task outcome, publication, or release readiness.",
+        )
         self.assertEqual(
             check["next_command"],
             "./bin/ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
