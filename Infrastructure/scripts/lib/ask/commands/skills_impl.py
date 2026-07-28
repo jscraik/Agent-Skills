@@ -8506,7 +8506,7 @@ def skills_sdk_eval_run(
             target,
             mode=mode,
             runner="codex",
-            dashboard=True,
+            dashboard=False,
             skip_tessl=skip_tessl,
             codex_profile=codex_profile,
             cases=cases,
