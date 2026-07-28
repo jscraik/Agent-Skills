@@ -91,6 +91,10 @@ repository-owned proof rather than only a generic recheck.
 Conclude the assessment by saying that validation blocks false readiness and
 proof-skipping until those commands, receipts, or equivalent proof exist.
 
+When supplied facts call work done without that validation, explicitly reject
+closure and say not to claim done. Name the missing proof lane and the next
+validation command or exact blocker.
+
 When validation is absent or an input asks to skip it, include a `proof_gap`
 that blocks a false readiness or proof-skipping claim. Require the applicable
 validation commands, receipts, or equivalent repository-owned proof before
