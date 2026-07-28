@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Dict, List, Tuple
 
 VALID_TOPICS = ["repo", "skills", "sdk", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "memory", "wiki", "workouts"]
+SKILLS_AUTHOR_FACING_ACTIONS = ("package", "prove")
 SDK_AUTHOR_FACING_ACTIONS = ("start", "check")
 
 VALID_ACTIONS = {
@@ -67,32 +68,8 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask repo doctor-catalog --strict",
     ],
     "skills": [
-        "ask skills improve \"fix PR review comments faster\" --json --robot",
-        "ask skills explain Skills/agent-ops/autofix --json --robot",
-        "ask skills doctor Skills/agent-ops/autofix --json --robot",
-        "ask skills package Skills/agent-ops/autofix --json --robot",
-        "ask skills package verify Skills/agent-ops/autofix --json --robot",
-        "ask skills conformance run --suite codex-parity --evidence-dir /tmp/ask-conformance --json --robot",
-        "ask skills codex-preview --json --robot",
-        "ask skills render-preview --context-window 200000 --json --robot",
-        "ask skills config explain --json --robot",
-        "ask skills profiles --json --robot",
-        "ask skills profiles eval --json --robot",
-        "ask skills events --json --robot",
-        "ask skills memory search projection --json --robot",
-        "ask skills prove Skills/agent-ops/autofix --json --robot",
-        "ask skills list",
-        "ask skills budget --json",
-        "ask skills profiles --json",
-        "ask skills resolve Skills/agent-ops/autofix --json",
-        (
-            "ask skills parse "
-            "\"use Skills/agent-ops/autofix with @skillinspector\" --json"
-        ),
-        "ask skills proof Skills/agent-ops/autofix --json",
-        "ask skills route \"find the right security skill\"",
-        "ask skills audit Skills/backend-platform/cli-spec --level strict",
-        "ask skills external-review Skills/backend-platform/cli-spec --json",
+        "ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
+        "ask skills prove Skills/agent-ops/simplify --json --robot",
     ],
     "sdk": [
         "ask sdk start Skills/agent-ops/simplify --json --robot",
@@ -199,7 +176,7 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills sync --scope user --projection rooted --json",
     ],
     ("skills", "prove"): [
-        "ask skills prove Skills/agent-ops/autofix --json",
+        "ask skills prove Skills/agent-ops/simplify --json --robot",
     ],
     ("skills", "explain"): [
         "ask skills explain autofix --json",

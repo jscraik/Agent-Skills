@@ -2,12 +2,57 @@ from __future__ import annotations
 
 import argparse
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from ask.cli_errors import _normalize_token, consume_global_prefix_flags
 
 
 ROBOT_FLAGS = {"--robot", "--agent-mode", "-r"}
+
+
+class FacadeHelpSubparsersAction(argparse._SubParsersAction):
+    """Render only the declared facade actions without removing expert routes."""
+
+    facade_actions: tuple[str, ...] = ()
+
+    def _get_subactions(self) -> list[argparse.Action]:
+        """Limit the help projection while retaining every parser route."""
+        return [
+            action
+            for action in super()._get_subactions()
+            if action.dest in self.facade_actions
+        ]
+
+
+def facade_help_action(facade_actions: tuple[str, ...]) -> type[FacadeHelpSubparsersAction]:
+    """Build the argparse action type for one compact facade projection."""
+    return type(
+        "FacadeHelpSubparsersAction",
+        (FacadeHelpSubparsersAction,),
+        {"facade_actions": facade_actions},
+    )
+
+
+class FacadeActionChoices(Mapping[str, argparse.ArgumentParser]):
+    """Accept every parser route while rendering facade-only invalid choices."""
+
+    def __init__(
+        self,
+        actions: dict[str, argparse.ArgumentParser],
+        facade_actions: tuple[str, ...],
+    ) -> None:
+        self._actions = actions
+        self._facade_actions = facade_actions
+
+    def __getitem__(self, action: str) -> argparse.ArgumentParser:
+        return self._actions[action]
+
+    def __iter__(self):
+        return iter(self._facade_actions)
+
+    def __len__(self) -> int:
+        return len(self._actions)
 
 
 @dataclass(frozen=True)

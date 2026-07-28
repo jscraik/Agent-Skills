@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Mapping
 from pathlib import Path
 
 import ask.commands.skills as skills_commands
 from ask.command_metadata import SDK_AUTHOR_FACING_ACTIONS
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
+from ask.cli_args import FacadeActionChoices, facade_help_action
 from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.commands.sdk_eval import add_sdk_eval_parser, dispatch_sdk_eval
@@ -44,34 +44,6 @@ from ask.skills_sdk.local_score import (
 
 
 DEFAULT_SDK_ACTIONS = SDK_AUTHOR_FACING_ACTIONS
-
-
-class _SdkDefaultHelpSubparsersAction(argparse._SubParsersAction):
-    """Render the author-facing SDK routes without removing expert commands."""
-
-    def _get_subactions(self) -> list[argparse.Action]:
-        """Limit only the help projection to the stable local journey."""
-        return [
-            action
-            for action in super()._get_subactions()
-            if action.dest in DEFAULT_SDK_ACTIONS
-        ]
-
-
-class _SdkDefaultActionChoices(Mapping[str, argparse.ArgumentParser]):
-    """Accept expert routes while limiting unknown-action guidance to the facade."""
-
-    def __init__(self, actions: dict[str, argparse.ArgumentParser]) -> None:
-        self._actions = actions
-
-    def __getitem__(self, action: str) -> argparse.ArgumentParser:
-        return self._actions[action]
-
-    def __iter__(self):
-        return iter(DEFAULT_SDK_ACTIONS)
-
-    def __len__(self) -> int:
-        return len(self._actions)
 
 
 def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -385,7 +357,7 @@ def add_sdk_parser(
     sdk_parser = subparsers.add_parser("sdk", help="Skills SDK product facade", parents=[global_parser])
     sdk_subparsers = sdk_parser.add_subparsers(
         dest="action",
-        action=_SdkDefaultHelpSubparsersAction,
+        action=facade_help_action(DEFAULT_SDK_ACTIONS),
     )
     sdk_subparsers.metavar = "{" + ",".join(DEFAULT_SDK_ACTIONS) + "}"
     _add_sdk_start_parser(sdk_subparsers, global_parser)
@@ -413,7 +385,10 @@ def add_sdk_parser(
     _add_sdk_lenses_parser(sdk_subparsers, global_parser)
     _add_sdk_determinism_parser(sdk_subparsers, global_parser)
     _add_sdk_review_parser(sdk_subparsers, global_parser)
-    sdk_subparsers.choices = _SdkDefaultActionChoices(sdk_subparsers._name_parser_map)
+    sdk_subparsers.choices = FacadeActionChoices(
+        sdk_subparsers._name_parser_map,
+        DEFAULT_SDK_ACTIONS,
+    )
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
