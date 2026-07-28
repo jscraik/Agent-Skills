@@ -165,6 +165,8 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
 
             receipt = build_package_security_signature_receipt(REPO_ROOT, source_path=skill_md, query=str(skill_md))
 
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["inspected_file_count"], 2)
         indicator_ids = {indicator["id"] for indicator in receipt["indicators"]}
         self.assertNotIn("pipe_to_shell_download", indicator_ids)
         self.assertNotIn("destructive_local_capability", indicator_ids)
