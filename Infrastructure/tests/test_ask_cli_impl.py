@@ -1604,6 +1604,25 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Unknown action", result.stdout)
         self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
 
+    def test_sdk_unknown_action_keeps_expert_routes_out_of_default_recovery(self):
+        cmd = [sys.executable, "Infrastructure/bin/ask", "sdk", "unsupported-action", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        error = output["errors"][0]
+        self.assertEqual(error["fix_suggestion"], "Valid actions: start, check")
+        self.assertIn("choose from start, check", error["message"])
+        self.assertNotIn("score", error["message"])
+        self.assertNotIn("lifecycle", error["message"])
+        self.assertEqual(
+            output["data"]["candidate_commands"],
+            [
+                "ask sdk start Skills/agent-ops/simplify --json --robot",
+                "ask sdk check Skills/agent-ops/simplify --json --robot",
+            ],
+        )
+
     def test_ambiguous_action_first_error_exposes_candidate_commands(self):
         """Verify ambiguous action-first parser errors expose machine-readable candidates."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "list", "--json", "--robot"]
