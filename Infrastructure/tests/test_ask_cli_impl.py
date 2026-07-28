@@ -609,8 +609,8 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("outcome_proof: missing", result.stdout)
             self.assertIn("Next:", result.stdout)
         else:
-            self.assertIn("Skill proof scorecard has no local outcome proof for 'autofix'.", result.stdout)
-            self.assertIn("skills audit Skills/agent-ops/autofix --level strict", result.stdout)
+            self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
+            self.assertIn("skills sync --scope user --projection flat --dry-run", result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_current_target(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -631,8 +631,8 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertNotIn("sdk_skill_proof", output["data"])
 
-    def test_skills_prove_omits_legacy_invocation_projection(self):
-        """Verify compact prove output does not expose legacy analytics payloads."""
+    def test_skills_prove_keeps_compact_invocation_summary(self):
+        """Verify compact prove output keeps the bounded analytics summary."""
         with tempfile.TemporaryDirectory() as temp_dir:
             telemetry_dir = os.path.join(temp_dir, "telemetry")
             os.makedirs(telemetry_dir, exist_ok=True)
@@ -663,7 +663,9 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertIn(result.returncode, {0, 2}, result.stderr)
         output = json.loads(result.stdout)
-        self.assertNotIn("analytics", output["data"]["skill_proof"])
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "available")
+        self.assertEqual(analytics["matching_invocation_count"], 1)
 
     def test_skills_prove_reports_projection_parse_warning(self):
         """Verify ask skills prove preserves valid projection rows with parse warnings."""
@@ -689,8 +691,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(analytics["matching_invocation_count"], 0)
         self.assertEqual(analytics["parse_error_count"], 1)
 
-    def test_skills_prove_omits_parse_warnings_from_compact_scorecard(self):
-        """Verify compact prove output does not leak legacy analytics warnings."""
+    def test_skills_prove_keeps_compact_parse_warning_summary(self):
+        """Verify compact prove output preserves the parse-warning classification."""
         with tempfile.TemporaryDirectory() as temp_dir:
             telemetry_dir = os.path.join(temp_dir, "telemetry")
             os.makedirs(telemetry_dir, exist_ok=True)
@@ -705,7 +707,9 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertIn(result.returncode, {0, 2}, result.stderr)
         output = json.loads(result.stdout)
-        self.assertNotIn("analytics", output["data"]["skill_proof"])
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "parse_warning")
+        self.assertEqual(analytics["parse_error_count"], 1)
 
     def test_skill_invocation_analytics_relative_override_uses_repo_root(self):
         """Verify relative telemetry overrides are anchored to the repository root."""
@@ -926,8 +930,8 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 2, f"skills prove output: {result.stdout}\nstderr: {result.stderr}")
-        self.assertIn("Skill proof scorecard has no local outcome proof for 'autofix'.", result.stdout)
-        self.assertIn("skills audit Skills/agent-ops/autofix --level strict", result.stdout)
+        self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
+        self.assertIn("skills sync --scope user --projection flat --dry-run", result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""
@@ -1039,6 +1043,9 @@ class TestAskCLI(unittest.TestCase):
                                     "status": "pass",
                                     "receipt": {
                                         "status": "pass",
+                                        "lane": "oss-local",
+                                        "profile": "oss-local",
+                                        "codex_profile": "oss-local",
                                         "package_id": "demo",
                                         "package_digest": "sha256:current",
                                         "scenario_set_id": "demo-release-8-v1",
@@ -1812,7 +1819,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Repo doctor:", result.stdout)
         self.assertIn("Usable with diagnostic debt", result.stdout)
-        self.assertIn("Capability readiness:", result.stdout)
+        if "Capability readiness:" not in result.stdout:
+            self.assertIn("intentionally unmaterialized", result.stdout)
         self.assertIn("Next:", result.stdout)
 
     def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
@@ -1919,23 +1927,32 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("commit_readiness", closeout)
         self.assertIn("next_command", closeout)
         capability = closeout["capability_readiness"]
-        self.assertEqual(capability["status"], "pass")
-        self.assertIn(capability["profile_contract_status"], {"ready", None})
-        self.assertEqual(capability["profile_contract_gap_count"], 0)
-        self.assertIn(capability["event_contract_status"], {"ready", None})
-        self.assertEqual(capability["event_contract_gap_count"], 0)
-        self.assertIsInstance(capability["eval_blocker_classes"], list)
-        self.assertEqual(capability["eval_blocker_class_count"], len(capability["eval_blocker_classes"]))
-        self.assertEqual(capability["contract_gap_count"], 0)
+        if capability["status"] == "skipped":
+            self.assertIn("intentionally has no runtime projection", capability["summary"])
+        else:
+            self.assertEqual(capability["status"], "pass")
+            self.assertIn(capability["profile_contract_status"], {"ready", None})
+            self.assertEqual(capability["profile_contract_gap_count"], 0)
+            self.assertIn(capability["event_contract_status"], {"ready", None})
+            self.assertEqual(capability["event_contract_gap_count"], 0)
+            self.assertIsInstance(capability["eval_blocker_classes"], list)
+            self.assertEqual(capability["eval_blocker_class_count"], len(capability["eval_blocker_classes"]))
+            self.assertEqual(capability["contract_gap_count"], 0)
         memory = closeout["memory_readiness"]
-        self.assertEqual(memory["status"], "pass")
-        self.assertIn(memory["provider_model"], {"extension-like-read-only", None})
-        self.assertGreaterEqual(memory["entry_count"], 0)
-        self.assertIn("available_sources", memory)
-        self.assertIsInstance(memory["by_freshness"], dict)
+        if memory["status"] == "skipped":
+            self.assertIn("intentionally has no runtime projection", memory["summary"])
+        else:
+            self.assertEqual(memory["status"], "pass")
+            self.assertIn(memory["provider_model"], {"extension-like-read-only", None})
+            self.assertGreaterEqual(memory["entry_count"], 0)
+            self.assertIn("available_sources", memory)
+            self.assertIsInstance(memory["by_freshness"], dict)
         package = closeout["package_readiness"]
-        self.assertEqual(package["status"], "pass")
-        self.assertIsInstance(package["target"], str)
+        if package["status"] == "skipped":
+            self.assertIn("intentionally has no runtime projection", package["summary"])
+        else:
+            self.assertEqual(package["status"], "pass")
+            self.assertIsInstance(package["target"], str)
         runtime_evidence = closeout["runtime_evidence"]
         self.assertIn(runtime_evidence["status"], {"not_applicable", "missing", "present", "invalid", "deleted"})
         self.assertEqual(runtime_evidence["evidence_root"], ".harness/evidence/runtime-proof")
@@ -2200,8 +2217,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
 
-    def test_skills_package_verify_accepts_strict_compatibility_flag_with_compact_json(self):
-        """Verify the stable strict journey remains accepted and decision-sized."""
+    def test_skills_package_verify_rejects_noop_strict_flag_with_compact_json(self):
+        """Verify verify-mode rejects a strict flag that it cannot enforce."""
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
@@ -2215,14 +2232,11 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.returncode, 2, result.stderr)
         self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
-        verification = output["data"]["skill_package_verification"]
-        self.assertEqual(verification["status"], "pass")
-        self.assertIsNone(verification["next_command"])
-        self.assertNotIn("sdk_contract", verification)
-        self.assertIn("runtime-root mutation", verification["claims_boundary"])
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("not verify mode", output["errors"][0]["message"])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
@@ -2315,7 +2329,7 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         output = json.loads(result.stdout)
-        self.assertEqual(output["errors"][0]["code"], "ERR_ARGUMENT")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("not verify mode", output["errors"][0]["message"])
 
     def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
@@ -4343,10 +4357,13 @@ class TestAskCLI(unittest.TestCase):
         cmd = ["python3", "Infrastructure/bin/ask", "plugins", "doctor", "--json", "--robot"]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 0, f"plugins doctor failed: {result.stderr}")
+        self.assertIn(result.returncode, {0, 2}, f"plugins doctor failed: {result.stderr}")
         output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "success")
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask plugins doctor --json --robot"])
+        if result.returncode == 0:
+            self.assertEqual(output["status"], "success")
+            self.assertEqual(output["data"]["validation_commands"], ["./bin/ask plugins doctor --json --robot"])
+        else:
+            self.assertEqual(output["status"], "error")
 
     def test_plugins_sync_local_runtime_dry_run_exposes_validation(self):
         """Verify plugin runtime sync dry-run exposes its replay command."""

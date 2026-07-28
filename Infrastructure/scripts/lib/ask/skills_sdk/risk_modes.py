@@ -244,6 +244,9 @@ PACKAGE_INDICATOR_MODE_MAP: dict[str, tuple[str, ...]] = {
 
 def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, str]]) -> list[dict[str, str]]:
     wanted = set(PACKAGE_INDICATOR_MODE_MAP.get(mode, ()))
+    defensive_untrusted_input = {
+        indicator.get("id") for indicator in package_indicators
+    } >= {"untrusted_content_ingestion", "untrusted_input_handling"}
     return [
         _indicator(
             indicator["id"],
@@ -252,6 +255,7 @@ def _package_indicators_for_mode(mode: str, package_indicators: list[dict[str, s
         )
         for indicator in package_indicators
         if indicator["id"] in wanted
+        and not (defensive_untrusted_input and indicator["id"] == "untrusted_content_ingestion")
     ]
 
 
@@ -309,10 +313,6 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
         )
     ignored_ids = {"missing_safety_language"}
     retained = [indicator for indicator in indicators if indicator["id"] not in ignored_ids]
-    if has_safety_boundary:
-        for indicator in retained:
-            if indicator["id"] == "impactful_write_without_review":
-                indicator["mitigation"] = "safety_boundary_language_present"
     return retained
 
 

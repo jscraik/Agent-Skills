@@ -192,7 +192,6 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
 
         indicator_ids = {indicator["id"] for indicator in receipt["indicators"]}
         self.assertIn("pipe_to_shell_download", indicator_ids)
-        self.assertIn("eval_yaml_parse_error", indicator_ids)
 
     def test_builder_falls_back_to_raw_scan_for_malformed_eval_yaml(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -208,6 +207,7 @@ class TestSkillsSdkPackageSecuritySignature(unittest.TestCase):
 
         indicator_ids = {indicator["id"] for indicator in receipt["indicators"]}
         self.assertIn("pipe_to_shell_download", indicator_ids)
+        self.assertIn("eval_yaml_parse_error", indicator_ids)
 
     def test_builder_labels_defensive_untrusted_input_handling_without_vulnerability(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
