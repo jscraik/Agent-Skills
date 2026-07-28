@@ -836,6 +836,7 @@ def _normalize_package_verification(
     query: str,
     validation_command: str,
     verification: dict[str, Any],
+    strict: bool,
 ) -> dict[str, Any]:
     archive = verification.get("archive")
     archive_identity = verification.get("archive_identity")
@@ -859,16 +860,19 @@ def _normalize_package_verification(
 
     blockers = _package_verify_blockers(verification)
     next_command: str | None = None
-    if verification.get("status") == "blocked" and target_kind == "skill_directory":
+    if verification.get("status") == "blocked" and strict and target_kind == "skill_directory":
+        next_command = _skills_validation_command("package", query, "--strict")
+    elif verification.get("status") == "blocked" and target_kind == "skill_directory":
         source_root = Path(str(target_path)).parent.as_posix()
         next_command = _skills_validation_command("audit", source_root, "--level", "strict")
     elif verification.get("status") == "blocked":
-        next_command = validation_command
+        next_command = _ask_validation_command("sdk", "start", query)
 
     normalized = {
         **verification,
         "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
         "query": query,
+        "strict": strict,
         "status": verification.get("status", "blocked"),
         "target_identity": {
             "kind": target_kind,
@@ -891,6 +895,35 @@ def _normalize_package_verification(
         else "Package verification passed without install, extraction, or runtime-root mutation."
     )
     return normalized
+
+
+def _apply_strict_package_readiness(
+    repo_root: Path,
+    query: str,
+    verification: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach the existing strict package-readiness result to verification."""
+    readiness_result = skills_package(repo_root, query, strict=True)
+    readiness = readiness_result.data.get("skill_package")
+    if not isinstance(readiness, dict):
+        return verification
+    if readiness.get("status") != "blocked":
+        return {**verification, "strict_package_readiness": readiness}
+
+    blocker = {
+        "rule_id": "strict_package_readiness_blocked",
+        "status": "blocked",
+        "message": readiness.get("agent_summary", "Strict package readiness failed."),
+        "path": readiness.get("canonical_source_path"),
+        "evidence": readiness,
+    }
+    return {
+        **verification,
+        "status": "blocked",
+        "strict_package_readiness": readiness,
+        "blockers": [*verification.get("blockers", []), blocker],
+        "rule_results": [*verification.get("rule_results", []), blocker],
+    }
 
 
 def _run_captured_tool(
@@ -3892,9 +3925,52 @@ def skills_package_verify(
         query=query,
         validation_command=validation_command,
         verification=verification,
+        strict=False,
     )
 
     result.data["skill_package_verification"] = verification
+    if verification["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=verification["agent_summary"],
+                fix_suggestion=verification["next_command"],
+            )
+        )
+    return result
+
+
+def skills_package_verify_strict(
+    repo_root: Path,
+    target: str,
+    expected_sha256: str | None = None,
+    trusted_provenance: str | None = None,
+    rollback_journal: str | None = None,
+) -> CallResult:
+    """Verify a package candidate and enforce strict package readiness."""
+    result = skills_package_verify(
+        repo_root,
+        target,
+        expected_sha256=expected_sha256,
+        trusted_provenance=trusted_provenance,
+        rollback_journal=rollback_journal,
+    )
+    query = target.strip()
+    verification = result.data.get("skill_package_verification")
+    if not isinstance(verification, dict):
+        return result
+    if verification.get("target_kind") == "skill_directory":
+        verification = _apply_strict_package_readiness(repo_root, query, verification)
+    verification = _normalize_package_verification(
+        query=query,
+        validation_command=_skills_validation_command("package", "verify", query, "--strict"),
+        verification=verification,
+        strict=True,
+    )
+    result.data["skill_package_verification"] = verification
+    result.errors = []
+    result.status = "success"
     if verification["status"] == "blocked":
         result.status = "error"
         result.errors.append(

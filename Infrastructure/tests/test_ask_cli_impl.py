@@ -2251,8 +2251,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
 
-    def test_skills_package_verify_rejects_noop_strict_flag_with_compact_json(self):
-        """Verify verify-mode rejects a strict flag that it cannot enforce."""
+    def test_skills_package_verify_strict_enforces_target_readiness_with_compact_json(self):
+        """Verify strict verification uses the requested target's readiness gate."""
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
@@ -2269,8 +2269,18 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
-        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
-        self.assertIn("not verify mode", output["errors"][0]["message"])
+        verification = output["data"]["skill_package_verification"]
+        self.assertTrue(verification["strict"])
+        self.assertEqual(verification["status"], "blocked")
+        self.assertEqual(
+            verification["next_command"],
+            "./bin/ask skills package simplify --strict --json --robot",
+        )
+        self.assertEqual(
+            verification["strict_package_readiness"]["missing_fields"],
+            ["compatible_roles", "maturity", "runtime_needs", "share_readiness"],
+        )
+        self.assertNotIn("autofix", output["errors"][0]["message"])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
@@ -2347,7 +2357,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["package_contract"]["install_gate"]["blocked_reasons"], [])
         self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
-    def test_skills_package_verify_rejects_noop_strict_flag(self):
+    def test_skills_package_verify_strict_reaches_directory_verification(self):
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
@@ -2361,10 +2371,9 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 2, result.stderr)
         output = json.loads(result.stdout)
-        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
-        self.assertIn("not verify mode", output["errors"][0]["message"])
+        self.assertIn("skill_package_verification", output["data"])
+        self.assertTrue(output["data"]["skill_package_verification"]["strict"])
 
     def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
         """Verify ask skills doctor exposes lifecycle and readiness contracts."""
