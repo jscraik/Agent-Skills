@@ -1,6 +1,7 @@
 import unittest
 import subprocess
 import json
+import hashlib
 import os
 import sys
 import tempfile
@@ -1032,6 +1033,10 @@ class TestAskCLI(unittest.TestCase):
                 source = repo_root / "Skills" / "agent-ops" / "demo" / "SKILL.md"
                 source.parent.mkdir(parents=True)
                 source.write_text("---\nname: demo\n---\n", encoding="utf-8")
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
                 aggregate_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "proof" / "aggregate.json"
                 aggregate_path.parent.mkdir(parents=True)
                 aggregate_path.write_text(
@@ -1048,6 +1053,7 @@ class TestAskCLI(unittest.TestCase):
                                         "codex_profile": "oss-local",
                                         "package_id": "demo",
                                         "package_digest": "sha256:current",
+                                        "rubric_digest": rubric_digest,
                                         "scenario_set_id": "demo-release-8-v1",
                                         "case_count": 8,
                                         "checks": [
