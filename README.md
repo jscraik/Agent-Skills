@@ -19,8 +19,8 @@ The short version:
 - Catalog parity marker: **84 canonical skills**. Regenerate this marker with
   the repo skill sync when catalog membership changes.
 
-For the product framing and proof contract, read
-[Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
+For the product framing and proof boundary, read
+[the Skills SDK local journey](Docs/product/agent-capability-control-plane.md).
 
 ## Contents
 
@@ -54,7 +54,7 @@ does not name a next action:
 ```bash
 ./bin/ask sdk start <skill> --json --robot
 ./bin/ask sdk check <skill> --json --robot
-./bin/ask skills package verify <skill> --json --robot
+./bin/ask skills package verify <skill> --strict --json --robot
 ./bin/ask skills prove <skill> --json --robot
 ```
 
@@ -71,13 +71,17 @@ That path answers:
 | -------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | Start          | `./bin/ask sdk start <skill> --json --robot`                 | Resolves the target, local state, and one next action.                            |
 | Check          | `./bin/ask sdk check <skill> --json --robot`                 | Gives a compact structural summary and one actionable follow-up.                  |
-| Verify package | `./bin/ask skills package verify <skill> --json --robot` | Verifies the requested package without installing or changing the runtime. |
+| Verify package | `./bin/ask skills package verify <skill> --strict --json --robot` | Enforces target-bound package readiness without installing or changing the runtime. |
 | Prove          | `./bin/ask skills prove <skill> --json --robot`              | Keeps structural, runtime, and task-outcome truth separate.                       |
 
 Use `--robot` when an agent is driving the CLI. The wrapper corrects clear
 syntax mistakes and returns structured errors when intent is ambiguous.
 
-## Everyday commands
+## Expert and repository commands
+
+The following operations serve specific discovery, maintenance, and lifecycle
+needs. They are not prerequisites for the four-command local skill journey
+above; use them only when a command result or owning runbook directs you here.
 
 ### Discover capabilities
 
