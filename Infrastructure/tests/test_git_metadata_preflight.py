@@ -347,7 +347,11 @@ class GitMetadataPreflightTests(unittest.TestCase):
             blocked_payload = json.loads(blocked.stdout)
             self.assertEqual(blocked.returncode, 78, blocked_payload)
             self.assertFalse(blocked_payload["expected_hook_transaction"])
-            self.assertIn("stale_index_lock_candidate", blocked_payload["reason_codes"])
+            reason_codes = set(blocked_payload["reason_codes"])
+            if lsof_available():
+                self.assertIn("stale_index_lock_candidate", reason_codes)
+            else:
+                self.assertIn("lock_owner_detector_unavailable", reason_codes)
 
     def test_unowned_linked_worktree_index_lock_is_not_waived_for_pre_commit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

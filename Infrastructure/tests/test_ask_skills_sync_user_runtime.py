@@ -125,6 +125,7 @@ class TestAskSkillsSyncUserRuntime(TestCase):
         stale_link = self.fake_home / ".agents" / "skills"
         stale_link.parent.mkdir(parents=True)
         stale_link.symlink_to(stale_skills)
+        shutil.rmtree(stale_skills.parent)
 
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
@@ -137,7 +138,8 @@ class TestAskSkillsSyncUserRuntime(TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
         self.assertIn("foreign or stale", result.errors[0].message)
-        self.assertEqual(stale_link.resolve(), stale_skills.resolve())
+        self.assertTrue(stale_link.is_symlink())
+        self.assertFalse(stale_skills.exists())
         self.assertFalse((self.fake_home / ".codex" / "skills").exists())
         self.assertFalse((self.fake_home / ".agents" / "agent-skills").exists())
         checks = result.data["plan"]["user_runtime_link_preflight"]

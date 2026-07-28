@@ -114,6 +114,7 @@ from ask.skills_sdk.package_build import build_package_digest_receipt as _build_
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.eval_shard_aggregate import _current_rubric_digest as _skills_sdk_current_rubric_digest  # noqa: E402
 from ask.skills_sdk.release_scenario_sets import (  # noqa: E402
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
@@ -1877,6 +1878,7 @@ def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
         return {"status": "missing", "evidence_class": "outcome_proof"}
 
     artifacts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
+    current_rubric_digest = _skills_sdk_current_rubric_digest(repo_root)
     accepted: list[tuple[int, dict[str, Any]]] = []
     for candidate in artifacts_root.glob("**/aggregate.json"):
         relative_path = _repo_relative_path(repo_root, candidate)
@@ -1903,6 +1905,8 @@ def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
             and receipt.get("lane") == "oss-local"
             and receipt.get("profile") == "oss-local"
             and receipt.get("codex_profile") == "oss-local"
+            and current_rubric_digest is not None
+            and receipt.get("rubric_digest") == current_rubric_digest
             and receipt.get("package_id") == package_id
             and receipt.get("package_digest") == package_digest
             and check_statuses.get("shards_match_current_package") == "pass"
@@ -4326,10 +4330,16 @@ def skills_sdk_check(
         doctor_command_args.append("--strict")
     if codex_parity:
         doctor_command_args.append("--codex-parity")
-    command = _skills_validation_command("doctor", *doctor_command_args)
+    doctor_command = _skills_validation_command("doctor", *doctor_command_args)
+    facade_command_parts = ["sdk", "check", target]
+    if strict:
+        facade_command_parts.append("--strict")
+    if codex_parity:
+        facade_command_parts.append("--codex-parity")
+    facade_replay_command = _ask_validation_command(*facade_command_parts)
     facade_command = "skills-sdk check"
     next_command = (
-        str(doctor.get("next_command") or command)
+        str(doctor.get("next_command") or doctor_command)
         if status in {"blocked", "degraded"} and isinstance(doctor, dict)
         else _ask_validation_command("skills", "package", "verify", target, "--strict")
     )
@@ -4346,7 +4356,7 @@ def skills_sdk_check(
         "proof": {
             "type": "command_output",
             "evidence_kind": "receipt",
-            "evidence_ref": command,
+            "evidence_ref": facade_replay_command,
         },
         "sensor": {
             "id": "skills-sdk.check.facade",
@@ -4364,7 +4374,7 @@ def skills_sdk_check(
         "status": status,
         "failure_class": failure_class,
         "doctor_status": doctor_status,
-        "canonical_command": command,
+        "canonical_command": facade_replay_command,
         "facade_command": facade_command,
         "receipt": receipt,
         "agent_summary": (
@@ -4377,8 +4387,8 @@ def skills_sdk_check(
             )
         ),
         "validation_commands": [
-            _ask_validation_command("sdk", "check", target),
-            command,
+            facade_replay_command,
+            doctor_command,
         ],
         "next_command": next_command,
     }
@@ -4450,7 +4460,11 @@ def _sdk_start_local_receipt(
         },
         "blocked_downstream_lanes": [],
         "blockers": blockers,
-        "what_this_proves": "The named target resolves to a canonical local skill source.",
+        "what_this_proves": (
+            "The named target resolves to a canonical local skill source."
+            if status == "pass"
+            else "The named target could not be resolved to a canonical local skill source."
+        ),
         "what_this_does_not_prove": "Structural validity, package readiness, runtime reachability, and outcome proof have not run.",
     }
 

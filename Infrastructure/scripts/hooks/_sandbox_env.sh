@@ -21,10 +21,14 @@ export TMPDIR="$hook_tmp_dir"
 cache_path_is_usable() {
 	local candidate="$1"
 	local parent
+	local cache_repo_root="${REPO_ROOT:-}"
 	[[ -n "$candidate" ]] || return 1
-	if [[ -n "${REPO_ROOT:-}" ]]; then
+	if [[ -z "$cache_repo_root" ]]; then
+		cache_repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+	fi
+	if [[ -n "$cache_repo_root" ]]; then
 		case "$candidate" in
-			"$REPO_ROOT"|"$REPO_ROOT"/*) return 1 ;;
+			"$cache_repo_root"|"$cache_repo_root"/*) return 1 ;;
 		esac
 	fi
 	if [[ -e "$candidate" || -L "$candidate" ]]; then
