@@ -48,6 +48,21 @@ passing structural or runtime check does not establish a successful task
 outcome; an outcome result does not establish installation, activation,
 publication, review acceptance, or release readiness.
 
+### SDK Check Contract
+
+The compact `data.skills_sdk_check` result conforms to
+[`skills-sdk-check.v1`](/Infrastructure/config/schemas/skills-sdk/sdk-check.v1.schema.json).
+It reports the requested `query`, one facade `status`, the canonical replay and
+next commands, and the nested
+[`skills-sdk.check-receipt.v1`](/Infrastructure/config/schemas/skills-sdk/check-receipt.v1.schema.json).
+
+`canonical_source_path` identifies the canonical `SKILL.md` used for the
+result, or is `null` when the target cannot resolve to one. `claims_boundary`
+states the local truth the check establishes and explicitly excludes package
+readiness, runtime reachability, task outcome, publication, and release
+readiness. Consumers must retain those fields rather than inferring broader
+readiness from a passing check.
+
 ## Ownership And Boundaries
 
 Skill Factory owns creating, importing, refactoring, and retiring skill source.

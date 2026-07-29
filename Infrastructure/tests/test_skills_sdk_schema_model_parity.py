@@ -20,6 +20,7 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 SCHEMA_FILES = {
     "manifest-source": "manifest-source.v1.schema.json",
     "check-receipt": "check-receipt.v1.schema.json",
+    "sdk-check": "sdk-check.v1.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
     "install-preview": "install-preview.v1.schema.json",
     "install-receipt": "install-receipt.v1.schema.json",
@@ -77,6 +78,7 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
         cases = (
             ("manifest-source", "manifest-source.json", contracts.validate_manifest_source),
             ("check-receipt", "check-receipt.json", contracts.validate_check_receipt),
+            ("sdk-check", "sdk-check.json", contracts.validate_skills_sdk_check),
             ("risk-classification", "risk-classification.json", contracts.validate_risk_classification),
             ("install-preview", "install-preview.json", contracts.validate_install_preview),
             ("install-receipt", "install-receipt.json", contracts.validate_install_receipt),
@@ -102,6 +104,18 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_check_receipt(_json(FIXTURE_DIR / "invalid" / "check-receipt-pass-placeholder.json"))
+
+    def test_invalid_sdk_check_missing_contract_fields_fails_schema_and_model(self) -> None:
+        for fixture_name, missing_field in (
+            ("sdk-check-missing-canonical-source-path.json", "canonical_source_path"),
+            ("sdk-check-missing-claims-boundary.json", "claims_boundary"),
+        ):
+            with self.subTest(fixture_name=fixture_name):
+                result = self.assert_schema_fails("sdk-check", fixture_name)
+                self.assertIn(missing_field, result.diagnostics[0].json_path)
+
+                with self.assertRaises(ValidationError):
+                    contracts.validate_skills_sdk_check(_json(FIXTURE_DIR / "invalid" / fixture_name))
 
     def test_invalid_skill_intake_execution_claim_fails_schema_and_model(self) -> None:
         result = self.assert_schema_fails("skill-intake-receipt", "skill-intake-executes.json")

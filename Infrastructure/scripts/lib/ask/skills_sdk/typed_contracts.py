@@ -656,6 +656,22 @@ class CheckReceipt(_SdkContractModel):
     acceptance_trace: list[Literal["FR-008", "FR-009", "SA-004", "SA-005", "VP-002", "VP-011", "VP-021"]]
 
 
+class SkillsSdkCheck(_SdkContractModel):
+    schema_version: Literal["skills-sdk-check.v1"]
+    query: str
+    status: Literal["pass", "blocked", "degraded"]
+    failure_class: Literal["none", "validation_failed"]
+    doctor_status: str | None
+    canonical_source_path: str | None
+    canonical_command: str
+    facade_command: Literal["skills-sdk check"]
+    receipt: CheckReceipt
+    agent_summary: str
+    validation_commands: list[str]
+    next_command: str
+    claims_boundary: str
+
+
 class RiskSensor(_SdkContractModel):
     id: str
     placement: Literal["source", "schema", "static", "runtime_adapter", "external_adapter", "preview"]
@@ -815,6 +831,10 @@ def validate_install_preview(payload: object) -> InstallPreview:
 
 
 def validate_check_receipt(payload: object) -> CheckReceipt: return CheckReceipt.model_validate(payload)
+
+
+def validate_skills_sdk_check(payload: object) -> SkillsSdkCheck:
+    return SkillsSdkCheck.model_validate(payload)
 
 
 def validate_risk_classification(payload: object) -> RiskClassification: return RiskClassification.model_validate(payload)

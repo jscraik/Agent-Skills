@@ -10,6 +10,7 @@ from helpers.schema_validator import _validate_schema_subset
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/check-receipt.v1.schema.json"
+PUBLIC_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/sdk-check.v1.schema.json"
 TARGET = "Skills/agent-ops/simplify"
 UNMATERIALIZED_TARGET = "Skills/agent-ops/improve-agent-native"
 
@@ -73,6 +74,12 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertLess(len(json.dumps(payload)), 10_240)
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         _validate_schema_subset(schema, check["receipt"], {"check-receipt": schema})
+        public_schema = json.loads(PUBLIC_SCHEMA_PATH.read_text(encoding="utf-8"))
+        _validate_schema_subset(
+            public_schema,
+            check,
+            {"check-receipt": schema, SCHEMA_PATH.name: schema},
+        )
 
     def test_check_validates_source_without_requiring_workspace_projection(self) -> None:
         payload = _run_json_command(
