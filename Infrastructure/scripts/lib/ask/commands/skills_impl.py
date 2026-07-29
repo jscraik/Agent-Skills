@@ -6004,7 +6004,7 @@ def _skills_sdk_persist_eval_shard_aggregate(
     payload: dict[str, Any],
 ) -> str | None:
     """Persist passing aggregate evidence in the existing repository-local artifact lane."""
-    if not package_id or Path(package_id).name != package_id:
+    if package_id in {"", ".", ".."} or Path(package_id).name != package_id:
         return None
     artifact_dir = (
         repo_root

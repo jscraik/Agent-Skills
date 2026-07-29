@@ -1669,6 +1669,29 @@ class TestAskCLI(unittest.TestCase):
         self.assertNotIn("artifact_path", payload)
         self.assertFalse(payload["mutation_performed"])
 
+    def test_persist_eval_shard_aggregate_rejects_dot_package_ids(self):
+        """Aggregate evidence never escapes its per-package artifact lane."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                for package_id in (".", ".."):
+                    with self.subTest(package_id=package_id):
+                        payload = {"mutation_performed": False}
+                        artifact_ref = skills_commands._impl._skills_sdk_persist_eval_shard_aggregate(
+                            repo_root,
+                            package_id,
+                            payload,
+                        )
+                        self.assertIsNone(artifact_ref)
+                        self.assertEqual(payload, {"mutation_performed": False})
+                        self.assertFalse((repo_root / "Infrastructure" / "artifacts").exists())
+        finally:
+            sys.path.remove(lib_path)
+
     def test_shard_aggregate_writes_evidence_only_outside_preview(self):
         """The normal aggregate route persists evidence while preview remains non-mutating."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
