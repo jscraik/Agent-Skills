@@ -104,8 +104,14 @@ def test_shard_aggregate_dispatch_selects_preview_or_write_artifact_mode() -> No
         args.preview = True
         sdk_eval._dispatch_shard_aggregate(REPO_ROOT, args)
 
-    write_aggregate.assert_called_once()
-    preview_aggregate.assert_called_once()
+    expected_kwargs = {
+        "target": args.target,
+        "scenario_set": args.scenario_set,
+        "receipts": args.receipts,
+        "codex_profile": args.codex_profile,
+    }
+    write_aggregate.assert_called_once_with(REPO_ROOT, **expected_kwargs)
+    preview_aggregate.assert_called_once_with(REPO_ROOT, **expected_kwargs)
 
 
 def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
@@ -151,6 +157,26 @@ def test_codex_release_profile_timeout_uses_selected_case_budget(tmp_path: Path)
 
     assert result.status == "success"
     assert run_mock.call_args.kwargs["timeout"] == 240
+
+
+def test_codex_release_profile_timeout_caps_scaled_case_budget(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="release",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            codex_profile="codex-fast",
+            cases=[f"case-{index}" for index in range(40)],
+            timeout_seconds=600,
+        )
+
+    assert result.status == "success"
+    assert run_mock.call_args.kwargs["timeout"] == evals.RELEASE_EVAL_TIMEOUT_SECONDS
 
 
 def test_codex_smoke_without_case_filter_preserves_suite_timeout_floor(tmp_path: Path) -> None:

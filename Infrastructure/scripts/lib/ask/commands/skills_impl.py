@@ -1972,7 +1972,7 @@ def _current_release_shard_receipts(
 ) -> list[tuple[Path, list[str]]]:
     """Return current, non-overlapping OSS-local release shard receipts and their cases."""
     current_rubric_digest = _skills_sdk_current_rubric_digest(repo_root)
-    if current_rubric_digest is None:
+    if current_rubric_digest is None or not package_id or Path(package_id).name != package_id:
         return []
     candidates: list[tuple[int, Path, list[str]]] = []
     receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
@@ -2024,7 +2024,10 @@ def _outcome_proof_next_command(repo_root: Path, handle: str, fallback: str) -> 
     if release_set is None:
         return fallback
     case_ids = list(release_set.get("case_ids") or [])
-    minimum = int(release_set.get("minimum_scenarios") or RELEASE_SCENARIO_MINIMUM)
+    try:
+        minimum = int(release_set.get("minimum_scenarios") or RELEASE_SCENARIO_MINIMUM)
+    except (TypeError, ValueError):
+        return fallback
     if not RELEASE_SCENARIO_MINIMUM <= minimum <= len(case_ids) <= RELEASE_SCENARIO_MAXIMUM:
         return fallback
     package_identity = _skills_sdk_eval_package_identity(repo_root, handle)
@@ -6017,12 +6020,21 @@ def _skills_sdk_persist_eval_shard_aggregate(
         artifact_ref = _repo_relative_path(repo_root, artifact_path)
         if artifact_ref is None:
             return None
-        payload["artifact_path"] = artifact_ref
-        payload["mutation_performed"] = True
-        envelope = {"status": "success", "data": {"skills_sdk_eval_shard_aggregate": payload}}
+        envelope = {
+            "status": "success",
+            "data": {
+                "skills_sdk_eval_shard_aggregate": {
+                    **payload,
+                    "artifact_path": artifact_ref,
+                    "mutation_performed": True,
+                }
+            },
+        }
         artifact_path.write_text(json.dumps(envelope, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     except OSError:
         return None
+    payload["artifact_path"] = artifact_ref
+    payload["mutation_performed"] = True
     return artifact_ref
 
 

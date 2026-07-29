@@ -1572,6 +1572,103 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("run-two", command)
         self.assertNotIn("rerun-old", command)
 
+    def test_outcome_proof_next_command_falls_back_for_non_numeric_minimum(self):
+        """Malformed release-set thresholds cannot escape the compact proof facade."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-invalid-v1
+    default: true
+    minimum_scenarios: not-a-number
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                fallback = "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot"
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"):
+                    command = skills_commands._impl._outcome_proof_next_command(repo_root, "demo", fallback)
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(command, fallback)
+
+    def test_current_release_shard_receipts_reject_path_traversal_package_id(self):
+        """Receipt discovery remains contained in the package artifact lane."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                escaped_receipt = repo_root / "Infrastructure" / "artifacts" / "outside" / "run" / "sdk-eval-run-receipt.json"
+                escaped_receipt.parent.mkdir(parents=True)
+                escaped_receipt.write_text(
+                    json.dumps(
+                        {
+                            "status": "pass",
+                            "lane": "oss-local",
+                            "lane_type": "release-shard",
+                            "profile": "oss-local",
+                            "codex_profile": "oss-local",
+                            "rubric_digest": "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest(),
+                            "scenario_set_id": "demo-release-5-v1",
+                            "package_id": "../outside",
+                            "package_digest": "sha256:current",
+                            "selected_case_ids": ["case-one"],
+                            "case_count": 1,
+                            "passed_count": 1,
+                            "failed_count": 0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                receipts = skills_commands._impl._current_release_shard_receipts(
+                    repo_root,
+                    package_id="../outside",
+                    package_digest="sha256:current",
+                    scenario_set_id="demo-release-5-v1",
+                )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(receipts, [])
+
+    def test_persist_eval_shard_aggregate_does_not_claim_failed_write(self):
+        """A failed aggregate write cannot leave persisted-evidence fields on the payload."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                payload = {"mutation_performed": False}
+                with mock.patch.object(Path, "write_text", side_effect=OSError("disk full")):
+                    artifact_ref = skills_commands._impl._skills_sdk_persist_eval_shard_aggregate(
+                        Path(temp_dir),
+                        "demo",
+                        payload,
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIsNone(artifact_ref)
+        self.assertNotIn("artifact_path", payload)
+        self.assertFalse(payload["mutation_performed"])
+
     def test_shard_aggregate_writes_evidence_only_outside_preview(self):
         """The normal aggregate route persists evidence while preview remains non-mutating."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")

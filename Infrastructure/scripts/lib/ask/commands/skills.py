@@ -390,6 +390,7 @@ __all__ = [
     "skills_sdk_observability_phoenix_mirror",
     "skills_sdk_eval_run",
     "skills_sdk_eval_shard_aggregate",
+    "skills_sdk_eval_shard_aggregate_preview",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",
     "skills_sdk_eval_ab_preview",
