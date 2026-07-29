@@ -664,7 +664,7 @@ class SkillsSdkCheck(_SdkContractModel):
     query: NonEmptySdkCheckText
     status: Literal["pass", "blocked", "degraded"]
     failure_class: Literal["none", "validation_failed"]
-    doctor_status: str | None
+    doctor_status: NonEmptySdkCheckText | None
     canonical_source_path: NonEmptySdkCheckText | None
     canonical_command: NonEmptySdkCheckText
     facade_command: Literal["skills-sdk check"]
@@ -681,6 +681,20 @@ class SkillsSdkCheck(_SdkContractModel):
     def receipt_matches_facade_verdict(self) -> SkillsSdkCheck:
         if self.receipt.status != self.status or self.receipt.failure_class != self.failure_class:
             raise ValueError("skills-sdk check receipt status and failure_class must match the facade verdict")
+        if self.status == "pass":
+            if self.doctor_status not in {"pass", "warning"}:
+                raise ValueError("passing skills-sdk checks require a passing or warning doctor status")
+            if self.canonical_source_path is None:
+                raise ValueError("passing skills-sdk checks require a canonical source path")
+        elif self.status == "blocked":
+            if self.doctor_status != "blocked":
+                raise ValueError("blocked skills-sdk checks require a blocked doctor status")
+        elif self.doctor_status in {"pass", "warning", "blocked"}:
+            raise ValueError("degraded skills-sdk checks require an unrecognized doctor status")
+
+        expected_exit_code = 0 if self.status == "pass" else 2
+        if self.receipt.exit_code != expected_exit_code:
+            raise ValueError("skills-sdk check receipt exit_code must match the facade verdict")
         return self
 
 

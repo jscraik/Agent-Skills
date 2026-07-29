@@ -1013,14 +1013,65 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         payload = self.assert_valid("sdk-check", "sdk-check.json")
         invalid_payloads = (
             {**payload, "canonical_source_path": ""},
+            {**payload, "canonical_source_path": None},
             {**payload, "validation_commands": []},
             {**payload, "claims_boundary": "This proves package readiness."},
+            {**payload, "doctor_status": "blocked"},
             {
                 **payload,
                 "receipt": {
                     **payload["receipt"],
                     "status": "blocked",
                     "failure_class": "validation_failed",
+                },
+            },
+            {**payload, "receipt": {**payload["receipt"], "exit_code": 2}},
+            {
+                **payload,
+                "status": "blocked",
+                "failure_class": "validation_failed",
+                "doctor_status": "warning",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                    "exit_code": 2,
+                },
+            },
+            {
+                **payload,
+                "status": "blocked",
+                "failure_class": "validation_failed",
+                "doctor_status": "blocked",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                    "exit_code": 0,
+                },
+            },
+            {
+                **payload,
+                "status": "degraded",
+                "failure_class": "validation_failed",
+                "doctor_status": "warning",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "degraded",
+                    "failure_class": "validation_failed",
+                    "exit_code": 2,
+                },
+            },
+            {
+                **payload,
+                "status": "degraded",
+                "failure_class": "validation_failed",
+                "doctor_status": None,
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "degraded",
+                    "failure_class": "validation_failed",
+                    "exit_code": 0,
                 },
             },
         )

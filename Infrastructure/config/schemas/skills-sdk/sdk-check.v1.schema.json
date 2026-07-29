@@ -9,7 +9,7 @@
     "query": {"type": "string", "minLength": 1},
     "status": {"type": "string", "enum": ["pass", "blocked", "degraded"]},
     "failure_class": {"type": "string", "enum": ["none", "validation_failed"]},
-    "doctor_status": {"type": ["string", "null"]},
+    "doctor_status": {"type": ["string", "null"], "minLength": 1},
     "canonical_source_path": {"type": ["string", "null"], "minLength": 1},
     "canonical_command": {"type": "string", "minLength": 1},
     "facade_command": {"type": "string", "const": "skills-sdk check"},
@@ -47,10 +47,13 @@
       "then": {
         "properties": {
           "failure_class": {"const": "none"},
+          "doctor_status": {"enum": ["pass", "warning"]},
+          "canonical_source_path": {"type": "string", "minLength": 1},
           "receipt": {
             "properties": {
               "status": {"const": "pass"},
-              "failure_class": {"const": "none"}
+              "failure_class": {"const": "none"},
+              "exit_code": {"const": 0}
             }
           }
         }
@@ -61,10 +64,12 @@
       "then": {
         "properties": {
           "failure_class": {"const": "validation_failed"},
+          "doctor_status": {"const": "blocked"},
           "receipt": {
             "properties": {
               "status": {"const": "blocked"},
-              "failure_class": {"const": "validation_failed"}
+              "failure_class": {"const": "validation_failed"},
+              "exit_code": {"const": 2}
             }
           }
         }
@@ -75,10 +80,17 @@
       "then": {
         "properties": {
           "failure_class": {"const": "validation_failed"},
+          "doctor_status": {
+            "anyOf": [
+              {"type": "null"},
+              {"type": "string", "pattern": "^(?!(?:pass|warning|blocked)$).+$"}
+            ]
+          },
           "receipt": {
             "properties": {
               "status": {"const": "degraded"},
-              "failure_class": {"const": "validation_failed"}
+              "failure_class": {"const": "validation_failed"},
+              "exit_code": {"const": 2}
             }
           }
         }

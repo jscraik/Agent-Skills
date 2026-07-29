@@ -35,6 +35,23 @@ def _json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _sdk_check_with_verdict(
+    payload: dict, status: str, doctor_status: str | None, exit_code: int
+) -> dict:
+    return {
+        **payload,
+        "status": status,
+        "failure_class": "validation_failed",
+        "doctor_status": doctor_status,
+        "receipt": {
+            **payload["receipt"],
+            "status": status,
+            "failure_class": "validation_failed",
+            "exit_code": exit_code,
+        },
+    }
+
+
 class TestSkillsSdkSchemaModelParity(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -140,6 +157,75 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
             with self.subTest(case_name=case_name):
                 with self.assertRaises(ValidationError):
                     contracts.validate_skills_sdk_check(copy.deepcopy(invalid_payload))
+
+    def test_sdk_check_model_rejects_passing_contract_contradictions(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sdk-check.json")
+        self.assertIsInstance(payload, dict)
+        cases = (
+            ("passing_check_without_source", {**payload, "canonical_source_path": None}),
+            ("passing_check_with_blocked_doctor", {**payload, "doctor_status": "blocked"}),
+            ("passing_check_with_failure_exit_code", {**payload, "receipt": {**payload["receipt"], "exit_code": 2}}),
+        )
+
+        for case_name, invalid_payload in cases:
+            with self.subTest(case_name=case_name):
+                with self.assertRaises(ValidationError):
+                    contracts.validate_skills_sdk_check(copy.deepcopy(invalid_payload))
+
+    def test_sdk_check_model_rejects_blocked_contract_contradictions(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sdk-check.json")
+        self.assertIsInstance(payload, dict)
+        blocked_payload = _sdk_check_with_verdict(payload, "blocked", "blocked", 2)
+        cases = (
+            (
+                "blocked_check_with_warning_doctor",
+                {**blocked_payload, "doctor_status": "warning"},
+            ),
+            (
+                "blocked_check_with_success_exit_code",
+                {**blocked_payload, "receipt": {**blocked_payload["receipt"], "exit_code": 0}},
+            ),
+        )
+
+        for case_name, invalid_payload in cases:
+            with self.subTest(case_name=case_name):
+                with self.assertRaises(ValidationError):
+                    contracts.validate_skills_sdk_check(copy.deepcopy(invalid_payload))
+
+    def test_sdk_check_model_rejects_degraded_contract_contradictions(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sdk-check.json")
+        self.assertIsInstance(payload, dict)
+        degraded_payload = _sdk_check_with_verdict(payload, "degraded", None, 2)
+        cases = (
+            (
+                "degraded_check_with_known_doctor_status",
+                {**degraded_payload, "doctor_status": "warning"},
+            ),
+            (
+                "degraded_check_with_success_exit_code",
+                {**degraded_payload, "receipt": {**degraded_payload["receipt"], "exit_code": 0}},
+            ),
+        )
+
+        for case_name, invalid_payload in cases:
+            with self.subTest(case_name=case_name):
+                with self.assertRaises(ValidationError):
+                    contracts.validate_skills_sdk_check(copy.deepcopy(invalid_payload))
+
+    def test_sdk_check_contract_accepts_degraded_unknown_doctor_status(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sdk-check.json")
+        self.assertIsInstance(payload, dict)
+        degraded_payload = _sdk_check_with_verdict(payload, "degraded", "unexpected_future_status", 2)
+        result = schema_validation.validate_payload_against_schema(
+            degraded_payload,
+            self.schemas["sdk-check"],
+            {**self.schemas, **self.schemas_by_file},
+            schema_path=SCHEMA_DIR / SCHEMA_FILES["sdk-check"],
+            payload_source="inline:degraded-sdk-check",
+            truth_lane="schema_contract",
+        )
+        self.assertEqual(result.status, "pass", result.diagnostics)
+        contracts.validate_skills_sdk_check(degraded_payload)
 
     def test_invalid_skill_intake_execution_claim_fails_schema_and_model(self) -> None:
         result = self.assert_schema_fails("skill-intake-receipt", "skill-intake-executes.json")
