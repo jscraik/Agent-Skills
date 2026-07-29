@@ -1316,6 +1316,10 @@ class TestAskCLI(unittest.TestCase):
 """,
                     encoding="utf-8",
                 )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
                 receipt_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "run" / "sdk-eval-run-receipt.json"
                 receipt_path.parent.mkdir(parents=True)
                 receipt_path.write_text(
@@ -1323,8 +1327,10 @@ class TestAskCLI(unittest.TestCase):
                         {
                             "status": "pass",
                             "lane": "oss-local",
+                            "lane_type": "release-shard",
                             "profile": "oss-local",
                             "codex_profile": "oss-local",
+                            "rubric_digest": rubric_digest,
                             "scenario_set_id": "demo-release-8-v1",
                             "package_id": "demo",
                             "package_digest": "sha256:current",
@@ -1373,6 +1379,10 @@ class TestAskCLI(unittest.TestCase):
 """,
                     encoding="utf-8",
                 )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
                 receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
                 for index, selected_case_ids in enumerate((['case-one', 'case-two'], ['case-three', 'case-four'], ['case-five'])):
                     receipt_path = receipts_root / f"run-{index}" / "sdk-eval-run-receipt.json"
@@ -1382,8 +1392,10 @@ class TestAskCLI(unittest.TestCase):
                             {
                                 "status": "pass",
                                 "lane": "oss-local",
+                                "lane_type": "release-shard",
                                 "profile": "oss-local",
                                 "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
                                 "scenario_set_id": "demo-release-5-v1",
                                 "package_id": "demo",
                                 "package_digest": "sha256:current",
@@ -1415,6 +1427,150 @@ class TestAskCLI(unittest.TestCase):
             "--receipt Infrastructure/artifacts/skills/demo/run-1/sdk-eval-run-receipt.json "
             "--receipt Infrastructure/artifacts/skills/demo/run-2/sdk-eval-run-receipt.json --json --robot",
         )
+
+    def test_outcome_proof_next_command_ignores_stale_and_non_shard_receipts(self):
+        """Only current release-shard receipts may advance an OSS-local release set."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for run_name, lane_type, rubric_digest in (
+                    ("full-release", "release", "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()),
+                    ("stale-shard", "release-shard", "sha256:stale"),
+                ):
+                    receipt_path = receipts_root / run_name / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "lane_type": lane_type,
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": ["case-one", "case-two"],
+                                "case_count": 2,
+                                "passed_count": 2,
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("--case case-one --case case-two", command)
+        self.assertNotIn("aggregate-shards", command)
+
+    def test_outcome_proof_next_command_uses_latest_disjoint_release_shards(self):
+        """A rerun replaces its earlier shard instead of duplicating aggregate cases."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for index, (run_name, selected_case_ids) in enumerate(
+                    (
+                        ("rerun-old", ["case-one", "case-two"]),
+                        ("rerun-new", ["case-one", "case-two"]),
+                        ("run-one", ["case-three", "case-four"]),
+                        ("run-two", ["case-five"]),
+                    )
+                ):
+                    receipt_path = receipts_root / run_name / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "lane_type": "release-shard",
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": selected_case_ids,
+                                "case_count": len(selected_case_ids),
+                                "passed_count": len(selected_case_ids),
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                    os.utime(receipt_path, ns=(1_000_000_000 + index, 1_000_000_000 + index))
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("rerun-new", command)
+        self.assertIn("run-one", command)
+        self.assertIn("run-two", command)
+        self.assertNotIn("rerun-old", command)
 
     def test_shard_aggregate_writes_evidence_only_outside_preview(self):
         """The normal aggregate route persists evidence while preview remains non-mutating."""

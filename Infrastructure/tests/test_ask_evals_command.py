@@ -153,6 +153,24 @@ def test_codex_release_profile_timeout_uses_selected_case_budget(tmp_path: Path)
     assert run_mock.call_args.kwargs["timeout"] == 240
 
 
+def test_codex_smoke_without_case_filter_preserves_suite_timeout_floor(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            timeout_seconds=90,
+        )
+
+    assert result.status == "success"
+    assert run_mock.call_args.kwargs["timeout"] == evals.SMOKE_EVAL_TIMEOUT_SECONDS
+
+
 def test_codex_oss_local_blocks_unfiltered_batch(tmp_path: Path) -> None:
     with mock.patch.object(evals.subprocess, "run") as run_mock:
         result = evals.run_evals(

@@ -6311,7 +6311,8 @@ def run_evals(
         if mode == "smoke" and (model or not codex_profile):
             cmd.extend(["--model", model or SMOKE_EVAL_MODEL])
         selected_case_count = max(len(selected_cases), 1)
-        timeout = int(case_timeout) * selected_case_count + 60
+        selected_case_timeout = int(case_timeout) * selected_case_count + 60
+        timeout = max(SMOKE_EVAL_TIMEOUT_SECONDS, selected_case_timeout) if mode == "smoke" else selected_case_timeout
     elif mode == "smoke":
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
     if timeout_seconds is not None and not (runner == "codex" and (mode == "smoke" or codex_profile is not None)):

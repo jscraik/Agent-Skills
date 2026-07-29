@@ -1970,8 +1970,11 @@ def _current_release_shard_receipts(
     package_digest: str,
     scenario_set_id: str,
 ) -> list[tuple[Path, list[str]]]:
-    """Return current, complete OSS-local release shard receipts and their cases."""
-    completed: list[tuple[Path, list[str]]] = []
+    """Return current, non-overlapping OSS-local release shard receipts and their cases."""
+    current_rubric_digest = _skills_sdk_current_rubric_digest(repo_root)
+    if current_rubric_digest is None:
+        return []
+    candidates: list[tuple[int, Path, list[str]]] = []
     receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
     for receipt_path in sorted(receipts_root.glob("**/sdk-eval-run-receipt.json")):
         try:
@@ -1979,11 +1982,18 @@ def _current_release_shard_receipts(
         except (OSError, TypeError, json.JSONDecodeError):
             continue
         selected = receipt.get("selected_case_ids") if isinstance(receipt, dict) else None
-        if not isinstance(selected, list) or not selected or not all(isinstance(case_id, str) for case_id in selected):
+        if (
+            not isinstance(selected, list)
+            or not selected
+            or not all(isinstance(case_id, str) for case_id in selected)
+            or len(set(selected)) != len(selected)
+        ):
             continue
         if not (
             receipt.get("status") == "pass"
             and receipt.get("lane") == receipt.get("profile") == receipt.get("codex_profile") == "oss-local"
+            and receipt.get("lane_type") == "release-shard"
+            and receipt.get("rubric_digest") == current_rubric_digest
             and receipt.get("scenario_set_id") == scenario_set_id
             and receipt.get("package_id") == package_id
             and receipt.get("package_digest") == package_digest
@@ -1991,8 +2001,15 @@ def _current_release_shard_receipts(
             and receipt.get("failed_count") == 0
         ):
             continue
-        completed.append((receipt_path, selected))
-    return completed
+        candidates.append((receipt_path.stat().st_mtime_ns, receipt_path, selected))
+
+    completed_case_ids: set[str] = set()
+    completed: list[tuple[Path, list[str]]] = []
+    for _mtime_ns, receipt_path, selected in sorted(candidates, key=lambda item: (item[0], str(item[1])), reverse=True):
+        if completed_case_ids.isdisjoint(selected):
+            completed.append((receipt_path, selected))
+            completed_case_ids.update(selected)
+    return sorted(completed, key=lambda item: str(item[0]))
 
 
 def _outcome_proof_next_command(repo_root: Path, handle: str, fallback: str) -> str:
