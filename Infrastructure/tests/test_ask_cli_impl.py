@@ -1326,7 +1326,7 @@ class TestAskCLI(unittest.TestCase):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
         for handle, canonical_source, owner in (
             ("agents-md", "Skills/agent-ops/agents-md/SKILL.md", "agent-ops"),
-            ("simplify", "Skills/agent-ops/simplify/SKILL.md", "agent-ops"),
+            ("simplify", "Skills/agent-ops/simplify/SKILL.md", "Agent Skills Team"),
         ):
             with self.subTest(handle=handle):
                 cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", handle, "--json", "--robot"]
@@ -1544,15 +1544,15 @@ class TestAskCLI(unittest.TestCase):
             result.stdout,
         )
 
-    def test_skills_invalid_action_mentions_proof(self):
-        """Verify invalid skill-action guidance includes the public proof command."""
+    def test_skills_invalid_action_mentions_prove(self):
+        """Verify invalid skill-action guidance includes the public prove command."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--json"]
         result = _run_cli(cmd)
 
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
         suggestion = output["errors"][0]["fix_suggestion"]
-        self.assertIn("proof", suggestion)
+        self.assertIn("prove", suggestion)
 
     def test_unknown_action_helpers_share_valid_actions_fix_suggestion(self):
         """Verify unknown-action helpers format valid actions from one source."""
@@ -1649,7 +1649,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(
             output["data"]["validation_commands"],
             [
-                "./bin/ask skills list --json --robot",
+                "./bin/ask sdk start <skill> --json --robot",
                 "./bin/ask plugins list --json --robot",
                 "./bin/ask graph list --json --robot",
             ],
@@ -1669,7 +1669,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills resolve --help"])
         self.assertEqual(len(output["data"]["candidate_commands"]), 1)
         self.assertRegex(
             output["data"]["candidate_commands"][0],
@@ -1686,7 +1686,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("missing action", output["errors"][0]["message"])
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
 
     def test_skills_missing_action_human_output_exposes_validation(self):
         """Verify incomplete skills commands render the read-only recovery command."""
@@ -1695,7 +1695,7 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("missing action for topic 'skills'", result.stdout)
-        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
+        self.assertIn("Validation: ./bin/ask sdk start <skill> --json --robot", result.stdout)
 
     def test_skills_goal_json_contract(self):
         """
@@ -2266,21 +2266,21 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
         verification = output["data"]["skill_package_verification"]
         self.assertTrue(verification["strict"])
-        self.assertEqual(verification["status"], "blocked")
+        self.assertEqual(verification["status"], "pass")
         self.assertEqual(
             verification["next_command"],
-            "./bin/ask skills package simplify --strict --json --robot",
+            "./bin/ask skills prove simplify --json --robot",
         )
         self.assertEqual(
             verification["strict_package_readiness"]["missing_fields"],
-            ["compatible_roles", "maturity", "runtime_needs", "share_readiness"],
+            [],
         )
-        self.assertNotIn("autofix", output["errors"][0]["message"])
+        self.assertEqual(output["errors"], [])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
