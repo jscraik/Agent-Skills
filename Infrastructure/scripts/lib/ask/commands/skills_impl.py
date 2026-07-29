@@ -1963,6 +1963,79 @@ def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
     return max(accepted, key=lambda item: item[0])[1] if accepted else {"status": "missing", "evidence_class": "outcome_proof"}
 
 
+def _completed_release_shard_case_ids(
+    repo_root: Path,
+    *,
+    package_id: str,
+    package_digest: str,
+    scenario_set_id: str,
+) -> set[str]:
+    """Return case IDs from current, complete OSS-local release shard receipts."""
+    completed: set[str] = set()
+    receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
+    for receipt_path in receipts_root.glob("**/sdk-eval-run-receipt.json"):
+        try:
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        except (OSError, TypeError, json.JSONDecodeError):
+            continue
+        selected = receipt.get("selected_case_ids") if isinstance(receipt, dict) else None
+        if not isinstance(selected, list) or not selected or not all(isinstance(case_id, str) for case_id in selected):
+            continue
+        if not (
+            receipt.get("status") == "pass"
+            and receipt.get("lane") == receipt.get("profile") == receipt.get("codex_profile") == "oss-local"
+            and receipt.get("scenario_set_id") == scenario_set_id
+            and receipt.get("package_id") == package_id
+            and receipt.get("package_digest") == package_digest
+            and receipt.get("case_count") == receipt.get("passed_count") == len(selected)
+            and receipt.get("failed_count") == 0
+        ):
+            continue
+        completed.update(selected)
+    return completed
+
+
+def _outcome_proof_next_command(repo_root: Path, handle: str, fallback: str) -> str:
+    """Return the first missing bounded OSS release shard when a valid set is declared."""
+    source_path = _skills_sdk_eval_source_path(repo_root, handle)
+    if source_path is None:
+        return fallback
+    release_set = _select_release_scenario_set(
+        _load_release_scenario_sets(source_path.parent / "references" / "evals.yaml"),
+        scenario_set=None,
+    )
+    if release_set is None:
+        return fallback
+    case_ids = list(release_set.get("case_ids") or [])
+    minimum = int(release_set.get("minimum_scenarios") or RELEASE_SCENARIO_MINIMUM)
+    if not RELEASE_SCENARIO_MINIMUM <= minimum <= len(case_ids) <= RELEASE_SCENARIO_MAXIMUM:
+        return fallback
+    package_identity = _skills_sdk_eval_package_identity(repo_root, handle)
+    if package_identity is None:
+        return fallback
+    missing_case_ids = [
+        case_id
+        for case_id in case_ids
+        if case_id not in _completed_release_shard_case_ids(
+            repo_root,
+            package_id=package_identity["package_id"],
+            package_digest=package_identity["package_digest"],
+            scenario_set_id=str(release_set["id"]),
+        )
+    ]
+    if not missing_case_ids:
+        return fallback
+    target = _repo_relative_path(repo_root, source_path.parent) or handle
+    return _skills_sdk_eval_run_validation_command(
+        target,
+        mode="release",
+        codex_profile="oss-local",
+        cases=missing_case_ids[:2],
+        scenario_set=str(release_set["id"]),
+        timeout_seconds=None,
+    )
+
+
 def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
     """Return a repo-relative POSIX path when *path* is inside *repo_root*."""
     try:
@@ -9902,7 +9975,11 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         next_command = _ask_validation_command("workouts", "run", workouts[0])
     else:
         proof_status = "reachable_without_outcome_proof"
-        next_command = structural_detail.get("strict_audit_command") or next_command
+        next_command = _outcome_proof_next_command(
+            repo_root,
+            normalized,
+            structural_detail.get("strict_audit_command") or next_command,
+        )
 
     scorecard = {
         "schema_version": "skill-proof-scorecard.v1",

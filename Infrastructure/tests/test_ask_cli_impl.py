@@ -1206,6 +1206,151 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
         self.assertEqual(proof["outcome_proof"]["status"], "missing")
 
+    def test_skills_prove_names_first_bounded_release_shard_when_outcome_is_missing(self):
+        """A missing aggregate must advance through a bounded declared release shard."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                skill_dir.mkdir(parents=True)
+                skill_dir.joinpath("SKILL.md").write_text("---\nname: demo\n---\n", encoding="utf-8")
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir()
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                reachable = CallResult()
+                reachable.data["proof"] = {
+                    "status": "pass",
+                    "handle": "demo",
+                    "resolution": {"status": "ok", "handle": "demo", "source_path": "Skills/agent-ops/demo/SKILL.md"},
+                }
+                with mock.patch.object(skills_commands, "skills_proof", return_value=reachable), mock.patch.object(
+                    skills_commands, "audit_skill", return_value=CallResult()
+                ), mock.patch.object(
+                    skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
+                ), mock.patch.object(
+                    skills_commands, "_skill_workout_candidates", return_value=[]
+                ), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
+        self.assertEqual(
+            proof["next_command"],
+            "./bin/ask sdk eval run Skills/agent-ops/demo --runner internal --mode release "
+            "--codex-profile oss-local --scenario-set demo-release-8-v1 --case case-one --case case-two --json --robot",
+        )
+
+    def test_outcome_proof_next_command_rejects_undersized_release_set(self):
+        """An invalid release set must not replace the existing safe repair action."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-invalid-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two]
+""",
+                    encoding="utf-8",
+                )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(command, "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot")
+
+    def test_outcome_proof_next_command_skips_current_passing_shard_cases(self):
+        """A current shard receipt advances the next action to missing release cases."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                receipt_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "run" / "sdk-eval-run-receipt.json"
+                receipt_path.parent.mkdir(parents=True)
+                receipt_path.write_text(
+                    json.dumps(
+                        {
+                            "status": "pass",
+                            "lane": "oss-local",
+                            "profile": "oss-local",
+                            "codex_profile": "oss-local",
+                            "scenario_set_id": "demo-release-8-v1",
+                            "package_id": "demo",
+                            "package_digest": "sha256:current",
+                            "selected_case_ids": ["case-one", "case-two"],
+                            "case_count": 2,
+                            "passed_count": 2,
+                            "failed_count": 0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("--case case-three --case case-four", command)
+
     def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
         """The compact proof facade retains the identity-bound outcome reference."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
