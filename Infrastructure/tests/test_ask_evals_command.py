@@ -102,15 +102,15 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
-            cases=["smoke-discovery"],
-            timeout_seconds=5,
+            cases=["smoke-discovery", "happy-path"],
+            timeout_seconds=90,
         )
 
     assert result.status == "error"
     assert run_mock.call_args.kwargs["start_new_session"] is True
 
 
-def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> None:
+def test_codex_release_profile_timeout_uses_selected_case_budget(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
@@ -122,11 +122,12 @@ def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> No
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
-            cases=["smoke-discovery"],
+            cases=["smoke-discovery", "happy-path"],
+            timeout_seconds=90,
         )
 
     assert result.status == "success"
-    assert run_mock.call_args.kwargs["timeout"] == evals.RELEASE_EVAL_TIMEOUT_SECONDS
+    assert run_mock.call_args.kwargs["timeout"] == 240
 
 
 def test_codex_oss_local_blocks_unfiltered_batch(tmp_path: Path) -> None:
