@@ -1206,6 +1206,536 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
         self.assertEqual(proof["outcome_proof"]["status"], "missing")
 
+    def test_skills_prove_names_first_bounded_release_shard_when_outcome_is_missing(self):
+        """A missing aggregate must advance through a bounded declared release shard."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                skill_dir.mkdir(parents=True)
+                skill_dir.joinpath("SKILL.md").write_text("---\nname: demo\n---\n", encoding="utf-8")
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir()
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                reachable = CallResult()
+                reachable.data["proof"] = {
+                    "status": "pass",
+                    "handle": "demo",
+                    "resolution": {"status": "ok", "handle": "demo", "source_path": "Skills/agent-ops/demo/SKILL.md"},
+                }
+                with mock.patch.object(skills_commands, "skills_proof", return_value=reachable), mock.patch.object(
+                    skills_commands, "audit_skill", return_value=CallResult()
+                ), mock.patch.object(
+                    skills_commands, "skill_invocation_analytics", return_value={"status": "unavailable_or_legacy"}
+                ), mock.patch.object(
+                    skills_commands, "_skill_workout_candidates", return_value=[]
+                ), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["proof_status"], "reachable_without_outcome_proof")
+        self.assertEqual(
+            proof["next_command"],
+            "./bin/ask sdk eval run Skills/agent-ops/demo --runner internal --mode release "
+            "--codex-profile oss-local --scenario-set demo-release-8-v1 --case case-one --case case-two --json --robot",
+        )
+
+    def test_outcome_proof_next_command_rejects_undersized_release_set(self):
+        """An invalid release set must not replace the existing safe repair action."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-invalid-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two]
+""",
+                    encoding="utf-8",
+                )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(command, "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot")
+
+    def test_outcome_proof_next_command_skips_current_passing_shard_cases(self):
+        """A current shard receipt advances the next action to missing release cases."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-8-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
+                receipt_path = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo" / "run" / "sdk-eval-run-receipt.json"
+                receipt_path.parent.mkdir(parents=True)
+                receipt_path.write_text(
+                    json.dumps(
+                        {
+                            "status": "pass",
+                            "lane": "oss-local",
+                            "lane_type": "release-shard",
+                            "profile": "oss-local",
+                            "codex_profile": "oss-local",
+                            "rubric_digest": rubric_digest,
+                            "scenario_set_id": "demo-release-8-v1",
+                            "package_id": "demo",
+                            "package_digest": "sha256:current",
+                            "selected_case_ids": ["case-one", "case-two"],
+                            "case_count": 2,
+                            "passed_count": 2,
+                            "failed_count": 0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("--case case-three --case case-four", command)
+
+    def test_outcome_proof_next_command_aggregates_complete_current_release_shards(self):
+        """Complete current shards advance to the existing aggregate command."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for index, selected_case_ids in enumerate((['case-one', 'case-two'], ['case-three', 'case-four'], ['case-five'])):
+                    receipt_path = receipts_root / f"run-{index}" / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "lane_type": "release-shard",
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": selected_case_ids,
+                                "case_count": len(selected_case_ids),
+                                "passed_count": len(selected_case_ids),
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(
+            command,
+            "./bin/ask sdk eval aggregate-shards Skills/agent-ops/demo --scenario-set demo-release-5-v1 "
+            "--codex-profile oss-local --receipt Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json "
+            "--receipt Infrastructure/artifacts/skills/demo/run-1/sdk-eval-run-receipt.json "
+            "--receipt Infrastructure/artifacts/skills/demo/run-2/sdk-eval-run-receipt.json --json --robot",
+        )
+
+    def test_outcome_proof_next_command_ignores_stale_and_non_shard_receipts(self):
+        """Only current release-shard receipts may advance an OSS-local release set."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for run_name, lane_type, rubric_digest in (
+                    ("full-release", "release", "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()),
+                    ("stale-shard", "release-shard", "sha256:stale"),
+                ):
+                    receipt_path = receipts_root / run_name / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "lane_type": lane_type,
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": ["case-one", "case-two"],
+                                "case_count": 2,
+                                "passed_count": 2,
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("--case case-one --case case-two", command)
+        self.assertNotIn("aggregate-shards", command)
+
+    def test_outcome_proof_next_command_uses_latest_disjoint_release_shards(self):
+        """A rerun replaces its earlier shard instead of duplicating aggregate cases."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                rubric_digest = "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest()
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for index, (run_name, selected_case_ids) in enumerate(
+                    (
+                        ("rerun-old", ["case-one", "case-two"]),
+                        ("rerun-new", ["case-one", "case-two"]),
+                        ("run-one", ["case-three", "case-four"]),
+                        ("run-two", ["case-five"]),
+                    )
+                ):
+                    receipt_path = receipts_root / run_name / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "lane_type": "release-shard",
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "rubric_digest": rubric_digest,
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": selected_case_ids,
+                                "case_count": len(selected_case_ids),
+                                "passed_count": len(selected_case_ids),
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                    os.utime(receipt_path, ns=(1_000_000_000 + index, 1_000_000_000 + index))
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIn("rerun-new", command)
+        self.assertIn("run-one", command)
+        self.assertIn("run-two", command)
+        self.assertNotIn("rerun-old", command)
+
+    def test_outcome_proof_next_command_falls_back_for_non_numeric_minimum(self):
+        """Malformed release-set thresholds cannot escape the compact proof facade."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-invalid-v1
+    default: true
+    minimum_scenarios: not-a-number
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                fallback = "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot"
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"):
+                    command = skills_commands._impl._outcome_proof_next_command(repo_root, "demo", fallback)
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(command, fallback)
+
+    def test_current_release_shard_receipts_reject_path_traversal_package_id(self):
+        """Receipt discovery remains contained in the package artifact lane."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                rubric_path = repo_root / "Infrastructure" / "config" / "skills-sdk" / "gold-standard-rubric.v1.json"
+                rubric_path.parent.mkdir(parents=True)
+                rubric_path.write_text('{"rubric":"current"}\n', encoding="utf-8")
+                escaped_receipt = repo_root / "Infrastructure" / "artifacts" / "outside" / "run" / "sdk-eval-run-receipt.json"
+                escaped_receipt.parent.mkdir(parents=True)
+                escaped_receipt.write_text(
+                    json.dumps(
+                        {
+                            "status": "pass",
+                            "lane": "oss-local",
+                            "lane_type": "release-shard",
+                            "profile": "oss-local",
+                            "codex_profile": "oss-local",
+                            "rubric_digest": "sha256:" + hashlib.sha256(rubric_path.read_bytes()).hexdigest(),
+                            "scenario_set_id": "demo-release-5-v1",
+                            "package_id": "../outside",
+                            "package_digest": "sha256:current",
+                            "selected_case_ids": ["case-one"],
+                            "case_count": 1,
+                            "passed_count": 1,
+                            "failed_count": 0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                receipts = skills_commands._impl._current_release_shard_receipts(
+                    repo_root,
+                    package_id="../outside",
+                    package_digest="sha256:current",
+                    scenario_set_id="demo-release-5-v1",
+                )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(receipts, [])
+
+    def test_persist_eval_shard_aggregate_does_not_claim_failed_write(self):
+        """A failed aggregate write cannot leave persisted-evidence fields on the payload."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                payload = {"mutation_performed": False}
+                with mock.patch.object(Path, "write_text", side_effect=OSError("disk full")):
+                    artifact_ref = skills_commands._impl._skills_sdk_persist_eval_shard_aggregate(
+                        Path(temp_dir),
+                        "demo",
+                        payload,
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertIsNone(artifact_ref)
+        self.assertNotIn("artifact_path", payload)
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_persist_eval_shard_aggregate_rejects_dot_package_ids(self):
+        """Aggregate evidence never escapes its per-package artifact lane."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                for package_id in (".", ".."):
+                    with self.subTest(package_id=package_id):
+                        payload = {"mutation_performed": False}
+                        artifact_ref = skills_commands._impl._skills_sdk_persist_eval_shard_aggregate(
+                            repo_root,
+                            package_id,
+                            payload,
+                        )
+                        self.assertIsNone(artifact_ref)
+                        self.assertEqual(payload, {"mutation_performed": False})
+                        self.assertFalse((repo_root / "Infrastructure" / "artifacts").exists())
+        finally:
+            sys.path.remove(lib_path)
+
+    def test_shard_aggregate_writes_evidence_only_outside_preview(self):
+        """The normal aggregate route persists evidence while preview remains non-mutating."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                receipt = {"status": "pass", "agent_summary": "All bounded release shards passed."}
+                with mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ), mock.patch(
+                    "ask.skills_sdk.eval_shard_aggregate.build_eval_shard_aggregate_receipt",
+                    return_value=receipt,
+                ):
+                    written = skills_commands.skills_sdk_eval_shard_aggregate(
+                        repo_root,
+                        target="Skills/agent-ops/demo",
+                        scenario_set="demo-release-5-v1",
+                        receipts=["Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json"],
+                    )
+                    preview = skills_commands.skills_sdk_eval_shard_aggregate_preview(
+                        repo_root,
+                        target="Skills/agent-ops/demo",
+                        scenario_set="demo-release-5-v1",
+                        receipts=["Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json"],
+                    )
+                    written_payload = written.data["skills_sdk_eval_shard_aggregate"]
+                    artifact_path = repo_root / written_payload["artifact_path"]
+                    self.assertTrue(written_payload["mutation_performed"])
+                    self.assertTrue(artifact_path.is_file())
+                    self.assertEqual(
+                        json.loads(artifact_path.read_text(encoding="utf-8"))["data"]["skills_sdk_eval_shard_aggregate"]["receipt"],
+                        receipt,
+                    )
+                    preview_payload = preview.data["skills_sdk_eval_shard_aggregate"]
+                    self.assertFalse(preview_payload["mutation_performed"])
+                    self.assertNotIn("artifact_path", preview_payload)
+        finally:
+            sys.path.remove(lib_path)
+
     def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
         """The compact proof facade retains the identity-bound outcome reference."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
@@ -1326,7 +1856,7 @@ class TestAskCLI(unittest.TestCase):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
         for handle, canonical_source, owner in (
             ("agents-md", "Skills/agent-ops/agents-md/SKILL.md", "agent-ops"),
-            ("simplify", "Skills/agent-ops/simplify/SKILL.md", "agent-ops"),
+            ("simplify", "Skills/agent-ops/simplify/SKILL.md", "Agent Skills Team"),
         ):
             with self.subTest(handle=handle):
                 cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", handle, "--json", "--robot"]
@@ -1544,15 +2074,15 @@ class TestAskCLI(unittest.TestCase):
             result.stdout,
         )
 
-    def test_skills_invalid_action_mentions_proof(self):
-        """Verify invalid skill-action guidance includes the public proof command."""
+    def test_skills_invalid_action_mentions_prove(self):
+        """Verify invalid skill-action guidance includes the public prove command."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--json"]
         result = _run_cli(cmd)
 
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
         suggestion = output["errors"][0]["fix_suggestion"]
-        self.assertIn("proof", suggestion)
+        self.assertIn("prove", suggestion)
 
     def test_unknown_action_helpers_share_valid_actions_fix_suggestion(self):
         """Verify unknown-action helpers format valid actions from one source."""
@@ -1649,7 +2179,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(
             output["data"]["validation_commands"],
             [
-                "./bin/ask skills list --json --robot",
+                "./bin/ask sdk start <skill> --json --robot",
                 "./bin/ask plugins list --json --robot",
                 "./bin/ask graph list --json --robot",
             ],
@@ -1669,7 +2199,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills resolve --help"])
         self.assertEqual(len(output["data"]["candidate_commands"]), 1)
         self.assertRegex(
             output["data"]["candidate_commands"][0],
@@ -1686,7 +2216,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("missing action", output["errors"][0]["message"])
-        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask sdk start <skill> --json --robot"])
 
     def test_skills_missing_action_human_output_exposes_validation(self):
         """Verify incomplete skills commands render the read-only recovery command."""
@@ -1695,7 +2225,7 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("missing action for topic 'skills'", result.stdout)
-        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
+        self.assertIn("Validation: ./bin/ask sdk start <skill> --json --robot", result.stdout)
 
     def test_skills_goal_json_contract(self):
         """
@@ -2266,21 +2796,21 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertLess(len(result.stdout.encode("utf-8")), 10 * 1024)
         output = json.loads(result.stdout)
         verification = output["data"]["skill_package_verification"]
         self.assertTrue(verification["strict"])
-        self.assertEqual(verification["status"], "blocked")
+        self.assertEqual(verification["status"], "pass")
         self.assertEqual(
             verification["next_command"],
-            "./bin/ask skills package simplify --strict --json --robot",
+            "./bin/ask skills prove simplify --json --robot",
         )
         self.assertEqual(
             verification["strict_package_readiness"]["missing_fields"],
-            ["compatible_roles", "maturity", "runtime_needs", "share_readiness"],
+            [],
         )
-        self.assertNotIn("autofix", output["errors"][0]["message"])
+        self.assertEqual(output["errors"], [])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""

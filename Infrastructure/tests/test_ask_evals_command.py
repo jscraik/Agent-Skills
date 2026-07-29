@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import subprocess
@@ -19,6 +20,7 @@ if str(ASK_LIB_DIR) not in sys.path:
     sys.path.insert(0, str(ASK_LIB_DIR))
 
 from ask.commands import evals  # noqa: E402
+from ask.commands import sdk_eval  # noqa: E402
 from ask.skills_sdk.handoff_readiness import build_candidate_identity  # noqa: E402
 from ask.skill_review_dashboard import _parse_plugin_eval, _render_eval_cases, render_skill_review_dashboard  # noqa: E402
 
@@ -85,6 +87,33 @@ def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     assert evals._extract_tessl_eval_run_id(payload) == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
 
 
+def test_shard_aggregate_dispatch_selects_preview_or_write_artifact_mode() -> None:
+    args = argparse.Namespace(
+        target="Skills/agent-ops/demo",
+        scenario_set="demo-release-5-v1",
+        receipts=["Infrastructure/artifacts/skills/demo/run/sdk-eval-run-receipt.json"],
+        codex_profile="oss-local",
+        preview=False,
+    )
+    with mock.patch.object(sdk_eval.skills_commands, "skills_sdk_eval_shard_aggregate", return_value=mock.Mock()) as write_aggregate, mock.patch.object(
+        sdk_eval.skills_commands,
+        "skills_sdk_eval_shard_aggregate_preview",
+        return_value=mock.Mock(),
+    ) as preview_aggregate:
+        sdk_eval._dispatch_shard_aggregate(REPO_ROOT, args)
+        args.preview = True
+        sdk_eval._dispatch_shard_aggregate(REPO_ROOT, args)
+
+    expected_kwargs = {
+        "target": args.target,
+        "scenario_set": args.scenario_set,
+        "receipts": args.receipts,
+        "codex_profile": args.codex_profile,
+    }
+    write_aggregate.assert_called_once_with(REPO_ROOT, **expected_kwargs)
+    preview_aggregate.assert_called_once_with(REPO_ROOT, **expected_kwargs)
+
+
 def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
     completed = subprocess.CompletedProcess(
         args=["run_skill_evals.py"],
@@ -102,15 +131,15 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
-            cases=["smoke-discovery"],
-            timeout_seconds=5,
+            cases=["smoke-discovery", "happy-path"],
+            timeout_seconds=90,
         )
 
     assert result.status == "error"
     assert run_mock.call_args.kwargs["start_new_session"] is True
 
 
-def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> None:
+def test_codex_release_profile_timeout_uses_selected_case_budget(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
@@ -122,11 +151,50 @@ def test_codex_release_profile_timeout_uses_release_budget(tmp_path: Path) -> No
             dashboard=False,
             skip_tessl=True,
             codex_profile="oss-local",
-            cases=["smoke-discovery"],
+            cases=["smoke-discovery", "happy-path"],
+            timeout_seconds=90,
+        )
+
+    assert result.status == "success"
+    assert run_mock.call_args.kwargs["timeout"] == 240
+
+
+def test_codex_release_profile_timeout_caps_scaled_case_budget(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="release",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            codex_profile="codex-fast",
+            cases=[f"case-{index}" for index in range(40)],
+            timeout_seconds=600,
         )
 
     assert result.status == "success"
     assert run_mock.call_args.kwargs["timeout"] == evals.RELEASE_EVAL_TIMEOUT_SECONDS
+
+
+def test_codex_smoke_without_case_filter_preserves_suite_timeout_floor(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            runner="codex",
+            dashboard=False,
+            skip_tessl=True,
+            timeout_seconds=90,
+        )
+
+    assert result.status == "success"
+    assert run_mock.call_args.kwargs["timeout"] == evals.SMOKE_EVAL_TIMEOUT_SECONDS
 
 
 def test_codex_oss_local_blocks_unfiltered_batch(tmp_path: Path) -> None:
