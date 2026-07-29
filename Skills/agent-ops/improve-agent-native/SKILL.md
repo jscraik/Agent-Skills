@@ -95,6 +95,10 @@ When supplied facts call work done without that validation, explicitly reject
 closure and say not to claim done. Name the missing proof lane and the next
 validation command or exact blocker.
 
+For a PR closeout, report local validation, hosted CI, branch protection or
+mergeability, and merge-queue state as separate facts. If any hosted state is
+uninspected, say so rather than implying that it passed.
+
 When validation is absent or an input asks to skip it, include a `proof_gap`
 that blocks a false readiness or proof-skipping claim. Require the applicable
 validation commands, receipts, or equivalent repository-owned proof before
