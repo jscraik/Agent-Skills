@@ -227,7 +227,12 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
 
 
 def _dispatch_shard_aggregate(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    return skills_commands.skills_sdk_eval_shard_aggregate(
+    aggregate = (
+        skills_commands.skills_sdk_eval_shard_aggregate_preview
+        if args.preview
+        else skills_commands.skills_sdk_eval_shard_aggregate
+    )
+    return aggregate(
         repo_root,
         target=args.target,
         scenario_set=args.scenario_set,

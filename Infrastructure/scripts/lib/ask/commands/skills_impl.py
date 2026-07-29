@@ -1963,17 +1963,17 @@ def _eval_shard_outcome_proof(repo_root: Path, handle: str) -> dict[str, Any]:
     return max(accepted, key=lambda item: item[0])[1] if accepted else {"status": "missing", "evidence_class": "outcome_proof"}
 
 
-def _completed_release_shard_case_ids(
+def _current_release_shard_receipts(
     repo_root: Path,
     *,
     package_id: str,
     package_digest: str,
     scenario_set_id: str,
-) -> set[str]:
-    """Return case IDs from current, complete OSS-local release shard receipts."""
-    completed: set[str] = set()
+) -> list[tuple[Path, list[str]]]:
+    """Return current, complete OSS-local release shard receipts and their cases."""
+    completed: list[tuple[Path, list[str]]] = []
     receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / package_id
-    for receipt_path in receipts_root.glob("**/sdk-eval-run-receipt.json"):
+    for receipt_path in sorted(receipts_root.glob("**/sdk-eval-run-receipt.json")):
         try:
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         except (OSError, TypeError, json.JSONDecodeError):
@@ -1991,7 +1991,7 @@ def _completed_release_shard_case_ids(
             and receipt.get("failed_count") == 0
         ):
             continue
-        completed.update(selected)
+        completed.append((receipt_path, selected))
     return completed
 
 
@@ -2013,19 +2013,18 @@ def _outcome_proof_next_command(repo_root: Path, handle: str, fallback: str) -> 
     package_identity = _skills_sdk_eval_package_identity(repo_root, handle)
     if package_identity is None:
         return fallback
-    missing_case_ids = [
-        case_id
-        for case_id in case_ids
-        if case_id not in _completed_release_shard_case_ids(
-            repo_root,
-            package_id=package_identity["package_id"],
-            package_digest=package_identity["package_digest"],
-            scenario_set_id=str(release_set["id"]),
-        )
-    ]
-    if not missing_case_ids:
-        return fallback
+    current_receipts = _current_release_shard_receipts(
+        repo_root,
+        package_id=package_identity["package_id"],
+        package_digest=package_identity["package_digest"],
+        scenario_set_id=str(release_set["id"]),
+    )
+    completed_case_ids = {case_id for _receipt_path, selected_case_ids in current_receipts for case_id in selected_case_ids}
+    missing_case_ids = [case_id for case_id in case_ids if case_id not in completed_case_ids]
     target = _repo_relative_path(repo_root, source_path.parent) or handle
+    if not missing_case_ids:
+        aggregate_command = _release_shard_aggregate_command(repo_root, target, str(release_set["id"]), current_receipts)
+        return aggregate_command or fallback
     return _skills_sdk_eval_run_validation_command(
         target,
         mode="release",
@@ -2033,6 +2032,29 @@ def _outcome_proof_next_command(repo_root: Path, handle: str, fallback: str) -> 
         cases=missing_case_ids[:2],
         scenario_set=str(release_set["id"]),
         timeout_seconds=None,
+    )
+
+
+def _release_shard_aggregate_command(
+    repo_root: Path,
+    target: str,
+    scenario_set: str,
+    receipts: list[tuple[Path, list[str]]],
+) -> str | None:
+    """Build the existing aggregate command from current repository-owned receipts."""
+    receipt_paths = [_repo_relative_path(repo_root, receipt_path) for receipt_path, _case_ids in receipts]
+    if not receipt_paths or not all(receipt_paths):
+        return None
+    return _ask_validation_command(
+        "sdk",
+        "eval",
+        "aggregate-shards",
+        target,
+        "--scenario-set",
+        scenario_set,
+        "--codex-profile",
+        "oss-local",
+        *[part for receipt_path in receipt_paths for part in ("--receipt", receipt_path)],
     )
 
 
@@ -5956,6 +5978,67 @@ def _blocked_eval_shard_aggregate_receipt(
     }
 
 
+def _skills_sdk_persist_eval_shard_aggregate(
+    repo_root: Path,
+    package_id: str,
+    payload: dict[str, Any],
+) -> str | None:
+    """Persist passing aggregate evidence in the existing repository-local artifact lane."""
+    if not package_id or Path(package_id).name != package_id:
+        return None
+    artifact_dir = (
+        repo_root
+        / "Infrastructure"
+        / "artifacts"
+        / "skills"
+        / package_id
+        / datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
+    )
+    try:
+        artifact_dir.mkdir(parents=True, exist_ok=False)
+        artifact_path = artifact_dir / "aggregate.json"
+        artifact_ref = _repo_relative_path(repo_root, artifact_path)
+        if artifact_ref is None:
+            return None
+        payload["artifact_path"] = artifact_ref
+        payload["mutation_performed"] = True
+        envelope = {"status": "success", "data": {"skills_sdk_eval_shard_aggregate": payload}}
+        artifact_path.write_text(json.dumps(envelope, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError:
+        return None
+    return artifact_ref
+
+
+def _skills_sdk_eval_shard_aggregate_payload(
+    *,
+    target: str,
+    scenario_set: str,
+    receipts: list[str],
+    codex_profile: str,
+    receipt: dict[str, Any],
+    artifact_mode: Literal["preview", "write"],
+) -> dict[str, Any]:
+    """Build the existing aggregate envelope for the requested artifact mode."""
+    command_parts = [
+        "sdk", "eval", "aggregate-shards", target, "--scenario-set", scenario_set,
+        "--codex-profile", codex_profile,
+    ]
+    command_parts.extend(part for receipt_path in receipts for part in ("--receipt", receipt_path))
+    if artifact_mode == "preview":
+        command_parts.append("--preview")
+    return {
+        "schema_version": "skills-sdk-eval-shard-aggregate.v0",
+        "status": receipt["status"],
+        "target": target,
+        "scenario_set": scenario_set,
+        "codex_profile": codex_profile,
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [_ask_validation_command(*command_parts)],
+        "agent_summary": receipt["agent_summary"],
+    }
+
+
 def skills_sdk_eval_shard_aggregate(
     repo_root: Path,
     *,
@@ -5964,7 +6047,46 @@ def skills_sdk_eval_shard_aggregate(
     receipts: list[str],
     codex_profile: str = "oss-local",
 ) -> CallResult:
-    """Aggregate bounded OSS release shards without running another model lane."""
+    """Aggregate bounded OSS release shards and persist a passing local aggregate."""
+    return _skills_sdk_eval_shard_aggregate(
+        repo_root,
+        target=target,
+        scenario_set=scenario_set,
+        receipts=receipts,
+        codex_profile=codex_profile,
+        artifact_mode="write",
+    )
+
+
+def skills_sdk_eval_shard_aggregate_preview(
+    repo_root: Path,
+    *,
+    target: str,
+    scenario_set: str,
+    receipts: list[str],
+    codex_profile: str = "oss-local",
+) -> CallResult:
+    """Aggregate bounded OSS release shards without writing local evidence."""
+    return _skills_sdk_eval_shard_aggregate(
+        repo_root,
+        target=target,
+        scenario_set=scenario_set,
+        receipts=receipts,
+        codex_profile=codex_profile,
+        artifact_mode="preview",
+    )
+
+
+def _skills_sdk_eval_shard_aggregate(
+    repo_root: Path,
+    *,
+    target: str,
+    scenario_set: str,
+    receipts: list[str],
+    codex_profile: str,
+    artifact_mode: Literal["preview", "write"],
+) -> CallResult:
+    """Build an aggregate result in the selected explicit artifact mode."""
     from ask.skills_sdk.eval_shard_aggregate import (  # noqa: PLC0415
         EvalShardAggregateError,
         build_eval_shard_aggregate_receipt,
@@ -5972,6 +6094,10 @@ def skills_sdk_eval_shard_aggregate(
 
     result = CallResult()
     result.metadata["command"] = "sdk eval aggregate-shards"
+    if artifact_mode not in {"preview", "write"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=f"unsupported aggregate artifact mode: {artifact_mode}"))
+        return result
     target_path = Path(target) if Path(target).is_absolute() else repo_root / target
     try:
         package_identity = _skills_sdk_eval_package_identity(repo_root, target)
@@ -5994,22 +6120,20 @@ def skills_sdk_eval_shard_aggregate(
                 scenario_set=scenario_set,
                 message=str(exc),
             )
-    payload = {
-        "schema_version": "skills-sdk-eval-shard-aggregate.v0",
-        "status": receipt["status"],
-        "target": target,
-        "scenario_set": scenario_set,
-        "codex_profile": codex_profile,
-        "receipt": receipt,
-        "mutation_performed": False,
-        "validation_commands": [
-            _ask_validation_command(
-                "sdk", "eval", "aggregate-shards", target, "--scenario-set", scenario_set, "--codex-profile", codex_profile,
-                *[part for path in receipts for part in ("--receipt", path)], "--preview",
-            )
-        ],
-        "agent_summary": receipt["agent_summary"],
-    }
+        package_identity = None
+    payload = _skills_sdk_eval_shard_aggregate_payload(
+        target=target,
+        scenario_set=scenario_set,
+        receipts=receipts,
+        codex_profile=codex_profile,
+        receipt=receipt,
+        artifact_mode=artifact_mode,
+    )
+    if receipt["status"] == "pass" and artifact_mode == "write":
+        package_id = str((package_identity or {}).get("package_id") or "")
+        if not _skills_sdk_persist_eval_shard_aggregate(repo_root, package_id, payload):
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_RUNTIME", message="unable to persist local aggregate outcome evidence"))
     result.data["skills_sdk_eval_shard_aggregate"] = payload
     if receipt["status"] != "pass":
         result.status = "error"

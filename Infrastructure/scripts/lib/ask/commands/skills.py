@@ -169,6 +169,10 @@ def skills_sdk_eval_shard_aggregate(*args, **kwargs):
     return _call_impl("skills_sdk_eval_shard_aggregate", *args, **kwargs)
 
 
+def skills_sdk_eval_shard_aggregate_preview(*args, **kwargs):
+    return _call_impl("skills_sdk_eval_shard_aggregate_preview", *args, **kwargs)
+
+
 def _impl_facade(command_name):
     def facade(*args, **kwargs):
         return _call_impl(command_name, *args, **kwargs)

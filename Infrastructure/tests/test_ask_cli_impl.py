@@ -1351,6 +1351,115 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertIn("--case case-three --case case-four", command)
 
+    def test_outcome_proof_next_command_aggregates_complete_current_release_shards(self):
+        """Complete current shards advance to the existing aggregate command."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_dir = repo_root / "Skills" / "agent-ops" / "demo"
+                evals_path = skill_dir / "references" / "evals.yaml"
+                evals_path.parent.mkdir(parents=True)
+                evals_path.write_text(
+                    """release_scenario_sets:
+  - id: demo-release-5-v1
+    default: true
+    minimum_scenarios: 5
+    groups:
+      core: [case-one, case-two, case-three, case-four, case-five]
+""",
+                    encoding="utf-8",
+                )
+                receipts_root = repo_root / "Infrastructure" / "artifacts" / "skills" / "demo"
+                for index, selected_case_ids in enumerate((['case-one', 'case-two'], ['case-three', 'case-four'], ['case-five'])):
+                    receipt_path = receipts_root / f"run-{index}" / "sdk-eval-run-receipt.json"
+                    receipt_path.parent.mkdir(parents=True)
+                    receipt_path.write_text(
+                        json.dumps(
+                            {
+                                "status": "pass",
+                                "lane": "oss-local",
+                                "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "scenario_set_id": "demo-release-5-v1",
+                                "package_id": "demo",
+                                "package_digest": "sha256:current",
+                                "selected_case_ids": selected_case_ids,
+                                "case_count": len(selected_case_ids),
+                                "passed_count": len(selected_case_ids),
+                                "failed_count": 0,
+                            }
+                        ),
+                        encoding="utf-8",
+                    )
+                with mock.patch.object(skills_commands._impl, "_skills_sdk_eval_source_path", return_value=skill_dir / "SKILL.md"), mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ):
+                    command = skills_commands._impl._outcome_proof_next_command(
+                        repo_root,
+                        "demo",
+                        "./bin/ask skills audit Skills/agent-ops/demo --level strict --json --robot",
+                    )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(
+            command,
+            "./bin/ask sdk eval aggregate-shards Skills/agent-ops/demo --scenario-set demo-release-5-v1 "
+            "--codex-profile oss-local --receipt Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json "
+            "--receipt Infrastructure/artifacts/skills/demo/run-1/sdk-eval-run-receipt.json "
+            "--receipt Infrastructure/artifacts/skills/demo/run-2/sdk-eval-run-receipt.json --json --robot",
+        )
+
+    def test_shard_aggregate_writes_evidence_only_outside_preview(self):
+        """The normal aggregate route persists evidence while preview remains non-mutating."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                receipt = {"status": "pass", "agent_summary": "All bounded release shards passed."}
+                with mock.patch.object(
+                    skills_commands._impl,
+                    "_skills_sdk_eval_package_identity",
+                    return_value={"package_id": "demo", "package_digest": "sha256:current"},
+                ), mock.patch(
+                    "ask.skills_sdk.eval_shard_aggregate.build_eval_shard_aggregate_receipt",
+                    return_value=receipt,
+                ):
+                    written = skills_commands.skills_sdk_eval_shard_aggregate(
+                        repo_root,
+                        target="Skills/agent-ops/demo",
+                        scenario_set="demo-release-5-v1",
+                        receipts=["Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json"],
+                    )
+                    preview = skills_commands.skills_sdk_eval_shard_aggregate_preview(
+                        repo_root,
+                        target="Skills/agent-ops/demo",
+                        scenario_set="demo-release-5-v1",
+                        receipts=["Infrastructure/artifacts/skills/demo/run-0/sdk-eval-run-receipt.json"],
+                    )
+                    written_payload = written.data["skills_sdk_eval_shard_aggregate"]
+                    artifact_path = repo_root / written_payload["artifact_path"]
+                    self.assertTrue(written_payload["mutation_performed"])
+                    self.assertTrue(artifact_path.is_file())
+                    self.assertEqual(
+                        json.loads(artifact_path.read_text(encoding="utf-8"))["data"]["skills_sdk_eval_shard_aggregate"]["receipt"],
+                        receipt,
+                    )
+                    preview_payload = preview.data["skills_sdk_eval_shard_aggregate"]
+                    self.assertFalse(preview_payload["mutation_performed"])
+                    self.assertNotIn("artifact_path", preview_payload)
+        finally:
+            sys.path.remove(lib_path)
+
     def test_compact_skill_prove_payload_keeps_local_outcome_evidence(self):
         """The compact proof facade retains the identity-bound outcome reference."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")

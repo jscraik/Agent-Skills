@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import subprocess
@@ -19,6 +20,7 @@ if str(ASK_LIB_DIR) not in sys.path:
     sys.path.insert(0, str(ASK_LIB_DIR))
 
 from ask.commands import evals  # noqa: E402
+from ask.commands import sdk_eval  # noqa: E402
 from ask.skills_sdk.handoff_readiness import build_candidate_identity  # noqa: E402
 from ask.skill_review_dashboard import _parse_plugin_eval, _render_eval_cases, render_skill_review_dashboard  # noqa: E402
 
@@ -83,6 +85,27 @@ def test_tessl_run_id_parser_handles_prefixed_json() -> None:
         "id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"
     }
     assert evals._extract_tessl_eval_run_id(payload) == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+
+
+def test_shard_aggregate_dispatch_selects_preview_or_write_artifact_mode() -> None:
+    args = argparse.Namespace(
+        target="Skills/agent-ops/demo",
+        scenario_set="demo-release-5-v1",
+        receipts=["Infrastructure/artifacts/skills/demo/run/sdk-eval-run-receipt.json"],
+        codex_profile="oss-local",
+        preview=False,
+    )
+    with mock.patch.object(sdk_eval.skills_commands, "skills_sdk_eval_shard_aggregate", return_value=mock.Mock()) as write_aggregate, mock.patch.object(
+        sdk_eval.skills_commands,
+        "skills_sdk_eval_shard_aggregate_preview",
+        return_value=mock.Mock(),
+    ) as preview_aggregate:
+        sdk_eval._dispatch_shard_aggregate(REPO_ROOT, args)
+        args.preview = True
+        sdk_eval._dispatch_shard_aggregate(REPO_ROOT, args)
+
+    write_aggregate.assert_called_once()
+    preview_aggregate.assert_called_once()
 
 
 def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
