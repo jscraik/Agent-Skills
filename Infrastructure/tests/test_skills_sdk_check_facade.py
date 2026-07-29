@@ -10,6 +10,7 @@ from helpers.schema_validator import _validate_schema_subset
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/check-receipt.v1.schema.json"
+PUBLIC_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/sdk-check.v1.schema.json"
 TARGET = "Skills/agent-ops/simplify"
 UNMATERIALIZED_TARGET = "Skills/agent-ops/improve-agent-native"
 
@@ -60,6 +61,11 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertEqual(check["receipt"]["failure_class"], "none")
         self.assertEqual(check["status"], "pass")
         self.assertEqual(check["doctor_status"], "warning")
+        self.assertEqual(check["canonical_source_path"], "Skills/agent-ops/simplify/SKILL.md")
+        self.assertEqual(
+            check["claims_boundary"],
+            "This checks local source readiness; it does not prove package readiness, runtime reachability, task outcome, publication, or release readiness.",
+        )
         self.assertEqual(
             check["next_command"],
             "./bin/ask skills package verify Skills/agent-ops/simplify --strict --json --robot",
@@ -68,6 +74,12 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         self.assertLess(len(json.dumps(payload)), 10_240)
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         _validate_schema_subset(schema, check["receipt"], {"check-receipt": schema})
+        public_schema = json.loads(PUBLIC_SCHEMA_PATH.read_text(encoding="utf-8"))
+        _validate_schema_subset(
+            public_schema,
+            check,
+            {"check-receipt": schema, SCHEMA_PATH.name: schema},
+        )
 
     def test_check_validates_source_without_requiring_workspace_projection(self) -> None:
         payload = _run_json_command(
@@ -112,6 +124,8 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         wrapper_check = wrapper_payload["data"]["skills_sdk_check"]
         self.assertEqual(wrapper_check["schema_version"], ask_check["schema_version"])
         self.assertEqual(wrapper_check["status"], ask_check["status"])
+        self.assertEqual(wrapper_check["canonical_source_path"], ask_check["canonical_source_path"])
+        self.assertEqual(wrapper_check["claims_boundary"], ask_check["claims_boundary"])
         self.assertEqual(wrapper_check["receipt"], ask_check["receipt"])
         self.assertEqual(wrapper_payload["metadata"]["command"], f"sdk check {TARGET} --json --robot")
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ask.skills_sdk import ab_contracts, ab_contracts_v0, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
 from ask.skills_sdk.eval_closeout_contracts import EvalCloseoutValidation
@@ -656,6 +656,48 @@ class CheckReceipt(_SdkContractModel):
     acceptance_trace: list[Literal["FR-008", "FR-009", "SA-004", "SA-005", "VP-002", "VP-011", "VP-021"]]
 
 
+NonEmptySdkCheckText = Annotated[str, Field(min_length=1)]
+
+
+class SkillsSdkCheck(_SdkContractModel):
+    schema_version: Literal["skills-sdk-check.v1"]
+    query: NonEmptySdkCheckText
+    status: Literal["pass", "blocked", "degraded"]
+    failure_class: Literal["none", "validation_failed"]
+    doctor_status: NonEmptySdkCheckText | None
+    canonical_source_path: NonEmptySdkCheckText | None
+    canonical_command: NonEmptySdkCheckText
+    facade_command: Literal["skills-sdk check"]
+    receipt: CheckReceipt
+    agent_summary: NonEmptySdkCheckText
+    validation_commands: list[NonEmptySdkCheckText] = Field(min_length=1)
+    next_command: NonEmptySdkCheckText
+    claims_boundary: Literal[
+        "This checks local source readiness; it does not prove package readiness, runtime reachability, "
+        "task outcome, publication, or release readiness."
+    ]
+
+    @model_validator(mode="after")
+    def receipt_matches_facade_verdict(self) -> SkillsSdkCheck:
+        if self.receipt.status != self.status or self.receipt.failure_class != self.failure_class:
+            raise ValueError("skills-sdk check receipt status and failure_class must match the facade verdict")
+        if self.status == "pass":
+            if self.doctor_status not in {"pass", "warning"}:
+                raise ValueError("passing skills-sdk checks require a passing or warning doctor status")
+            if self.canonical_source_path is None:
+                raise ValueError("passing skills-sdk checks require a canonical source path")
+        elif self.status == "blocked":
+            if self.doctor_status != "blocked":
+                raise ValueError("blocked skills-sdk checks require a blocked doctor status")
+        elif self.doctor_status in {"pass", "warning", "blocked"}:
+            raise ValueError("degraded skills-sdk checks require an unrecognized doctor status")
+
+        expected_exit_code = 0 if self.status == "pass" else 2
+        if self.receipt.exit_code != expected_exit_code:
+            raise ValueError("skills-sdk check receipt exit_code must match the facade verdict")
+        return self
+
+
 class RiskSensor(_SdkContractModel):
     id: str
     placement: Literal["source", "schema", "static", "runtime_adapter", "external_adapter", "preview"]
@@ -815,6 +857,10 @@ def validate_install_preview(payload: object) -> InstallPreview:
 
 
 def validate_check_receipt(payload: object) -> CheckReceipt: return CheckReceipt.model_validate(payload)
+
+
+def validate_skills_sdk_check(payload: object) -> SkillsSdkCheck:
+    return SkillsSdkCheck.model_validate(payload)
 
 
 def validate_risk_classification(payload: object) -> RiskClassification: return RiskClassification.model_validate(payload)

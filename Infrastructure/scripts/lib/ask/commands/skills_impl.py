@@ -4452,6 +4452,7 @@ def skills_sdk_check(
         "status": status,
         "failure_class": failure_class,
         "doctor_status": doctor_status,
+        "canonical_source_path": doctor.get("canonical_source_path") if isinstance(doctor, dict) else None,
         "canonical_command": facade_replay_command,
         "facade_command": facade_command,
         "receipt": receipt,
@@ -4469,6 +4470,10 @@ def skills_sdk_check(
             doctor_command,
         ],
         "next_command": next_command,
+        "claims_boundary": (
+            "This checks local source readiness; it does not prove package readiness, runtime reachability, "
+            "task outcome, publication, or release readiness."
+        ),
     }
     result.data["skills_sdk_check"] = payload
     return result

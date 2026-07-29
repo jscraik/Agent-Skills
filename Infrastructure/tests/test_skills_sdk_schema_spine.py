@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -15,6 +16,7 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 SCHEMA_NAMES = {
     "manifest-source": "manifest-source.v1.schema.json",
     "check-receipt": "check-receipt.v1.schema.json",
+    "sdk-check": "sdk-check.v1.schema.json",
     "capability-evidence-receipt": "capability-evidence-receipt.v0.schema.json",
     "evidence-status": "evidence-status.v1.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
@@ -187,6 +189,12 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["work_mode"], "computational")
         self.assertEqual(payload["actor"]["role"], "agent")
         self.assertIn("VP-011", payload["acceptance_trace"])
+
+    def test_sdk_check_fixture_binds_source_and_claims_boundary(self) -> None:
+        payload = self.assert_valid("sdk-check", "sdk-check.json")
+
+        self.assertEqual(payload["canonical_source_path"], "Skills/agent-ops/simplify/SKILL.md")
+        self.assertIn("does not prove package readiness", payload["claims_boundary"])
 
     def test_risk_classification_fixture_encodes_dimensions_and_sensor_ids(self) -> None:
         payload = self.assert_valid("risk-classification", "risk-classification.json")
@@ -996,6 +1004,86 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_receipt_schema_rejects_non_contract_status_names(self) -> None:
         self.assert_invalid("check-receipt", "check-receipt-pass-placeholder.json")
+
+    def test_sdk_check_schema_requires_source_and_claims_boundary(self) -> None:
+        self.assert_invalid("sdk-check", "sdk-check-missing-canonical-source-path.json")
+        self.assert_invalid("sdk-check", "sdk-check-missing-claims-boundary.json")
+
+    def test_sdk_check_schema_rejects_empty_or_contradictory_contract_values(self) -> None:
+        payload = self.assert_valid("sdk-check", "sdk-check.json")
+        invalid_payloads = (
+            {**payload, "canonical_source_path": ""},
+            {**payload, "canonical_source_path": None},
+            {**payload, "validation_commands": []},
+            {**payload, "claims_boundary": "This proves package readiness."},
+            {**payload, "doctor_status": "blocked"},
+            {
+                **payload,
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                },
+            },
+            {**payload, "receipt": {**payload["receipt"], "exit_code": 2}},
+            {
+                **payload,
+                "status": "blocked",
+                "failure_class": "validation_failed",
+                "doctor_status": "warning",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                    "exit_code": 2,
+                },
+            },
+            {
+                **payload,
+                "status": "blocked",
+                "failure_class": "validation_failed",
+                "doctor_status": "blocked",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                    "exit_code": 0,
+                },
+            },
+            {
+                **payload,
+                "status": "degraded",
+                "failure_class": "validation_failed",
+                "doctor_status": "warning",
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "degraded",
+                    "failure_class": "validation_failed",
+                    "exit_code": 2,
+                },
+            },
+            {
+                **payload,
+                "status": "degraded",
+                "failure_class": "validation_failed",
+                "doctor_status": None,
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "degraded",
+                    "failure_class": "validation_failed",
+                    "exit_code": 0,
+                },
+            },
+        )
+
+        for invalid_payload in invalid_payloads:
+            with self.subTest(invalid_payload=invalid_payload):
+                with self.assertRaises(AssertionError):
+                    _validate_schema_subset(
+                        self.schemas["sdk-check"],
+                        copy.deepcopy(invalid_payload),
+                        {**self.schemas, **self.schemas_by_file},
+                    )
 
     def test_install_preview_schema_rejects_write_claims(self) -> None:
         self.assert_invalid("install-preview", "install-preview-writes.json")

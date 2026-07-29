@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/sdk-check.v1.schema.json",
+  "title": "Skills SDK Check Facade v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk-check.v1"},
+    "query": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["pass", "blocked", "degraded"]},
+    "failure_class": {"type": "string", "enum": ["none", "validation_failed"]},
+    "doctor_status": {"type": ["string", "null"], "minLength": 1},
+    "canonical_source_path": {"type": ["string", "null"], "minLength": 1},
+    "canonical_command": {"type": "string", "minLength": 1},
+    "facade_command": {"type": "string", "const": "skills-sdk check"},
+    "receipt": {"allOf": [{"$ref": "check-receipt.v1.schema.json"}]},
+    "agent_summary": {"type": "string", "minLength": 1},
+    "validation_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_command": {"type": "string", "minLength": 1},
+    "claims_boundary": {
+      "type": "string",
+      "const": "This checks local source readiness; it does not prove package readiness, runtime reachability, task outcome, publication, or release readiness."
+    }
+  },
+  "required": [
+    "schema_version",
+    "query",
+    "status",
+    "failure_class",
+    "doctor_status",
+    "canonical_source_path",
+    "canonical_command",
+    "facade_command",
+    "receipt",
+    "agent_summary",
+    "validation_commands",
+    "next_command",
+    "claims_boundary"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "none"},
+          "doctor_status": {"enum": ["pass", "warning"]},
+          "canonical_source_path": {"type": "string", "minLength": 1},
+          "receipt": {
+            "properties": {
+              "status": {"const": "pass"},
+              "failure_class": {"const": "none"},
+              "exit_code": {"const": 0}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "validation_failed"},
+          "doctor_status": {"const": "blocked"},
+          "receipt": {
+            "properties": {
+              "status": {"const": "blocked"},
+              "failure_class": {"const": "validation_failed"},
+              "exit_code": {"const": 2}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "degraded"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "validation_failed"},
+          "doctor_status": {
+            "anyOf": [
+              {"type": "null"},
+              {"type": "string", "pattern": "^(?!(?:pass|warning|blocked)$).+$"}
+            ]
+          },
+          "receipt": {
+            "properties": {
+              "status": {"const": "degraded"},
+              "failure_class": {"const": "validation_failed"},
+              "exit_code": {"const": 2}
+            }
+          }
+        }
+      }
+    }
+  ]
+}
