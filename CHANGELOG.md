@@ -27,6 +27,7 @@ All notable changes for this repository are documented in this file.
 
 ### Fixed
 
+- `2026-07-29` [50f66e3] fix(sdk): persist passing local evaluation shard aggregates for target-bound skill proof
 - `2026-02-23` [fd3ab94] Fix Codex skills symlink sync and update skill index
 - `2026-02-22` [8196e8b] fix codex-agent-builder accuracy and installer behavior
 
