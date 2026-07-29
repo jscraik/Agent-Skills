@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ask.skills_sdk import ab_contracts, ab_contracts_v0, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
 from ask.skills_sdk.eval_closeout_contracts import EvalCloseoutValidation
@@ -656,20 +656,32 @@ class CheckReceipt(_SdkContractModel):
     acceptance_trace: list[Literal["FR-008", "FR-009", "SA-004", "SA-005", "VP-002", "VP-011", "VP-021"]]
 
 
+NonEmptySdkCheckText = Annotated[str, Field(min_length=1)]
+
+
 class SkillsSdkCheck(_SdkContractModel):
     schema_version: Literal["skills-sdk-check.v1"]
-    query: str
+    query: NonEmptySdkCheckText
     status: Literal["pass", "blocked", "degraded"]
     failure_class: Literal["none", "validation_failed"]
     doctor_status: str | None
-    canonical_source_path: str | None
-    canonical_command: str
+    canonical_source_path: NonEmptySdkCheckText | None
+    canonical_command: NonEmptySdkCheckText
     facade_command: Literal["skills-sdk check"]
     receipt: CheckReceipt
-    agent_summary: str
-    validation_commands: list[str]
-    next_command: str
-    claims_boundary: str
+    agent_summary: NonEmptySdkCheckText
+    validation_commands: list[NonEmptySdkCheckText] = Field(min_length=1)
+    next_command: NonEmptySdkCheckText
+    claims_boundary: Literal[
+        "This checks local source readiness; it does not prove package readiness, runtime reachability, "
+        "task outcome, publication, or release readiness."
+    ]
+
+    @model_validator(mode="after")
+    def receipt_matches_facade_verdict(self) -> SkillsSdkCheck:
+        if self.receipt.status != self.status or self.receipt.failure_class != self.failure_class:
+            raise ValueError("skills-sdk check receipt status and failure_class must match the facade verdict")
+        return self
 
 
 class RiskSensor(_SdkContractModel):

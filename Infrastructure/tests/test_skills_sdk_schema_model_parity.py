@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 import sys
@@ -116,6 +117,29 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
 
                 with self.assertRaises(ValidationError):
                     contracts.validate_skills_sdk_check(_json(FIXTURE_DIR / "invalid" / fixture_name))
+
+    def test_sdk_check_model_rejects_empty_or_contradictory_contract_values(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sdk-check.json")
+        self.assertIsInstance(payload, dict)
+        cases = (
+            ("empty_query", {**payload, "query": ""}),
+            ("empty_canonical_source_path", {**payload, "canonical_source_path": ""}),
+            ("empty_canonical_command", {**payload, "canonical_command": ""}),
+            ("empty_agent_summary", {**payload, "agent_summary": ""}),
+            ("empty_validation_commands", {**payload, "validation_commands": []}),
+            ("empty_validation_command", {**payload, "validation_commands": [""]}),
+            ("empty_next_command", {**payload, "next_command": ""}),
+            ("broadened_claims_boundary", {**payload, "claims_boundary": "This proves package readiness."}),
+            (
+                "contradictory_receipt_status",
+                {**payload, "receipt": {**payload["receipt"], "status": "blocked", "failure_class": "validation_failed"}},
+            ),
+        )
+
+        for case_name, invalid_payload in cases:
+            with self.subTest(case_name=case_name):
+                with self.assertRaises(ValidationError):
+                    contracts.validate_skills_sdk_check(copy.deepcopy(invalid_payload))
 
     def test_invalid_skill_intake_execution_claim_fails_schema_and_model(self) -> None:
         result = self.assert_schema_fails("skill-intake-receipt", "skill-intake-executes.json")

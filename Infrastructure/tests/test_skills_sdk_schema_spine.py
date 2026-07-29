@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -1007,6 +1008,31 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
     def test_sdk_check_schema_requires_source_and_claims_boundary(self) -> None:
         self.assert_invalid("sdk-check", "sdk-check-missing-canonical-source-path.json")
         self.assert_invalid("sdk-check", "sdk-check-missing-claims-boundary.json")
+
+    def test_sdk_check_schema_rejects_empty_or_contradictory_contract_values(self) -> None:
+        payload = self.assert_valid("sdk-check", "sdk-check.json")
+        invalid_payloads = (
+            {**payload, "canonical_source_path": ""},
+            {**payload, "validation_commands": []},
+            {**payload, "claims_boundary": "This proves package readiness."},
+            {
+                **payload,
+                "receipt": {
+                    **payload["receipt"],
+                    "status": "blocked",
+                    "failure_class": "validation_failed",
+                },
+            },
+        )
+
+        for invalid_payload in invalid_payloads:
+            with self.subTest(invalid_payload=invalid_payload):
+                with self.assertRaises(AssertionError):
+                    _validate_schema_subset(
+                        self.schemas["sdk-check"],
+                        copy.deepcopy(invalid_payload),
+                        {**self.schemas, **self.schemas_by_file},
+                    )
 
     def test_install_preview_schema_rejects_write_claims(self) -> None:
         self.assert_invalid("install-preview", "install-preview-writes.json")

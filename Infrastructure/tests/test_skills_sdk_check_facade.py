@@ -124,6 +124,8 @@ class TestSkillsSdkCheckFacade(unittest.TestCase):
         wrapper_check = wrapper_payload["data"]["skills_sdk_check"]
         self.assertEqual(wrapper_check["schema_version"], ask_check["schema_version"])
         self.assertEqual(wrapper_check["status"], ask_check["status"])
+        self.assertEqual(wrapper_check["canonical_source_path"], ask_check["canonical_source_path"])
+        self.assertEqual(wrapper_check["claims_boundary"], ask_check["claims_boundary"])
         self.assertEqual(wrapper_check["receipt"], ask_check["receipt"])
         self.assertEqual(wrapper_payload["metadata"]["command"], f"sdk check {TARGET} --json --robot")
 

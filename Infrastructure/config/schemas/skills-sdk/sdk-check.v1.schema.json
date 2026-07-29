@@ -13,7 +13,7 @@
     "canonical_source_path": {"type": ["string", "null"], "minLength": 1},
     "canonical_command": {"type": "string", "minLength": 1},
     "facade_command": {"type": "string", "const": "skills-sdk check"},
-    "receipt": {"$ref": "check-receipt.v1.schema.json"},
+    "receipt": {"allOf": [{"$ref": "check-receipt.v1.schema.json"}]},
     "agent_summary": {"type": "string", "minLength": 1},
     "validation_commands": {
       "type": "array",
@@ -21,7 +21,10 @@
       "items": {"type": "string", "minLength": 1}
     },
     "next_command": {"type": "string", "minLength": 1},
-    "claims_boundary": {"type": "string", "minLength": 1}
+    "claims_boundary": {
+      "type": "string",
+      "const": "This checks local source readiness; it does not prove package readiness, runtime reachability, task outcome, publication, or release readiness."
+    }
   },
   "required": [
     "schema_version",
@@ -37,5 +40,49 @@
     "validation_commands",
     "next_command",
     "claims_boundary"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "none"},
+          "receipt": {
+            "properties": {
+              "status": {"const": "pass"},
+              "failure_class": {"const": "none"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "validation_failed"},
+          "receipt": {
+            "properties": {
+              "status": {"const": "blocked"},
+              "failure_class": {"const": "validation_failed"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "degraded"}}},
+      "then": {
+        "properties": {
+          "failure_class": {"const": "validation_failed"},
+          "receipt": {
+            "properties": {
+              "status": {"const": "degraded"},
+              "failure_class": {"const": "validation_failed"}
+            }
+          }
+        }
+      }
+    }
   ]
 }
