@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
 from __future__ import annotations
 
 import argparse
@@ -16,11 +17,15 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+SKILLS_SDK_LIB_DIR = SCRIPT_DIR.parent / "lib"
+if str(SKILLS_SDK_LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(SKILLS_SDK_LIB_DIR))
 
 from check_oss_local_smoke_output import _findings
+from ask.skills_sdk.eval_profiles import OSS_CLOUD_MODEL
 
 
-EXPECTED_MODEL = "minimax-m2.7:cloud"
+EXPECTED_MODEL = OSS_CLOUD_MODEL
 EXPECTED_PROVIDER = "ollama-cloud"
 DEFAULT_PROFILE_SOURCE = Path.home() / ".codex" / "oss-cloud.config.toml"
 DEFAULT_OP_ENV_FILE = Path.home() / ".codex" / ".env"

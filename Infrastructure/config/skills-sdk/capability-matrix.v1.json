@@ -465,8 +465,8 @@
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Run a bounded minimax-m2.7:cloud canary through codex exec --profile oss-cloud, then refresh the 10-case cloud challenge receipts before Tessl dry-run.",
-      "notes": "The SDK routes to the internal skill-builder eval backend, binds receipts to package, rubric, and execution-model identity, and aggregates bounded release shards only when profile and exact case coverage match. The prior qwen and DeepSeek target-eight aggregates are archived historical evidence because the package policy and oss-cloud model changed. skills-sdk.evaluation-lane-policy.v1 now requires a 20-case qwen local development pool, a 10-case MiniMax cloud challenge pool containing the fixed release eight plus 2 rotating local growth cases, and the unchanged release eight for Tessl deepseek-v4-flash comparison. Changing release case ids, criteria, rubric, scorer, package identity, or execution model family creates a new baseline version. Config and contract checks pass; live MiniMax provider invocation remains blocked in the nested Codex sandbox. No Tessl, distribution, runtime, or release readiness is claimed."
+      "next_slice": "Run a bounded deepseek-v4-flash:cloud canary through codex exec --profile oss-cloud, then refresh the cloud challenge receipts before Tessl dry-run.",
+      "notes": "The SDK routes to the internal skill-builder eval backend, binds receipts to package, rubric, and execution-model identity, and aggregates bounded release shards only when profile and exact case coverage match. A cloud model change creates a new baseline version and requires the same selected release cases, rubric, scorer, package identity, and execution-model identity. Config and contract checks pass; live DeepSeek provider invocation remains blocked in the nested Codex sandbox. No Tessl, distribution, runtime, or release readiness is claimed."
     },
     {
       "id": "eval_profiles",
@@ -482,7 +482,7 @@
         "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
       ],
       "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
-      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:9b-mlx, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for minimax-m2.7:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:9b-mlx, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
     },
     {
       "id": "ab_rubric",
@@ -498,8 +498,8 @@
         "Infrastructure/tests/test_skills_sdk_ab_rubric.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_rubric_fixture_records_stable_cross_stage_scorecard"
       ],
-      "next_slice": "Use this rubric digest for Codex oss-local judge execution before adding Codex oss-cloud MiniMax and Tessl DeepSeek confirmation receipts.",
-      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:9b-mlx, cloud minimax-m2.7:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
+      "next_slice": "Use this rubric digest for Codex oss-local judge execution before adding Codex oss-cloud DeepSeek and Tessl confirmation receipts.",
+      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:9b-mlx, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
     },
     {
       "id": "ab_preview",
@@ -547,8 +547,8 @@
         "Infrastructure/tests/test_skills_sdk_ab_run.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_run_fixture_records_codex_execution_without_judge_invocation"
       ],
-      "next_slice": "Use completed A/B run receipts to feed local advisory judge scoring before adding cloud MiniMax and Tessl DeepSeek confirmation receipts.",
-      "notes": "The SDK now has an explicit --execute-gated Codex A/B run command that writes bounded prompt/stdout/stderr/last-message evidence, records one result per variant, and keeps judge provider invocation false until a separate scoring receipt is added."
+      "next_slice": "Use completed A/B run receipts to feed local advisory judge scoring before adding cloud DeepSeek and Tessl confirmation receipts.",
+      "notes": "The SDK has an explicit --execute-gated Codex A/B run command that executes exactly one selected runtime stage, writes bounded prompt/stdout/stderr/last-message evidence, records one result per variant, and keeps judge provider invocation false until a separate scoring receipt is added. An oss-local completion may truthfully remain offline; an oss-cloud completion still requires opaque credential and network evidence."
     },
     {
       "id": "ab_judge_preview",
@@ -581,7 +581,7 @@
         "Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_score_fixture_records_codex_profile_advisory_decision"
       ],
-      "next_slice": "Add Codex oss-cloud MiniMax confirmation only after local qwen3.5:9b-mlx scoring receipts are calibrated against expected labels.",
+      "next_slice": "Add Codex oss-cloud DeepSeek confirmation only after local qwen3.5:9b-mlx scoring receipts are calibrated against expected labels.",
       "notes": "The SDK can now invoke Codex exec with --profile oss-local against sanitized A/B evidence, validate the returned decision contract, and emit advisory score receipts. Codex oss-cloud, Codex-fast, and Tessl remain separate confirmation lanes."
     },
     {

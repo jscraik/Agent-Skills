@@ -38,6 +38,8 @@ class TestSkillsSdkAbRubric(unittest.TestCase):
             {policy["stage"] for policy in receipt["rubric"]["stage_policies"]},
             {"local_oss_loop", "cloud_oss_loop", "external_validation"},
         )
+        cloud_policy = next(policy for policy in receipt["rubric"]["stage_policies"] if policy["stage"] == "cloud_oss_loop")
+        self.assertEqual(cloud_policy["default_model"], "deepseek-v4-flash:cloud")
         self.assertEqual(
             receipt["rubric"]["judge_output_contract"],
             {

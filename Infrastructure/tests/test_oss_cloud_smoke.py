@@ -27,7 +27,7 @@ def _write_executable(path: Path, contents: str) -> None:
     path.chmod(0o755)
 
 
-def _write_profile(path: Path, *, model: str = "minimax-m2.7:cloud", provider: str = "ollama-cloud") -> None:
+def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:cloud", provider: str = "ollama-cloud") -> None:
     path.write_text(
         f'model = "{model}"\nmodel_provider = "{provider}"\n',
         encoding="utf-8",
@@ -119,7 +119,7 @@ class TestOssCloudSmoke(unittest.TestCase):
     def test_profile_findings_reject_wrong_model_and_provider(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "oss-cloud.config.toml"
-            _write_profile(path, model="deepseek-v4-flash", provider="ollama")
+            _write_profile(path, model="minimax-m2.7:cloud", provider="ollama")
 
             findings = self.runner._profile_findings(path)
 
@@ -132,7 +132,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "oss-cloud.config.toml"
             path.write_text(
-                'model="minimax-m2.7:cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
+                'model="deepseek-v4-flash:cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
                 encoding="utf-8",
             )
 
@@ -227,7 +227,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["model"], "minimax-m2.7:cloud")
+        self.assertEqual(receipt["model"], "deepseek-v4-flash:cloud")
         self.assertEqual(receipt["model_provider"], "ollama-cloud")
         self.assertEqual(receipt["auth_source"], "op_reference")
         self.assertNotIn("OLLAMA_API_KEY=", json.dumps(receipt))
