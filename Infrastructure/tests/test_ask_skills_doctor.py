@@ -22,128 +22,8 @@ from ask.commands.skills_impl import (  # noqa: E402
 from ask.skills_sdk import runtime_adapters  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 from helpers.schema_validator import (  # noqa: E402
-    SUPPORTED_SCHEMA_KEYS as _SUPPORTED_SCHEMA_KEYS,
-    _resolve_schema_ref,
-    _schema_type_matches,
+    _validate_schema_subset,
 )
-
-
-def _validate_json_schema_subset(
-    schema: dict,
-    value: object,
-    root_schema: dict,
-    path: str = "$",
-) -> None:
-    if "$ref" in schema:
-        _validate_json_schema_subset(
-            _resolve_schema_ref(schema["$ref"], root_schema),
-            value,
-            root_schema,
-            path,
-        )
-        return
-
-    if "type" in schema:
-        expected_types = schema["type"]
-        if isinstance(expected_types, str):
-            expected_types = [expected_types]
-        if not any(_schema_type_matches(value, expected) for expected in expected_types):
-            raise AssertionError(
-                f"{path}: expected type {expected_types}, got {type(value).__name__}"
-            )
-
-    if "const" in schema and value != schema["const"]:
-        raise AssertionError(f"{path}: expected const {schema['const']!r}, got {value!r}")
-
-    if "enum" in schema and value not in schema["enum"]:
-        raise AssertionError(f"{path}: expected one of {schema['enum']!r}, got {value!r}")
-
-    if isinstance(value, str) and "minLength" in schema:
-        if len(value) < schema["minLength"]:
-            raise AssertionError(f"{path}: shorter than minLength {schema['minLength']}")
-
-    if isinstance(value, int) and "minimum" in schema:
-        if value < schema["minimum"]:
-            raise AssertionError(f"{path}: smaller than minimum {schema['minimum']}")
-
-    if isinstance(value, dict):
-        for key in schema.get("required", []):
-            if key not in value:
-                raise AssertionError(f"{path}: missing required key {key!r}")
-
-        properties = schema.get("properties", {})
-        for key, child_schema in properties.items():
-            if key in value:
-                _validate_json_schema_subset(
-                    child_schema,
-                    value[key],
-                    root_schema,
-                    f"{path}.{key}",
-                )
-
-        additional = schema.get("additionalProperties", True)
-        extra_keys = set(value) - set(properties)
-        if additional is False and extra_keys:
-            raise AssertionError(f"{path}: unexpected keys {sorted(extra_keys)!r}")
-        if isinstance(additional, dict):
-            for key in extra_keys:
-                _validate_json_schema_subset(
-                    additional,
-                    value[key],
-                    root_schema,
-                    f"{path}.{key}",
-                )
-
-    if isinstance(value, list) and "items" in schema:
-        if "minItems" in schema and len(value) < schema["minItems"]:
-            raise AssertionError(f"{path}: fewer than minItems {schema['minItems']}")
-        for index, item in enumerate(value):
-            _validate_json_schema_subset(
-                schema["items"],
-                item,
-                root_schema,
-                f"{path}[{index}]",
-            )
-
-    if "oneOf" in schema:
-        matches = 0
-        for option in schema["oneOf"]:
-            try:
-                _validate_json_schema_subset(option, value, root_schema, path)
-            except AssertionError:
-                continue
-            matches += 1
-        if matches != 1:
-            raise AssertionError(f"{path}: expected exactly one oneOf match, got {matches}")
-
-
-def _assert_schema_subset_supported(schema: dict, path: str = "$") -> None:
-    for key, value in schema.items():
-        if key == "definitions":
-            if isinstance(value, dict):
-                for definition_name, definition_schema in value.items():
-                    _assert_schema_subset_supported(
-                        definition_schema,
-                        f"{path}.definitions.{definition_name}",
-                    )
-            continue
-        if key == "properties":
-            if isinstance(value, dict):
-                for property_name, property_schema in value.items():
-                    _assert_schema_subset_supported(
-                        property_schema,
-                        f"{path}.properties.{property_name}",
-                    )
-            continue
-        if key not in _SUPPORTED_SCHEMA_KEYS:
-            raise AssertionError(f"{path}: unsupported schema keyword {key!r}")
-        if key == "items" and isinstance(value, dict):
-            _assert_schema_subset_supported(value, f"{path}.items")
-        if key == "additionalProperties" and isinstance(value, dict):
-            _assert_schema_subset_supported(value, f"{path}.additionalProperties")
-        if key == "oneOf" and isinstance(value, list):
-            for index, option_schema in enumerate(value):
-                _assert_schema_subset_supported(option_schema, f"{path}.oneOf[{index}]")
 
 
 def _assert_skill_doctor_schema_validates(test_case: unittest.TestCase, payload: dict) -> None:
@@ -152,8 +32,7 @@ def _assert_skill_doctor_schema_validates(test_case: unittest.TestCase, payload:
     )
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     try:
-        _assert_schema_subset_supported(schema)
-        _validate_json_schema_subset(schema, payload, schema)
+        _validate_schema_subset(schema, payload, {})
     except AssertionError as exc:
         test_case.fail(f"skill-doctor schema validation failed: {exc}")
 
@@ -405,7 +284,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         }
 
         with self.assertRaises(AssertionError) as context:
-            _validate_json_schema_subset(schema, invalid_payload, schema)
+            _validate_schema_subset(schema, invalid_payload, {})
 
         self.assertIn("missing required key", str(context.exception))
 
@@ -456,6 +335,46 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(doctor["lifecycle_event"]["event_type"], "skill_doctor_completed")
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
         self.assertEqual(len(doctor["warnings"]), 1)
+        _assert_skill_doctor_schema_validates(self, doctor)
+
+    def test_doctor_accepts_current_release_aggregate_as_outcome_proof(self) -> None:
+        resolution = {
+            "status": "ok",
+            "handle": "autofix",
+            "source_path": "Skills/agent-ops/autofix/SKILL.md",
+        }
+        release_evidence = {
+            "status": "pass",
+            "evidence_class": "oss_local_release_aggregate",
+            "evidence_ref": "Infrastructure/artifacts/skills/autofix/current/aggregate.json",
+            "evidence_digest": "sha256:release-proof",
+            "scenario_set": "autofix-release-8-v1",
+            "case_count": 8,
+        }
+
+        with (
+            patch("ask.commands.skills_impl.resolve_skill_handle", return_value=resolution),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("autofix")),
+            patch("ask.commands.skills_impl.audit_skill", return_value=_audit_result()),
+            patch("ask.commands.skills_impl._skill_workout_candidates", return_value=[]),
+            patch("ask.commands.skills_impl._eval_shard_outcome_proof", return_value=release_evidence),
+        ):
+            result = skills_doctor(REPO_ROOT, "autofix")
+
+        doctor = result.data["skill_doctor"]
+        self.assertEqual(doctor["checks"]["outcome_proof"]["status"], "pass")
+        self.assertEqual(
+            doctor["checks"]["outcome_proof"]["evidence_class"],
+            "oss_local_release_aggregate",
+        )
+        self.assertEqual(
+            doctor["checks"]["outcome_proof"]["evidence_ref"],
+            "Infrastructure/artifacts/skills/autofix/current/aggregate.json",
+        )
+        self.assertNotIn(
+            "outcome_proof_missing",
+            [warning["class"] for warning in doctor["warnings"]],
+        )
         _assert_skill_doctor_schema_validates(self, doctor)
 
     def test_doctor_blocks_when_runtime_reachability_fails(self) -> None:
