@@ -4403,13 +4403,28 @@ def skills_doctor(
 
     workout_handle = str(normalized_handle or (Path(audit_target).name if audit_target else "")).strip()
     workouts = _skill_workout_candidates(repo_root, workout_handle) if workout_handle else []
+    evaluation_proof = _eval_shard_outcome_proof(repo_root, workout_handle) if workout_handle else {
+        "status": "missing",
+        "evidence_class": "outcome_proof",
+    }
+    outcome_proof_status = str(evaluation_proof.get("status") or "missing")
+    if outcome_proof_status == "pass":
+        doctor_outcome_status = "pass"
+    elif workouts:
+        doctor_outcome_status = "available_not_run"
+    else:
+        doctor_outcome_status = "missing"
     checks["outcome_proof"] = _doctor_check(
-        "available_not_run" if workouts else "missing",
+        doctor_outcome_status,
         check_name="outcome_proof",
         workout_candidates=workouts,
-        evidence_class="outcome_proof",
+        evidence_class=evaluation_proof.get("evidence_class", "outcome_proof"),
+        evidence_ref=evaluation_proof.get("evidence_ref"),
+        evidence_digest=evaluation_proof.get("evidence_digest"),
+        scenario_set=evaluation_proof.get("scenario_set"),
+        case_count=evaluation_proof.get("case_count"),
     )
-    if not workouts:
+    if outcome_proof_status != "pass" and not workouts:
         warnings.append(
             _doctor_warning(
                 "outcome_proof_missing",
