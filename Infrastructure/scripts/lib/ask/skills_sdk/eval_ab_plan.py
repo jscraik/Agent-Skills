@@ -103,7 +103,6 @@ def _codex_command_argv(
         "exec",
         "--profile",
         codex_profile,
-        "--ignore-user-config",
         "--disable",
         "apps",
         "-c",

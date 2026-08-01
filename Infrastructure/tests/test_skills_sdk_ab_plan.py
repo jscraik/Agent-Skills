@@ -383,10 +383,10 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
 
     def _assert_command_argv(self, receipt: dict[str, object]) -> None:
         first = receipt["command_plan"][0]
-        self.assertEqual(first["command_argv"][:11], ["codex", "exec", "--profile", "oss-local", "--ignore-user-config", "--disable", "apps", "-c", 'approval_policy="on-request"', "--sandbox", "read-only"])
+        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "--disable", "apps", "-c", 'approval_policy="on-request"'])
         self.assertEqual(first["approval_policy"], "on-request")
-        self.assertIn("--ignore-user-config", first["command_argv"])
         self.assertEqual(first["command_argv"][first["command_argv"].index("--disable") + 1], "apps")
+        self.assertNotIn("--ignore-user-config", first["command_argv"])
         self.assertIn("--json", first["command_argv"])
         for gate in receipt["runtime_profile_gates"]:
             for command in gate["command_plan"]:
