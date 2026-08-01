@@ -102,43 +102,29 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(failures, ["regex failed: /(?i)red_signal/"])
 
     def test_expected_signal_acceptance_is_executable_for_text_and_json(self) -> None:
-        assertions = [
-            {
-                "type": "expected_signal",
-                "value": (
-                    "Starts from inspected traces, labels, metrics, or files and names "
-                    "the smallest next validation step instead of treating trust as a "
-                    "generic quality score."
-                ),
-            },
-            {"type": "regex", "value": "(validation|evidence|scope|workflow)"},
-        ]
+        assertions = [{"type": "expected_signal", "value": "Starts from inspected traces, labels, metrics, or files and names the smallest next validation step instead of treating trust as a generic quality score."}, {"type": "regex", "value": "(validation|evidence|scope|workflow)"}]
+        for runner, output in [
+            (evaluate_assertions_text, "I inspected the trace and label evidence, then identified the smallest next validation step before changing the workflow."),
+            (evaluate_assertions_json, {"evidence": "inspected trace labels", "next_check": "smallest validation step", "quality": "not a generic trust score"}),
+        ]:
+            self.assertEqual(runner(output, assertions, skill_name="improve-agent-native", selected_skill=True), [])
 
-        self.assertEqual(
-            evaluate_assertions_text(
-                (
-                    "I inspected the trace and label evidence, then identified the "
-                    "smallest next validation step before changing the workflow."
-                ),
-                assertions,
-                skill_name="improve-agent-native",
-                selected_skill=True,
-            ),
-            [],
-        )
-        self.assertEqual(
-            evaluate_assertions_json(
-                {
-                    "evidence": "inspected trace labels",
-                    "next_check": "smallest validation step",
-                    "quality": "not a generic trust score",
-                },
-                assertions,
-                skill_name="improve-agent-native",
-                selected_skill=True,
-            ),
-            [],
-        )
+        semantic = [{"type": "semantic_requirements", "requirements": [
+            {"id": "stable_read", "all_of": ["stable", "side-effect-free"]},
+            {"id": "single_read", "all_of": ["two calls", "one read"]},
+            {"id": "both_branches", "all_of": ["validation", "enabled", "disabled"]},
+        ]}]
+        passing = "stable and side-effect-free; two calls become one read; validation covers enabled and disabled branches"
+        self.assertEqual(evaluate_assertions_text(passing, semantic, skill_name="simplify", selected_skill=True), [])
+        for requirement_id, output in {"stable_read": "two calls become one read; validation covers enabled and disabled branches", "single_read": "stable and side-effect-free; validation covers enabled and disabled branches", "both_branches": "stable and side-effect-free; two calls become one read"}.items():
+            failure = evaluate_assertions_text(output, semantic, skill_name="simplify", selected_skill=True)
+            self.assertEqual(failure[0], f"semantic_requirements failed: {requirement_id}")
+        for requirements, message in [([], "missing non-empty requirements list"), ([{"id": "bad", "all_of": []}], "requirement 'bad' needs non-empty any_of and/or all_of strings")]:
+            failure = evaluate_assertions_text("evidence", [{"type": "semantic_requirements", "requirements": requirements}], skill_name="simplify", selected_skill=True)
+            self.assertEqual(failure[0], f"semantic_requirements {message}")
+        self.assertEqual(evaluate_assertions_text("**Outcome:** `no_justified_edit`", [{"type": "text_field_equals", "field": "Outcome", "value": "no_justified_edit"}], skill_name="simplify", selected_skill=True), [])
+        case = next(item for item in _load_evals_document(REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml")["cases"] if item["id"] == "edge-efficiency-rubric")
+        self.assertEqual(case["acceptance"][1]["type"], "semantic_requirements")
 
     def test_expected_signal_acceptance_fails_vague_regex_only_response(self) -> None:
         assertions = [
