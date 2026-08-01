@@ -1,0 +1,7 @@
+{
+  "id": "no-diff-edit-invented",
+  "probe_type": "skill_name_mention_not_enough",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fail fixture treats a skill name as permission to invent a cleanup when no comparison scope was supplied."
+}

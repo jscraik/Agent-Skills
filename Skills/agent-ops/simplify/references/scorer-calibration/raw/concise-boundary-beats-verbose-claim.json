@@ -1,0 +1,7 @@
+{
+  "id": "concise-boundary-beats-verbose-claim",
+  "probe_type": "short_correct_vs_verbose_wrong",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fail fixture prefers an unsupported verbose equivalence claim over a concise evidence boundary."
+}

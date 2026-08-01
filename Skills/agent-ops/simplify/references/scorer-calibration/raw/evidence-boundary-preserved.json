@@ -1,0 +1,7 @@
+{
+  "id": "evidence-boundary-preserved",
+  "probe_type": "obvious_correct",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "rationale": "Pass fixture names the supplied diff, focused validation, and the behavior boundary without claiming equivalence beyond the evidence."
+}
