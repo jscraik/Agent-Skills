@@ -143,7 +143,7 @@ def _validate_completed_run_packets(receipt: Any) -> None:
     if not _run_has_consistent_runtime_gates(receipt):
         raise ValueError("A/B run must preserve ordered runtime gates and matching oss-local results")
     if any(gate.status != "completed" for gate in receipt.runtime_profile_gates):
-        raise ValueError("completed A/B run requires both runtime profile gates")
+        raise ValueError("completed A/B run requires every selected runtime profile gate")
 
 
 def _run_has_evidence(receipt: Any) -> bool:
@@ -155,8 +155,9 @@ def _run_has_evidence(receipt: Any) -> bool:
 
 
 def _run_has_consistent_runtime_gates(receipt: Any) -> bool:
+    expected_lanes = ["oss-local", "oss-cloud"] if receipt.execution_lane == "all" else ["oss-local"]
     return (
-        [gate.lane for gate in receipt.runtime_profile_gates] == ["oss-local", "oss-cloud"]
+        [gate.lane for gate in receipt.runtime_profile_gates] == expected_lanes
         and receipt.command_plan == receipt.runtime_profile_gates[0].command_plan
         and receipt.variant_results == receipt.runtime_profile_gates[0].variant_results
         and all(_gate_results_match_command_plan(gate) for gate in receipt.runtime_profile_gates)
@@ -182,5 +183,7 @@ def _reports_codex_side_effects(receipt: Any) -> bool:
         receipt.mutation_performed
         and receipt.provider_invoked
         and receipt.codex_exec_invoked
-        and receipt.network_accessed
+        # Local Ollama execution can be proven without an external network
+        # claim; the default all-lane contract still requires network evidence.
+        and (receipt.network_accessed or receipt.execution_lane == "oss-local")
     )

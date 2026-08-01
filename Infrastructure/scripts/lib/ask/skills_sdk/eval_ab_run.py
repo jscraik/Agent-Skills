@@ -378,6 +378,7 @@ def _build_ab_run_receipt(
     skill_b_identity: dict[str, str] | None,
     execution_profile_id: str = "codex-read-only",
     judge_profile_id: str = "oss-local",
+    execution_lane: str = "all",
     evidence_root: str = ".harness/artifacts/sdk-ab-evals",
     timeout_seconds: int = 1800,
     runner: CodexRunner | None = None,
@@ -393,6 +394,7 @@ def _build_ab_run_receipt(
             skill_b_identity=skill_b_identity,
             execution_profile_id=execution_profile_id,
             judge_profile_id=judge_profile_id,
+            execution_lane=execution_lane,
             evidence_root=evidence_root,
             preflight_probe=preflight_probe,
         )
@@ -405,11 +407,7 @@ def _build_ab_run_receipt(
     status = "completed" if not blockers else "blocked"
     side_effects = _run_side_effects(plan, variant_results)
     receipt_variant_results = runtime_profile_gates[0]["variant_results"] if runtime_profile_gates else []
-    return _run_payload(
-        plan, status, blockers, receipt_variant_results, runtime_profile_gates,
-        side_effects["codex_exec_started"], side_effects["provider_invoked"],
-        side_effects["network_accessed"], timeout_seconds,
-    )
+    return _run_payload(plan, status, blockers, receipt_variant_results, runtime_profile_gates, side_effects["codex_exec_started"], side_effects["provider_invoked"], side_effects["network_accessed"], timeout_seconds)
 
 
 def build_ab_run_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -584,6 +582,7 @@ def _run_payload(
         "fixture": plan["fixture"],
         "execution_profile": plan["execution_profile"],
         "judge_profile": plan["judge_profile"],
+        "execution_lane": plan["execution_lane"],
         "codex_profile": "oss-local",
         "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": plan["evidence_root"],

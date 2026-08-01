@@ -117,8 +117,7 @@ def _judge_scores_match(decision: AbJudgeDecision, computed_scores: dict[str, fl
     return all(
         math.isclose(getattr(decision, key), computed_scores[key], rel_tol=0, abs_tol=1e-9)
         for key in computed_scores
-    )
-
+)
 
 def _judge_confidence_meets_minimum(value: str, minimum: str) -> bool:
     confidence_rank = {"low": 0, "medium": 1, "high": 2}
@@ -385,6 +384,7 @@ class AbPlanReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
+    execution_lane: Literal["all", "oss-local"] = "all"
     codex_profile: Literal["oss-local"] | None
     runtime_profile_gates: list[AbRuntimeProfilePlanGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)
@@ -427,8 +427,9 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
         if not _exact_variant_labels(self.command_plan) or self.command_variant_labels != ["A", "B"]:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
-        if [gate.lane for gate in self.runtime_profile_gates] != ["oss-local", "oss-cloud"]:
-            raise ValueError("A/B plan must require ordered oss-local then oss-cloud gates")
+        expected_lanes = ["oss-local", "oss-cloud"] if self.execution_lane == "all" else ["oss-local"]
+        if [gate.lane for gate in self.runtime_profile_gates] != expected_lanes:
+            raise ValueError("planned A/B receipts must preserve the declared execution lane order")
         if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
@@ -532,6 +533,7 @@ class AbRunReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
+    execution_lane: Literal["all", "oss-local"] = "all"
     codex_profile: Literal["oss-local"]
     runtime_profile_gates: list[AbRuntimeProfileRunGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)

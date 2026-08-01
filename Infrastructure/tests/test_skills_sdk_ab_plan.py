@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import json
 from copy import deepcopy
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -14,8 +15,9 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_run import CodexRunResult, build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
-from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt, validate_ab_run_receipt  # noqa: E402
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
 
@@ -286,6 +288,94 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self._assert_command_argv(receipt)
         self._assert_plan_evidence(receipt)
         validate_ab_plan_receipt(receipt)
+
+    def test_explicit_oss_local_lane_plans_without_cloud_preflight(self) -> None:
+        probed_lanes: list[str] = []
+
+        def local_only_probe(profile: dict[str, object]) -> dict[str, object]:
+            probed_lanes.append(str(profile["id"]))
+            if profile["id"] != "oss-local":
+                raise AssertionError("oss-local execution lane must not probe cloud")
+            return declared_profile_preflight(profile)
+
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            execution_lane="oss-local",
+            preflight_probe=local_only_probe,
+        )
+
+        self.assertEqual(receipt["status"], "planned")
+        self.assertEqual(receipt["execution_lane"], "oss-local")
+        self.assertEqual(probed_lanes, ["oss-local"])
+        self.assertEqual(
+            [(gate["order"], gate["lane"]) for gate in receipt["runtime_profile_gates"]],
+            [(1, "oss-local")],
+        )
+        self.assertEqual(receipt["command_variant_labels"], ["A", "B"])
+        validate_ab_plan_receipt(receipt)
+        self.assertEqual(self._managed_v1_result(receipt).status, "pass")
+
+    def test_default_all_lane_still_rejects_a_single_local_gate(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            execution_lane="oss-local",
+            preflight_probe=declared_profile_preflight,
+        )
+        forged = deepcopy(receipt)
+        forged.pop("execution_lane")
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(forged)
+        self.assertEqual(self._managed_v1_result(forged).status, "fail")
+
+    def test_explicit_oss_local_run_omits_cloud_and_default_all_rejects_one_gate(self) -> None:
+        evidence_root = ".harness/test-sdk-ab-plan-local-run"
+        shutil.rmtree(REPO_ROOT / evidence_root, ignore_errors=True)
+        probed_lanes: list[str] = []
+        calls: list[list[str]] = []
+        def local_only_probe(profile: dict[str, object]) -> dict[str, object]:
+            probed_lanes.append(str(profile["id"]))
+            return declared_profile_preflight(profile)
+        def local_runner(command_argv: list[str], _prompt: str, root: Path, _timeout: object) -> CodexRunResult:
+            calls.append(command_argv)
+            output_path = root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("local", encoding="utf-8")
+            return CodexRunResult(0, '{"type":"response.completed"}\n', "", command_argv)
+        try:
+            receipt = build_ab_run_receipt(
+                REPO_ROOT,
+                skill_a=SKILL_A,
+                skill_b=SKILL_B,
+                fixture=FIXTURE,
+                skill_a_identity=IDENTITY_A,
+                skill_b_identity=IDENTITY_B,
+                execution_lane="oss-local",
+                evidence_root=evidence_root,
+                runner=local_runner,
+                preflight_probe=local_only_probe,
+            )
+            self.assertEqual((receipt["status"], receipt["execution_lane"]), ("completed", "oss-local"))
+            self.assertEqual((probed_lanes, len(calls)), (["oss-local"], 2))
+            self.assertEqual([gate["lane"] for gate in receipt["runtime_profile_gates"]], ["oss-local"])
+            validate_ab_run_receipt(receipt)
+            run_schema = json.loads((REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v1.schema.json").read_text())
+            self.assertEqual(schema_validation.validate_payload_against_schema(receipt, run_schema, {"ab-run-receipt.v1.schema.json": run_schema}, schema_path="ab-run-receipt.v1.schema.json", payload_source="local-run", truth_lane="schema_contract").status, "pass")
+
+            forged = deepcopy(receipt) | {"execution_lane": "all", "runtime_profile_gates": receipt["runtime_profile_gates"][:1]}
+            with self.assertRaises(ValueError):
+                validate_ab_run_receipt(forged)
+        finally:
+            shutil.rmtree(REPO_ROOT / evidence_root, ignore_errors=True)
 
     def _assert_gate_identities(self, receipt: dict[str, object]) -> None:
         identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]

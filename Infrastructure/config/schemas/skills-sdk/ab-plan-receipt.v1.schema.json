@@ -1400,6 +1400,15 @@
         }
       ]
     },
+    "execution_lane": {
+      "default": "all",
+      "enum": [
+        "all",
+        "oss-local"
+      ],
+      "title": "Execution Lane",
+      "type": "string"
+    },
     "codex_profile": {
       "anyOf": [
         {
@@ -1583,25 +1592,61 @@
             "uniqueItems": true
           },
           "runtime_profile_gates": {
-            "items": {
-              "properties": {
-                "command_plan": {
-                  "maxItems": 2,
-                  "minItems": 2
-                },
-                "status": {
-                  "const": "planned"
-                }
+            "anyOf": [
+              {
+                "items": {"properties": {"command_plan": {"maxItems": 2, "minItems": 2}, "status": {"const": "planned"}}},
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}}},
+                  {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}}}
+                ]
+              },
+              {
+                "items": {"properties": {"command_plan": {"maxItems": 2, "minItems": 2}, "status": {"const": "planned"}}},
+                "maxItems": 1,
+                "minItems": 1,
+                "prefixItems": [
+                  {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}}}
+                ]
               }
-            },
-            "maxItems": 2,
-            "minItems": 2,
-            "prefixItems": [
-              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}}},
-              {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}}}
             ]
           }
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "planned"},
+          "execution_lane": {"const": "oss-local"}
+        },
+        "required": ["status", "execution_lane"]
+      },
+      "then": {
+        "properties": {
+          "runtime_profile_gates": {
+            "minItems": 1,
+            "maxItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "planned"}
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {"execution_lane": {"const": "oss-local"}},
+            "required": ["execution_lane"]
+          },
+          {"properties": {"runtime_profile_gates": {"minItems": 2, "maxItems": 2}}}
+        ]
       }
     },
     {

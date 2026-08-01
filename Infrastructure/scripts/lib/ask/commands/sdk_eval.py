@@ -152,6 +152,7 @@ def _add_ab_preview_parser(subparsers: argparse._SubParsersAction, global_parser
 def _add_ab_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     plan = subparsers.add_parser("ab-plan", help="Plan Codex exec commands for a skill A/B eval", parents=[global_parser])
     _add_ab_common_arguments(plan)
+    plan.add_argument("--execution-lane", choices=("all", "oss-local"), default="all")
     plan.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
     plan.add_argument("--preview", action="store_true", help="Emit a non-mutating A/B execution plan receipt")
 
@@ -159,6 +160,7 @@ def _add_ab_plan_parser(subparsers: argparse._SubParsersAction, global_parser: a
 def _add_ab_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     run = subparsers.add_parser("ab-run", help="Execute a Codex-backed skill A/B eval", parents=[global_parser])
     _add_ab_common_arguments(run)
+    run.add_argument("--execution-lane", choices=("all", "oss-local"), default="all")
     run.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
     run.add_argument("--timeout-seconds", type=_positive_int, default=1800, help="Timeout for each Codex variant run.")
     run.add_argument("--execute", action="store_true", help="Required explicit gate before invoking Codex exec.")
@@ -222,7 +224,7 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
         codex_profile=args.codex_profile,
         cases=args.cases,
         scenario_set=args.scenario_set,
-        timeout_seconds=args.timeout_seconds,
+        timeout_seconds=getattr(args, "timeout_seconds", 1800),
     )
 
 
@@ -357,18 +359,13 @@ def _dispatch_ab_plan(repo_root: Path, args: argparse.Namespace) -> CallResult:
     error = _preview_required("sdk eval ab-plan", "A/B execution plan requires --preview.", _ab_plan_next(), args)
     if error:
         return error
-    return skills_commands.skills_sdk_eval_ab_plan(repo_root, evidence_root=args.evidence_root, **_ab_common_kwargs(args))
+    return skills_commands.skills_sdk_eval_ab_plan(repo_root, _ab_request(args))
 
 
 def _dispatch_ab_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if not args.execute:
         return build_validation_error("sdk eval ab-run", "A/B eval execution invokes Codex and requires --execute.", _ab_run_next())
-    return skills_commands.skills_sdk_eval_ab_run(
-        repo_root,
-        evidence_root=args.evidence_root,
-        timeout_seconds=args.timeout_seconds,
-        **_ab_common_kwargs(args),
-    )
+    return skills_commands.skills_sdk_eval_ab_run(repo_root, _ab_request(args))
 
 
 def _dispatch_ab_judge_preview(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -388,14 +385,30 @@ def _dispatch_ab_judge_score(repo_root: Path, args: argparse.Namespace) -> CallR
     )
 
 
-def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
-    return {
+def _ab_common_kwargs(args: argparse.Namespace, *, include_execution_lane: bool = False) -> dict[str, str]:
+    kwargs = {
         "skill_a": args.skill_a,
         "skill_b": args.skill_b,
         "fixture": args.fixture,
         "execution_profile": args.execution_profile,
         "judge_profile": args.judge_profile,
     }
+    if include_execution_lane:
+        kwargs["execution_lane"] = getattr(args, "execution_lane", "all")
+    return kwargs
+
+
+def _ab_request(args: argparse.Namespace) -> skills_commands.AbEvalRequest:
+    return skills_commands.AbEvalRequest(
+        skill_a=args.skill_a,
+        skill_b=args.skill_b,
+        fixture=args.fixture,
+        execution_profile=args.execution_profile,
+        judge_profile=args.judge_profile,
+        execution_lane=getattr(args, "execution_lane", "all"),
+        evidence_root=args.evidence_root,
+        timeout_seconds=getattr(args, "timeout_seconds", 1800),
+    )
 
 
 def _scenario_quality_next() -> str:
