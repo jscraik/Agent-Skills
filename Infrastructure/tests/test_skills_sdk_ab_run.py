@@ -58,6 +58,7 @@ def _build_test_ab_run_receipt(
     evidence_root: str,
     runner: TestRunner,
     preflight_probe: PreflightProbe = declared_profile_preflight,
+    execution_lane: str = "all",
 ) -> dict[str, object]:
     return build_ab_run_receipt(
         REPO_ROOT,
@@ -69,6 +70,7 @@ def _build_test_ab_run_receipt(
         evidence_root=evidence_root,
         runner=runner,
         preflight_probe=preflight_probe,
+        execution_lane=execution_lane,
     )
 
 
@@ -197,7 +199,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertIn("A:provider_event_missing", receipt["blockers"])
         self.assertIn("B:provider_event_missing", receipt["blockers"])
         validate_ab_run_receipt(receipt)
-
     def test_local_success_is_preserved_when_cloud_gate_blocks(self) -> None:
         def local_then_cloud_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
@@ -357,6 +358,38 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(cloud_gate["variant_results"], [])
         validate_ab_run_receipt(receipt)
 
+    def test_explicit_oss_local_lane_runs_both_variants_without_cloud_gate(self) -> None:
+        probed_lanes: list[str] = []
+        def local_only_probe(profile: dict[str, object]) -> dict[str, object]:
+            probed_lanes.append(str(profile["id"]))
+            return declared_profile_preflight(profile)
+        calls: list[list[str]] = []
+        def local_runner(command_argv: list[str], _prompt: str, repo_root: Path, _timeout: object) -> CodexRunResult:
+            calls.append(command_argv)
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("local", encoding="utf-8")
+            return CodexRunResult(0, '{"type":"response.completed"}\n', "", _test_execution_argv(command_argv))
+        receipt = _build_test_ab_run_receipt(self.evidence_root, local_runner, local_only_probe, execution_lane="oss-local")
+        self.assertEqual((receipt["status"], receipt["execution_lane"], probed_lanes, len(calls)), ("completed", "oss-local", ["oss-local"], 2))
+        self.assertEqual([gate["lane"] for gate in receipt["runtime_profile_gates"]], ["oss-local"])
+        self.assertEqual([result["variant_label"] for result in receipt["variant_results"]], ["A", "B"])
+        validate_ab_run_receipt(receipt)
+        self.assertEqual(self._full_v1_schema_result(receipt).status, "pass")
+
+    def test_default_all_lane_cannot_claim_a_single_local_gate(self) -> None:
+        receipt = _build_test_ab_run_receipt(
+            self.evidence_root,
+            lambda *_args: (_ for _ in ()).throw(AssertionError("runner must not be invoked")),
+            _cloud_auth_blocked_probe,
+        )
+        local_only = deepcopy(receipt)
+        local_only["status"] = "completed"
+        local_only["execution_lane"] = "all"
+        local_only["runtime_profile_gates"] = [local_only["runtime_profile_gates"][0]]
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(local_only)
+        self.assertEqual(self._full_v1_schema_result(local_only).status, "fail")
     def test_non_preflight_blocked_plan_marks_both_empty_gates_not_run(self) -> None:
         plan = build_ab_plan_receipt(
             REPO_ROOT,
@@ -395,7 +428,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         )
         self.assertTrue(all(gate["variant_results"] == [] for gate in receipt["runtime_profile_gates"]))
         validate_ab_run_receipt(receipt)
-
     def test_pre_execution_plan_blocker_without_runtime_gates_is_valid(self) -> None:
         receipt = build_ab_run_receipt(
             REPO_ROOT,
@@ -412,7 +444,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["runtime_profile_gates"], [])
         self.assertTrue(receipt["blockers"])
         validate_ab_run_receipt(receipt)
-
     def test_builder_executes_with_injected_runner_and_records_evidence(self) -> None:
         calls: list[list[str]] = []
 
@@ -453,7 +484,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             self.assertTrue((REPO_ROOT / result["output_last_message_path"]).is_file())
             self.assertTrue(str(result["output_last_message_digest"]).startswith("sha256:"))
         validate_ab_run_receipt(receipt)
-
     def test_builder_blocks_failed_variant_without_judge_invocation(self) -> None:
         def fake_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
             if command_argv[command_argv.index("--output-last-message") + 1].endswith("/A/last-message.json"):
@@ -480,7 +510,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertIn("B:output_last_message_missing", receipt["blockers"])
         self.assertFalse(receipt["judge_provider_invoked"])
         validate_ab_run_receipt(receipt)
-
     def test_builder_records_parse_failure_without_provider_or_network_claim(self) -> None:
         def parse_failure_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
@@ -499,7 +528,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertFalse(receipt["provider_invoked"])
         self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
-
     def test_builder_records_app_server_initialization_failure_without_provider_claim(self) -> None:
         def initialization_failure_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
@@ -521,7 +549,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["runtime_profile_gates"][1]["status"], "not_run_with_reason")
         self.assertEqual(receipt["runtime_profile_gates"][1]["variant_results"], [])
         validate_ab_run_receipt(receipt)
-
     def test_error_and_metadata_items_do_not_prove_provider_invocation(self) -> None:
         event_streams = (
             '{"type":"item.completed","item":{"type":"error","message":"failed"}}\n',
@@ -560,7 +587,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(receipt["provider_invoked"])
         self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
-
     def test_mixed_provider_evidence_blocks_non_proving_variant(self) -> None:
         def mixed_evidence_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
@@ -588,7 +614,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(receipt["runtime_profile_gates"][0]["status"], "blocked")
         self.assertEqual(receipt["runtime_profile_gates"][1]["status"], "not_run_with_reason")
         validate_ab_run_receipt(receipt)
-
     def test_builder_preserves_provider_claim_for_nonzero_post_invocation_failure(self) -> None:
         def post_invocation_failure_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
@@ -607,7 +632,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(receipt["provider_invoked"])
         self.assertTrue(receipt["network_accessed"])
         validate_ab_run_receipt(receipt)
-
     def test_builder_preserves_provider_claim_when_last_message_is_missing(self) -> None:
         def missing_last_message_runner(
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object
@@ -627,7 +651,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertTrue(receipt["network_accessed"])
         self.assertIn("A:output_last_message_missing", receipt["blockers"])
         validate_ab_run_receipt(receipt)
-
     def test_builder_preserves_timeout_output_as_text_evidence(self) -> None:
         def timeout_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
             raise subprocess.TimeoutExpired(command_argv, timeout_seconds, output=b"partial stdout", stderr=b"partial stderr")
@@ -654,7 +677,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             self.assertEqual((REPO_ROOT / result["runner_stdout_capture_path"]).read_text(encoding="utf-8"), "partial stdout")
             self.assertEqual((REPO_ROOT / result["runner_stderr_capture_path"]).read_text(encoding="utf-8"), "partial stderr")
         validate_ab_run_receipt(receipt)
-
     def test_builder_clears_stale_output_before_variant_rerun(self) -> None:
         def successful_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
             output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]

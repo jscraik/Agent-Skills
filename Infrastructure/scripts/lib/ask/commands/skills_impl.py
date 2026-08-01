@@ -7666,157 +7666,84 @@ def skills_sdk_eval_ab_preview(
     return result
 
 
-def skills_sdk_eval_ab_plan(
-    repo_root: Path,
-    *,
-    skill_a: str,
-    skill_b: str,
-    fixture: str,
-    execution_profile: str = "codex-read-only",
-    judge_profile: str = "oss-local",
-    evidence_root: str = ".harness/artifacts/sdk-ab-evals",
-) -> CallResult:
+@dataclass(frozen=True)
+class AbEvalRequest:
+    skill_a: str
+    skill_b: str
+    fixture: str
+    execution_profile: str = "codex-read-only"
+    judge_profile: str = "oss-local"
+    execution_lane: str = "all"
+    evidence_root: str = ".harness/artifacts/sdk-ab-evals"
+    timeout_seconds: int = 1800
+
+
+def _ab_receipt_kwargs(repo_root: Path, request: AbEvalRequest) -> dict[str, object]:
+    return {
+        "repo_root": repo_root, "skill_a": request.skill_a, "skill_b": request.skill_b,
+        "fixture": request.fixture,
+        "skill_a_identity": _skills_sdk_eval_package_identity(repo_root, request.skill_a),
+        "skill_b_identity": _skills_sdk_eval_package_identity(repo_root, request.skill_b),
+        "execution_profile_id": request.execution_profile, "judge_profile_id": request.judge_profile,
+        "execution_lane": request.execution_lane, "evidence_root": request.evidence_root,
+    }
+
+
+def _ab_validation_command(action: str, request: AbEvalRequest) -> str:
+    args = ["sdk", "eval", action, "--skill-a", request.skill_a, "--skill-b", request.skill_b,
+            "--fixture", request.fixture, "--execution-profile", request.execution_profile,
+            "--judge-profile", request.judge_profile, "--execution-lane", request.execution_lane,
+            "--evidence-root", request.evidence_root]
+    args += ["--timeout-seconds", str(request.timeout_seconds), "--execute"] if action == "ab-run" else ["--preview"]
+    return _ask_validation_command(*args)
+
+
+def _ab_blocked_result(result: CallResult, receipt: dict[str, object], fix: str) -> None:
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=receipt["agent_summary"], fix_suggestion=fix))
+
+
+def _ab_plan_payload(receipt: dict[str, object], request: AbEvalRequest) -> dict[str, object]:
+    return {"schema_version": "skills-sdk-ab-plan.v0", "status": receipt["status"],
+            "facade_command": "skills-sdk eval ab-plan", "receipt": receipt,
+            "mutation_performed": False, "validation_commands": [_ab_validation_command("ab-plan", request)],
+            "agent_summary": receipt["agent_summary"]}
+
+
+def _ab_run_payload(repo_root: Path, receipt: dict[str, object], request: AbEvalRequest) -> dict[str, object]:
+    payload = {"schema_version": "skills-sdk-ab-run.v0", "status": receipt["status"],
+               "facade_command": "skills-sdk eval ab-run", "receipt": receipt,
+               "mutation_performed": receipt["mutation_performed"],
+               "validation_commands": [_ab_validation_command("ab-run", request)],
+               "agent_summary": receipt["agent_summary"]}
+    _attach_phoenix_eval_trace(payload, repo_root, receipt, command_name="sdk eval ab-run")
+    return payload
+
+
+def skills_sdk_eval_ab_plan(repo_root: Path, request: AbEvalRequest) -> CallResult:
     """Emit a non-mutating Codex-backed A/B eval execution plan."""
     from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: PLC0415
 
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-plan --preview"
-    skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
-    skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
-    receipt = build_ab_plan_receipt(
-        repo_root,
-        skill_a=skill_a,
-        skill_b=skill_b,
-        fixture=fixture,
-        skill_a_identity=skill_a_identity,
-        skill_b_identity=skill_b_identity,
-        execution_profile_id=execution_profile,
-        judge_profile_id=judge_profile,
-        evidence_root=evidence_root,
-    )
-    payload = {
-        "schema_version": "skills-sdk-ab-plan.v0",
-        "status": receipt["status"],
-        "facade_command": "skills-sdk eval ab-plan",
-        "receipt": receipt,
-        "mutation_performed": False,
-        "validation_commands": [
-            _ask_validation_command(
-                "sdk",
-                "eval",
-                "ab-plan",
-                "--skill-a",
-                skill_a,
-                "--skill-b",
-                skill_b,
-                "--fixture",
-                fixture,
-                "--execution-profile",
-                execution_profile,
-                "--judge-profile",
-                judge_profile,
-                "--evidence-root",
-                evidence_root,
-                "--preview",
-            )
-        ],
-        "agent_summary": receipt["agent_summary"],
-    }
-    result.data["skills_sdk_eval_ab_plan"] = payload
-    if receipt["status"] == "blocked":
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=receipt["agent_summary"],
-                fix_suggestion=(
-                    "Use canonical repo-local skill sources, a repo-local fixture, and a repo-local "
-                    "evidence root before running ask sdk eval ab-plan."
-                ),
-            )
-        )
+    receipt = build_ab_plan_receipt(**_ab_receipt_kwargs(repo_root, request))
+    result.data["skills_sdk_eval_ab_plan"] = _ab_plan_payload(receipt, request)
+    _ab_blocked_result(result, receipt, "Use canonical repo-local skill sources, fixture, and evidence root before ask sdk eval ab-plan.")
     return result
 
 
-def skills_sdk_eval_ab_run(
-    repo_root: Path,
-    *,
-    skill_a: str,
-    skill_b: str,
-    fixture: str,
-    execution_profile: str = "codex-read-only",
-    judge_profile: str = "oss-local",
-    evidence_root: str = ".harness/artifacts/sdk-ab-evals",
-    timeout_seconds: int = 1800,
-) -> CallResult:
+def skills_sdk_eval_ab_run(repo_root: Path, request: AbEvalRequest) -> CallResult:
     """Execute a Codex-backed A/B eval and emit bounded evidence receipts."""
     from ask.skills_sdk.eval_ab_run import build_ab_run_receipt  # noqa: PLC0415
 
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-run --execute"
-    skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
-    skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
-    receipt = build_ab_run_receipt(
-        repo_root,
-        skill_a=skill_a,
-        skill_b=skill_b,
-        fixture=fixture,
-        skill_a_identity=skill_a_identity,
-        skill_b_identity=skill_b_identity,
-        execution_profile_id=execution_profile,
-        judge_profile_id=judge_profile,
-        evidence_root=evidence_root,
-        timeout_seconds=timeout_seconds,
-    )
-    payload = {
-        "schema_version": "skills-sdk-ab-run.v0",
-        "status": receipt["status"],
-        "facade_command": "skills-sdk eval ab-run",
-        "receipt": receipt,
-        "mutation_performed": receipt["mutation_performed"],
-        "validation_commands": [
-            _ask_validation_command(
-                "sdk",
-                "eval",
-                "ab-run",
-                "--skill-a",
-                skill_a,
-                "--skill-b",
-                skill_b,
-                "--fixture",
-                fixture,
-                "--execution-profile",
-                execution_profile,
-                "--judge-profile",
-                judge_profile,
-                "--evidence-root",
-                evidence_root,
-                "--timeout-seconds",
-                str(timeout_seconds),
-                "--execute",
-            )
-        ],
-        "agent_summary": receipt["agent_summary"],
-    }
-    _attach_phoenix_eval_trace(
-        payload,
-        repo_root,
-        receipt,
-        command_name="sdk eval ab-run",
-    )
-    result.data["skills_sdk_eval_ab_run"] = payload
-    if receipt["status"] == "blocked":
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=receipt["agent_summary"],
-                fix_suggestion=(
-                    "Review the per-variant blockers, evidence files, and Codex stderr captures before "
-                    "rerunning ask sdk eval ab-run."
-                ),
-            )
-        )
+    kwargs = _ab_receipt_kwargs(repo_root, request)
+    kwargs["timeout_seconds"] = request.timeout_seconds
+    receipt = build_ab_run_receipt(**kwargs)
+    result.data["skills_sdk_eval_ab_run"] = _ab_run_payload(repo_root, receipt, request)
+    _ab_blocked_result(result, receipt, "Review per-variant blockers and Codex captures before rerunning ask sdk eval ab-run.")
     return result
 
 

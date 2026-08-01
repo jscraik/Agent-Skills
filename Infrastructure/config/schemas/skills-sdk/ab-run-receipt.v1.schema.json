@@ -141,8 +141,8 @@
           "if": {"properties": {"codex_profile": {"const": "oss-local"}}, "required": ["codex_profile"]},
           "then": {
             "properties": {
-              "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "command_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]},
+              "execution_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}
             }
           }
         },
@@ -150,8 +150,8 @@
           "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
           "then": {
             "properties": {
-              "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "command_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]},
+              "execution_argv": {"anyOf": [{"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}
             }
           }
         }
@@ -976,11 +976,11 @@
       "allOf": [
         {
           "if": {"properties": {"codex_profile": {"const": "oss-local"}}, "required": ["codex_profile"]},
-          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+          "then": {"properties": {"command_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}, "execution_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-local"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}}}
         },
         {
           "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
-          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}}}
+          "then": {"properties": {"command_argv": {"anyOf": [{"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}, "execution_argv": {"anyOf": [{"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}]}}}
         },
         {
           "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},
@@ -1614,6 +1614,15 @@
         }
       ]
     },
+    "execution_lane": {
+      "default": "all",
+      "enum": [
+        "all",
+        "oss-local"
+      ],
+      "title": "Execution Lane",
+      "type": "string"
+    },
     "codex_profile": {
       "const": "oss-local",
       "title": "Codex Profile",
@@ -1805,13 +1814,25 @@
             "maxItems": 2
           },
           "runtime_profile_gates": {
-            "minItems": 2,
-            "maxItems": 2,
-            "prefixItems": [
-              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}},
-              {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
-            ],
-            "items": {"$ref": "#/$defs/AbRuntimeProfileRunGate"}
+            "anyOf": [
+              {
+                "minItems": 2,
+                "maxItems": 2,
+                "prefixItems": [
+                  {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}},
+                  {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
+                ],
+                "items": {"$ref": "#/$defs/AbRuntimeProfileRunGate"}
+              },
+              {
+                "minItems": 1,
+                "maxItems": 1,
+                "prefixItems": [
+                  {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}}
+                ],
+                "items": {"$ref": "#/$defs/AbRuntimeProfileRunGate"}
+              }
+            ]
           },
           "variant_results": {
             "minItems": 2,
@@ -1823,11 +1844,54 @@
           },
           "mutation_performed": {"const": true},
           "provider_invoked": {"const": true},
-          "network_accessed": {"const": true},
           "codex_exec_invoked": {
             "const": true
           }
+        },
+        "anyOf": [
+          {
+            "required": ["execution_lane"],
+            "properties": {
+              "execution_lane": {"const": "oss-local"},
+              "network_accessed": {"type": "boolean"}
+            }
+          },
+          {"properties": {"network_accessed": {"const": true}}}
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "execution_lane": {"const": "oss-local"}
+        },
+        "required": ["status", "execution_lane"]
+      },
+      "then": {
+        "properties": {
+          "runtime_profile_gates": {
+            "minItems": 1,
+            "maxItems": 1
+          }
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"}
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {"execution_lane": {"const": "oss-local"}},
+            "required": ["execution_lane"]
+          },
+          {"properties": {"runtime_profile_gates": {"minItems": 2, "maxItems": 2}}}
+        ]
       }
     },
     {

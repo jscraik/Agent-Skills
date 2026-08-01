@@ -48,6 +48,7 @@ WORKSPACE_ROOT = SCRIPT_DIR.parents[3]
 for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
+sys.path.insert(0, str(WORKSPACE_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 try:
     import yaml  # type: ignore
@@ -93,6 +94,7 @@ from eval_signal_contract import (  # noqa: E402
     expected_signal_items,
     parse_min_expected_signal_score,
 )
+from ask.skills_sdk.release_rubric_checks import evaluate_semantic_requirements  # noqa: E402
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
@@ -1683,7 +1685,11 @@ def _to_text_blob(data: Any) -> str:
 
 
 def _contains_text(haystack: str, needle: str) -> bool:
-    return needle.casefold() in haystack.casefold()
+    return _normalized_match_text(needle) in _normalized_match_text(haystack)
+
+
+def _normalized_match_text(value: str) -> str:
+    return value.replace("`", "").replace("**", "").casefold()
 
 
 def _normalize_text_field_key(value: str) -> str:
@@ -1697,7 +1703,7 @@ def _text_field_map(text: str) -> Dict[str, str]:
         if not line:
             continue
         line = re.sub(r"^[-*]\\s+", "", line)
-        line = line.replace(chr(96), "")
+        line = line.replace(chr(96), "").replace("**", "")
         if ":" not in line:
             continue
         key, value = line.split(":", 1)
@@ -1937,6 +1943,43 @@ def _evaluate_discovery_question_assertion(text: str) -> Optional[str]:
     return None
 
 
+def _evaluate_text_pattern_assertion(text: str, assertion: Dict[str, Any]) -> Optional[str]:
+    assertion_type = assertion["type"]
+    value = _to_text_blob(assertion.get("value", ""))
+    if assertion_type == "contains" and not _contains_text(text, value):
+        return f"contains failed: {value!r}"
+    if assertion_type == "not_contains" and _contains_text(text, value):
+        return f"not_contains failed: {value!r}"
+    if assertion_type == "regex" and not re.search(value, text, flags=re.MULTILINE):
+        return f"regex failed: /{value}/"
+    if assertion_type == "not_regex" and re.search(value, text, flags=re.MULTILINE):
+        return f"not_regex failed: /{value}/"
+    return None
+
+
+def _evaluate_text_assertion(
+    text: str,
+    assertion: Dict[str, Any],
+    *,
+    skill_name: str,
+    selected_skill: Optional[bool],
+) -> Optional[str]:
+    assertion_type = assertion["type"]
+    if assertion_type in {"contains", "not_contains", "regex", "not_regex"}:
+        return _evaluate_text_pattern_assertion(text, assertion)
+    if assertion_type in {"skill_selected", "skill_not_selected"}:
+        return _evaluate_skill_selection_assertion(assertion, skill_name=skill_name, selected=selected_skill)
+    if assertion_type in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
+        return _evaluate_text_field_assertion(text, assertion)
+    if assertion_type == "expected_signal":
+        return _evaluate_expected_signal_assertion(text, assertion.get("value", ""))
+    if assertion_type == "semantic_requirements":
+        return evaluate_semantic_requirements(text, assertion)
+    if assertion_type == "discovery_question":
+        return _evaluate_discovery_question_assertion(text)
+    return f"unsupported assertion type for text output: {assertion_type!r}"
+
+
 def evaluate_assertions_text(
     text: str,
     assertions: List[Assertion],
@@ -1946,49 +1989,46 @@ def evaluate_assertions_text(
 ) -> List[str]:
     failures: List[str] = []
     for raw in assertions:
-        a = _normalize_assert(raw)
-        t = a["type"]
-        v = a.get("value", "")
-
-        if t == "contains":
-            needle = _to_text_blob(v)
-            if not _contains_text(text, needle):
-                failures.append(f"contains failed: {needle!r}")
-        elif t == "not_contains":
-            needle = _to_text_blob(v)
-            if _contains_text(text, needle):
-                failures.append(f"not_contains failed: {needle!r}")
-        elif t == "regex":
-            pattern = _to_text_blob(v)
-            if not re.search(pattern, text, flags=re.MULTILINE):
-                failures.append(f"regex failed: /{pattern}/")
-        elif t == "not_regex":
-            pattern = _to_text_blob(v)
-            if re.search(pattern, text, flags=re.MULTILINE):
-                failures.append(f"not_regex failed: /{pattern}/")
-        elif t in {"skill_selected", "skill_not_selected"}:
-            msg = _evaluate_skill_selection_assertion(
-                a,
-                skill_name=skill_name,
-                selected=selected_skill,
-            )
-            if msg:
-                failures.append(msg)
-        elif t in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
-            msg = _evaluate_text_field_assertion(text, a)
-            if msg:
-                failures.append(msg)
-        elif t == "expected_signal":
-            msg = _evaluate_expected_signal_assertion(text, v)
-            if msg:
-                failures.append(msg)
-        elif t == "discovery_question":
-            msg = _evaluate_discovery_question_assertion(text)
-            if msg:
-                failures.append(msg)
-        else:
-            failures.append(f"unsupported assertion type for text output: {t!r}")
+        message = _evaluate_text_assertion(
+            text,
+            _normalize_assert(raw),
+            skill_name=skill_name,
+            selected_skill=selected_skill,
+        )
+        if message:
+            failures.append(message)
     return failures
+
+
+def _evaluate_json_path_assertion(obj: Any, assertion: Dict[str, Any]) -> Optional[str]:
+    assertion_type = assertion["type"]
+    path = assertion.get("path")
+    if not isinstance(path, str) or not path.strip():
+        return f"{assertion_type} missing `path`"
+    try:
+        actual = _json_get_path(obj, path)
+    except KeyError:
+        return f"{assertion_type} {'missing path' if assertion_type == 'jsonpath_equals' else 'failed (missing)'}: {path}"
+    if assertion_type == "jsonpath_equals" and actual != assertion.get("value"):
+        return f"jsonpath_equals failed at {path}: got={actual!r} expected={assertion.get('value')!r}"
+    return None
+
+
+def _evaluate_json_assertion(
+    obj: Any,
+    assertion: Dict[str, Any],
+    *,
+    skill_name: str,
+    selected_skill: Optional[bool],
+) -> Optional[str]:
+    assertion_type = assertion["type"]
+    if assertion_type in {"contains", "not_contains", "regex", "not_regex", "skill_selected", "skill_not_selected", "expected_signal", "semantic_requirements", "discovery_question"}:
+        return _evaluate_text_assertion(json.dumps(obj, ensure_ascii=False, indent=2), assertion, skill_name=skill_name, selected_skill=selected_skill)
+    if assertion_type in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
+        return _evaluate_json_text_field_assertion(obj, assertion)
+    if assertion_type in {"jsonpath_equals", "jsonpath_exists"}:
+        return _evaluate_json_path_assertion(obj, assertion)
+    return f"unsupported assertion type for json output: {assertion_type!r}"
 
 
 def evaluate_assertions_json(
@@ -2000,59 +2040,9 @@ def evaluate_assertions_json(
 ) -> List[str]:
     failures: List[str] = []
     for raw in assertions:
-        a = _normalize_assert(raw)
-        t = a["type"]
-
-        if t in {
-            "contains",
-            "not_contains",
-            "regex",
-            "not_regex",
-            "skill_selected",
-            "skill_not_selected",
-            "expected_signal",
-            "discovery_question",
-        }:
-            text = json.dumps(obj, ensure_ascii=False, indent=2)
-            failures.extend(
-                evaluate_assertions_text(
-                    text,
-                    [a],
-                    skill_name=skill_name,
-                    selected_skill=selected_skill,
-                )
-            )
-            continue
-        if t in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
-            msg = _evaluate_json_text_field_assertion(obj, a)
-            if msg:
-                failures.append(msg)
-            continue
-
-        if t == "jsonpath_equals":
-            path = a.get("path")
-            expected = a.get("value")
-            if not isinstance(path, str) or path.strip() == "":
-                failures.append("jsonpath_equals missing `path`")
-                continue
-            try:
-                got = _json_get_path(obj, path)
-            except KeyError:
-                failures.append(f"jsonpath_equals missing path: {path}")
-                continue
-            if got != expected:
-                failures.append(f"jsonpath_equals failed at {path}: got={got!r} expected={expected!r}")
-        elif t == "jsonpath_exists":
-            path = a.get("path")
-            if not isinstance(path, str) or path.strip() == "":
-                failures.append("jsonpath_exists missing `path`")
-                continue
-            try:
-                _json_get_path(obj, path)
-            except KeyError:
-                failures.append(f"jsonpath_exists failed (missing): {path}")
-        else:
-            failures.append(f"unsupported assertion type for json output: {t!r}")
+        message = _evaluate_json_assertion(obj, _normalize_assert(raw), skill_name=skill_name, selected_skill=selected_skill)
+        if message:
+            failures.append(message)
     return failures
 
 

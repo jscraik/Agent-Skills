@@ -8,6 +8,7 @@ EVAL_PROFILE_PREVIEW_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
 )
 EVAL_PROFILE_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
+OSS_CLOUD_MODEL = "deepseek-v4-flash:cloud"
 LOCAL_SANDBOX_DEFAULT_SETTINGS = {"num_ctx": 8192, "num_predict": 1024, "temperature": 0.1, "top_p": 0.9}
 LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS = {
     "num_ctx": 16384,
@@ -94,7 +95,7 @@ def _judge_profiles() -> list[dict[str, Any]]:
             "provider": "codex",
             "mode": "cloud",
             "host": "codex-cli-profile",
-            "model": "minimax-m2.7:cloud",
+            "model": OSS_CLOUD_MODEL,
             "model_role": "cloud_confirmation",
             "model_settings": None,
             "runtime_metadata": None,

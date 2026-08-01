@@ -9,7 +9,12 @@ from ask.skills_sdk.eval_lane_policy import build_eval_lane_policy_checks
 from ask.skills_sdk.scenario_registry_guardrails import no_direct_registry_use_checks
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
-from ask.skills_sdk.release_rubric_checks import release_rubric_regex_checks
+from ask.skills_sdk.release_rubric_checks import (
+    acceptance_assertion_shape_checks,
+    release_rubric_regex_checks,
+    TEXT_FIELD_ASSERTION_TYPES,
+    semantic_requirement_terms,
+)
 
 SCENARIO_QUALITY_SCHEMA_VERSION = "skills-sdk.scenario-quality-receipt.v0"
 SCENARIO_QUALITY_SCHEMA_URI = (
@@ -46,22 +51,10 @@ RUBRIC_EVIDENCE_TERMS = (
     "source",
     "validation",
 )
-TEXT_FIELD_ASSERTION_TYPES = {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}
 TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES = {
     "contains", "not_contains", "regex", "not_regex", "skill_selected", "skill_not_selected",
-    "expected_signal", "discovery_question", *TEXT_FIELD_ASSERTION_TYPES,
+    "expected_signal", "semantic_requirements", "discovery_question", *TEXT_FIELD_ASSERTION_TYPES,
 }
-STRUCTURED_FIELD_ASSERTION_KEYS = (
-    "publication_gate_status",
-    "publication_status",
-    "evidence_level",
-    "external_factual_claims",
-    "unsupported_external_claims",
-    "claim_authority",
-    "clarification_state",
-    "codexrepo_validation_status",
-    "source_confidence",
-)
 PLATFORM_PARITY_GATE_ID_PREFIX = "platform_tessl_quality"
 GENERATED_FIXTURE_RESPONSE_ARTIFACT_TERMS = ("final.json", "raw_response", "transcript", "chat output")
 
@@ -333,44 +326,11 @@ def _acceptance_text(case: dict[str, Any]) -> str:
             value = item.get("value")
             if value is not None:
                 parts.append(str(value))
+            if item.get("type") == "semantic_requirements":
+                parts.extend(semantic_requirement_terms(item))
         else:
             parts.append(str(item))
     return " ".join(parts)
-
-def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
-    malformed_text_fields: list[str] = []
-    regex_structured_fields: list[str] = []
-    unsupported_text_assertions: list[str] = []
-    for index, item in enumerate(_list_field(case, "acceptance"), start=1):
-        if not isinstance(item, dict):
-            continue
-        assertion_type = str(item.get("type") or "")
-        marker = f"{scenario_id}:acceptance[{index}]"
-        if assertion_type not in TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES:
-            unsupported_text_assertions.append(f"{marker}:{assertion_type or 'missing_type'}")
-        if _text_field_assertion_malformed(item, assertion_type):
-            malformed_text_fields.append(marker)
-        regex_structured_fields.extend(_regex_structured_field_refs(item, assertion_type, marker))
-    return [
-        _check(
-            "text_output_runner_acceptance_supported",
-            "blocker" if unsupported_text_assertions else "pass",
-            "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
-            unsupported_text_assertions,
-        ),
-        _check(
-            "typed_text_field_assertions_valid",
-            "blocker" if malformed_text_fields else "pass",
-            "text_field_* assertions must declare field/fields and expected values when required.",
-            malformed_text_fields,
-        ),
-        _check(
-            "structured_fields_use_typed_assertions",
-            "blocker" if regex_structured_fields else "pass",
-            "Known structured output fields must use text_field_* assertions instead of regex.",
-            regex_structured_fields,
-        ),
-    ]
 
 def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     """Apply the Tessl live-private scenario quality gate to SDK scenario rows."""
@@ -395,29 +355,6 @@ def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict
         )
         for finding in findings
     ]
-
-def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
-    if assertion_type not in TEXT_FIELD_ASSERTION_TYPES:
-        return False
-    field = item.get("field") or item.get("key") or item.get("path")
-    fields = item.get("fields")
-    has_field = isinstance(field, str) and bool(field.strip())
-    has_fields = isinstance(fields, list) and any(isinstance(value, str) and value.strip() for value in fields)
-    has_expected = assertion_type in {"text_field_present", "text_field_absent"} or _has_text_field_expected_value(item)
-    return not (has_field or has_fields) or not has_expected
-
-def _has_text_field_expected_value(item: dict[str, Any]) -> bool:
-    value = item.get("value")
-    if isinstance(value, str) and value.strip():
-        return True
-    values = item.get("values")
-    return isinstance(values, list) and any(isinstance(value, str) and value.strip() for value in values)
-
-def _regex_structured_field_refs(item: dict[str, Any], assertion_type: str, marker: str) -> list[str]:
-    if assertion_type != "regex":
-        return []
-    value = str(item.get("value") or "")
-    return [f"{marker}:{key}" for key in STRUCTURED_FIELD_ASSERTION_KEYS if key in value][:1]
 
 def _case_has_release_mode(case: dict[str, Any]) -> bool:
     return "release" in {str(mode) for mode in _list_field(case, "eval_modes")}
@@ -565,7 +502,7 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     checks.extend(_release_rubric_checks(case, scenario_id))
     checks.extend(_registry_dependency_checks(case, scenario_id))
     checks.extend(_generated_fixture_artifact_contract_checks(case, scenario_id))
-    checks.extend(_acceptance_assertion_checks(case, scenario_id))
+    checks.extend(acceptance_assertion_shape_checks(case, scenario_id, TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES))
     checks.extend(_platform_parity_checks(case, scenario_id))
     return checks
 

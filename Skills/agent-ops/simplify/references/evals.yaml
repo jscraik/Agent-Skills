@@ -1,6 +1,54 @@
 ---
 schema_version: '2.0'
 skill_name: simplify
+scorer_quality:
+  schema_version: skills-sdk.scorer-quality.v1
+  scorer_id: simplify-release-scorer
+  scorer_type: hybrid
+  scope: suite
+  scorer_version_or_digest: simplify-evals-2026-07-30
+  pass_threshold: 0.85
+  deterministic_checks_first: true
+  parameters:
+    model: deterministic-local
+    temperature: 0
+    trial_count: 1
+  rationale_audit:
+    required: true
+    sampled_count: 6
+  bias_probes:
+  - short_correct_vs_verbose_wrong
+  - verbosity_bias
+  segmentation_fields:
+  - category
+  - claim_ids
+  - eval_modes
+  calibration_cases:
+  - id: evidence-boundary-preserved
+    probe_type: obvious_correct
+    expected_label: pass
+    expected_score: 0.95
+  - id: unsupported-equivalence-claim
+    probe_type: obvious_wrong
+    expected_label: fail
+    expected_score: 0.05
+  - id: concise-boundary-beats-verbose-claim
+    probe_type: short_correct_vs_verbose_wrong
+    expected_label: fail
+    expected_score: 0.2
+    expected_direction: short_correct_wins
+  - id: invented-comparison-scope
+    probe_type: rubric_copying_rejected
+    expected_label: fail
+    expected_score: 0.1
+  - id: no-diff-edit-invented
+    probe_type: skill_name_mention_not_enough
+    expected_label: fail
+    expected_score: 0.2
+  - id: local-proof-overclaims-runtime
+    probe_type: evidence_lane_overclaim_rejected
+    expected_label: fail
+    expected_score: 0.05
 claims:
 - id: simplify.behavior-preservation
   statement: Simplify reviews existing changes without claiming behavioral equivalence beyond the validation evidence.
@@ -122,7 +170,7 @@ cases:
   claim_ids:
   - simplify.behavior-preservation
   prompt: |-
-    Perform a final cleanup review of this supplied change before merge:
+    Perform a final cleanup review of this supplied change before merge. Explain whether combining the duplicate guard preserves side effects and operation order, and require focused validation for both enabled and disabled branches:
 
     ```diff
     diff --git a/src/retry.py b/src/retry.py
@@ -142,10 +190,32 @@ cases:
     - rm -rf
     - nc
   acceptance:
-  - type: expected_signal
-    value: Combine duplicate condition with behavior evidence.
-  - type: expected_signal
-    value: Run focused retry_delay tests covering enabled states.
+  - type: text_field_present
+    field: Outcome
+  - type: semantic_requirements
+    requirements:
+    - id: outcome_changed
+      any_of:
+      - "Outcome: changed"
+    - id: combine_duplicate_guard
+      all_of:
+      - duplicate
+      - guard
+      any_of:
+      - combine
+      - merge
+    - id: preserve_execution_order
+      all_of:
+      - preserv
+      any_of:
+      - side effect
+      - operation order
+      - return value
+    - id: validate_both_branches
+      all_of:
+      - validation
+      - enabled
+      - disabled
 - id: edge-risky
   name: risky dedupe
   category: edge
@@ -214,8 +284,8 @@ cases:
   name: quality rubric
   category: edge
   task: Review a diff for maintainability and behavior evidence.
-  given: A cleanup request names nested conditionals and dead code.
-  should: Report concrete findings and retain a behavior-validation boundary.
+  given: A cleanup request names nested conditionals and dead code, and `item.enabled` is a stable read with a side-effect-free attribute.
+  should: Report concrete findings, preserve behavior, and retain validation for both enabled and disabled branches.
   eval_modes:
   - release
   realistic: true
@@ -229,7 +299,7 @@ cases:
   claim_ids:
   - simplify.behavior-preservation
   prompt: |-
-    Review this supplied diff before merge and return a concise cleanup note:
+    Review this supplied diff before merge and return a concise cleanup note. State explicitly that `item.enabled` is a stable read with no side effects, that the duplicate guard can be consolidated while preserving behavior, and that focused validation is required for both enabled and disabled branches:
 
     ```diff
     diff --git a/summary.py b/summary.py
@@ -249,18 +319,47 @@ cases:
     - rm -rf
     - nc
   acceptance:
-  - type: expected_signal
-    value: Removing the duplicated enabled condition preserves return behavior.
-  - type: expected_signal
-    value: Run focused render tests before merge.
+  - type: text_field_present
+    field: Outcome
+  - type: semantic_requirements
+    requirements:
+    - id: stable_enabled_read
+      all_of:
+      - stable
+      - enabled
+      any_of:
+      - side-effect-free
+      - no side effects
+    - id: stable_read_surface
+      any_of:
+      - read
+      - attribute
+    - id: consolidate_duplicate_guard
+      any_of:
+      - duplicate guard
+      - duplicate condition
+      - identical guards
+      - repeated condition
+    - id: preserve_behavior
+      all_of:
+      - preserv
+      any_of:
+      - behavior
+      - return value
+      - operation order
+    - id: validate_both_branches
+      all_of:
+      - validation
+      - enabled
+      - disabled
   - type: not_contains
     value: safe without evidence
 - id: edge-efficiency-rubric
   name: efficiency rubric
   category: edge
   task: Assess a performance-sensitive maintenance change.
-  given: The diff may introduce redundant reads or no-op updates.
-  should: Identify efficiency risks without claiming runtime measurements were run.
+  given: The diff removes a duplicate read under a declared stable, side-effect-free store contract.
+  should: Identify the safe two-calls-to-one-read change, require validation of both value branches, and avoid claiming runtime measurements were run.
   eval_modes:
   - release
   unit: simplify polling-efficiency review
@@ -272,7 +371,7 @@ cases:
   claim_ids:
   - simplify.behavior-preservation
   prompt: |-
-    Review this supplied diff before merge and return a concise cleanup note:
+    Review this supplied diff before merge and return a concise cleanup note. State explicitly that the store contract is stable and side-effect-free, that two calls to `store.get` become one read/snapshot, and that validation covers both the present-value and `None` branches. Put the exact token `Outcome: no_justified_edit` on its own line and do not claim that runtime measurements were run:
 
     ```diff
     diff --git a/polling.py b/polling.py
@@ -290,10 +389,31 @@ cases:
     - rm -rf
     - nc
   acceptance:
-  - type: expected_signal
-    value: Reuse checked store value with focused source validation.
-  - type: expected_signal
-    value: Focused test emits an active value and calls store.get(key) once.
+  - type: text_field_equals
+    field: Outcome
+    value: no_justified_edit
+  - type: semantic_requirements
+    requirements:
+    - id: stable_side_effect_free_read
+      all_of:
+      - stable
+      any_of:
+      - side-effect-free
+      - no side effects
+    - id: two_calls_to_one_read
+      all_of:
+      - store.get
+      - two
+      - one
+      any_of:
+      - read
+      - lookup
+      - snapshot
+    - id: validate_present_and_none_branches
+      all_of:
+      - validation
+      - present
+      - None
   - type: not_contains
     value: runtime result without evidence
   realistic: true

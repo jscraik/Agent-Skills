@@ -185,7 +185,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         cloud = declared_profile_preflight(select_judge_profile("oss-cloud"))
         self.assertEqual(local["profile_config"]["configured_model_id"], "qwen3.5:9b-mlx")
         self.assertEqual(local["profile_config"]["configured_provider_id"], "ollama")
-        self.assertEqual(cloud["profile_config"]["configured_model_id"], "minimax-m2.7:cloud")
+        self.assertEqual(cloud["profile_config"]["configured_model_id"], "deepseek-v4-flash:cloud")
         self.assertEqual(cloud["profile_config"]["configured_provider_id"], "ollama-cloud")
 
     def test_required_typed_blockers_are_preserved(self) -> None:

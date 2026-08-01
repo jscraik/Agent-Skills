@@ -5,7 +5,9 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
+import shutil
 import subprocess
+import tempfile
 from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
@@ -53,6 +55,9 @@ _CODEX_ENV_ALLOWLIST = frozenset(
         "LANG",
         "LC_ALL",
         "LOGNAME",
+        "MISE_CACHE_DIR",
+        "MISE_STATE_DIR",
+        "MISE_TRUSTED_CONFIG_PATHS",
         "PATH",
         "SHELL",
         "TERM",
@@ -86,6 +91,55 @@ def _codex_runner_env(source: dict[str, str] | None = None) -> dict[str, str]:
     }
 
 
+def _prepare_isolated_codex_home(codex_profile: str, target_home: Path) -> None:
+    """Copy only the non-secret Codex config needed by one ephemeral A/B run."""
+    configured_home = os.environ.get("CODEX_HOME")
+    source_home = Path(configured_home).expanduser() if configured_home else Path.home() / ".codex"
+    target_home.mkdir(parents=True, exist_ok=True)
+    copied_profile = False
+    for name in ("config.toml", f"{codex_profile}.config.toml"):
+        source = source_home / name
+        if not source.is_file():
+            continue
+        shutil.copy2(source, target_home / name)
+        copied_profile = copied_profile or name == f"{codex_profile}.config.toml"
+    if not copied_profile:
+        raise FileNotFoundError(f"missing Codex profile config for {codex_profile}: {source_home}")
+
+
+def _codex_temp_parent() -> str | None:
+    private_tmp = Path("/private/tmp")
+    return str(private_tmp) if private_tmp.is_dir() else None
+
+
+def _isolated_codex_environment(codex_profile: str) -> tuple[tempfile.TemporaryDirectory[str], dict[str, str]]:
+    """Return a temporary Codex home and sanitized environment for one run."""
+    temp_home = tempfile.TemporaryDirectory(prefix="sdk-ab-codex-home.", dir=_codex_temp_parent())
+    target_home = Path(temp_home.name)
+    _prepare_isolated_codex_home(codex_profile, target_home)
+    env = _codex_runner_env()
+    env.pop("CODEX_CONFIG_HOME", None)
+    env["CODEX_HOME"] = str(target_home)
+    return temp_home, env
+
+
+def _run_codex_process(
+    command: list[str], prompt: str, repo_root: Path, timeout_seconds: int,
+    env: dict[str, str], *, pass_fds: tuple[int, ...] = (),
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command,
+        cwd=repo_root,
+        input=prompt,
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=timeout_seconds,
+        env=env,
+        pass_fds=pass_fds,
+    )
+
+
 def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
     raw_path = Path(repo_relative_path)
     if raw_path.is_absolute():
@@ -99,38 +153,31 @@ def _default_codex_runner(
     command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int,
     *, expected_auth_stream_identity: str | None = None,
 ) -> CodexRunResult:
-    if _codex_profile_from_argv(command_argv) == "oss-cloud":
-        default_stream = actual_opaque_env_path()
-        env_file = os.environ.get(
-            "SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "",
-        )
-        with approved_op_env_invocation(
-            env_file, expected_identity_digest=expected_auth_stream_identity,
-        ) as invocation:
-            proc = subprocess.run(
-                invocation.runtime_argv(command_argv),
-                cwd=repo_root,
-                input=prompt,
-                text=True,
-                capture_output=True,
-                check=False,
-                timeout=timeout_seconds,
-                env=_codex_runner_env(),
-                pass_fds=invocation.pass_fds,
+    codex_profile = _codex_profile_from_argv(command_argv)
+    temp_home, runner_env = _isolated_codex_environment(codex_profile)
+    try:
+        if codex_profile == "oss-cloud":
+            default_stream = actual_opaque_env_path()
+            env_file = os.environ.get(
+                "SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "",
             )
-            execution_argv = invocation.receipt_argv(command_argv)
-    else:
-        execution_argv = _execution_argv_for_run(command_argv)
-        proc = subprocess.run(
-            execution_argv,
-            cwd=repo_root,
-            input=prompt,
-            text=True,
-            capture_output=True,
-            check=False,
-            timeout=timeout_seconds,
-            env=_codex_runner_env(),
-        )
+            with approved_op_env_invocation(
+                env_file, expected_identity_digest=expected_auth_stream_identity,
+            ) as invocation:
+                proc = _run_codex_process(
+                    invocation.runtime_argv(command_argv),
+                    prompt,
+                    repo_root,
+                    timeout_seconds,
+                    runner_env,
+                    pass_fds=invocation.pass_fds,
+                )
+                execution_argv = invocation.receipt_argv(command_argv)
+        else:
+            execution_argv = _execution_argv_for_run(command_argv)
+            proc = _run_codex_process(execution_argv, prompt, repo_root, timeout_seconds, runner_env)
+    finally:
+        temp_home.cleanup()
     return CodexRunResult(
         exit_code=proc.returncode, stdout=proc.stdout, stderr=proc.stderr, executed_argv=execution_argv,
     )
@@ -378,6 +425,7 @@ def _build_ab_run_receipt(
     skill_b_identity: dict[str, str] | None,
     execution_profile_id: str = "codex-read-only",
     judge_profile_id: str = "oss-local",
+    execution_lane: str = "all",
     evidence_root: str = ".harness/artifacts/sdk-ab-evals",
     timeout_seconds: int = 1800,
     runner: CodexRunner | None = None,
@@ -393,6 +441,7 @@ def _build_ab_run_receipt(
             skill_b_identity=skill_b_identity,
             execution_profile_id=execution_profile_id,
             judge_profile_id=judge_profile_id,
+            execution_lane=execution_lane,
             evidence_root=evidence_root,
             preflight_probe=preflight_probe,
         )
@@ -405,11 +454,7 @@ def _build_ab_run_receipt(
     status = "completed" if not blockers else "blocked"
     side_effects = _run_side_effects(plan, variant_results)
     receipt_variant_results = runtime_profile_gates[0]["variant_results"] if runtime_profile_gates else []
-    return _run_payload(
-        plan, status, blockers, receipt_variant_results, runtime_profile_gates,
-        side_effects["codex_exec_started"], side_effects["provider_invoked"],
-        side_effects["network_accessed"], timeout_seconds,
-    )
+    return _run_payload(plan, status, blockers, receipt_variant_results, runtime_profile_gates, side_effects["codex_exec_started"], side_effects["provider_invoked"], side_effects["network_accessed"], timeout_seconds)
 
 
 def build_ab_run_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -584,6 +629,7 @@ def _run_payload(
         "fixture": plan["fixture"],
         "execution_profile": plan["execution_profile"],
         "judge_profile": plan["judge_profile"],
+        "execution_lane": plan["execution_lane"],
         "codex_profile": "oss-local",
         "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": plan["evidence_root"],

@@ -163,7 +163,7 @@
       "provider": "codex",
       "mode": "cloud",
       "host": "codex-cli-profile",
-      "model": "minimax-m2.7:cloud",
+      "model": "deepseek-v4-flash:cloud",
       "model_role": "cloud_confirmation",
       "model_settings": null,
       "runtime_metadata": null,

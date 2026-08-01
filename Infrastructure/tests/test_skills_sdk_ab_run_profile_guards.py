@@ -100,6 +100,28 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             truth_lane="schema_contract",
         )
 
+    def test_default_codex_runner_uses_ephemeral_profile_home(self) -> None:
+        command = ["codex", "exec", "--profile", "oss-local", "--sandbox", "read-only", "-"]
+        with tempfile.TemporaryDirectory() as source_dir:
+            source_home = Path(source_dir)
+            (source_home / "oss-local.config.toml").write_text('model = "qwen3.5:9b-mlx"\n', encoding="utf-8")
+            captured: dict[str, object] = {}
+
+            def fake_run(_argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+                captured.update(kwargs)
+                return subprocess.CompletedProcess(_argv, 0, '{"type":"response.completed"}\n', "")
+
+            with patch.dict(os.environ, {"CODEX_HOME": str(source_home), "CODEX_CONFIG_HOME": str(source_home), "MISE_TRUSTED_CONFIG_PATHS": "/private/tmp/test-worktree/.mise.toml"}), patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run):
+                result = _default_codex_runner(command, "prompt", REPO_ROOT, 10)
+
+        self.assertEqual(result.exit_code, 0)
+        env = captured["env"]
+        assert isinstance(env, dict)
+        self.assertNotEqual(env["CODEX_HOME"], str(source_home))
+        self.assertNotIn("CODEX_CONFIG_HOME", env)
+        self.assertEqual(env["MISE_TRUSTED_CONFIG_PATHS"], "/private/tmp/test-worktree/.mise.toml")
+        self.assertFalse(Path(str(env["CODEX_HOME"])).exists())
+
     def test_missing_executed_argv_blocks_without_claiming_a_runtime_profile(self) -> None:
         def missing_argv_runner(command_argv, prompt, repo_root, timeout_seconds):
             output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]

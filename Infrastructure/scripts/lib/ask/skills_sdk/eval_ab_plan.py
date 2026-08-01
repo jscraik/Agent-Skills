@@ -103,8 +103,8 @@ def _codex_command_argv(
         "exec",
         "--profile",
         codex_profile,
-        "--ask-for-approval",
-        approval_policy,
+        "-c",
+        f'approval_policy="{approval_policy}"',
         "--sandbox",
         sandbox_mode,
         "--cd",
@@ -144,6 +144,7 @@ def _build_ab_plan_receipt(
     skill_b_identity: dict[str, str] | None,
     execution_profile_id: str = "codex-read-only",
     judge_profile_id: str = "oss-local",
+    execution_lane: str = "all",
     evidence_root: str = DEFAULT_EVIDENCE_ROOT,
     preflight_probe: PreflightProbe | None = None,
 ) -> dict[str, Any]:
@@ -158,22 +159,20 @@ def _build_ab_plan_receipt(
         judge_profile_id=judge_profile_id,
     )
     blockers = list(preview["blockers"])
+    blockers += [] if execution_lane in {"all", "oss-local"} else ["execution_lane_invalid"]
     evidence_root_label, evidence_blocker = _planned_evidence_root(repo_root, evidence_root)
-    if evidence_blocker:
-        blockers.append(evidence_blocker)
+    blockers += [evidence_blocker] if evidence_blocker else []
     experiment_id, runtime_profile_gates = _planned_commands(
         preview,
         blockers=blockers,
         evidence_root_label=evidence_root_label,
         execution_profile_id=execution_profile_id,
         judge_profile_id=judge_profile_id,
+        execution_lane=execution_lane,
         preflight_probe=preflight_probe,
     )
     status, command_plan = _plan_status(blockers, runtime_profile_gates)
-    return _plan_payload(
-        preview, status, blockers, evidence_root_label, experiment_id,
-        command_plan, runtime_profile_gates,
-    )
+    return _plan_payload(preview, status, blockers, evidence_root_label, experiment_id, command_plan, runtime_profile_gates, execution_lane)
 
 
 def build_ab_plan_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -213,13 +212,15 @@ def _planned_commands(
     evidence_root_label: str | None,
     execution_profile_id: str,
     judge_profile_id: str,
+    execution_lane: str,
     preflight_probe: PreflightProbe | None,
 ) -> tuple[str | None, list[dict[str, Any]]]:
     if blockers or evidence_root_label is None:
         return _experiment_id_from_seed("\n".join(blockers or ["evidence_root_unavailable"])), []
     experiment_id = _experiment_id(preview, execution_profile_id, judge_profile_id)
     gates = []
-    for order, profile_id in enumerate(("oss-local", "oss-cloud"), start=1):
+    profile_ids = ("oss-local", "oss-cloud") if execution_lane == "all" else ("oss-local",)
+    for order, profile_id in enumerate(profile_ids, start=1):
         profile = select_judge_profile(profile_id)
         codex_profile = str(profile["codex_profile"])
         preflight = build_lane_preflight(profile, preflight_probe)
@@ -281,6 +282,7 @@ def _plan_payload(
     experiment_id: str | None,
     command_plan: list[dict[str, Any]],
     runtime_profile_gates: list[dict[str, Any]],
+    execution_lane: str,
 ) -> dict[str, Any]:
     return {
         "schema_version": AB_PLAN_SCHEMA_VERSION,
@@ -292,6 +294,7 @@ def _plan_payload(
         "fixture": preview["fixture"],
         "execution_profile": preview["execution_profile"],
         "judge_profile": preview["judge_profile"],
+        "execution_lane": execution_lane,
         "codex_profile": "oss-local" if runtime_profile_gates else None,
         "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": evidence_root_label,
@@ -307,11 +310,7 @@ def _plan_payload(
         "codex_exec_invoked": False,
         "blockers": blockers,
         "acceptance_trace": preview["acceptance_trace"],
-        "agent_summary": (
-            "A/B eval execution plan is ready; Codex has not been invoked."
-            if status == "planned"
-            else f"A/B eval execution plan is blocked: {', '.join(blockers)}."
-        ),
+        "agent_summary": "A/B eval execution plan is ready; Codex has not been invoked." if status == "planned" else f"A/B eval execution plan is blocked: {', '.join(blockers)}.",
     }
 
 

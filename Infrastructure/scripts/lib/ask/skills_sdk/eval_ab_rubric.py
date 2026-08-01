@@ -4,6 +4,8 @@ import hashlib
 import json
 from typing import Any
 
+from ask.skills_sdk.eval_profiles import OSS_CLOUD_MODEL
+
 
 AB_RUBRIC_SCHEMA_VERSION = "skills-sdk.ab-rubric-receipt.v0"
 AB_RUBRIC_SCHEMA_URI = (
@@ -59,7 +61,7 @@ AB_RUBRIC_STAGE_POLICIES = [
     {
         "stage": "cloud_oss_loop",
         "judge_profile": "oss-cloud",
-        "default_model": "minimax-m2.7:cloud",
+        "default_model": OSS_CLOUD_MODEL,
         "confidence_weight": "second_pass_signal",
         "promotion_gate": "confirm_local_delta",
     },

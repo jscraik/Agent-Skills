@@ -1,0 +1,7 @@
+{
+  "id": "local-proof-overclaims-runtime",
+  "probe_type": "evidence_lane_overclaim_rejected",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "Fail fixture treats local review validation as proof of runtime reachability or task outcome."
+}
