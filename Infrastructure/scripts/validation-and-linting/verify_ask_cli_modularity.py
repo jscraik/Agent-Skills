@@ -6,219 +6,12 @@ from __future__ import annotations
 import argparse
 import ast
 import subprocess
-from datetime import date
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-LEGACY_SHAPE_DEBT = {
-    "Infrastructure/scripts/lib/ask/commands/evals.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing eval command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin eval runner extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/skill_gate.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin gate extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin eval regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin gate regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/skills_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skills command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/repo_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing repository command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/sdk.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional SDK parser and dispatch extraction debt while Phoenix observability commands are stabilized",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/phoenix_auto_trace.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional auto-trace extraction debt pending a smaller observability config object",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skills_sdk/phoenix_observability.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional Phoenix receipt and OTLP helper extraction debt pending provider-specific module split",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skill_review_dashboard.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill review dashboard extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skills_sdk/typed_contracts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing typed contract extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing routed skillset extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill authoring benchmark extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_cli_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing ask CLI regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_repo_doctor.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing repository doctor regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_evals_command.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing eval command regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_package_contract.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_package.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package verification regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_pr_skills_sdk_artifacts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing SDK artifact regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_scenario_quality.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing scenario quality regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_ab_judge_score.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing A/B judge score regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_schema_spine.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing schema spine regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_phoenix_observability.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional Phoenix CLI and receipt coverage pending fixture helper extraction",
-        "expires": "2026-07-31",
-    },
-    "skills-system/skill-creator/scripts/init_skill.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill creator scaffold extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing code-quality skill gate regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_errors.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skills error regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
-        "owner": "validation",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PROGRAM-DESIGN-RATCHET",
-        "reason": "pre-existing validation integration fixture exceeds file budget; split in follow-up",
-        "expires": "2026-07-31",
-    },
-}
-LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
     """
     Create and parse command-line arguments for verifying the ask CLI modularity.
@@ -363,8 +156,6 @@ def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
 
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     line_count = len(current.splitlines())
     baseline_line_count = len(baseline.splitlines()) if baseline is not None else 0
     if line_count <= args.max_file_lines:
@@ -375,8 +166,6 @@ def _check_file_size(path: Path, current: str, baseline: str | None, args: argpa
 
 def _check_function_shape(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     current_metrics = _function_metrics(current, source="current")
     baseline_metrics = _function_metrics(baseline, source="baseline") if baseline is not None else {}
     for name, (line_count, complexity) in sorted(current_metrics.items()):
@@ -389,31 +178,11 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
-    issues.extend(_check_legacy_shape_debt_metadata())
     for path in _changed_python_paths(tuple(args.changed_files)):
         current = path.read_text(encoding="utf-8")
         baseline = _git_head_text(path)
         _check_file_size(path, current, baseline, args, issues)
         _check_function_shape(path, current, baseline, args, issues)
-    return issues
-
-
-def _check_legacy_shape_debt_metadata() -> list[str]:
-    issues: list[str] = []
-    required_fields = ("owner", "rule_id", "ticket", "reason", "expires")
-    today = date.today()
-    for relpath, metadata in sorted(LEGACY_SHAPE_DEBT.items()):
-        missing = [field for field in required_fields if not metadata.get(field)]
-        if missing:
-            issues.append(f"{relpath} legacy shape debt missing waiver field(s): {', '.join(missing)}")
-            continue
-        try:
-            expires = date.fromisoformat(metadata["expires"])
-        except ValueError:
-            issues.append(f"{relpath} legacy shape debt has invalid expires date: {metadata['expires']}")
-            continue
-        if expires < today:
-            issues.append(f"{relpath} legacy shape debt expired on {metadata['expires']}")
     return issues
 
 
