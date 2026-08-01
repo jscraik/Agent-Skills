@@ -383,7 +383,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
 
     def _assert_command_argv(self, receipt: dict[str, object]) -> None:
         first = receipt["command_plan"][0]
-        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "--ask-for-approval", "on-request", "--sandbox", "read-only"])
+        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "-c", 'approval_policy="on-request"', "--sandbox", "read-only"])
         self.assertEqual(first["approval_policy"], "on-request")
         self.assertIn("--json", first["command_argv"])
         for gate in receipt["runtime_profile_gates"]:

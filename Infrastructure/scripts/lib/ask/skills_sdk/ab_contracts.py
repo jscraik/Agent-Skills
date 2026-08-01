@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from ask.skills_sdk.ab_contract_guards import (
     exact_variant_labels as _exact_variant_labels,
+    approval_policy_from_argv as _approval_policy_from_argv,
     run_gate_is_completed,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
@@ -97,7 +98,7 @@ def _validate_judge_argv(argv: list[str], codex_index: int, require_approval: bo
     profile_index = argv.index("--profile", codex_index)
     if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index != codex_index + 2:
         raise ValueError("judge Codex argv must contain an ordered profile option")
-    if require_approval and (argv.count("--ask-for-approval") != 1 or argv[argv.index("--ask-for-approval", codex_index) + 1] != "on-request"):
+    if require_approval and _approval_policy_from_argv(argv, codex_index) != "on-request":
         raise ValueError("judge Codex argv must prove the on-request approval policy")
 
 
@@ -351,7 +352,7 @@ class AbCodexCommandPlan(_SdkContractModel):
         if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
             raise ValueError("Codex command argv profile must match codex_profile")
         _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
-        if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != self.approval_policy:
+        if _approval_policy_from_argv(self.command_argv) != self.approval_policy:
             raise ValueError("Codex command argv must prove the declared approval policy")
         validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="Codex command argv must prove output_last_message_path")
         return self
@@ -469,7 +470,7 @@ class AbVariantRunResult(_SdkContractModel):
             if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
                 raise ValueError("executed Codex argv profile must match codex_profile")
             _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
-        if self.command_argv.count("--ask-for-approval") != 1 or self.command_argv[self.command_argv.index("--ask-for-approval") + 1] != "on-request":
+        if _approval_policy_from_argv(self.command_argv) != "on-request":
             raise ValueError("executed Codex argv must prove on-request approval")
         validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="executed Codex argv must prove output_last_message_path")
         if bool(self.blockers) != (self.status == "blocked"):
@@ -795,6 +796,4 @@ class AbJudgeScoreReceipt(_SdkContractModel):
                 self.judge_output_digest,
                 self.judge_command_argv,
                 self.codex_profile,
-                self.decision,
-            )
-        )
+                self.decision))

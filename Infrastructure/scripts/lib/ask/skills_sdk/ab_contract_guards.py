@@ -18,6 +18,15 @@ def argv_output_last_message_path(argv: list[str]) -> str | None:
     return argv[option_index + 1]
 
 
+def approval_policy_from_argv(argv: list[str], start: int = 0) -> str | None:
+    args = argv[start:]
+    if "--ask-for-approval" in args:
+        index = args.index("--ask-for-approval")
+        return args[index + 1] if index + 1 < len(args) else None
+    values = [args[index + 1].split("=", 1)[1].strip('"\'') for index, value in enumerate(args[:-1]) if value in {"-c", "--config"} and args[index + 1].startswith("approval_policy=")]
+    return values[0] if len(values) == 1 else None
+
+
 def validate_argv_output_last_message_path(argv: list[str], path: str, *, message: str) -> None:
     if argv_output_last_message_path(argv) != path:
         raise ValueError(message)
