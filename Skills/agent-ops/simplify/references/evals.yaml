@@ -524,6 +524,7 @@ cases:
       - id: command_not_executed
         any_of:
         - did not run
+        - didn’t run
         - did not execute
         - refused
         - blocked
