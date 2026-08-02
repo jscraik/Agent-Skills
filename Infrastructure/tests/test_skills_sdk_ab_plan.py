@@ -14,7 +14,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
-from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_plan import (  # noqa: E402
+    _PROMPT_FIXTURE_LIMIT_BYTES,
+    _variant_prompt,
+    build_ab_plan_receipt,
+)
 from ask.skills_sdk.eval_ab_run import CodexRunResult, build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt, validate_ab_run_receipt  # noqa: E402
@@ -38,6 +42,43 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
+    def test_variant_prompt_is_self_contained_and_tool_free(self) -> None:
+        prompt = _variant_prompt(
+            REPO_ROOT,
+            {"label": "A", "query": SKILL_A, **IDENTITY_A},
+            {"path": FIXTURE, "digest": "sha256:" + "3" * 64},
+        )
+        self.assertIn("Do not call tools", prompt)
+        self.assertIn('"case_id": "exact-summary"', prompt)
+
+    def test_variant_prompt_rejects_missing_oversized_or_uncontrolled_material(self) -> None:
+        with self.assertRaisesRegex(ValueError, "regular file"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {
+                    "path": "Infrastructure/tests/fixtures/skills_sdk/missing-fixture.json",
+                    "digest": "sha256:" + "3" * 64,
+                },
+            )
+        oversized = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "skills_sdk" / "ab-oversized.txt"
+        oversized.write_bytes(b"x" * (_PROMPT_FIXTURE_LIMIT_BYTES + 1))
+        try:
+            with self.assertRaisesRegex(ValueError, "exceeds"):
+                _variant_prompt(
+                    REPO_ROOT,
+                    {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                    {"path": oversized.relative_to(REPO_ROOT).as_posix(), "digest": "sha256:" + "3" * 64},
+                )
+        finally:
+            oversized.unlink(missing_ok=True)
+        with self.assertRaisesRegex(ValueError, "controlled SDK fixture root"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": "README.md", "digest": "sha256:" + "3" * 64},
+            )
+
     def test_skills_command_defers_optional_ab_contract_imports(self) -> None:
         """The general ask command must load without the optional Pydantic lane."""
         source_path = REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py"

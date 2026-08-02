@@ -21,6 +21,7 @@ from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_confi
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
 _CODEX_TMPDIR_ENV = "ASK_CODEX_TMPDIR"
 _CODEX_OP_ENV_FILE_ENV = "ASK_CODEX_OP_ENV_FILE"
+_MINIMAL_CODEX_CONFIG = 'model_reasoning_effort = "none"\n'
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,7 @@ def _run_codex_judge(
         with tempfile.TemporaryDirectory(prefix="codex-oss-sqlite.", dir=_codex_temp_parent()) as sqlite_home_raw:
             codex_home = Path(codex_home_raw)
             sqlite_home = Path(sqlite_home_raw)
+            _write_minimal_codex_config(codex_home)
             _copy_codex_profile_config(judge_profile, codex_home)
             completed, command = _execute_codex_judge_command(
                 command, prompt, judge_profile, timeout_seconds, repo_root, codex_home, sqlite_home,
@@ -90,10 +92,13 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
         "exec",
         "--profile",
         codex_profile,
-        "--ask-for-approval",
-        "on-request",
+        "--disable",
+        "apps",
+        "-c",
+        'approval_policy="on-request"',
         "--cd",
         str(work_dir),
+        "--skip-git-repo-check",
         "--sandbox",
         "read-only",
         "--ephemeral",
@@ -196,6 +201,14 @@ def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) 
     target = codex_home / f"{profile_id}.config.toml"
     shutil.copy2(source, target)
     augment_local_codex_profile_config(target, _codex_profile_model(judge_profile))
+    target.chmod(0o600)
+    return target
+
+
+def _write_minimal_codex_config(codex_home: Path) -> Path:
+    codex_home.mkdir(parents=True, exist_ok=True)
+    target = codex_home / "config.toml"
+    target.write_text(_MINIMAL_CODEX_CONFIG, encoding="utf-8")
     target.chmod(0o600)
     return target
 

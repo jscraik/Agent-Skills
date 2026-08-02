@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
+    _judge_prompt,
     build_ab_judge_preview_receipt,
     build_ab_judge_score_receipt,
 )
@@ -68,6 +69,15 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
         self.assertNotIn("output_last_message_path", comparison["variant_results"][0])
         self.assertNotIn("command_argv", comparison["variant_results"][0])
         validate_ab_judge_preview_receipt(receipt)
+
+    def test_judge_prompt_binds_winner_to_normalized_policy_delta(self) -> None:
+        receipt = build_ab_judge_preview_receipt(REPO_ROOT, run_receipt=RUN_RECEIPT_V1)
+
+        prompt = _judge_prompt(receipt["comparison_payload"])
+
+        self.assertIn("normalized_score_b - normalized_score_a", prompt)
+        self.assertIn("do not use the raw 0-to-5 score gap", prompt)
+        self.assertIn("set winner to\ninconclusive", prompt)
 
     def test_builder_blocks_non_completed_run_receipt(self) -> None:
         receipt = build_ab_judge_preview_receipt(

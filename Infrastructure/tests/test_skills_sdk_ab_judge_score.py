@@ -190,7 +190,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
         command_tail = [
             "--", "codex", "exec", "--profile", "oss-cloud",
-            "--ask-for-approval", "on-request", "-",
+            "--disable", "apps", "-c", 'approval_policy="on-request"', "-",
         ]
         with tempfile.TemporaryDirectory() as directory, patch(
             "ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)
@@ -1138,10 +1138,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(
             command[9:],
             [
-                "--ask-for-approval",
-                "on-request",
-                "--cd",
-                str(codex_judge._codex_judge_work_dir(output_file)),
+                "--disable", "apps", "-c", 'approval_policy="on-request"',
+                "--cd", str(codex_judge._codex_judge_work_dir(output_file)), "--skip-git-repo-check",
                 "--sandbox",
                 "read-only",
                 "--ephemeral",

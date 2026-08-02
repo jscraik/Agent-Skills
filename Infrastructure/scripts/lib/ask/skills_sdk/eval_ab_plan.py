@@ -12,6 +12,7 @@ from ask.skills_sdk.eval_ab_preflight import PreflightProbe, build_lane_prefligh
 AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v1"
 AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
 DEFAULT_EVIDENCE_ROOT = ".harness/artifacts/sdk-ab-evals"
+_PROMPT_FIXTURE_LIMIT_BYTES = 64 * 1024
 
 
 def _digest_text(value: str) -> str:
@@ -125,14 +126,44 @@ def _planned_execution_argv(codex_profile: str, command_argv: list[str]) -> list
     return list(command_argv)
 
 
-def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
+def _contained_fixture_prompt(repo_root: Path, raw_path: str) -> tuple[str, str]:
+    candidate = Path(raw_path)
+    if candidate.is_absolute():
+        raise ValueError("fixture prompt source must be repo-relative")
+    raw_candidate = repo_root / candidate
+    current = raw_candidate
+    while current != repo_root:
+        if current.is_symlink():
+            raise ValueError("fixture prompt source must not traverse a symlink")
+        current = current.parent
+    resolved = (repo_root / candidate).resolve()
+    try:
+        resolved.relative_to(repo_root.resolve())
+    except ValueError as exc:
+        raise ValueError("fixture prompt source must remain inside the repository") from exc
+    relative = resolved.relative_to(repo_root.resolve()).as_posix()
+    if not relative.startswith("Infrastructure/tests/fixtures/skills_sdk/"):
+        raise ValueError("fixture prompt source is outside the controlled SDK fixture root")
+    if resolved.is_symlink() or not resolved.is_file():
+        raise ValueError("fixture prompt source must be a regular file")
+    if resolved.stat().st_size > _PROMPT_FIXTURE_LIMIT_BYTES:
+        raise ValueError(f"fixture prompt source exceeds {_PROMPT_FIXTURE_LIMIT_BYTES} bytes")
+    return relative, resolved.read_text(encoding="utf-8")
+
+
+def _variant_prompt(repo_root: Path, variant: dict[str, str], fixture: dict[str, Any]) -> str:
+    fixture_path, fixture_text = _contained_fixture_prompt(repo_root, fixture["path"])
     return (
-        f"Run Skills SDK A/B variant {variant['label']} against fixture {fixture['path']}.\n"
+        "Run one self-contained Skills SDK A/B evaluation in read-only mode.\n"
+        "Do not call tools, inspect the repository, execute commands, or ask follow-up questions.\n"
+        "Treat the embedded controlled fixture as the complete input and return sanitized evidence only.\n"
+        f"Variant: {variant['label']}\n"
         f"Skill query: {variant['query']}\n"
         f"Package id: {variant['package_id']}\n"
         f"Package digest: {variant['package_digest']}\n"
         f"Fixture digest: {fixture['digest']}\n"
-        "Return sanitized evidence only. Do not include secrets."
+        f"\n--- BEGIN FIXTURE {fixture_path} ---\n{fixture_text}\n--- END FIXTURE ---\n"
+        "Do not include secrets or claim work outside these inputs."
     )
 
 
@@ -165,6 +196,7 @@ def _build_ab_plan_receipt(
     evidence_root_label, evidence_blocker = _planned_evidence_root(repo_root, evidence_root)
     blockers += [evidence_blocker] if evidence_blocker else []
     experiment_id, runtime_profile_gates = _planned_commands(
+        repo_root,
         preview,
         blockers=blockers,
         evidence_root_label=evidence_root_label,
@@ -208,6 +240,7 @@ def _preview_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
 
 
 def _planned_commands(
+    repo_root: Path,
     preview: dict[str, Any],
     *,
     blockers: list[str],
@@ -239,6 +272,7 @@ def _planned_commands(
     if all(gate["preflight"]["admission"]["status"] == "pass" for gate in gates):
         for gate in gates:
             gate["command_plan"] = _variant_commands(
+                repo_root,
                 preview,
                 evidence_root_label,
                 experiment_id,
@@ -248,6 +282,7 @@ def _planned_commands(
 
 
 def _variant_commands(
+    repo_root: Path,
     preview: dict[str, Any], evidence_root_label: str, experiment_id: str, codex_profile: str,
 ) -> list[dict[str, Any]]:
     sandbox_mode = preview["execution_profile"]["sandbox_mode"]
@@ -260,7 +295,7 @@ def _variant_commands(
             approval_policy=approval_policy,
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
-            prompt=_variant_prompt(preview["skill_a"], preview["fixture"]),
+            prompt=_variant_prompt(repo_root, preview["skill_a"], preview["fixture"]),
             codex_profile=codex_profile,
         ),
         _variant_command(
@@ -270,7 +305,7 @@ def _variant_commands(
             approval_policy=approval_policy,
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
-            prompt=_variant_prompt(preview["skill_b"], preview["fixture"]),
+            prompt=_variant_prompt(repo_root, preview["skill_b"], preview["fixture"]),
             codex_profile=codex_profile,
         ),
     ]
