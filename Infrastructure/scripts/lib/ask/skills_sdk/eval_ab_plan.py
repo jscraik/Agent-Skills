@@ -153,6 +153,10 @@ def _contained_fixture_prompt(repo_root: Path, raw_path: str) -> tuple[str, str]
 
 def _variant_prompt(repo_root: Path, variant: dict[str, str], fixture: dict[str, Any]) -> str:
     fixture_path, fixture_text = _contained_fixture_prompt(repo_root, fixture["path"])
+    expected_digest = str(fixture.get("digest") or "")
+    actual_digest = _digest_text(fixture_text)
+    if expected_digest != actual_digest:
+        raise ValueError(f"fixture digest mismatch: expected {expected_digest}, got {actual_digest}")
     return (
         "Run one self-contained Skills SDK A/B evaluation in read-only mode.\n"
         "Do not call tools, inspect the repository, execute commands, or ask follow-up questions.\n"

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from copy import deepcopy
 import shutil
@@ -43,13 +44,22 @@ IDENTITY_B = {
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
     def test_variant_prompt_is_self_contained_and_tool_free(self) -> None:
+        fixture_text = (REPO_ROOT / FIXTURE).read_text(encoding="utf-8")
         prompt = _variant_prompt(
             REPO_ROOT,
             {"label": "A", "query": SKILL_A, **IDENTITY_A},
-            {"path": FIXTURE, "digest": "sha256:" + "3" * 64},
+            {"path": FIXTURE, "digest": "sha256:" + hashlib.sha256(fixture_text.encode("utf-8")).hexdigest()},
         )
         self.assertIn("Do not call tools", prompt)
         self.assertIn('"case_id": "exact-summary"', prompt)
+
+    def test_variant_prompt_rejects_fixture_digest_mismatch(self) -> None:
+        with self.assertRaisesRegex(ValueError, "fixture digest mismatch"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": FIXTURE, "digest": "sha256:" + "3" * 64},
+            )
 
     def test_variant_prompt_rejects_missing_oversized_or_uncontrolled_material(self) -> None:
         with self.assertRaisesRegex(ValueError, "regular file"):

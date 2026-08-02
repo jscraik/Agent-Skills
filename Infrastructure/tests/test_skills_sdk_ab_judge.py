@@ -77,6 +77,8 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
 
         self.assertIn("normalized_score_b - normalized_score_a", prompt)
         self.assertIn("do not use the raw 0-to-5 score gap", prompt)
+        self.assertIn("A positive delta selects skill_b", prompt)
+        self.assertIn("a negative delta selects skill_a", prompt)
         self.assertIn("set winner to\ninconclusive", prompt)
 
     def test_builder_blocks_non_completed_run_receipt(self) -> None:
