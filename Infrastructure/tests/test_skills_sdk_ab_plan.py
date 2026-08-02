@@ -87,6 +87,12 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                     "digest": "sha256:" + "3" * 64,
                 },
             )
+        with self.assertRaisesRegex(ValueError, "parent directories"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": "../README.md", "digest": "sha256:" + "3" * 64},
+            )
         oversized = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "skills_sdk" / "ab-oversized.txt"
         oversized.write_bytes(b"x" * (_PROMPT_FIXTURE_LIMIT_BYTES + 1))
         try:

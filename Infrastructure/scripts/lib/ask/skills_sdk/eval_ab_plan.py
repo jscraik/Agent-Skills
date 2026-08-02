@@ -135,6 +135,8 @@ def _contained_fixture_prompt(repo_root: Path, raw_path: str) -> tuple[str, str]
     candidate = Path(raw_path)
     if candidate.is_absolute():
         raise ValueError("fixture prompt source must be repo-relative")
+    if ".." in candidate.parts:
+        raise ValueError("fixture prompt source must not traverse parent directories")
     raw_candidate = repo_root / candidate
     current = raw_candidate
     while current != repo_root:
