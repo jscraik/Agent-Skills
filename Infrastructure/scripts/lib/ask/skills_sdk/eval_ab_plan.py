@@ -13,10 +13,15 @@ AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v1"
 AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
 DEFAULT_EVIDENCE_ROOT = ".harness/artifacts/sdk-ab-evals"
 _PROMPT_FIXTURE_LIMIT_BYTES = 64 * 1024
+_PROMPT_SKILL_LIMIT_BYTES = 128 * 1024
 
 
 def _digest_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
+
+
+def _digest_bytes(value: bytes) -> str:
+    return f"sha256:{hashlib.sha256(value).hexdigest()}"
 
 
 def _experiment_id_from_seed(seed: str) -> str:
@@ -148,24 +153,49 @@ def _contained_fixture_prompt(repo_root: Path, raw_path: str) -> tuple[str, str]
         raise ValueError("fixture prompt source must be a regular file")
     if resolved.stat().st_size > _PROMPT_FIXTURE_LIMIT_BYTES:
         raise ValueError(f"fixture prompt source exceeds {_PROMPT_FIXTURE_LIMIT_BYTES} bytes")
-    return relative, resolved.read_text(encoding="utf-8")
+    raw_bytes = resolved.read_bytes()
+    return relative, raw_bytes.decode("utf-8")
+
+
+def _contained_skill_prompt(repo_root: Path, query: str) -> tuple[str, str, str]:
+    from ask.commands.skills_impl import _skills_sdk_eval_source_path  # noqa: PLC0415
+
+    source = _skills_sdk_eval_source_path(repo_root, query)
+    if source is None:
+        raise ValueError(f"skill source is unavailable for variant {query!r}")
+    if source.is_symlink():
+        raise ValueError("variant skill source must not traverse a symlink")
+    resolved = source.resolve()
+    try:
+        relative = resolved.relative_to(repo_root.resolve()).as_posix()
+    except ValueError as exc:
+        raise ValueError("variant skill source must remain inside the repository") from exc
+    if resolved.is_symlink() or not resolved.is_file():
+        raise ValueError("variant skill source must be a regular file")
+    if resolved.stat().st_size > _PROMPT_SKILL_LIMIT_BYTES:
+        raise ValueError(f"variant skill source exceeds {_PROMPT_SKILL_LIMIT_BYTES} bytes")
+    raw_bytes = resolved.read_bytes()
+    return relative, raw_bytes.decode("utf-8"), _digest_bytes(raw_bytes)
 
 
 def _variant_prompt(repo_root: Path, variant: dict[str, str], fixture: dict[str, Any]) -> str:
+    skill_path, skill_text, skill_digest = _contained_skill_prompt(repo_root, variant["query"])
     fixture_path, fixture_text = _contained_fixture_prompt(repo_root, fixture["path"])
     expected_digest = str(fixture.get("digest") or "")
-    actual_digest = _digest_text(fixture_text)
+    actual_digest = _digest_bytes((repo_root / fixture_path).read_bytes())
     if expected_digest != actual_digest:
         raise ValueError(f"fixture digest mismatch: expected {expected_digest}, got {actual_digest}")
     return (
         "Run one self-contained Skills SDK A/B evaluation in read-only mode.\n"
         "Do not call tools, inspect the repository, execute commands, or ask follow-up questions.\n"
-        "Treat the embedded controlled fixture as the complete input and return sanitized evidence only.\n"
+        "Treat the embedded skill variant and controlled fixture as the complete input and return sanitized evidence only.\n"
         f"Variant: {variant['label']}\n"
         f"Skill query: {variant['query']}\n"
         f"Package id: {variant['package_id']}\n"
         f"Package digest: {variant['package_digest']}\n"
+        f"Skill source digest: {skill_digest}\n"
         f"Fixture digest: {fixture['digest']}\n"
+        f"\n--- BEGIN VARIANT SKILL {skill_path} ---\n{skill_text}\n--- END VARIANT SKILL ---\n"
         f"\n--- BEGIN FIXTURE {fixture_path} ---\n{fixture_text}\n--- END FIXTURE ---\n"
         "Do not include secrets or claim work outside these inputs."
     )
@@ -274,15 +304,25 @@ def _planned_commands(
             "command_plan": [],
         })
     if all(gate["preflight"]["admission"]["status"] == "pass" for gate in gates):
-        for gate in gates:
-            gate["command_plan"] = _variant_commands(
-                repo_root,
-                preview,
-                evidence_root_label,
-                experiment_id,
-                gate["codex_profile"],
-            )
+        _populate_variant_commands(repo_root, preview, evidence_root_label, experiment_id, gates, blockers)
     return experiment_id, gates
+
+
+def _populate_variant_commands(
+    repo_root: Path,
+    preview: dict[str, Any],
+    evidence_root_label: str,
+    experiment_id: str,
+    gates: list[dict[str, Any]],
+    blockers: list[str],
+) -> None:
+    for gate in gates:
+        try:
+            gate["command_plan"] = _variant_commands(
+                repo_root, preview, evidence_root_label, experiment_id, gate["codex_profile"],
+            )
+        except ValueError as exc:
+            blockers.append(f"variant_prompt_invalid:{exc}")
 
 
 def _variant_commands(

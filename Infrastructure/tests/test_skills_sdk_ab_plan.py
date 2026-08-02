@@ -44,14 +44,30 @@ IDENTITY_B = {
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
     def test_variant_prompt_is_self_contained_and_tool_free(self) -> None:
-        fixture_text = (REPO_ROOT / FIXTURE).read_text(encoding="utf-8")
+        fixture_bytes = (REPO_ROOT / FIXTURE).read_bytes()
         prompt = _variant_prompt(
             REPO_ROOT,
             {"label": "A", "query": SKILL_A, **IDENTITY_A},
-            {"path": FIXTURE, "digest": "sha256:" + hashlib.sha256(fixture_text.encode("utf-8")).hexdigest()},
+            {"path": FIXTURE, "digest": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest()},
         )
         self.assertIn("Do not call tools", prompt)
         self.assertIn('"case_id": "exact-summary"', prompt)
+        self.assertIn("--- BEGIN VARIANT SKILL", prompt)
+        self.assertIn((REPO_ROOT / SKILL_A / "SKILL.md").read_text(encoding="utf-8").strip(), prompt)
+
+    def test_variant_prompt_hashes_fixture_bytes_before_decoding(self) -> None:
+        fixture = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "skills_sdk" / "ab-crlf-fixture.txt"
+        fixture_bytes = b"case: crlf\r\nvalue: stable\r\n"
+        fixture.write_bytes(fixture_bytes)
+        try:
+            prompt = _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": fixture.relative_to(REPO_ROOT).as_posix(), "digest": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest()},
+            )
+            self.assertIn("case: crlf", prompt)
+        finally:
+            fixture.unlink(missing_ok=True)
 
     def test_variant_prompt_rejects_fixture_digest_mismatch(self) -> None:
         with self.assertRaisesRegex(ValueError, "fixture digest mismatch"):
@@ -88,6 +104,20 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                 {"label": "A", "query": SKILL_A, **IDENTITY_A},
                 {"path": "README.md", "digest": "sha256:" + "3" * 64},
             )
+
+    def test_plan_blocks_uncontrolled_fixture_with_a_receipt(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture="README.md",
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any("variant_prompt_invalid" in blocker for blocker in receipt["blockers"]))
+        self.assertEqual(receipt["command_plan"], [])
 
     def test_skills_command_defers_optional_ab_contract_imports(self) -> None:
         """The general ask command must load without the optional Pydantic lane."""
