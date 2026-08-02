@@ -319,6 +319,57 @@ def _git_head_text(path: Path) -> str | None:
     return result.stdout
 
 
+def _deleted_python_paths() -> list[Path]:
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=D", "HEAD", "--"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    paths: list[Path] = []
+    for line in result.stdout.splitlines():
+        candidate = _repo_path(line.strip())
+        if candidate.suffix == PYTHON_SUFFIX:
+            paths.append(candidate)
+    return paths
+
+
+def _oversized_sibling_paths(path: Path, max_file_lines: int = 800) -> list[Path]:
+    parent = path.parent.relative_to(REPO_ROOT).as_posix()
+    result = subprocess.run(
+        ["git", "ls-files", "--", f"{parent}/*.py"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    paths: list[Path] = []
+    for line in result.stdout.splitlines():
+        candidate = _repo_path(line.strip())
+        if candidate == path or not candidate.is_file():
+            continue
+        text = _git_head_text(candidate)
+        if text is not None and len(text.splitlines()) > max_file_lines:
+            paths.append(candidate)
+    return paths
+
+
+def _moved_function_metrics(path: Path) -> dict[str, tuple[int, int]]:
+    """Use uniquely named functions in deleted sibling modules as move baselines."""
+    candidates: dict[str, list[tuple[int, int]]] = {}
+    baseline_paths = [*_deleted_python_paths(), *_oversized_sibling_paths(path)]
+    for deleted_path in dict.fromkeys(baseline_paths):
+        if deleted_path.parent != path.parent:
+            continue
+        text = _git_head_text(deleted_path)
+        if text is None:
+            continue
+        for name, metrics in _function_metrics(text, source="baseline").items():
+            candidates.setdefault(name, []).append(metrics)
+    return {name: values[0] for name, values in candidates.items() if len(values) == 1}
+
+
 def _complexity(node: ast.AST) -> int:
     score = 1
     decision_nodes = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.ExceptHandler, ast.IfExp, ast.Assert, ast.comprehension)
@@ -379,7 +430,11 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
     if relpath in LEGACY_SHAPE_DEBT_PATHS:
         return
     current_metrics = _function_metrics(current, source="current")
-    baseline_metrics = _function_metrics(baseline, source="baseline") if baseline is not None else {}
+    baseline_metrics = (
+        _function_metrics(baseline, source="baseline")
+        if baseline is not None
+        else _moved_function_metrics(path)
+    )
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))
         if line_count > args.max_function_lines and line_count > old_lines:

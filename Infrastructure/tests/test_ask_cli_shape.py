@@ -4,6 +4,7 @@ import importlib.util
 import subprocess
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
@@ -157,6 +158,33 @@ def sample(value):
             self.assertEqual(validator._check_python_shape(args), [])
         finally:
             validator.LEGACY_SHAPE_DEBT = original_debt
+    def test_moved_function_uses_deleted_sibling_as_shape_baseline(self) -> None:
+        validator = _load_validator()
+        args = SimpleNamespace(max_function_lines=1, max_complexity=1)
+        current = "def moved(value):\n    if value:\n        return 1\n    return 0\n"
+        issues: list[str] = []
+
+        with unittest.mock.patch.object(
+            validator,
+            "_moved_function_metrics",
+            return_value={"moved": (4, 2)},
+        ):
+            validator._check_function_shape(VALIDATOR_PATH, current, None, args, issues)
+
+        self.assertEqual(issues, [])
+
+    def test_new_function_still_fails_without_a_move_baseline(self) -> None:
+        validator = _load_validator()
+        args = SimpleNamespace(max_function_lines=1, max_complexity=1)
+        current = "def fresh(value):\n    if value:\n        return 1\n    return 0\n"
+        issues: list[str] = []
+
+        with unittest.mock.patch.object(validator, "_moved_function_metrics", return_value={}):
+            validator._check_function_shape(VALIDATOR_PATH, current, None, args, issues)
+
+        self.assertEqual(len(issues), 2)
+        self.assertIn("function line budget", issues[0])
+        self.assertIn("complexity budget", issues[1])
 
 
 if __name__ == "__main__":
