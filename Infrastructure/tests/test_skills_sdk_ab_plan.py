@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from copy import deepcopy
 import shutil
@@ -14,7 +15,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
-from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_plan import (  # noqa: E402
+    _PROMPT_FIXTURE_LIMIT_BYTES,
+    _variant_prompt,
+    build_ab_plan_receipt,
+)
 from ask.skills_sdk.eval_ab_run import CodexRunResult, build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt, validate_ab_run_receipt  # noqa: E402
@@ -38,6 +43,88 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
+    def test_variant_prompt_is_self_contained_and_tool_free(self) -> None:
+        fixture_bytes = (REPO_ROOT / FIXTURE).read_bytes()
+        prompt = _variant_prompt(
+            REPO_ROOT,
+            {"label": "A", "query": SKILL_A, **IDENTITY_A},
+            {"path": FIXTURE, "digest": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest()},
+        )
+        self.assertIn("Do not call tools", prompt)
+        self.assertIn('"case_id": "exact-summary"', prompt)
+        self.assertIn("--- BEGIN VARIANT SKILL", prompt)
+        self.assertIn((REPO_ROOT / SKILL_A / "SKILL.md").read_text(encoding="utf-8").strip(), prompt)
+
+    def test_variant_prompt_hashes_fixture_bytes_before_decoding(self) -> None:
+        fixture = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "skills_sdk" / "ab-crlf-fixture.txt"
+        fixture_bytes = b"case: crlf\r\nvalue: stable\r\n"
+        fixture.write_bytes(fixture_bytes)
+        try:
+            prompt = _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": fixture.relative_to(REPO_ROOT).as_posix(), "digest": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest()},
+            )
+            self.assertIn("case: crlf", prompt)
+        finally:
+            fixture.unlink(missing_ok=True)
+
+    def test_variant_prompt_rejects_fixture_digest_mismatch(self) -> None:
+        with self.assertRaisesRegex(ValueError, "fixture digest mismatch"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": FIXTURE, "digest": "sha256:" + "3" * 64},
+            )
+
+    def test_variant_prompt_rejects_missing_oversized_or_uncontrolled_material(self) -> None:
+        with self.assertRaisesRegex(ValueError, "regular file"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {
+                    "path": "Infrastructure/tests/fixtures/skills_sdk/missing-fixture.json",
+                    "digest": "sha256:" + "3" * 64,
+                },
+            )
+        with self.assertRaisesRegex(ValueError, "parent directories"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": "../README.md", "digest": "sha256:" + "3" * 64},
+            )
+        oversized = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "skills_sdk" / "ab-oversized.txt"
+        oversized.write_bytes(b"x" * (_PROMPT_FIXTURE_LIMIT_BYTES + 1))
+        try:
+            with self.assertRaisesRegex(ValueError, "exceeds"):
+                _variant_prompt(
+                    REPO_ROOT,
+                    {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                    {"path": oversized.relative_to(REPO_ROOT).as_posix(), "digest": "sha256:" + "3" * 64},
+                )
+        finally:
+            oversized.unlink(missing_ok=True)
+        with self.assertRaisesRegex(ValueError, "controlled SDK fixture root"):
+            _variant_prompt(
+                REPO_ROOT,
+                {"label": "A", "query": SKILL_A, **IDENTITY_A},
+                {"path": "README.md", "digest": "sha256:" + "3" * 64},
+            )
+
+    def test_plan_blocks_uncontrolled_fixture_with_a_receipt(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture="README.md",
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any("variant_prompt_invalid" in blocker for blocker in receipt["blockers"]))
+        self.assertEqual(receipt["command_plan"], [])
+
     def test_skills_command_defers_optional_ab_contract_imports(self) -> None:
         """The general ask command must load without the optional Pydantic lane."""
         source_path = REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
@@ -383,8 +470,10 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
 
     def _assert_command_argv(self, receipt: dict[str, object]) -> None:
         first = receipt["command_plan"][0]
-        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "-c", 'approval_policy="on-request"', "--sandbox", "read-only"])
+        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "--disable", "apps", "-c", 'approval_policy="on-request"'])
         self.assertEqual(first["approval_policy"], "on-request")
+        self.assertEqual(first["command_argv"][first["command_argv"].index("--disable") + 1], "apps")
+        self.assertNotIn("--ignore-user-config", first["command_argv"])
         self.assertIn("--json", first["command_argv"])
         for gate in receipt["runtime_profile_gates"]:
             for command in gate["command_plan"]:

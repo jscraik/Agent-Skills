@@ -19,7 +19,7 @@ from ask.skills_sdk.ab_transport_contracts import (
     is_approved_op_binary,
     opaque_env_identity_digest,
 )
-from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
+from ask.skills_sdk.eval_ab_plan import _variant_prompt, build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 
 
@@ -195,17 +195,6 @@ def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     if op_binary is None:
         raise ValueError("cloud execution requires an approved 1Password CLI binary")
     return [op_binary, "run", "--env-file", env_file, "--", *command_argv]
-
-
-def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
-    return (
-        f"Run Skills SDK A/B variant {variant['label']} against fixture {fixture['path']}.\n"
-        f"Skill query: {variant['query']}\n"
-        f"Package id: {variant['package_id']}\n"
-        f"Package digest: {variant['package_digest']}\n"
-        f"Fixture digest: {fixture['digest']}\n"
-        "Return sanitized evidence only. Do not include secrets."
-    )
 
 
 def _execute_variant(
@@ -576,7 +565,7 @@ def _execute_runtime_gate(
     for command_plan in gate["command_plan"]:
         result = _execute_variant(
             repo_root, command_plan=command_plan,
-            prompt=_variant_prompt(_variant_for_plan(plan, command_plan), plan["fixture"]),
+            prompt=_variant_prompt(repo_root, _variant_for_plan(plan, command_plan), plan["fixture"]),
             timeout_seconds=timeout, runner=gate_runner,
         )
         if result["codex_profile"] is not None and result["codex_profile"] != gate["codex_profile"]:

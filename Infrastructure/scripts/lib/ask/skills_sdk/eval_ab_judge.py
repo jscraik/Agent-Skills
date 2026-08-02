@@ -202,6 +202,11 @@ def _judge_prompt(comparison_payload: dict[str, Any]) -> str:
         "reason, and evidence_refs.\n"
         "Use dimension_scores, never dimensions. Use one evidence_refs array per object.\n"
         "Scores are 0 to 5. Normalized scores are 0 to 1: weighted_sum_of_dimension_scores / 5.\n"
+        "Compute the normalized delta as normalized_score_b - normalized_score_a after applying the rubric weights.\n"
+        "Apply winner_policy to that normalized delta: do not use the raw 0-to-5 score gap; when the absolute\n"
+        "delta is below minimum_normalized_delta, or confidence is below minimum_confidence, set winner to\n"
+        "inconclusive. A positive delta selects skill_b, and a negative delta selects skill_a; a directional\n"
+        "winner is valid only when the normalized policy threshold is met.\n"
         "Choose inconclusive when the sanitized evidence is insufficient.\n\n"
         f"Evidence:\n{json.dumps(comparison_payload, sort_keys=True, indent=2)}\n"
     )
