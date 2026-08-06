@@ -57,6 +57,22 @@ claims:
   scenario_families:
   - happy
   - edge
+- id: testing.strategy_and_gate_placement
+  statement: The testing skill maps meaningful failure modes to proportionate test
+    layers and verifies whether commit, push, and pull-request gates actually
+    invoke the selected checks.
+  source: SKILL.md:Test Strategy And Gate Placement
+  claim_type: execution
+  risk: high
+  hard_gate: true
+  evidence_required:
+  - strategy cases distinguish unit, boundary, smoke, regression, and exploratory
+    or mutation evidence by the failure mode they address
+  - gate-audit cases report present, missing, not_applicable, or unverified from
+    actual hook and workflow entrypoints
+  scenario_families:
+  - happy
+  - edge
 cases:
 - id: happy-validate-change
   name: validate changed behavior
@@ -410,6 +426,33 @@ cases:
     the exact proof lane.
   should: Select repo-native proof, classify pass/fail/blocked evidence truthfully,
     and avoid overclaiming readiness.
+- id: happy-test-strategy-gate-audit
+  name: test strategy and gate audit
+  category: happy
+  eval_modes:
+  - smoke
+  - release
+  realistic: true
+  should_trigger: true
+  prepend_skill: false
+  tessl_live_private: false
+  prompt: Our TypeScript service has unit tests and a small end-to-end smoke test,
+    but we do not know whether tests run before commit, before push, or on pull
+    requests. Propose a proportionate test strategy and audit plan without assuming
+    that a package test script is enforced.
+  acceptance:
+  - type: skill_selected
+    expected_skill: testing
+  - type: regex
+    value: "(?i)(unit|integration|contract|smoke|regression)"
+  - type: regex
+    value: "(?i)(pre-commit|precommit|pre-push|prepush|pull request|CI)"
+  - type: regex
+    value: "(?i)(present|missing|not applicable|unverified|hook|workflow)"
+  given: A repository needs a test strategy and gate audit rather than a generic
+    coverage recommendation.
+  should: Map failure modes to proportionate test layers and verify enforcement
+    through the actual hook and workflow entrypoints.
 - id: happy-issue-reproduction-lens
   name: issue reproduction fail-to-pass proof
   category: happy

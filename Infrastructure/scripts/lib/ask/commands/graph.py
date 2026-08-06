@@ -1,11 +1,13 @@
+"""Skill graph navigation and discovery for agent-native workflows."""
+
 from __future__ import annotations
 
-"""Skill graph navigation and discovery for agent-native workflows."""
 import json
 import re
 import shlex
-from pathlib import Path
 from collections import Counter, defaultdict, deque
+from pathlib import Path
+
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries
 
@@ -413,8 +415,48 @@ def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None)
     result.data["query"] = query
     result.data["matches"] = [n for _, n in scored]
     result.data["count"] = len(scored)
-    result.metadata["next_steps"] = [f"ask graph info <skill>"]
+    result.metadata["next_steps"] = ["ask graph info <skill>"]
     return result
+
+
+def _resolve_graph_info_node(data: dict, skill: str) -> str | ErrorObject:
+    start, ambiguous = _find_node(data, skill)
+    if ambiguous:
+        return ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Ambiguous skill name '{skill}'. Matches: {', '.join(ambiguous[:5])}",
+            fix_suggestion="Use a more specific skill name.",
+        )
+    if start:
+        return start
+    return ErrorObject(
+        code="ERR_VALIDATION",
+        message=f"Skill not found: '{skill}'",
+        fix_suggestion=(
+            f"Search available skill ids with: {_graph_validation_command('find', skill)}; "
+            f"if no matches are returned, run {_graph_validation_command('list')}"
+        ),
+    )
+
+
+def _graph_info_payload(start: str, node_map: dict, fwd: dict, rev: dict) -> dict:
+    node = node_map.get(start, {"id": start})
+    out_edges = sorted(fwd.get(start, []), key=lambda edge: -edge.get("weight", 1.0))
+    in_edges = sorted(rev.get(start, []), key=lambda edge: -edge.get("weight", 1.0))
+    return {
+        "skill": start,
+        "node": node,
+        "out_edges": out_edges,
+        "in_edges": in_edges,
+        "metrics": {
+            "in_degree": node.get("in_degree", len(in_edges)),
+            "out_degree": node.get("out_degree", len(out_edges)),
+            "topic": node.get("topic", "unknown"),
+            "tier": node.get("tier", "experimental"),
+            "stability": node.get("stability", "unknown"),
+        },
+    }
+
 
 def graph_info(repo_root: Path, skill: str) -> CallResult:
     """Returns full node details including topic, tier, degree, and links."""
@@ -428,44 +470,17 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
         return result
 
     node_map, fwd, rev = _build_index(data)
-    start, ambiguous = _find_node(data, skill)
-
-    if ambiguous:
+    resolved = _resolve_graph_info_node(data, skill)
+    if isinstance(resolved, ErrorObject):
         result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message=f"Ambiguous skill name '{skill}'. Matches: {', '.join(ambiguous[:5])}",
-            fix_suggestion="Use a more specific skill name."
-        ))
+        result.errors.append(resolved)
         return result
-
-    if not start:
-        result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message=f"Skill not found: '{skill}'"
-        ))
-        return result
-
-    n = node_map.get(start, {"id": start})
-    out_edges = sorted(fwd.get(start, []), key=lambda e: -e.get("weight", 1.0))
-    in_edges = sorted(rev.get(start, []), key=lambda e: -e.get("weight", 1.0))
 
     result.status = "success"
-    result.data["skill"] = start
-    result.data["node"] = n
-    result.data["out_edges"] = out_edges
-    result.data["in_edges"] = in_edges
-    result.data["metrics"] = {
-        "in_degree": n.get("in_degree", len(in_edges)),
-        "out_degree": n.get("out_degree", len(out_edges)),
-        "topic": n.get("topic", "unknown"),
-        "tier": n.get("tier", "experimental"),
-        "stability": n.get("stability", "unknown"),
-    }
+    result.data.update(_graph_info_payload(resolved, node_map, fwd, rev))
     result.metadata["next_steps"] = [
-        f"ask graph related {start}",
-        f"ask skills audit {start} --level strict"
+        f"ask graph related {resolved}",
+        f"ask skills audit {resolved} --level strict",
     ]
     return result
 

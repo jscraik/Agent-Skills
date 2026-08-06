@@ -16,7 +16,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact, _cloud_catalog_fact  # noqa: E402
 from ask.skills_sdk.eval_ab_run import _execution_argv_for_run, _validated_recorded_execution_argv  # noqa: E402
 from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
-    approved_op_env_invocation,
+    configs_auth_backed_invocation,
     is_actual_opaque_env_reference,
     is_opaque_env_reference,
 )
@@ -30,7 +30,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             "network_accessed": True,
             "http_status": 200,
             "catalog_digest": f"sha256:{'a' * 64}",
-            "matched_model": "minimax-m2.7:cloud",
+            "matched_model": "deepseek-v4-flash:cloud",
             "match_count": 1,
             "secret_value_observed": False,
             "secret_not_observed": True,
@@ -48,15 +48,19 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
             ):
-                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
                 env_file.unlink()
                 os.mkfifo(env_file)
                 fact = _cloud_catalog_fact(
-                    "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), auth,
+                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth,
                     lambda _command: subprocess.CompletedProcess(
-                        ["op", "run"], 0, stdout=json.dumps(self._catalog_payload()), stderr="",
+                        ["bash", "/mock/configs/run-auth-backed.sh"], 0,
+                        stdout=json.dumps(self._catalog_payload()), stderr="",
                     ),
                 )
         self.assertEqual(fact["status"], "blocked")
@@ -68,15 +72,18 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             os.mkfifo(env_file)
             auth = {
                 "status": "pass",
-                "auth_source": "op_fifo",
+                "auth_source": "1password_desktop_fifo",
                 "auth_stream_identity_digest": "sha256:" + "a" * 64,
             }
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
-                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
             ):
                 fact = _cloud_catalog_fact(
-                    "minimax-m2.7:cloud",
+                    "deepseek-v4-flash:cloud",
                     Path("/mock/oss-cloud.config.toml"),
                     auth,
                     lambda _command: self.fail("unapproved FIFO must not reach the catalog runner"),
@@ -96,11 +103,14 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(unapproved_env)}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
             ):
-                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
                 fact = _cloud_catalog_fact(
-                    "minimax-m2.7:cloud",
+                    "deepseek-v4-flash:cloud",
                     Path("/mock/oss-cloud.config.toml"),
                     auth,
                     lambda _command: self.fail("unapproved home FIFO must not reach the catalog runner"),
@@ -112,10 +122,10 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
         command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
         with (
             patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=True),
-            patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
-            patch("ask.skills_sdk.eval_ab_run.approved_op_binary", return_value="/mock/bin/op"),
+            patch("ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper", return_value="/mock/configs/run-auth-backed.sh"),
+            patch("ask.skills_sdk.eval_ab_run.configs_auth_wrapper", return_value="/mock/configs/run-auth-backed.sh"),
         ):
-            auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
             with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
                 _execution_argv_for_run(command)
         self.assertEqual(auth["status"], "blocked")
@@ -127,7 +137,11 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
 
     def test_recorded_runner_argv_rejects_receipt_only_stream_marker(self) -> None:
         command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "-"]
-        execution = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command]
+        execution = [
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+            "--env-file", "<operator-approved-opaque-env-stream>",
+            "--require-env", "OLLAMA_API_KEY", "--", *command,
+        ]
         with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
             _validated_recorded_execution_argv(execution, command, "oss-cloud")
 
@@ -157,7 +171,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=linked_home):
                 self.assertFalse(is_actual_opaque_env_reference(str(linked_home / ".codex" / ".env")))
 
-    def test_descriptor_handoff_remains_bound_after_fifo_replacement(self) -> None:
+    def test_configs_wrapper_invocation_binds_fifo_identity_without_opening_stream(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             home = Path(temp_dir)
             env_file = home / ".codex" / ".env"
@@ -165,23 +179,25 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             os.mkfifo(env_file)
             with (
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.ab_transport_contracts.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
             ):
-                with approved_op_env_invocation(env_file) as invocation:
-                    original = os.fstat(invocation.env_fd)
-                    env_file.unlink()
-                    os.mkfifo(env_file)
-                    replacement = env_file.lstat()
-                    self.assertNotEqual((original.st_dev, original.st_ino), (replacement.st_dev, replacement.st_ino))
-                    self.assertEqual((os.fstat(invocation.env_fd).st_dev, os.fstat(invocation.env_fd).st_ino), (original.st_dev, original.st_ino))
-                    self.assertEqual(invocation.runtime_argv(["child"])[3], f"/dev/fd/{invocation.env_fd}")
-                    self.assertEqual(invocation.receipt_argv(["child"])[3], str(env_file))
+                with configs_auth_backed_invocation(env_file) as invocation:
+                    runtime = invocation.runtime_argv(["child"])
+                    self.assertEqual(runtime, [
+                        "bash", "/mock/configs/run-auth-backed.sh", "--env-file", str(env_file),
+                        "--require-env", "OLLAMA_API_KEY", "--", "child",
+                    ])
+                    self.assertEqual(invocation.receipt_argv(["child"]), runtime)
+                    self.assertNotIn("/dev/fd/", " ".join(runtime))
 
-    def test_default_catalog_runner_hands_only_the_open_descriptor_to_op(self) -> None:
-        captured: list[tuple[list[str], tuple[int, ...]]] = []
+    def test_default_catalog_runner_hands_fifo_only_to_configs_wrapper(self) -> None:
+        captured: list[tuple[list[str], dict[str, object]]] = []
 
         def fake_run(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-            captured.append((argv, tuple(kwargs["pass_fds"])))
+            captured.append((argv, kwargs))
             return subprocess.CompletedProcess(
                 argv, 0, stdout=json.dumps(self._catalog_payload()), stderr="",
             )
@@ -194,18 +210,22 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
-                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
                 patch("ask.skills_sdk.eval_ab_preflight.subprocess.run", side_effect=fake_run),
             ):
-                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
                 fact = _cloud_catalog_fact(
-                    "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), auth,
+                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth,
                 )
         self.assertEqual(fact["status"], "pass")
-        self.assertEqual(captured[0][0][:3], ["/mock/bin/op", "run", "--env-file"])
-        self.assertRegex(captured[0][0][3], r"^/dev/fd/\d+$")
-        self.assertEqual(captured[0][1], (int(captured[0][0][3].removeprefix("/dev/fd/")),))
+        self.assertEqual(captured[0][0][:7], [
+            "bash", "/mock/configs/run-auth-backed.sh", "--env-file", str(env_file),
+            "--require-env", "OLLAMA_API_KEY", "--",
+        ])
+        self.assertNotIn("pass_fds", captured[0][1])
 
     def test_runtime_stream_ignores_ambient_home_override(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

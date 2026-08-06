@@ -96,8 +96,8 @@ def _execution_identity(profile: str) -> dict[str, str]:
             "execution_model_provider": "ollama",
         }
     return {
-        "execution_model": "minimax-m2.7:cloud",
-        "execution_model_family": "minimax",
+        "execution_model": "deepseek-v4-flash:cloud",
+        "execution_model_family": "deepseek",
         "execution_model_provider": "ollama-cloud",
     }
 

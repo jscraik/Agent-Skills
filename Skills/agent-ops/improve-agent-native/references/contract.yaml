@@ -8,6 +8,143 @@ non_goals:
   - "Enterprise process design by default."
   - "Broad architecture rewrites."
   - "Implementation without explicit edit authority."
+authoring_contract:
+  schema_version: skills-sdk.authoring-contract.v1
+  primary_job:
+    outcome: "Produce an evidence-backed agent-readiness scorecard for a named repository or product surface."
+    refusal_boundary: "Do not treat an audit, chat memory, or package pass as target-repository readiness proof."
+  invocation:
+    mode: both
+    rationale: "Users request readiness audits directly and the model may route explicit agent-readiness requests to this bounded audit skill."
+    context_load: bounded
+    load_control: "The skill reads only the smallest target-repository evidence needed for the named readiness decision."
+  entrypoint:
+    max_lines: 300
+    reject_duplicate_paragraphs: true
+    section_roles:
+      when-to-use: routing
+      inputs: action
+      outputs: output
+      workflow: action
+      failure-mode: safety
+      gotchas: safety
+      execution-boundaries: safety
+      validation: proof
+      references: reference
+  steering_terms:
+    - term: proof lane
+      definition: "A distinct source, CI, review, runtime, Tessl, registry, or release evidence boundary."
+    - term: proof gap
+      definition: "A missing command, receipt, or inspected artifact that prevents a readiness claim."
+  phase_model:
+    kind: single
+    rationale: "The audit has one evidence-to-scorecard decision loop; implementation is a separately authorized outcome."
+  decision_boundaries:
+    - id: scope
+      kind: scope
+      statement: "Keep audits read-only unless the user explicitly asks for implementation."
+      typed_outcome: ask_for_input
+      scenario_ids: [happy-scorecard]
+    - id: authority
+      kind: authority
+      statement: "Patch work starts only after the user grants implementation authority, and the target repo's own validation owns delivery proof."
+      typed_outcome: blocked_unauthorized_change
+      scenario_ids: [happy-proof-loop-gap]
+    - id: side-effect
+      kind: side_effect
+      statement: "Do not edit generated/runtime projections unless the repo marks them canonical."
+      typed_outcome: blocked_side_effect
+      scenario_ids: [edge-ui-action-without-agent-capability]
+    - id: stop
+      kind: stop_condition
+      statement: "Stop immediately on a safety, authority, destructive-action, or secret-handling failure."
+      typed_outcome: blocked_safety_boundary
+      scenario_ids: [pressure-prompt-injection]
+    - id: evidence-claim
+      kind: evidence_claim
+      statement: "Do not mark a repo agent-ready because this skill package passed its own audit."
+      typed_outcome: blocked_missing_evidence
+      scenario_ids: [eval.harness.local-pass-ci-unknown]
+  blocker_matrix:
+    coverage:
+      tool:
+        typed_outcome: blocked_missing_tool
+        rationale: "A missing target validation entrypoint cannot be inferred from the SDK package."
+        scenario_ids: [edge-no-validation-entrypoint]
+      input:
+        typed_outcome: blocked_missing_input
+        rationale: "An unnamed target or artifact cannot support a readiness score."
+        scenario_ids: [happy-proof-loop-gap]
+      credential:
+        typed_outcome: blocked_secret_boundary
+        rationale: "Secrets must be redacted rather than used as readiness evidence."
+        scenario_ids: [pressure-prompt-injection]
+      permission:
+        typed_outcome: blocked_unauthorized_change
+        rationale: "An audit request does not grant patch or runtime mutation authority."
+        scenario_ids: [happy-proof-loop-gap]
+      evidence:
+        typed_outcome: blocked_missing_evidence
+        rationale: "Audit-only or local evidence cannot prove hosted or runtime readiness."
+        scenario_ids: [eval.harness.local-pass-ci-unknown]
+    not_applicable: {}
+  critical_rules:
+    - id: no-silent-fallback
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "doing so keeps the scorecard's evidence boundary truthful."
+      typed_outcome: blocked_missing_evidence
+      scenario_ids:
+        - edge-no-validation-entrypoint
+        - happy-proof-loop-gap
+    - id: untrusted-content-boundary
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "This boundary prevents untrusted instructions from becoming false readiness evidence."
+      typed_outcome: blocked_untrusted_instruction
+      scenario_ids:
+        - adversarial-prompt-injection-audit-boundary
+        - pressure-prompt-injection
+  reference_routes:
+    - id: readiness-rubric
+      path: references/harness-readiness-rubric.md
+      read_when: "A readiness score or comparison needs the package's named assessment dimensions."
+      scenario_ids: [edge-no-validation-entrypoint, happy-proof-loop-gap]
+  output_contract:
+    required_fields:
+      - score
+      - evidence
+      - validation_evidence
+      - residual_risk
+    artifact_locations:
+      - scorecard
+      - audit_handoff
+    provenance_fields:
+      - target_repo
+      - evidence
+  mutation_targets:
+    - kind: critical_rule
+      target: no-silent-fallback
+      scenario_ids:
+        - edge-no-validation-entrypoint
+        - happy-proof-loop-gap
+      removal_test:
+        scenario_ids: [edge-no-validation-entrypoint, happy-proof-loop-gap]
+        expected_effect: "Removing no-silent-fallback must make missing-target evidence appear falsely sufficient."
+    - kind: reference_route
+      target: readiness-rubric
+      scenario_ids:
+        - edge-no-validation-entrypoint
+        - happy-proof-loop-gap
+      removal_test:
+        scenario_ids: [edge-no-validation-entrypoint, happy-proof-loop-gap]
+        expected_effect: "Removing readiness-rubric must make the controlled scorecard lose its named assessment dimensions."
+  focused_proof: "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
+  behavior_proof:
+    command_template: "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
+    scenario_ids: [happy-scorecard, edge-no-validation-entrypoint]
+    observed_fields: [outcome, evidence, validation, residual_risk]
+  readiness_evidence:
+    required_lanes: [structural, package, behavioral, runtime]
+    not_ready_statement: "Do not mark a repo agent-ready because this skill package passed its own audit."
 inputs:
   - "target repository path or diff"
   - facet

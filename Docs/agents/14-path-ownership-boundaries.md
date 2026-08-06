@@ -3,7 +3,7 @@
 ## Table of Contents
 
 - [Purpose](#purpose)
-- [Three-plane model](#three-plane-model)
+- [Four-plane model](#four-plane-model)
 - [Canonical sources](#canonical-sources)
 - [Derived and runtime surfaces](#derived-and-runtime-surfaces)
 - [Edit policy](#edit-policy)
@@ -13,26 +13,45 @@
 
 Separate skill and plugin product content from factory mechanics and runtime projections so ownership is unambiguous.
 
-## Three-plane model
+## Four-plane model
 
-1. Product plane (`what users consume`)
+1. Foundry retention plane (`what is preserved but not active`)
 
-- Canonical skills and plugin capability content.
-- Author and review here.
+- Curated skill and plugin packages held in `/Users/jamiecraik/dev/skills-foundry`.
+- Holds package source, provenance, licences, documentation, and reference assets.
+- Admission is copy-first. A Foundry admission does not install, enable, publish,
+  promote, or transfer runtime authority.
 
-1. Factory plane (`how content is built`)
+2. Active SDK product plane (`what the SDK currently shapes`)
+
+- Selected candidate skills and plugin capability content in this repository.
+- Author and review only when the explicit owner decision selects
+  `agent-skills` as the active SDK workspace for the bounded task.
+
+3. Factory plane (`how content is built`)
 
 - Sync, projection, graph, validation, and install mechanics.
 - Change only when improving repo tooling behavior.
 
-1. Runtime plane (`derived views and projections`)
+4. Runtime plane (`derived views and projections`)
 
 - Flat/runtime projections and mirrored cache surfaces.
 - Never hand-edit.
 
 ## Canonical sources
 
-First-party skill source:
+Every package has one canonical source determined by an explicit owner
+decision. A runtime path is never canonical source. Foundry admission is a
+copy-first retention step; move source authority only after direct consumers,
+provenance, and the replacement path have been verified.
+
+Skills Foundry retained source:
+
+- `/Users/jamiecraik/dev/skills-foundry/**`
+- Source-only package retention outside the active authoring and runtime
+  surface.
+
+Active SDK candidate source in this repository:
 
 - `Skills/agent-ops/**`
 - `Skills/frontend-ui/**`
@@ -42,11 +61,31 @@ First-party skill source:
 - `Skills/content-publishing/**`
 - `Skills/mobile-native/**`
 
-Plugin-owned source:
+Active SDK plugin-owned source in this repository:
 
 - `Plugins/<plugin>/skills/**`
 - `Plugins/<plugin>/.codex-plugin/**`
 - `Plugins/<plugin>/Infrastructure/references/**`
+
+### Bulk-admission rule
+
+Before admitting packages in bulk, classify each package independently as one
+of: retained Foundry source, explicitly selected active SDK candidate, or
+runtime-only availability. For a package that is not already owned by the
+active SDK workspace:
+
+1. Copy it into `/Users/jamiecraik/dev/skills-foundry` before changing an
+   existing source or runtime surface.
+2. Preserve the origin path or repository, licence, revision when known, and
+   direct consumer notes with that Foundry copy.
+3. Do not install, enable, publish, project, delete, or relink it as a side
+   effect of the copy.
+4. Move into active SDK work only when an explicit owner decision names the
+   candidate source, bounded task, and the source that remains authoritative.
+
+The same named package can appear in Foundry, `agent-skills`, Tessl, and a
+home runtime at once. Those locations describe different lanes; they do not
+transfer ownership by proximity or by name.
 
 Factory and governance mechanics:
 
@@ -66,6 +105,8 @@ Runtime/projection surfaces (non-canonical):
 - `skills-codex/**`
 - `Plugins/cache/**`
 - `runtime/**` (whenever introduced by migration phases)
+- `~/.agents/skills/**`, `~/.codex/skills/**`, `~/.agents/plugins/**`, and
+  `~/.codex/plugins/**` (curated or accepted runtime availability only)
 
 Active agent-facing docs:
 
@@ -82,7 +123,12 @@ Workout and telemetry surfaces:
 
 ## Edit policy
 
-- Edit product content only in canonical source paths.
+- Edit product content only in the canonical source path named by the explicit
+  owner decision.
+- Do not treat a package in Skills Foundry as active SDK source until an
+  explicit selected-candidate handoff names the source copy and bounded task.
+- Do not copy an external or runtime package into `agent-skills` merely to make
+  it visible; preserve its provenance in Skills Foundry first.
 - Do not hand-edit runtime/projection surfaces.
 - Edit tracked `.agents/workflows/**` docs directly when the workflow itself changes.
 - Do not hand-edit .skillsets/**; refresh current runtime projections with python3 bin/ask skills sync --scope workspace --projection flat and use the manifest generator only for legacy .skillsets/** compatibility metadata.

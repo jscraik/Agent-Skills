@@ -1,0 +1,7 @@
+{
+  "id": "obvious-wrong-equivalence-overclaim",
+  "probe_type": "obvious_wrong",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "Fail fixture declares a risky shared-helper change safe and behaviorally equivalent without identifying callers, a comparison scope, or focused validation results."
+}

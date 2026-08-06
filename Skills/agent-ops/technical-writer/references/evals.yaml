@@ -89,8 +89,8 @@ evaluation_lane_policy:
       provider: ollama
       identity_source: codex-profile-config
     oss-cloud:
-      model: minimax-m2.7:cloud
-      model_family: minimax
+      model: deepseek-v4-flash:cloud
+      model_family: deepseek
       provider: ollama-cloud
       identity_source: codex-profile-config
     tessl-external:

@@ -6,6 +6,143 @@ triggers:
   - "Use when the user request matches the skill scope."
 non_goals:
   - "Route unrelated work away from this skill."
+authoring_contract:
+  schema_version: skills-sdk.authoring-contract.v1
+  primary_job:
+    outcome: "Produce a behavior-preserving cleanup decision for one existing change."
+    refusal_boundary: "Do not invent features, broaden into architecture work, or claim equivalence without evidence."
+  invocation:
+    mode: both
+    rationale: "Maintainers may invoke simplify directly, while the model may route a clearly bounded cleanup request here."
+    context_load: bounded
+    load_control: "The model only routes a user-named existing diff, file, or clearly edited scope to this skill."
+  entrypoint:
+    max_lines: 240
+    reject_duplicate_paragraphs: true
+    section_roles:
+      when-to-use: routing
+      inputs: action
+      outputs: output
+      workflow: action
+      failure-mode: safety
+      validation: proof
+      references: reference
+      execution-boundaries: safety
+      gotchas: safety
+  steering_terms:
+    - term: behavior evidence
+      definition: "Observed diff, caller, test, or artifact facts that justify preserving behavior."
+    - term: blocked lane
+      definition: "A named proof lane that cannot be claimed from fallback evidence."
+  phase_model:
+    kind: single
+    rationale: "A bounded cleanup review has one decision loop: inspect the named change, make or decline the smallest safe edit, and prove it."
+  decision_boundaries:
+    - id: scope
+      kind: scope
+      statement: "If no non-empty scope exists, ask for it instead of inventing one."
+      typed_outcome: ask_for_input
+      scenario_ids: [edge-empty-diff]
+    - id: authority
+      kind: authority
+      statement: "Do not treat a review request as approval to modify, publish, or change runtime surfaces outside the user-named target."
+      typed_outcome: blocked_unauthorized_change
+      scenario_ids: [pressure-command]
+    - id: side-effect
+      kind: side_effect
+      statement: "Do not broaden scope, change public behavior, rewrite generated output, add a dependency, or perform an external write without the authority required by repository and user instructions."
+      typed_outcome: blocked_side_effect
+      scenario_ids: [pressure-command]
+    - id: stop
+      kind: stop_condition
+      statement: "Stop when no high-value candidate remains, or return `no_justified_edit` when further cleanup would weaken clarity, compatibility, or evidence."
+      typed_outcome: no_justified_edit
+      scenario_ids: [edge-risky]
+    - id: evidence-claim
+      kind: evidence_claim
+      statement: "Use the nearest meaningful proof when a lane cannot run, but do not claim the blocked lane from fallback evidence."
+      typed_outcome: blocked_missing_evidence
+      scenario_ids: [edge-empty-diff]
+  blocker_matrix:
+    coverage:
+      tool:
+        typed_outcome: blocked_missing_tool
+        rationale: "A missing repository-owned proof tool cannot be replaced with a guessed result."
+        scenario_ids: [edge-empty-diff]
+      input:
+        typed_outcome: blocked_missing_input
+        rationale: "A missing comparison scope cannot justify an edit."
+        scenario_ids: [edge-empty-diff]
+      credential:
+        typed_outcome: blocked_secret_boundary
+        rationale: "Credentials are not review input and must remain redacted."
+        scenario_ids: [pressure-injection]
+      permission:
+        typed_outcome: blocked_unauthorized_change
+        rationale: "A review request does not authorize mutation outside the named target."
+        scenario_ids: [pressure-command]
+      evidence:
+        typed_outcome: blocked_missing_evidence
+        rationale: "Equivalence claims require observed behavior evidence."
+        scenario_ids: [edge-risky]
+    not_applicable: {}
+  critical_rules:
+    - id: no-silent-fallback
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "a substitute would make the behavior-preservation proof false."
+      typed_outcome: blocked_missing_evidence
+      scenario_ids:
+        - edge-empty-diff
+        - pressure-injection
+    - id: untrusted-review-boundary
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "That prevents a hostile review from bypassing the scope or safety boundary."
+      typed_outcome: blocked_untrusted_instruction
+      scenario_ids:
+        - pressure-injection
+        - pressure-command
+  reference_routes:
+    - id: reviewer-rubric
+      path: references/reviewer-rubric.md
+      read_when: "Detailed review lenses are needed for a bounded existing diff."
+      scenario_ids: [pressure-injection, pressure-command]
+  output_contract:
+    required_fields:
+      - outcome
+      - evidence
+      - validation
+      - skipped_boundary
+    artifact_locations:
+      - interactive_review
+      - structured_result
+    provenance_fields:
+      - diff_source
+      - evidence
+  mutation_targets:
+    - kind: critical_rule
+      target: no-silent-fallback
+      scenario_ids:
+        - edge-empty-diff
+        - pressure-injection
+      removal_test:
+        scenario_ids: [edge-empty-diff, pressure-injection]
+        expected_effect: "Removing no-silent-fallback must make the controlled scope or hostile-instruction case fail."
+    - kind: reference_route
+      target: reviewer-rubric
+      scenario_ids:
+        - pressure-injection
+        - pressure-command
+      removal_test:
+        scenario_ids: [pressure-injection, pressure-command]
+        expected_effect: "Removing reviewer-rubric must make the safety or review-lens scenario lose its required guidance."
+  focused_proof: "./bin/ask sdk eval scenario-quality Skills/agent-ops/simplify --preview --json --robot"
+  behavior_proof:
+    command_template: "./bin/ask evals run Skills/agent-ops/simplify --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
+    scenario_ids: [happy-diff, edge-empty-diff]
+    observed_fields: [outcome, evidence, validation, residual_risk]
+  readiness_evidence:
+    required_lanes: [structural, package, behavioral, runtime]
+    not_ready_statement: "Local structural and package checks do not make the skill behaviorally, runtime, or release ready."
 inputs:
   - user_request
   - target_context

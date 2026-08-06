@@ -34,8 +34,8 @@ def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:cloud", provid
     )
 
 
-def _write_op(bin_dir: Path) -> Path:
-    path = bin_dir / "op"
+def _write_auth_wrapper(bin_dir: Path) -> Path:
+    path = bin_dir / "run-auth-backed.sh"
     _write_executable(
         path,
         "#!/bin/sh\n"
@@ -46,18 +46,13 @@ def _write_op(bin_dir: Path) -> Path:
     return path
 
 
-def _write_codex(bin_dir: Path) -> Path:
-    path = bin_dir / "codex"
+def _write_codex_exec_wrapper(bin_dir: Path) -> Path:
+    path = bin_dir / "run-codex-exec.sh"
     _write_executable(
         path,
         "#!/bin/sh\n"
-        "last=''\n"
-        "while [ $# -gt 0 ]; do\n"
-        "  if [ \"$1\" = \"--output-last-message\" ]; then shift; last=\"$1\"; fi\n"
-        "  shift\n"
-        "done\n"
         "printf 'CODEX_OSS_CLOUD_OK\\n'\n"
-        "printf 'CODEX_OSS_CLOUD_OK\\n' > \"$last\"\n",
+        "exit 0\n",
     )
     return path
 
@@ -67,7 +62,8 @@ def _run_cloud_smoke(
     profile: Path,
     env_file: Path,
     *,
-    op_bin: Path | None = None,
+    auth_wrapper: Path,
+    codex_exec_wrapper: Path,
     env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command = [
@@ -75,14 +71,16 @@ def _run_cloud_smoke(
         str(RUNNER),
         "--profile-source",
         str(profile),
-        "--op-env-file",
+        "--env-file",
         str(env_file),
+        "--auth-wrapper",
+        str(auth_wrapper),
+        "--codex-exec-wrapper",
+        str(codex_exec_wrapper),
         "--output-dir",
         str(root / "out"),
         "--json",
     ]
-    if op_bin is not None:
-        command.extend(["--op-bin", str(op_bin)])
     return subprocess.run(
         command,
         cwd=REPO_ROOT,
@@ -97,15 +95,11 @@ class TestOssCloudSmoke(unittest.TestCase):
     def setUp(self) -> None:
         self.runner = _load_runner()
 
-    def test_approved_env_requires_ollama_op_reference(self) -> None:
+    def test_approved_env_requires_a_fifo_without_reading_it(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            empty = Path(temp_dir) / "empty.env"
-            empty.write_text("", encoding="utf-8")
-            self.assertIsNone(self.runner._approved_env_file(empty))
-
-            valid = Path(temp_dir) / "valid.env"
-            valid.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            self.assertEqual(self.runner._approved_env_file(valid), valid)
+            regular = Path(temp_dir) / "regular.env"
+            regular.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            self.assertIsNone(self.runner._approved_env_file(regular))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
     def test_approved_env_accepts_1password_fifo(self) -> None:
@@ -114,7 +108,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             os.mkfifo(env_file)
 
             self.assertEqual(self.runner._approved_env_file(env_file), env_file)
-            self.assertEqual(self.runner._auth_source(env_file), "op_fifo")
+            self.assertEqual(self.runner._auth_source(env_file), "1password_desktop_fifo")
 
     def test_profile_findings_reject_wrong_model_and_provider(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -210,7 +204,8 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
-    def test_runner_uses_op_reference_and_emits_redacted_pass_receipt(self) -> None:
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
+    def test_runner_uses_configs_wrappers_and_emits_redacted_pass_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "oss-cloud.config.toml"
@@ -218,39 +213,79 @@ class TestOssCloudSmoke(unittest.TestCase):
             bin_dir = root / "bin"
             bin_dir.mkdir()
             _write_profile(profile)
-            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            op = _write_op(bin_dir)
-            _write_codex(bin_dir)
+            os.mkfifo(env_file)
+            auth_wrapper = _write_auth_wrapper(bin_dir)
+            codex_exec_wrapper = _write_codex_exec_wrapper(bin_dir)
             env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}"}
-            proc = _run_cloud_smoke(root, profile, env_file, op_bin=op, env=env)
+            proc = _run_cloud_smoke(
+                root, profile, env_file, auth_wrapper=auth_wrapper,
+                codex_exec_wrapper=codex_exec_wrapper, env=env,
+            )
 
         self.assertEqual(proc.returncode, 0, proc.stderr)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "pass")
         self.assertEqual(receipt["model"], "deepseek-v4-flash:cloud")
         self.assertEqual(receipt["model_provider"], "ollama-cloud")
-        self.assertEqual(receipt["auth_source"], "op_reference")
+        self.assertEqual(receipt["auth_source"], "1password_desktop_fifo")
         self.assertNotIn("OLLAMA_API_KEY=", json.dumps(receipt))
+        self.assertNotIn(str(env_file), json.dumps(receipt))
 
-    def test_runner_blocks_empty_env_before_provider_invocation(self) -> None:
+    def test_runner_blocks_regular_env_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "oss-cloud.config.toml"
-            empty_env = root / "oss-cloud.env"
+            regular_env = root / "oss-cloud.env"
             bin_dir = root / "bin"
             bin_dir.mkdir()
             _write_profile(profile)
-            empty_env.write_text("", encoding="utf-8")
-            op = _write_op(bin_dir)
+            regular_env.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            auth_wrapper = _write_auth_wrapper(bin_dir)
+            codex_exec_wrapper = _write_codex_exec_wrapper(bin_dir)
             env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}"}
 
-            proc = _run_cloud_smoke(root, profile, empty_env, op_bin=op, env=env)
+            proc = _run_cloud_smoke(
+                root, profile, regular_env, auth_wrapper=auth_wrapper,
+                codex_exec_wrapper=codex_exec_wrapper, env=env,
+            )
 
         self.assertEqual(proc.returncode, 1)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "blocked")
-        self.assertEqual({finding["code"] for finding in receipt["findings"]}, {"oss_cloud_credential_reference_missing"})
+        self.assertEqual({finding["code"] for finding in receipt["findings"]}, {"oss_cloud_auth_stream_missing"})
         self.assertFalse(receipt["provider_invoked"])
+
+    def test_cloud_metadata_fallback_is_a_warning_when_marker_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text(
+                "warning: Model metadata for deepseek-v4-flash:cloud not found. Defaulting to fallback metadata.\n"
+                "tokens used\n14916\n",
+                encoding="utf-8",
+            )
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "run-auth-backed.sh"],
+                exit_code=0,
+                duration_seconds=1.0,
+                provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertEqual(receipt["findings"], [])
+        self.assertEqual(
+            [warning["code"] for warning in receipt["warnings"]],
+            ["codex_runtime_metadata_fallback"],
+        )
 
 if __name__ == "__main__":
     unittest.main()

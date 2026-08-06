@@ -14,7 +14,7 @@ from ask.skills_sdk.eval_ab_judge_codex import (
     CodexProfileConfigError,
     _codex_judge_command,
     _codex_judge_work_dir,
-    _codex_op_env_file_available,
+    _codex_auth_boundary_available,
     _run_codex_judge,
 )
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
@@ -367,7 +367,7 @@ def _score_preflight(
     if (
         judge_profile is not None
         and evidence.get("output_file") is not None
-        and "judge_cloud_op_boundary_unavailable" not in blockers
+        and "judge_cloud_auth_boundary_unavailable" not in blockers
     ):
         evidence["command_argv"] = _codex_judge_command(
             judge_profile,
@@ -402,14 +402,14 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
 
 
 def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
-    if _codex_profile_id_for_score(judge_profile) == "oss-cloud" and not _codex_op_env_file_available(judge_profile):
-        return ["judge_cloud_op_boundary_unavailable"]
+    if _codex_profile_id_for_score(judge_profile) == "oss-cloud" and not _codex_auth_boundary_available(judge_profile):
+        return ["judge_cloud_auth_boundary_unavailable"]
     missing = [
         name
         for name in judge_profile.get("secret_env_names", [])
         if isinstance(name, str) and name and name not in os.environ
     ]
-    if missing and _codex_op_env_file_available(judge_profile):
+    if missing and _codex_auth_boundary_available(judge_profile):
         return []
     return ["judge_profile_secret_missing"] if missing else []
 

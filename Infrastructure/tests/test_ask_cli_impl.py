@@ -5608,6 +5608,33 @@ class TestAskCLI(unittest.TestCase):
             ["./bin/ask graph info agents-md --json --robot"],
         )
 
+    def test_graph_info_unknown_skill_exposes_recovery_commands(self):
+        """Verify an unknown graph skill points agents to inspect valid ids."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "info",
+            "definitely-missing",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(
+            result.returncode,
+            2,
+            f"graph info output: {result.stdout}\nstderr: {result.stderr}",
+        )
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["errors"][0]["fix_suggestion"],
+            "Search available skill ids with: ./bin/ask graph find definitely-missing --json --robot; "
+            "if no matches are returned, run ./bin/ask graph list --json --robot",
+        )
+
     def test_graph_info_human_output_exposes_validation(self):
         """Verify graph info human output names its replay command."""
         cmd = ["python3", "Infrastructure/bin/ask", "graph", "info", "agents-md", "--robot"]

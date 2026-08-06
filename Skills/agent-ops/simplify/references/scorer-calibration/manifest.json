@@ -1,7 +1,7 @@
 {
   "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
   "scorer_id": "simplify-release-scorer",
-  "scorer_version_or_digest": "simplify-evals-2026-07-30",
+  "scorer_version_or_digest": "simplify-evals-2026-08-06",
   "prompt_version": "simplify-release-scorer.v1",
   "split": "held_out",
   "threshold": 0.85,

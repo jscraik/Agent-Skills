@@ -34,6 +34,15 @@ from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # no
 
 
 RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+_EXPERIMENTAL_MALWARE_WARNING = (
+    "warning: Malware checks are experimental and may change without warning. "
+    "Pass `--preview-features malware-check` to disable this warning.\n"
+)
+
+
+def _assert_robot_cli_stderr(testcase: unittest.TestCase, stderr: str) -> None:
+    """Keep robot-output tests strict while admitting the runner's known warning."""
+    testcase.assertIn(stderr, {"", _EXPERIMENTAL_MALWARE_WARNING})
 
 
 def _judge_result(
@@ -121,8 +130,11 @@ def _run_codex_with_captured_subprocess(
         nonlocal captured_profile_text
         captured_command.extend(args)
         captured_env.update(kwargs["env"])
-        copied_profile = Path(captured_env["CODEX_HOME"]) / f"{profile_id}.config.toml"
-        captured_profile_text = copied_profile.read_text(encoding="utf-8")
+        if "CODEX_HOME" in captured_env:
+            copied_profile = Path(captured_env["CODEX_HOME"]) / f"{profile_id}.config.toml"
+            captured_profile_text = copied_profile.read_text(encoding="utf-8")
+        else:
+            captured_profile_text = config_text
         output_file.parent.mkdir(parents=True, exist_ok=True)
         output_file.write_text("{}", encoding="utf-8")
         return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
@@ -132,27 +144,21 @@ def _run_codex_with_captured_subprocess(
         with tempfile.TemporaryDirectory() as profile_dir:
             env_dir = Path(profile_dir) / ".codex"
             env_dir.mkdir()
-            op_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
-            if op_env_file is not None:
-                os.mkfifo(op_env_file)
+            auth_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
+            if auth_env_file is not None:
+                os.mkfifo(auth_env_file)
             Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
             env = {"ASK_CODEX_PROFILE_SOURCE_DIR": profile_dir, **(extra_env or {})}
-            if op_env_file is not None:
-                env["ASK_CODEX_OP_ENV_FILE"] = str(op_env_file)
+            if auth_env_file is not None:
+                env["SKILLS_SDK_OSS_CLOUD_ENV_FILE"] = str(auth_env_file)
             subprocess.run = fake_run  # type: ignore[assignment]
             base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
-            op_patch = (
-                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op")
-                if op_env_file is not None
-                else patch.object(codex_judge, "_codex_op_bin", return_value=None)
-            )
             with (
                 patch.dict(os.environ, {**base_env, **env}, clear=True),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
-                op_patch,
             ):
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
-            return result, captured_command, captured_env, captured_profile_text, op_env_file
+            return result, captured_command, captured_env, captured_profile_text, auth_env_file
     finally:
         subprocess.run = original_run  # type: ignore[assignment]
 
@@ -160,7 +166,7 @@ def _run_codex_with_captured_subprocess(
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_judge_rejects_fifo_outside_actual_codex_home(self) -> None:
-        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as directory:
             actual_home = Path(directory) / "actual-home"
             other_home = Path(directory) / "other-home"
@@ -168,29 +174,30 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             unapproved_stream.parent.mkdir(parents=True)
             os.mkfifo(unapproved_stream)
             with (
-                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(unapproved_stream)}, clear=False),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(unapproved_stream)}, clear=False),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=actual_home),
-                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
             ):
-                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
-                with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+                self.assertIsNone(codex_judge._codex_auth_env_file_path(profile))
+                with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "Configs auth-backed wrapper boundary"):
                     codex_judge._codex_judge_command(profile, Path(directory) / "work", Path(directory) / "last-message.json")
 
     def test_cloud_judge_rejects_receipt_only_stream_marker(self) -> None:
-        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with (
-            patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
-            patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
+            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
         ):
-            self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
-            with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "approved op run env boundary"):
+            self.assertIsNone(codex_judge._codex_auth_env_file_path(profile))
+            with self.assertRaisesRegex(codex_judge.CodexProfileConfigError, "Configs auth-backed wrapper boundary"):
                 codex_judge._codex_judge_command(profile, Path("/private/tmp/work"), Path("/private/tmp/last-message.json"))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_judge_execution_argv_requires_a_real_opaque_fifo(self) -> None:
         command_tail = [
-            "--", "codex", "exec", "--profile", "oss-cloud",
-            "--disable", "apps", "-c", 'approval_policy="on-request"', "-",
+            "--require-env", "OLLAMA_API_KEY", "--",
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+            "--strict-config", "-c", 'approval_policy="on-request"',
+            "--sandbox", "read-only", "--ephemeral", "-",
         ]
         with tempfile.TemporaryDirectory() as directory, patch(
             "ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)
@@ -198,7 +205,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_dir = Path(directory) / ".codex"
             env_dir.mkdir()
             env_file = env_dir / ".env"
-            regular = ["op", "run", "--env-file", str(env_file), *command_tail]
+            regular = ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file", str(env_file), *command_tail]
             env_file.write_text("opaque reference only", encoding="utf-8")
             blockers: list[str] = []
             result = CodexJudgeResult(0, "", "", executed_argv=regular)
@@ -208,21 +215,21 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
             env_file.unlink()
             os.mkfifo(env_file)
-            fifo_argv = ["op", "run", "--env-file", str(env_file), *command_tail]
+            fifo_argv = ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file", str(env_file), *command_tail]
             blockers = []
             result = CodexJudgeResult(0, "", "", executed_argv=fifo_argv)
             evidence = {"command_argv": fifo_argv, "codex_profile": "oss-cloud"}
             self.assertEqual(_validate_judge_execution_argv(evidence, result, blockers), "oss-cloud")
             self.assertEqual(blockers, [])
 
-            receipt_marker = ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", *command_tail]
+            receipt_marker = ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file", "<operator-approved-opaque-env-stream>", *command_tail]
             blockers = []
             result = CodexJudgeResult(0, "", "", executed_argv=receipt_marker)
             evidence = {"command_argv": receipt_marker, "codex_profile": "oss-cloud"}
             self.assertIsNone(_validate_judge_execution_argv(evidence, result, blockers))
             self.assertEqual(blockers, ["judge_command_profile_missing_or_invalid"])
 
-            relative = ["evil/op", "run", "--env-file", str(env_file), *command_tail]
+            relative = ["bash", "evil/run-auth-backed.sh", "--env-file", str(env_file), *command_tail]
             blockers = []
             result = CodexJudgeResult(0, "", "", executed_argv=relative)
             evidence = {"command_argv": relative, "codex_profile": "oss-cloud"}
@@ -381,10 +388,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as profile_dir:
             env_dir = Path(profile_dir) / ".codex"
             env_dir.mkdir()
-            op_env_file = env_dir / ".env"
-            os.mkfifo(op_env_file)
+            auth_env_file = env_dir / ".env"
+            os.mkfifo(auth_env_file)
             with (
-                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(auth_env_file)}),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 receipt = build_ab_judge_score_receipt(
@@ -425,7 +432,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         )
 
         payload = json.loads(proc.stdout)
-        self.assertEqual(proc.stderr, "")
+        _assert_robot_cli_stderr(self, proc.stderr)
         self.assertEqual(payload["status"], "error")
 
     def test_cli_accepts_declared_local_code_judge_profile_before_execute_gate(self) -> None:
@@ -449,7 +456,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         )
 
         payload = json.loads(proc.stdout)
-        self.assertEqual(proc.stderr, "")
+        _assert_robot_cli_stderr(self, proc.stderr)
         self.assertEqual(payload["status"], "error")
         self.assertIn("requires --execute", payload["errors"][0]["message"])
         self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
@@ -1093,23 +1100,29 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(captured_command[:4], ["codex", "exec", "--profile", "oss-local-fallback"])
         self.assertIn('model = "qwen3.5:latest"', captured_profile_text)
 
-    def test_cloud_codex_runner_wraps_codex_with_op_env_file(self) -> None:
-        result, captured_command, captured_env, captured_profile_text, op_env_file = _run_codex_with_captured_subprocess(
+    def test_cloud_codex_runner_uses_configs_auth_and_execution_wrappers(self) -> None:
+        result, captured_command, captured_env, captured_profile_text, auth_env_file = _run_codex_with_captured_subprocess(
             "oss-cloud",
-            'model = "minimax-m2.7:cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
-            {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+            'model = "deepseek-v4-flash:cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
             {"OPENAI_API_KEY": "other-token", "GITHUB_TOKEN": "repo-token"},
         )
 
         self.assertEqual(result.exit_code, 0)
-        self.assertTrue(captured_command[0].endswith("/op") or captured_command[0] == "op")
-        self.assertEqual(captured_command[1:3], ["run", "--env-file"])
-        self.assertRegex(captured_command[3], r"^/dev/fd/\d+$")
-        self.assertEqual(captured_command[4], "--")
-        codex_segments = [captured_command[index:index + 4] for index in range(len(captured_command) - 3)]
-        self.assertIn(["codex", "exec", "--profile", "oss-cloud"], codex_segments)
+        self.assertEqual(captured_command[:7], [
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+            "--env-file", str(auth_env_file), "--require-env", "OLLAMA_API_KEY", "--",
+        ])
+        self.assertEqual(captured_command[7:11], [
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+            "--profile", "oss-cloud",
+        ])
+        self.assertIn("--strict-config", captured_command)
+        self.assertIn("--model", captured_command)
+        self.assertIn("deepseek-v4-flash:cloud", captured_command)
+        self.assertNotIn("op", captured_command)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
-        self.assertIn('model = "minimax-m2.7:cloud"', captured_profile_text)
+        self.assertIn('model = "deepseek-v4-flash:cloud"', captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)
 
@@ -1119,82 +1132,109 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as profile_dir:
             env_dir = Path(profile_dir) / ".codex"
             env_dir.mkdir()
-            op_env_file = env_dir / ".env"
-            os.mkfifo(op_env_file)
+            auth_env_file = env_dir / ".env"
+            os.mkfifo(auth_env_file)
             with (
-                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}),
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(auth_env_file)}),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(
-                    {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+                    {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
                     codex_judge._codex_judge_work_dir(output_file),
                     output_file,
                 )
 
         self.assertEqual(
-            command[:9],
-            [command[0], "run", "--env-file", str(op_env_file), "--", "codex", "exec", "--profile", "oss-cloud"],
-        )
-        self.assertEqual(
-            command[9:],
+            command[:11],
             [
-                "--disable", "apps", "-c", 'approval_policy="on-request"',
-                "--cd", str(codex_judge._codex_judge_work_dir(output_file)), "--skip-git-repo-check",
-                "--sandbox",
-                "read-only",
-                "--ephemeral",
-                "--json",
-                "--output-last-message",
-                str(output_file),
-                "-",
+                "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                "--env-file", str(auth_env_file), "--require-env", "OLLAMA_API_KEY", "--",
+                "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                "--profile", "oss-cloud",
             ],
         )
-        self.assertNotEqual(command[11], str(REPO_ROOT))
+        self.assertIn("--model", command)
+        self.assertIn("deepseek-v4-flash:cloud", command)
+        self.assertIn("--strict-config", command)
+        self.assertIn("--skip-git-repo-check", command)
+        self.assertIn("--cd", command)
+        self.assertNotIn(str(REPO_ROOT), command)
 
-    def test_cloud_op_env_file_requires_a_1password_reference(self) -> None:
-        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+    def test_cloud_auth_env_file_requires_a_desktop_fifo(self) -> None:
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_file = Path(profile_dir) / "codex.env"
             env_file.write_text("", encoding="utf-8")
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
-                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            with patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}):
+                self.assertIsNone(codex_judge._codex_auth_env_file_path(profile))
 
-    def test_cloud_judge_rejects_direct_codex_when_opaque_op_boundary_is_missing(self) -> None:
+    def test_cloud_judge_rejects_direct_codex_when_configs_boundary_is_missing(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
-        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_file = Path(profile_dir) / "codex.env"
-            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            with (
-                patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}, clear=True),
-                patch.object(codex_judge, "_codex_op_bin", return_value="/mock/bin/op"),
-            ):
+            env_file.write_text("not a FIFO\n", encoding="utf-8")
+            with patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True):
                 with self.assertRaises(codex_judge.CodexProfileConfigError):
                     _codex_judge_command(
                         profile,
                         codex_judge._codex_judge_work_dir(output_file),
                         output_file,
                     )
-            env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
-            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(env_file)}):
-                self.assertIsNone(codex_judge._codex_op_env_file_path(profile))
+            env_file.write_text("not a FIFO\n", encoding="utf-8")
+            with patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}):
+                self.assertIsNone(codex_judge._codex_auth_env_file_path(profile))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
-    def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
+    def test_cloud_codex_command_accepts_desktop_fifo(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
-        profile = {"id": "oss-cloud", "model": "minimax-m2.7:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_dir = Path(profile_dir) / ".codex"
             env_dir.mkdir()
-            op_env_file = env_dir / ".env"
-            os.mkfifo(op_env_file)
-            env_patch = patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)})
-            bin_patch = patch.object(codex_judge, "_codex_op_bin", return_value="/opt/homebrew/bin/op")
+            auth_env_file = env_dir / ".env"
+            os.mkfifo(auth_env_file)
+            env_patch = patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(auth_env_file)})
             with (
                 env_patch,
-                bin_patch,
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
-        self.assertEqual(command[1:5], ["run", "--env-file", str(op_env_file), "--"])
-        self.assertEqual(command[5:9], ["codex", "exec", "--profile", "oss-cloud"])
+        self.assertEqual(command[2:7], ["--env-file", str(auth_env_file), "--require-env", "OLLAMA_API_KEY", "--"])
+        self.assertEqual(command[7:11], ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud"])
+
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
+    def test_cloud_judge_contains_runtime_output_and_copies_receipt(self) -> None:
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        with tempfile.TemporaryDirectory() as profile_dir, tempfile.TemporaryDirectory() as evidence_dir:
+            profile_root = Path(profile_dir)
+            env_file = profile_root / ".codex" / ".env"
+            env_file.parent.mkdir()
+            os.mkfifo(env_file)
+            output_file = Path(evidence_dir) / "judge" / "codex-last-message.json"
+            captured: dict[str, object] = {}
+
+            def fake_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+                captured["cwd"] = kwargs["cwd"]
+                output_path = Path(args[args.index("--output-last-message") + 1])
+                self.assertFalse(output_path.is_absolute())
+                runtime_output = Path(kwargs["cwd"]) / output_path
+                runtime_output.write_text('{"winner":"skill_b"}', encoding="utf-8")
+                return subprocess.CompletedProcess(args=args, returncode=0, stdout="events", stderr="")
+
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=False),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=profile_root),
+                patch("ask.skills_sdk.eval_ab_judge_codex.subprocess.run", side_effect=fake_run),
+            ):
+                result = _run_codex_judge("prompt", profile, 5, REPO_ROOT, output_file)
+
+            expected_work_dir = codex_judge._codex_judge_work_dir(output_file)
+            self.assertEqual(captured["cwd"], expected_work_dir)
+            self.assertEqual(result.output_text, '{"winner":"skill_b"}')
+            self.assertEqual(output_file.read_text(encoding="utf-8"), '{"winner":"skill_b"}')
+            self.assertEqual(
+                result.executed_argv[result.executed_argv.index("--output-last-message") + 1],
+                "codex-last-message.json",
+            )
+            shutil.rmtree(expected_work_dir, ignore_errors=True)

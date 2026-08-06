@@ -4,24 +4,24 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.eval_ab_inputs import ControlledInputError, build_controlled_variant_prompt
 from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt
 from ask.skills_sdk.eval_profiles import select_judge_profile
 from ask.skills_sdk.eval_ab_preflight import PreflightProbe, build_lane_preflight
+from ask.skills_sdk.ab_transport_contracts import (
+    CONFIGS_AUTH_WRAPPER,
+    OSS_CLOUD_REQUIRED_ENV,
+    configs_oss_cloud_exec_command,
+)
 
 
 AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v1"
 AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v1.schema.json"
 DEFAULT_EVIDENCE_ROOT = ".harness/artifacts/sdk-ab-evals"
-_PROMPT_FIXTURE_LIMIT_BYTES = 64 * 1024
-_PROMPT_SKILL_LIMIT_BYTES = 128 * 1024
 
 
 def _digest_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
-
-
-def _digest_bytes(value: bytes) -> str:
-    return f"sha256:{hashlib.sha256(value).hexdigest()}"
 
 
 def _experiment_id_from_seed(seed: str) -> str:
@@ -109,8 +109,6 @@ def _codex_command_argv(
         "exec",
         "--profile",
         codex_profile,
-        "--disable",
-        "apps",
         "-c",
         f'approval_policy="{approval_policy}"',
         "--sandbox",
@@ -127,112 +125,36 @@ def _codex_command_argv(
 def _planned_execution_argv(codex_profile: str, command_argv: list[str]) -> list[str]:
     """Return the transport argv without exposing the opaque credential source."""
     if codex_profile == "oss-cloud":
-        return ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *command_argv]
+        return [
+            "bash", str(CONFIGS_AUTH_WRAPPER),
+            "--env-file", "<operator-approved-opaque-env-stream>",
+            "--require-env", OSS_CLOUD_REQUIRED_ENV, "--",
+            *configs_oss_cloud_exec_command(command_argv),
+        ]
     return list(command_argv)
 
 
-def _contained_fixture_prompt(repo_root: Path, raw_path: str) -> tuple[str, str]:
-    candidate = Path(raw_path)
-    if candidate.is_absolute():
-        raise ValueError("fixture prompt source must be repo-relative")
-    if ".." in candidate.parts:
-        raise ValueError("fixture prompt source must not traverse parent directories")
-    raw_candidate = repo_root / candidate
-    current = raw_candidate
-    while current != repo_root:
-        if current.is_symlink():
-            raise ValueError("fixture prompt source must not traverse a symlink")
-        current = current.parent
-    resolved = (repo_root / candidate).resolve()
-    try:
-        resolved.relative_to(repo_root.resolve())
-    except ValueError as exc:
-        raise ValueError("fixture prompt source must remain inside the repository") from exc
-    relative = resolved.relative_to(repo_root.resolve()).as_posix()
-    if not relative.startswith("Infrastructure/tests/fixtures/skills_sdk/"):
-        raise ValueError("fixture prompt source is outside the controlled SDK fixture root")
-    if resolved.is_symlink() or not resolved.is_file():
-        raise ValueError("fixture prompt source must be a regular file")
-    if resolved.stat().st_size > _PROMPT_FIXTURE_LIMIT_BYTES:
-        raise ValueError(f"fixture prompt source exceeds {_PROMPT_FIXTURE_LIMIT_BYTES} bytes")
-    raw_bytes = resolved.read_bytes()
-    return relative, raw_bytes.decode("utf-8")
-
-
-def _contained_skill_prompt(repo_root: Path, query: str) -> tuple[str, str, str]:
-    from ask.commands.skills_impl import _skills_sdk_eval_source_path  # noqa: PLC0415
-
-    source = _skills_sdk_eval_source_path(repo_root, query)
-    if source is None:
-        raise ValueError(f"skill source is unavailable for variant {query!r}")
-    if source.is_symlink():
-        raise ValueError("variant skill source must not traverse a symlink")
-    resolved = source.resolve()
-    try:
-        relative = resolved.relative_to(repo_root.resolve()).as_posix()
-    except ValueError as exc:
-        raise ValueError("variant skill source must remain inside the repository") from exc
-    if resolved.is_symlink() or not resolved.is_file():
-        raise ValueError("variant skill source must be a regular file")
-    if resolved.stat().st_size > _PROMPT_SKILL_LIMIT_BYTES:
-        raise ValueError(f"variant skill source exceeds {_PROMPT_SKILL_LIMIT_BYTES} bytes")
-    raw_bytes = resolved.read_bytes()
-    return relative, raw_bytes.decode("utf-8"), _digest_bytes(raw_bytes)
-
-
-def _variant_prompt(repo_root: Path, variant: dict[str, str], fixture: dict[str, Any]) -> str:
-    skill_path, skill_text, skill_digest = _contained_skill_prompt(repo_root, variant["query"])
-    fixture_path, fixture_text = _contained_fixture_prompt(repo_root, fixture["path"])
-    expected_digest = str(fixture.get("digest") or "")
-    actual_digest = _digest_bytes((repo_root / fixture_path).read_bytes())
-    if expected_digest != actual_digest:
-        raise ValueError(f"fixture digest mismatch: expected {expected_digest}, got {actual_digest}")
-    return (
-        "Run one self-contained Skills SDK A/B evaluation in read-only mode.\n"
-        "Do not call tools, inspect the repository, execute commands, or ask follow-up questions.\n"
-        "Treat the embedded skill variant and controlled fixture as the complete input and return sanitized evidence only.\n"
-        f"Variant: {variant['label']}\n"
-        f"Skill query: {variant['query']}\n"
-        f"Package id: {variant['package_id']}\n"
-        f"Package digest: {variant['package_digest']}\n"
-        f"Skill source digest: {skill_digest}\n"
-        f"Fixture digest: {fixture['digest']}\n"
-        f"\n--- BEGIN VARIANT SKILL {skill_path} ---\n{skill_text}\n--- END VARIANT SKILL ---\n"
-        f"\n--- BEGIN FIXTURE {fixture_path} ---\n{fixture_text}\n--- END FIXTURE ---\n"
-        "Do not include secrets or claim work outside these inputs."
-    )
-
-
 def _build_ab_plan_receipt(
-    repo_root: Path,
-    *,
-    skill_a: str,
-    skill_b: str,
-    fixture: str,
-    skill_a_identity: dict[str, str] | None,
-    skill_b_identity: dict[str, str] | None,
-    execution_profile_id: str = "codex-read-only",
-    judge_profile_id: str = "oss-local",
+    repo_root: Path, *, skill_a: str, skill_b: str, fixture: str,
+    skill_a_identity: dict[str, str] | None, skill_b_identity: dict[str, str] | None,
+    skill_a_source_path: Path | None = None, skill_b_source_path: Path | None = None,
+    execution_profile_id: str = "codex-read-only", judge_profile_id: str = "oss-local", evidence_root: str = DEFAULT_EVIDENCE_ROOT,
     execution_lane: str = "all",
-    evidence_root: str = DEFAULT_EVIDENCE_ROOT,
     preflight_probe: PreflightProbe | None = None,
 ) -> dict[str, Any]:
-    preview = _preview_receipt(
-        repo_root,
-        skill_a=skill_a,
-        skill_b=skill_b,
-        fixture=fixture,
-        skill_a_identity=skill_a_identity,
-        skill_b_identity=skill_b_identity,
-        execution_profile_id=execution_profile_id,
-        judge_profile_id=judge_profile_id,
-    )
+    preview = _preview_receipt(repo_root, skill_a=skill_a, skill_b=skill_b, fixture=fixture, skill_a_identity=skill_a_identity, skill_b_identity=skill_b_identity, execution_profile_id=execution_profile_id, judge_profile_id=judge_profile_id)
     blockers = list(preview["blockers"])
-    blockers += [] if execution_lane in {"all", "oss-local"} else ["execution_lane_invalid"]
-    evidence_root_label, evidence_blocker = _planned_evidence_root(repo_root, evidence_root)
-    blockers += [evidence_blocker] if evidence_blocker else []
-    experiment_id, runtime_profile_gates = _planned_commands(
+    variant_prompts, input_blockers = _controlled_variant_prompts(
         repo_root,
+        preview,
+        skill_a_source_path=skill_a_source_path,
+        skill_b_source_path=skill_b_source_path,
+    )
+    blockers.extend(input_blockers)
+    evidence_root_label, evidence_blocker = _planned_evidence_root(repo_root, evidence_root)
+    if evidence_blocker:
+        blockers.append(evidence_blocker)
+    experiment_id, runtime_profile_gates = _planned_commands(
         preview,
         blockers=blockers,
         evidence_root_label=evidence_root_label,
@@ -240,9 +162,14 @@ def _build_ab_plan_receipt(
         judge_profile_id=judge_profile_id,
         execution_lane=execution_lane,
         preflight_probe=preflight_probe,
+        variant_prompts=variant_prompts,
     )
     status, command_plan = _plan_status(blockers, runtime_profile_gates)
-    return _plan_payload(preview, status, blockers, evidence_root_label, experiment_id, command_plan, runtime_profile_gates, execution_lane)
+    return _plan_payload(
+        preview, status, blockers, evidence_root_label, experiment_id,
+        command_plan, runtime_profile_gates,
+        execution_lane,
+    )
 
 
 def build_ab_plan_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
@@ -276,7 +203,6 @@ def _preview_receipt(repo_root: Path, **kwargs: Any) -> dict[str, Any]:
 
 
 def _planned_commands(
-    repo_root: Path,
     preview: dict[str, Any],
     *,
     blockers: list[str],
@@ -285,54 +211,53 @@ def _planned_commands(
     judge_profile_id: str,
     execution_lane: str,
     preflight_probe: PreflightProbe | None,
+    variant_prompts: dict[str, str],
 ) -> tuple[str | None, list[dict[str, Any]]]:
     if blockers or evidence_root_label is None:
         return _experiment_id_from_seed("\n".join(blockers or ["evidence_root_unavailable"])), []
     experiment_id = _experiment_id(preview, execution_profile_id, judge_profile_id)
-    gates = []
-    profile_ids = ("oss-local", "oss-cloud") if execution_lane == "all" else ("oss-local",)
-    for order, profile_id in enumerate(profile_ids, start=1):
-        profile = select_judge_profile(profile_id)
-        codex_profile = str(profile["codex_profile"])
-        preflight = build_lane_preflight(profile, preflight_probe)
-        gates.append({
-            "order": order,
-            "lane": profile_id,
-            "codex_profile": codex_profile,
-            "judge_profile": profile,
-            "status": "planned" if preflight["admission"]["status"] == "pass" else "blocked",
-            "blockers": preflight["admission"]["blockers"],
-            "preflight": preflight,
-            "command_plan": [],
-        })
+    profiles = ("oss-local", "oss-cloud") if execution_lane == "all" else ("oss-local",)
+    gates = [
+        _planned_profile_gate(profile_id, order, preflight_probe)
+        for order, profile_id in enumerate(profiles, start=1)
+    ]
     if all(gate["preflight"]["admission"]["status"] == "pass" for gate in gates):
-        _populate_variant_commands(repo_root, preview, evidence_root_label, experiment_id, gates, blockers)
+        for gate in gates:
+            gate["command_plan"] = _variant_commands(
+                variant_prompts,
+                evidence_root_label,
+                experiment_id,
+                gate["codex_profile"],
+                sandbox_mode=preview["execution_profile"]["sandbox_mode"],
+                approval_policy=preview["execution_profile"]["approval_policy"],
+            )
     return experiment_id, gates
 
 
-def _populate_variant_commands(
-    repo_root: Path,
-    preview: dict[str, Any],
-    evidence_root_label: str,
-    experiment_id: str,
-    gates: list[dict[str, Any]],
-    blockers: list[str],
-) -> None:
-    for gate in gates:
-        try:
-            gate["command_plan"] = _variant_commands(
-                repo_root, preview, evidence_root_label, experiment_id, gate["codex_profile"],
-            )
-        except ValueError as exc:
-            blockers.append(f"variant_prompt_invalid:{exc}")
+def _planned_profile_gate(
+    profile_id: str, order: int, preflight_probe: PreflightProbe | None,
+) -> dict[str, Any]:
+    profile = select_judge_profile(profile_id)
+    codex_profile = str(profile["codex_profile"])
+    preflight = build_lane_preflight(profile, preflight_probe)
+    return {
+        "order": order, "lane": profile_id, "codex_profile": codex_profile,
+        "judge_profile": profile,
+        "status": "planned" if preflight["admission"]["status"] == "pass" else "blocked",
+        "blockers": preflight["admission"]["blockers"], "preflight": preflight,
+        "command_plan": [],
+    }
 
 
 def _variant_commands(
-    repo_root: Path,
-    preview: dict[str, Any], evidence_root_label: str, experiment_id: str, codex_profile: str,
+    variant_prompts: dict[str, str],
+    evidence_root_label: str,
+    experiment_id: str,
+    codex_profile: str,
+    *,
+    sandbox_mode: str,
+    approval_policy: str,
 ) -> list[dict[str, Any]]:
-    sandbox_mode = preview["execution_profile"]["sandbox_mode"]
-    approval_policy = preview["execution_profile"]["approval_policy"]
     return [
         _variant_command(
             label="A",
@@ -341,7 +266,7 @@ def _variant_commands(
             approval_policy=approval_policy,
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
-            prompt=_variant_prompt(repo_root, preview["skill_a"], preview["fixture"]),
+            prompt=variant_prompts["A"],
             codex_profile=codex_profile,
         ),
         _variant_command(
@@ -351,10 +276,34 @@ def _variant_commands(
             approval_policy=approval_policy,
             evidence_root=evidence_root_label,
             experiment_id=experiment_id,
-            prompt=_variant_prompt(repo_root, preview["skill_b"], preview["fixture"]),
+            prompt=variant_prompts["B"],
             codex_profile=codex_profile,
         ),
     ]
+
+
+def _controlled_variant_prompts(
+    repo_root: Path,
+    preview: dict[str, Any],
+    *,
+    skill_a_source_path: Path | None,
+    skill_b_source_path: Path | None,
+) -> tuple[dict[str, str], list[str]]:
+    if preview["skill_a"] is None or preview["skill_b"] is None or preview["fixture"] is None:
+        return {}, []
+    prompts: dict[str, str] = {}
+    blockers: list[str] = []
+    for label, variant, source_path in (
+        ("A", preview["skill_a"], skill_a_source_path),
+        ("B", preview["skill_b"], skill_b_source_path),
+    ):
+        try:
+            prompts[label] = build_controlled_variant_prompt(
+                repo_root, variant=variant, fixture=preview["fixture"], source_path=source_path,
+            )
+        except ControlledInputError as exc:
+            blockers.append(f"{label}:{exc.code}")
+    return prompts, blockers
 
 
 def _plan_payload(
@@ -368,8 +317,7 @@ def _plan_payload(
     execution_lane: str,
 ) -> dict[str, Any]:
     return {
-        "schema_version": AB_PLAN_SCHEMA_VERSION,
-        "schema_uri": AB_PLAN_SCHEMA_URI,
+        "schema_version": AB_PLAN_SCHEMA_VERSION, "schema_uri": AB_PLAN_SCHEMA_URI,
         "status": status,
         "operation": "ab_plan",
         "skill_a": preview["skill_a"],
@@ -385,15 +333,18 @@ def _plan_payload(
         "command_variant_labels": [plan["variant_label"] for plan in command_plan],
         "command_plan": command_plan,
         "secret_boundary": preview["secret_boundary"],
-        "execution_boundary": "codex_exec_sandbox",
-        "judge_boundary": "post_run_sanitized_evidence_only",
+        "execution_boundary": "codex_exec_sandbox", "judge_boundary": "post_run_sanitized_evidence_only",
         "mutation_performed": False,
         "network_accessed": _preflight_network_accessed(runtime_profile_gates),
         "provider_invoked": False,
         "codex_exec_invoked": False,
         "blockers": blockers,
         "acceptance_trace": preview["acceptance_trace"],
-        "agent_summary": "A/B eval execution plan is ready; Codex has not been invoked." if status == "planned" else f"A/B eval execution plan is blocked: {', '.join(blockers)}.",
+        "agent_summary": (
+            "A/B eval execution plan is ready; Codex has not been invoked."
+            if status == "planned"
+            else f"A/B eval execution plan is blocked: {', '.join(blockers)}."
+        ),
     }
 
 

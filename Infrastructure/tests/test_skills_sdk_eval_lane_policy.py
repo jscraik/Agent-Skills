@@ -27,7 +27,7 @@ def _payload(*, cloud_cases: list[str] | None = None, baseline_fields: list[str]
             or ["case_ids", "criteria_digest", "rubric_digest", "scorer_version", "package_digest", "execution_model_family"],
             "model_routing": {
                 "oss-local": {"model": "qwen", "model_family": "qwen", "provider": "ollama", "identity_source": "profile-config"},
-                "oss-cloud": {"model": "minimax", "model_family": "minimax", "provider": "ollama-cloud", "identity_source": "profile-config"},
+                "oss-cloud": {"model": "deepseek-v4-flash:cloud", "model_family": "deepseek", "provider": "ollama-cloud", "identity_source": "profile-config"},
                 "tessl-external": {"model": "deepseek", "model_family": "deepseek", "provider": "tessl", "identity_source": "operator-confirmed"},
             },
             "pools": {
@@ -77,23 +77,38 @@ class EvalLanePolicyTests(unittest.TestCase):
         self.assertEqual(blocker["status"], "blocker")
         self.assertIn("criteria_digest", blocker["evidence"])
 
-    def test_model_families_must_be_distinct(self) -> None:
+    def test_oss_model_families_must_be_distinct(self) -> None:
         payload = _payload()
-        payload["evaluation_lane_policy"]["model_routing"]["oss-cloud"]["model_family"] = "deepseek"
+        payload["evaluation_lane_policy"]["model_routing"]["oss-cloud"]["model_family"] = "qwen"
 
         checks = build_eval_lane_policy_checks(payload, _cases())
 
-        blocker = next(row for row in checks if row["id"] == "eval_lane_model_families_distinct")
+        blocker = next(row for row in checks if row["id"] == "eval_lane_oss_model_families_distinct")
         self.assertEqual(blocker["status"], "blocker")
 
-    def test_model_family_comparison_is_case_insensitive(self) -> None:
+    def test_oss_model_family_comparison_is_case_insensitive(self) -> None:
         payload = _payload()
         payload["evaluation_lane_policy"]["model_routing"]["oss-cloud"]["model_family"] = "QWEN"
 
         checks = build_eval_lane_policy_checks(payload, _cases())
 
-        blocker = next(row for row in checks if row["id"] == "eval_lane_model_families_distinct")
+        blocker = next(row for row in checks if row["id"] == "eval_lane_oss_model_families_distinct")
         self.assertEqual(blocker["status"], "blocker")
+
+    def test_tessl_may_share_the_cloud_model_family_when_provider_is_external(self) -> None:
+        checks = build_eval_lane_policy_checks(_payload(), _cases())
+
+        external = next(row for row in checks if row["id"] == "eval_lane_tessl_external_provider_distinct")
+        self.assertEqual(external["status"], "pass")
+
+    def test_tessl_provider_must_not_reuse_an_oss_execution_provider(self) -> None:
+        payload = _payload()
+        payload["evaluation_lane_policy"]["model_routing"]["tessl-external"]["provider"] = "ollama-cloud"
+
+        checks = build_eval_lane_policy_checks(payload, _cases())
+
+        external = next(row for row in checks if row["id"] == "eval_lane_tessl_external_provider_distinct")
+        self.assertEqual(external["status"], "blocker")
 
 
 if __name__ == "__main__":

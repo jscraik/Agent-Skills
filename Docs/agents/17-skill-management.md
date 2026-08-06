@@ -27,6 +27,17 @@ Treat a dangling runtime link as a runtime outage even when the git cleanup was
 otherwise correct. The repo is clean only in the git lane; picker readiness is a
 separate runtime-projection lane.
 
+### Curated transition set
+
+`~/.codex/skills`, `~/.codex/plugins`, and their `~/.agents` counterparts may
+temporarily expose a curated transition set while packages await SDK admission.
+That availability is neither a source-of-truth decision nor an admission into
+the active SDK workspace. Preserve an unmanaged package copy-first in
+`/Users/jamiecraik/dev/skills-foundry`, retain its provenance there, and start
+active SDK work only after an explicit owner decision names the candidate source
+and bounded task. Do not remove, relink, install, publish, or promote a runtime
+package merely because its source is being retained or reviewed.
+
 ## Runtime Proof Before Skill Use
 
 Canonical skill source existence is not runtime authorization. When a user,

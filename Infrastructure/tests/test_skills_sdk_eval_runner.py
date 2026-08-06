@@ -245,7 +245,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run,
             mock.patch(
                 "ask.commands.skills_impl._skills_sdk_eval_execution_identity",
-                return_value={"model": "minimax", "model_family": "minimax", "provider": "cloud", "identity_source": "codex-profile-config"},
+                return_value={"model": "deepseek-v4-flash:cloud", "model_family": "deepseek", "provider": "cloud", "identity_source": "codex-profile-config"},
             ),
         ):
             result = skills_sdk_eval_run(
@@ -301,7 +301,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
             mock.patch("ask.commands.evals.run_evals", return_value=successful_internal_result("oss-cloud")) as run,
             mock.patch(
                 "ask.commands.skills_impl._skills_sdk_eval_execution_identity",
-                return_value={"model": "minimax", "model_family": "minimax", "provider": "cloud", "identity_source": "codex-profile-config"},
+                return_value={"model": "deepseek-v4-flash:cloud", "model_family": "deepseek", "provider": "cloud", "identity_source": "codex-profile-config"},
             ),
         ):
             result = skills_sdk_eval_run(

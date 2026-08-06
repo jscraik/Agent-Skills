@@ -511,6 +511,7 @@ def _sdk_quality_values(sdk_contract: dict[str, Any]) -> dict[str, dict[str, Any
     return {
         "reference_quality": values.get("reference_quality", {}),
         "writing_quality": values.get("writing_quality", {}),
+        "authoring_contract": values.get("authoring_contract", {}),
         "openai_platform_compat": values.get("openai_platform_compat", {}),
     }
 
@@ -552,6 +553,7 @@ def _quality_blockers(quality: dict[str, dict[str, Any]]) -> list[dict[str, Any]
     specs = (
         ("reference_quality", "reference_quality_blocked", "Skill references failed package-readiness quality checks."),
         ("writing_quality", "skill_writing_quality_blocked", "Skill writing quality failed SDK rubric checks."),
+        ("authoring_contract", "skill_authoring_contract_blocked", "Skill authoring contract failed deterministic SDK admission checks."),
         ("openai_platform_compat", "openai_platform_compat_blocked", "OpenAI platform compatibility failed SDK projection checks."),
     )
     blockers: list[dict[str, Any]] = []

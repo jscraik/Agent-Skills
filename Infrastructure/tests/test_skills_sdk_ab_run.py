@@ -44,13 +44,23 @@ IDENTITY_B = {
 TestRunner = Callable[[list[str], str, Path, int], CodexRunResult]
 PreflightProbe = Callable[[dict[str, object]], dict[str, object]]
 _TEST_CLOUD_ENV_FILE: Path | None = None
+_CONFIGS_AUTH_WRAPPER = "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"
+_CONFIGS_CODEX_EXEC_WRAPPER = "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"
 
 
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
         assert _TEST_CLOUD_ENV_FILE is not None
-        return ["op", "run", "--env-file", str(_TEST_CLOUD_ENV_FILE), "--", *command_argv]
+        return [
+            "bash", _CONFIGS_AUTH_WRAPPER, "--env-file", str(_TEST_CLOUD_ENV_FILE),
+            "--require-env", "OLLAMA_API_KEY", "--",
+            "bash", _CONFIGS_CODEX_EXEC_WRAPPER, "--profile", "oss-cloud",
+            "--model", "deepseek-v4-flash:cloud", "--strict-config", "-c",
+            'approval_policy="on-request"', "--cd", command_argv[command_argv.index("--cd") + 1],
+            "--sandbox", "read-only", "--ephemeral", "--json", "--output-last-message",
+            command_argv[command_argv.index("--output-last-message") + 1], "-",
+        ]
     return list(command_argv)
 
 
@@ -78,7 +88,6 @@ def _forbidden_test_runner(calls: list[list[str]]) -> TestRunner:
     def runner(argv: list[str], *_args: object) -> CodexRunResult:
         calls.append(argv)
         raise AssertionError("runner must not be invoked for a blocked plan")
-
     return runner
 
 
@@ -125,6 +134,29 @@ def _local_runtime_blocked_probe(profile: dict[str, object]) -> dict[str, object
 
 
 class TestSkillsSdkAbRun(unittest.TestCase):
+    def test_execution_uses_the_same_inline_controlled_material_as_the_plan(self) -> None:
+        prompts: dict[tuple[str, str], str] = {}
+        def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            profile = command_argv[command_argv.index("--profile") + 1]
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("controlled output", encoding="utf-8")
+            label = "A" if output_path.parent.name == "A" else "B"
+            prompts[(profile, label)] = prompt
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
+                stderr="",
+                executed_argv=_test_execution_argv(command_argv),
+            )
+        receipt = _build_test_ab_run_receipt(self.evidence_root, runner)
+        self.assertEqual(receipt["status"], "completed")
+        fixture_text = (REPO_ROOT / FIXTURE).read_text(encoding="utf-8")
+        for profile in ("oss-local", "oss-cloud"):
+            self.assertIn("# Skills SDK Valid Fixture", prompts[(profile, "A")])
+            self.assertIn("# Scenario Quality Fixture", prompts[(profile, "B")])
+            self.assertIn(fixture_text, prompts[(profile, "A")])
+            self.assertIn("Do not inspect the repository", prompts[(profile, "B")])
     def setUp(self) -> None:
         global _TEST_CLOUD_ENV_FILE
         self.evidence_root = ".harness/test-sdk-ab-run"
@@ -136,14 +168,12 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self._home_patch = patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home)
         self._home_patch.start()
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
-
     def tearDown(self) -> None:
         global _TEST_CLOUD_ENV_FILE
         self._home_patch.stop()
         self._temporary_home.cleanup()
         _TEST_CLOUD_ENV_FILE = None
         shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
-
     def _schema_status_guard(self, preflight: dict[str, object]) -> object:
         schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v1.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -156,7 +186,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             payload_source="completed-preflight-status-probe",
             truth_lane="schema_contract",
         )
-
     def _full_v1_schema_result(self, receipt: dict[str, object]) -> object:
         schema_path = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v1.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -168,7 +197,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             payload_source="full-ab-run-v1-regression",
             truth_lane="schema_contract",
         )
-
     def test_cloud_auth_replacement_becomes_typed_variant_blocker(self) -> None:
         def runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
             if command_argv[command_argv.index("--profile") + 1] == "oss-cloud":
@@ -183,7 +211,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                 stderr="",
                 executed_argv=_test_execution_argv(command_argv),
             )
-
         receipt = _build_test_ab_run_receipt(self.evidence_root, runner)
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("A:codex_exec_preflight_blocked", receipt["blockers"])
@@ -193,7 +220,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: object,
         ) -> CodexRunResult:
             return CodexRunResult(exit_code=0, stdout='{"type":"thread.started"}\n', stderr="", executed_argv=_test_execution_argv(command_argv))
-
         receipt = _build_test_ab_run_receipt(self.evidence_root, no_provider_event_runner)
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("A:provider_event_missing", receipt["blockers"])
@@ -215,7 +241,6 @@ class TestSkillsSdkAbRun(unittest.TestCase):
                     executed_argv=_test_execution_argv(command_argv),
                 )
             return CodexRunResult(exit_code=2, stdout="", stderr="cloud blocked", executed_argv=_test_execution_argv(command_argv))
-
         receipt = _build_test_ab_run_receipt(self.evidence_root, local_then_cloud_runner)
         local_gate, cloud_gate = receipt["runtime_profile_gates"]
         self.assertEqual(receipt["status"], "blocked")
@@ -223,14 +248,12 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(cloud_gate["status"], "blocked")
         self.assertEqual(receipt["variant_results"], local_gate["variant_results"])
         validate_ab_run_receipt(receipt)
-
     def test_v0_and_v1_run_fixtures_are_readable_under_own_semantics(self) -> None:
         fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid"
         v0 = json.loads((fixture_root / "ab-run-receipt.json").read_text())
         v1 = json.loads((fixture_root / "ab-run-receipt.v1.json").read_text())
         self.assertEqual(validate_ab_run_receipt(v0).schema_version, "skills-sdk.ab-run-receipt.v0")
         self.assertEqual(validate_ab_run_receipt(v1).schema_version, "skills-sdk.ab-run-receipt.v1")
-
     def test_v0_run_requires_exact_a_and_b_commands_and_results(self) -> None:
         fixture_root = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid"
         fixture = json.loads((fixture_root / "ab-run-receipt.json").read_text())

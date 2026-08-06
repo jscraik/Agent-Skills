@@ -81,7 +81,7 @@
 - Keep Skills SDK runtime proof lanes separate:
   SDK mechanical validation proves package/scenario/scorer/static readiness,
   `codex exec --profile oss-local` proves the oss-local flow,
-  `codex exec --profile oss-cloud` proves the oss-cloud flow,
+  the Configs-backed strict `oss-cloud` executor chain proves the oss-cloud flow,
   local Tessl staging proves only the Tessl local flow, and
   `--tessl-live-private` plus a scored `tessl eval view --json` artifact
   proves the Tessl external flow.

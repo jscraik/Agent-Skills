@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,16 @@ def _finding(path: str, message: str) -> dict[str, str]:
 
 def _non_empty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip()) and "<" not in value and ">" not in value
+
+
+def _timezone_aware_iso8601(value: Any) -> bool:
+    if not _non_empty_string(value):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.utcoffset() is not None
 
 
 def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
@@ -86,9 +97,13 @@ def _validate_delivered_state(delivery: dict[str, Any]) -> list[dict[str, str]]:
     if delivery.get("delivery_status") != "delivered":
         return findings
 
-    for key in ("delivered_at", "message_summary"):
-        if not _non_empty_string(delivery.get(key)):
-            findings.append(_finding(f"delivery.{key}", "must be present for delivered status"))
+    delivered_at = delivery.get("delivered_at")
+    if not _non_empty_string(delivered_at):
+        findings.append(_finding("delivery.delivered_at", "must be present for delivered status"))
+    elif not _timezone_aware_iso8601(delivered_at):
+        findings.append(_finding("delivery.delivered_at", "must be a timezone-aware ISO 8601 timestamp"))
+    if not _non_empty_string(delivery.get("message_summary")):
+        findings.append(_finding("delivery.message_summary", "must be present for delivered status"))
     if delivery.get("delivery_method", "").startswith("blocked"):
         findings.append(_finding("delivery.delivery_method", "delivered status cannot use a blocked delivery method"))
     return findings

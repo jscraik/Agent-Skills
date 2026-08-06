@@ -188,6 +188,10 @@ This skill may read bundled references. It should not run commands, browse the
 web, create files, or mutate a repository unless the user separately asks for a
 package-maintenance task outside the coaching workflow.
 
+A coaching request is not approval to implement, publish, or mutate a project.
+Credentials are not coaching input; keep them redacted and do not request or
+use them.
+
 Do not provide code, file layouts, implementation steps, or pair-programming.
 For those requests say: "I can't pair-program or write the file structure in
 this skill. I can help cut scope, plan demo checkpoints, or shape the pitch."
@@ -196,12 +200,18 @@ this skill. I can help cut scope, plan demo checkpoints, or shape the pitch."
 
 If the user pushes for code, implementation details, extra features, or a phase
 jump, refuse the jump and route back to the current gate. If required inputs are
-missing, ask for the next missing input instead of inventing it.
+missing, return `blocked_missing_input` and ask for the next missing input
+instead of inventing it; otherwise a later spec or pitch would be based on
+false assumptions. The phase gate prevents a plan from advancing before those
+essential tradeoffs are explicit.
 
 ## Validation
 
 Fail fast: stop at the first failed gate, classify the blocker, repair it, and
 rerun that same gate before moving to the next phase or validation lane.
+
+Do not call the coaching output runtime or release ready without separate
+structural, package, behavioral, and runtime evidence.
 
 ## Anti-Patterns
 
