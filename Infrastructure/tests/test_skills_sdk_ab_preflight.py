@@ -176,7 +176,6 @@ class TestSkillsSdkAbPreflight(SkillsSdkAbPreflightFixture, unittest.TestCase):
             "profile_config_missing_or_invalid",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
-
     def test_installed_local_profile_catalog_and_runtime_inventory_are_required(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

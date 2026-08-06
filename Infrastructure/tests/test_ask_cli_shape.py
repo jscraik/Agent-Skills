@@ -563,6 +563,24 @@ class Runner:
         self.assertEqual(issues, [])
         baseline.assert_called_once_with(paths[0], "BASE", staged_source=False)
 
+    def test_changed_file_mode_defers_unrelated_expired_waivers(self) -> None:
+        validator = _load_validator()
+        original_debt = validator.LEGACY_SHAPE_DEBT
+        try:
+            validator.LEGACY_SHAPE_DEBT = {
+                "test/expired.py": {
+                    "owner": "test",
+                    "rule_id": "ask-cli-shape-budget",
+                    "ticket": "JSC-TEST",
+                    "reason": "test reason",
+                    "expires": "2020-01-01",
+                }
+            }
+            args = SimpleNamespace(changed_files=("README.md",))
+            self.assertEqual(validator._check_python_shape(args), [])
+        finally:
+            validator.LEGACY_SHAPE_DEBT = original_debt
+
 
 if __name__ == "__main__":
     unittest.main()
