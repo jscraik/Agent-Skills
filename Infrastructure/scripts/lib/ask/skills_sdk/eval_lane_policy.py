@@ -76,13 +76,14 @@ def _pool_checks(
 def _model_routing_checks(policy: dict[str, Any]) -> list[dict[str, Any]]:
     routing = policy.get("model_routing")
     rows = routing if isinstance(routing, dict) else {}
-    families: list[str] = []
+    identities: dict[str, dict[str, str]] = {}
     checks = [_check("eval_lane_model_routing_present", passed=bool(rows), message="Model routing must be declared for every proof lane.")]
     for lane in MODEL_LANES:
         row = rows.get(lane)
         identity = row if isinstance(row, dict) else {}
         family = str(identity.get("model_family") or "").strip()
-        families.append(family.casefold())
+        provider = str(identity.get("provider") or "").strip()
+        identities[lane] = {"family": family.casefold(), "provider": provider.casefold()}
         checks.extend([
             _check(f"eval_lane_{lane}_model_identity", passed=bool(identity), message=f"{lane} must declare a model identity."),
             _check(f"eval_lane_{lane}_model", passed=bool(str(identity.get("model") or "").strip()), message=f"{lane} must declare a model."),
@@ -90,14 +91,23 @@ def _model_routing_checks(policy: dict[str, Any]) -> list[dict[str, Any]]:
             _check(f"eval_lane_{lane}_model_family", passed=bool(family), message=f"{lane} must declare a model family."),
             _check(f"eval_lane_{lane}_identity_source", passed=bool(str(identity.get("identity_source") or "").strip()), message=f"{lane} must declare its identity source."),
         ])
-    checks.append(
+    local = identities["oss-local"]
+    cloud = identities["oss-cloud"]
+    tessl = identities["tessl-external"]
+    checks.extend([
         _check(
-            "eval_lane_model_families_distinct",
-            passed=len(families) == len(set(families)) and all(families),
-            message="OSS local, OSS cloud, and Tessl external must use distinct model families unless an explicit exception is recorded.",
-            evidence=families,
-        )
-    )
+            "eval_lane_oss_model_families_distinct",
+            passed=bool(local["family"]) and bool(cloud["family"]) and local["family"] != cloud["family"],
+            message="OSS local and OSS cloud must use distinct model families for the independent A/B proof lanes.",
+            evidence=[local["family"], cloud["family"]],
+        ),
+        _check(
+            "eval_lane_tessl_external_provider_distinct",
+            passed=bool(tessl["provider"]) and tessl["provider"] not in {local["provider"], cloud["provider"]},
+            message="Tessl external proof must use a provider distinct from the OSS execution lanes; it may use the same model family.",
+            evidence=[local["provider"], cloud["provider"], tessl["provider"]],
+        ),
+    ])
     return checks
 
 

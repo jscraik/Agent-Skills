@@ -10,13 +10,17 @@ from typing import Any, Callable
 
 from ask.skills_sdk.ab_contracts import _codex_profile_from_argv, _validate_execution_argv
 from ask.skills_sdk.ab_transport_contracts import (
+    OSS_CLOUD_REQUIRED_ENV,
     actual_opaque_env_path,
-    approved_op_binary,
-    approved_op_env_invocation,
+    configs_auth_backed_invocation,
+    configs_auth_wrapper,
+    configs_oss_cloud_exec_command,
+    configs_oss_local_exec_command,
     is_actual_opaque_env_reference,
-    is_approved_op_binary,
+    is_configs_auth_wrapper,
     opaque_env_identity_digest,
 )
+from ask.skills_sdk.eval_ab_inputs import build_controlled_variant_prompt
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt
 
@@ -48,6 +52,7 @@ CodexRunner = Callable[[list[str], str, Path, int], CodexRunResult]
 _CODEX_ENV_ALLOWLIST = frozenset(
     {
         "CODEX_CONFIG_HOME",
+        "CODEX_CLI_PATH",
         "CODEX_HOME",
         "HOME",
         "LANG",
@@ -79,11 +84,17 @@ def _digest_file(path: Path) -> str | None:
 
 def _codex_runner_env(source: dict[str, str] | None = None) -> dict[str, str]:
     env = source if source is not None else os.environ
-    return {
+    filtered = {
         name: value
         for name, value in env.items()
         if name in _CODEX_ENV_ALLOWLIST and not any(marker in name.upper() for marker in _SECRET_ENV_MARKERS)
     }
+    configured_path = filtered.get("CODEX_CLI_PATH")
+    if configured_path and Path(configured_path).is_absolute():
+        parent = str(Path(configured_path).parent)
+        current_path = filtered.get("PATH", "")
+        filtered["PATH"] = parent if not current_path else f"{parent}{os.pathsep}{current_path}"
+    return filtered
 
 
 def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
@@ -104,11 +115,12 @@ def _default_codex_runner(
         env_file = os.environ.get(
             "SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "",
         )
-        with approved_op_env_invocation(
+        with configs_auth_backed_invocation(
             env_file, expected_identity_digest=expected_auth_stream_identity,
         ) as invocation:
+            cloud_command = configs_oss_cloud_exec_command(command_argv)
             proc = subprocess.run(
-                invocation.runtime_argv(command_argv),
+                invocation.runtime_argv(cloud_command),
                 cwd=repo_root,
                 input=prompt,
                 text=True,
@@ -116,11 +128,10 @@ def _default_codex_runner(
                 check=False,
                 timeout=timeout_seconds,
                 env=_codex_runner_env(),
-                pass_fds=invocation.pass_fds,
             )
-            execution_argv = invocation.receipt_argv(command_argv)
+            execution_argv = invocation.receipt_argv(cloud_command)
     else:
-        execution_argv = _execution_argv_for_run(command_argv)
+        execution_argv = configs_oss_local_exec_command(command_argv)
         proc = subprocess.run(
             execution_argv,
             cwd=repo_root,
@@ -139,26 +150,20 @@ def _default_codex_runner(
 def _execution_argv_for_run(command_argv: list[str]) -> list[str]:
     profile = _codex_profile_from_argv(command_argv)
     if profile == "oss-local":
-        return list(command_argv)
+        return configs_oss_local_exec_command(command_argv)
     default_stream = actual_opaque_env_path()
     env_file = os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else "")
     if not is_actual_opaque_env_reference(env_file):
         raise ValueError("cloud execution requires an operator-approved opaque environment stream")
-    op_binary = approved_op_binary()
-    if op_binary is None:
-        raise ValueError("cloud execution requires an approved 1Password CLI binary")
-    return [op_binary, "run", "--env-file", env_file, "--", *command_argv]
-
-
-def _variant_prompt(variant: dict[str, str], fixture: dict[str, Any]) -> str:
-    return (
-        f"Run Skills SDK A/B variant {variant['label']} against fixture {fixture['path']}.\n"
-        f"Skill query: {variant['query']}\n"
-        f"Package id: {variant['package_id']}\n"
-        f"Package digest: {variant['package_digest']}\n"
-        f"Fixture digest: {fixture['digest']}\n"
-        "Return sanitized evidence only. Do not include secrets."
-    )
+    auth_wrapper = configs_auth_wrapper()
+    if auth_wrapper is None:
+        raise ValueError("cloud execution requires the Configs auth-backed wrapper")
+    return [
+        "bash", auth_wrapper,
+        "--env-file", env_file,
+        "--require-env", OSS_CLOUD_REQUIRED_ENV,
+        "--", *configs_oss_cloud_exec_command(command_argv),
+    ]
 
 
 def _execute_variant(
@@ -232,23 +237,27 @@ def _validated_recorded_execution_argv(
     execution_argv: list[str], command_argv: list[str], declared_profile: str,
 ) -> tuple[list[str], str]:
     if declared_profile == "oss-cloud":
-        if len(execution_argv) < 5:
-            raise ValueError("cloud execution requires the approved op run wrapper")
+        if len(execution_argv) < 8:
+            raise ValueError("cloud execution requires the Configs auth-backed wrapper")
         if not is_actual_opaque_env_reference(execution_argv[3]):
             raise ValueError("cloud execution requires an operator-approved opaque environment stream")
     recorded = _redact_execution_argv(execution_argv)
     _validate_execution_argv(recorded, command_argv, declared_profile)
-    codex_argv = recorded[5:] if declared_profile == "oss-cloud" else recorded
-    return recorded, _codex_profile_from_argv(codex_argv)
+    # The cloud child is Configs' executor rather than the logical ``codex
+    # exec`` receipt command. Its exact profile is verified above; retain the
+    # declared logical profile instead of parsing the wrapper as a direct CLI.
+    executed_profile = declared_profile if declared_profile in {"oss-local", "oss-cloud"} else _codex_profile_from_argv(recorded)
+    return recorded, executed_profile
 
 
 def _redact_execution_argv(execution_argv: list[str]) -> list[str]:
     redacted = list(execution_argv)
     if (
-        len(redacted) >= 5
-        and is_approved_op_binary(redacted[0])
-        and redacted[1:3] == ["run", "--env-file"]
-        and redacted[4] == "--"
+        len(redacted) >= 8
+        and redacted[0] == "bash"
+        and is_configs_auth_wrapper(redacted[1])
+        and redacted[2] == "--env-file"
+        and redacted[4:7] == ["--require-env", OSS_CLOUD_REQUIRED_ENV, "--"]
     ):
         redacted[3] = "<operator-approved-opaque-env-stream>"
     return redacted
@@ -372,34 +381,21 @@ def _variant_blockers(
 
 
 def _build_ab_run_receipt(
-    repo_root: Path,
-    *, skill_a: str, skill_b: str, fixture: str,
-    skill_a_identity: dict[str, str] | None,
-    skill_b_identity: dict[str, str] | None,
-    execution_profile_id: str = "codex-read-only",
-    judge_profile_id: str = "oss-local",
-    evidence_root: str = ".harness/artifacts/sdk-ab-evals",
+    repo_root: Path, *, skill_a: str, skill_b: str, fixture: str,
+    skill_a_identity: dict[str, str] | None, skill_b_identity: dict[str, str] | None,
+    skill_a_source_path: Path | None = None, skill_b_source_path: Path | None = None,
+    execution_profile_id: str = "codex-read-only", judge_profile_id: str = "oss-local", evidence_root: str = ".harness/artifacts/sdk-ab-evals",
     timeout_seconds: int = 1800,
-    runner: CodexRunner | None = None,
-    preflight_probe: Any = None,
+    runner: CodexRunner | None = None, preflight_probe: Any = None,
 ) -> dict[str, Any]:
-    plan = _validated_v1_plan(
-        _build_plan(
-            repo_root,
-            skill_a=skill_a,
-            skill_b=skill_b,
-            fixture=fixture,
-            skill_a_identity=skill_a_identity,
-            skill_b_identity=skill_b_identity,
-            execution_profile_id=execution_profile_id,
-            judge_profile_id=judge_profile_id,
-            evidence_root=evidence_root,
-            preflight_probe=preflight_probe,
-        )
-    )
+    plan = _validated_v1_plan(_build_plan(repo_root, skill_a=skill_a, skill_b=skill_b, fixture=fixture, skill_a_identity=skill_a_identity, skill_b_identity=skill_b_identity, skill_a_source_path=skill_a_source_path, skill_b_source_path=skill_b_source_path, execution_profile_id=execution_profile_id, judge_profile_id=judge_profile_id, evidence_root=evidence_root, preflight_probe=preflight_probe))
     blockers = list(plan["blockers"])
     runtime_profile_gates, variant_results = _execute_runtime_profile_gates(
-        repo_root, plan, timeout_seconds, runner or _default_codex_runner,
+        repo_root,
+        plan,
+        timeout_seconds,
+        runner or _default_codex_runner,
+        {"A": skill_a_source_path, "B": skill_b_source_path},
     )
     blockers.extend(_execution_blockers(runtime_profile_gates, variant_results))
     status = "completed" if not blockers else "blocked"
@@ -458,6 +454,7 @@ def _execute_runtime_profile_gates(
     plan: dict[str, Any],
     timeout: int,
     runner: CodexRunner,
+    variant_source_paths: dict[str, Path | None],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not plan.get("runtime_profile_gates"):
         return [], []
@@ -474,7 +471,7 @@ def _execute_runtime_profile_gates(
             gate_results.append(_preflight_blocked_gate(gate))
             prior_blocked = True
             continue
-        results = _execute_runtime_gate(repo_root, plan, gate, timeout, runner)
+        results = _execute_runtime_gate(repo_root, plan, gate, timeout, runner, variant_source_paths)
         gate_blockers = [blocker for result in results for blocker in result["blockers"]]
         prior_blocked = bool(gate_blockers)
         all_results.extend(results)
@@ -524,14 +521,24 @@ def _preflight_blocked_gate(gate: dict[str, Any]) -> dict[str, Any]:
 
 
 def _execute_runtime_gate(
-    repo_root: Path, plan: dict[str, Any], gate: dict[str, Any], timeout: int, runner: CodexRunner,
+    repo_root: Path,
+    plan: dict[str, Any],
+    gate: dict[str, Any],
+    timeout: int,
+    runner: CodexRunner,
+    variant_source_paths: dict[str, Path | None],
 ) -> list[dict[str, Any]]:
     gate_runner = _runner_bound_to_auth_identity(gate, runner)
     results = []
     for command_plan in gate["command_plan"]:
         result = _execute_variant(
             repo_root, command_plan=command_plan,
-            prompt=_variant_prompt(_variant_for_plan(plan, command_plan), plan["fixture"]),
+            prompt=build_controlled_variant_prompt(
+                repo_root,
+                variant=_variant_for_plan(plan, command_plan),
+                fixture=plan["fixture"],
+                source_path=variant_source_paths[command_plan["variant_label"]],
+            ),
             timeout_seconds=timeout, runner=gate_runner,
         )
         if result["codex_profile"] is not None and result["codex_profile"] != gate["codex_profile"]:

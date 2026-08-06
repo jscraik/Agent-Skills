@@ -12,15 +12,16 @@ from typing import Any
 
 from ask.skills_sdk.ab_transport_contracts import (
     actual_opaque_env_path,
-    approved_op_binary,
-    approved_op_env_invocation,
+    configs_auth_wrapper,
+    configs_codex_exec_wrapper,
     is_actual_opaque_env_reference,
 )
 from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config
 
 _CODEX_PROFILE_SOURCE_DIR_ENV = "ASK_CODEX_PROFILE_SOURCE_DIR"
 _CODEX_TMPDIR_ENV = "ASK_CODEX_TMPDIR"
-_CODEX_OP_ENV_FILE_ENV = "ASK_CODEX_OP_ENV_FILE"
+_CODEX_AUTH_ENV_FILE_ENV = "SKILLS_SDK_OSS_CLOUD_ENV_FILE"
+_CODEX_RUNTIME_OUTPUT_NAME = "codex-last-message.json"
 
 
 @dataclass(frozen=True)
@@ -46,13 +47,27 @@ def _run_codex_judge(
     work_dir = _codex_judge_work_dir(output_file)
     _prepare_codex_judge_work_dir(work_dir)
     command = _codex_judge_command(judge_profile, work_dir, output_file)
+    if _codex_profile_id(judge_profile) == "oss-cloud":
+        completed, execution_argv = _execute_codex_judge_command(
+            command, prompt, judge_profile, timeout_seconds, repo_root, None, None, work_dir,
+        )
+        runtime_output = work_dir / _CODEX_RUNTIME_OUTPUT_NAME
+        _copy_contained_judge_output(runtime_output, output_file, work_dir)
+        output_text = _read_runtime_output(runtime_output, completed.stdout)
+        return CodexJudgeResult(
+            exit_code=completed.returncode,
+            stdout=completed.stdout,
+            stderr=completed.stderr,
+            output_text=output_text,
+            executed_argv=execution_argv,
+        )
     with tempfile.TemporaryDirectory(prefix="codex-oss-home.", dir=_codex_temp_parent()) as codex_home_raw:
         with tempfile.TemporaryDirectory(prefix="codex-oss-sqlite.", dir=_codex_temp_parent()) as sqlite_home_raw:
             codex_home = Path(codex_home_raw)
             sqlite_home = Path(sqlite_home_raw)
             _copy_codex_profile_config(judge_profile, codex_home)
             completed, command = _execute_codex_judge_command(
-                command, prompt, judge_profile, timeout_seconds, repo_root, codex_home, sqlite_home,
+                command, prompt, judge_profile, timeout_seconds, repo_root, codex_home, sqlite_home, work_dir,
             )
     return CodexJudgeResult(
         exit_code=completed.returncode,
@@ -65,33 +80,53 @@ def _run_codex_judge(
 
 def _execute_codex_judge_command(
     command: list[str], prompt: str, judge_profile: dict[str, Any], timeout_seconds: int,
-    repo_root: Path, codex_home: Path, sqlite_home: Path,
+    repo_root: Path, codex_home: Path | None, sqlite_home: Path | None, work_dir: Path,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     kwargs: dict[str, Any] = {
         "input": prompt, "text": True, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE,
         "check": False, "timeout": timeout_seconds,
         "env": _codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
+        "cwd": work_dir,
     }
-    if _codex_profile_id(judge_profile) != "oss-cloud":
-        return subprocess.run(command, **kwargs), command
-    op_env_file = _codex_op_env_file_path(judge_profile)
-    if op_env_file is None:
-        raise CodexProfileConfigError("oss-cloud judge execution requires the approved op run env boundary")
-    with approved_op_env_invocation(op_env_file) as invocation:
-        kwargs["pass_fds"] = invocation.pass_fds
-        completed = subprocess.run(invocation.runtime_argv(command[5:]), **kwargs)
-        return completed, invocation.receipt_argv(command[5:])
+    return subprocess.run(command, **kwargs), command
 
 
 def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
+    if _codex_profile_id(judge_profile) == "oss-cloud":
+        return _cloud_judge_command(judge_profile, work_dir)
+    return _local_judge_command(judge_profile, work_dir, output_file)
+
+
+def _cloud_judge_command(judge_profile: dict[str, Any], work_dir: Path) -> list[str]:
+    env_file = _codex_auth_env_file_path(judge_profile)
+    auth_wrapper = configs_auth_wrapper()
+    codex_exec_wrapper = configs_codex_exec_wrapper()
+    if env_file is None or auth_wrapper is None or codex_exec_wrapper is None:
+        raise CodexProfileConfigError("oss-cloud judge execution requires the Configs auth-backed wrapper boundary")
+    command = [
+        "bash", auth_wrapper, "--env-file", str(env_file), "--require-env", "OLLAMA_API_KEY", "--",
+        "bash", codex_exec_wrapper, "--profile", "oss-cloud", "--strict-config",
+        "-c", 'approval_policy="on-request"', "--cd", str(work_dir), "--sandbox", "read-only",
+        "--ephemeral", "--skip-git-repo-check", "--json", "--output-last-message",
+        _CODEX_RUNTIME_OUTPUT_NAME, "-",
+    ]
+    model = _codex_profile_model(judge_profile)
+    if model is not None:
+        command[11:11] = ["--model", model]
+    for override in reversed(_codex_model_setting_overrides(judge_profile)):
+        command[command.index("--strict-config"):command.index("--strict-config")] = ["-c", override]
+    return command
+
+
+def _local_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
     codex_profile = _codex_profile_id(judge_profile)
     codex_command = [
         "codex",
         "exec",
         "--profile",
         codex_profile,
-        "--ask-for-approval",
-        "on-request",
+        "-c",
+        'approval_policy="on-request"',
         "--cd",
         str(work_dir),
         "--sandbox",
@@ -107,13 +142,37 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
         codex_command[4:4] = ["-c", f"model={_json_toml_string(model_override)}"]
     for override in reversed(_codex_model_setting_overrides(judge_profile)):
         codex_command[4:4] = ["-c", override]
-    op_env_file = _codex_op_env_file_path(judge_profile)
-    op_bin = _codex_op_bin() if op_env_file is not None else None
-    if op_env_file is not None and op_bin is not None:
-        return [op_bin, "run", "--env-file", str(op_env_file), "--", *codex_command]
-    if codex_profile == "oss-cloud":
-        raise CodexProfileConfigError("oss-cloud judge execution requires the approved op run env boundary")
     return codex_command
+
+
+def _read_runtime_output(runtime_output: Path, fallback: str) -> str:
+    if runtime_output.is_symlink() or not runtime_output.is_file():
+        return fallback
+    try:
+        return runtime_output.read_text(encoding="utf-8")
+    except OSError:
+        return fallback
+
+
+def _copy_contained_judge_output(runtime_output: Path, output_file: Path, work_dir: Path) -> None:
+    """Copy the contained runtime receipt into the repo-owned evidence path."""
+    if runtime_output.is_symlink() or not runtime_output.is_file() or output_file.is_symlink():
+        return
+    try:
+        runtime_output.resolve().relative_to(work_dir.resolve())
+    except (OSError, ValueError):
+        return
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    temporary_output = output_file.with_name(f".{output_file.name}.{os.getpid()}.tmp")
+    if temporary_output.is_symlink():
+        return
+    try:
+        shutil.copyfile(runtime_output, temporary_output)
+        temporary_output.chmod(0o600)
+        os.replace(temporary_output, output_file)
+    finally:
+        if temporary_output.exists() and not temporary_output.is_symlink():
+            temporary_output.unlink()
 
 
 def _codex_profile_id(judge_profile: dict[str, Any]) -> str:
@@ -153,7 +212,7 @@ def _json_toml_string(value: str) -> str:
 
 def _codex_judge_work_dir(output_file: Path) -> Path:
     digest = hashlib.sha256(str(output_file).encode("utf-8")).hexdigest()[:16]
-    return Path(_codex_temp_parent() or tempfile.gettempdir()) / "ask-sdk-ab-judge-workspaces" / digest
+    return Path("/private/tmp/ask-sdk-ab-variant-workspaces") / "judge" / digest
 
 
 def _prepare_codex_judge_work_dir(work_dir: Path) -> None:
@@ -166,20 +225,20 @@ def _prepare_codex_judge_work_dir(work_dir: Path) -> None:
     work_dir.mkdir(parents=True, exist_ok=True)
 
 
-def _codex_op_env_file_available(judge_profile: dict[str, Any]) -> bool:
-    return _codex_op_env_file_path(judge_profile) is not None and _codex_op_bin() is not None
+def _codex_auth_boundary_available(judge_profile: dict[str, Any]) -> bool:
+    return (
+        _codex_auth_env_file_path(judge_profile) is not None
+        and configs_auth_wrapper() is not None
+        and configs_codex_exec_wrapper() is not None
+    )
 
 
-def _codex_op_bin() -> str | None:
-    return approved_op_binary()
-
-
-def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
+def _codex_auth_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     if _codex_profile_id(judge_profile) != "oss-cloud":
         return None
     if not judge_profile.get("secret_env_names"):
         return None
-    configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
+    configured = os.environ.get(_CODEX_AUTH_ENV_FILE_ENV)
     default_stream = actual_opaque_env_path()
     candidate = configured if configured is not None else str(default_stream) if default_stream else ""
     if not is_actual_opaque_env_reference(candidate):
@@ -249,8 +308,8 @@ def _codex_temp_parent() -> str | None:
 def _codex_judge_env(
     judge_profile: dict[str, Any],
     repo_root: Path,
-    codex_home: Path,
-    sqlite_home: Path,
+    codex_home: Path | None,
+    sqlite_home: Path | None,
 ) -> dict[str, str]:
     allowed_secret_names = {
         name
@@ -266,8 +325,9 @@ def _codex_judge_env(
         for key, value in os.environ.items()
         if key in passthrough_names or key in allowed_secret_names
     }
-    env["CODEX_HOME"] = str(codex_home)
-    env["CODEX_SQLITE_HOME"] = str(sqlite_home)
+    if codex_home is not None and sqlite_home is not None:
+        env["CODEX_HOME"] = str(codex_home)
+        env["CODEX_SQLITE_HOME"] = str(sqlite_home)
     repo_mise_config = repo_root / ".mise.toml"
     if repo_mise_config.is_file() and "MISE_TRUSTED_CONFIG_PATHS" not in env:
         env["MISE_TRUSTED_CONFIG_PATHS"] = str(repo_mise_config)

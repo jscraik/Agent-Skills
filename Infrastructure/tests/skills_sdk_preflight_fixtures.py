@@ -53,7 +53,7 @@ def _auth_fact(lane: str, source: str) -> dict[str, Any]:
         **_fact("not_applicable" if is_local else "pass", source, {"lane": lane}),
         "auth_reference": "none" if is_local else "codex_cli_auth",
         "secret_value_observed": False,
-        "auth_source": "not_applicable" if is_local else "op_opaque_env_file",
+        "auth_source": "not_applicable" if is_local else "1password_desktop_fifo",
     }
 
 
@@ -74,6 +74,7 @@ def _cloud_catalog_probe_fields(model: str) -> dict[str, Any]:
         "http_status": 200,
         "catalog_digest": _digest({"models": [model]}),
         "matched_model": model,
+        "catalog_match_source": "exact_catalog",
         "network_accessed": True,
     }
 

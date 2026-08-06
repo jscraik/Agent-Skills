@@ -1,0 +1,20 @@
+{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "simplify-release-scorer",
+  "scorer_version_or_digest": "simplify-evals-2026-08-06",
+  "prompt_version": "simplify-release-scorer.v1",
+  "split": "held_out",
+  "threshold": 0.85,
+  "parameters": {
+    "model": "deterministic-local",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw",
+  "minimum_examples": 6,
+  "minimum_true_positives": 1,
+  "minimum_true_negatives": 5,
+  "max_false_positives": 0,
+  "max_false_negatives": 0
+}

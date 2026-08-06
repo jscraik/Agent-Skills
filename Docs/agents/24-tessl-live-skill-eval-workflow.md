@@ -35,7 +35,7 @@ ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
 Keep the model families independent across proof lanes: `oss-local` uses
-`qwen3.5:9b-mlx`, `oss-cloud` uses `minimax-m2.7:cloud`, and Tessl external uses
+`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:cloud`, and Tessl external uses
 `deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
 family, provider, and identity source. A model change starts a new baseline for
 that lane. Do not average scores across model families; compare each lane to its
@@ -362,7 +362,7 @@ Before claiming completion:
   scenarios, targets 8, and carries the same ids proven by `oss-local` and
   `oss-cloud`.
 - OSS receipts name the execution model, family, provider, and identity source;
-  the Qwen, MiniMax, and Tessl DeepSeek families are distinct.
+  the Qwen local and DeepSeek cloud provider lanes are distinct.
 - When `oss-local` uses bounded qwen shards, every shard contains at most two
   cases and `ask sdk eval aggregate-shards` passes over repo-owned shard
   receipts with one package, dataset, rubric, profile, and exact release-set

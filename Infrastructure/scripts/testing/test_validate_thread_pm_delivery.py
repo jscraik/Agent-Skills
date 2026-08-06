@@ -142,6 +142,25 @@ def test_delivered_receipt_passes_when_required(tmp_path: Path) -> None:
     assert findings == []
 
 
+def test_delivered_receipt_rejects_timestamp_without_timezone(tmp_path: Path) -> None:
+    module = _load_module()
+    report = tmp_path / "latest.json"
+    delivery = tmp_path / "pm-delivery.json"
+    report.write_text(_valid_report(), encoding="utf-8")
+    delivery.write_text(
+        _valid_delivery().replace("2026-06-28T18:30:00Z", "2026-06-28T18:30:00"),
+        encoding="utf-8",
+    )
+
+    findings = module.validate_delivery(report, delivery, require_delivery=True)
+
+    assert any(
+        finding["path"] == "delivery.delivered_at"
+        and "timezone-aware ISO 8601" in finding["message"]
+        for finding in findings
+    )
+
+
 def test_blocked_delivery_receipt_fails_when_delivery_required(tmp_path: Path) -> None:
     module = _load_module()
     report = tmp_path / "latest.json"

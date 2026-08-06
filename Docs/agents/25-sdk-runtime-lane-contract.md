@@ -32,8 +32,9 @@ automatic failure conditions, lane separation, or command-evidence requirements.
    `codex exec --profile oss-local` in the read-only Codex profile sandbox;
    iterate until the sandboxed local OSS lane is valid, then move to the next
    model lane.
-3. oss-cloud flow: run the same proof through `codex exec --profile oss-cloud`
-   in the read-only Codex profile sandbox;
+3. oss-cloud flow: run the same proof through the Configs-owned
+   `run-auth-backed.sh → run-codex-exec.sh` chain for `oss-cloud` in the
+   read-only, strict, ephemeral Codex profile sandbox;
    iterate until the sandboxed cloud OSS lane is valid, then move to Tessl.
 4. Tessl local flow: run internal/local Tessl staging and rubric checks;
    iterate until the rubric and scenario package are good enough for external
@@ -43,15 +44,32 @@ automatic failure conditions, lane separation, or command-evidence requirements.
    score the preserved `tessl eval view --json` artifact before claiming
    handoff readiness.
 
+### Disposable SDK judge workspaces
+
+An SDK A/B judge may execute from a fresh workspace under
+`/private/tmp/ask-sdk-ab-variant-workspaces/` rather than a checked-out Git
+directory. The command must keep that workspace path contained and
+candidate-bound, then pass `--skip-git-repo-check` to the strict Configs
+executor. This flag only permits Codex startup in that SDK-created disposable
+workspace; it does not widen the filesystem root, change the read-only
+sandbox, or permit a dirty/current checkout. Keep `--output-last-message`
+repo-relative, copy the resulting receipt into the evidence root, and retain
+the exact command argv in the judge receipt.
+
 ## Lane Matrix
 
 | Lane                      | Proves                                                                                                                                                                | Required command shape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Authority boundary                                                                                                                                                                                                                                                                                                        | Blocks that do not prove failure                                                                                                                                            |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | SDK mechanical validation | Skill package shape and static SDK readiness before runtime model proof.                                                                                              | `./bin/ask skills package verify <skill-path> --json --robot`; `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`; `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`; `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`; `./bin/ask skills audit <skill-path>/SKILL.md --level strict --json --robot`.                                                                                                                                                                                                                                                                                                                                                                                                                           | Repository schemas, package validators, static eval metadata, local files only.                                                                                                                                                                                                                                           | Live model quota, Tessl workspace quota, cloud auth, or model subscription failures.                                                                                        |
 | oss-local flow            | Local OSS model behavior through the Codex control plane.                                                                                                             | `codex exec --profile oss-local` or an SDK command whose receipt shows `codex_exec_invoked=true` and `codex_profile=oss-local`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Codex `oss-local.config.toml`; local profile sandbox and configured local model runtime.                                                                                                                                                                                                                                  | Missing local model, Ollama local runtime unavailable, profile config missing, local sandbox denial, unsupported generic ChatGPT-account model.                             |
-| oss-cloud flow            | Cloud OSS confirmation through the Codex control plane.                                                                                                               | `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json`, which validates the projected profile and approved 1Password reference before it invokes `op run --env-file … -- codex exec --profile oss-cloud`; or an SDK command whose receipt shows `codex_exec_invoked=true` and `codex_profile=oss-cloud`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Codex `oss-cloud.config.toml`; approved cloud auth stream such as the operator-approved env file or 1Password wrapper; cloud model access.                                                                                                                                                                                | Subscription missing, cloud provider 403, approved env stream unavailable, profile config missing.                                                                          |
+| oss-cloud flow            | Cloud OSS confirmation through the Codex control plane.                                                                                                               | `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json`, which validates the projected profile and 1Password Desktop FIFO before it invokes `bash run-auth-backed.sh --env-file ~/.codex/.env --require-env OLLAMA_API_KEY -- bash run-codex-exec.sh --profile oss-cloud --model deepseek-v4-flash:cloud --strict-config --sandbox read-only --ephemeral`; or an SDK receipt whose `execution_argv` proves that same wrapper chain and `codex_profile=oss-cloud`.                                                                                                                                                                                                                                                                                                                                                                         | Codex `oss-cloud.config.toml`; Desktop-owned `~/.codex/.env` FIFO; reviewed Configs wrappers; cloud model access.                                                                                                                                                                                                          | Subscription missing, cloud provider 403, unavailable FIFO writer, wrapper/profile config missing.                                                                          |
 | Tessl local flow          | Local Tessl package shape, scenario staging, native Tessl CLI compatibility, package archive creation, and temp `file:` install behavior without public distribution. | `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot` for the executed Tessl plugin lint, pack, temp `file:` install, and optional review receipt. Use `--preview` only to plan the lane before producing readiness evidence. Preparatory commands are `./bin/ask evals run <skill-path> --mode smoke or release --json --robot` and `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`; scenario preparation stages only by default and requires `--execute` for a temporary Tessl install. They do not satisfy Tessl local proof readiness by themselves.                                                                                                                                           | Native installed `tessl` CLI, stable `/tmp/ask-tessl-*` staged input, temp install workspace under `/tmp/ask-tessl-local-install`, no `npx`, no publish, no registry upload, no live repo source install.                                                                                                                 | Missing project link, local Tessl CLI auth blocker, staged package shape failure, generated scenario draft needing review, pack command failure, temp file-install failure. |
-| Tessl external flow       | Durable private Tessl projection plus private Workspace scoring evidence.                                                                                             | First run the explicit project-setup lane `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot` with operator authority; it records a candidate-bound project-link receipt. Then use `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot`; use `--tessl-live-dry-run` before live service calls when proving shape. The dry-run admission requires current mechanical, security, scenario/scorer, deterministic, `oss-local`, `oss-cloud`, and Tessl-local proof receipts. A non-dry live run additionally requires the completed candidate-bound handoff receipt, the project-link receipt, and the recorded dry-run lane. The live evaluator never repairs, relinks, updates, or creates a project. | Foundry package id in `agent-skills`; private Tessl package id `<workspace>/<package-name>`; candidate-bound project-link receipt before eval; preserved `tessl eval view --json` artifact; score receipt through `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`. | Quota, workspace token/session failure, stale project-link receipt, live score below threshold, non-discriminative baseline, missing final view artifact.                   |
+| Tessl external flow       | Durable private Tessl projection plus private Workspace scoring evidence.                                                                                             | First run the explicit project-setup lane `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot` with operator authority; it records a candidate-bound project-link receipt. Then use `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot`; use `--tessl-live-dry-run` before live service calls when proving shape. The dry-run admission requires current mechanical, security, scenario/scorer, deterministic, `oss-local`, `oss-cloud`, and Tessl-local proof receipts. A non-dry live run additionally requires the completed candidate-bound handoff receipt, the project-link receipt, and the recorded dry-run lane. The live evaluator never repairs, relinks, updates, or creates a project. | Foundry package id from the current canonical owner record; private Tessl package id `<workspace>/<package-name>`; candidate-bound project-link receipt before eval; preserved `tessl eval view --json` artifact; score receipt through `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`. | Quota, workspace token/session failure, stale project-link receipt, live score below threshold, non-discriminative baseline, missing final view artifact.                   |
+
+In this table, “current canonical owner record” means the explicit owner
+decision for the bounded package lane. It is not inferred from an
+`agent-skills` checkout path, a Foundry copy, a Tessl project, or a home-runtime
+link.
 
 ## Non-Substitution Rules
 
@@ -88,7 +106,8 @@ For each lane, report:
   `tessl-external`.
 - `command`: the exact command attempted.
 - `authority_boundary`: profile, workspace, or staged package boundary.
-- `foundry_package_id`: the canonical package identity in `agent-skills`.
+- `foundry_package_id`: the canonical package identity from its explicit owner
+  decision, rather than an assumed repository path.
 - `tessl_private_package_id`: the private Tessl package identity, usually
   `<workspace>/<package-name>`.
 - `status`: `pass`, `fail`, or `blocked`.
@@ -105,21 +124,28 @@ For each lane, report:
 - If oss-cloud blocks on subscription or provider access, leave oss-cloud
   blocked and continue only with lanes that do not claim cloud confirmation.
 - Before a live oss-cloud retry, run
-  `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json` from a host context with 1Password desktop access. The runner accepts only the projected MiniMax/Ollama Cloud profile plus either a regular file containing an `OLLAMA_API_KEY=op://...` reference or the operator-approved FIFO that `op run --env-file` consumes. Its receipt records `auth_source=op_reference` or `auth_source=op_fifo` without reading the FIFO. An empty, plaintext, malformed, or unavailable regular env source is a local preflight blocker: it must not start `codex exec` or be reported as a provider failure.
+  `python3 Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py --json`.
+  The runner accepts only the Desktop-owned FIFO at `~/.codex/.env`, invokes
+  the reviewed Configs chain with `oss-cloud` and `deepseek-v4-flash:cloud`,
+  and records `auth_source=1password_desktop_fifo` without reading the FIFO.
+  A plaintext, symlinked, malformed, unavailable, or unwritten stream is a
+  local preflight blocker: it must not start the provider or be reported as a
+  provider failure. Use one fresh wrapper invocation for each credentialed
+  stage; never reuse a FIFO descriptor across catalog, A, B, and judge.
 - Before an A/B plan admits the `oss-cloud` lane, its catalog preflight must
   invoke the official `GET https://ollama.com/api/tags` list-models surface
-  through `op run --env-file ~/.codex/.env -- ...`. The env source is an
-  opaque operator stream: the parent process must not open, read, hash, copy,
-  or include its contents in commands, exceptions, logs, receipts, or test
-  fixtures. Only the probe child receives `OLLAMA_API_KEY`; it sends the
-  credential to the official endpoint and emits a redacted result containing
-  the HTTP classification, catalog digest, and exact selected-model match.
-  Missing `op`/auth, network or timeout denial, HTTP failure, malformed catalog,
+  through `bash run-auth-backed.sh --env-file ~/.codex/.env --require-env
+  OLLAMA_API_KEY -- ...`. The env source is an opaque operator stream: the
+  parent process must not open, read, hash, copy, or include its contents in
+  commands, exceptions, logs, receipts, or test fixtures. Only the probe child
+  receives `OLLAMA_API_KEY`; it sends the credential to the official endpoint
+  and emits a redacted result containing the HTTP classification, catalog
+  digest, and exact selected-model match. Missing Configs auth, network or timeout denial, HTTP failure, malformed catalog,
   missing model, and duplicate exact matches are typed blockers. There is no
   direct unauthenticated fallback. This read-only catalog request proves only
   profile/catalog admission: it performs no generation, does not invoke Codex,
   and does not prove A/B, judge, provider-generation, or release behavior.
-  The parent accepts catalog-probe transport only when `op run` returns the
+  The parent accepts catalog-probe transport only when the Configs wrapper child returns the
   exact built-in integer exit code `0` for a pass or `2` for a validated typed
   blocker, stderr is empty, and stdout is exactly one JSON object matching the
   closed probe contract for that result class. Boolean, float, string, null,
@@ -157,10 +183,14 @@ For each lane, report:
 
 ## Tessl External Identity Contract
 
-The Tessl external lane is a projection from the foundry into a durable private
-Tessl package:
+The Tessl external lane is a projection from a selected canonical package into
+a durable private Tessl package:
 
-- `agent-skills` is the foundry source of truth.
+- `/Users/jamiecraik/dev/skills-foundry` retains source-only packages,
+  provenance, and licences outside active authoring.
+- `agent-skills` implements the Skills SDK and may hold the selected active
+  candidate for the bounded lifecycle task; its copy does not change source
+  ownership without an explicit authority decision.
 - `jscraik` is the single intended Tessl workspace for Skills SDK project
   creation, scenario generation, internal review, eval iteration, private
   registry retention, and later public registry publication decisions.
@@ -175,7 +205,7 @@ Tessl package:
   visibility requires a separate explicit publish lane and must not be inferred
   from project linking, eval success, or workspace selection.
 - `foundry_package_id` identifies the canonical skill or plugin package in the
-  repo.
+  source location named by its explicit owner decision.
 - `tessl_private_package_id` identifies the private Tessl registry/workspace
   package and must match the project marker, normally
   `<workspace>/<project-slug>`.
@@ -293,8 +323,8 @@ made.
 
 For a first private Tessl package projection:
 
-1. Derive `foundry_package_id`, source commit, and staged package digest from
-   the canonical `agent-skills` package.
+1. Derive `foundry_package_id`, source identity, and staged package digest from
+   the selected canonical package and record its owner location.
 2. Stage a clean private Tessl package under `/tmp/ask-tessl-*`; include
    `.tessl-plugin/plugin.json`, `README.md` for registry presentation, skill
    content, references, and scenarios generated from SDK metadata. The staged
@@ -309,7 +339,7 @@ For a first private Tessl package projection:
    `--include-review` is explicitly supplied.
 4. Diagnose or repair project identity only through the explicit project-setup
    wrapper: `./bin/ask evals prepare-tessl-scenarios <skill-path>
-   --tessl-workspace <workspace> --execute --json --robot`.
+--tessl-workspace <workspace> --execute --json --robot`.
 5. Preserve its candidate-bound project-link receipt. The later live evaluator
    treats a missing, stale, or mismatched receipt as a blocker and performs no
    project mutation itself.

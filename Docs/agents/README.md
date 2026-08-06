@@ -50,6 +50,7 @@
 
 | Need                                              | Open                                                                                                                               |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Cold-start intent, proof, and blocked recovery    | [/Docs/agents/5-minute-success-path.md](/Docs/agents/5-minute-success-path.md)                                                     |
 | Tooling and command policy                        | [/Docs/agents/02-tooling-policy.md](/Docs/agents/02-tooling-policy.md)                                                             |
 | Validation order and checks                       | [/Docs/agents/04-validation.md](/Docs/agents/04-validation.md)                                                                     |
 | Security and governance                           | [/Docs/agents/06-security-and-governance.md](/Docs/agents/06-security-and-governance.md)                                           |

@@ -11,7 +11,10 @@ prompt context.
 
 The short version:
 
-- Canonical skill source lives in `Skills/**` and `Plugins/*/skills/**`.
+- An active SDK candidate may have source in `Skills/**` or
+  `Plugins/*/skills/**`; a retained package's source lives in
+  `/Users/jamiecraik/dev/skills-foundry`. An explicit owner decision decides
+  which is canonical.
 - Generated runtime surfaces live in `.agents/**`.
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
@@ -67,12 +70,12 @@ That path answers:
 
 ## Pick the right path
 
-| Reader job     | Start here                                                   | Why                                                                                 |
-| -------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Start          | `./bin/ask sdk start <skill> --json --robot`                 | Resolves the target, local state, and one next action.                            |
-| Check          | `./bin/ask sdk check <skill> --json --robot`                 | Gives a compact structural summary and one actionable follow-up.                  |
+| Reader job     | Start here                                                        | Why                                                                                 |
+| -------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Start          | `./bin/ask sdk start <skill> --json --robot`                      | Resolves the target, local state, and one next action.                              |
+| Check          | `./bin/ask sdk check <skill> --json --robot`                      | Gives a compact structural summary and one actionable follow-up.                    |
 | Verify package | `./bin/ask skills package verify <skill> --strict --json --robot` | Enforces target-bound package readiness without installing or changing the runtime. |
-| Prove          | `./bin/ask skills prove <skill> --json --robot`              | Keeps structural, runtime, and task-outcome truth separate.                       |
+| Prove          | `./bin/ask skills prove <skill> --json --robot`                   | Keeps structural, runtime, and task-outcome truth separate.                         |
 
 Use `--robot` when an agent is driving the CLI. The wrapper corrects clear
 syntax mistakes and returns structured errors when intent is ambiguous.
@@ -119,12 +122,16 @@ This repo separates source, generated projections, and live runtime visibility.
 
 | Surface                               | Purpose                                                 | Edit policy            |
 | ------------------------------------- | ------------------------------------------------------- | ---------------------- |
-| `Skills/<topic>/<skill>/SKILL.md`     | Canonical first-party skill source                      | Edit here              |
-| `Plugins/<plugin>/skills/**/SKILL.md` | Canonical plugin-owned skill source                     | Edit here              |
+| `Skills/<topic>/<skill>/SKILL.md`     | Active SDK candidate source owned by this repository    | Edit only when selected |
+| `Plugins/<plugin>/skills/**/SKILL.md` | Active SDK plugin candidate source owned by this repo   | Edit only when selected |
+| `~/dev/skills-foundry/**`             | Source-only retained package, provenance, and licences  | Copy-first admission    |
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes | Regenerate only        |
-| `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection             | Refresh with user sync |
+| `~/.agents/skills`, `~/.codex/skills` | Curated or accepted user runtime skill availability     | Refresh with user sync |
+| `~/.agents/plugins`, `~/.codex/plugins` | Curated or accepted user runtime plugin availability  | Refresh with plugin sync |
 
-SDK-flat metadata is generated from canonical skill sources. Obsolete rooted
+An explicit owner decision chooses between Skills Foundry retention and an
+active SDK candidate in this repository. SDK-flat metadata is generated only
+from the selected canonical skill source. Obsolete rooted
 manifests and command-surface files are not SDK inputs and should not be used as
 operator handles.
 

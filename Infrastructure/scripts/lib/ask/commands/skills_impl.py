@@ -7683,6 +7683,8 @@ def skills_sdk_eval_ab_plan(
     result.metadata["command"] = "sdk eval ab-plan --preview"
     skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
     skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
+    skill_a_source_path = _skills_sdk_eval_source_path(repo_root, skill_a)
+    skill_b_source_path = _skills_sdk_eval_source_path(repo_root, skill_b)
     receipt = build_ab_plan_receipt(
         repo_root,
         skill_a=skill_a,
@@ -7690,6 +7692,8 @@ def skills_sdk_eval_ab_plan(
         fixture=fixture,
         skill_a_identity=skill_a_identity,
         skill_b_identity=skill_b_identity,
+        skill_a_source_path=skill_a_source_path,
+        skill_b_source_path=skill_b_source_path,
         execution_profile_id=execution_profile,
         judge_profile_id=judge_profile,
         evidence_root=evidence_root,
@@ -7756,6 +7760,8 @@ def skills_sdk_eval_ab_run(
     result.metadata["command"] = "sdk eval ab-run --execute"
     skill_a_identity = _skills_sdk_eval_package_identity(repo_root, skill_a)
     skill_b_identity = _skills_sdk_eval_package_identity(repo_root, skill_b)
+    skill_a_source_path = _skills_sdk_eval_source_path(repo_root, skill_a)
+    skill_b_source_path = _skills_sdk_eval_source_path(repo_root, skill_b)
     receipt = build_ab_run_receipt(
         repo_root,
         skill_a=skill_a,
@@ -7763,6 +7769,8 @@ def skills_sdk_eval_ab_run(
         fixture=fixture,
         skill_a_identity=skill_a_identity,
         skill_b_identity=skill_b_identity,
+        skill_a_source_path=skill_a_source_path,
+        skill_b_source_path=skill_b_source_path,
         execution_profile_id=execution_profile,
         judge_profile_id=judge_profile,
         evidence_root=evidence_root,

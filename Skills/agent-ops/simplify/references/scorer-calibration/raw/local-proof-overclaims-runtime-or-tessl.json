@@ -1,0 +1,7 @@
+{
+  "id": "local-proof-overclaims-runtime-or-tessl",
+  "probe_type": "evidence_lane_overclaim_rejected",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "Fail fixture treats a local package check as proof of runtime installation, Tessl evaluation, publication, and release readiness, which are separate evidence lanes."
+}

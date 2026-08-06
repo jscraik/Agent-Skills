@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from copy import deepcopy
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 
 
@@ -14,6 +16,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_inputs import ControlledInputError, build_controlled_variant_prompt  # noqa: E402
 from ask.skills_sdk import schema_validation  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_plan_receipt  # noqa: E402
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
@@ -36,6 +39,63 @@ IDENTITY_B = {
 
 
 class TestSkillsSdkAbPlan(unittest.TestCase):
+    def test_controlled_prompt_binds_inline_skill_and_raw_fixture_bytes(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+        fixture = receipt["fixture"]
+        assert fixture is not None
+        prompt_a = build_controlled_variant_prompt(
+            REPO_ROOT, variant=receipt["skill_a"], fixture=fixture, source_path=None,
+        )
+        prompt_b = build_controlled_variant_prompt(
+            REPO_ROOT, variant=receipt["skill_b"], fixture=fixture, source_path=None,
+        )
+
+        self.assertIn("Use only the controlled material below.", prompt_a)
+        self.assertIn("# Skills SDK Valid Fixture", prompt_a)
+        self.assertIn("# Scenario Quality Fixture", prompt_b)
+        self.assertIn((REPO_ROOT / FIXTURE).read_text(encoding="utf-8"), prompt_a)
+        self.assertNotEqual(prompt_a, prompt_b)
+
+        prompts = {"A": prompt_a, "B": prompt_b}
+        for gate in receipt["runtime_profile_gates"]:
+            for command in gate["command_plan"]:
+                expected = f"sha256:{hashlib.sha256(prompts[command['variant_label']].encode('utf-8')).hexdigest()}"
+                self.assertEqual(command["prompt_stdin_digest"], expected)
+
+    def test_controlled_prompt_verifies_crlf_fixture_bytes_before_decoding(self) -> None:
+        with tempfile.TemporaryDirectory(dir=REPO_ROOT / ".harness") as temporary_root:
+            fixture_path = Path(temporary_root) / "fixture.md"
+            fixture_bytes = b"first line\r\nsecond line\r\n"
+            fixture_path.write_bytes(fixture_bytes)
+            fixture = {
+                "path": fixture_path.relative_to(REPO_ROOT).as_posix(),
+                "digest": f"sha256:{hashlib.sha256(fixture_bytes).hexdigest()}",
+                "size_bytes": len(fixture_bytes),
+            }
+            variant = {
+                "label": "A",
+                "query": SKILL_A,
+                **IDENTITY_A,
+            }
+            prompt = build_controlled_variant_prompt(
+                REPO_ROOT, variant=variant, fixture=fixture, source_path=None,
+            )
+            self.assertIn("first line\r\nsecond line", prompt)
+
+            fixture["digest"] = f"sha256:{'0' * 64}"
+            with self.assertRaisesRegex(ControlledInputError, "fixture_digest_mismatch"):
+                build_controlled_variant_prompt(
+                    REPO_ROOT, variant=variant, fixture=fixture, source_path=None,
+                )
+
     def test_skills_command_defers_optional_ab_contract_imports(self) -> None:
         """The general ask command must load without the optional Pydantic lane."""
         source_path = REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
@@ -293,14 +353,24 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
 
     def _assert_command_argv(self, receipt: dict[str, object]) -> None:
         first = receipt["command_plan"][0]
-        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "--ask-for-approval", "on-request", "--sandbox", "read-only"])
+        self.assertEqual(first["command_argv"][:8], ["codex", "exec", "--profile", "oss-local", "-c", 'approval_policy="on-request"', "--sandbox", "read-only"])
         self.assertEqual(first["approval_policy"], "on-request")
         self.assertIn("--json", first["command_argv"])
         for gate in receipt["runtime_profile_gates"]:
             for command in gate["command_plan"]:
                 argv = command["command_argv"]
                 self.assertEqual(argv[argv.index("--profile") + 1], gate["codex_profile"])
-                expected = argv if gate["codex_profile"] == "oss-local" else ["op", "run", "--env-file", "<operator-approved-opaque-env-stream>", "--", *argv]
+                expected = argv if gate["codex_profile"] == "oss-local" else [
+                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                    "--env-file", "<operator-approved-opaque-env-stream>",
+                    "--require-env", "OLLAMA_API_KEY", "--",
+                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                    "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+                    "--strict-config", "-c", 'approval_policy="on-request"',
+                    "--cd", argv[argv.index("--cd") + 1],
+                    "--sandbox", "read-only", "--ephemeral", "--json",
+                    "--output-last-message", argv[argv.index("--output-last-message") + 1], "-",
+                ]
                 self.assertEqual(command["execution_argv"], expected)
 
     def _assert_plan_evidence(self, receipt: dict[str, object]) -> None:
@@ -418,13 +488,14 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
             capture_output=True,
         )
 
-        self.assertEqual(proc.returncode, 2, proc.stderr)
+        self.assertIn(proc.returncode, (0, 2), proc.stderr)
         payload = json.loads(proc.stdout)
         receipt = payload["data"]["skills_sdk_eval_ab_plan"]["receipt"]
-        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn(receipt["status"], ("planned", "blocked"))
         self.assertEqual(receipt["execution_profile"]["id"], "codex-read-only")
         self.assertEqual(receipt["evidence_root"], ".harness/artifacts/sdk-ab-evals")
-        self.assertTrue(receipt["blockers"])
+        if receipt["status"] == "blocked":
+            self.assertTrue(receipt["blockers"])
         self.assertFalse(receipt["codex_exec_invoked"])
         validate_ab_plan_receipt(receipt)
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 import shutil
 import subprocess
@@ -17,24 +18,32 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
-from ask.skills_sdk.ab_transport_contracts import actual_opaque_env_path, approved_op_binary, is_actual_opaque_env_reference, opaque_env_identity_digest, run_with_approved_op_env
+from ask.skills_sdk.ab_transport_contracts import (
+    OSS_CLOUD_REQUIRED_ENV,
+    actual_opaque_env_path,
+    configs_auth_wrapper,
+    configs_codex_exec_wrapper,
+    is_actual_opaque_env_reference,
+    opaque_env_identity_digest,
+)
+from ask.skills_sdk.eval_ab_catalog_validation import (
+    CloudCatalogRunner,
+    _blocked_catalog_probe,
+    _catalog_result_fields,
+    _catalog_probe_result,
+    _closed_probe_envelope,
+    _reject_duplicate_json_keys,
+    _reject_json_constant,
+    _passing_catalog_probe,
+)
 
 
 PreflightProbe = Callable[[dict[str, Any]], dict[str, Any]]
-CloudCatalogRunner = Callable[[list[str]], subprocess.CompletedProcess[str]]
+CloudSmokeRunner = Callable[[list[str]], subprocess.CompletedProcess[str]]
 OllamaInventoryResult = tuple[subprocess.CompletedProcess[str] | None, dict[str, Any] | None]
-CatalogProbeResult = tuple[dict[str, Any] | None, str | None, dict[str, Any]]
 _CLOUD_CATALOG_PROBE = Path(__file__).with_name("cloud_catalog_probe.py")
-_CATALOG_PROBE_KEYS = frozenset(
-    "result_class network_accessed http_status catalog_digest matched_model match_count secret_value_observed "
-    "secret_not_observed generation_performed provider_invoked codex_exec_invoked".split()
-)
-_CATALOG_RESULT_CLASSES = frozenset(
-    "pass auth_missing http_failure timeout network_failure payload_too_large malformed_json malformed_catalog "
-    "model_missing model_ambiguous invalid_catalog_url redirect_rejected".split()
-)
-_MAX_PROBE_STDOUT_CHARS = 1024 * 1024
-_MISSING = object()
+_CLOUD_SMOKE_RUNNER = Path(__file__).parents[3] / "validation-and-linting" / "run_oss_cloud_smoke.py"
+_CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
 
 
 def _profile_filename(lane: str) -> str: return f"{lane}.config.toml"
@@ -208,18 +217,18 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
     path = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
     source = "operator-approved-op-env-stream"
     approved = is_actual_opaque_env_reference(str(path))
-    source_kind = "op_fifo" if approved else "missing_or_invalid"
-    op_binary = approved_op_binary()
+    source_kind = "1password_desktop_fifo" if approved else "missing_or_invalid"
+    auth_wrapper = configs_auth_wrapper()
     evidence = {
         "auth_source": source_kind,
-        "op_binary_resolved": op_binary is not None,
-        "credential_presence": "delegated_to_op_run" if approved else "unavailable",
+        "configs_auth_wrapper_resolved": auth_wrapper is not None,
+        "credential_presence": "delegated_to_configs_auth_wrapper" if approved else "unavailable",
         "env_stream_content_observed": False,
         "auth_stream_identity_digest": opaque_env_identity_digest(path),
     }
-    if not approved or op_binary is None:
+    if not approved or auth_wrapper is None:
         return _blocked_fact(
-            "cloud_auth_unavailable", "approved opaque 1Password env stream or CLI is unavailable",
+            "cloud_auth_unavailable", "approved opaque 1Password env stream or Configs wrapper is unavailable",
             source, evidence, auth_reference="codex_cli_auth", secret_value_observed=False,
             auth_source=source_kind,
         )
@@ -231,11 +240,45 @@ def _approved_cloud_auth_fact(selected_model: str) -> dict[str, Any]:
         "auth_stream_identity_digest": evidence["auth_stream_identity_digest"],
     }
 
-def _cloud_catalog_command(op_binary: str, env_file: Path, selected_model: str) -> list[str]:
-    return [op_binary, "run", "--env-file", str(env_file), "--", sys.executable, str(_CLOUD_CATALOG_PROBE), "--url", DEFAULT_CATALOG_URL, "--model", selected_model, "--timeout-seconds", "10"]
+def _cloud_catalog_command(auth_wrapper: str, env_file: Path, selected_model: str) -> list[str]:
+    return [
+        "bash", auth_wrapper,
+        "--env-file", str(env_file),
+        "--require-env", OSS_CLOUD_REQUIRED_ENV,
+        "--", sys.executable, str(_CLOUD_CATALOG_PROBE),
+        "--url", DEFAULT_CATALOG_URL, "--model", selected_model, "--timeout-seconds", "10",
+    ]
 
-def _run_cloud_catalog(command: list[str], *, pass_fds: tuple[int, ...] = ()) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, capture_output=True, check=False, text=True, timeout=15, env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}}, pass_fds=pass_fds)
+def _run_cloud_catalog(command: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, capture_output=True, check=False, text=True, timeout=15, env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}})
+
+
+def _cloud_smoke_command(
+    profile_path: Path, env_file: Path, auth_wrapper: str,
+) -> list[str]:
+    codex_wrapper = configs_codex_exec_wrapper() or "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"
+    return [
+        sys.executable,
+        str(_CLOUD_SMOKE_RUNNER),
+        "--profile-source", str(profile_path),
+        "--env-file", str(env_file),
+        "--auth-wrapper", auth_wrapper,
+        "--codex-exec-wrapper", codex_wrapper,
+        "--marker", _CLOUD_SMOKE_MARKER,
+        "--timeout-seconds", "120",
+        "--json",
+    ]
+
+
+def _run_cloud_smoke(command: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=135,
+        env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}},
+    )
 
 def _safe_command_shape(command: list[str]) -> list[str]:
     safe = list(command)
@@ -243,304 +286,121 @@ def _safe_command_shape(command: list[str]) -> list[str]:
     safe[env_index] = "<operator-approved-opaque-env-stream>"
     return safe
 
-def _catalog_probe_result(command: list[str], runner: CloudCatalogRunner) -> CatalogProbeResult:
+
+def _valid_observed_at(value: object) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
     try:
-        completed = runner(command)
-    except subprocess.TimeoutExpired:
-        return None, "timeout", {"probe_exit_class": "timeout"}
-    except OSError:
-        return None, "network_or_runtime_failure", {"probe_exit_class": "runtime_failure"}
-    envelope, envelope_evidence = _closed_probe_envelope(completed)
-    if envelope is None:
-        return None, "invalid_probe_transport_envelope", envelope_evidence
-    returncode, stdout, stderr = envelope
-    child_evidence = {
-        **envelope_evidence,
-        "probe_exit_class": "zero" if returncode == 0 else "nonzero",
-        "probe_stderr_empty": stderr == "",
-    }
-    if -255 <= returncode <= 255:
-        child_evidence["probe_exit_code"] = returncode
-    if stderr:
-        return None, "probe_stderr_nonempty", child_evidence
-    try:
-        payload = json.loads(stdout, object_pairs_hook=_reject_duplicate_json_keys,
-                             parse_constant=_reject_json_constant)
-    except (TypeError, ValueError, json.JSONDecodeError):
-        return None, "malformed_probe_output", child_evidence
-    if not _valid_catalog_probe_payload(payload):
-        return None, "invalid_probe_contract", child_evidence
-    result_class = str(payload["result_class"])
-    expected_returncode = 0 if result_class == "pass" else 2
-    child_evidence.update(
-        {
-            "probe_result_class": result_class,
-            "probe_expected_exit_code": expected_returncode,
-        }
-    )
-    if returncode != expected_returncode:
-        return None, "probe_exit_contract_mismatch", child_evidence
-    return payload, None, child_evidence
-
-
-def _closed_probe_envelope(
-    completed: object,
-) -> tuple[tuple[int, str, str] | None, dict[str, Any]]:
-    """Copy only an exact, bounded transport envelope across the subprocess boundary."""
-    returncode, returncode_class = _read_probe_attribute(completed, "returncode", int)
-    stdout, stdout_class = _read_probe_attribute(completed, "stdout", str)
-    stderr, stderr_class = _read_probe_attribute(completed, "stderr", str)
-    evidence = {
-        "probe_transport_class": "closed",
-        "probe_returncode_class": returncode_class,
-        "probe_stdout_class": stdout_class,
-        "probe_stderr_class": stderr_class,
-    }
-    if returncode_class != "exact_int" or stdout_class != "exact_str" or stderr_class != "exact_str":
-        evidence["probe_transport_class"] = "invalid"
-        return None, evidence
-    assert type(returncode) is int and type(stdout) is str and type(stderr) is str
-    stdout_frame = _probe_stdout_frame_class(stdout)
-    evidence["probe_stdout_class"] = stdout_frame
-    if stdout_frame != "bounded_json_text":
-        evidence["probe_transport_class"] = "invalid"
-        return None, evidence
-    return (returncode, stdout, stderr), evidence
-
-
-_UNTRUSTED_ATTRIBUTE_EXCEPTION = BaseException
-
-
-def _read_probe_attribute(
-    completed: object, name: str, expected_type: type[int] | type[str],
-) -> tuple[object, str]:
-    try:
-        value = getattr(completed, name, _MISSING)
-    except _UNTRUSTED_ATTRIBUTE_EXCEPTION:
-        return _MISSING, "attribute_access_failure"
-    if value is _MISSING:
-        return _MISSING, "missing"
-    if type(value) is not expected_type:
-        return _MISSING, "invalid_type"
-    return value, "exact_int" if expected_type is int else "exact_str"
-
-
-def _probe_stdout_frame_class(stdout: str) -> str:
-    if len(stdout) > _MAX_PROBE_STDOUT_CHARS:
-        return "oversized"
-    if "\x00" in stdout:
-        return "invalid_framing"
-    for index, character in enumerate(stdout):
-        if ord(character) >= 32:
-            continue
-        if character == "\n" and index == len(stdout) - 1:
-            continue
-        return "invalid_framing"
-    return "bounded_json_text"
-
-
-def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    payload: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in payload:
-            raise ValueError("duplicate JSON key")
-        payload[key] = value
-    return payload
-
-
-def _reject_json_constant(value: str) -> None:
-    raise ValueError(f"invalid JSON constant: {value}")
-
-
-def _is_digest(value: object) -> bool:
-    if not isinstance(value, str) or not value.startswith("sha256:") or len(value) != 71:
-        return False
-    return all(character in "0123456789abcdef" for character in value[7:])
-
-
-def _valid_catalog_probe_payload(payload: object) -> bool:
-    if not isinstance(payload, dict) or set(payload) != _CATALOG_PROBE_KEYS:
-        return False
-    result_class = payload["result_class"]
-    if type(result_class) is not str or result_class not in _CATALOG_RESULT_CLASSES:
-        return False
-    return _valid_catalog_probe_types(payload) and _safe_catalog_probe_flags(payload) and (
-        _valid_catalog_result_semantics(payload)
-    )
-
-
-def _valid_catalog_probe_types(payload: dict[str, Any]) -> bool:
-    for field in (
-        "network_accessed", "secret_value_observed", "secret_not_observed",
-        "generation_performed", "provider_invoked", "codex_exec_invoked",
-    ):
-        if type(payload[field]) is not bool:
-            return False
-    return _valid_catalog_probe_nullable_types(payload)
-
-
-def _valid_catalog_probe_nullable_types(payload: dict[str, Any]) -> bool:
-    http_status = payload["http_status"]
-    match_count = payload["match_count"]
-    if http_status is not None and (type(http_status) is not int or not 100 <= http_status <= 599):
-        return False
-    if match_count is not None and (type(match_count) is not int or match_count < 0):
-        return False
-    if payload["catalog_digest"] is not None and not _is_digest(payload["catalog_digest"]):
-        return False
-    if payload["matched_model"] is not None and type(payload["matched_model"]) is not str:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
         return False
     return True
 
 
-def _safe_catalog_probe_flags(payload: dict[str, Any]) -> bool:
-    return not any((
-        payload["secret_value_observed"] is not False,
-        payload["secret_not_observed"] is not True,
-        payload["generation_performed"] is not False,
-        payload["provider_invoked"] is not False,
-        payload["codex_exec_invoked"] is not False,
-    ))
-
-
-def _valid_catalog_result_semantics(payload: dict[str, Any]) -> bool:
-    validators = {
-        "pass": _valid_pass_semantics,
-        "invalid_catalog_url": _valid_auth_missing_semantics,
-        "redirect_rejected": _valid_transport_failure_semantics,
-        "model_missing": _valid_missing_semantics,
-        "model_ambiguous": _valid_ambiguous_semantics,
-        "malformed_json": _valid_catalog_parse_failure_semantics,
-        "malformed_catalog": _valid_catalog_parse_failure_semantics,
-        "payload_too_large": _valid_catalog_parse_failure_semantics,
-        "http_failure": _valid_http_failure_semantics,
-        "timeout": _valid_transport_failure_semantics,
-        "network_failure": _valid_transport_failure_semantics,
-        "auth_missing": _valid_auth_missing_semantics,
+def _cloud_smoke_result(
+    command: list[str], runner: CloudSmokeRunner,
+) -> tuple[dict[str, Any] | None, str | None, dict[str, Any]]:
+    try:
+        completed = runner(command)
+    except subprocess.TimeoutExpired:
+        return None, "timeout", {"smoke_exit_class": "timeout"}
+    except OSError:
+        return None, "runtime_failure", {"smoke_exit_class": "runtime_failure"}
+    envelope, envelope_evidence = _closed_probe_envelope(completed)
+    if envelope is None:
+        return None, "invalid_smoke_transport_envelope", envelope_evidence
+    returncode, stdout, stderr = envelope
+    evidence = {
+        **envelope_evidence,
+        "smoke_exit_class": "zero" if returncode == 0 else "nonzero",
+        "smoke_stderr_empty": stderr == "",
     }
-    validator = validators.get(payload["result_class"])
-    return validator is not None and validator(payload)
+    if stderr:
+        return None, "smoke_stderr_nonempty", evidence
+    try:
+        payload = json.loads(
+            stdout,
+            object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_json_constant,
+        )
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None, "malformed_smoke_output", evidence
+    if not isinstance(payload, dict):
+        return None, "invalid_smoke_contract", evidence
+    if not _valid_cloud_smoke_receipt(payload):
+        return None, "invalid_smoke_contract", evidence
+    expected_returncode = 0 if payload["status"] == "pass" else 1
+    evidence.update({
+        "smoke_receipt_status": payload["status"],
+        "smoke_expected_exit_code": expected_returncode,
+    })
+    if returncode != expected_returncode:
+        return None, "smoke_exit_contract_mismatch", evidence
+    return payload, None, evidence
 
 
-def _valid_pass_semantics(payload: dict[str, Any]) -> bool:
-    return (
-        _has_successful_catalog_response(payload)
-        and payload["matched_model"] is not None and payload["match_count"] == 1
-    )
+def _valid_cloud_smoke_receipt(payload: dict[str, Any]) -> bool:
+    required = {
+        "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
+        "model_provider", "auth_source", "provider_invoked", "exit_code", "marker",
+        "warnings", "findings",
+    }
+    if not required.issubset(payload) or payload.get("schema_version") != "skills-sdk.oss-cloud-smoke-run.v0":
+        return False
+    return _valid_cloud_smoke_identity(payload) and _valid_cloud_smoke_outcome(payload)
 
 
-def _valid_missing_semantics(payload: dict[str, Any]) -> bool:
-    return (
-        _has_successful_catalog_response(payload)
-        and payload["matched_model"] is None and payload["match_count"] == 0
-    )
-
-
-def _valid_ambiguous_semantics(payload: dict[str, Any]) -> bool:
-    count = payload["match_count"]
-    return (
-        _has_successful_catalog_response(payload)
-        and payload["matched_model"] is None and type(count) is int and count > 1
-    )
-
-
-def _has_successful_catalog_response(payload: dict[str, Any]) -> bool:
-    status = payload["http_status"]
-    return (
-        payload["network_accessed"] is True and type(status) is int and 200 <= status < 300
-        and payload["catalog_digest"] is not None
-    )
-
-
-def _has_no_catalog_claims(payload: dict[str, Any]) -> bool:
-    return (
-        payload["catalog_digest"] is None and payload["matched_model"] is None
-        and payload["match_count"] is None
-    )
-
-
-def _valid_catalog_parse_failure_semantics(payload: dict[str, Any]) -> bool:
-    status = payload["http_status"]
-    return (
-        payload["network_accessed"] is True and type(status) is int and 200 <= status < 300
-        and _has_no_catalog_claims(payload)
-    )
-
-
-def _valid_http_failure_semantics(payload: dict[str, Any]) -> bool:
-    status = payload["http_status"]
-    return (
-        payload["network_accessed"] is True and type(status) is int and not 200 <= status < 300
-        and _has_no_catalog_claims(payload)
-    )
-
-
-def _valid_transport_failure_semantics(payload: dict[str, Any]) -> bool:
-    return (
-        payload["network_accessed"] is True and payload["http_status"] is None
-        and _has_no_catalog_claims(payload)
-    )
-
-
-def _valid_auth_missing_semantics(payload: dict[str, Any]) -> bool:
-    return (
-        payload["network_accessed"] is False and payload["http_status"] is None
-        and _has_no_catalog_claims(payload)
-    )
-
-
-def _passing_catalog_probe(payload: dict[str, Any], selected_model: str) -> bool:
-    digest = payload.get("catalog_digest")
+def _valid_cloud_smoke_identity(payload: dict[str, Any]) -> bool:
     return all((
-        payload.get("result_class") == "pass",
-        payload.get("network_accessed") is True,
-        isinstance(payload.get("http_status"), int) and 200 <= payload["http_status"] < 300,
-        isinstance(digest, str) and digest.startswith("sha256:") and len(digest) == 71,
-        payload.get("matched_model") == selected_model,
-        payload.get("match_count") == 1,
-        payload.get("secret_value_observed") is False,
-        payload.get("secret_not_observed") is True,
-        payload.get("generation_performed") is False,
-        payload.get("provider_invoked") is False,
-        payload.get("codex_exec_invoked") is False,
+        payload.get("lane") == "oss-cloud",
+        payload.get("codex_profile") == "oss-cloud",
+        payload.get("model") == "deepseek-v4-flash:cloud",
+        payload.get("model_provider") == "ollama-cloud",
+        payload.get("auth_source") == "1password_desktop_fifo",
+        type(payload.get("provider_invoked")) is bool and payload.get("provider_invoked") is True,
     ))
 
 
-def _catalog_result_fields(selected_model: str, payload: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "selected_model_id": selected_model,
-        "catalog_identity": DEFAULT_CATALOG_URL,
-        "probe_url": DEFAULT_CATALOG_URL,
-        "http_status": payload.get("http_status"),
-        "catalog_digest": payload.get("catalog_digest"),
-        "matched_model": payload.get("matched_model"),
-        "network_accessed": payload.get("network_accessed") is True,
-        "secret_value_observed": False,
-        "generation_performed": False,
-        "provider_invoked": False,
-        "codex_exec_invoked": False,
-    }
+def _valid_cloud_smoke_outcome(payload: dict[str, Any]) -> bool:
+    return all((
+        payload.get("status") in {"pass", "blocked"},
+        payload.get("exit_code") == 0,
+        payload.get("marker") == _CLOUD_SMOKE_MARKER,
+        payload.get("findings") == [],
+        isinstance(payload.get("warnings"), list),
+        _valid_observed_at(payload.get("observed_at")),
+        payload.get("status") == "pass",
+        payload.get("secret_value_observed", False) is False,
+    ))
 
-
-def _blocked_catalog_probe(
-    selected_model: str, evidence: dict[str, Any], blocker_class: str, reason: str,
-    *, network_accessed: bool,
-) -> dict[str, Any]:
-    payload = {"network_accessed": network_accessed}
-    return _blocked_fact(
-        blocker_class, reason, DEFAULT_CATALOG_URL, {**evidence, **payload},
-        **_catalog_result_fields(selected_model, payload),
-    )
 
 
 def _catalog_fact_from_payload(
-    selected_model: str, evidence: dict[str, Any], payload: dict[str, Any],
+    selected_model: str,
+    evidence: dict[str, Any],
+    payload: dict[str, Any],
+    *,
+    profile_path: Path | None = None,
+    auth_fact: dict[str, Any] | None = None,
+    env_file: Path | None = None,
+    auth_wrapper: str | None = None,
+    smoke_runner: CloudSmokeRunner | None = None,
+    profile_evidence_digest: str | None = None,
+    codex_executable_identity: str | None = None,
 ) -> dict[str, Any]:
     result_class = str(payload["result_class"])
     safe_evidence = {**evidence, **payload}
     fields = _catalog_result_fields(selected_model, payload)
     if _passing_catalog_probe(payload, selected_model):
         return {**_fact("pass", DEFAULT_CATALOG_URL, safe_evidence), **fields}
+    if result_class in {"model_missing", "model_ambiguous"}:
+        return _direct_smoke_catalog_fact(
+            selected_model, result_class, safe_evidence, fields,
+            profile_path=profile_path, auth_fact=auth_fact, env_file=env_file,
+            auth_wrapper=auth_wrapper, smoke_runner=smoke_runner,
+            profile_evidence_digest=profile_evidence_digest,
+            codex_executable_identity=codex_executable_identity,
+        )
     if result_class == "pass":
         result_class = "unverifiable_catalog_evidence"
     blocker_class = "cloud_auth_unavailable" if result_class == "auth_missing" else (
@@ -552,15 +412,113 @@ def _catalog_fact_from_payload(
         DEFAULT_CATALOG_URL, safe_evidence, **fields,
     )
 
+
+def _direct_smoke_catalog_fact(
+    selected_model: str,
+    result_class: str,
+    evidence: dict[str, Any],
+    fields: dict[str, Any],
+    *,
+    profile_path: Path | None,
+    auth_fact: dict[str, Any] | None,
+    env_file: Path | None,
+    auth_wrapper: str | None,
+    smoke_runner: CloudSmokeRunner | None,
+    profile_evidence_digest: str | None,
+    codex_executable_identity: str | None,
+) -> dict[str, Any]:
+    required = (profile_path, env_file, auth_wrapper, profile_evidence_digest, codex_executable_identity)
+    if smoke_runner is None or any(value is None for value in required):
+        return _blocked_fact(
+            "catalog_alias_unlisted",
+            f"cloud catalog returned {result_class}; exact-model direct smoke was not admitted",
+            DEFAULT_CATALOG_URL, evidence, **fields,
+        )
+    smoke_command = _cloud_smoke_command(profile_path, env_file, auth_wrapper)
+    evidence["direct_smoke_command_shape"] = _safe_smoke_command_shape(smoke_command)
+    smoke_receipt, smoke_failure, smoke_evidence = _cloud_smoke_result(smoke_command, smoke_runner)
+    evidence["direct_smoke_evidence"] = smoke_evidence
+    if smoke_receipt is None:
+        return _blocked_fact(
+            "catalog_alias_unlisted",
+            f"cloud catalog returned {result_class}; direct provider smoke failed: {smoke_failure}",
+            DEFAULT_CATALOG_URL, evidence, **fields,
+        )
+    return _direct_smoke_pass_fact(
+        selected_model, evidence, fields, smoke_receipt,
+        profile_path=profile_path, auth_fact=auth_fact,
+        profile_evidence_digest=profile_evidence_digest,
+        codex_executable_identity=codex_executable_identity,
+    )
+
+
+def _direct_smoke_pass_fact(
+    selected_model: str,
+    evidence: dict[str, Any],
+    fields: dict[str, Any],
+    smoke_receipt: dict[str, Any],
+    *,
+    profile_path: Path,
+    auth_fact: dict[str, Any] | None,
+    profile_evidence_digest: str,
+    codex_executable_identity: str,
+) -> dict[str, Any]:
+    provider_endpoint = _profile_provider_endpoint(profile_path)
+    observed_at = str(smoke_receipt["observed_at"])
+    receipt_digest = _digest(smoke_receipt)
+    binding_digest = _digest({
+        "profile_evidence_digest": profile_evidence_digest,
+        "selected_model": selected_model,
+        "provider_endpoint": provider_endpoint,
+        "codex_executable_identity": codex_executable_identity,
+        "auth_stream_identity_digest": auth_fact.get("auth_stream_identity_digest") if auth_fact else None,
+        "observed_at": observed_at,
+        "receipt_digest": receipt_digest,
+    })
+    return {
+        **_fact("pass", DEFAULT_CATALOG_URL, evidence), **fields,
+        "matched_model": selected_model,
+        "catalog_match_source": "direct_provider_smoke",
+        "direct_smoke_receipt_digest": receipt_digest,
+        "direct_smoke_binding_digest": binding_digest,
+        "direct_smoke_observed_at": observed_at,
+        "direct_smoke_provider_endpoint": provider_endpoint,
+        "direct_smoke_profile_evidence_digest": profile_evidence_digest,
+        "direct_smoke_codex_executable_identity": codex_executable_identity,
+        "direct_smoke_auth_stream_identity_digest": auth_fact.get("auth_stream_identity_digest") if auth_fact else None,
+        "direct_smoke_provider_invoked": True,
+        "direct_smoke_exit_code": 0,
+        "direct_smoke_marker": _CLOUD_SMOKE_MARKER,
+    }
+
+
+def _safe_smoke_command_shape(command: list[str]) -> list[str]:
+    safe = list(command)
+    for index, value in enumerate(safe[:-1]):
+        if value == "--env-file":
+            safe[index + 1] = "<operator-approved-opaque-env-stream>"
+    return safe
+
+
+def _profile_provider_endpoint(profile_path: Path) -> str | None:
+    try:
+        payload = tomllib.loads(profile_path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    providers = payload.get("model_providers")
+    provider = providers.get("ollama-cloud") if isinstance(providers, dict) else None
+    endpoint = provider.get("base_url") if isinstance(provider, dict) else None
+    return endpoint if isinstance(endpoint, str) else None
+
 def _auth_blocked_catalog(selected_model: str, evidence: dict[str, Any], reason: str) -> dict[str, Any]:
     return _blocked_catalog_probe(selected_model, evidence, "cloud_auth_unavailable", reason, network_accessed=False)
 
 
 def _catalog_auth_admission(
-    selected_model: str, auth_fact: dict[str, Any], env_file: Path, op_binary: str | None,
+    selected_model: str, auth_fact: dict[str, Any], env_file: Path, auth_wrapper: str | None,
 ) -> tuple[str | None, str | None]:
-    if auth_fact.get("status") != "pass" or op_binary is None:
-        return "cloud catalog probe requires the approved op-run auth boundary", None
+    if auth_fact.get("status") != "pass" or auth_wrapper is None:
+        return "cloud catalog probe requires the Configs auth-backed wrapper", None
     if not is_actual_opaque_env_reference(str(env_file)):
         return "cloud catalog probe requires the exact approved opaque auth stream", None
     expected_identity = auth_fact.get("auth_stream_identity_digest")
@@ -570,42 +528,59 @@ def _catalog_auth_admission(
         return "approved opaque auth stream changed or became unavailable before catalog execution", None
     return None, expected_identity if isinstance(expected_identity, str) else None
 
-def _cloud_catalog_fact(selected_model: str, profile_path: Path, auth_fact: dict[str, Any], runner: CloudCatalogRunner = _run_cloud_catalog) -> dict[str, Any]:
-    default_stream = actual_opaque_env_path()
-    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
-    op_binary = approved_op_binary()
-    evidence = {
-        "profile_path": str(profile_path), "selected_model_digest": _digest(selected_model),
-        "probe_url": DEFAULT_CATALOG_URL,
-        "safe_non_generation_catalog_probe": True, "auth_source": auth_fact.get("auth_source", "missing_or_invalid"),
-        "secret_value_observed": False, "generation_performed": False,
-        "provider_invoked": False, "codex_exec_invoked": False,
-    }
-    auth_error, expected_identity = _catalog_auth_admission(selected_model, auth_fact, env_file, op_binary)
+def _cloud_catalog_fact(
+    selected_model: str, profile_path: Path, auth_fact: dict[str, Any],
+    runner: CloudCatalogRunner = _run_cloud_catalog,
+    *,
+    smoke_runner: CloudSmokeRunner | None = None, profile_evidence_digest: str | None = None,
+    codex_executable_identity: str | None = None,
+) -> dict[str, Any]:
+    env_file, auth_wrapper, evidence = _cloud_catalog_inputs(selected_model, profile_path, auth_fact)
+    auth_error, expected_identity = _catalog_auth_admission(selected_model, auth_fact, env_file, auth_wrapper)
     if auth_error is not None:
         return _auth_blocked_catalog(selected_model, evidence, auth_error)
-    command = _cloud_catalog_command(op_binary, env_file, selected_model)
+    assert auth_wrapper is not None
+    command = _cloud_catalog_command(auth_wrapper, env_file, selected_model)
     evidence["probe_command_shape"] = _safe_command_shape(command)
-    try:
-        payload, failure, child_evidence = (
-            run_with_approved_op_env(
-                env_file, command[5:],
-                lambda argv, fds: _catalog_probe_result(argv, lambda command: _run_cloud_catalog(command, pass_fds=fds)),
-                expected_identity_digest=expected_identity,
-            ) if runner is _run_cloud_catalog else _catalog_probe_result(command, runner)
-        )
-    except (OSError, ValueError) as exc:
+    if opaque_env_identity_digest(env_file) != expected_identity:
         return _auth_blocked_catalog(
             selected_model, evidence,
-            f"approved opaque auth stream could not be descriptor-bound: {type(exc).__name__}",
+            "approved opaque auth stream identity changed before catalog execution",
         )
+    payload, failure, child_evidence = _catalog_probe_result(command, runner)
     evidence.update(child_evidence)
     if payload is None:
         return _blocked_catalog_probe(
             selected_model, evidence, "cloud_catalog_unavailable", f"cloud catalog probe failed: {failure}",
             network_accessed=failure != "network_or_runtime_failure",
         )
-    return _catalog_fact_from_payload(selected_model, evidence, payload)
+    return _catalog_fact_from_payload(
+        selected_model,
+        evidence,
+        payload,
+        profile_path=profile_path,
+        auth_fact=auth_fact,
+        env_file=env_file,
+        auth_wrapper=auth_wrapper,
+        smoke_runner=smoke_runner,
+        profile_evidence_digest=profile_evidence_digest,
+        codex_executable_identity=codex_executable_identity,
+    )
+
+
+def _cloud_catalog_inputs(
+    selected_model: str, profile_path: Path, auth_fact: dict[str, Any]
+) -> tuple[Path, str | None, dict[str, Any]]:
+    default_stream = actual_opaque_env_path()
+    env_file = Path(os.environ.get("SKILLS_SDK_OSS_CLOUD_ENV_FILE", str(default_stream) if default_stream else ""))
+    evidence = {
+        "profile_path": str(profile_path), "selected_model_digest": _digest(selected_model),
+        "probe_url": DEFAULT_CATALOG_URL, "safe_non_generation_catalog_probe": True,
+        "auth_source": auth_fact.get("auth_source", "missing_or_invalid"),
+        "secret_value_observed": False, "generation_performed": False,
+        "provider_invoked": False, "codex_exec_invoked": False,
+    }
+    return env_file, configs_auth_wrapper(), evidence
 
 
 def installed_profile_preflight(profile: dict[str, Any]) -> dict[str, Any]:
@@ -668,10 +643,18 @@ def _local_profile_facts(
 def _cloud_profile_facts(profile_fact: dict[str, Any], model: str) -> dict[str, Any]:
     path = _profile_path("oss-cloud")
     auth = _approved_cloud_auth_fact(model)
-    cloud_catalog = _cloud_catalog_fact(model, path, auth)
+    runtime = _cloud_runtime_fact(model, path)
+    cloud_catalog = _cloud_catalog_fact(
+        model,
+        path,
+        auth,
+        smoke_runner=_run_cloud_smoke,
+        profile_evidence_digest=profile_fact.get("evidence_digest"),
+        codex_executable_identity=runtime.get("codex_executable_identity"),
+    )
     return {
         "profile_config": profile_fact, "model_catalog": cloud_catalog,
-        "runtime": _cloud_runtime_fact(model, path), "auth": auth,
+        "runtime": runtime, "auth": auth,
         "catalog": _catalog_fact(cloud_catalog, str(cloud_catalog["catalog_identity"])),
     }
 

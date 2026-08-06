@@ -1,6 +1,54 @@
 ---
 schema_version: '2.0'
 skill_name: simplify
+scorer_quality:
+  schema_version: skills-sdk.scorer-quality.v1
+  scorer_id: simplify-release-scorer
+  scorer_type: hybrid
+  scope: suite
+  scorer_version_or_digest: simplify-evals-2026-08-06
+  pass_threshold: 0.85
+  deterministic_checks_first: true
+  parameters:
+    model: deterministic-local
+    temperature: 0
+    trial_count: 1
+  rationale_audit:
+    required: true
+    sampled_count: 6
+  bias_probes:
+  - short_correct_vs_verbose_wrong
+  - verbosity_bias
+  segmentation_fields:
+  - category
+  - claim_ids
+  - eval_modes
+  calibration_cases:
+  - id: obvious-correct-bounded-cleanup
+    probe_type: obvious_correct
+    expected_label: pass
+    expected_score: 0.95
+  - id: obvious-wrong-equivalence-overclaim
+    probe_type: obvious_wrong
+    expected_label: fail
+    expected_score: 0.05
+  - id: concise-correct-beats-verbose-overclaim
+    probe_type: short_correct_vs_verbose_wrong
+    expected_label: fail
+    expected_score: 0.2
+    expected_direction: short_correct_wins
+  - id: copied-rubric-without-validation-evidence
+    probe_type: rubric_copying_rejected
+    expected_label: fail
+    expected_score: 0.1
+  - id: skill-name-mentioned-without-diff-proof
+    probe_type: skill_name_mention_not_enough
+    expected_label: fail
+    expected_score: 0.2
+  - id: local-proof-overclaims-runtime-or-tessl
+    probe_type: evidence_lane_overclaim_rejected
+    expected_label: fail
+    expected_score: 0.05
 claims:
 - id: simplify.behavior-preservation
   statement: Simplify reviews existing changes without claiming behavioral equivalence beyond the validation evidence.

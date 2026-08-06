@@ -53,8 +53,7 @@
           "enum": [
             "not_applicable",
             "missing_or_invalid",
-            "op_fifo",
-            "op_opaque_env_file"
+            "1password_desktop_fifo"
           ],
           "title": "Auth Source",
           "type": "string"
@@ -151,7 +150,7 @@
           "then": {
             "properties": {
               "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"pattern": "^(?:op|/(?:[^/]+/)*op)$", "type": "string"}, {"const": "run"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--"}, {"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}
+              "execution_argv": {"prefixItems": [{"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--require-env"}, {"const": "OLLAMA_API_KEY"}, {"const": "--"}, {"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--model"}, {"const": "deepseek-v4-flash:cloud"}, {"const": "--strict-config"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}
             }
           }
         }
@@ -185,7 +184,6 @@
         "execution_argv": {
           "items": {"type": "string"},
           "minItems": 10,
-          "uniqueItems": true,
           "title": "Execution Argv",
           "type": "array"
         },
@@ -587,6 +585,170 @@
           "default": null,
           "title": "Matched Model"
         },
+        "catalog_match_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "exact_catalog",
+                "direct_provider_smoke"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catalog Match Source"
+        },
+        "catalog_probe_result_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catalog Probe Result Class"
+        },
+        "direct_smoke_receipt_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Receipt Digest"
+        },
+        "direct_smoke_binding_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Binding Digest"
+        },
+        "direct_smoke_observed_at": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Observed At"
+        },
+        "direct_smoke_provider_endpoint": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Provider Endpoint"
+        },
+        "direct_smoke_profile_evidence_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Profile Evidence Digest"
+        },
+        "direct_smoke_codex_executable_identity": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Codex Executable Identity"
+        },
+        "direct_smoke_auth_stream_identity_digest": {
+          "anyOf": [
+            {
+              "minLength": 71,
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Auth Stream Identity Digest"
+        },
+        "direct_smoke_provider_invoked": {
+          "anyOf": [
+            {
+              "const": true,
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Provider Invoked"
+        },
+        "direct_smoke_exit_code": {
+          "anyOf": [
+            {
+              "const": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Exit Code"
+        },
+        "direct_smoke_marker": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direct Smoke Marker"
+        },
         "network_accessed": {
           "default": false,
           "title": "Network Accessed",
@@ -674,6 +836,7 @@
             "local_model_unavailable",
             "cloud_auth_unavailable",
             "cloud_catalog_unavailable",
+            "catalog_alias_unlisted",
             "selected_model_unavailable",
             "preflight_evidence_missing"
           ],

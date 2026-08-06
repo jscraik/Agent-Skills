@@ -94,7 +94,7 @@ def _judge_profiles() -> list[dict[str, Any]]:
             "provider": "codex",
             "mode": "cloud",
             "host": "codex-cli-profile",
-            "model": "minimax-m2.7:cloud",
+            "model": "deepseek-v4-flash:cloud",
             "model_role": "cloud_confirmation",
             "model_settings": None,
             "runtime_metadata": None,

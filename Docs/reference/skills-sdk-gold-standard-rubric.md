@@ -13,6 +13,11 @@ validation docs. The rubric prevents a false positive where high scores or
 structural checks hide that the skill lacks an observable contract for the work
 it is supposed to perform.
 
+Gold-standard packages also declare the deterministic
+[Skills SDK Authoring Contract](/Docs/reference/skills-sdk-authoring-contract.md).
+That contract checks authoring structure and scenario bindings at package
+admission; it does not replace behavioral, runtime, or external evidence.
+
 ## Domain Analysis
 
 - Domain: AI skill package design, technical documentation, eval design,
@@ -499,7 +504,8 @@ commands:
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 - ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot
 
-OSS profile proof must use codex exec --profile oss-local and codex exec
---profile oss-cloud, or SDK receipts that prove those profiles were invoked.
+OSS profile proof must use `codex exec --profile oss-local` and the Configs-backed
+strict `oss-cloud` executor chain, or SDK receipts that prove those exact profile
+boundaries were invoked.
 Plugin Eval and Tessl review evidence must remain separate from live Tessl
 scoring and registry publication evidence.

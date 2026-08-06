@@ -37,7 +37,7 @@ def _assert_qwen_local_profile(test: unittest.TestCase, profile: dict[str, objec
 
 def _assert_cloud_profile(test: unittest.TestCase, profile: dict[str, object]) -> None:
     test.assertEqual(profile["provider"], "codex")
-    test.assertEqual(profile["model"], "minimax-m2.7:cloud")
+    test.assertEqual(profile["model"], "deepseek-v4-flash:cloud")
     test.assertEqual(profile["host"], "codex-cli-profile")
     test.assertTrue(profile["network_required"])
     test.assertEqual(profile["secret_env_names"], ["OLLAMA_API_KEY"])

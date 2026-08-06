@@ -23,6 +23,7 @@ PREFLIGHT_BLOCKER_CLASSES = frozenset(
         "local_model_unavailable",
         "cloud_auth_unavailable",
         "cloud_catalog_unavailable",
+        "catalog_alias_unlisted",
         "selected_model_unavailable",
         "preflight_evidence_missing",
     }
@@ -111,6 +112,7 @@ class AbPreflightBlocker(_SdkContractModel):
         "local_model_unavailable",
         "cloud_auth_unavailable",
         "cloud_catalog_unavailable",
+        "catalog_alias_unlisted",
         "selected_model_unavailable",
         "preflight_evidence_missing",
     ]
@@ -137,6 +139,28 @@ class AbModelCatalogPreflightFact(AbPreflightFact):
     http_status: int | None = Field(default=None, ge=100, le=599)
     catalog_digest: str | None = Field(default=None, pattern=r"^sha256:[0-9a-f]{64}$")
     matched_model: str | None = Field(default=None, min_length=1)
+    catalog_match_source: Literal["exact_catalog", "direct_provider_smoke"] | None = None
+    catalog_probe_result_class: str | None = Field(default=None, min_length=1)
+    direct_smoke_receipt_digest: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
+    direct_smoke_binding_digest: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
+    direct_smoke_observed_at: str | None = Field(default=None, min_length=1)
+    direct_smoke_provider_endpoint: str | None = Field(default=None, min_length=1)
+    direct_smoke_profile_evidence_digest: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
+    direct_smoke_codex_executable_identity: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
+    direct_smoke_auth_stream_identity_digest: str | None = Field(
+        default=None, pattern=r"^sha256:[0-9a-f]{64}$",
+    )
+    direct_smoke_provider_invoked: Literal[True] | None = None
+    direct_smoke_exit_code: Literal[0] | None = None
+    direct_smoke_marker: str | None = Field(default=None, min_length=1)
     network_accessed: bool = False
     secret_value_observed: Literal[False] = False
     generation_performed: Literal[False] = False
@@ -155,7 +179,7 @@ class AbRuntimePreflightFact(AbPreflightFact):
 class AbAuthPreflightFact(AbPreflightFact):
     auth_reference: Literal["none", "codex_cli_auth"]
     secret_value_observed: Literal[False]
-    auth_source: Literal["not_applicable", "missing_or_invalid", "op_fifo", "op_opaque_env_file"] = (
+    auth_source: Literal["not_applicable", "missing_or_invalid", "1password_desktop_fifo"] = (
         "not_applicable"
     )
     auth_stream_identity_digest: str | None = Field(
@@ -288,10 +312,17 @@ def codex_identity_evidence_digest(path: str, identity: str) -> str:
 
 
 def resolve_installed_codex_identity() -> tuple[str, str] | None:
-    discovered = shutil.which("codex")
-    if not discovered:
-        return None
-    discovered_path = Path(discovered).absolute()
+    configured = os.environ.get("CODEX_CLI_PATH")
+    if configured:
+        configured_path = Path(configured)
+        if not configured_path.is_absolute():
+            return None
+        discovered_path = configured_path
+    else:
+        discovered = shutil.which("codex")
+        if not discovered:
+            return None
+        discovered_path = Path(discovered).absolute()
     try:
         resolved = discovered_path.resolve(strict=True)
         if not resolved.is_file() or not os.access(resolved, os.X_OK):
@@ -406,21 +437,37 @@ def _cloud_preflight_identity_matches(preflight: AbLanePreflight) -> bool:
     profile = preflight.profile_config
     model_catalog = preflight.model_catalog
     auth = preflight.auth
-    return all(
-        (
-            preflight.runtime.availability_kind == "cloud_endpoint",
-            auth.status == "pass",
-            auth.auth_reference == "codex_cli_auth",
-            auth.auth_source in {"op_fifo", "op_opaque_env_file"},
-            model_catalog.catalog_identity == _OLLAMA_CLOUD_CATALOG_URL,
-            model_catalog.probe_url == _OLLAMA_CLOUD_CATALOG_URL,
-            model_catalog.http_status == 200,
-            model_catalog.catalog_digest is not None,
-            model_catalog.matched_model == profile.configured_model_id,
-            model_catalog.network_accessed,
-            not model_catalog.secret_value_observed,
-            not model_catalog.generation_performed,
-            not model_catalog.provider_invoked,
-            not model_catalog.codex_exec_invoked,
-        )
+    common = (
+        preflight.runtime.availability_kind == "cloud_endpoint",
+        auth.status == "pass",
+        auth.auth_reference == "codex_cli_auth",
+        auth.auth_source == "1password_desktop_fifo",
+        model_catalog.catalog_identity == _OLLAMA_CLOUD_CATALOG_URL,
+        model_catalog.probe_url == _OLLAMA_CLOUD_CATALOG_URL,
+        model_catalog.http_status == 200,
+        model_catalog.catalog_digest is not None,
+        model_catalog.network_accessed,
+        not model_catalog.secret_value_observed,
+        not model_catalog.generation_performed,
+        not model_catalog.provider_invoked,
+        not model_catalog.codex_exec_invoked,
     )
+    exact_catalog = (
+        model_catalog.catalog_match_source in (None, "exact_catalog"),
+        model_catalog.matched_model == profile.configured_model_id,
+    )
+    direct_smoke = (
+        model_catalog.catalog_match_source == "direct_provider_smoke",
+        model_catalog.matched_model == profile.configured_model_id,
+        model_catalog.direct_smoke_receipt_digest is not None,
+        model_catalog.direct_smoke_binding_digest is not None,
+        model_catalog.direct_smoke_observed_at is not None,
+        model_catalog.direct_smoke_provider_endpoint == "https://ollama.com/v1",
+        model_catalog.direct_smoke_profile_evidence_digest == profile.evidence_digest,
+        model_catalog.direct_smoke_codex_executable_identity == preflight.runtime.codex_executable_identity,
+        model_catalog.direct_smoke_auth_stream_identity_digest == auth.auth_stream_identity_digest,
+        model_catalog.direct_smoke_provider_invoked is True,
+        model_catalog.direct_smoke_exit_code == 0,
+        model_catalog.direct_smoke_marker == "CODEX_OSS_CLOUD_OK",
+    )
+    return all(common) and (all(exact_catalog) or all(direct_smoke))
