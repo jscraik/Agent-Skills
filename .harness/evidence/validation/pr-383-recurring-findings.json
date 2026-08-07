@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "classes": [
+    {
+      "finding_class_id": "finding_candidate_bound_docs_claim",
+      "fingerprint_sha256": "9cdf058419e8bd3535607549126b8bbfd8b0adcc121e4418f83beed11f7afea6",
+      "normalized_invariant": "status documentation must bind cloud evidence to the immutable candidate receipt",
+      "root_cause": "The atlas described historical cloud evidence as current candidate proof.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600596"}],
+      "guardrail": {"status":"validated","artifact_ref":"Docs/reference/skills-sdk-platform-atlas.html:331","validation_commands":[{"command":"git diff --check -- Docs/reference/skills-sdk-platform-atlas.html","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_judge_shape_runtime_binding",
+      "fingerprint_sha256": "1a46460cd8eacd6301ad05a4869de8f83117020c6f52b3733cf28588f69cce73",
+      "normalized_invariant": "judge command shape must match the executed runtime argv profile",
+      "root_cause": "The receipt contract consumed a logical shape without binding it to runtime argv.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600600"}],
+      "guardrail": {"status":"validated","artifact_ref":"Infrastructure/scripts/lib/ask/skills_sdk/ab_judge_contracts.py:237","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_schema_spine tests.test_skills_sdk_ab_judge tests.test_skills_sdk_ab_judge_score tests.test_skills_sdk_phoenix_observability","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_modularity_repo_wrapper",
+      "fingerprint_sha256": "15c3c6384f6bb1ec657f6811332d3c295f26b2afb401d7f5a42a9abe7f3a1233",
+      "normalized_invariant": "modularity baseline discovery must use the repository ask wrapper",
+      "root_cause": "Candidate discovery launched direct git subprocesses despite the repository command contract.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600605"}],
+      "guardrail": {"status":"validated","artifact_ref":"Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py:312","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh scripts/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_modularity_git_error_propagation",
+      "fingerprint_sha256": "76619b77cdfb0c810128493cd93e73112995ab9b661f468cb0e2d3ce2790e366",
+      "normalized_invariant": "modularity baseline discovery must stop on git query failure",
+      "root_cause": "Nonzero subprocess results were treated as empty baseline data.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600611"}],
+      "guardrail": {"status":"validated","artifact_ref":"Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py:478","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_ask_cli_shape","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_modularity_qualified_move_identity",
+      "fingerprint_sha256": "75be1f98856f5ce3029ba94c507ac792be35b2e62ee1ec00aaf375518f380e8a",
+      "normalized_invariant": "moved function baselines must use qualified identity and prove a real move",
+      "root_cause": "Historical metrics were matched by function name alone.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600616"}],
+      "guardrail": {"status":"validated","artifact_ref":"Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py:409","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_ask_cli_shape","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_cloud_shape_fifo_test_context",
+      "fingerprint_sha256": "908cee4c1cddec8a554bbe2e01a90b2e157fc26f8a79f06a8478e628dd093665",
+      "normalized_invariant": "cloud command-shape tests must construct the shape while the FIFO boundary is patched",
+      "root_cause": "The test rebuilt the cloud command after its temporary auth boundary had exited.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600621"}],
+      "guardrail": {"status":"validated","artifact_ref":"Infrastructure/tests/test_skills_sdk_ab_judge_score.py:1214","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.test_skills_sdk_ab_judge_score","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_acceptance_lookup_by_type",
+      "fingerprint_sha256": "611e1cc0d59c08e42156a3e05728638292c38f75c7e23b2289eedcffc7da29b7",
+      "normalized_invariant": "evaluation tests must select acceptance entries by type rather than list position",
+      "root_cause": "The regression test was coupled to YAML acceptance ordering.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600628"}],
+      "guardrail": {"status":"validated","artifact_ref":"Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_blockers.py:121","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q ../Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_blockers.py","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_runner_metric_isolation",
+      "fingerprint_sha256": "a4d0894f164dc6e7c881090e72c98b2fb7f215e62a27b197868e9fa99b3ff183",
+      "normalized_invariant": "evaluation assertions must hold the runner key constant while varying one metric",
+      "root_cause": "The negative and positive cases changed runner identity and metric payload together.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600633"}],
+      "guardrail": {"status":"validated","artifact_ref":"Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_claims.py:1","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q ../Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_claims.py","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_post_refusal_guard_test",
+      "fingerprint_sha256": "f8638a36d340c4f82e8d390b4aad4ca0c31dd55fe592c2d08b273add71b7e4ed",
+      "normalized_invariant": "post-refusal execution fixtures must isolate the refusal guard as the sole failure",
+      "root_cause": "The fixture failed a missing rejection requirement before exercising the not-regex guard.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600645"}],
+      "guardrail": {"status":"validated","artifact_ref":"Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_pressure_boundaries.py:59","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q ../Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_pressure_boundaries.py","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_stale_module_import_order",
+      "fingerprint_sha256": "69847700f70d71debd16488d98d83f66c43a791e251f9177ad622080bbde279e",
+      "normalized_invariant": "skill evaluation tests must purge stale modules before importing the test target",
+      "root_cause": "The module-level import preceded the stale-module purge.",
+      "occurrences": [{"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600652"}],
+      "guardrail": {"status":"validated","artifact_ref":"Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_runtime.py:25","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q ../Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_runtime.py","status":"pass"}]},
+      "merge_eligible": true
+    },
+    {
+      "finding_class_id": "finding_semantic_token_discrimination",
+      "fingerprint_sha256": "972f1e0fba336cb937b1bb7cc4605222d38f425096b6979f9bc4c7efc09bc4da",
+      "normalized_invariant": "semantic any_of tokens must remain discriminating after all_of requirements pass",
+      "root_cause": "Duplicate or bare substring tokens made acceptance clauses pass without the intended evidence.",
+      "occurrences": [
+        {"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600663"},
+        {"repository":"jscraik/Agent-Skills","pull_request":383,"evidence_ref":"pr383:comment-3738600666"}
+      ],
+      "guardrail": {"status":"validated","artifact_ref":"Skills/agent-ops/simplify/references/evals.yaml:222","validation_commands":[{"command":"bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q ../Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals_pressure_boundaries.py","status":"pass"}]},
+      "merge_eligible": true
+    }
+  ]
+}

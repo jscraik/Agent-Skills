@@ -1211,8 +1211,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
+                shape = _codex_judge_command_shape(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[2:7], ["--env-file", str(auth_env_file), "--require-env", "OLLAMA_API_KEY", "--"])
         self.assertEqual(command[7:11], ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud"])
+        self.assertEqual(shape[:4], ["codex", "exec", "--profile", "oss-cloud"])
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_judge_contains_runtime_output_and_copies_receipt(self) -> None:

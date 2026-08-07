@@ -225,8 +225,6 @@ cases:
       any_of:
       - focused
       - retry_delay
-      - tests
-      - test
       - validation
       - enabled
       - order

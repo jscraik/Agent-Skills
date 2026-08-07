@@ -85,6 +85,21 @@ def sample(value):
 
         self.assertEqual(metrics["sample"], (4, 2))
 
+    def test_function_metrics_preserve_qualified_identity_for_moved_methods(self) -> None:
+        validator = _load_validator()
+        metrics = validator._function_metrics(
+            """
+class Runner:
+    def execute(self, value):
+        if value:
+            return 1
+        return 0
+"""
+        )
+
+        self.assertIn("Runner.execute", metrics)
+        self.assertNotIn("execute", metrics)
+
     def test_skills_sdk_evidence_status_and_hook_fixture_fit_shape_budget(self) -> None:
         validator = _load_validator()
         targets = {
@@ -185,6 +200,19 @@ def sample(value):
         self.assertEqual(len(issues), 2)
         self.assertIn("function line budget", issues[0])
         self.assertIn("complexity budget", issues[1])
+
+    def test_shape_baseline_failure_is_reported_and_stops_changed_file_scan(self) -> None:
+        validator = _load_validator()
+        args = SimpleNamespace(changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",))
+        with unittest.mock.patch.object(
+            validator,
+            "_shape_baseline",
+            side_effect=RuntimeError("wrapper unavailable"),
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(len(issues), 1)
+        self.assertIn("shape baseline unavailable", issues[0])
 
 
 if __name__ == "__main__":

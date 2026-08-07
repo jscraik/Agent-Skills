@@ -94,7 +94,8 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
             self.assertEqual(failure[0], f"semantic_requirements {message}")
         self.assertEqual(evaluate_assertions_text("**Outcome:** `no_justified_edit`", [{"type": "text_field_equals", "field": "Outcome", "value": "no_justified_edit"}], skill_name="simplify", selected_skill=True), [])
         case = next(item for item in _load_evals_document(REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml")["cases"] if item["id"] == "edge-efficiency-rubric")
-        self.assertEqual(case["acceptance"][1]["type"], "semantic_requirements")
+        semantic_acceptance = next(item for item in case["acceptance"] if item["type"] == "semantic_requirements")
+        self.assertEqual(semantic_acceptance["type"], "semantic_requirements")
 
 
     def test_expected_signal_acceptance_fails_vague_regex_only_response(self) -> None:
