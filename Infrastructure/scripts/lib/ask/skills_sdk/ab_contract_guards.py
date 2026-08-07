@@ -34,7 +34,7 @@ def validate_argv_output_last_message_path(argv: list[str], path: str, *, messag
 
 def validate_plan_gate_identity(gate: Any) -> None:
     if gate.lane != gate.codex_profile or gate.order not in {1, 2}:
-        raise ValueError("runtime profile gate identity or order is invalid")
+        raise ValueError("runtime profile gate identity or order is invalid; valid-prefix gate identity sequence is required")
     if gate.judge_profile.codex_profile != gate.codex_profile:
         raise ValueError("judge metadata cannot substitute for the runtime Codex profile")
     if gate.status == "planned" and not runtime_preflight_identity_matches_lane(gate.lane, gate.preflight):
@@ -43,7 +43,7 @@ def validate_plan_gate_identity(gate: Any) -> None:
 
 def validate_receipt_profile_binding(receipt: Any) -> None:
     if receipt.runtime_profile_gates and receipt.codex_profile != receipt.runtime_profile_gates[0].codex_profile:
-        raise ValueError("top-level Codex profile must match the first runtime profile gate")
+        raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
 
 def validate_runtime_gate_prefix(execution_lane: str, gates: list[Any], *, message: str) -> None:
@@ -106,10 +106,10 @@ def _fact_status_admitted(gate: Any, key: str, status: str) -> bool:
 
 
 def validate_run_receipt_status(receipt: Any) -> None:
-    validate_receipt_profile_binding(receipt)
     if receipt.command_variant_labels and receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("A/B run receipts must preserve ordered command variant labels")
     if receipt.status == "completed":
+        validate_receipt_profile_binding(receipt)
         _validate_completed_run_receipt(receipt)
         return
     if not receipt.blockers:
@@ -119,7 +119,7 @@ def validate_run_receipt_status(receipt: Any) -> None:
     validate_runtime_gate_prefix(
         receipt.execution_lane,
         receipt.runtime_profile_gates,
-        message="blocked A/B run receipts must preserve a valid runtime gate prefix",
+        message="blocked A/B run receipts must preserve a valid-prefix gate identity sequence",
     )
     blocked_seen = False
     for gate in receipt.runtime_profile_gates:
@@ -129,6 +129,7 @@ def validate_run_receipt_status(receipt: Any) -> None:
             blocked_seen = True
     if not blocked_seen:
         raise ValueError("blocked A/B run receipts require a non-completed runtime gate")
+    validate_receipt_profile_binding(receipt)
 
 
 def _validate_gate_packet_shape(gate: Any) -> None:

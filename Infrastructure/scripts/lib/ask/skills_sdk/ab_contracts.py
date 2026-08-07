@@ -478,11 +478,12 @@ class AbPlanReceipt(_SdkContractModel):
 
     @model_validator(mode="after")
     def _status_matches_plan(self) -> AbPlanReceipt:
-        validate_receipt_profile_binding(self)
         if self.status == "planned":
+            validate_receipt_profile_binding(self)
             self._validate_planned_packet()
         else:
             self._validate_blocked_packet()
+            validate_receipt_profile_binding(self)
         return self
 
     def _validate_blocked_packet(self) -> None:
@@ -499,7 +500,7 @@ class AbPlanReceipt(_SdkContractModel):
         validate_runtime_gate_prefix(
             self.execution_lane,
             self.runtime_profile_gates,
-            message="blocked A/B plan receipts must preserve a valid runtime gate prefix",
+            message="blocked A/B plan receipts must preserve a valid-prefix gate identity sequence",
         )
 
     def _validate_planned_packet(self) -> None:
