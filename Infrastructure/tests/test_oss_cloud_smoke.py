@@ -197,13 +197,11 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertNotIn("mcp_servers", (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"))
             self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
-    def test_command_resolves_relative_profile_before_work_dir_changes(self) -> None:
+    def test_command_resolves_relative_profile_from_caller_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "profiles" / "oss-cloud.config.toml"
-            work_dir = root / "different-work-dir"
             profile.parent.mkdir()
-            work_dir.mkdir()
             _write_profile(profile)
             previous_cwd = Path.cwd()
             try:
@@ -212,14 +210,11 @@ class TestOssCloudSmoke(unittest.TestCase):
                     [
                         "--profile-source",
                         "profiles/oss-cloud.config.toml",
-                        "--work-dir",
-                        str(work_dir),
                     ]
                 )
                 paths = self.runner._paths(str(root / "out"))
                 command = self.runner._command(args, paths, root / "env")
                 self.assertIn(f"CODEX_HOME={paths['codex_home']}", command)
-                self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
             finally:
                 os.chdir(previous_cwd)
 
@@ -258,7 +253,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             auth_wrapper = _write_auth_wrapper(bin_dir)
             codex_exec_wrapper, state_path = _write_env_probe_wrapper(bin_dir)
             args = self.runner._parser().parse_args([
-                "--profile-source", str(profile), "--work-dir", str(root),
+                "--profile-source", str(profile),
                 "--auth-wrapper", str(auth_wrapper),
                 "--codex-exec-wrapper", str(codex_exec_wrapper),
             ])
@@ -395,7 +390,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             paths = self.runner._paths(str(root / "out"))
-            args = self.runner._parser().parse_args(["--work-dir", str(REPO_ROOT)])
+            args = self.runner._parser().parse_args([])
             observed_cwd: list[str] = []
 
             def fake_run(*_command: object, **kwargs: object) -> object:

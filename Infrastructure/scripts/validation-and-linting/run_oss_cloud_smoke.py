@@ -72,7 +72,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--codex-exec-wrapper", default=str(DEFAULT_CODEX_EXEC_WRAPPER))
     parser.add_argument("--timeout-seconds", type=int, default=120)
     parser.add_argument("--marker", default=DEFAULT_MARKER)
-    parser.add_argument("--work-dir", default=str(Path.cwd()))
     parser.add_argument("--output-dir", default=None)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -175,26 +174,29 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
 
 def _run(command: list[str], paths: dict[str, Path], args: argparse.Namespace) -> tuple[int, float]:
     started = time.monotonic()
-    with paths["stdout"].open("w", encoding="utf-8") as stdout, paths["stderr"].open("w", encoding="utf-8") as stderr:
+    with (
+        paths["stdout"].open("w", encoding="utf-8") as stdout,
+        paths["stderr"].open("w", encoding="utf-8") as stderr,
+        tempfile.TemporaryDirectory(prefix="ask-oss-cloud-smoke-work.") as work_dir,
+    ):
         # Run from an empty temporary directory rather than the consuming
         # repository. Codex discovers AGENTS.md and project context from cwd
         # parents, so honoring the caller's work directory would invalidate
         # the context-minimal smoke claim.
-        with tempfile.TemporaryDirectory(prefix="ask-oss-cloud-smoke-work.") as work_dir:
-            try:
-                completed = subprocess.run(
-                    command,
-                    cwd=work_dir,
-                    stdin=subprocess.DEVNULL,
-                    stdout=stdout,
-                    stderr=stderr,
-                    check=False,
-                    text=True,
-                    timeout=args.timeout_seconds,
-                )
-                return completed.returncode, round(time.monotonic() - started, 3)
-            except subprocess.TimeoutExpired:
-                return 124, round(time.monotonic() - started, 3)
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=work_dir,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout,
+                stderr=stderr,
+                check=False,
+                text=True,
+                timeout=args.timeout_seconds,
+            )
+            return completed.returncode, round(time.monotonic() - started, 3)
+        except subprocess.TimeoutExpired:
+            return 124, round(time.monotonic() - started, 3)
 
 
 def _read(path: Path) -> str:
