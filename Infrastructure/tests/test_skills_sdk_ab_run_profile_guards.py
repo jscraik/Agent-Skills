@@ -127,6 +127,30 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         validate_ab_run_receipt(receipt)
         self.assertEqual(self._schema_result(receipt).status, "pass")
 
+    def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        candidate["codex_profile"] = "oss-cloud"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+    def test_blocked_cloud_receipt_requires_a_cloud_runtime_gate_prefix(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        local_gate = candidate["runtime_profile_gates"][0]
+        local_gate.update({"status": "blocked", "blockers": ["oss-cloud:typed_blocker"]})
+        candidate.update({
+            "status": "blocked",
+            "blockers": ["oss-cloud:typed_blocker"],
+            "execution_lane": "oss-cloud",
+            "codex_profile": "oss-cloud",
+            "runtime_profile_gates": [local_gate],
+        })
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
     def test_default_codex_runner_uses_ephemeral_profile_home(self) -> None:
         command = ["codex", "exec", "--profile", "oss-local", "--sandbox", "read-only", "-"]
         with tempfile.TemporaryDirectory() as source_dir:

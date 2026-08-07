@@ -4,10 +4,12 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +57,20 @@ def _write_codex_exec_wrapper(bin_dir: Path) -> Path:
         "exit 0\n",
     )
     return path
+
+
+def _write_env_probe_wrapper(bin_dir: Path) -> tuple[Path, Path]:
+    state_path = bin_dir / "codex-config-home-state.txt"
+    path = bin_dir / "run-codex-exec-probe.sh"
+    _write_executable(
+        path,
+        "#!/bin/sh\n"
+        f"if [ \"${{CODEX_CONFIG_HOME+x}}\" = x ]; then printf 'present' > {shlex.quote(str(state_path))}; "
+        f"else printf 'unset' > {shlex.quote(str(state_path))}; fi\n"
+        "printf 'CODEX_OSS_CLOUD_OK\\n'\n"
+        "exit 0\n",
+    )
+    return path, state_path
 
 
 def _run_cloud_smoke(
@@ -211,6 +227,40 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertIn("plugins = false", config)
         self.assertIn("apps = false", config)
         self.assertNotIn("developer_instructions", config)
+
+    def test_isolated_config_disables_loopback_network_access(self) -> None:
+        config = self.runner.ISOLATED_CODEX_CONFIG
+
+        self.assertIn("allow_local_binding = false", config)
+        self.assertIn('"ollama.com" = "allow"', config)
+        self.assertNotIn('"localhost" = "allow"', config)
+        self.assertNotIn('"127.0.0.1" = "allow"', config)
+
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
+    def test_marker_child_cannot_inherit_codex_config_home(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            env_file = root / "oss-cloud.env"
+            bin_dir = root / "bin"
+            bin_dir.mkdir()
+            _write_profile(profile)
+            os.mkfifo(env_file)
+            auth_wrapper = _write_auth_wrapper(bin_dir)
+            codex_exec_wrapper, state_path = _write_env_probe_wrapper(bin_dir)
+            args = self.runner._parser().parse_args([
+                "--profile-source", str(profile), "--work-dir", str(root),
+                "--auth-wrapper", str(auth_wrapper),
+                "--codex-exec-wrapper", str(codex_exec_wrapper),
+            ])
+            paths = self.runner._paths(str(root / "out"))
+            command = self.runner._command(args, paths, env_file)
+
+            with patch.dict(os.environ, {"CODEX_CONFIG_HOME": str(root / "inherited")}):
+                exit_code, _ = self.runner._run(command, paths, args)
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(state_path.read_text(encoding="utf-8"), "unset")
 
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

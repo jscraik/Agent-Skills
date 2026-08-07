@@ -373,6 +373,43 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         validate_ab_plan_receipt(receipt)
         self.assertEqual(self._managed_v1_result(receipt).status, "pass")
 
+    def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
+        for execution_lane in ("all", "oss-cloud"):
+            with self.subTest(execution_lane=execution_lane):
+                receipt = build_ab_plan_receipt(
+                    REPO_ROOT,
+                    skill_a=SKILL_A,
+                    skill_b=SKILL_B,
+                    fixture=FIXTURE,
+                    skill_a_identity=IDENTITY_A,
+                    skill_b_identity=IDENTITY_B,
+                    execution_lane=execution_lane,
+                    judge_profile_id="oss-cloud" if execution_lane == "oss-cloud" else "oss-local",
+                    preflight_probe=declared_profile_preflight,
+                )
+                receipt["codex_profile"] = "oss-local" if execution_lane == "oss-cloud" else "oss-cloud"
+                with self.assertRaises(ValueError):
+                    validate_ab_plan_receipt(receipt)
+                self.assertEqual(self._managed_v1_result(receipt).status, "fail")
+
+    def test_blocked_receipt_requires_a_valid_runtime_gate_prefix(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            execution_lane="oss-cloud",
+            judge_profile_id="oss-cloud",
+            preflight_probe=declared_profile_preflight,
+        )
+        blocked = self._blocked_plan(receipt)
+        blocked["runtime_profile_gates"][0].update({"lane": "oss-local", "codex_profile": "oss-local"})
+        with self.assertRaises(ValueError):
+            validate_ab_plan_receipt(blocked)
+        self.assertEqual(self._managed_v1_result(blocked).status, "fail")
+
     def _assert_gate_identities(self, receipt: dict[str, object]) -> None:
         identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]
         self.assertEqual(identities, [(1, "oss-local", "oss-local"), (2, "oss-cloud", "oss-cloud")])

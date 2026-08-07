@@ -10,6 +10,8 @@ from ask.skills_sdk.ab_contract_guards import (
     run_gate_is_completed,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
+    validate_receipt_profile_binding,
+    validate_runtime_gate_prefix,
     validate_argv_output_last_message_path,
     validate_run_receipt_status,
 )
@@ -476,6 +478,7 @@ class AbPlanReceipt(_SdkContractModel):
 
     @model_validator(mode="after")
     def _status_matches_plan(self) -> AbPlanReceipt:
+        validate_receipt_profile_binding(self)
         if self.status == "planned":
             self._validate_planned_packet()
         else:
@@ -493,17 +496,11 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("blocked A/B runtime gates must carry typed blockers")
         if any(gate.status == "planned" and gate.blockers for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B runtime gates must not carry blockers")
-        if self.runtime_profile_gates:
-            expected_lanes = ["oss-local", "oss-cloud"] if self.execution_lane == "all" else [self.execution_lane]
-            if len(self.runtime_profile_gates) > len(expected_lanes):
-                raise ValueError("blocked A/B plan receipts cannot have excess runtime gates")
-            for index, gate in enumerate(self.runtime_profile_gates):
-                if gate.lane != expected_lanes[index] or gate.order != index + 1 or gate.codex_profile != gate.lane:
-                    raise ValueError("blocked A/B plan receipts require valid-prefix gate identity sequence")
-            if self.execution_lane != "all" and len(self.runtime_profile_gates) == 1:
-                gate = self.runtime_profile_gates[0]
-                if gate.lane != self.execution_lane or gate.codex_profile != self.execution_lane or gate.order != 1:
-                    raise ValueError("blocked single-lane plan receipts require matching gate identity")
+        validate_runtime_gate_prefix(
+            self.execution_lane,
+            self.runtime_profile_gates,
+            message="blocked A/B plan receipts must preserve a valid runtime gate prefix",
+        )
 
     def _validate_planned_packet(self) -> None:
         if self.blockers or not self._has_plan_evidence():
