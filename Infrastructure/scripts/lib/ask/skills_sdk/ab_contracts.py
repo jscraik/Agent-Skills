@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from ask.skills_sdk.ab_contract_guards import (
     exact_variant_labels as _exact_variant_labels,
-    approval_policy_from_argv as _approval_policy_from_argv,
     run_gate_is_completed,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
@@ -22,7 +21,11 @@ from ask.skills_sdk.ab_profile_contracts import (
     EvalSecretBoundary,
 )
 from ask.skills_sdk.ab_transport_contracts import (
-    is_approved_op_binary as _is_approved_op_binary,
+    OSS_CLOUD_REQUIRED_ENV,
+    configs_oss_cloud_exec_command as _configs_oss_cloud_exec_command,
+    configs_oss_local_exec_command as _configs_oss_local_exec_command,
+    is_configs_auth_wrapper as _is_configs_auth_wrapper,
+    is_configs_codex_exec_wrapper as _is_configs_codex_exec_wrapper,
     is_opaque_env_reference as _is_opaque_env_reference,
 )
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
@@ -58,7 +61,29 @@ def _codex_profile_from_argv(argv: list[str]) -> str:
     return profile
 
 
+def _argv_proves_approval(argv: list[str], expected: str = "on-request") -> bool:
+    legacy = [
+        argv[index + 1]
+        for index, value in enumerate(argv[:-1])
+        if value == "--ask-for-approval"
+    ]
+    config = [
+        argv[index + 1]
+        for index, value in enumerate(argv[:-1])
+        if value == "-c" and argv[index + 1].startswith("approval_policy=")
+    ]
+    return (legacy == [expected] and not config) or (
+        not legacy and config == [f'approval_policy="{expected}"']
+    )
+
+
 def _codex_profile_from_judge_argv(argv: list[str], *, require_approval: bool = True) -> str:
+    if _is_configs_judge_argv(argv):
+        profile = argv[10]
+        if profile not in _JUDGE_PROFILES:
+            raise ValueError("judge Codex argv profile must be an admitted runtime profile")
+        _validate_configs_judge_argv(argv, require_approval)
+        return profile
     try:
         codex_index = _judge_codex_index(argv)
         profile = _judge_profile_token(argv, codex_index)
@@ -70,6 +95,42 @@ def _codex_profile_from_judge_argv(argv: list[str], *, require_approval: bool = 
     return profile
 
 
+def _is_configs_judge_argv(argv: list[str]) -> bool:
+    return (
+        len(argv) >= 12
+        and argv[0] == "bash"
+        and _is_configs_auth_wrapper(argv[1])
+        and argv[2] == "--env-file"
+        and _is_opaque_env_reference(argv[3])
+        and argv[4:7] == ["--require-env", OSS_CLOUD_REQUIRED_ENV, "--"]
+        and argv[7] == "bash"
+        and _is_configs_codex_exec_wrapper(argv[8])
+        and argv[9] == "--profile"
+    )
+
+
+def _validate_configs_judge_argv(argv: list[str], require_approval: bool) -> None:
+    if argv.count("--profile") != 1 or argv[10] != "oss-cloud":
+        raise ValueError("Configs judge argv must use exactly the oss-cloud profile")
+    if argv.count("--strict-config") != 1 or argv.count("--ephemeral") != 1:
+        raise ValueError("Configs judge argv must use strict disposable cloud execution")
+    sandbox_values = [
+        argv[index + 1]
+        for index, value in enumerate(argv[:-1])
+        if value == "--sandbox"
+    ]
+    if sandbox_values != ["read-only"]:
+        raise ValueError("Configs judge argv must use read-only sandboxing")
+    if require_approval:
+        approval_values = [
+            argv[index + 1]
+            for index, value in enumerate(argv[:-1])
+            if value == "-c"
+        ]
+        if approval_values.count('approval_policy="on-request"') != 1:
+            raise ValueError("Configs judge argv must prove the on-request approval policy")
+
+
 _JUDGE_PROFILES = ("oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud")
 
 
@@ -79,14 +140,15 @@ def _judge_codex_index(argv: list[str]) -> int:
     if argv[0] == "codex":
         return 0
     if (
-        len(argv) >= 6
-        and _is_approved_op_binary(argv[0])
-        and argv[1:3] == ["run", "--env-file"]
+        len(argv) >= 9
+        and argv[0] == "bash"
+        and _is_configs_auth_wrapper(argv[1])
+        and argv[2] == "--env-file"
         and _is_opaque_env_reference(argv[3])
-        and argv[4] == "--"
+        and argv[4:7] == ["--require-env", OSS_CLOUD_REQUIRED_ENV, "--"]
     ):
-        return 5
-    raise ValueError("judge argv must use codex directly or the approved op wrapper")
+        return 7
+    raise ValueError("judge argv must use codex directly or the Configs auth-backed wrapper")
 
 
 def _judge_profile_token(argv: list[str], codex_index: int) -> str:
@@ -98,7 +160,7 @@ def _validate_judge_argv(argv: list[str], codex_index: int, require_approval: bo
     profile_index = argv.index("--profile", codex_index)
     if argv[codex_index + 1] != "exec" or argv.count("--profile") != 1 or profile_index != codex_index + 2:
         raise ValueError("judge Codex argv must contain an ordered profile option")
-    if require_approval and _approval_policy_from_argv(argv, codex_index) != "on-request":
+    if require_approval and not _argv_proves_approval(argv[codex_index:]):
         raise ValueError("judge Codex argv must prove the on-request approval policy")
 
 
@@ -118,7 +180,8 @@ def _judge_scores_match(decision: AbJudgeDecision, computed_scores: dict[str, fl
     return all(
         math.isclose(getattr(decision, key), computed_scores[key], rel_tol=0, abs_tol=1e-9)
         for key in computed_scores
-)
+    )
+
 
 def _judge_confidence_meets_minimum(value: str, minimum: str) -> bool:
     confidence_rank = {"low": 0, "medium": 1, "high": 2}
@@ -352,7 +415,7 @@ class AbCodexCommandPlan(_SdkContractModel):
         if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
             raise ValueError("Codex command argv profile must match codex_profile")
         _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
-        if _approval_policy_from_argv(self.command_argv) != self.approval_policy:
+        if not _argv_proves_approval(self.command_argv, self.approval_policy):
             raise ValueError("Codex command argv must prove the declared approval policy")
         validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="Codex command argv must prove output_last_message_path")
         return self
@@ -430,7 +493,7 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
         expected_lanes = ["oss-local", "oss-cloud"] if self.execution_lane == "all" else ["oss-local"]
         if [gate.lane for gate in self.runtime_profile_gates] != expected_lanes:
-            raise ValueError("planned A/B receipts must preserve the declared execution lane order")
+            raise ValueError("A/B plan must preserve the declared execution lane order")
         if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
@@ -470,7 +533,7 @@ class AbVariantRunResult(_SdkContractModel):
             if _codex_profile_from_argv(self.command_argv) != self.codex_profile:
                 raise ValueError("executed Codex argv profile must match codex_profile")
             _validate_execution_argv(self.execution_argv, self.command_argv, self.codex_profile)
-        if _approval_policy_from_argv(self.command_argv) != "on-request":
+        if not _argv_proves_approval(self.command_argv):
             raise ValueError("executed Codex argv must prove on-request approval")
         validate_argv_output_last_message_path(self.command_argv, self.output_last_message_path, message="executed Codex argv must prove output_last_message_path")
         if bool(self.blockers) != (self.status == "blocked"):
@@ -480,19 +543,18 @@ class AbVariantRunResult(_SdkContractModel):
 
 def _validate_execution_argv(execution_argv: list[str], command_argv: list[str], codex_profile: str) -> None:
     if codex_profile == "oss-local":
-        if execution_argv != command_argv:
-            raise ValueError("local execution argv must equal the Codex command argv")
+        if execution_argv != command_argv and execution_argv != _configs_oss_local_exec_command(command_argv):
+            raise ValueError("local execution argv must use the logical Codex command or Configs disposable executor")
         return
-    if len(execution_argv) < len(command_argv) + 5:
-        raise ValueError("cloud execution argv must include the approved op run wrapper")
-    if not _is_approved_op_binary(execution_argv[0]):
-        raise ValueError("cloud execution argv must invoke the approved op binary")
-    if execution_argv[1:5] != ["run", "--env-file", execution_argv[3], "--"] or execution_argv[3] != "<operator-approved-opaque-env-stream>":
-        raise ValueError("cloud execution argv must use op run --env-file <opaque> --")
-    if execution_argv[5:] != command_argv:
-        raise ValueError("cloud execution argv must preserve the canonical Codex command argv")
-    if _codex_profile_from_argv(execution_argv[5:]) != codex_profile:
-        raise ValueError("executed Codex argv profile must match codex_profile")
+    expected_child = _configs_oss_cloud_exec_command(command_argv)
+    if len(execution_argv) != len(expected_child) + 7:
+        raise ValueError("cloud execution argv must include the Configs auth-backed wrapper")
+    if execution_argv[0] != "bash" or not _is_configs_auth_wrapper(execution_argv[1]):
+        raise ValueError("cloud execution argv must invoke the Configs auth-backed wrapper")
+    if execution_argv[2:7] != ["--env-file", "<operator-approved-opaque-env-stream>", "--require-env", OSS_CLOUD_REQUIRED_ENV, "--"]:
+        raise ValueError("cloud execution argv must use the Configs FIFO wrapper contract")
+    if execution_argv[7:] != expected_child:
+        raise ValueError("cloud execution argv must use the Configs strict executor contract")
 
 
 class AbRuntimeProfileRunGate(_SdkContractModel):
@@ -563,237 +625,13 @@ class AbRunReceipt(_SdkContractModel):
         return self
 
 
-class AbJudgePackageIdentity(_SdkContractModel):
-    package_id: str = Field(min_length=1)
-    package_digest: str = Field(min_length=71)
-
-
-class AbJudgeFixtureIdentity(_SdkContractModel):
-    path: str = Field(min_length=1)
-    digest: str = Field(min_length=71)
-
-
-class AbJudgeSanitizedVariantResult(_SdkContractModel):
-    variant_label: Literal["A", "B"]
-    status: Literal["pass", "blocked"]
-    exit_code: int
-    sandbox_mode: Literal["read-only", "workspace-write"]
-    output_last_message_digest: str = Field(min_length=71)
-    runner_stdout_digest: str = Field(min_length=71)
-    runner_stderr_digest: str = Field(min_length=71)
-    semantic_output_excerpt: str = Field(min_length=1)
-    blockers: list[str]
-
-
-class AbJudgeComparisonPayload(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
-    rubric: AbRubricContract
-    rubric_digest: str = Field(min_length=71)
-    skill_a: AbJudgePackageIdentity
-    skill_b: AbJudgePackageIdentity
-    fixture: AbJudgeFixtureIdentity
-    execution_profile: str = Field(min_length=1)
-    variant_results: list[AbJudgeSanitizedVariantResult] = Field(min_length=2, max_length=2)
-    allowed_winners: list[Literal["skill_a", "skill_b", "inconclusive"]] = Field(min_length=3, max_length=3)
-
-    @model_validator(mode="after")
-    def _comparison_has_exact_labels(self) -> AbJudgeComparisonPayload:
-        if {result.variant_label for result in self.variant_results} != {"A", "B"}:
-            raise ValueError("A/B judge comparison must contain exactly one result per variant")
-        if set(self.allowed_winners) != {"skill_a", "skill_b", "inconclusive"}:
-            raise ValueError("A/B judge comparison must contain exact winner labels")
-        return self
-
-
-class AbJudgePreviewReceipt(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-judge-preview-receipt.v0"]
-    schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
-    ]
-    status: Literal["preview", "blocked"]
-    operation: Literal["ab_judge_preview"]
-    run_receipt_path: str | None = Field(default=None, min_length=1)
-    run_receipt_digest: str | None = Field(default=None, min_length=71)
-    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
-    judge_profile: EvalJudgeProfile | None
-    rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
-    rubric_digest: str | None = Field(default=None, min_length=71)
-    comparison_payload: AbJudgeComparisonPayload | None
-    judge_prompt_digest: str | None = Field(default=None, min_length=71)
-    decision_schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    allowed_winners: list[Literal["skill_a", "skill_b", "inconclusive"]] = Field(min_length=3, max_length=3)
-    calibration_required: Literal[True]
-    provider_invoked: Literal[False]
-    network_accessed: Literal[False]
-    mutation_performed: Literal[False]
-    blockers: list[str]
-    acceptance_trace: list[
-        Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
-    ] = Field(min_length=1)
-    agent_summary: str = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def _status_matches_judge_preview(self) -> AbJudgePreviewReceipt:
-        if not _exact_decision_labels(self.allowed_winners):
-            raise ValueError("A/B judge preview must contain exact winner labels")
-        if self.status == "preview":
-            if self.blockers:
-                raise ValueError("preview A/B judge receipts must not include blockers")
-            if not self._has_judge_input_evidence():
-                raise ValueError("preview A/B judge receipts must include complete judge input evidence")
-        elif not self.blockers:
-            raise ValueError("blocked A/B judge receipts must include blockers")
-        return self
-
-    def _has_judge_input_evidence(self) -> bool:
-        return all(
-            item is not None
-            for item in (
-                self.run_receipt_path,
-                self.run_receipt_digest,
-                self.experiment_id,
-                self.judge_profile,
-                self.rubric_id,
-                self.rubric_digest,
-                self.comparison_payload,
-                self.judge_prompt_digest,
-            )
-        )
-
-
-class AbJudgeDimensionScore(_SdkContractModel):
-    dimension_id: str = Field(min_length=1)
-    skill_a_score: Annotated[float, Field(ge=0, le=5)]
-    skill_b_score: Annotated[float, Field(ge=0, le=5)]
-    reason: str = Field(min_length=1)
-    evidence_refs: list[str] = Field(min_length=1)
-
-    @field_validator("dimension_id")
-    @classmethod
-    def _dimension_id_canonical(cls, value: str) -> str:
-        if value not in _AB_JUDGE_DIMENSION_IDS:
-            raise ValueError("judge dimension id must be canonical")
-        return value
-
-    @field_validator("evidence_refs")
-    @classmethod
-    def _evidence_refs_non_empty(cls, value: list[str]) -> list[str]:
-        if any(not item for item in value):
-            raise ValueError("judge dimension evidence refs must be non-empty")
-        return value
-
-
-class AbJudgeDecision(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
-    dimension_scores: list[AbJudgeDimensionScore] = Field(min_length=5, max_length=5)
-    normalized_score_a: Annotated[float, Field(ge=0, le=1)]
-    normalized_score_b: Annotated[float, Field(ge=0, le=1)]
-    winner: Literal["skill_a", "skill_b", "inconclusive"]
-    confidence: Literal["low", "medium", "high"]
-    reason: str = Field(min_length=1)
-    evidence_refs: list[str] = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def _decision_has_canonical_dimensions(self) -> AbJudgeDecision:
-        if {row.dimension_id for row in self.dimension_scores} != _AB_JUDGE_DIMENSION_IDS:
-            raise ValueError("A/B judge decisions must score every canonical dimension exactly once")
-        if any(not item for item in self.evidence_refs):
-            raise ValueError("judge decision evidence refs must be non-empty")
-        return self
-
-
-class AbJudgeScoreReceipt(_SdkContractModel):
-    schema_version: Literal["skills-sdk.ab-judge-score-receipt.v0"]
-    schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
-    ]
-    status: Literal["scored", "blocked"]
-    operation: Literal["ab_judge_score"]
-    run_receipt_path: str | None = Field(default=None, min_length=1)
-    run_receipt_digest: str | None = Field(default=None, min_length=71)
-    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
-    judge_profile: EvalJudgeProfile | None
-    rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
-    rubric_digest: str | None = Field(default=None, min_length=71)
-    decision_schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    allowed_winners: list[Literal["skill_a", "skill_b", "inconclusive"]] = Field(min_length=3, max_length=3)
-    judge_prompt_digest: str | None = Field(default=None, min_length=71)
-    judge_output_path: str | None = Field(default=None, min_length=1)
-    judge_output_digest: str | None = Field(default=None, min_length=71)
-    judge_command_argv: list[str]
-    codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"] | None
-    codex_exec_invoked: bool
-    decision: AbJudgeDecision | None
-    calibration_required: Literal[True]
-    advisory_only: Literal[True]
-    provider_invoked: bool
-    network_accessed: bool
-    mutation_performed: bool
-    blockers: list[str]
-    acceptance_trace: list[
-        Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
-    ] = Field(min_length=1)
-    agent_summary: str = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def _status_matches_score(self) -> AbJudgeScoreReceipt:
-        if not _exact_decision_labels(self.allowed_winners):
-            raise ValueError("A/B judge score receipts must contain exact winner labels")
-        if self.status == "scored":
-            self._validate_scored_receipt()
-        elif not self.blockers:
-            raise ValueError("blocked A/B judge score receipts must include blockers")
-        return self
-
-    def _validate_scored_receipt(self) -> None:
-        if self.blockers:
-            raise ValueError("scored A/B judge receipts must not include blockers")
-        if not self._has_score_evidence():
-            raise ValueError("scored A/B judge receipts must include complete score evidence")
-        if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
-            raise ValueError("scored A/B judge receipts must report provider side effects")
-        try:
-            # v0 judge receipts predate the explicit approval-policy argv contract.
-            # Keep them readable while all newly planned/executed v1 lanes remain
-            # strict through their plan/run validators and runner evidence.
-            executed_profile = _codex_profile_from_judge_argv(
-                self.judge_command_argv,
-                require_approval=False,
-            )
-        except ValueError as exc:
-            raise ValueError("scored A/B judge receipts must prove profile in executed Codex argv") from exc
-        if self.codex_profile != executed_profile:
-            raise ValueError("scored A/B judge receipts must derive Codex profile from executed argv")
-        if self.codex_profile != self.judge_profile.codex_profile:
-            raise ValueError("scored A/B judge receipts must bind intended judge profile to executed profile")
-        self._validate_decision_consistency()
-
-    def _validate_decision_consistency(self) -> None:
-        if self.decision is None:
-            return
-        if self.decision.experiment_id != self.experiment_id:
-            raise ValueError("scored A/B judge receipts must bind decision to receipt experiment")
-        computed_scores = _computed_judge_scores(self.decision.dimension_scores)
-        if not _judge_scores_match(self.decision, computed_scores):
-            raise ValueError("scored A/B judge receipts must match normalized rubric scores")
-        if self.decision.winner != _expected_judge_winner(self.decision, computed_scores):
-            raise ValueError("scored A/B judge receipts must match rubric winner policy")
-
-    def _has_score_evidence(self) -> bool:
-        return all(
-            item is not None
-            for item in (
-                self.run_receipt_path,
-                self.run_receipt_digest,
-                self.experiment_id,
-                self.judge_profile,
-                self.rubric_id,
-                self.rubric_digest,
-                self.judge_prompt_digest,
-                self.judge_output_path,
-                self.judge_output_digest,
-                self.judge_command_argv,
-                self.codex_profile,
-                self.decision))
+from ask.skills_sdk.ab_judge_contracts import (  # noqa: E402,F401
+    AbJudgeComparisonPayload,
+    AbJudgeDecision,
+    AbJudgeDimensionScore,
+    AbJudgeFixtureIdentity,
+    AbJudgePackageIdentity,
+    AbJudgePreviewReceipt,
+    AbJudgeSanitizedVariantResult,
+    AbJudgeScoreReceipt,
+)

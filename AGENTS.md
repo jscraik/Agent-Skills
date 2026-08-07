@@ -29,10 +29,18 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
 - Before changing Skills SDK plans, specs, atlas visuals, capability claims, or
   product-direction docs, use the product-boundary terms in
-  [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md): `agent-skills` is the
-  foundry/dogfood/source repo, Skills SDK is the professional lifecycle
-  contract, Tessl is distribution and external proof, and local runtime truth is
-  a separate installed-behavior lane.
+  [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md):
+  `/Users/jamiecraik/dev/skills-foundry` is the source-only Foundry for
+  retained packages; `agent-skills` implements and dogfoods the Skills SDK and
+  owns active SDK candidates; Tessl is distribution and external proof; and
+  local runtime truth is a separate installed-behavior lane. A package's
+  explicit owner decision—not a runtime path—decides its canonical source.
+- For a package selecting `skills-sdk.gold-standard.v1`, read
+  [Skills SDK Authoring Contract](./Docs/reference/skills-sdk-authoring-contract.md),
+  update `references/contract.yaml: authoring_contract` with the skill, and run
+  `./bin/ask skills package verify <skill-path> --json --robot`. That is a
+  structural admission gate only: run the declared behavioral proof and the
+  selected runtime or external lane before claiming the skill is ready.
 - Edit canonical sources, not runtime projections. See
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
 - Finish the named outcome through the smallest local change and focused proof.

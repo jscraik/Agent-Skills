@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from contextlib import contextmanager
 import sys
 import json
 import os
@@ -36,12 +37,10 @@ class _CustomBoundarySignal(BaseException):
 class _HostileEnvelope:
     returncode = 0
     stderr = ""
-
     def __init__(self, target: str, raised: BaseException, stdout: str) -> None:
         self._target = target
         self._raised = raised
         self.stdout = stdout
-
     def __getattribute__(self, name: str) -> object:
         if name in {"returncode", "stdout", "stderr"}:
             target = object.__getattribute__(self, "_target")
@@ -52,13 +51,29 @@ class _HostileEnvelope:
 
 
 class TestSkillsSdkAbPreflight(unittest.TestCase):
+    @contextmanager
+    def _approved_cloud_auth_context(self):
+        """Provide a metadata-valid FIFO without opening its secret stream."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            home = Path(temp_dir)
+            env_file = home / ".codex" / ".env"
+            env_file.parent.mkdir()
+            os.mkfifo(env_file, 0o600)
+            with (
+                patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
+                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
+                patch(
+                    "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
+            ):
+                yield env_file
     @staticmethod
     def _codex_fixture(root: Path, version: str = "codex-cli 1.2.3") -> Path:
         binary = root / "codex"
         binary.write_text(f"#!/bin/sh\nprintf '%s\\n' '{version}'\n", encoding="utf-8")
         binary.chmod(0o755)
         return binary
-
     @staticmethod
     def _catalog_process(
         payload: dict[str, object], returncode: int = 0, stderr: str = "",
@@ -66,7 +81,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         return subprocess.CompletedProcess(
             ["op", "run"], returncode, stdout=json.dumps(payload), stderr=stderr,
         )
-
     @staticmethod
     def _catalog_payload(result_class: str = "pass", **fields: object) -> dict[str, object]:
         return {
@@ -74,7 +88,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "network_accessed": True,
             "http_status": 200,
             "catalog_digest": "sha256:" + "a" * 64,
-            "matched_model": "minimax-m2.7:cloud" if result_class == "pass" else None,
+            "matched_model": "deepseek-v4-flash:cloud" if result_class == "pass" else None,
             "match_count": 1 if result_class == "pass" else 0,
             "secret_value_observed": False,
             "secret_not_observed": True,
@@ -83,7 +97,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "codex_exec_invoked": False,
             **fields,
         }
-
     @staticmethod
     def _cloud_runtime_not_applicable(candidate: dict[str, object]) -> dict[str, object]:
         facts = declared_profile_preflight(candidate)
@@ -92,7 +105,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             Path("/mock/oss-cloud.config.toml"),
         )
         return facts
-
     @classmethod
     def _typed_catalog_blocker_payload(cls, result_class: str) -> dict[str, object]:
         if result_class == "model_ambiguous":
@@ -127,7 +139,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 result_class=result_class, catalog_digest=None, match_count=None,
             )
         return cls._catalog_payload(result_class=result_class)
-
     def test_default_preflight_blocks_when_runtime_surfaces_are_absent(self) -> None:
         empty_environment = {"HOME": "/tmp/skills-sdk-empty-home", "PATH": "/tmp/skills-sdk-empty-bin"}
         with patch.dict("os.environ", empty_environment, clear=True):
@@ -143,7 +154,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "profile_config_missing_or_invalid",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
-
     def test_installed_local_profile_catalog_and_runtime_inventory_are_required(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -179,7 +189,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 "local_model_unavailable",
                 {item["blocker_class"] for item in blocked["admission"]["blockers"]},
             )
-
     def test_declared_profile_facts_record_configured_provider_and_model(self) -> None:
         local = declared_profile_preflight(select_judge_profile("oss-local"))
         cloud = declared_profile_preflight(select_judge_profile("oss-cloud"))
@@ -187,7 +196,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(local["profile_config"]["configured_provider_id"], "ollama")
         self.assertEqual(cloud["profile_config"]["configured_model_id"], "deepseek-v4-flash:cloud")
         self.assertEqual(cloud["profile_config"]["configured_provider_id"], "ollama-cloud")
-
     def test_required_typed_blockers_are_preserved(self) -> None:
         matrix = {
             "profile_config_missing_or_invalid": "profile_config",
@@ -216,7 +224,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 classes = {item["blocker_class"] for item in receipt["admission"]["blockers"]}
                 self.assertIn(blocker_class, classes)
                 self.assertEqual(receipt["admission"]["status"], "blocked")
-
     def test_required_facts_cannot_use_not_applicable_for_lane_admission(self) -> None:
         required_facts_by_lane = {
             "oss-local": ("profile_config", "model_catalog", "runtime", "catalog"),
@@ -240,13 +247,12 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                         "preflight_evidence_missing",
                         {item["blocker_class"] for item in receipt["admission"]["blockers"]},
                     )
-
     def test_only_proven_cloud_endpoint_runtime_may_use_not_applicable(self) -> None:
         profile = select_judge_profile("oss-cloud")
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             binary = self._codex_fixture(root)
-            with patch.dict(os.environ, {"PATH": temp_dir}):
+            with patch.dict(os.environ, {"PATH": temp_dir, "CODEX_CLI_PATH": ""}):
                 receipt = build_lane_preflight(profile, self._cloud_runtime_not_applicable)
                 self.assertEqual(receipt["admission"]["status"], "pass")
                 AbLanePreflight.model_validate(receipt)
@@ -274,12 +280,11 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                     profile, self._forged_cloud_runtime({"evidence_source": str(symlink)}),
                 )
                 self.assertEqual(substituted["admission"]["status"], "blocked")
-
     def test_changed_executable_content_invalidates_stored_cloud_identity(self) -> None:
         profile = select_judge_profile("oss-cloud")
         with tempfile.TemporaryDirectory() as temp_dir:
             binary = self._codex_fixture(Path(temp_dir))
-            with patch.dict(os.environ, {"PATH": temp_dir}):
+            with patch.dict(os.environ, {"PATH": temp_dir, "CODEX_CLI_PATH": ""}):
                 receipt = build_lane_preflight(profile, self._cloud_runtime_not_applicable)
                 self.assertEqual(receipt["admission"]["status"], "pass")
                 AbLanePreflight.model_validate(receipt)
@@ -290,16 +295,14 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 facts = {key: value for key, value in receipt.items() if key != "admission"}
                 rebuilt = build_lane_preflight(profile, lambda _candidate: facts)
                 self.assertEqual(rebuilt["admission"]["status"], "blocked")
-
     def test_invalid_codex_version_is_rejected_separately(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             self._codex_fixture(Path(temp_dir), "not-codex 1.2.3")
-            with patch.dict(os.environ, {"PATH": temp_dir}):
+            with patch.dict(os.environ, {"PATH": temp_dir, "CODEX_CLI_PATH": ""}):
                 receipt = build_lane_preflight(
                     select_judge_profile("oss-cloud"), self._cloud_runtime_not_applicable,
                 )
         self.assertEqual(receipt["admission"]["status"], "blocked")
-
     def _forged_cloud_runtime(
         self, override: dict[str, object], *, missing_identity: bool = False,
     ) -> Callable[[dict[str, object]], dict[str, object]]:
@@ -310,7 +313,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 facts["runtime"].pop("codex_executable_identity", None)
             return facts
         return probe
-
     def test_local_lane_cannot_use_cloud_runtime_identity(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             self._codex_fixture(Path(temp_dir))
@@ -320,10 +322,9 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                     str(candidate["model"]), Path("/mock/oss-local.config.toml"),
                 )
                 return facts
-            with patch.dict(os.environ, {"PATH": temp_dir}):
+            with patch.dict(os.environ, {"PATH": temp_dir, "CODEX_CLI_PATH": ""}):
                 receipt = build_lane_preflight(select_judge_profile("oss-local"), probe)
         self.assertEqual(receipt["admission"]["status"], "blocked")
-
     def test_only_local_auth_may_use_not_applicable(self) -> None:
         local = build_lane_preflight(select_judge_profile("oss-local"), declared_profile_preflight)
         self.assertEqual(local["auth"]["status"], "not_applicable")
@@ -347,7 +348,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "cloud_auth_unavailable",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
-
     def test_missing_evidence_and_profile_model_mismatch_fail_closed(self) -> None:
         profile = select_judge_profile("oss-cloud")
         def probe(candidate: dict[str, object]) -> dict[str, object]:
@@ -366,7 +366,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "cloud_auth_unavailable",
         }.issubset(classes))
         self.assertFalse(receipt["admission"]["secret_values_observed"])
-
     def test_cloud_catalog_probe_uses_exact_authenticated_get_without_secret_output(self) -> None:
         captured: dict[str, object] = {}
         class Response:
@@ -379,7 +378,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 return 200
             @staticmethod
             def read(_limit: int) -> bytes:
-                return json.dumps({"models": [{"name": "minimax-m2.7:cloud"}]}).encode()
+                return json.dumps({"models": [{"name": "deepseek-v4-flash:cloud"}]}).encode()
         def opener(request: object, *, timeout: int) -> Response:
             captured["request"] = request
             captured["timeout"] = timeout
@@ -387,7 +386,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         with patch.dict(os.environ, {"OLLAMA_API_KEY": "fixture-secret"}, clear=True):
             result = probe_catalog(
                 url="https://ollama.com/api/tags",
-                selected_model="minimax-m2.7:cloud",
+                selected_model="deepseek-v4-flash:cloud",
                 timeout_s=10,
                 opener=opener,
             )
@@ -395,12 +394,11 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(request.get_method(), "GET")  # type: ignore[union-attr]
         self.assertEqual(request.get_header("Authorization"), "Bearer fixture-secret")  # type: ignore[union-attr]
         self.assertEqual(result["result_class"], "pass")
-        self.assertEqual(result["matched_model"], "minimax-m2.7:cloud")
+        self.assertEqual(result["matched_model"], "deepseek-v4-flash:cloud")
         self.assertTrue(result["network_accessed"])
         self.assertFalse(result["generation_performed"])
         self.assertFalse(result["provider_invoked"])
         self.assertNotIn("fixture-secret", json.dumps(result))
-
     def test_cloud_catalog_probe_rejects_missing_duplicate_and_fast_substitution(self) -> None:
         class Response:
             def __init__(self, names: list[str]) -> None:
@@ -416,17 +414,16 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 return json.dumps({"models": [{"name": name} for name in self.names]}).encode()
         with patch.dict(os.environ, {"OLLAMA_API_KEY": "fixture-secret"}, clear=True):
             missing = probe_catalog(
-                url="https://ollama.com/api/tags", selected_model="minimax-m2.7:cloud",
+                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
                 timeout_s=10, opener=lambda *_args, **_kwargs: Response(["fast"]),
             )
             duplicate = probe_catalog(
-                url="https://ollama.com/api/tags", selected_model="minimax-m2.7:cloud",
+                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
                 timeout_s=10,
-                opener=lambda *_args, **_kwargs: Response(["minimax-m2.7:cloud", "minimax-m2.7:cloud"]),
+                opener=lambda *_args, **_kwargs: Response(["deepseek-v4-flash:cloud", "deepseek-v4-flash:cloud"]),
             )
         self.assertEqual(missing["result_class"], "model_missing")
         self.assertEqual(duplicate["result_class"], "model_ambiguous")
-
     def test_cloud_catalog_probe_classifies_http_timeout_network_and_malformed_payloads(self) -> None:
         class Response:
             def __enter__(self) -> "Response":
@@ -451,139 +448,156 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             for expected, opener in cases.items():
                 with self.subTest(expected=expected):
                     result = probe_catalog(
-                        url="https://ollama.com/api/tags", selected_model="minimax-m2.7:cloud",
+                        url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
                         timeout_s=10, opener=opener,
                     )
                     self.assertEqual(result["result_class"], expected)
                     self.assertNotIn("fixture-secret", json.dumps(result))
-
-    def test_cloud_auth_fifo_is_never_read_and_op_run_is_the_only_catalog_path(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            home = Path(temp_dir)
-            env_file = home / ".codex" / ".env"
-            env_file.parent.mkdir()
-            os.mkfifo(env_file)
-            environment = {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}
-            with (
-                patch.dict(os.environ, environment, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=home),
-                patch("ask.skills_sdk.eval_ab_preflight.approved_op_binary", return_value="/mock/bin/op"),
-                patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")),
-            ):
-                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+    def test_cloud_auth_fifo_is_never_read_and_configs_wrapper_is_the_only_catalog_path(self) -> None:
+        with self._approved_cloud_auth_context() as env_file:
+            with patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")):
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
                 seen: list[list[str]] = []
                 def runner(command: list[str]) -> subprocess.CompletedProcess[str]:
                     seen.append(command)
                     return self._catalog_process(self._catalog_payload())
                 fact = _cloud_catalog_fact(
-                    "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), auth, runner,
+                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth, runner,
                 )
         self.assertEqual(auth["status"], "pass")
-        self.assertEqual(auth["auth_source"], "op_fifo")
+        self.assertEqual(auth["auth_source"], "1password_desktop_fifo")
         self.assertEqual(fact["status"], "pass")
-        self.assertEqual(seen[0][:3], ["/mock/bin/op", "run", "--env-file"])
-        self.assertEqual(seen[0][3], str(env_file))
-        self.assertEqual(seen[0][4], "--")
+        self.assertEqual(seen[0][:7], [
+            "bash", "/mock/configs/run-auth-backed.sh", "--env-file", str(env_file),
+            "--require-env", "OLLAMA_API_KEY", "--",
+        ])
         serialized = json.dumps(fact)
         self.assertNotIn(str(env_file), serialized)
         self.assertNotIn("Authorization", serialized)
-
     def test_cloud_catalog_has_no_unauthenticated_fallback_and_redacts_probe_failures(self) -> None:
         auth = {
             "status": "blocked", "auth_source": "missing_or_invalid",
             "auth_reference": "codex_cli_auth", "secret_value_observed": False,
         }
         def forbidden_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
-            raise AssertionError("catalog runner must not start without op auth")
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            blocked = _cloud_catalog_fact(
-                "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), auth, forbidden_runner,
-            )
+            raise AssertionError("catalog runner must not start without Configs wrapper auth")
+        blocked = _cloud_catalog_fact(
+            "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth, forbidden_runner,
+        )
         self.assertEqual(blocked["blocker"]["blocker_class"], "cloud_auth_unavailable")
         self.assertFalse(blocked["network_accessed"])
-        approved = {**auth, "status": "pass", "auth_source": "op_fifo"}
         secret = "should-never-appear"
         malformed = subprocess.CompletedProcess(["op", "run"], 2, stdout="", stderr=secret)
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            failure = _cloud_catalog_fact(
-                "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                lambda _command: malformed,
-            )
+        failure = self._catalog_fact_for_process(malformed)
         self.assertEqual(failure["blocker"]["blocker_class"], "cloud_catalog_unavailable")
         self.assertNotIn(secret, json.dumps(failure))
-
-    def test_cloud_catalog_blocks_missing_op_and_rejects_self_claimed_unsafe_pass(self) -> None:
+    def test_cloud_catalog_blocks_missing_configs_wrapper_and_rejects_self_claimed_unsafe_pass(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             env_file = Path(temp_dir) / "opaque-env"
             env_file.touch()
             with (
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
-                patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value=None),
+                patch("ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper", return_value=None),
             ):
-                auth = _approved_cloud_auth_fact("minimax-m2.7:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
         self.assertEqual(auth["blocker"]["blocker_class"], "cloud_auth_unavailable")
-        approved = {
-            "status": "pass", "auth_source": "op_fifo",
-            "auth_reference": "codex_cli_auth", "secret_value_observed": False,
-        }
         unsafe = self._catalog_payload(secret_value_observed=True)
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            fact = _cloud_catalog_fact(
-                "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                lambda _command: self._catalog_process(unsafe),
-            )
+        fact = self._catalog_fact_for_process(self._catalog_process(unsafe))
         self.assertEqual(fact["status"], "blocked")
         self.assertEqual(fact["blocker"]["blocker_class"], "cloud_catalog_unavailable")
-
     def test_cloud_catalog_rejects_nonzero_self_claimed_pass_and_extra_fields(self) -> None:
-        approved = {
-            "status": "pass", "auth_source": "op_fifo",
-            "auth_reference": "codex_cli_auth", "secret_value_observed": False,
-        }
         cases = (
             self._catalog_process(self._catalog_payload(), returncode=2),
             self._catalog_process(self._catalog_payload(untrusted_extra="ignored-child-claim")),
         )
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            for completed in cases:
-                with self.subTest(returncode=completed.returncode):
-                    fact = _cloud_catalog_fact(
-                        "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                        lambda _command, result=completed: result,
-                    )
-                    self.assertEqual(fact["status"], "blocked")
-                    self.assertNotIn("untrusted_extra", json.dumps(fact))
-
+        for completed in cases:
+            with self.subTest(returncode=completed.returncode):
+                fact = self._catalog_fact_for_process(completed)
+                self.assertEqual(fact["status"], "blocked")
+                self.assertNotIn("untrusted_extra", json.dumps(fact))
     def test_cloud_catalog_preserves_typed_nonzero_blocker_payloads(self) -> None:
         result_classes = (
             "model_missing", "model_ambiguous", "auth_missing", "http_failure",
             "timeout", "network_failure", "payload_too_large", "malformed_json",
             "malformed_catalog", "invalid_catalog_url", "redirect_rejected",
         )
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            for result_class in result_classes:
-                with self.subTest(result_class=result_class):
-                    payload = self._typed_catalog_blocker_payload(result_class)
-                    expected_blocker = (
-                        "selected_model_unavailable" if result_class.startswith("model_")
-                        else "cloud_auth_unavailable" if result_class == "auth_missing"
-                        else "cloud_catalog_unavailable"
-                    )
-                    completed = self._catalog_process(payload, returncode=2)
-                    fact = self._catalog_fact_for_process(completed)
-                    parsed, failure, evidence = _catalog_probe_result(
-                        ["op", "run"], lambda _command, result=completed: result,
-                    )
-                    self.assertEqual(parsed, payload)
-                    self.assertIsNone(failure)
-                    self.assertEqual(evidence["probe_exit_code"], 2)
-                    self.assertEqual(fact["status"], "blocked")
-                    self.assertEqual(fact["blocker"]["blocker_class"], expected_blocker)
-                    self.assertIn(str(payload["result_class"]), fact["blocker"]["reason"])
-                    self.assertEqual(fact["http_status"], payload["http_status"])
-                    self.assertEqual(fact["catalog_digest"], payload["catalog_digest"])
-                    self.assertEqual(fact["matched_model"], payload["matched_model"])
-                    self.assertFalse(fact["secret_value_observed"])
+        for result_class in result_classes:
+            with self.subTest(result_class=result_class):
+                payload = self._typed_catalog_blocker_payload(result_class)
+                expected_blocker = (
+                    "catalog_alias_unlisted" if result_class.startswith("model_")
+                    else "cloud_auth_unavailable" if result_class == "auth_missing"
+                    else "cloud_catalog_unavailable"
+                )
+                completed = self._catalog_process(payload, returncode=2)
+                fact = self._catalog_fact_for_process(completed)
+                parsed, failure, evidence = _catalog_probe_result(
+                    ["op", "run"], lambda _command, result=completed: result,
+                )
+                self.assertEqual(parsed, payload)
+                self.assertIsNone(failure)
+                self.assertEqual(evidence["probe_exit_code"], 2)
+                self.assertEqual(fact["status"], "blocked")
+                self.assertEqual(fact["blocker"]["blocker_class"], expected_blocker)
+                self.assertIn(str(payload["result_class"]), fact["blocker"]["reason"])
+                self.assertEqual(fact["http_status"], payload["http_status"])
+                self.assertEqual(fact["catalog_digest"], payload["catalog_digest"])
+                self.assertEqual(fact["matched_model"], payload["matched_model"])
+                self.assertFalse(fact["secret_value_observed"])
+    def _cloud_alias_fact(self, env_file: Path) -> dict[str, object]:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            profile = Path(temp_dir) / "oss-cloud.config.toml"
+            profile.write_text('[model_providers.ollama-cloud]\nbase_url = "https://ollama.com/v1"\n', encoding="utf-8")
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            smoke = {
+                "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+                "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+                "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [],
+            }
+            def smoke_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
+                return subprocess.CompletedProcess(
+                    ["python", "run_oss_cloud_smoke.py"], 0, stdout=json.dumps(smoke), stderr="",
+                )
+            return _cloud_catalog_fact(
+                "deepseek-v4-flash:cloud", profile, auth,
+                lambda _command: self._catalog_process(self._catalog_payload(result_class="model_missing"), returncode=2),
+                smoke_runner=smoke_runner, profile_evidence_digest="sha256:" + "a" * 64,
+                codex_executable_identity="sha256:" + "b" * 64,
+            )
+
+    def test_cloud_catalog_alias_fallback_requires_and_binds_direct_smoke(self) -> None:
+        with self._approved_cloud_auth_context() as env_file:
+            fact = self._cloud_alias_fact(env_file)
+        self.assertEqual(fact["status"], "pass")
+        self.assertEqual(fact["catalog_match_source"], "direct_provider_smoke")
+        self.assertEqual(fact["matched_model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(fact["direct_smoke_provider_endpoint"], "https://ollama.com/v1")
+        self.assertTrue(fact["direct_smoke_provider_invoked"])
+        self.assertEqual(fact["direct_smoke_exit_code"], 0)
+        self.assertNotIn(str(env_file), json.dumps(fact))
+
+    def test_cloud_catalog_alias_fallback_stays_blocked_when_direct_smoke_fails(self) -> None:
+        with self._approved_cloud_auth_context():
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            smoke = subprocess.CompletedProcess(
+                ["python", "run_oss_cloud_smoke.py"], 1,
+                stdout=json.dumps({"status": "blocked"}), stderr="",
+            )
+            fact = _cloud_catalog_fact(
+                "deepseek-v4-flash:cloud",
+                Path("/mock/oss-cloud.config.toml"),
+                auth,
+                lambda _command: self._catalog_process(
+                    self._catalog_payload(result_class="model_missing"), returncode=2,
+                ),
+                smoke_runner=lambda _command: smoke,
+                profile_evidence_digest="sha256:" + "a" * 64,
+                codex_executable_identity="sha256:" + "b" * 64,
+            )
+        self.assertEqual(fact["status"], "blocked")
+        self.assertEqual(fact["blocker"]["blocker_class"], "catalog_alias_unlisted")
+        self.assertIn("direct provider smoke failed", fact["blocker"]["reason"])
 
     def test_cloud_catalog_rejects_mismatched_payload_and_exit_semantics(self) -> None:
         cases = (
@@ -618,13 +632,12 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         class IntSubclass(int):
             pass
         invalid_values = (False, True, 0.0, "0", None, IntSubclass(0))
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            for returncode in invalid_values:
-                with self.subTest(returncode_type=type(returncode).__name__):
-                    self._assert_invalid_catalog_returncode(returncode)
-            for returncode in (-9, 1, 255):
-                with self.subTest(returncode=returncode):
-                    self._assert_nonzero_catalog_returncode(returncode)
+        for returncode in invalid_values:
+            with self.subTest(returncode_type=type(returncode).__name__):
+                self._assert_invalid_catalog_returncode(returncode)
+        for returncode in (-9, 1, 255):
+            with self.subTest(returncode=returncode):
+                self._assert_nonzero_catalog_returncode(returncode)
 
     def test_cloud_catalog_requires_closed_transport_envelope(self) -> None:
         class StringSubclass(str):
@@ -748,20 +761,14 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
     def _catalog_fact_for_process(
         self, completed: subprocess.CompletedProcess[str],
     ) -> dict[str, object]:
-        approved = {
-            "status": "pass", "auth_source": "op_fifo",
-            "auth_reference": "codex_cli_auth", "secret_value_observed": False,
-        }
-        return _cloud_catalog_fact(
-            "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-            lambda _command: completed,
-        )
+        with self._approved_cloud_auth_context():
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            return _cloud_catalog_fact(
+                "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                lambda _command: completed,
+            )
 
     def test_cloud_catalog_rejects_malformed_or_contradictory_child_contracts(self) -> None:
-        approved = {
-            "status": "pass", "auth_source": "op_fifo",
-            "auth_reference": "codex_cli_auth", "secret_value_observed": False,
-        }
         duplicate = json.dumps(self._catalog_payload()).replace(
             '"result_class": "pass"', '"result_class": "pass", "result_class": "pass"',
         )
@@ -782,15 +789,11 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             for raw in raw_cases
         ]
         completed_cases.append(self._catalog_process(self._catalog_payload(), stderr="unexpected"))
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
-            for index, completed in enumerate(completed_cases):
-                with self.subTest(index=index):
-                    fact = _cloud_catalog_fact(
-                        "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                        lambda _command, result=completed: result,
-                    )
-                    self.assertEqual(fact["status"], "blocked")
-                    self.assertFalse(fact["secret_value_observed"])
+        for index, completed in enumerate(completed_cases):
+            with self.subTest(index=index):
+                fact = self._catalog_fact_for_process(completed)
+                self.assertEqual(fact["status"], "blocked")
+                self.assertFalse(fact["secret_value_observed"])
 
 
 if __name__ == "__main__":

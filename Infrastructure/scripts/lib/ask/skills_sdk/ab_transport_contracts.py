@@ -7,54 +7,20 @@ import stat
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterator, Sequence, TypeVar
+from typing import Iterator, Sequence
 
 
-ResultT = TypeVar("ResultT")
-
-
-def is_approved_op_binary(value: str) -> bool:
-    return value == "op" or (Path(value).is_absolute() and Path(value).name == "op")
-
-
-def approved_op_binary() -> str | None:
-    """Resolve the installed 1Password CLI without consulting caller PATH."""
-    for candidate in (Path("/opt/homebrew/bin/op"), Path("/usr/local/bin/op")):
-        try:
-            if candidate.is_file() and os.access(candidate, os.X_OK):
-                return str(candidate)
-        except OSError:
-            continue
-    return None
-
-
-@dataclass(frozen=True)
-class ApprovedOpEnvInvocation:
-    """A descriptor-bound `op run` boundary for the approved opaque FIFO."""
-
-    op_binary: str
-    env_file: Path
-    env_fd: int
-    auth_stream_identity_digest: str
-
-    @property
-    def pass_fds(self) -> tuple[int, ...]:
-        return (self.env_fd,)
-
-    def runtime_argv(self, command: Sequence[str]) -> list[str]:
-        return [
-            self.op_binary,
-            "run",
-            "--env-file",
-            f"/dev/fd/{self.env_fd}",
-            "--",
-            *command,
-        ]
-
-    def receipt_argv(self, command: Sequence[str]) -> list[str]:
-        """Return the non-secret shape later redacted into the persisted receipt."""
-        return [self.op_binary, "run", "--env-file", str(self.env_file), "--", *command]
-
+CONFIGS_AUTH_WRAPPER = Path(
+    "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"
+)
+CONFIGS_CODEX_EXEC_WRAPPER = Path(
+    "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"
+)
+OSS_CLOUD_REQUIRED_ENV = "OLLAMA_API_KEY"
+OSS_CLOUD_PROFILE = "oss-cloud"
+OSS_CLOUD_MODEL = "deepseek-v4-flash:cloud"
+OSS_LOCAL_PROFILE = "oss-local"
+_OSS_CLOUD_APPROVAL_SETTING = 'approval_policy="on-request"'
 
 def _has_symlink_component(path: Path) -> bool:
     # The account home and its immediate parent define the owned boundary.
@@ -78,13 +44,13 @@ def operator_account_home() -> Path | None:
 
 
 def actual_opaque_env_path() -> Path | None:
-    """Return the only env stream path an op subprocess may open."""
+    """Return the only env stream path an authenticated subprocess may open."""
     home = operator_account_home()
     return None if home is None else home / ".codex" / ".env"
 
 
 def is_actual_opaque_env_reference(value: str) -> bool:
-    """Return whether value names the one runtime stream an op process may open."""
+    """Return whether value names the one runtime stream an auth process may open."""
     if value.startswith("~"):
         return False
     try:
@@ -114,60 +80,175 @@ def opaque_env_identity_digest(value: str | Path) -> str | None:
     return _identity_digest(metadata)
 
 
+def configs_auth_wrapper() -> str | None:
+    """Return the one reviewed Configs wrapper for Codex secret-bearing children."""
+    try:
+        # The contract invokes this shell script explicitly through `bash`, so
+        # readability as a regular file is sufficient. Requiring an execute
+        # bit would reject the canonical checked-in Configs source mode.
+        if CONFIGS_AUTH_WRAPPER.is_file() and not CONFIGS_AUTH_WRAPPER.is_symlink():
+            return str(CONFIGS_AUTH_WRAPPER)
+    except OSError:
+        pass
+    return None
+
+
+def is_configs_auth_wrapper(value: str) -> bool:
+    return value == str(CONFIGS_AUTH_WRAPPER)
+
+
+def configs_codex_exec_wrapper() -> str | None:
+    """Return the reviewed Configs Codex executor for the OSS-cloud lane."""
+    try:
+        if CONFIGS_CODEX_EXEC_WRAPPER.is_file() and os.access(CONFIGS_CODEX_EXEC_WRAPPER, os.X_OK):
+            return str(CONFIGS_CODEX_EXEC_WRAPPER)
+    except OSError:
+        pass
+    return None
+
+
+def is_configs_codex_exec_wrapper(value: str) -> bool:
+    return value == str(CONFIGS_CODEX_EXEC_WRAPPER)
+
+
+def configs_oss_cloud_exec_command(command: Sequence[str]) -> list[str]:
+    """Translate logical Codex argv into the reviewed cloud executor argv."""
+    argv = list(command)
+    if argv[:4] != ["codex", "exec", "--profile", OSS_CLOUD_PROFILE]:
+        raise ValueError("cloud execution requires the canonical oss-cloud Codex command")
+    approval_values = [
+        argv[index + 1]
+        for index, value in enumerate(argv[:-1])
+        if value == "-c" and argv[index + 1] == 'approval_policy="on-request"'
+    ]
+    legacy_approval = argv.count("--ask-for-approval") == 1 and argv[argv.index("--ask-for-approval") + 1] == "on-request"
+    if len(approval_values) + int(legacy_approval) != 1:
+        raise ValueError("cloud execution requires on-request approval")
+    if argv.count("--sandbox") != 1 or argv[argv.index("--sandbox") + 1] != "read-only":
+        raise ValueError("cloud execution requires the read-only sandbox")
+    if argv.count("--cd") != 1 or argv.count("--output-last-message") != 1 or argv.count("--json") != 1 or argv[-1] != "-":
+        raise ValueError("cloud execution requires canonical SDK evidence arguments")
+    return [
+        "bash",
+        str(CONFIGS_CODEX_EXEC_WRAPPER),
+        "--profile",
+        OSS_CLOUD_PROFILE,
+        "--model",
+        OSS_CLOUD_MODEL,
+        "--strict-config",
+        "-c",
+        _OSS_CLOUD_APPROVAL_SETTING,
+        "--cd",
+        argv[argv.index("--cd") + 1],
+        "--sandbox",
+        "read-only",
+        "--ephemeral",
+        "--json",
+        "--output-last-message",
+        argv[argv.index("--output-last-message") + 1],
+        "-",
+    ]
+
+
+def _local_command_has_evidence(argv: list[str]) -> bool:
+    return any(option in argv for option in ("--cd", "--output-last-message", "--json"))
+
+
+def _validate_local_command(argv: list[str], has_evidence: bool) -> None:
+    if argv[-1] != "-":
+        raise ValueError("local execution requires a stdin prompt operand")
+    if has_evidence and (
+        argv.count("--cd") != 1
+        or argv.count("--output-last-message") != 1
+        or argv.count("--json") != 1
+    ):
+        raise ValueError("local execution requires canonical SDK evidence arguments")
+    if not has_evidence and argv[4:] != ["--sandbox", "read-only", "-"]:
+        raise ValueError("local execution requires the canonical profile-guard command")
+
+
+def _translated_local_command(argv: list[str], wrapper: str, has_evidence: bool) -> list[str]:
+    translated = [
+        "bash", wrapper, "--profile", OSS_LOCAL_PROFILE,
+        "--sandbox", "read-only", "--ephemeral",
+    ]
+    if has_evidence:
+        translated.extend([
+            "--cd", argv[argv.index("--cd") + 1], "--json",
+            "--output-last-message", argv[argv.index("--output-last-message") + 1],
+        ])
+    return [*translated, "-"]
+
+
+def configs_oss_local_exec_command(command: Sequence[str]) -> list[str]:
+    """Run the local lane through the disposable Configs executor.
+
+    The installed Codex app-server can reject a direct in-process client from
+    the managed sandbox.  Configs' executor retries that exact command in a
+    disposable CODEX_HOME while keeping the logical receipt command as
+    ``codex exec``.
+    """
+    argv = list(command)
+    if argv[:4] != ["codex", "exec", "--profile", OSS_LOCAL_PROFILE]:
+        raise ValueError("local execution requires the canonical oss-local Codex command")
+    if argv.count("--sandbox") != 1 or argv[argv.index("--sandbox") + 1] != "read-only":
+        raise ValueError("local execution requires the read-only sandbox")
+    has_evidence_options = _local_command_has_evidence(argv)
+    _validate_local_command(argv, has_evidence_options)
+    wrapper = configs_codex_exec_wrapper()
+    if wrapper is None:
+        raise ValueError("local execution requires the Configs Codex executor")
+    return _translated_local_command(argv, wrapper, has_evidence_options)
+
+
+@dataclass(frozen=True)
+class ConfigsAuthBackedInvocation:
+    """Receipt-safe command shape for one Configs-owned FIFO consumption."""
+
+    wrapper: str
+    env_file: Path
+    auth_stream_identity_digest: str
+
+    def runtime_argv(self, command: Sequence[str]) -> list[str]:
+        return [
+            "bash",
+            self.wrapper,
+            "--env-file",
+            str(self.env_file),
+            "--require-env",
+            OSS_CLOUD_REQUIRED_ENV,
+            "--",
+            *command,
+        ]
+
+    def receipt_argv(self, command: Sequence[str]) -> list[str]:
+        return self.runtime_argv(command)
+
+
 @contextmanager
-def approved_op_env_invocation(
+def configs_auth_backed_invocation(
     value: str | Path,
     *,
     expected_identity_digest: str | None = None,
-) -> Iterator[ApprovedOpEnvInvocation]:
-    """Open the approved FIFO once and hand its descriptor to `op`.
+) -> Iterator[ConfigsAuthBackedInvocation]:
+    """Bind one child command to the reviewed Configs FIFO wrapper.
 
-    A path-only validation cannot protect the interval between validation and a
-    later child opening that path.  Capture a stable FIFO inode with a
-    non-blocking, no-follow descriptor instead; any replacement before open is
-    rejected by the inode comparison and any replacement after open cannot
-    change what the child receives through ``/dev/fd/<n>``.
+    The wrapper validates and consumes the Desktop-owned FIFO itself. This
+    consumer checks its non-secret identity immediately before constructing the
+    child command so a stale plan cannot silently use a replaced mount.
     """
     path = Path(value)
     if not is_actual_opaque_env_reference(str(path)):
         raise ValueError("cloud execution requires an operator-approved opaque environment stream")
-    op_binary = approved_op_binary()
-    if op_binary is None:
-        raise ValueError("cloud execution requires an approved 1Password CLI binary")
-
-    before = path.lstat()
-    flags = os.O_RDONLY | os.O_NONBLOCK
-    if hasattr(os, "O_CLOEXEC"):
-        flags |= os.O_CLOEXEC
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    fd = os.open(path, flags)
-    try:
-        opened = os.fstat(fd)
-        if not stat.S_ISFIFO(opened.st_mode):
-            raise ValueError("cloud execution auth stream is not a FIFO")
-        if (before.st_dev, before.st_ino) != (opened.st_dev, opened.st_ino):
-            raise ValueError("cloud execution auth stream identity changed before descriptor handoff")
-        identity = _identity_digest(opened)
-        if expected_identity_digest is not None and identity != expected_identity_digest:
-            raise ValueError("cloud execution auth stream identity changed before descriptor handoff")
-        yield ApprovedOpEnvInvocation(op_binary, path, fd, identity)
-    finally:
-        os.close(fd)
-
-
-def run_with_approved_op_env(
-    value: str | Path,
-    command: Sequence[str],
-    operation: Callable[[list[str], tuple[int, ...]], ResultT],
-    *,
-    expected_identity_digest: str | None = None,
-) -> ResultT:
-    """Run one operation through a descriptor-bound approved `op` command."""
-    with approved_op_env_invocation(
-        value, expected_identity_digest=expected_identity_digest,
-    ) as invocation:
-        return operation(invocation.runtime_argv(command), invocation.pass_fds)
+    wrapper = configs_auth_wrapper()
+    if wrapper is None:
+        raise ValueError("cloud execution requires the Configs auth-backed wrapper")
+    identity = opaque_env_identity_digest(path)
+    if identity is None or (
+        expected_identity_digest is not None and identity != expected_identity_digest
+    ):
+        raise ValueError("cloud execution auth stream identity changed before wrapper start")
+    yield ConfigsAuthBackedInvocation(wrapper, path, identity)
 
 
 def redact_opaque_env_reference(value: str) -> str:

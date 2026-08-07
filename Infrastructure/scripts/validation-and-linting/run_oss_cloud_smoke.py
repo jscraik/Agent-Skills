@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# ruff: noqa: E402
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
-import shutil
 import stat
 import subprocess
 import sys
@@ -17,26 +16,27 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
-SKILLS_SDK_LIB_DIR = SCRIPT_DIR.parent / "lib"
-if str(SKILLS_SDK_LIB_DIR) not in sys.path:
-    sys.path.insert(0, str(SKILLS_SDK_LIB_DIR))
 
-from check_oss_local_smoke_output import _findings
-from ask.skills_sdk.eval_profiles import OSS_CLOUD_MODEL
+from check_oss_local_smoke_output import _findings  # noqa: E402
 
 
-EXPECTED_MODEL = OSS_CLOUD_MODEL
+EXPECTED_MODEL = "deepseek-v4-flash:cloud"
 EXPECTED_PROVIDER = "ollama-cloud"
 DEFAULT_PROFILE_SOURCE = Path.home() / ".codex" / "oss-cloud.config.toml"
-DEFAULT_OP_ENV_FILE = Path.home() / ".codex" / ".env"
+DEFAULT_AUTH_ENV_FILE = Path.home() / ".codex" / ".env"
+DEFAULT_AUTH_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh")
+DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh")
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
+CLOUD_SMOKE_MAX_TOKENS_USED = 20000
+CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a bounded oss-cloud Codex marker smoke through 1Password.")
     parser.add_argument("--profile-source", default=str(DEFAULT_PROFILE_SOURCE))
-    parser.add_argument("--op-env-file", default=str(DEFAULT_OP_ENV_FILE))
-    parser.add_argument("--op-bin", default=shutil.which("op") or "op")
+    parser.add_argument("--env-file", default=str(DEFAULT_AUTH_ENV_FILE))
+    parser.add_argument("--auth-wrapper", default=str(DEFAULT_AUTH_WRAPPER))
+    parser.add_argument("--codex-exec-wrapper", default=str(DEFAULT_CODEX_EXEC_WRAPPER))
     parser.add_argument("--timeout-seconds", type=int, default=120)
     parser.add_argument("--marker", default=DEFAULT_MARKER)
     parser.add_argument("--work-dir", default=str(Path.cwd()))
@@ -76,20 +76,13 @@ def _approved_env_file(path: Path) -> Path | None:
         mode = path.stat().st_mode
     except OSError:
         return None
-    if stat.S_ISFIFO(mode):
-        return path
-    if not path.is_file():
-        return None
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        if line.startswith("OLLAMA_API_KEY=op://") and len(line) > len("OLLAMA_API_KEY=op://"):
-            return path
-    return None
+    return path if stat.S_ISFIFO(mode) else None
 
 
 def _auth_source(path: Path) -> str:
     if _approved_env_file(path) is None:
         return "missing_or_invalid"
-    return "op_fifo" if stat.S_ISFIFO(path.stat().st_mode) else "op_reference"
+    return "1password_desktop_fifo"
 
 
 def _paths(output_dir: str | None) -> dict[str, Path]:
@@ -105,26 +98,27 @@ def _paths(output_dir: str | None) -> dict[str, Path]:
 
 
 def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -> list[str]:
+    del paths
     return [
-        args.op_bin,
-        "run",
+        "bash",
+        args.auth_wrapper,
         "--env-file",
         str(env_file),
+        "--require-env",
+        "OLLAMA_API_KEY",
         "--",
         "env",
         f"CODEX_HOME={Path(args.profile_source).expanduser().parent.resolve(strict=False)}",
-        "codex",
-        "exec",
+        "bash",
+        args.codex_exec_wrapper,
         "--profile",
         "oss-cloud",
+        "--strict-config",
         "--sandbox",
         "read-only",
         "--ephemeral",
-        "--json",
-        "--ignore-rules",
-        "--skip-git-repo-check",
-        "--output-last-message",
-        str(paths["last_message"]),
+        "--model",
+        EXPECTED_MODEL,
         f"Reply exactly {args.marker}",
     ]
 
@@ -153,40 +147,58 @@ def _read(path: Path) -> str:
 
 
 def _receipt(
-    args: argparse.Namespace,
-    paths: dict[str, Path],
-    profile: Path,
-    findings: list[dict[str, str]],
-    *,
-    command: list[str] | None,
-    exit_code: int | None,
-    duration_seconds: float,
-    provider_invoked: bool,
+    args: argparse.Namespace, paths: dict[str, Path], profile: Path, findings: list[dict[str, str]], *,
+    command: list[str] | None, exit_code: int | None, duration_seconds: float, provider_invoked: bool,
 ) -> dict[str, Any]:
-    if command is not None:
-        findings.extend(_findings("\n".join((_read(paths["stdout"]), _read(paths["stderr"]))), 7000))
-        if exit_code != 0:
-            findings.append({"code": "oss_cloud_smoke_exit_nonzero", "message": f"Codex exited with {exit_code}."})
-        if _read(paths["last_message"]).strip() != args.marker:
-            findings.append({"code": "oss_cloud_smoke_marker_mismatch", "message": "Cloud smoke marker did not match."})
+    warnings = _runtime_findings(args, paths, findings, command, exit_code)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
+        "observed_at": datetime.now(timezone.utc).isoformat(),
         "status": "pass" if provider_invoked and not findings else "blocked",
         "lane": "oss-cloud",
         "codex_profile": "oss-cloud",
         "model": _profile_value(profile, "model") if profile.is_file() else None,
         "model_provider": _profile_value(profile, "model_provider") if profile.is_file() else None,
-        "auth_source": _auth_source(Path(args.op_env_file).expanduser()),
+        "auth_source": _auth_source(Path(args.env_file).expanduser()),
         "provider_invoked": provider_invoked,
-        "command": command,
+        "command": _redacted_command(command),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
         "marker": args.marker,
         "stdout_path": str(paths["stdout"]),
         "stderr_path": str(paths["stderr"]),
         "last_message_path": str(paths["last_message"]),
+        "warnings": warnings,
         "findings": findings,
     }
+
+
+def _runtime_findings(
+    args: argparse.Namespace, paths: dict[str, Path], findings: list[dict[str, str]],
+    command: list[str] | None, exit_code: int | None,
+) -> list[dict[str, str]]:
+    if command is None:
+        return []
+    runtime_findings = _findings(
+        "\n".join((_read(paths["stdout"]), _read(paths["stderr"]))), CLOUD_SMOKE_MAX_TOKENS_USED,
+    )
+    warnings = [item for item in runtime_findings if item["code"] in CLOUD_SMOKE_NON_BLOCKING_CODES]
+    findings.extend(item for item in runtime_findings if item["code"] not in CLOUD_SMOKE_NON_BLOCKING_CODES)
+    if exit_code != 0:
+        findings.append({"code": "oss_cloud_smoke_exit_nonzero", "message": f"Codex exited with {exit_code}."})
+    if _read(paths["stdout"]).strip() != args.marker:
+        findings.append({"code": "oss_cloud_smoke_marker_mismatch", "message": "Cloud smoke marker did not match."})
+    return warnings
+
+
+def _redacted_command(command: list[str] | None) -> list[str] | None:
+    if command is None:
+        return None
+    redacted = list(command)
+    for index, value in enumerate(redacted[:-1]):
+        if value == "--env-file":
+            redacted[index + 1] = "<operator-approved-opaque-env-stream>"
+    return redacted
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -196,18 +208,20 @@ def main(argv: list[str] | None = None) -> int:
     profile = Path(args.profile_source).expanduser()
     paths = _paths(args.output_dir)
     findings = _profile_findings(profile)
-    env_file = _approved_env_file(Path(args.op_env_file).expanduser())
+    env_file = _approved_env_file(Path(args.env_file).expanduser())
     if env_file is None:
-        findings.append({"code": "oss_cloud_credential_reference_missing", "message": "Approved OLLAMA_API_KEY 1Password reference is required."})
-    if not Path(args.op_bin).is_file() and shutil.which(args.op_bin) is None:
-        findings.append({"code": "oss_cloud_op_missing", "message": "1Password CLI is required for oss-cloud."})
+        findings.append({"code": "oss_cloud_auth_stream_missing", "message": "Desktop-owned OLLAMA_API_KEY FIFO is required."})
+    if not Path(args.auth_wrapper).is_file() or Path(args.auth_wrapper).is_symlink():
+        findings.append({"code": "oss_cloud_auth_wrapper_missing", "message": "Configs auth-backed wrapper is required for oss-cloud."})
+    if not Path(args.codex_exec_wrapper).is_file() or not Path(args.codex_exec_wrapper).stat().st_mode & stat.S_IXUSR:
+        findings.append({"code": "oss_cloud_exec_wrapper_missing", "message": "Configs Codex execution wrapper is required for oss-cloud."})
     if findings:
         receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False)
     else:
         command = _command(args, paths, env_file)
         exit_code, duration_seconds = _run(command, paths, args)
         receipt = _receipt(args, paths, profile, findings, command=command, exit_code=exit_code, duration_seconds=duration_seconds, provider_invoked=True)
-    print(json.dumps(receipt, sort_keys=True, indent=2) if args.json else receipt["status"])
+    print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
 

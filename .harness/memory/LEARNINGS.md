@@ -253,3 +253,27 @@ Repo-specific agent knowledge base. Append-only.
 **2026-07-14 [Codex]:** An empty command list in a globally blocked A/B plan is suppressed execution, not successful execution. -> Translate every blocked plan into a non-executing run receipt before the runtime loop: keep each lane with its own failed preflight `blocked`, label a lane whose preflight passed `not_run_with_reason` using a deterministic plan-blocked reason, preserve empty results and zero side-effect claims, and require the resulting receipt to pass the canonical v1 reader.
 **2026-07-15 [Codex]:** A catalog probe is network evidence, not provider execution evidence. -> Keep authenticated non-generation catalog access behind the opaque `op run --env-file` boundary, derive provider invocation only from an observed Codex model event, and emit a typed `provider_event_missing` blocker when a variant has no such event even if the process exits successfully.
 **2026-07-15 [Codex]:** Skills SDK receipts must keep provider and network evidence separate while proving the command contract. -> Attribute provider invocation only to observed model events; allow authenticated catalog preflight to establish network access; and require every planned and executed Codex argv to contain exactly one `--ask-for-approval on-request` binding alongside its declared runtime profile.
+
+**2026-07-31 [Codex]:** Bash command 'python3' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2804028037)
+
+**2026-07-31 [Codex]:** Bash command 'zsh' failed with exit code 9 -> summarize the failure and change approach before rerunning the same command (auto-key:254763255)
+
+**2026-07-31 [Codex]:** Bash command 'redacted-command' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2755738978)
+
+**2026-07-31 [Codex]:** Bash command 'redacted-command' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1658494203)
+
+**2026-07-31 [Codex]:** Bash command 'redacted-command' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2967061960)
+
+**2026-07-31 [Codex]:** Bash command 'mkdir' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:3878850473)
+
+**2026-07-31 [Codex]:** Bash command 'redacted-command' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:3350881350)
+
+**2026-07-31 [Codex]:** Bash command 'redacted-command' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1124029071)
+
+**2026-08-04 [Codex]:** Bash command 'bash' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3822099911)
+
+**2026-08-04 [Codex]:** Bash command 'bash' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2208772009)
+
+**2026-08-04 [Codex]:** Bash command 'jq' failed with exit code 124 -> summarize the failure and change approach before rerunning the same command (auto-key:698697174)
+
+**2026-08-06 [Codex]:** Bash command 'bash' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2871825019)

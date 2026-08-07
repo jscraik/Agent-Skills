@@ -1,6 +1,6 @@
 ---
 name: testing
-description: "Choose validation proof for tests, CI, coverage, evals, and closeout evidence: map changed files to repo-native commands, classify pass/fail/blocked ownership, preserve trace/regression artifacts, and keep local, CI, Tessl, external-review, tracker, and runtime truth separate. Use when users ask what tests to run, why validation failed, what proof is enough, or whether command evidence supports a claim."
+description: "Validate and choose proportionate test proof for tests, CI, coverage, evals, and closeout evidence: map changed files to repo-native commands, place checks at commit, push, and pull-request gates, classify pass/fail/blocked ownership, and preserve trace/regression artifacts. Use when users ask what tests or gates to run, how to design coverage, why validation failed, or what proof supports a claim."
 metadata:
   version: "1.1.0"
   skill-type: code_quality_review
@@ -24,6 +24,7 @@ Select the smallest real proof that exercises the changed behavior, then widen o
 
 - Choose validation for code, docs, config, workflow, skill, or eval changes.
 - Fix failing tests, classify validation ownership, or design coverage.
+- Design or audit a repository's test layers and local/CI gate placement.
 - Prove completion before handoff, PR, merge, release, or closeout claims.
 
 ## Inputs
@@ -92,6 +93,41 @@ Default widening ladder:
 Skip a rung when it does not apply, but record the reason. Do not treat a later
 rung as a substitute for missing earlier behavior proof.
 
+## Test Strategy And Gate Placement
+
+Start from the user-visible promise and its failure modes, not a universal test
+percentage or a copied toolchain. Select the smallest layers that would detect
+the meaningful ways that promise could fail:
+
+| Layer | Use it for | Keep the proof focused on |
+| --- | --- | --- |
+| Unit | Pure rules, transforms, validation, and explicit error paths. | Observable inputs, outputs, boundaries, and rejected cases. |
+| Integration or contract | CLI, filesystem, package, API, configuration, or service boundaries. | Real message, file, command, or schema shape at the boundary. |
+| End-to-end smoke | A small number of critical user journeys. | The main action completes with a usable result; do not duplicate every lower-level case. |
+| Regression | A fixed defect or stable production failure. | The original failure first, then the corrected behavior. |
+| Property-based or generative | Many input combinations share a clear invariant. | The invariant, generated input domain, shrinking, and the retained counterexample. |
+| Mutation or exploratory | Assertions may be weak, or the unknown risk needs investigation. | Surviving mutations or an exploration charter; treat both as gap-finding evidence, not total correctness proof. |
+
+Place only work that is fast enough and relevant enough at each gate:
+
+1. **Pre-commit:** formatting, linting, type checks, and affected fast tests.
+   Do not make every commit wait for a broad suite unless the repository has a
+   measured reason to do so.
+2. **Pre-push:** the wider affected suite and repository-specific checks that
+   are too slow for ordinary commits but cheap enough to stop a bad push.
+3. **Pull request CI:** the full maintained unit suite, required integration or
+   contract tests, build, static checks, and critical smoke coverage. Confirm
+   the workflow actually invokes them; a package script alone is not PR proof.
+4. **Scheduled or release depth:** mutation, broader end-to-end, compatibility,
+   performance, security, and live-dependency checks when their risk warrants
+   them. Report this lane separately from commit or PR evidence.
+
+For a strategy or gate audit, inventory each layer as `present`, `missing`,
+`not_applicable`, or `unverified`. Then verify the actual hook or workflow
+entrypoint rather than inferring enforcement from a README, package script, or
+tool dependency. A green unit suite does not prove its pre-commit, pre-push,
+or pull-request gate ran.
+
 ### Command Templates
 
 - Skill package: `./bin/ask skills package verify Skills/agent-ops/testing --json --robot`
@@ -107,8 +143,17 @@ rung as a substitute for missing earlier behavior proof.
 - For a validator change, retain one accepted fixture and one rejected fixture,
   run their focused test, then run the canonical wrapper that owns that test.
   Report behavior proof separately from wrapper wiring and hosted checks.
+- For a test-strategy request, map promises and failure modes to layers, inspect
+  the installed hooks and PR workflow, and report each gate as present, missing,
+  not applicable, or unverified before recommending a change.
 
 ## Failure Mode
+
+If the repository does not expose its actual hook, workflow, or test entrypoint,
+report the affected gate as `unverified` rather than assuming it runs. Ask for
+the smallest path or command evidence needed to inspect it, and do not add a
+new test layer or mandatory gate until the target repository and its risk are
+known.
 
 ## Gotchas
 

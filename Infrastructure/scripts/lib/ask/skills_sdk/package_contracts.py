@@ -12,6 +12,7 @@ from ask.skills_sdk.contracts import (
     PACKAGE_CONTRACT_FIELDS,
     parse_frontmatter_scalar,
 )
+from ask.skills_sdk.skill_authoring_contract import authoring_contract
 
 try:
     import yaml  # type: ignore
@@ -48,6 +49,7 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "reference_contract",
     "reference_quality",
     "writing_quality",
+    "authoring_contract",
     "openai_platform_compat",
     "purpose",
     "inputs",
@@ -618,10 +620,6 @@ def _basic_requirement_rubric_check(
     missing: list[str] = []
     quality_keys: list[str] = []
     selector_keys: list[str] = []
-
-    # Check field presence (exists in contract) vs emptiness (present but no content)
-    quality_present = "quality_criteria" in contract or bool(profile_ids)
-    evidence_present = "evidence_requirements" in contract
 
     has_quality = isinstance(quality_criteria, dict) and quality_criteria
     has_evidence = isinstance(evidence_requirements, list) and [
@@ -4248,6 +4246,13 @@ def sdk_package_contract(
         text,
         progressive_disclosure,
     )
+    authoring = authoring_contract(
+        repo_root,
+        source_path,
+        frontmatter,
+        reference_contract,
+        text,
+    )
     openai_platform_compat = openai_platform_compat_contract(repo_root, source_path, frontmatter)
     identity_and_assets = identity_and_assets_contract(repo_root, source_path, frontmatter)
     knowledge_capsules = knowledge_capsule_first_party_contract(repo_root, source_path, text)
@@ -4294,6 +4299,7 @@ def sdk_package_contract(
         },
         "reference_quality": reference_quality,
         "writing_quality": writing_quality,
+        "authoring_contract": authoring,
         "openai_platform_compat": openai_platform_compat,
         "purpose": reference_contract.get("purpose") or frontmatter.get("description"),
         "inputs": reference_contract.get("inputs")
@@ -4345,6 +4351,7 @@ def sdk_package_contract(
             "references_contract_declared": bool(reference_contract),
             "references_quality_status": reference_quality["status"],
             "writing_quality_status": writing_quality["status"],
+            "authoring_contract_status": authoring["status"],
             "openai_platform_compat_status": openai_platform_compat["status"],
             "evals_declared": bool(eval_paths),
             "task_profile_declared": bool(task_profile_path),
@@ -4602,6 +4609,7 @@ def skill_package_readiness(
     required_contract_blockers = _required_sdk_contract_blockers(sdk_contract)
     reference_blockers = required_contract_blockers.pop("reference_quality", [])
     writing_quality_blockers = required_contract_blockers.pop("writing_quality", [])
+    authoring_contract_blockers = required_contract_blockers.pop("authoring_contract", [])
     openai_platform_blockers = required_contract_blockers.pop("openai_platform_compat", [])
     other_required_contract_blockers = [
         blocker
@@ -4610,6 +4618,7 @@ def skill_package_readiness(
     ]
     blocked_reasons.extend(reference_blockers)
     blocked_reasons.extend(writing_quality_blockers)
+    blocked_reasons.extend(authoring_contract_blockers)
     blocked_reasons.extend(openai_platform_blockers)
     blocked_reasons.extend(other_required_contract_blockers)
     if sdk_missing and not missing_identity_fields and not missing:
@@ -4649,6 +4658,18 @@ def skill_package_readiness(
         readiness_level = "writing_quality_incomplete"
         share_ready = False
     if (
+        authoring_contract_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+        and not writing_quality_blockers
+    ):
+        readiness_level = "authoring_contract_incomplete"
+        share_ready = False
+    if (
         openai_platform_blockers
         and not missing_identity_fields
         and not missing
@@ -4657,6 +4678,7 @@ def skill_package_readiness(
         and not optimization_blockers
         and not reference_blockers
         and not writing_quality_blockers
+        and not authoring_contract_blockers
     ):
         readiness_level = "openai_platform_compat_incomplete"
         share_ready = False
@@ -4669,6 +4691,7 @@ def skill_package_readiness(
         and not optimization_blockers
         and not reference_blockers
         and not writing_quality_blockers
+        and not authoring_contract_blockers
         and not openai_platform_blockers
     ):
         readiness_level = "sdk_required_contract_incomplete"
@@ -4691,6 +4714,7 @@ def skill_package_readiness(
         and not optimization_blockers
         and not reference_blockers
         and not writing_quality_blockers
+        and not authoring_contract_blockers
         and not openai_platform_blockers
         and not other_required_contract_blockers
     ):
@@ -4717,6 +4741,7 @@ def skill_package_readiness(
         and not optimization_blockers
         and not reference_blockers
         and not writing_quality_blockers
+        and not authoring_contract_blockers
         and not openai_platform_blockers
         and not other_required_contract_blockers
         and not knowledge_blockers

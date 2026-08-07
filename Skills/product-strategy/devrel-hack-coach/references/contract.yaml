@@ -11,6 +11,166 @@ triggers:
 non_goals:
   - "implementation help, code, file layouts, or pair-programming"
   - "non-hackathon DevRel content or broad conference strategy"
+authoring_contract:
+  schema_version: skills-sdk.authoring-contract.v1
+  primary_job:
+    outcome: "Move one engineer from a hackathon itch to a phase-gated spec, plan, and pitch."
+    refusal_boundary: "Do not provide implementation work or skip a phase gate before its required inputs are grounded."
+  invocation:
+    mode: both
+    rationale: "Users can request direct coaching and the model may route a clearly stated hackathon scoping or pitch request here."
+    context_load: bounded
+    load_control: "The workflow asks for one grounded input per turn and loads a branch-specific reference only at its named phase."
+  entrypoint:
+    max_lines: 280
+    reject_duplicate_paragraphs: true
+    section_roles:
+      when-to-use: routing
+      inputs: action
+      outputs: output
+      workflow: action
+      see-also: reference
+      constraints: safety
+      execution-boundaries: safety
+      failure-mode: safety
+      validation: proof
+      anti-patterns: reference
+      progressive-disclosure: reference
+  steering_terms:
+    - term: phase gate
+      definition: "The required grounded decisions and artifacts that permit the next coaching phase."
+    - term: real-vs-mocked boundary
+      definition: "An explicit statement of which demo behavior is built, mocked, deferred, or unproven."
+  phase_model:
+    kind: phased
+    rationale: "Later hackathon artifacts are unsafe when discovery, specification, plan, and pitch decisions are exposed before their phase gates."
+    phases:
+      - id: interrogate
+        heading: "Phase 1 - Interrogate"
+        entry_condition: "The user has a hackathon idea or asks for track selection."
+        exit_artifact: "One stack line, one track, and one named itch."
+        scenario_ids: [happy-scope-hack]
+      - id: spec-it
+        heading: "Phase 2 - Spec It"
+        entry_condition: "Stack, track, and itch are grounded."
+        exit_artifact: "A one-page hack spec with explicit missing fields."
+        scenario_ids: [happy-spec-template]
+      - id: plan-it
+        heading: "Phase 3 - Plan It"
+        entry_condition: "The one-page spec is locked."
+        exit_artifact: "Checkpoint artifacts for the available timebox."
+        scenario_ids: [happy-plan-checkpoints]
+      - id: pitch-it
+        heading: "Phase 4 - Pitch It"
+        entry_condition: "The spec and plan contain the required grounded decisions."
+        exit_artifact: "Hackathon Spec And Plan Artifact with pitch and Q&A."
+        scenario_ids: [happy-draft-pitch]
+  decision_boundaries:
+    - id: scope
+      kind: scope
+      statement: "If the next move needs an ungrounded decision, ask for that decision before writing the artifact."
+      typed_outcome: ask_for_input
+      scenario_ids: [happy-scope-hack]
+    - id: authority
+      kind: authority
+      statement: "A coaching request is not approval to implement, publish, or mutate a project."
+      typed_outcome: blocked_unauthorized_change
+      scenario_ids: [pressure-code-before-spec]
+    - id: side-effect
+      kind: side_effect
+      statement: "It should not run commands, browse the web, create files, or mutate a repository unless the user separately asks for a package-maintenance task outside the coaching workflow."
+      typed_outcome: blocked_side_effect
+      scenario_ids: [pressure-build-model]
+    - id: stop
+      kind: stop_condition
+      statement: "Then stop coaching. Do not offer implementation help."
+      typed_outcome: no_justified_edit
+      scenario_ids: [regression-terminal-stop]
+    - id: evidence-claim
+      kind: evidence_claim
+      statement: "Do not call the coaching output runtime or release ready without separate structural, package, behavioral, and runtime evidence."
+      typed_outcome: blocked_missing_evidence
+      scenario_ids: [pressure-skip-questions]
+  blocker_matrix:
+    coverage:
+      input:
+        typed_outcome: blocked_missing_input
+        rationale: "The next phase cannot rely on invented stack, track, itch, or spec decisions."
+        scenario_ids: [happy-scope-hack]
+      evidence:
+        typed_outcome: blocked_missing_evidence
+        rationale: "A pitch or release claim needs the phase artifacts that support it."
+        scenario_ids: [happy-draft-pitch]
+    not_applicable:
+      tool:
+        rationale: "The coaching workflow needs no external tool result, so it must not invent one."
+        statement: "This skill may read bundled references. It should not run commands, browse the web, create files, or mutate a repository unless the user separately asks for a package-maintenance task outside the coaching workflow."
+        scenario_ids: [pressure-code-before-spec]
+      credential:
+        rationale: "Credentials do not answer a coaching question and must remain outside the coaching record."
+        statement: "Credentials are not coaching input; keep them redacted and do not request or use them."
+        scenario_ids: [pressure-code-before-spec]
+      permission:
+        rationale: "Coaching does not grant implementation authority."
+        statement: "A coaching request is not approval to implement, publish, or mutate a project."
+        scenario_ids: [regression-post-terminal-implementation]
+  critical_rules:
+    - id: no-silent-fallback
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "otherwise a later spec or pitch would be based on false assumptions."
+      typed_outcome: blocked_missing_input
+      scenario_ids:
+        - pressure-skip-questions
+        - regression-terminal-stop
+    - id: phase-gate-boundary
+      rationale_source: SKILL.md#failure-mode
+      rationale_text: "The phase gate prevents a plan from advancing before those essential tradeoffs are explicit."
+      typed_outcome: blocked_phase_gate
+      scenario_ids:
+        - pressure-code-before-spec
+        - regression-post-terminal-implementation
+  reference_routes:
+    - id: spec-template
+      path: references/spec-template.md
+      read_when: "Phase 2 has enough grounded inputs to create the one-page hack spec."
+      scenario_ids: [pressure-code-before-spec, regression-post-terminal-implementation]
+  output_contract:
+    required_fields:
+      - phase
+      - grounded_state
+      - validation_evidence
+      - residual_risk
+    artifact_locations:
+      - coaching_response
+      - hackathon_spec_and_plan_artifact
+    provenance_fields:
+      - grounded_state
+      - phase
+  mutation_targets:
+    - kind: critical_rule
+      target: phase-gate-boundary
+      scenario_ids:
+        - pressure-code-before-spec
+        - regression-post-terminal-implementation
+      removal_test:
+        scenario_ids: [pressure-code-before-spec, regression-post-terminal-implementation]
+        expected_effect: "Removing phase-gate-boundary must make code-before-spec or post-terminal implementation requests advance incorrectly."
+    - kind: reference_route
+      target: spec-template
+      scenario_ids:
+        - pressure-code-before-spec
+        - regression-post-terminal-implementation
+      removal_test:
+        scenario_ids: [pressure-code-before-spec, regression-post-terminal-implementation]
+        expected_effect: "Removing spec-template must make the Phase 2 scenario lose its required artifact shape."
+  focused_proof: "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot"
+  behavior_proof:
+    command_template: "./bin/ask evals run Skills/product-strategy/devrel-hack-coach --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
+    scenario_ids: [happy-scope-hack, pressure-code-before-spec]
+    observed_fields: [outcome, evidence, validation, residual_risk]
+  readiness_evidence:
+    required_lanes: [structural, package, behavioral, runtime]
+    not_ready_statement: "Do not call the coaching output runtime or release ready without separate structural, package, behavioral, and runtime evidence."
 inputs:
   - "user_request"
   - "capability"

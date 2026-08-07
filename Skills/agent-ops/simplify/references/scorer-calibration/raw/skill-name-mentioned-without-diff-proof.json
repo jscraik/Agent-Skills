@@ -1,0 +1,7 @@
+{
+  "id": "skill-name-mentioned-without-diff-proof",
+  "probe_type": "skill_name_mention_not_enough",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fail fixture invokes simplify by name yet proposes a rewrite without a supplied diff or comparison base, so it does not satisfy the skill's bounded-review contract."
+}

@@ -37,9 +37,29 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
         self.assertNotIn("OPENAI_API_KEY", env)
         self.assertNotIn("SESSION_TOKEN", env)
 
+    def test_codex_runner_env_prefers_bound_executable_parent(self) -> None:
+        env = _codex_runner_env(
+            {
+                "PATH": "/usr/bin",
+                "CODEX_CLI_PATH": "/Applications/ChatGPT.app/Contents/Resources/codex",
+            }
+        )
+        self.assertEqual(
+            env["PATH"],
+            "/Applications/ChatGPT.app/Contents/Resources:/usr/bin",
+        )
+        self.assertEqual(
+            env["CODEX_CLI_PATH"],
+            "/Applications/ChatGPT.app/Contents/Resources/codex",
+        )
+
     def test_default_cloud_runner_uses_only_actual_home_fifo(self) -> None:
         captured: list[list[str]] = []
-        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "--sandbox", "read-only", "--json", "-"]
+        command = [
+            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
+            "--sandbox", "read-only", "--cd", ".", "--json", "--output-last-message",
+            ".harness/artifacts/last-message.json", "-",
+        ]
 
         def fake_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
             captured.append(argv)
@@ -53,16 +73,28 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
                 patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=fake_run),
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)),
-                patch("ask.skills_sdk.ab_transport_contracts.approved_op_binary", return_value="/mock/bin/op"),
+                patch(
+                    "ask.skills_sdk.ab_transport_contracts.configs_auth_wrapper",
+                    return_value="/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                ),
             ):
                 result = _default_codex_runner(command, "prompt", REPO_ROOT, 1)
-        self.assertEqual(captured[0][:3], ["/mock/bin/op", "run", "--env-file"])
-        self.assertRegex(captured[0][3], r"^/dev/fd/\d+$")
-        self.assertEqual(captured[0][4], "--")
-        self.assertEqual(result.executed_argv[:5], ["/mock/bin/op", "run", "--env-file", str(env_file), "--"])
+        self.assertEqual(captured[0][:7], [
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+            "--env-file", str(env_file), "--require-env", "OLLAMA_API_KEY", "--",
+        ])
+        self.assertEqual(result.executed_argv[:7], captured[0][:7])
+        self.assertEqual(captured[0][7:13], [
+            "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+        ])
 
     def test_default_cloud_runner_rejects_non_fifo_stream_before_subprocess(self) -> None:
-        command = ["codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request", "--sandbox", "read-only", "--json", "-"]
+        command = [
+            "codex", "exec", "--profile", "oss-cloud", "--ask-for-approval", "on-request",
+            "--sandbox", "read-only", "--cd", ".", "--json", "--output-last-message",
+            ".harness/artifacts/last-message.json", "-",
+        ]
         with tempfile.TemporaryDirectory() as directory:
             env_file = Path(directory) / ".codex" / ".env"
             env_file.parent.mkdir()

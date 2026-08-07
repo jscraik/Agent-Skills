@@ -44,13 +44,17 @@ IDENTITY_B = {
     "package_digest": f"sha256:{'2' * 64}",
 }
 _TEST_CLOUD_ENV_FILE: Path | None = None
+_CONFIGS_AUTH_WRAPPER = "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"
 
 
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
         assert _TEST_CLOUD_ENV_FILE is not None
-        return ["op", "run", "--env-file", str(_TEST_CLOUD_ENV_FILE), "--", *command_argv]
+        return [
+            "bash", _CONFIGS_AUTH_WRAPPER, "--env-file", str(_TEST_CLOUD_ENV_FILE),
+            "--require-env", "OLLAMA_API_KEY", "--", *command_argv,
+        ]
     return list(command_argv)
 
 
@@ -147,7 +151,7 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
                     exit_code=0,
                     stdout='{"type":"response.completed"}\n',
                     stderr="",
-                    executed_argv=["op", "run", "--env-file"],
+                    executed_argv=["bash", _CONFIGS_AUTH_WRAPPER, "--env-file"],
                 )
             return CodexRunResult(
                 exit_code=0,
@@ -337,11 +341,22 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         self.assertEqual(self._schema_result(candidate).status, "fail")
 
     def test_cloud_catalog_probe_failure_preserves_network_attempt(self) -> None:
-        approved = {"status": "pass", "auth_source": "op_fifo", "auth_reference": "codex_cli_auth", "secret_value_observed": False}
-        with patch("ask.skills_sdk.eval_ab_preflight.shutil.which", return_value="/mock/bin/op"):
+        assert _TEST_CLOUD_ENV_FILE is not None
+        with (
+            patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(_TEST_CLOUD_ENV_FILE)}),
+            patch(
+                "ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper",
+                return_value="/mock/configs/run-auth-backed.sh",
+            ),
+        ):
+            from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact
+
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
             fact = _cloud_catalog_fact(
-                "minimax-m2.7:cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                lambda _command: (_ for _ in ()).throw(subprocess.TimeoutExpired(["op", "run"], 1)),
+                "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                lambda _command: (_ for _ in ()).throw(
+                    subprocess.TimeoutExpired(["bash", "/mock/configs/run-auth-backed.sh"], 1)
+                ),
             )
         self.assertEqual(fact["status"], "blocked")
         self.assertTrue(fact["network_accessed"])
@@ -371,6 +386,10 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
                 patch("ask.skills_sdk.eval_ab_run.subprocess.run", side_effect=forbidden_run),
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}),
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(directory)),
+                patch(
+                    "ask.skills_sdk.ab_transport_contracts.configs_auth_wrapper",
+                    return_value="/mock/configs/run-auth-backed.sh",
+                ),
             ):
                 with self.assertRaisesRegex(ValueError, "identity changed"):
                     _default_codex_runner(

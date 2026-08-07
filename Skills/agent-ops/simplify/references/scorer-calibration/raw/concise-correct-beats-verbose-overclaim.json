@@ -1,0 +1,7 @@
+{
+  "id": "concise-correct-beats-verbose-overclaim",
+  "probe_type": "short_correct_vs_verbose_wrong",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fail fixture is verbose but still overclaims equivalence and treats a broad cleanup as safe without evidence; verbosity cannot compensate for a missing behavior boundary."
+}
