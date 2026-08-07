@@ -21,7 +21,6 @@ if repo_root_str not in sys.path:
 SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
 from defusedxml import ElementTree as ET  # noqa: E402
-import run_skill_evals  # noqa: E402
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:
@@ -35,6 +34,7 @@ if existing_trace_checks is not None:
     if existing_path.parent != SCRIPT_DIR:
         del sys.modules["deterministic_trace_checks"]
 
+import run_skill_evals  # noqa: E402
 from run_skill_evals import (  # noqa: E402
     EvalCase,
     _classify_runner_blocker,
