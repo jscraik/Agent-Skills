@@ -1064,6 +1064,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("--sandbox", captured_command)
         self.assertIn("read-only", captured_command)
         self.assertIn("--ephemeral", captured_command)
+        self.assertIn("--skip-git-repo-check", captured_command)
         self.assertIn("--output-last-message", captured_command)
         self.assertIn("--cd", captured_command)
         self.assertNotEqual(captured_command[captured_command.index("--cd") + 1], str(REPO_ROOT))

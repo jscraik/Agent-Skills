@@ -154,6 +154,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "profile_config_missing_or_invalid",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
+
     def test_installed_local_profile_catalog_and_runtime_inventory_are_required(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -794,7 +795,5 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 fact = self._catalog_fact_for_process(completed)
                 self.assertEqual(fact["status"], "blocked")
                 self.assertFalse(fact["secret_value_observed"])
-
-
 if __name__ == "__main__":
     unittest.main()

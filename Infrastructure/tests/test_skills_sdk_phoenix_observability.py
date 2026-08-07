@@ -561,6 +561,108 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             ["oss-local", "oss-cloud"],
         )
 
+    def test_ab_trace_accepts_selected_cloud_lane(self) -> None:
+        receipt = {
+            "schema_version": "skills-sdk.ab-run-receipt.v1",
+            "status": "completed",
+            "operation": "ab_run",
+            "execution_lane": "oss-cloud",
+            "codex_profile": "oss-cloud",
+            "runtime_profile_gates": [{"lane": "oss-cloud", "codex_profile": "oss-cloud"}],
+            "variant_results": [
+                {
+                    "variant_label": "A",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "codex_profile": "oss-cloud",
+                    "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
+                },
+                {
+                    "variant_label": "B",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "codex_profile": "oss-cloud",
+                    "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
+                },
+            ],
+        }
+
+        plan = build_eval_trace_plan(receipt)
+
+        self.assertEqual(plan["blockers"], [])
+        self.assertEqual(
+            [row["derived_codex_profile"] for row in plan["profile_evidence"]],
+            ["oss-cloud", "oss-cloud"],
+        )
+
+    def test_ab_trace_uses_first_runtime_gate_for_all_lane_top_level_variants(self) -> None:
+        receipt = {
+            "schema_version": "skills-sdk.ab-run-receipt.v1",
+            "status": "completed",
+            "operation": "ab_run",
+            "execution_lane": "all",
+            "codex_profile": "oss-local",
+            "runtime_profile_gates": [
+                {"lane": "oss-local", "codex_profile": "oss-local"},
+                {"lane": "oss-cloud", "codex_profile": "oss-cloud"},
+            ],
+            "variant_results": [
+                {
+                    "variant_label": "A",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "codex_profile": "oss-local",
+                    "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
+                },
+                {
+                    "variant_label": "B",
+                    "status": "pass",
+                    "exit_code": 0,
+                    "codex_profile": "oss-local",
+                    "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
+                },
+            ],
+        }
+
+        plan = build_eval_trace_plan(receipt)
+
+        self.assertEqual(plan["blockers"], [])
+        self.assertEqual(
+            [row["derived_codex_profile"] for row in plan["profile_evidence"]],
+            ["oss-local", "oss-local"],
+        )
+
+    def test_ab_trace_blocks_explicit_all_lane_without_runtime_gates(self) -> None:
+        plan = build_eval_trace_plan(
+            {
+                "schema_version": "skills-sdk.ab-run-receipt.v1",
+                "status": "completed",
+                "operation": "ab_run",
+                "execution_lane": "all",
+                "codex_profile": "oss-local",
+                "runtime_profile_gates": [],
+                "variant_results": [
+                    {
+                        "variant_label": "A",
+                        "status": "pass",
+                        "codex_profile": "oss-local",
+                        "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
+                    },
+                    {
+                        "variant_label": "B",
+                        "status": "pass",
+                        "codex_profile": "oss-cloud",
+                        "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
+                    },
+                ],
+            }
+        )
+
+        self.assertTrue(plan["blockers"])
+        self.assertTrue(
+            any("profile_order_required:selected-execution-lane" in blocker for blocker in plan["blockers"])
+        )
+
     def test_ab_trace_rejects_metadata_only_duplicate_substituted_and_reordered_profiles(self) -> None:
         counterexamples = {
             "judge_metadata_only": [

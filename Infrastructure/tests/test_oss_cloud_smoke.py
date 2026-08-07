@@ -163,18 +163,26 @@ class TestOssCloudSmoke(unittest.TestCase):
             isolated_home = paths["codex_home"]
             self.assertIn("env", command)
             self.assertIn(f"CODEX_HOME={isolated_home}", command)
+            self.assertIn("--skip-git-repo-check", command)
             self.assertTrue((isolated_home / "config.toml").is_file())
             self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
             self.assertNotIn(f"CODEX_HOME={profile.parent.resolve()}", command)
 
-    def test_command_copies_projected_profile_into_isolated_codex_home(self) -> None:
+    def test_command_writes_allowlisted_profile_into_isolated_codex_home(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = root / "source" / "profile.toml"
             projected = root / "projection" / "oss-cloud.config.toml"
             source.parent.mkdir()
             projected.parent.mkdir()
-            _write_profile(source)
+            source.write_text(
+                'model = "deepseek-v4-flash:cloud"\n'
+                'model_provider = "ollama-cloud"\n'
+                "\n[mcp_servers.untrusted]\n"
+                'command = "untrusted-mcp"\n'
+                "enabled = false\n",
+                encoding="utf-8",
+            )
             projected.symlink_to(source)
             args = self.runner._parser().parse_args(["--profile-source", str(projected)])
             paths = self.runner._paths(str(root / "out"))
@@ -184,17 +192,16 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertIn(f"CODEX_HOME={isolated_home}", command)
             self.assertEqual(
                 (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"),
-                source.read_text(encoding="utf-8"),
+                self.runner.ISOLATED_CODEX_CONFIG,
             )
+            self.assertNotIn("mcp_servers", (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"))
             self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
-    def test_command_resolves_relative_profile_before_work_dir_changes(self) -> None:
+    def test_command_resolves_relative_profile_from_caller_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "profiles" / "oss-cloud.config.toml"
-            work_dir = root / "different-work-dir"
             profile.parent.mkdir()
-            work_dir.mkdir()
             _write_profile(profile)
             previous_cwd = Path.cwd()
             try:
@@ -203,14 +210,11 @@ class TestOssCloudSmoke(unittest.TestCase):
                     [
                         "--profile-source",
                         "profiles/oss-cloud.config.toml",
-                        "--work-dir",
-                        str(work_dir),
                     ]
                 )
                 paths = self.runner._paths(str(root / "out"))
                 command = self.runner._command(args, paths, root / "env")
                 self.assertIn(f"CODEX_HOME={paths['codex_home']}", command)
-                self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
             finally:
                 os.chdir(previous_cwd)
 
@@ -249,7 +253,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             auth_wrapper = _write_auth_wrapper(bin_dir)
             codex_exec_wrapper, state_path = _write_env_probe_wrapper(bin_dir)
             args = self.runner._parser().parse_args([
-                "--profile-source", str(profile), "--work-dir", str(root),
+                "--profile-source", str(profile),
                 "--auth-wrapper", str(auth_wrapper),
                 "--codex-exec-wrapper", str(codex_exec_wrapper),
             ])
@@ -381,6 +385,25 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertIn("CODEX_CONFIG_HOME", command[env_index:])
             u_index = command.index("-u", env_index)
             self.assertEqual(command[u_index + 1], "CODEX_CONFIG_HOME")
+
+    def test_run_uses_empty_temporary_work_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            args = self.runner._parser().parse_args([])
+            observed_cwd: list[str] = []
+
+            def fake_run(*_command: object, **kwargs: object) -> object:
+                observed_cwd.append(str(kwargs["cwd"]))
+                return type("Completed", (), {"returncode": 0})()
+
+            with patch.object(self.runner.subprocess, "run", side_effect=fake_run):
+                exit_code, _ = self.runner._run(["true"], paths, args)
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(len(observed_cwd), 1)
+            self.assertNotEqual(Path(observed_cwd[0]).resolve(), REPO_ROOT.resolve())
+            self.assertFalse(Path(observed_cwd[0]).exists())
 
 if __name__ == "__main__":
     unittest.main()

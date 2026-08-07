@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
-import shutil
 import stat
 import subprocess
 import sys
@@ -73,7 +72,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--codex-exec-wrapper", default=str(DEFAULT_CODEX_EXEC_WRAPPER))
     parser.add_argument("--timeout-seconds", type=int, default=120)
     parser.add_argument("--marker", default=DEFAULT_MARKER)
-    parser.add_argument("--work-dir", default=str(Path.cwd()))
     parser.add_argument("--output-dir", default=None)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -136,7 +134,11 @@ def _isolated_codex_home(profile: Path, paths: dict[str, Path]) -> Path:
     """Prepare a context-minimal Codex home for the bounded marker call."""
     codex_home = paths["codex_home"]
     codex_home.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(profile.resolve(strict=True), codex_home / "oss-cloud.config.toml")
+    # The operator profile is admission input, not executable context.  Write
+    # only the fixed, allowlisted cloud profile so disabled MCPs, project
+    # instructions, and other workstation settings cannot cross the boundary.
+    profile.resolve(strict=True)
+    (codex_home / "oss-cloud.config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
     (codex_home / "config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
     return codex_home
 
@@ -160,6 +162,7 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "--profile",
         "oss-cloud",
         "--strict-config",
+        "--skip-git-repo-check",
         "--sandbox",
         "read-only",
         "--ephemeral",
@@ -171,11 +174,19 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
 
 def _run(command: list[str], paths: dict[str, Path], args: argparse.Namespace) -> tuple[int, float]:
     started = time.monotonic()
-    with paths["stdout"].open("w", encoding="utf-8") as stdout, paths["stderr"].open("w", encoding="utf-8") as stderr:
+    with (
+        paths["stdout"].open("w", encoding="utf-8") as stdout,
+        paths["stderr"].open("w", encoding="utf-8") as stderr,
+        tempfile.TemporaryDirectory(prefix="ask-oss-cloud-smoke-work.") as work_dir,
+    ):
+        # Run from an empty temporary directory rather than the consuming
+        # repository. Codex discovers AGENTS.md and project context from cwd
+        # parents, so honoring the caller's work directory would invalidate
+        # the context-minimal smoke claim.
         try:
             completed = subprocess.run(
                 command,
-                cwd=args.work_dir,
+                cwd=work_dir,
                 stdin=subprocess.DEVNULL,
                 stdout=stdout,
                 stderr=stderr,

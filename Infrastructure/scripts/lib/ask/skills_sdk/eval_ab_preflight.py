@@ -271,13 +271,22 @@ def _cloud_smoke_command(
 
 
 def _run_cloud_smoke(command: list[str]) -> subprocess.CompletedProcess[str]:
+    # Keep the child environment minimal, but preserve the identity-bound
+    # executable selected by Configs.  Dropping CODEX_CLI_PATH silently falls
+    # back to the caller's PATH (often a mise shim), which can hang in the
+    # empty smoke cwd and produce a misleading invalid receipt.
+    environment = {
+        name: value
+        for name, value in os.environ.items()
+        if name in {"HOME", "PATH", "CODEX_CLI_PATH"}
+    }
     return subprocess.run(
         command,
         capture_output=True,
         check=False,
         text=True,
         timeout=135,
-        env={name: value for name, value in os.environ.items() if name in {"HOME", "PATH"}},
+        env=environment,
     )
 
 def _safe_command_shape(command: list[str]) -> list[str]:

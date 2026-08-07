@@ -13,7 +13,11 @@ from unittest.mock import patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact, _cloud_catalog_fact  # noqa: E402
+from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402
+    _approved_cloud_auth_fact,
+    _cloud_catalog_fact,
+    _run_cloud_smoke,
+)
 from ask.skills_sdk.eval_ab_run import _execution_argv_for_run, _validated_recorded_execution_argv  # noqa: E402
 from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
     configs_auth_backed_invocation,
@@ -23,6 +27,20 @@ from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
 
 
 class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
+    def test_cloud_smoke_preserves_identity_bound_codex_cli_path(self) -> None:
+        completed = subprocess.CompletedProcess(["python", "run_oss_cloud_smoke.py"], 1, stdout="", stderr="")
+        with patch.dict(
+            os.environ,
+            {"HOME": "/tmp/skills-sdk-home", "PATH": "/mock/bin", "CODEX_CLI_PATH": "/mock/codex"},
+            clear=True,
+        ), patch("ask.skills_sdk.eval_ab_preflight.subprocess.run", return_value=completed) as run:
+            _run_cloud_smoke(["python", "run_oss_cloud_smoke.py"])
+
+        self.assertEqual(
+            run.call_args.kwargs["env"],
+            {"HOME": "/tmp/skills-sdk-home", "PATH": "/mock/bin", "CODEX_CLI_PATH": "/mock/codex"},
+        )
+
     @staticmethod
     def _catalog_payload() -> dict[str, object]:
         return {

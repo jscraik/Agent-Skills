@@ -1962,6 +1962,51 @@
   "type": "object",
   "allOf": [
     {
+      "if": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "execution_lane": {"const": "all"},
+          "runtime_profile_gates": {"maxItems": 0}
+        },
+        "required": ["status", "execution_lane", "runtime_profile_gates"]
+      },
+      "then": {
+        "properties": {
+          "codex_profile": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "execution_lane": {"const": "oss-local"},
+          "runtime_profile_gates": {"maxItems": 0}
+        },
+        "required": ["status", "execution_lane", "runtime_profile_gates"]
+      },
+      "then": {
+        "properties": {
+          "codex_profile": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "execution_lane": {"const": "oss-cloud"},
+          "runtime_profile_gates": {"maxItems": 0}
+        },
+        "required": ["status", "execution_lane", "runtime_profile_gates"]
+      },
+      "then": {
+        "properties": {
+          "codex_profile": {"type": "null"}
+        }
+      }
+    },
+    {
       "if": {"properties": {"status": {"const": "completed"}}, "required": ["status"]},
       "then": {
         "properties": {
