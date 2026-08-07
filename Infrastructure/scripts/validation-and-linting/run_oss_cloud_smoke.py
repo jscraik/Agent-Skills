@@ -52,12 +52,10 @@ description = "Bounded read-only cloud smoke profile."
 
 [permissions.readonly-net.network]
 enabled = true
-allow_local_binding = true
+allow_local_binding = false
 
 [permissions.readonly-net.network.domains]
 "ollama.com" = "allow"
-"localhost" = "allow"
-"127.0.0.1" = "allow"
 
 [model_providers.ollama-cloud]
 name = "Ollama Cloud"
@@ -154,6 +152,8 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "OLLAMA_API_KEY",
         "--",
         "env",
+        "-u",
+        "CODEX_CONFIG_HOME",
         f"CODEX_HOME={codex_home}",
         "bash",
         args.codex_exec_wrapper,

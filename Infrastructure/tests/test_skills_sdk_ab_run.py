@@ -818,6 +818,41 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertEqual(payload["status"], "error")
         self.assertIn("must be >= 1", payload["errors"][0]["message"])
 
+    def test_completed_receipt_rejects_codex_profile_mismatch_with_first_gate(self) -> None:
+        def successful_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text("result", encoding="utf-8")
+            return CodexRunResult(
+                exit_code=0,
+                stdout='{"type":"item.completed","item":{"type":"agent_message","text":"ok"}}\n',
+                stderr="",
+                executed_argv=_test_execution_argv(command_argv),
+            )
+
+        receipt = _build_test_ab_run_receipt(self.evidence_root, successful_runner)
+        self.assertEqual(receipt["status"], "completed")
+        self.assertEqual(receipt["codex_profile"], "oss-local")
+
+        mismatched = deepcopy(receipt)
+        mismatched["codex_profile"] = "oss-cloud"
+        with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
+            validate_ab_run_receipt(mismatched)
+
+    def test_blocked_run_rejects_invalid_gate_sequence(self) -> None:
+        receipt = _build_test_ab_run_receipt(
+            self.evidence_root,
+            _forbidden_test_runner([]),
+            _cloud_auth_blocked_probe,
+        )
+        self.assertEqual(receipt["status"], "blocked")
+        validate_ab_run_receipt(receipt)
+
+        wrong_order = deepcopy(receipt)
+        wrong_order["runtime_profile_gates"] = list(reversed(wrong_order["runtime_profile_gates"]))
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
+            validate_ab_run_receipt(wrong_order)
+
 
 if __name__ == "__main__":
     unittest.main()

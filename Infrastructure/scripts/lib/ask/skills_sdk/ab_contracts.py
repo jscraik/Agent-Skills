@@ -493,6 +493,17 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("blocked A/B runtime gates must carry typed blockers")
         if any(gate.status == "planned" and gate.blockers for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B runtime gates must not carry blockers")
+        if self.runtime_profile_gates:
+            expected_lanes = ["oss-local", "oss-cloud"] if self.execution_lane == "all" else [self.execution_lane]
+            if len(self.runtime_profile_gates) > len(expected_lanes):
+                raise ValueError("blocked A/B plan receipts cannot have excess runtime gates")
+            for index, gate in enumerate(self.runtime_profile_gates):
+                if gate.lane != expected_lanes[index] or gate.order != index + 1 or gate.codex_profile != gate.lane:
+                    raise ValueError("blocked A/B plan receipts require valid-prefix gate identity sequence")
+            if self.execution_lane != "all" and len(self.runtime_profile_gates) == 1:
+                gate = self.runtime_profile_gates[0]
+                if gate.lane != self.execution_lane or gate.codex_profile != self.execution_lane or gate.order != 1:
+                    raise ValueError("blocked single-lane plan receipts require matching gate identity")
 
     def _validate_planned_packet(self) -> None:
         if self.blockers or not self._has_plan_evidence():
@@ -508,6 +519,8 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
             raise ValueError("top-level command plan must match the oss-local runtime gate")
+        if self.codex_profile != self.runtime_profile_gates[0].codex_profile:
+            raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
     def _has_plan_evidence(self) -> bool:
         evidence = (self.skill_a, self.skill_b, self.fixture, self.execution_profile,

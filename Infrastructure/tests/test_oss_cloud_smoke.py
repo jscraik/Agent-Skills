@@ -307,5 +307,30 @@ class TestOssCloudSmoke(unittest.TestCase):
             ["codex_runtime_metadata_fallback"],
         )
 
+    def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
+        config_text = self.runner.ISOLATED_CODEX_CONFIG
+        self.assertIn("allow_local_binding = false", config_text)
+        self.assertNotIn('"localhost"', config_text)
+        self.assertNotIn('"127.0.0.1"', config_text)
+        self.assertIn('"ollama.com"', config_text)
+
+    def test_command_explicitly_unsets_codex_config_home_env_var(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            env_file = root / ".env"
+            _write_profile(profile)
+            env_file.write_text("OLLAMA_API_KEY=test\n", encoding="utf-8")
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+            paths = self.runner._paths(str(root / "out"))
+
+            command = self.runner._command(args, paths, env_file)
+
+            env_index = command.index("env")
+            self.assertIn("-u", command[env_index:])
+            self.assertIn("CODEX_CONFIG_HOME", command[env_index:])
+            u_index = command.index("-u", env_index)
+            self.assertEqual(command[u_index + 1], "CODEX_CONFIG_HOME")
+
 if __name__ == "__main__":
     unittest.main()
