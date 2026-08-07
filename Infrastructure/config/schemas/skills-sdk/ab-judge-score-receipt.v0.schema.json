@@ -27,6 +27,7 @@
     "judge_output_path": {"type": ["string", "null"], "minLength": 1},
     "judge_output_digest": {"type": ["string", "null"], "minLength": 71},
     "judge_command_argv": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "judge_command_shape": {"type": ["array", "null"], "items": {"type": "string", "minLength": 1}},
     "codex_profile": {
       "type": ["string", "null"],
       "enum": ["oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud", null]

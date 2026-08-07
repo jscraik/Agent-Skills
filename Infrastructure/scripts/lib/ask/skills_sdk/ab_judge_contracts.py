@@ -184,6 +184,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     judge_output_path: str | None = Field(default=None, min_length=1)
     judge_output_digest: str | None = Field(default=None, min_length=71)
     judge_command_argv: list[str]
+    judge_command_shape: list[str] | None = None
     codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"] | None
     codex_exec_invoked: bool
     decision: AbJudgeDecision | None

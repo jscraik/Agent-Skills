@@ -13,6 +13,7 @@ from ask.skills_sdk.eval_ab_judge_codex import (
     CodexJudgeResult,
     CodexProfileConfigError,
     _codex_judge_command,
+    _codex_judge_command_shape,
     _codex_judge_work_dir,
     _codex_auth_boundary_available,
     _run_codex_judge,
@@ -369,24 +370,32 @@ def _score_preflight(
         and evidence.get("output_file") is not None
         and "judge_cloud_auth_boundary_unavailable" not in blockers
     ):
-        evidence["command_argv"] = _codex_judge_command(
-            judge_profile,
-            _codex_judge_work_dir(evidence["output_file"]),
-            evidence["output_file"],
-        )
-        try:
-            evidence["codex_profile"] = _codex_profile_from_judge_argv(evidence["command_argv"])
-        except ValueError:
-            evidence["codex_profile"] = None
+        command, shape, profile = _score_command_evidence(judge_profile, evidence["output_file"])
+        evidence["command_argv"], evidence["command_shape"], evidence["codex_profile"] = command, shape, profile
+        if profile is None:
             blockers.append("judge_command_profile_missing_or_invalid")
     else:
         evidence["command_argv"] = []
+        evidence["command_shape"] = []
         evidence["codex_profile"] = None
     if preview["status"] != "preview":
         blockers.append("judge_input_preview_blocked")
     if timeout_seconds < 1:
         blockers.append("timeout_seconds_invalid")
     return blockers, judge_profile, evidence
+
+
+def _score_command_evidence(
+    judge_profile: dict[str, Any], output_file: Path,
+) -> tuple[list[str], list[str], str | None]:
+    work_dir = _codex_judge_work_dir(output_file)
+    command = _codex_judge_command(judge_profile, work_dir, output_file)
+    shape = _codex_judge_command_shape(judge_profile, work_dir, output_file)
+    try:
+        profile = _codex_profile_from_judge_argv(command)
+    except ValueError:
+        profile = None
+    return command, shape, profile
 
 
 def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, Any] | None:
@@ -776,6 +785,7 @@ def _score_receipt_run_fields(
         "judge_output_path": evidence["output_path"],
         "judge_output_digest": output_digest,
         "judge_command_argv": evidence["command_argv"],
+        "judge_command_shape": evidence.get("command_shape") or None,
         "codex_profile": evidence["codex_profile"],
     }
 

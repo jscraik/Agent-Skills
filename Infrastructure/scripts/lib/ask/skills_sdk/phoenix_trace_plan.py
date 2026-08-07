@@ -6,6 +6,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.ab_contracts import _codex_profile_from_judge_argv
+
 
 OSS_CODEX_PROFILES = ("oss-local", "oss-cloud")
 PHOENIX_PROJECT_NAME = "agent-skills-skills-sdk-evals"
@@ -94,9 +96,17 @@ def _ab_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     ]
     if not evidence:
         evidence.append(_profile_from_argv(None, lane="ab-variants"))
-    if [item.get("derived_codex_profile") for item in evidence] != list(OSS_CODEX_PROFILES):
+    execution_lane = str(receipt.get("execution_lane") or "all")
+    expected_profiles = (
+        (execution_lane,) * len(evidence)
+        if execution_lane in OSS_CODEX_PROFILES
+        else OSS_CODEX_PROFILES
+    )
+    if [item.get("derived_codex_profile") for item in evidence] != list(expected_profiles):
         for item in evidence:
-            item["blockers"].append("profile_order_required:oss-local,oss-cloud")
+            item["blockers"].append(
+                f"profile_order_required:{','.join(expected_profiles)}"
+            )
             item["status"] = "blocked"
     return evidence
 
@@ -107,8 +117,22 @@ def _profile_evidence(receipt: dict[str, Any], source_kind: str) -> list[dict[st
     if source_kind == "ab_run_receipt":
         return _ab_profile_evidence(receipt)
     if source_kind == "ab_judge_score_receipt":
+        command_shape = receipt.get("judge_command_shape")
+        if isinstance(command_shape, list):
+            argv = command_shape
+        else:
+            argv = receipt.get("judge_command_argv")
+            if isinstance(argv, list):
+                try:
+                    # Validate the wrapped runtime command before projecting its
+                    # redacted logical shape into observability evidence.
+                    _codex_profile_from_judge_argv(argv, require_approval=False)
+                    profile_index = argv.index("--profile")
+                    argv = ["codex", "exec", *argv[profile_index:]]
+                except (ValueError, IndexError):
+                    pass
         row = _profile_from_argv(
-            receipt.get("judge_command_argv"),
+            argv,
             lane="judge-score",
             claimed_profile=receipt.get("codex_profile"),
         )

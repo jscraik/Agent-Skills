@@ -97,6 +97,31 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
     return _local_judge_command(judge_profile, work_dir, output_file)
 
 
+def _codex_judge_command_shape(
+    judge_profile: dict[str, Any], work_dir: Path, output_file: Path,
+) -> list[str]:
+    """Return a redacted logical argv shape for receipt-bound observability.
+
+    The runtime cloud argv must retain the Configs FIFO wrapper for provenance.
+    Phoenix, however, needs the underlying Codex command shape to derive the
+    admitted profile. Keep both views instead of treating the wrapper itself as
+    a direct ``codex exec`` invocation.
+    """
+    runtime_command = _codex_judge_command(judge_profile, work_dir, output_file)
+    if _codex_profile_id(judge_profile) == "oss-cloud":
+        # run-codex-exec.sh is the second child of the auth wrapper. Its
+        # arguments begin at --profile and represent the logical Codex argv.
+        logical_command = ["codex", "exec", *runtime_command[9:]]
+    else:
+        logical_command = list(runtime_command)
+    for index, value in enumerate(logical_command[:-1]):
+        if value == "--cd":
+            logical_command[index + 1] = "<judge-workspace>"
+        elif value == "--output-last-message":
+            logical_command[index + 1] = "<judge-output>"
+    return logical_command
+
+
 def _cloud_judge_command(judge_profile: dict[str, Any], work_dir: Path) -> list[str]:
     env_file = _codex_auth_env_file_path(judge_profile)
     auth_wrapper = configs_auth_wrapper()
