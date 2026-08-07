@@ -53,7 +53,38 @@ from run_skill_evals import (  # noqa: E402
 )
 
 
-
+def _exercise_cloud_wrapper(workspace_root: Path, env_path: Path, invocation: unittest.mock.Mock, fake_proc: unittest.mock.Mock):
+    output_path = workspace_root / "reports" / "last.txt"
+    output_path.parent.mkdir()
+    kwargs = {
+        "workspace_root": workspace_root,
+        "prompt": "Route only.",
+        "output_last_message_path": output_path,
+        "output_schema_path": None,
+        "sandbox": "read-only",
+        "ask_for_approval": None,
+        "model": "deepseek-v4-flash:cloud",
+        "profile": "oss-cloud",
+        "codex_home": workspace_root / ".codex",
+        "jsonl_path": workspace_root / "trace.jsonl",
+        "codex_bin": None,
+        "timeout_sec": 1,
+        "timeout_profile": "default",
+    }
+    with (
+        unittest.mock.patch("run_skill_evals.actual_opaque_env_path", return_value=env_path),
+        unittest.mock.patch(
+            "run_skill_evals.configs_auth_backed_invocation",
+            return_value=unittest.mock.MagicMock(__enter__=lambda _self: invocation),
+        ) as auth_context,
+        unittest.mock.patch(
+            "run_skill_evals.configs_oss_cloud_exec_command",
+            wraps=run_skill_evals.configs_oss_cloud_exec_command,
+        ) as cloud_command,
+        unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run,
+    ):
+        result = run_codex_exec(**kwargs)
+    return result, auth_context, cloud_command, mocked_run
 
 class RunSkillEvalsRuntimeTests(unittest.TestCase):
     def test_smoke_mode_filters_release_only_and_pressure_cases(self) -> None:
@@ -368,6 +399,61 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
 
         self.assertTrue((isolated_home / "oss-local.config.toml").is_file())
         self.assertFalse((isolated_home / "config.toml").exists())
+
+    def test_isolated_codex_home_copies_base_config_for_cloud_wrapper(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
+            (default_home / "oss-cloud.config.toml").write_text(
+                'model = "deepseek-v4-flash:cloud"\nmodel_provider = "ollama-cloud"\n',
+                encoding="utf-8",
+            )
+
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud")
+
+        self.assertTrue((isolated_home / "config.toml").is_file())
+        self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
+
+    def test_run_codex_exec_uses_configs_wrapper_for_cloud_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            env_path = workspace_root / "opaque.env"
+            fake_proc = unittest.mock.Mock(returncode=0, stdout="{}\n", stderr="")
+            invocation = unittest.mock.Mock()
+            invocation.runtime_argv.side_effect = lambda command: [
+                "bash",
+                "auth-wrapper",
+                "--env-file",
+                str(env_path),
+                "--require-env",
+                "OLLAMA_API_KEY",
+                "--",
+                *command,
+            ]
+
+            (rc, stdout, stderr, warnings), auth_context, cloud_command, mocked_run = _exercise_cloud_wrapper(
+                workspace_root, env_path, invocation, fake_proc
+            )
+
+        self.assertEqual((rc, stdout, stderr), (0, "{}\n", ""))
+        self.assertEqual(warnings, [])
+        auth_context.assert_called_once_with(env_path)
+        logical = cloud_command.call_args.args[0]
+        self.assertEqual(logical[:4], ["codex", "exec", "--profile", "oss-cloud"])
+        self.assertIn("--cd", logical)
+        self.assertEqual(logical[logical.index("--cd") + 1], ".")
+        self.assertEqual(logical[-1], "-")
+        cmd = mocked_run.call_args.args[0]
+        self.assertEqual(cmd[:2], ["bash", "auth-wrapper"])
+        self.assertIn("--require-env", cmd)
+        self.assertIn("OLLAMA_API_KEY", cmd)
+        self.assertIn("--strict-config", cmd)
+        self.assertNotEqual(cmd[0], "codex")
 
 
     def test_isolated_codex_config_drops_mcp_servers(self) -> None:
