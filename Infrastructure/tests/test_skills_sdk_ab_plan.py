@@ -62,6 +62,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertIn("# Skills SDK Valid Fixture", prompt_a)
         self.assertIn("# Scenario Quality Fixture", prompt_b)
         self.assertIn((REPO_ROOT / FIXTURE).read_text(encoding="utf-8"), prompt_a)
+        self.assertIn("Do not invoke tools, run shell commands, or inspect files", prompt_b)
         self.assertNotEqual(prompt_a, prompt_b)
 
         prompts = {"A": prompt_a, "B": prompt_b}

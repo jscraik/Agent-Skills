@@ -100,5 +100,5 @@ def build_controlled_variant_prompt(
         f"{skill_text}\n\n"
         "## Controlled fixture\n"
         f"{fixture_text}\n\n"
-        "Return sanitized evidence only. Do not include secrets."
+        "Return sanitized evidence only. Do not include secrets. Do not invoke tools, run shell commands, or inspect files; evaluate the controlled fixture directly and keep the response compact."
     )
