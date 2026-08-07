@@ -33,8 +33,7 @@ def validate_argv_output_last_message_path(argv: list[str], path: str, *, messag
 
 
 def validate_plan_gate_identity(gate: Any) -> None:
-    expected_order = 1 if gate.lane == "oss-local" else 2
-    if gate.lane != gate.codex_profile or gate.order != expected_order:
+    if gate.lane != gate.codex_profile or gate.order not in {1, 2}:
         raise ValueError("runtime profile gate identity or order is invalid")
     if gate.judge_profile.codex_profile != gate.codex_profile:
         raise ValueError("judge metadata cannot substitute for the runtime Codex profile")
@@ -150,7 +149,7 @@ def _validate_completed_run_packets(receipt: Any) -> None:
     if receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("completed A/B run receipts must include exact command variant labels")
     if not _run_has_consistent_runtime_gates(receipt):
-        raise ValueError("A/B run must preserve ordered runtime gates and matching oss-local results")
+        raise ValueError("A/B run must preserve ordered runtime gates and matching results")
     if any(gate.status != "completed" for gate in receipt.runtime_profile_gates):
         raise ValueError("completed A/B run requires every selected runtime profile gate")
 
@@ -164,9 +163,11 @@ def _run_has_evidence(receipt: Any) -> bool:
 
 
 def _run_has_consistent_runtime_gates(receipt: Any) -> bool:
-    expected_lanes = ["oss-local", "oss-cloud"] if receipt.execution_lane == "all" else ["oss-local"]
+    expected_lanes = ["oss-local", "oss-cloud"] if receipt.execution_lane == "all" else [receipt.execution_lane]
+    expected_orders = list(range(1, len(expected_lanes) + 1))
     return (
         [gate.lane for gate in receipt.runtime_profile_gates] == expected_lanes
+        and [gate.order for gate in receipt.runtime_profile_gates] == expected_orders
         and receipt.command_plan == receipt.runtime_profile_gates[0].command_plan
         and receipt.variant_results == receipt.runtime_profile_gates[0].variant_results
         and all(_gate_results_match_command_plan(gate) for gate in receipt.runtime_profile_gates)

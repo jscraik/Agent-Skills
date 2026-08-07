@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Annotated, Literal
+from typing import Any, Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -48,6 +48,14 @@ _EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
+
+
+def _validate_runtime_gate_sequence(execution_lane: str, gates: list[Any], *, message: str) -> None:
+    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
+    expected_orders = list(range(1, len(expected_lanes) + 1))
+    if ([gate.lane for gate in gates] != expected_lanes
+            or [gate.order for gate in gates] != expected_orders):
+        raise ValueError(message)
 
 
 def _codex_profile_from_argv(argv: list[str]) -> str:
@@ -448,8 +456,8 @@ class AbPlanReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
-    execution_lane: Literal["all", "oss-local"] = "all"
-    codex_profile: Literal["oss-local"] | None
+    execution_lane: Literal["all", "oss-local", "oss-cloud"] = "all"
+    codex_profile: Literal["oss-local", "oss-cloud"] | None
     runtime_profile_gates: list[AbRuntimeProfilePlanGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)
     experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
@@ -491,9 +499,11 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
         if not _exact_variant_labels(self.command_plan) or self.command_variant_labels != ["A", "B"]:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
-        expected_lanes = ["oss-local", "oss-cloud"] if self.execution_lane == "all" else ["oss-local"]
-        if [gate.lane for gate in self.runtime_profile_gates] != expected_lanes:
-            raise ValueError("A/B plan must preserve the declared execution lane order")
+        _validate_runtime_gate_sequence(
+            self.execution_lane,
+            self.runtime_profile_gates,
+            message="A/B plan must preserve the declared execution lane order",
+        )
         if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
@@ -569,8 +579,7 @@ class AbRuntimeProfileRunGate(_SdkContractModel):
 
     @model_validator(mode="after")
     def _gate_status_matches(self) -> AbRuntimeProfileRunGate:
-        expected_order = 1 if self.lane == "oss-local" else 2
-        if self.lane != self.codex_profile or self.order != expected_order:
+        if self.lane != self.codex_profile or self.order not in {1, 2}:
             raise ValueError("runtime run gate identity or order is invalid")
         if self.status == "completed" and not self._is_completed_gate():
             raise ValueError("completed runtime gate requires both variants and no blockers")
@@ -596,8 +605,8 @@ class AbRunReceipt(_SdkContractModel):
     fixture: AbFixtureIdentity | None
     execution_profile: EvalExecutionProfile | None
     judge_profile: EvalJudgeProfile | None
-    execution_lane: Literal["all", "oss-local"] = "all"
-    codex_profile: Literal["oss-local"]
+    execution_lane: Literal["all", "oss-local", "oss-cloud"] = "all"
+    codex_profile: Literal["oss-local", "oss-cloud"] | None
     runtime_profile_gates: list[AbRuntimeProfileRunGate] = Field(max_length=2)
     evidence_root: str | None = Field(default=None, min_length=1)
     experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)

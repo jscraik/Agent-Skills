@@ -347,6 +347,32 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self._assert_plan_evidence(receipt)
         validate_ab_plan_receipt(receipt)
 
+    def test_explicit_oss_cloud_lane_plans_only_the_fifo_cloud_gate(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            judge_profile_id="oss-cloud",
+            execution_lane="oss-cloud",
+            preflight_probe=declared_profile_preflight,
+        )
+
+        self.assertEqual(receipt["status"], "planned")
+        self.assertEqual(receipt["execution_lane"], "oss-cloud")
+        self.assertEqual(receipt["codex_profile"], "oss-cloud")
+        self.assertEqual(
+            [(gate["order"], gate["lane"], gate["codex_profile"])
+             for gate in receipt["runtime_profile_gates"]],
+            [(1, "oss-cloud", "oss-cloud")],
+        )
+        self.assertEqual(receipt["command_plan"], receipt["runtime_profile_gates"][0]["command_plan"])
+        self.assertTrue(all(command["codex_profile"] == "oss-cloud" for command in receipt["command_plan"]))
+        validate_ab_plan_receipt(receipt)
+        self.assertEqual(self._managed_v1_result(receipt).status, "pass")
+
     def _assert_gate_identities(self, receipt: dict[str, object]) -> None:
         identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]
         self.assertEqual(identities, [(1, "oss-local", "oss-local"), (2, "oss-cloud", "oss-cloud")])
@@ -392,7 +418,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_ab_plan_receipt(receipt)
 
-    def test_validator_rejects_direct_cloud_execution_without_op_wrapper(self) -> None:
+    def test_validator_rejects_direct_cloud_execution_without_configs_fifo_wrapper(self) -> None:
         receipt = build_ab_plan_receipt(
             REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
             skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
