@@ -648,7 +648,7 @@ def _run_payload(
         "execution_profile": plan["execution_profile"],
         "judge_profile": plan["judge_profile"],
         "execution_lane": plan["execution_lane"],
-        "codex_profile": "oss-local",
+        "codex_profile": plan["codex_profile"],
         "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": plan["evidence_root"],
         "experiment_id": plan["experiment_id"],

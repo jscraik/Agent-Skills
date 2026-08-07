@@ -4,10 +4,12 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +57,20 @@ def _write_codex_exec_wrapper(bin_dir: Path) -> Path:
         "exit 0\n",
     )
     return path
+
+
+def _write_env_probe_wrapper(bin_dir: Path) -> tuple[Path, Path]:
+    state_path = bin_dir / "codex-config-home-state.txt"
+    path = bin_dir / "run-codex-exec-probe.sh"
+    _write_executable(
+        path,
+        "#!/bin/sh\n"
+        f"if [ \"${{CODEX_CONFIG_HOME+x}}\" = x ]; then printf 'present' > {shlex.quote(str(state_path))}; "
+        f"else printf 'unset' > {shlex.quote(str(state_path))}; fi\n"
+        "printf 'CODEX_OSS_CLOUD_OK\\n'\n"
+        "exit 0\n",
+    )
+    return path, state_path
 
 
 def _run_cloud_smoke(
@@ -134,7 +150,7 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
-    def test_command_binds_codex_home_to_profile_projection_parent(self) -> None:
+    def test_command_uses_an_isolated_codex_home(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "profiles" / "oss-cloud.config.toml"
@@ -144,11 +160,14 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
 
             command = self.runner._command(args, paths, root / "env")
+            isolated_home = paths["codex_home"]
+            self.assertIn("env", command)
+            self.assertIn(f"CODEX_HOME={isolated_home}", command)
+            self.assertTrue((isolated_home / "config.toml").is_file())
+            self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
+            self.assertNotIn(f"CODEX_HOME={profile.parent.resolve()}", command)
 
-        self.assertIn("env", command)
-        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
-
-    def test_command_keeps_codex_home_at_projected_profile_parent(self) -> None:
+    def test_command_copies_projected_profile_into_isolated_codex_home(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = root / "source" / "profile.toml"
@@ -161,9 +180,13 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
 
             command = self.runner._command(args, paths, root / "env")
-
-        self.assertIn(f"CODEX_HOME={projected.parent.resolve()}", command)
-        self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
+            isolated_home = paths["codex_home"]
+            self.assertIn(f"CODEX_HOME={isolated_home}", command)
+            self.assertEqual(
+                (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"),
+                source.read_text(encoding="utf-8"),
+            )
+            self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
     def test_command_resolves_relative_profile_before_work_dir_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -186,11 +209,58 @@ class TestOssCloudSmoke(unittest.TestCase):
                 )
                 paths = self.runner._paths(str(root / "out"))
                 command = self.runner._command(args, paths, root / "env")
+                self.assertIn(f"CODEX_HOME={paths['codex_home']}", command)
+                self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
             finally:
                 os.chdir(previous_cwd)
 
-        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
-        self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
+    def test_isolated_config_disables_context_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            paths = self.runner._paths(str(root / "out"))
+
+            self.runner._isolated_codex_home(profile, paths)
+            config = (paths["codex_home"] / "config.toml").read_text(encoding="utf-8")
+
+        self.assertIn("plugins = false", config)
+        self.assertIn("apps = false", config)
+        self.assertNotIn("developer_instructions", config)
+
+    def test_isolated_config_disables_loopback_network_access(self) -> None:
+        config = self.runner.ISOLATED_CODEX_CONFIG
+
+        self.assertIn("allow_local_binding = false", config)
+        self.assertIn('"ollama.com" = "allow"', config)
+        self.assertNotIn('"localhost" = "allow"', config)
+        self.assertNotIn('"127.0.0.1" = "allow"', config)
+
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
+    def test_marker_child_cannot_inherit_codex_config_home(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            env_file = root / "oss-cloud.env"
+            bin_dir = root / "bin"
+            bin_dir.mkdir()
+            _write_profile(profile)
+            os.mkfifo(env_file)
+            auth_wrapper = _write_auth_wrapper(bin_dir)
+            codex_exec_wrapper, state_path = _write_env_probe_wrapper(bin_dir)
+            args = self.runner._parser().parse_args([
+                "--profile-source", str(profile), "--work-dir", str(root),
+                "--auth-wrapper", str(auth_wrapper),
+                "--codex-exec-wrapper", str(codex_exec_wrapper),
+            ])
+            paths = self.runner._paths(str(root / "out"))
+            command = self.runner._command(args, paths, env_file)
+
+            with patch.dict(os.environ, {"CODEX_CONFIG_HOME": str(root / "inherited")}):
+                exit_code, _ = self.runner._run(command, paths, args)
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(state_path.read_text(encoding="utf-8"), "unset")
 
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -286,6 +356,31 @@ class TestOssCloudSmoke(unittest.TestCase):
             [warning["code"] for warning in receipt["warnings"]],
             ["codex_runtime_metadata_fallback"],
         )
+
+    def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
+        config_text = self.runner.ISOLATED_CODEX_CONFIG
+        self.assertIn("allow_local_binding = false", config_text)
+        self.assertNotIn('"localhost"', config_text)
+        self.assertNotIn('"127.0.0.1"', config_text)
+        self.assertIn('"ollama.com"', config_text)
+
+    def test_command_explicitly_unsets_codex_config_home_env_var(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            env_file = root / ".env"
+            _write_profile(profile)
+            env_file.write_text("OLLAMA_API_KEY=test\n", encoding="utf-8")
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+            paths = self.runner._paths(str(root / "out"))
+
+            command = self.runner._command(args, paths, env_file)
+
+            env_index = command.index("env")
+            self.assertIn("-u", command[env_index:])
+            self.assertIn("CODEX_CONFIG_HOME", command[env_index:])
+            u_index = command.index("-u", env_index)
+            self.assertEqual(command[u_index + 1], "CODEX_CONFIG_HOME")
 
 if __name__ == "__main__":
     unittest.main()

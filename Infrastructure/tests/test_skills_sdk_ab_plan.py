@@ -347,6 +347,70 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self._assert_plan_evidence(receipt)
         validate_ab_plan_receipt(receipt)
 
+    def test_explicit_oss_cloud_lane_plans_only_the_fifo_cloud_gate(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            judge_profile_id="oss-cloud",
+            execution_lane="oss-cloud",
+            preflight_probe=declared_profile_preflight,
+        )
+
+        self.assertEqual(receipt["status"], "planned")
+        self.assertEqual(receipt["execution_lane"], "oss-cloud")
+        self.assertEqual(receipt["codex_profile"], "oss-cloud")
+        self.assertEqual(
+            [(gate["order"], gate["lane"], gate["codex_profile"])
+             for gate in receipt["runtime_profile_gates"]],
+            [(1, "oss-cloud", "oss-cloud")],
+        )
+        self.assertEqual(receipt["command_plan"], receipt["runtime_profile_gates"][0]["command_plan"])
+        self.assertTrue(all(command["codex_profile"] == "oss-cloud" for command in receipt["command_plan"]))
+        validate_ab_plan_receipt(receipt)
+        self.assertEqual(self._managed_v1_result(receipt).status, "pass")
+
+    def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
+        for execution_lane in ("all", "oss-local", "oss-cloud"):
+            with self.subTest(execution_lane=execution_lane):
+                receipt = build_ab_plan_receipt(
+                    REPO_ROOT,
+                    skill_a=SKILL_A,
+                    skill_b=SKILL_B,
+                    fixture=FIXTURE,
+                    skill_a_identity=IDENTITY_A,
+                    skill_b_identity=IDENTITY_B,
+                    execution_lane=execution_lane,
+                    judge_profile_id="oss-cloud" if execution_lane == "oss-cloud" else "oss-local",
+                    preflight_probe=declared_profile_preflight,
+                )
+                receipt["codex_profile"] = "oss-local" if execution_lane == "oss-cloud" else "oss-cloud"
+                with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
+                    validate_ab_plan_receipt(receipt)
+                self.assertEqual(self._managed_v1_result(receipt).status, "fail")
+
+    def test_blocked_receipt_requires_a_valid_runtime_gate_prefix(self) -> None:
+        receipt = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            execution_lane="oss-cloud",
+            judge_profile_id="oss-cloud",
+            preflight_probe=declared_profile_preflight,
+        )
+        blocked = self._blocked_plan(receipt)
+        blocked["runtime_profile_gates"][0].update({"lane": "oss-local", "codex_profile": "oss-local"})
+        blocked["codex_profile"] = "oss-local"
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
+            validate_ab_plan_receipt(blocked)
+        self.assertEqual(self._managed_v1_result(blocked).status, "fail")
+
     def _assert_gate_identities(self, receipt: dict[str, object]) -> None:
         identities = [(gate["order"], gate["lane"], gate["codex_profile"]) for gate in receipt["runtime_profile_gates"]]
         self.assertEqual(identities, [(1, "oss-local", "oss-local"), (2, "oss-cloud", "oss-cloud")])
@@ -392,7 +456,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_ab_plan_receipt(receipt)
 
-    def test_validator_rejects_direct_cloud_execution_without_op_wrapper(self) -> None:
+    def test_validator_rejects_direct_cloud_execution_without_configs_fifo_wrapper(self) -> None:
         receipt = build_ab_plan_receipt(
             REPO_ROOT, skill_a=SKILL_A, skill_b=SKILL_B, fixture=FIXTURE,
             skill_a_identity=IDENTITY_A, skill_b_identity=IDENTITY_B,
@@ -514,6 +578,30 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertIn("evidence_root_outside_repo", receipt["blockers"])
         self.assertEqual(receipt["command_plan"], [])
         validate_ab_plan_receipt(receipt)
+
+    def test_blocked_plan_rejects_invalid_gate_sequence(self) -> None:
+        planned = build_ab_plan_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            preflight_probe=declared_profile_preflight,
+        )
+
+        blocked = self._blocked_plan(planned)
+        validate_ab_plan_receipt(blocked)
+
+        wrong_order = deepcopy(blocked)
+        wrong_order["runtime_profile_gates"] = list(reversed(wrong_order["runtime_profile_gates"]))
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
+            validate_ab_plan_receipt(wrong_order)
+
+        wrong_lane = deepcopy(blocked)
+        wrong_lane["runtime_profile_gates"][0]["lane"] = "oss-cloud"
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
+            validate_ab_plan_receipt(wrong_lane)
 
 
 if __name__ == "__main__":
