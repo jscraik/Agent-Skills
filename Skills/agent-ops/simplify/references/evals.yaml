@@ -413,7 +413,6 @@ cases:
       any_of:
       - two calls
       - one lookup
-      - one
       - stateful
       - side effects
       - side-effect
@@ -428,7 +427,6 @@ cases:
       - call-count
     - id: single_read_boundary
       any_of:
-      - one
       - once
       - second lookup
       - second
