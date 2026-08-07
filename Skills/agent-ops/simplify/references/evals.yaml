@@ -340,8 +340,18 @@ cases:
   acceptance:
   - type: expected_signal
     value: Reuse checked store value with focused source validation.
-  - type: expected_signal
-    value: Focused test emits an active value and calls store.get(key) once.
+  - type: semantic_requirements
+    requirements:
+    - id: reuse_checked_value
+      all_of:
+      - reuse
+      - checked
+      - value
+    - id: validate_single_read
+      all_of:
+      - focused
+      - validation
+      - once
   - type: not_contains
     value: runtime result without evidence
   realistic: true
