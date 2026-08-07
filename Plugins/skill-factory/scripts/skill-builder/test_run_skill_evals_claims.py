@@ -227,7 +227,7 @@ class RunSkillEvalsClaimsTests(unittest.TestCase):
             _case_has_executed_check_evidence(
                 case,
                 {
-                    "codex-kimi": {
+                    "codex": {
                         "passed": True,
                         "blocked": False,
                         "artifacts": {"final": "reports/execution/final.txt"},
