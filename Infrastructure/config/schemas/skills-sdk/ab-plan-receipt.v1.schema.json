@@ -1886,7 +1886,14 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-local"}},
+        "properties": {
+          "codex_profile": {"const": "oss-local"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-local"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
       }
     },
@@ -1899,7 +1906,14 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-local"}},
+        "properties": {
+          "codex_profile": {"const": "oss-local"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-local"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
       }
     },
@@ -1912,7 +1926,14 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-cloud"}},
+        "properties": {
+          "codex_profile": {"const": "oss-cloud"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-cloud"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
       }
     },

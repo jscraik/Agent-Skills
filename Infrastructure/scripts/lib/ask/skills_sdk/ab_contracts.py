@@ -513,7 +513,7 @@ class AbPlanReceipt(_SdkContractModel):
         if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
-            raise ValueError("top-level command plan must match the oss-local runtime gate")
+            raise ValueError("top-level command plan must match the first runtime gate")
         if self.codex_profile != self.runtime_profile_gates[0].codex_profile:
             raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 

@@ -375,7 +375,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertEqual(self._managed_v1_result(receipt).status, "pass")
 
     def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
-        for execution_lane in ("all", "oss-cloud"):
+        for execution_lane in ("all", "oss-local", "oss-cloud"):
             with self.subTest(execution_lane=execution_lane):
                 receipt = build_ab_plan_receipt(
                     REPO_ROOT,
@@ -389,7 +389,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                     preflight_probe=declared_profile_preflight,
                 )
                 receipt["codex_profile"] = "oss-local" if execution_lane == "oss-cloud" else "oss-cloud"
-                with self.assertRaises(ValueError):
+                with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
                     validate_ab_plan_receipt(receipt)
                 self.assertEqual(self._managed_v1_result(receipt).status, "fail")
 

@@ -33,8 +33,8 @@ def validate_argv_output_last_message_path(argv: list[str], path: str, *, messag
 
 
 def validate_plan_gate_identity(gate: Any) -> None:
-    if gate.lane != gate.codex_profile:
-        raise ValueError("runtime profile gate identity is invalid; valid-prefix gate identity sequence is required")
+    if gate.lane != gate.codex_profile or gate.order not in {1, 2}:
+        raise ValueError("runtime profile gate identity or order is invalid; valid-prefix gate identity sequence is required")
     if gate.judge_profile.codex_profile != gate.codex_profile:
         raise ValueError("judge metadata cannot substitute for the runtime Codex profile")
     if gate.status == "planned" and not runtime_preflight_identity_matches_lane(gate.lane, gate.preflight):
@@ -54,7 +54,7 @@ def validate_receipt_profile_for_lane(execution_lane: str, codex_profile: str | 
 
 def validate_blocked_receipt_profile(codex_profile: str | None, runtime_profile_gates: list[Any]) -> None:
     if not runtime_profile_gates and codex_profile is not None:
-        raise ValueError("blocked A/B receipts without runtime gates must not claim a Codex profile")
+        raise ValueError("blocked A/B receipts without runtime gates must not carry a profile")
 
 
 def validate_runtime_gate_prefix(execution_lane: str, gates: list[Any], *, message: str) -> None:
