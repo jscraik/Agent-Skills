@@ -56,6 +56,16 @@ def validate_runtime_gate_prefix(execution_lane: str, gates: list[Any], *, messa
         raise ValueError(message)
 
 
+def validate_runtime_gate_sequence(execution_lane: str, gates: list[Any], *, message: str) -> None:
+    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
+    if len(gates) != len(expected_lanes):
+        raise ValueError(message)
+    actual_lanes = [gate.lane for gate in gates]
+    actual_orders = [gate.order for gate in gates]
+    if actual_lanes != expected_lanes or actual_orders != list(range(1, len(gates) + 1)):
+        raise ValueError(message)
+
+
 def validate_plan_gate_packet(gate: Any) -> None:
     _validate_gate_packet_shape(gate)
     if (gate.status == "planned") != (gate.preflight.admission.status == "pass"):

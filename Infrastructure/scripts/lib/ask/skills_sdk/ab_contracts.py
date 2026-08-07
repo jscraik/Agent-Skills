@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Annotated, Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -12,6 +12,7 @@ from ask.skills_sdk.ab_contract_guards import (
     validate_plan_gate_packet,
     validate_receipt_profile_binding,
     validate_runtime_gate_prefix,
+    validate_runtime_gate_sequence,
     validate_argv_output_last_message_path,
     validate_run_receipt_status,
 )
@@ -50,14 +51,6 @@ _EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
-
-
-def _validate_runtime_gate_sequence(execution_lane: str, gates: list[Any], *, message: str) -> None:
-    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
-    expected_orders = list(range(1, len(expected_lanes) + 1))
-    if ([gate.lane for gate in gates] != expected_lanes
-            or [gate.order for gate in gates] != expected_orders):
-        raise ValueError(message)
 
 
 def _codex_profile_from_argv(argv: list[str]) -> str:
@@ -508,7 +501,7 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
         if not _exact_variant_labels(self.command_plan) or self.command_variant_labels != ["A", "B"]:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
-        _validate_runtime_gate_sequence(
+        validate_runtime_gate_sequence(
             self.execution_lane,
             self.runtime_profile_gates,
             message="A/B plan must preserve the declared execution lane order",

@@ -128,9 +128,11 @@ For each lane, report:
   The runner accepts only the Desktop-owned FIFO at `~/.codex/.env`, invokes
   the reviewed Configs chain with `oss-cloud` and `deepseek-v4-flash:cloud`,
   and records `auth_source=1password_desktop_fifo` without reading the FIFO.
-  The marker child runs from a temporary context-minimal `CODEX_HOME` containing
-  only the admitted profile and smoke config, so workstation-wide skills and
-  MCPs cannot consume the smoke budget or become cloud evidence.
+  The marker child runs from an empty temporary working directory and a
+  context-minimal `CODEX_HOME` containing only the fixed, allowlisted cloud
+  profile and smoke config. The runner also unsets `CODEX_CONFIG_HOME`, so
+  workstation-wide project instructions, skills, and MCPs cannot consume the
+  smoke budget or become cloud evidence.
   A plaintext, symlinked, malformed, unavailable, or unwritten stream is a
   local preflight blocker: it must not start the provider or be reported as a
   provider failure. Use one fresh wrapper invocation for each credentialed

@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
-import shutil
 import stat
 import subprocess
 import sys
@@ -136,7 +135,11 @@ def _isolated_codex_home(profile: Path, paths: dict[str, Path]) -> Path:
     """Prepare a context-minimal Codex home for the bounded marker call."""
     codex_home = paths["codex_home"]
     codex_home.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(profile.resolve(strict=True), codex_home / "oss-cloud.config.toml")
+    # The operator profile is admission input, not executable context.  Write
+    # only the fixed, allowlisted cloud profile so disabled MCPs, project
+    # instructions, and other workstation settings cannot cross the boundary.
+    profile.resolve(strict=True)
+    (codex_home / "oss-cloud.config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
     (codex_home / "config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
     return codex_home
 
@@ -160,6 +163,7 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "--profile",
         "oss-cloud",
         "--strict-config",
+        "--skip-git-repo-check",
         "--sandbox",
         "read-only",
         "--ephemeral",
@@ -172,20 +176,25 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
 def _run(command: list[str], paths: dict[str, Path], args: argparse.Namespace) -> tuple[int, float]:
     started = time.monotonic()
     with paths["stdout"].open("w", encoding="utf-8") as stdout, paths["stderr"].open("w", encoding="utf-8") as stderr:
-        try:
-            completed = subprocess.run(
-                command,
-                cwd=args.work_dir,
-                stdin=subprocess.DEVNULL,
-                stdout=stdout,
-                stderr=stderr,
-                check=False,
-                text=True,
-                timeout=args.timeout_seconds,
-            )
-            return completed.returncode, round(time.monotonic() - started, 3)
-        except subprocess.TimeoutExpired:
-            return 124, round(time.monotonic() - started, 3)
+        # Run from an empty temporary directory rather than the consuming
+        # repository. Codex discovers AGENTS.md and project context from cwd
+        # parents, so honoring the caller's work directory would invalidate
+        # the context-minimal smoke claim.
+        with tempfile.TemporaryDirectory(prefix="ask-oss-cloud-smoke-work.") as work_dir:
+            try:
+                completed = subprocess.run(
+                    command,
+                    cwd=work_dir,
+                    stdin=subprocess.DEVNULL,
+                    stdout=stdout,
+                    stderr=stderr,
+                    check=False,
+                    text=True,
+                    timeout=args.timeout_seconds,
+                )
+                return completed.returncode, round(time.monotonic() - started, 3)
+            except subprocess.TimeoutExpired:
+                return 124, round(time.monotonic() - started, 3)
 
 
 def _read(path: Path) -> str:
