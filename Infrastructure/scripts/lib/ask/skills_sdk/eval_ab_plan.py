@@ -216,7 +216,7 @@ def _planned_commands(
     if blockers or evidence_root_label is None:
         return _experiment_id_from_seed("\n".join(blockers or ["evidence_root_unavailable"])), []
     experiment_id = _experiment_id(preview, execution_profile_id, judge_profile_id)
-    profiles = ("oss-local", "oss-cloud") if execution_lane == "all" else ("oss-local",)
+    profiles = ("oss-local", "oss-cloud") if execution_lane == "all" else (execution_lane,)
     gates = [
         _planned_profile_gate(profile_id, order, preflight_probe)
         for order, profile_id in enumerate(profiles, start=1)
@@ -326,7 +326,7 @@ def _plan_payload(
         "execution_profile": preview["execution_profile"],
         "judge_profile": preview["judge_profile"],
         "execution_lane": execution_lane,
-        "codex_profile": "oss-local" if runtime_profile_gates else None,
+        "codex_profile": runtime_profile_gates[0]["codex_profile"] if runtime_profile_gates else None,
         "runtime_profile_gates": runtime_profile_gates,
         "evidence_root": evidence_root_label,
         "experiment_id": experiment_id,

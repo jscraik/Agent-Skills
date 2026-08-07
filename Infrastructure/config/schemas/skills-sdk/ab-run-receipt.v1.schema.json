@@ -1779,14 +1779,16 @@
     },
     "execution_lane": {
       "default": "all",
-      "enum": ["all", "oss-local"],
+      "enum": ["all", "oss-local", "oss-cloud"],
       "title": "Execution Lane",
       "type": "string"
     },
     "codex_profile": {
-      "const": "oss-local",
-      "title": "Codex Profile",
-      "type": "string"
+      "anyOf": [
+        {"enum": ["oss-local", "oss-cloud"]},
+        {"type": "null"}
+      ],
+      "title": "Codex Profile"
     },
     "runtime_profile_gates": {
       "items": {
@@ -2032,6 +2034,27 @@
               {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}, "status": {"const": "completed"}}}
             ]
           }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "execution_lane": {"const": "oss-cloud"}
+        },
+        "required": ["status", "execution_lane"]
+      },
+      "then": {
+        "properties": {
+          "runtime_profile_gates": {
+            "minItems": 1,
+            "maxItems": 1,
+            "prefixItems": [
+              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}, "status": {"const": "completed"}}}
+            ]
+          },
+          "network_accessed": {"const": true}
         }
       }
     },

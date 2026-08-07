@@ -152,7 +152,7 @@ def _add_ab_preview_parser(subparsers: argparse._SubParsersAction, global_parser
 def _add_ab_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     plan = subparsers.add_parser("ab-plan", help="Plan Codex exec commands for a skill A/B eval", parents=[global_parser])
     _add_ab_common_arguments(plan)
-    plan.add_argument("--execution-lane", choices=("all", "oss-local"), default="all")
+    plan.add_argument("--execution-lane", choices=("all", "oss-local", "oss-cloud"), default="all")
     plan.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
     plan.add_argument("--preview", action="store_true", help="Emit a non-mutating A/B execution plan receipt")
 
@@ -160,7 +160,7 @@ def _add_ab_plan_parser(subparsers: argparse._SubParsersAction, global_parser: a
 def _add_ab_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     run = subparsers.add_parser("ab-run", help="Execute a Codex-backed skill A/B eval", parents=[global_parser])
     _add_ab_common_arguments(run)
-    run.add_argument("--execution-lane", choices=("all", "oss-local"), default="all")
+    run.add_argument("--execution-lane", choices=("all", "oss-local", "oss-cloud"), default="all")
     run.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
     run.add_argument("--timeout-seconds", type=_positive_int, default=1800, help="Timeout for each Codex variant run.")
     run.add_argument("--execute", action="store_true", help="Required explicit gate before invoking Codex exec.")
