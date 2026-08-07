@@ -100,6 +100,21 @@ def _codex_profile_from_judge_argv(argv: list[str], *, require_approval: bool = 
     return profile
 
 
+def _judge_command_shape_from_argv(argv: list[str]) -> list[str]:
+    """Return the redacted logical shape represented by a runtime judge argv."""
+    _codex_profile_from_judge_argv(argv, require_approval=False)
+    if _is_configs_judge_argv(argv):
+        logical = ["codex", "exec", *argv[9:]]
+    else:
+        logical = list(argv)
+    for index, value in enumerate(logical[:-1]):
+        if value == "--cd":
+            logical[index + 1] = "<judge-workspace>"
+        elif value == "--output-last-message":
+            logical[index + 1] = "<judge-output>"
+    return logical
+
+
 def _is_configs_judge_argv(argv: list[str]) -> bool:
     return (
         len(argv) >= 12

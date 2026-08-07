@@ -17,6 +17,7 @@ from ask.skills_sdk.ab_contracts import (
     _AB_JUDGE_DIMENSION_IDS,
     _EXPERIMENT_ID_PATTERN,
     _codex_profile_from_judge_argv,
+    _judge_command_shape_from_argv,
     _computed_judge_scores,
     _exact_decision_labels,
     _expected_judge_winner,
@@ -184,6 +185,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     judge_output_path: str | None = Field(default=None, min_length=1)
     judge_output_digest: str | None = Field(default=None, min_length=71)
     judge_command_argv: list[str]
+    judge_command_shape: list[str] | None = None
     codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"] | None
     codex_exec_invoked: bool
     decision: AbJudgeDecision | None
@@ -215,6 +217,11 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must include complete score evidence")
         if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
             raise ValueError("scored A/B judge receipts must report provider side effects")
+        self._validate_executed_profile()
+        self._validate_command_shape()
+        self._validate_decision_consistency()
+
+    def _validate_executed_profile(self) -> None:
         try:
             # v0 judge receipts predate the explicit approval-policy argv contract.
             # Keep them readable while all newly planned/executed v1 lanes remain
@@ -229,7 +236,16 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must derive Codex profile from executed argv")
         if self.codex_profile != self.judge_profile.codex_profile:
             raise ValueError("scored A/B judge receipts must bind intended judge profile to executed profile")
-        self._validate_decision_consistency()
+
+    def _validate_command_shape(self) -> None:
+        if self.judge_command_shape is None:
+            raise ValueError("scored A/B judge receipts must include a logical judge command shape")
+        try:
+            expected_shape = _judge_command_shape_from_argv(self.judge_command_argv)
+        except ValueError as exc:
+            raise ValueError("scored A/B judge receipts must derive command shape from executed argv") from exc
+        if self.judge_command_shape != expected_shape:
+            raise ValueError("scored A/B judge receipts must bind logical command shape to executed argv")
 
     def _validate_decision_consistency(self) -> None:
         if self.decision is None:

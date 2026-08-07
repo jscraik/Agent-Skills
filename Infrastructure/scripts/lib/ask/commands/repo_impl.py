@@ -57,7 +57,7 @@ def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
     return " ".join(shlex.quote(part) for part in parts)
 
 
-def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
+def repo_status(repo_root: Path, verbose: bool = False, baseline_path: str | None = None) -> CallResult:
     """Return repository identity and the non-mutating workspace projection state."""
     result = CallResult()
     result.data["validation_commands"] = [_repo_validation_command("status", verbose=verbose)]
@@ -69,6 +69,14 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     projection_state, is_synced = _skills_projection_state(repo_root, skills_dir)
     result.data["skills_synced"] = is_synced
     result.data["skills_projection_state"] = projection_state
+
+    if baseline_path is not None:
+        try:
+            result.data["shape_baseline"] = _shape_baseline(repo_root, baseline_path)
+        except RuntimeError as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=str(exc)))
+            return result
 
     result.status = "success"
     return result
@@ -1138,7 +1146,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
     return result
 
 
-def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
+def _git_output_text(repo_root: Path, args: list[str]) -> str:
     command = ["git", *args]
     try:
         process = subprocess.run(
@@ -1161,7 +1169,31 @@ def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
             f"git command failed: {' '.join(command)}"
             + (f" ({detail})" if detail else "")
         )
-    return [line.strip() for line in process.stdout.splitlines() if line.strip()]
+    return process.stdout
+
+
+def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
+    return [line.strip() for line in _git_output_text(repo_root, args).splitlines() if line.strip()]
+
+
+def _shape_baseline(repo_root: Path, baseline_path: str | None) -> dict[str, Any]:
+    deleted = [
+        path
+        for path in _git_output_lines(repo_root, ["diff", "--name-only", "--diff-filter=D", "HEAD", "--"])
+        if path.endswith(".py")
+    ]
+    siblings: list[str] = []
+    if baseline_path:
+        relative = Path(baseline_path).resolve().relative_to(repo_root.resolve()).as_posix()
+        parent = Path(relative).parent.as_posix()
+        siblings = [
+            path
+            for path in _git_output_lines(repo_root, ["ls-files", "--", f"{parent}/*.py"])
+            if path.endswith(".py")
+        ]
+    paths = list(dict.fromkeys([*deleted, *siblings]))
+    head_text = {path: _git_output_text(repo_root, ["show", f"HEAD:{path}"]) for path in paths}
+    return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
 
 
 def collect_changed_files(repo_root: Path) -> list[str]:

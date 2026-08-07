@@ -21,6 +21,7 @@ from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     CodexJudgeResult,
     _clear_text_evidence,
     _codex_judge_command,
+    _codex_judge_command_shape,
     _parse_judge_decision,
     _run_codex_judge,
     _score_evidence_paths,
@@ -1161,6 +1162,15 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("--cd", command)
         self.assertNotIn(str(REPO_ROOT), command)
 
+        shape = _codex_judge_command_shape(
+            {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+            codex_judge._codex_judge_work_dir(output_file),
+            output_file,
+        )
+        self.assertEqual(shape[:4], ["codex", "exec", "--profile", "oss-cloud"])
+        self.assertNotIn(str(output_file), shape)
+        self.assertNotIn(str(codex_judge._codex_judge_work_dir(output_file)), shape)
+
     def test_cloud_auth_env_file_requires_a_desktop_fifo(self) -> None:
         profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
@@ -1201,8 +1211,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
+                shape = _codex_judge_command_shape(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[2:7], ["--env-file", str(auth_env_file), "--require-env", "OLLAMA_API_KEY", "--"])
         self.assertEqual(command[7:11], ["bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud"])
+        self.assertEqual(shape[:4], ["codex", "exec", "--profile", "oss-cloud"])
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_judge_contains_runtime_output_and_copies_receipt(self) -> None:

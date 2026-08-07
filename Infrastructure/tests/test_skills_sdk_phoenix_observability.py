@@ -595,6 +595,96 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             ["oss-cloud", "oss-cloud"],
         )
 
+    def test_judge_trace_accepts_configs_wrapped_runtime_with_logical_shape(self) -> None:
+        receipt = {
+            "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
+            "status": "scored",
+            "operation": "ab_judge_score",
+            "judge_profile": {"id": "oss-cloud", "codex_profile": "oss-cloud"},
+            "codex_profile": "oss-cloud",
+            "codex_exec_invoked": True,
+            "provider_invoked": True,
+            "network_accessed": True,
+            "mutation_performed": True,
+            "judge_command_argv": [
+                "bash",
+                "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                "--env-file",
+                "<operator-approved-opaque-env-stream>",
+                "--require-env",
+                "OLLAMA_API_KEY",
+                "--",
+                "bash",
+                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                "--profile",
+                "oss-cloud",
+                "--strict-config",
+                "--sandbox",
+                "read-only",
+                "--ephemeral",
+                "--json",
+                "-",
+            ],
+            "judge_command_shape": [
+                "codex",
+                "exec",
+                "--profile",
+                "oss-cloud",
+                "--strict-config",
+                "--sandbox",
+                "read-only",
+                "--ephemeral",
+                "--json",
+                "-",
+            ],
+            "decision": {"winner": "inconclusive"},
+        }
+
+        trace_receipt = build_phoenix_eval_trace_receipt(REPO_ROOT, eval_receipt=receipt, enabled=False)
+
+        self.assertEqual(trace_receipt["status"], "pass")
+        self.assertEqual(trace_receipt["observability_status"], "not_run")
+        self.assertEqual(trace_receipt["profile_evidence"][0]["derived_codex_profile"], "oss-cloud")
+        self.assertEqual(trace_receipt["profile_evidence"][0]["blockers"], [])
+
+    def test_judge_trace_blocks_shape_that_does_not_match_runtime_argv(self) -> None:
+        receipt = {
+            "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
+            "status": "scored",
+            "operation": "ab_judge_score",
+            "judge_profile": {"id": "oss-cloud", "codex_profile": "oss-cloud"},
+            "codex_profile": "oss-cloud",
+            "codex_exec_invoked": True,
+            "provider_invoked": True,
+            "network_accessed": True,
+            "mutation_performed": True,
+            "judge_command_argv": [
+                "bash",
+                "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                "--env-file",
+                "<operator-approved-opaque-env-stream>",
+                "--require-env",
+                "OLLAMA_API_KEY",
+                "--",
+                "bash",
+                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                "--profile",
+                "oss-cloud",
+                "--strict-config",
+                "--sandbox",
+                "read-only",
+                "--ephemeral",
+                "--json",
+                "-",
+            ],
+            "judge_command_shape": ["codex", "exec", "--profile", "oss-local"],
+        }
+
+        plan = build_eval_trace_plan(receipt)
+
+        self.assertIn("judge_command_shape_mismatch", plan["blockers"])
+        self.assertEqual(plan["profile_evidence"][0]["status"], "blocked")
+
     def test_ab_trace_uses_first_runtime_gate_for_all_lane_top_level_variants(self) -> None:
         receipt = {
             "schema_version": "skills-sdk.ab-run-receipt.v1",

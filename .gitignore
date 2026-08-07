@@ -230,3 +230,10 @@ plugins/.plugin-appserver/
 
 # Codex CLI last-message output is runtime evidence, not source.
 /codex-last-message.json
+
+# Candidate eval captures are local working evidence. Promote a deliberately
+# selected, digest-bound receipt instead of committing an entire rerun tree.
+.harness/evidence/continuation-*/
+.harness/evidence/handoff/simplify/
+Infrastructure/artifacts/evals/closeouts/sdk-eval-run-receipt.json
+Infrastructure/artifacts/evals/closeouts/*-Skills-agent-ops-simplify-*-codex.json

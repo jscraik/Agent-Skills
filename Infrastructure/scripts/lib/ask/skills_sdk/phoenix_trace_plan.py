@@ -6,6 +6,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.ab_contracts import _judge_command_shape_from_argv
+
 
 OSS_CODEX_PROFILES = ("oss-local", "oss-cloud")
 PHOENIX_PROJECT_NAME = "agent-skills-skills-sdk-evals"
@@ -126,11 +128,28 @@ def _profile_evidence(receipt: dict[str, Any], source_kind: str) -> list[dict[st
     if source_kind == "ab_run_receipt":
         return _ab_profile_evidence(receipt)
     if source_kind == "ab_judge_score_receipt":
+        command_shape = receipt.get("judge_command_shape")
+        runtime_argv = receipt.get("judge_command_argv")
+        argv = command_shape if isinstance(command_shape, list) else runtime_argv
+        shape_blockers: list[str] = []
+        if isinstance(runtime_argv, list):
+            try:
+                expected_shape = _judge_command_shape_from_argv(runtime_argv)
+            except ValueError:
+                shape_blockers.append("judge_command_argv_invalid")
+            else:
+                if isinstance(command_shape, list) and command_shape != expected_shape:
+                    shape_blockers.append("judge_command_shape_mismatch")
+                if not isinstance(command_shape, list):
+                    argv = expected_shape
         row = _profile_from_argv(
-            receipt.get("judge_command_argv"),
+            argv,
             lane="judge-score",
             claimed_profile=receipt.get("codex_profile"),
         )
+        row["blockers"].extend(shape_blockers)
+        if row["blockers"]:
+            row["status"] = "blocked"
         return [row]
     return []
 

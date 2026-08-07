@@ -93,6 +93,7 @@ def main():
     repo_subparsers = repo_parser.add_subparsers(dest="action")
     repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
     repo_status_parser.add_argument("--verbose", action="store_true", help="Include more details")
+    repo_status_parser.add_argument("--baseline-path", help="Include Git shape-baseline data for a repo-relative path")
     repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
     repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
     repo_validate_parser.add_argument("--fail-fast", action="store_true", help="Stop after the first required failure")
@@ -559,7 +560,7 @@ def main():
         print(f"{correction_note}\n")
     if args.topic == "repo":
         if args.action == "status":
-            result = repo_status(repo_root, verbose=args.verbose)
+            result = repo_status(repo_root, verbose=args.verbose, baseline_path=args.baseline_path)
         elif args.action == "validate":
             result = repo_validate(
                 repo_root,
