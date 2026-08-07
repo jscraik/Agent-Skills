@@ -36,13 +36,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing plugin gate extraction debt",
         "expires": "2026-07-31",
     },
-    "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin eval regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
