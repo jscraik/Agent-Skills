@@ -632,6 +632,37 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             ["oss-local", "oss-local"],
         )
 
+    def test_ab_trace_blocks_explicit_all_lane_without_runtime_gates(self) -> None:
+        plan = build_eval_trace_plan(
+            {
+                "schema_version": "skills-sdk.ab-run-receipt.v1",
+                "status": "completed",
+                "operation": "ab_run",
+                "execution_lane": "all",
+                "codex_profile": "oss-local",
+                "runtime_profile_gates": [],
+                "variant_results": [
+                    {
+                        "variant_label": "A",
+                        "status": "pass",
+                        "codex_profile": "oss-local",
+                        "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
+                    },
+                    {
+                        "variant_label": "B",
+                        "status": "pass",
+                        "codex_profile": "oss-cloud",
+                        "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
+                    },
+                ],
+            }
+        )
+
+        self.assertTrue(plan["blockers"])
+        self.assertTrue(
+            any("profile_order_required:selected-execution-lane" in blocker for blocker in plan["blockers"])
+        )
+
     def test_ab_trace_rejects_metadata_only_duplicate_substituted_and_reordered_profiles(self) -> None:
         counterexamples = {
             "judge_metadata_only": [

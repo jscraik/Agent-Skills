@@ -109,13 +109,14 @@ def _expected_ab_profiles(receipt: dict[str, Any], evidence_count: int) -> list[
         return [execution_lane] * evidence_count
     if execution_lane == "all":
         gates = receipt.get("runtime_profile_gates")
-        if isinstance(gates, list):
-            first_gate = next((gate for gate in gates if isinstance(gate, dict)), None)
-            first_profile = first_gate.get("codex_profile") if first_gate else None
-            if first_profile in OSS_CODEX_PROFILES:
-                return [first_profile] * evidence_count
+        first_gate = gates[0] if isinstance(gates, list) and gates else None
+        first_profile = first_gate.get("codex_profile") if isinstance(first_gate, dict) else None
+        return [first_profile] * evidence_count if first_profile in OSS_CODEX_PROFILES else []
+    if execution_lane is not None:
+        return []
     # Preserve the legacy two-profile receipt contract for receipts that
-    # predate execution_lane and runtime_profile_gates.
+    # predate execution_lane and runtime_profile_gates. Explicit lanes must
+    # carry valid metadata rather than silently using this fallback.
     return list(OSS_CODEX_PROFILES)
 
 
