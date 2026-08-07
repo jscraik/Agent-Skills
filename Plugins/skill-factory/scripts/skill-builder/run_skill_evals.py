@@ -95,6 +95,12 @@ from eval_signal_contract import (  # noqa: E402
     parse_min_expected_signal_score,
 )
 from ask.skills_sdk.release_rubric_checks import evaluate_semantic_requirements  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
+    OSS_CLOUD_MODEL,
+    actual_opaque_env_path,
+    configs_auth_backed_invocation,
+    configs_oss_cloud_exec_command,
+)
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
@@ -2399,57 +2405,95 @@ def run_codex_exec(
     timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
 
     def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
-        cmd = _codex_exec_prefix(codex_bin)
+        if effective_profile == "oss-cloud":
+            try:
+                if sandbox != "read-only":
+                    raise ValueError("oss-cloud execution requires the read-only sandbox")
+                if ask_for_approval not in (None, "on-request"):
+                    raise ValueError("oss-cloud execution requires on-request approval")
+                if model and model != OSS_CLOUD_MODEL:
+                    raise ValueError(f"oss-cloud execution requires model {OSS_CLOUD_MODEL}")
+                if output_schema_path is not None:
+                    raise ValueError("oss-cloud execution does not support an output schema")
+                if extra_codex_args:
+                    raise ValueError("oss-cloud execution does not accept ad hoc Codex arguments")
+                env_file = actual_opaque_env_path()
+                if env_file is None:
+                    raise ValueError("oss-cloud execution requires an operator-approved opaque environment stream")
+                relative_output = output_last_message_path.resolve().relative_to(workspace_root.resolve())
+                logical_command = [
+                    "codex",
+                    "exec",
+                    "--profile",
+                    "oss-cloud",
+                    "-c",
+                    'approval_policy="on-request"',
+                    "--cd",
+                    ".",
+                    "--sandbox",
+                    "read-only",
+                    "--output-last-message",
+                    relative_output.as_posix(),
+                    "--json",
+                    "-",
+                ]
+                with configs_auth_backed_invocation(env_file) as invocation:
+                    cmd = invocation.runtime_argv(configs_oss_cloud_exec_command(logical_command))
+            except (OSError, ValueError) as exc:
+                return 2, "", str(exc)
+        else:
+            cmd = _codex_exec_prefix(codex_bin)
         # Eval cases pass prompt/context explicitly. When a named runtime lane
         # profile is requested, keep profile config available while still using
         # the isolated CODEX_HOME copied below.
-        ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
-        if effective_profile:
-            if ignore_user_config_support is not False:
+        if effective_profile != "oss-cloud":
+            ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
+            if effective_profile:
+                if ignore_user_config_support is not False:
+                    cmd.append("--ignore-user-config")
+                    warnings.append(
+                        "Ignored base Codex user config while preserving the explicit --profile for noninteractive eval subprocesses."
+                    )
+                else:
+                    warnings.append(
+                        "Codex CLI does not support --ignore-user-config; profile eval subprocess may inherit base user config."
+                    )
+                disable_support = _codex_supports_exec_flag(codex_bin, "--disable")
+                if disable_support is not False:
+                    cmd.extend(["--disable", "apps"])
+                    warnings.append("Disabled Codex apps for noninteractive profile eval subprocesses.")
+                else:
+                    warnings.append("Codex CLI does not support --disable; eval runner could not disable apps.")
+            elif ignore_user_config_support is not False:
                 cmd.append("--ignore-user-config")
-                warnings.append(
-                    "Ignored base Codex user config while preserving the explicit --profile for noninteractive eval subprocesses."
-                )
             else:
-                warnings.append(
-                    "Codex CLI does not support --ignore-user-config; profile eval subprocess may inherit base user config."
-                )
-            disable_support = _codex_supports_exec_flag(codex_bin, "--disable")
-            if disable_support is not False:
-                cmd.extend(["--disable", "apps"])
-                warnings.append("Disabled Codex apps for noninteractive profile eval subprocesses.")
-            else:
-                warnings.append("Codex CLI does not support --disable; eval runner could not disable apps.")
-        elif ignore_user_config_support is not False:
-            cmd.append("--ignore-user-config")
-        else:
-            warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
-        cmd.extend(["--sandbox", sandbox])
+                warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
+            cmd.extend(["--sandbox", sandbox])
 
-        if ask_for_approval:
-            supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
-            if supports is not False:
-                cmd.extend(["--ask-for-approval", ask_for_approval])
+            if ask_for_approval:
+                supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
+                if supports is not False:
+                    cmd.extend(["--ask-for-approval", ask_for_approval])
 
-        cmd.extend([
-            "--output-last-message",
-            str(output_last_message_path),
-        ])
+            cmd.extend([
+                "--output-last-message",
+                str(output_last_message_path),
+            ])
 
-        if extra_codex_args:
-            cmd.extend(extra_codex_args)
+            if extra_codex_args:
+                cmd.extend(extra_codex_args)
 
-        if effective_profile:
-            cmd.extend(["--profile", effective_profile])
-        if model:
-            cmd.extend(["--model", model])
-        if output_schema_path:
-            cmd.extend(["--output-schema", str(output_schema_path)])
+            if effective_profile:
+                cmd.extend(["--profile", effective_profile])
+            if model:
+                cmd.extend(["--model", model])
+            if output_schema_path:
+                cmd.extend(["--output-schema", str(output_schema_path)])
 
-        if jsonl_path:
-            cmd.append("--json")
+            if jsonl_path:
+                cmd.append("--json")
 
-        cmd.append("-")
+            cmd.append("-")
 
         try:
             proc = sp.run(
@@ -2511,11 +2555,17 @@ def run_codex_exec(
         and fallback_profile != profile
         and _is_codex_reasoning_summary_unsupported(f"{stderr}\n{stdout}")
     ):
-        warnings.append(
-            "Codex rejected reasoning.summary for the active profile/model; "
-            f"retrying with fallback profile `{fallback_profile}`."
-        )
-        rc, stdout, stderr = _invoke(fallback_profile)
+        if profile == "oss-cloud":
+            warnings.append(
+                "Codex rejected reasoning.summary for oss-cloud; skipped cross-profile fallback "
+                "to preserve the authenticated Configs transport and requested provider identity."
+            )
+        else:
+            warnings.append(
+                "Codex rejected reasoning.summary for the active profile/model; "
+                f"retrying with fallback profile `{fallback_profile}`."
+            )
+            rc, stdout, stderr = _invoke(fallback_profile)
 
     return rc, stdout, stderr, warnings
 
@@ -2962,9 +3012,20 @@ def _isolated_codex_home_for_eval(profile: Optional[str] = None) -> Tuple[Path, 
 
     if source_home.exists():
         profile_config = f"{profile}.config.toml" if profile else None
-        names = ("auth.json", profile_config) if profile_config and (source_home / profile_config).is_file() else (
-            "auth.json", "config.toml", "oss-local.config.toml", "oss-cloud.config.toml"
-        )
+        if profile == "oss-cloud" and profile_config:
+            required = ("config.toml", profile_config)
+            missing = [name for name in required if not (source_home / name).is_file()]
+            if missing:
+                missing_names = ", ".join(missing)
+                raise ValueError(
+                    "oss-cloud eval requires both config.toml and oss-cloud.config.toml "
+                    f"in CODEX_HOME; missing: {missing_names} ({source_home})"
+                )
+            names = ("auth.json", "config.toml", profile_config)
+        else:
+            names = ("auth.json", profile_config) if profile_config and (source_home / profile_config).is_file() else (
+                "auth.json", "config.toml", "oss-local.config.toml", "oss-cloud.config.toml"
+            )
         for name in names:
             warning = _copy_codex_home_file(source_home, target_home, name)
             if warning:
@@ -4271,7 +4332,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     preflight_warnings: List[str] = []
 
     if "codex" in selected_runners and codex_home is None:
-        codex_home, isolation_warnings = _isolated_codex_home_for_eval(args.profile)
+        try:
+            codex_home, isolation_warnings = _isolated_codex_home_for_eval(args.profile)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
         preflight_warnings.extend(isolation_warnings)
 
     # Smoke-profile routing:
