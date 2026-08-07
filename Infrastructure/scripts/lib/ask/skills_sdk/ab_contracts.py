@@ -10,6 +10,7 @@ from ask.skills_sdk.ab_contract_guards import (
     run_gate_is_completed,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
+    validate_receipt_profile_for_lane,
     validate_receipt_profile_binding,
     validate_runtime_gate_prefix,
     validate_runtime_gate_sequence,
@@ -476,6 +477,7 @@ class AbPlanReceipt(_SdkContractModel):
             self._validate_planned_packet()
         else:
             self._validate_blocked_packet()
+            validate_receipt_profile_for_lane(self.execution_lane, self.codex_profile)
             validate_receipt_profile_binding(self)
         return self
 
@@ -583,8 +585,8 @@ class AbRuntimeProfileRunGate(_SdkContractModel):
 
     @model_validator(mode="after")
     def _gate_status_matches(self) -> AbRuntimeProfileRunGate:
-        if self.lane != self.codex_profile or self.order not in {1, 2}:
-            raise ValueError("runtime run gate identity or order is invalid")
+        if self.lane != self.codex_profile:
+            raise ValueError("runtime run gate identity is invalid")
         if self.status == "completed" and not self._is_completed_gate():
             raise ValueError("completed runtime gate requires both variants and no blockers")
         if self.status != "completed" and not self.blockers:

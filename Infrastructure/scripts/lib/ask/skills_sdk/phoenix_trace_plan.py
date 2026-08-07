@@ -94,11 +94,29 @@ def _ab_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     ]
     if not evidence:
         evidence.append(_profile_from_argv(None, lane="ab-variants"))
-    if [item.get("derived_codex_profile") for item in evidence] != list(OSS_CODEX_PROFILES):
+    expected_profiles = _expected_ab_profiles(receipt, len(evidence))
+    if [item.get("derived_codex_profile") for item in evidence] != expected_profiles:
         for item in evidence:
-            item["blockers"].append("profile_order_required:oss-local,oss-cloud")
+            expected = ",".join(expected_profiles) or "selected-execution-lane"
+            item["blockers"].append(f"profile_order_required:{expected}")
             item["status"] = "blocked"
     return evidence
+
+
+def _expected_ab_profiles(receipt: dict[str, Any], evidence_count: int) -> list[str]:
+    execution_lane = receipt.get("execution_lane")
+    if execution_lane in {"oss-local", "oss-cloud"}:
+        return [execution_lane] * evidence_count
+    if execution_lane == "all":
+        gates = receipt.get("runtime_profile_gates")
+        if isinstance(gates, list):
+            first_gate = next((gate for gate in gates if isinstance(gate, dict)), None)
+            first_profile = first_gate.get("codex_profile") if first_gate else None
+            if first_profile in OSS_CODEX_PROFILES:
+                return [first_profile] * evidence_count
+    # Preserve the legacy two-profile receipt contract for receipts that
+    # predate execution_lane and runtime_profile_gates.
+    return list(OSS_CODEX_PROFILES)
 
 
 def _profile_evidence(receipt: dict[str, Any], source_kind: str) -> list[dict[str, Any]]:
