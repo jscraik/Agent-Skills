@@ -372,13 +372,17 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
     def test_v1_schema_allows_zero_gate_blocked_receipt(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         blocked = json.loads(fixture_path.read_text())
-        blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
+        blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "codex_profile": None, "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
         self.assertEqual(self._schema_result(blocked).status, "pass")
 
         mismatched = dict(blocked)
         mismatched["execution_lane"] = "oss-cloud"
         mismatched["codex_profile"] = "oss-local"
         self.assertEqual(self._schema_result(mismatched).status, "fail")
+
+        all_mismatched = dict(blocked)
+        all_mismatched["codex_profile"] = "oss-local"
+        self.assertEqual(self._schema_result(all_mismatched).status, "fail")
 
     def test_v1_schema_rejects_blocked_receipt_when_all_gates_completed(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"

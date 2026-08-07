@@ -1972,7 +1972,7 @@
       },
       "then": {
         "properties": {
-          "codex_profile": {"anyOf": [{"const": "oss-local"}, {"type": "null"}]}
+          "codex_profile": {"type": "null"}
         }
       }
     },
@@ -1987,7 +1987,7 @@
       },
       "then": {
         "properties": {
-          "codex_profile": {"anyOf": [{"const": "oss-local"}, {"type": "null"}]}
+          "codex_profile": {"type": "null"}
         }
       }
     },
@@ -2002,7 +2002,7 @@
       },
       "then": {
         "properties": {
-          "codex_profile": {"anyOf": [{"const": "oss-cloud"}, {"type": "null"}]}
+          "codex_profile": {"type": "null"}
         }
       }
     },

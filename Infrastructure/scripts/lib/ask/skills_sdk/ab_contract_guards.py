@@ -52,6 +52,11 @@ def validate_receipt_profile_for_lane(execution_lane: str, codex_profile: str | 
         raise ValueError("top-level codex_profile must match the selected execution lane")
 
 
+def validate_blocked_receipt_profile(codex_profile: str | None, runtime_profile_gates: list[Any]) -> None:
+    if not runtime_profile_gates and codex_profile is not None:
+        raise ValueError("blocked A/B receipts without runtime gates must not claim a Codex profile")
+
+
 def validate_runtime_gate_prefix(execution_lane: str, gates: list[Any], *, message: str) -> None:
     expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
     if len(gates) > len(expected_lanes):
@@ -128,6 +133,7 @@ def validate_run_receipt_status(receipt: Any) -> None:
         validate_receipt_profile_binding(receipt)
         _validate_completed_run_receipt(receipt)
         return
+    validate_blocked_receipt_profile(receipt.codex_profile, receipt.runtime_profile_gates)
     validate_receipt_profile_for_lane(receipt.execution_lane, receipt.codex_profile)
     if not receipt.blockers:
         raise ValueError("blocked A/B run receipts must include blockers")

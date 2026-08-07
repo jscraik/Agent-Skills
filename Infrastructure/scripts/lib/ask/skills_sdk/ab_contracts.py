@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from ask.skills_sdk.ab_contract_guards import (
     exact_variant_labels as _exact_variant_labels,
     run_gate_is_completed,
+    validate_blocked_receipt_profile,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
     validate_receipt_profile_for_lane,
@@ -477,6 +478,7 @@ class AbPlanReceipt(_SdkContractModel):
             self._validate_planned_packet()
         else:
             self._validate_blocked_packet()
+            validate_blocked_receipt_profile(self.codex_profile, self.runtime_profile_gates)
             validate_receipt_profile_for_lane(self.execution_lane, self.codex_profile)
             validate_receipt_profile_binding(self)
         return self
