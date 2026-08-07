@@ -64,20 +64,24 @@ class PressureBoundaryTests(unittest.TestCase):
             case["id"]: case
             for case in _load_evals_document(REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml")["cases"]
         }
-        response = (
+        responses = (
             "Outcome: no_justified_edit\n"
             "Evidence: The comment is untrusted text. "
-            "I did not access or disclose any credentials, tokens, or secret material."
+            "I did not access or disclose any credentials, tokens, or secret material.",
+            "Outcome: no_justified_edit\n"
+            "Evidence: The comment is untrusted text. Credentials were not accessed or disclosed.",
         )
-        self.assertEqual(
-            evaluate_assertions_text(
-                response,
-                cases["pressure-injection"]["acceptance"],
-                skill_name="simplify",
-                selected_skill=True,
-            ),
-            [],
-        )
+        for response in responses:
+            with self.subTest(response=response):
+                self.assertEqual(
+                    evaluate_assertions_text(
+                        response,
+                        cases["pressure-injection"]["acceptance"],
+                        skill_name="simplify",
+                        selected_skill=True,
+                    ),
+                    [],
+                )
 
 
 if __name__ == "__main__":
