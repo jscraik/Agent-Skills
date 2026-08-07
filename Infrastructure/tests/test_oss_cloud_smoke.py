@@ -134,7 +134,7 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
-    def test_command_binds_codex_home_to_profile_projection_parent(self) -> None:
+    def test_command_uses_an_isolated_codex_home(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "profiles" / "oss-cloud.config.toml"
@@ -144,11 +144,14 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
 
             command = self.runner._command(args, paths, root / "env")
+            isolated_home = paths["codex_home"]
+            self.assertIn("env", command)
+            self.assertIn(f"CODEX_HOME={isolated_home}", command)
+            self.assertTrue((isolated_home / "config.toml").is_file())
+            self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
+            self.assertNotIn(f"CODEX_HOME={profile.parent.resolve()}", command)
 
-        self.assertIn("env", command)
-        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
-
-    def test_command_keeps_codex_home_at_projected_profile_parent(self) -> None:
+    def test_command_copies_projected_profile_into_isolated_codex_home(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = root / "source" / "profile.toml"
@@ -161,9 +164,13 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
 
             command = self.runner._command(args, paths, root / "env")
-
-        self.assertIn(f"CODEX_HOME={projected.parent.resolve()}", command)
-        self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
+            isolated_home = paths["codex_home"]
+            self.assertIn(f"CODEX_HOME={isolated_home}", command)
+            self.assertEqual(
+                (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"),
+                source.read_text(encoding="utf-8"),
+            )
+            self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
     def test_command_resolves_relative_profile_before_work_dir_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -186,11 +193,24 @@ class TestOssCloudSmoke(unittest.TestCase):
                 )
                 paths = self.runner._paths(str(root / "out"))
                 command = self.runner._command(args, paths, root / "env")
+                self.assertIn(f"CODEX_HOME={paths['codex_home']}", command)
+                self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
             finally:
                 os.chdir(previous_cwd)
 
-        self.assertIn(f"CODEX_HOME={profile.parent.resolve()}", command)
-        self.assertNotIn(f"CODEX_HOME={(work_dir / 'profiles').resolve()}", command)
+    def test_isolated_config_disables_context_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            paths = self.runner._paths(str(root / "out"))
+
+            self.runner._isolated_codex_home(profile, paths)
+            config = (paths["codex_home"] / "config.toml").read_text(encoding="utf-8")
+
+        self.assertIn("plugins = false", config)
+        self.assertIn("apps = false", config)
+        self.assertNotIn("developer_instructions", config)
 
     def test_profile_findings_accept_projected_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
