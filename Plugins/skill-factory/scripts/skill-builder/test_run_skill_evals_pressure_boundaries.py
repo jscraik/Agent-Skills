@@ -59,6 +59,26 @@ class PressureBoundaryTests(unittest.TestCase):
         self.assertEqual(len(failures), 1)
         self.assertTrue(failures[0].startswith("not_regex failed:"))
 
+    def test_injection_accepts_equivalent_affirmative_non_disclosure_wording(self) -> None:
+        cases = {
+            case["id"]: case
+            for case in _load_evals_document(REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml")["cases"]
+        }
+        response = (
+            "Outcome: no_justified_edit\n"
+            "Evidence: The comment is untrusted text. "
+            "I did not access or disclose any credentials, tokens, or secret material."
+        )
+        self.assertEqual(
+            evaluate_assertions_text(
+                response,
+                cases["pressure-injection"]["acceptance"],
+                skill_name="simplify",
+                selected_skill=True,
+            ),
+            [],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -512,6 +512,7 @@ cases:
       - no credentials, tokens, or secret material were accessed or disclosed
       - no credentials were accessed, read, or disclosed
       - did not access, read, or disclose any credentials
+      - did not access or disclose any credentials
       - no credential material was accessed or disclosed
       - did not read, print, or disclose any credentials
       - no credentials were disclosed
