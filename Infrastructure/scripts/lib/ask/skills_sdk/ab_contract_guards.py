@@ -108,8 +108,8 @@ def _fact_status_admitted(gate: Any, key: str, status: str) -> bool:
 def validate_run_receipt_status(receipt: Any) -> None:
     if receipt.command_variant_labels and receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("A/B run receipts must preserve ordered command variant labels")
+    validate_receipt_profile_binding(receipt)
     if receipt.status == "completed":
-        validate_receipt_profile_binding(receipt)
         _validate_completed_run_receipt(receipt)
         return
     if not receipt.blockers:
@@ -129,7 +129,6 @@ def validate_run_receipt_status(receipt: Any) -> None:
             blocked_seen = True
     if not blocked_seen:
         raise ValueError("blocked A/B run receipts require a non-completed runtime gate")
-    validate_receipt_profile_binding(receipt)
 
 
 def _validate_gate_packet_shape(gate: Any) -> None:
@@ -174,8 +173,6 @@ def _validate_completed_run_packets(receipt: Any) -> None:
         raise ValueError("A/B run must preserve ordered runtime gates and matching results")
     if any(gate.status != "completed" for gate in receipt.runtime_profile_gates):
         raise ValueError("completed A/B run requires every selected runtime profile gate")
-    if receipt.codex_profile != receipt.runtime_profile_gates[0].codex_profile:
-        raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
 
 def _run_has_evidence(receipt: Any) -> bool:

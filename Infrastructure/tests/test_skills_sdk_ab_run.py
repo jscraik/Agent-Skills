@@ -850,6 +850,7 @@ class TestSkillsSdkAbRun(unittest.TestCase):
 
         wrong_order = deepcopy(receipt)
         wrong_order["runtime_profile_gates"] = list(reversed(wrong_order["runtime_profile_gates"]))
+        wrong_order["codex_profile"] = wrong_order["runtime_profile_gates"][0]["codex_profile"]
         with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
             validate_ab_run_receipt(wrong_order)
 

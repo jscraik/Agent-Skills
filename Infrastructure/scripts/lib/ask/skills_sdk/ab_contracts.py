@@ -478,12 +478,11 @@ class AbPlanReceipt(_SdkContractModel):
 
     @model_validator(mode="after")
     def _status_matches_plan(self) -> AbPlanReceipt:
+        validate_receipt_profile_binding(self)
         if self.status == "planned":
-            validate_receipt_profile_binding(self)
             self._validate_planned_packet()
         else:
             self._validate_blocked_packet()
-            validate_receipt_profile_binding(self)
         return self
 
     def _validate_blocked_packet(self) -> None:
@@ -517,8 +516,6 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
             raise ValueError("top-level command plan must match the oss-local runtime gate")
-        if self.codex_profile != self.runtime_profile_gates[0].codex_profile:
-            raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
     def _has_plan_evidence(self) -> bool:
         evidence = (self.skill_a, self.skill_b, self.fixture, self.execution_profile,

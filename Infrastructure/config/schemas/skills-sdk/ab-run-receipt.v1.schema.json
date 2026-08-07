@@ -2070,7 +2070,14 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-local"}},
+        "properties": {
+          "codex_profile": {"const": "oss-local"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-local"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
       }
     },
@@ -2083,7 +2090,14 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-local"}},
+        "properties": {
+          "codex_profile": {"const": "oss-local"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-local"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
       }
     },
@@ -2096,69 +2110,15 @@
         "required": ["execution_lane", "runtime_profile_gates"]
       },
       "then": {
-        "properties": {"codex_profile": {"const": "oss-cloud"}},
+        "properties": {
+          "codex_profile": {"const": "oss-cloud"},
+          "runtime_profile_gates": {
+            "prefixItems": [
+              {"properties": {"codex_profile": {"const": "oss-cloud"}}}
+            ]
+          }
+        },
         "required": ["codex_profile"]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "status": {"const": "blocked"},
-          "execution_lane": {"const": "all"},
-          "runtime_profile_gates": {"minItems": 1}
-        },
-        "required": ["status", "execution_lane", "runtime_profile_gates"]
-      },
-      "then": {
-        "properties": {
-          "runtime_profile_gates": {
-            "maxItems": 2,
-            "prefixItems": [
-              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}}},
-              {"properties": {"order": {"const": 2}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}}}
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "status": {"const": "blocked"},
-          "execution_lane": {"const": "oss-local"},
-          "runtime_profile_gates": {"minItems": 1}
-        },
-        "required": ["status", "execution_lane", "runtime_profile_gates"]
-      },
-      "then": {
-        "properties": {
-          "runtime_profile_gates": {
-            "maxItems": 1,
-            "prefixItems": [
-              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-local"}, "codex_profile": {"const": "oss-local"}}}
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "status": {"const": "blocked"},
-          "execution_lane": {"const": "oss-cloud"},
-          "runtime_profile_gates": {"minItems": 1}
-        },
-        "required": ["status", "execution_lane", "runtime_profile_gates"]
-      },
-      "then": {
-        "properties": {
-          "runtime_profile_gates": {
-            "maxItems": 1,
-            "prefixItems": [
-              {"properties": {"order": {"const": 1}, "lane": {"const": "oss-cloud"}, "codex_profile": {"const": "oss-cloud"}}}
-            ]
-          }
-        }
       }
     },
     {

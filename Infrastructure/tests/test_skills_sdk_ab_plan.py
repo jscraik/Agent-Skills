@@ -374,7 +374,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertEqual(self._managed_v1_result(receipt).status, "pass")
 
     def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
-        for execution_lane in ("all", "oss-cloud"):
+        for execution_lane in ("all", "oss-local", "oss-cloud"):
             with self.subTest(execution_lane=execution_lane):
                 receipt = build_ab_plan_receipt(
                     REPO_ROOT,
@@ -388,7 +388,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                     preflight_probe=declared_profile_preflight,
                 )
                 receipt["codex_profile"] = "oss-local" if execution_lane == "oss-cloud" else "oss-cloud"
-                with self.assertRaises(ValueError):
+                with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
                     validate_ab_plan_receipt(receipt)
                 self.assertEqual(self._managed_v1_result(receipt).status, "fail")
 
@@ -406,7 +406,8 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         )
         blocked = self._blocked_plan(receipt)
         blocked["runtime_profile_gates"][0].update({"lane": "oss-local", "codex_profile": "oss-local"})
-        with self.assertRaises(ValueError):
+        blocked["codex_profile"] = "oss-local"
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
             validate_ab_plan_receipt(blocked)
         self.assertEqual(self._managed_v1_result(blocked).status, "fail")
 
@@ -577,44 +578,6 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
         self.assertIn("evidence_root_outside_repo", receipt["blockers"])
         self.assertEqual(receipt["command_plan"], [])
         validate_ab_plan_receipt(receipt)
-
-    def test_planned_receipt_rejects_codex_profile_mismatch_with_first_gate(self) -> None:
-        receipt = build_ab_plan_receipt(
-            REPO_ROOT,
-            skill_a=SKILL_A,
-            skill_b=SKILL_B,
-            fixture=FIXTURE,
-            skill_a_identity=IDENTITY_A,
-            skill_b_identity=IDENTITY_B,
-            preflight_probe=declared_profile_preflight,
-        )
-        self.assertEqual(receipt["status"], "planned")
-        self.assertEqual(receipt["codex_profile"], "oss-local")
-
-        cloud_only_receipt = deepcopy(receipt)
-        cloud_only_receipt["codex_profile"] = "oss-cloud"
-        with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
-            validate_ab_plan_receipt(cloud_only_receipt)
-
-    def test_cloud_lane_planned_receipt_rejects_codex_profile_mismatch(self) -> None:
-        receipt = build_ab_plan_receipt(
-            REPO_ROOT,
-            skill_a=SKILL_A,
-            skill_b=SKILL_B,
-            fixture=FIXTURE,
-            skill_a_identity=IDENTITY_A,
-            skill_b_identity=IDENTITY_B,
-            judge_profile_id="oss-cloud",
-            execution_lane="oss-cloud",
-            preflight_probe=declared_profile_preflight,
-        )
-        self.assertEqual(receipt["status"], "planned")
-        self.assertEqual(receipt["codex_profile"], "oss-cloud")
-
-        mismatched = deepcopy(receipt)
-        mismatched["codex_profile"] = "oss-local"
-        with self.assertRaisesRegex(ValueError, "codex_profile must match runtime_profile_gates"):
-            validate_ab_plan_receipt(mismatched)
 
     def test_blocked_plan_rejects_invalid_gate_sequence(self) -> None:
         planned = build_ab_plan_receipt(

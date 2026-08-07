@@ -144,10 +144,10 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
             "status": "blocked",
             "blockers": ["oss-cloud:typed_blocker"],
             "execution_lane": "oss-cloud",
-            "codex_profile": "oss-cloud",
+            "codex_profile": "oss-local",
             "runtime_profile_gates": [local_gate],
         })
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "valid-prefix gate identity sequence"):
             validate_ab_run_receipt(candidate)
         self.assertEqual(self._schema_result(candidate).status, "fail")
 
