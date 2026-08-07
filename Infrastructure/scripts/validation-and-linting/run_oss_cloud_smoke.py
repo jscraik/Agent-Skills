@@ -29,6 +29,39 @@ DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/r
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
+ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
+model_provider = "{EXPECTED_PROVIDER}"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+default_permissions = "readonly-net"
+model_reasoning_effort = "high"
+model_reasoning_summary = "concise"
+web_search = "cached"
+
+[features]
+plugins = false
+skill_mcp_dependency_install = false
+apps = false
+code_mode = false
+code_mode_only = false
+
+[permissions.readonly-net]
+extends = ":read-only"
+description = "Bounded read-only cloud smoke profile."
+
+[permissions.readonly-net.network]
+enabled = true
+allow_local_binding = false
+
+[permissions.readonly-net.network.domains]
+"ollama.com" = "allow"
+
+[model_providers.ollama-cloud]
+name = "Ollama Cloud"
+base_url = "https://ollama.com/v1"
+wire_api = "responses"
+env_key = "OLLAMA_API_KEY"
+'''
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -39,7 +72,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--codex-exec-wrapper", default=str(DEFAULT_CODEX_EXEC_WRAPPER))
     parser.add_argument("--timeout-seconds", type=int, default=120)
     parser.add_argument("--marker", default=DEFAULT_MARKER)
-    parser.add_argument("--work-dir", default=str(Path.cwd()))
     parser.add_argument("--output-dir", default=None)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -91,14 +123,28 @@ def _paths(output_dir: str | None) -> dict[str, Path]:
     root.mkdir(parents=True, exist_ok=True)
     return {
         "root": root,
+        "codex_home": root / "codex-home",
         "stdout": root / "stdout.txt",
         "stderr": root / "stderr.txt",
         "last_message": root / "last-message.txt",
     }
 
 
+def _isolated_codex_home(profile: Path, paths: dict[str, Path]) -> Path:
+    """Prepare a context-minimal Codex home for the bounded marker call."""
+    codex_home = paths["codex_home"]
+    codex_home.mkdir(parents=True, exist_ok=True)
+    # The operator profile is admission input, not executable context.  Write
+    # only the fixed, allowlisted cloud profile so disabled MCPs, project
+    # instructions, and other workstation settings cannot cross the boundary.
+    profile.resolve(strict=True)
+    (codex_home / "oss-cloud.config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
+    (codex_home / "config.toml").write_text(ISOLATED_CODEX_CONFIG, encoding="utf-8")
+    return codex_home
+
+
 def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -> list[str]:
-    del paths
+    codex_home = _isolated_codex_home(Path(args.profile_source).expanduser(), paths)
     return [
         "bash",
         args.auth_wrapper,
@@ -108,12 +154,15 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "OLLAMA_API_KEY",
         "--",
         "env",
-        f"CODEX_HOME={Path(args.profile_source).expanduser().parent.resolve(strict=False)}",
+        "-u",
+        "CODEX_CONFIG_HOME",
+        f"CODEX_HOME={codex_home}",
         "bash",
         args.codex_exec_wrapper,
         "--profile",
         "oss-cloud",
         "--strict-config",
+        "--skip-git-repo-check",
         "--sandbox",
         "read-only",
         "--ephemeral",
@@ -125,11 +174,19 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
 
 def _run(command: list[str], paths: dict[str, Path], args: argparse.Namespace) -> tuple[int, float]:
     started = time.monotonic()
-    with paths["stdout"].open("w", encoding="utf-8") as stdout, paths["stderr"].open("w", encoding="utf-8") as stderr:
+    with (
+        paths["stdout"].open("w", encoding="utf-8") as stdout,
+        paths["stderr"].open("w", encoding="utf-8") as stderr,
+        tempfile.TemporaryDirectory(prefix="ask-oss-cloud-smoke-work.") as work_dir,
+    ):
+        # Run from an empty temporary directory rather than the consuming
+        # repository. Codex discovers AGENTS.md and project context from cwd
+        # parents, so honoring the caller's work directory would invalidate
+        # the context-minimal smoke claim.
         try:
             completed = subprocess.run(
                 command,
-                cwd=args.work_dir,
+                cwd=work_dir,
                 stdin=subprocess.DEVNULL,
                 stdout=stdout,
                 stderr=stderr,

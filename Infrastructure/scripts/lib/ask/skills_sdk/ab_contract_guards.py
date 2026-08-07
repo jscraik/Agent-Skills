@@ -34,11 +34,47 @@ def validate_argv_output_last_message_path(argv: list[str], path: str, *, messag
 
 def validate_plan_gate_identity(gate: Any) -> None:
     if gate.lane != gate.codex_profile or gate.order not in {1, 2}:
-        raise ValueError("runtime profile gate identity or order is invalid")
+        raise ValueError("runtime profile gate identity or order is invalid; valid-prefix gate identity sequence is required")
     if gate.judge_profile.codex_profile != gate.codex_profile:
         raise ValueError("judge metadata cannot substitute for the runtime Codex profile")
     if gate.status == "planned" and not runtime_preflight_identity_matches_lane(gate.lane, gate.preflight):
         raise ValueError("planned runtime gate preflight identity does not match its lane")
+
+
+def validate_receipt_profile_binding(receipt: Any) -> None:
+    if receipt.runtime_profile_gates and receipt.codex_profile != receipt.runtime_profile_gates[0].codex_profile:
+        raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
+
+
+def validate_receipt_profile_for_lane(execution_lane: str, codex_profile: str | None) -> None:
+    expected_profile = "oss-cloud" if execution_lane == "oss-cloud" else "oss-local"
+    if codex_profile is not None and codex_profile != expected_profile:
+        raise ValueError("top-level codex_profile must match the selected execution lane")
+
+
+def validate_blocked_receipt_profile(codex_profile: str | None, runtime_profile_gates: list[Any]) -> None:
+    if not runtime_profile_gates and codex_profile is not None:
+        raise ValueError("blocked A/B receipts without runtime gates must not carry a profile")
+
+
+def validate_runtime_gate_prefix(execution_lane: str, gates: list[Any], *, message: str) -> None:
+    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
+    if len(gates) > len(expected_lanes):
+        raise ValueError(message)
+    actual_lanes = [gate.lane for gate in gates]
+    actual_orders = [gate.order for gate in gates]
+    if actual_lanes != expected_lanes[:len(gates)] or actual_orders != list(range(1, len(gates) + 1)):
+        raise ValueError(message)
+
+
+def validate_runtime_gate_sequence(execution_lane: str, gates: list[Any], *, message: str) -> None:
+    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
+    if len(gates) != len(expected_lanes):
+        raise ValueError(message)
+    actual_lanes = [gate.lane for gate in gates]
+    actual_orders = [gate.order for gate in gates]
+    if actual_lanes != expected_lanes or actual_orders != list(range(1, len(gates) + 1)):
+        raise ValueError(message)
 
 
 def validate_plan_gate_packet(gate: Any) -> None:
@@ -94,12 +130,20 @@ def validate_run_receipt_status(receipt: Any) -> None:
     if receipt.command_variant_labels and receipt.command_variant_labels != ["A", "B"]:
         raise ValueError("A/B run receipts must preserve ordered command variant labels")
     if receipt.status == "completed":
+        validate_receipt_profile_binding(receipt)
         _validate_completed_run_receipt(receipt)
         return
+    validate_blocked_receipt_profile(receipt.codex_profile, receipt.runtime_profile_gates)
+    validate_receipt_profile_for_lane(receipt.execution_lane, receipt.codex_profile)
     if not receipt.blockers:
         raise ValueError("blocked A/B run receipts must include blockers")
     if not receipt.runtime_profile_gates:
         return
+    validate_runtime_gate_prefix(
+        receipt.execution_lane,
+        receipt.runtime_profile_gates,
+        message="blocked A/B run receipts must preserve a valid-prefix gate identity sequence",
+    )
     blocked_seen = False
     for gate in receipt.runtime_profile_gates:
         if gate.status == "completed" and blocked_seen:
@@ -108,6 +152,7 @@ def validate_run_receipt_status(receipt: Any) -> None:
             blocked_seen = True
     if not blocked_seen:
         raise ValueError("blocked A/B run receipts require a non-completed runtime gate")
+    validate_receipt_profile_binding(receipt)
 
 
 def _validate_gate_packet_shape(gate: Any) -> None:
@@ -152,6 +197,8 @@ def _validate_completed_run_packets(receipt: Any) -> None:
         raise ValueError("A/B run must preserve ordered runtime gates and matching results")
     if any(gate.status != "completed" for gate in receipt.runtime_profile_gates):
         raise ValueError("completed A/B run requires every selected runtime profile gate")
+    if receipt.codex_profile != receipt.runtime_profile_gates[0].codex_profile:
+        raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
 
 def _run_has_evidence(receipt: Any) -> bool:

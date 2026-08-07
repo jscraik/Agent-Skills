@@ -96,19 +96,30 @@ def _ab_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     ]
     if not evidence:
         evidence.append(_profile_from_argv(None, lane="ab-variants"))
-    execution_lane = str(receipt.get("execution_lane") or "all")
-    expected_profiles = (
-        (execution_lane,) * len(evidence)
-        if execution_lane in OSS_CODEX_PROFILES
-        else OSS_CODEX_PROFILES
-    )
-    if [item.get("derived_codex_profile") for item in evidence] != list(expected_profiles):
+    expected_profiles = _expected_ab_profiles(receipt, len(evidence))
+    if [item.get("derived_codex_profile") for item in evidence] != expected_profiles:
         for item in evidence:
-            item["blockers"].append(
-                f"profile_order_required:{','.join(expected_profiles)}"
-            )
+            expected = ",".join(expected_profiles) or "selected-execution-lane"
+            item["blockers"].append(f"profile_order_required:{expected}")
             item["status"] = "blocked"
     return evidence
+
+
+def _expected_ab_profiles(receipt: dict[str, Any], evidence_count: int) -> list[str]:
+    execution_lane = receipt.get("execution_lane")
+    if execution_lane in {"oss-local", "oss-cloud"}:
+        return [execution_lane] * evidence_count
+    if execution_lane == "all":
+        gates = receipt.get("runtime_profile_gates")
+        first_gate = gates[0] if isinstance(gates, list) and gates else None
+        first_profile = first_gate.get("codex_profile") if isinstance(first_gate, dict) else None
+        return [first_profile] * evidence_count if first_profile in OSS_CODEX_PROFILES else []
+    if execution_lane is not None:
+        return []
+    # Preserve the legacy two-profile receipt contract for receipts that
+    # predate execution_lane and runtime_profile_gates. Explicit lanes must
+    # carry valid metadata rather than silently using this fallback.
+    return list(OSS_CODEX_PROFILES)
 
 
 def _profile_evidence(receipt: dict[str, Any], source_kind: str) -> list[dict[str, Any]]:

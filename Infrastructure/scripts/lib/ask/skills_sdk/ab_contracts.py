@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Annotated, Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ask.skills_sdk.ab_contract_guards import (
     exact_variant_labels as _exact_variant_labels,
     run_gate_is_completed,
+    validate_blocked_receipt_profile,
     validate_plan_gate_identity,
     validate_plan_gate_packet,
+    validate_receipt_profile_for_lane,
+    validate_receipt_profile_binding,
+    validate_runtime_gate_prefix,
+    validate_runtime_gate_sequence,
     validate_argv_output_last_message_path,
     validate_run_receipt_status,
 )
@@ -48,14 +53,6 @@ _EXPERIMENT_ID_PATTERN = r"^(?:ex_[a-z0-9]{16}|[0-9a-f]{16})$"
 
 def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
-
-
-def _validate_runtime_gate_sequence(execution_lane: str, gates: list[Any], *, message: str) -> None:
-    expected_lanes = ["oss-local", "oss-cloud"] if execution_lane == "all" else [execution_lane]
-    expected_orders = list(range(1, len(expected_lanes) + 1))
-    if ([gate.lane for gate in gates] != expected_lanes
-            or [gate.order for gate in gates] != expected_orders):
-        raise ValueError(message)
 
 
 def _codex_profile_from_argv(argv: list[str]) -> str:
@@ -477,9 +474,13 @@ class AbPlanReceipt(_SdkContractModel):
     @model_validator(mode="after")
     def _status_matches_plan(self) -> AbPlanReceipt:
         if self.status == "planned":
+            validate_receipt_profile_binding(self)
             self._validate_planned_packet()
         else:
             self._validate_blocked_packet()
+            validate_blocked_receipt_profile(self.codex_profile, self.runtime_profile_gates)
+            validate_receipt_profile_for_lane(self.execution_lane, self.codex_profile)
+            validate_receipt_profile_binding(self)
         return self
 
     def _validate_blocked_packet(self) -> None:
@@ -493,13 +494,18 @@ class AbPlanReceipt(_SdkContractModel):
             raise ValueError("blocked A/B runtime gates must carry typed blockers")
         if any(gate.status == "planned" and gate.blockers for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B runtime gates must not carry blockers")
+        validate_runtime_gate_prefix(
+            self.execution_lane,
+            self.runtime_profile_gates,
+            message="blocked A/B plan receipts must preserve a valid-prefix gate identity sequence",
+        )
 
     def _validate_planned_packet(self) -> None:
         if self.blockers or not self._has_plan_evidence():
             raise ValueError("planned A/B receipts require complete evidence and no blockers")
         if not _exact_variant_labels(self.command_plan) or self.command_variant_labels != ["A", "B"]:
             raise ValueError("planned A/B receipts require exact A/B command packets and labels")
-        _validate_runtime_gate_sequence(
+        validate_runtime_gate_sequence(
             self.execution_lane,
             self.runtime_profile_gates,
             message="A/B plan must preserve the declared execution lane order",
@@ -507,7 +513,9 @@ class AbPlanReceipt(_SdkContractModel):
         if any(gate.status != "planned" or not _exact_variant_labels(gate.command_plan) for gate in self.runtime_profile_gates):
             raise ValueError("planned A/B receipts require both command variants for every admitted runtime gate")
         if self.command_plan != self.runtime_profile_gates[0].command_plan:
-            raise ValueError("top-level command plan must match the oss-local runtime gate")
+            raise ValueError("top-level command plan must match the first runtime gate")
+        if self.codex_profile != self.runtime_profile_gates[0].codex_profile:
+            raise ValueError("top-level codex_profile must match runtime_profile_gates[0].codex_profile")
 
     def _has_plan_evidence(self) -> bool:
         evidence = (self.skill_a, self.skill_b, self.fixture, self.execution_profile,
@@ -579,8 +587,8 @@ class AbRuntimeProfileRunGate(_SdkContractModel):
 
     @model_validator(mode="after")
     def _gate_status_matches(self) -> AbRuntimeProfileRunGate:
-        if self.lane != self.codex_profile or self.order not in {1, 2}:
-            raise ValueError("runtime run gate identity or order is invalid")
+        if self.lane != self.codex_profile:
+            raise ValueError("runtime run gate identity is invalid")
         if self.status == "completed" and not self._is_completed_gate():
             raise ValueError("completed runtime gate requires both variants and no blockers")
         if self.status != "completed" and not self.blockers:

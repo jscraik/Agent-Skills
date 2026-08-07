@@ -17,7 +17,13 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.skills_sdk import schema_validation  # noqa: E402
-from ask.skills_sdk.ab_transport_contracts import opaque_env_identity_digest  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
+    CONFIGS_AUTH_WRAPPER,
+    CONFIGS_CODEX_EXEC_WRAPPER,
+    configs_auth_wrapper,
+    configs_codex_exec_wrapper,
+    opaque_env_identity_digest,
+)
 from ask.skills_sdk.eval_ab_run import (  # noqa: E402
     CodexRunResult,
     _default_codex_runner,
@@ -44,17 +50,15 @@ IDENTITY_B = {
     "package_digest": f"sha256:{'2' * 64}",
 }
 _TEST_CLOUD_ENV_FILE: Path | None = None
-_CONFIGS_AUTH_WRAPPER = "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"
-_CONFIGS_CODEX_EXEC_WRAPPER = "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"
-
-
 def _test_execution_argv(command_argv: list[str]) -> list[str]:
     profile = command_argv[command_argv.index("--profile") + 1]
     if profile == "oss-cloud":
         assert _TEST_CLOUD_ENV_FILE is not None
+        auth_wrapper = configs_auth_wrapper() or str(CONFIGS_AUTH_WRAPPER)
+        codex_exec_wrapper = configs_codex_exec_wrapper() or str(CONFIGS_CODEX_EXEC_WRAPPER)
         return [
-            "bash", _CONFIGS_AUTH_WRAPPER, "--env-file", str(_TEST_CLOUD_ENV_FILE),
-            "--require-env", "OLLAMA_API_KEY", "--", "bash", _CONFIGS_CODEX_EXEC_WRAPPER,
+            "bash", auth_wrapper, "--env-file", str(_TEST_CLOUD_ENV_FILE),
+            "--require-env", "OLLAMA_API_KEY", "--", "bash", codex_exec_wrapper,
             "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud", "--strict-config", "-c",
             'approval_policy="on-request"', "--cd", command_argv[command_argv.index("--cd") + 1],
             "--sandbox", "read-only", "--ephemeral", "--json", "--output-last-message",
@@ -127,6 +131,30 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         validate_ab_run_receipt(receipt)
         self.assertEqual(self._schema_result(receipt).status, "pass")
 
+    def test_receipt_profile_must_match_first_runtime_gate(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        candidate["codex_profile"] = "oss-cloud"
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
+    def test_blocked_cloud_receipt_requires_a_cloud_runtime_gate_prefix(self) -> None:
+        fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
+        candidate = json.loads(fixture_path.read_text())
+        local_gate = candidate["runtime_profile_gates"][0]
+        local_gate.update({"status": "blocked", "blockers": ["oss-cloud:typed_blocker"]})
+        candidate.update({
+            "status": "blocked",
+            "blockers": ["oss-cloud:typed_blocker"],
+            "execution_lane": "oss-cloud",
+            "codex_profile": "oss-cloud",
+            "runtime_profile_gates": [local_gate],
+        })
+        with self.assertRaises(ValueError):
+            validate_ab_run_receipt(candidate)
+        self.assertEqual(self._schema_result(candidate).status, "fail")
+
     def test_default_codex_runner_uses_ephemeral_profile_home(self) -> None:
         command = ["codex", "exec", "--profile", "oss-local", "--sandbox", "read-only", "-"]
         with tempfile.TemporaryDirectory() as source_dir:
@@ -174,7 +202,7 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
                     exit_code=0,
                     stdout='{"type":"response.completed"}\n',
                     stderr="",
-                    executed_argv=["bash", _CONFIGS_AUTH_WRAPPER, "--env-file"],
+                    executed_argv=["bash", str(CONFIGS_AUTH_WRAPPER), "--env-file"],
                 )
             return CodexRunResult(
                 exit_code=0,
@@ -344,8 +372,17 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
     def test_v1_schema_allows_zero_gate_blocked_receipt(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
         blocked = json.loads(fixture_path.read_text())
-        blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
+        blocked.update({"status": "blocked", "blockers": ["plan_blocked"], "codex_profile": None, "runtime_profile_gates": [], "command_plan": [], "variant_results": []})
         self.assertEqual(self._schema_result(blocked).status, "pass")
+
+        mismatched = dict(blocked)
+        mismatched["execution_lane"] = "oss-cloud"
+        mismatched["codex_profile"] = "oss-local"
+        self.assertEqual(self._schema_result(mismatched).status, "fail")
+
+        all_mismatched = dict(blocked)
+        all_mismatched["codex_profile"] = "oss-local"
+        self.assertEqual(self._schema_result(all_mismatched).status, "fail")
 
     def test_v1_schema_rejects_blocked_receipt_when_all_gates_completed(self) -> None:
         fixture_path = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
