@@ -167,6 +167,62 @@ Command: ./bin/ask skills package verify <skill-path> --json --robot -> pass|fai
 
 - Read `references/contract.yaml` for package inputs, outputs, and evidence requirements.
 """
+_WEAK_QUALITY_SKILL = """---
+name: packaged-skill
+description: Helpful package notes.
+version: "2.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Packaged Skill
+
+## Workflow
+
+1. Look at the skill.
+2. Say what you think.
+"""
+_ADVISORY_QUALITY_SKILL = """---
+name: review-advisory
+description: "Review changed code when users need a bounded behavior-preserving maintainability review."
+version: "2.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Review Advisory
+
+Review a diff from user-provided input and improve the result.
+
+## Workflow
+
+1. Inspect the submitted diff and identify the smallest maintainability finding.
+2. Decide what matters and report the evidence.
+
+## Output Contract
+
+Return schema_version: 1 and a short result summary.
+
+## Validation
+
+Command: pytest tests/test_review_advisory.py -q -> pass|fail|blocked.
+
+## Progressive Disclosure
+
+- Read references/evals.yaml for gold-standard scenarios.
+"""
 
 
 def write_minimal_sdk_package_companions(skill_dir: Path, *, complete_evals: bool = True) -> None:
@@ -188,6 +244,20 @@ def write_gold_scenario_sdk_companions(skill_dir: Path) -> None:
 def write_gold_quality_skill(skill_dir: Path) -> None:
     skill_dir.mkdir(parents=True, exist_ok=True)
     (skill_dir / "SKILL.md").write_text(_GOLD_SKILL, encoding="utf-8")
+    write_gold_scenario_sdk_companions(skill_dir)
+
+
+def write_weak_quality_skill(skill_dir: Path) -> None:
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(_WEAK_QUALITY_SKILL, encoding="utf-8")
+    write_minimal_sdk_package_companions(skill_dir, complete_evals=False)
+
+
+def write_advisory_quality_skill(skill_dir: Path) -> None:
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(_ADVISORY_QUALITY_SKILL, encoding="utf-8")
+    (skill_dir / "references").mkdir(parents=True, exist_ok=True)
+    (skill_dir / "references" / "orphaned.md").write_text("# Orphaned\n", encoding="utf-8")
     write_gold_scenario_sdk_companions(skill_dir)
 
 

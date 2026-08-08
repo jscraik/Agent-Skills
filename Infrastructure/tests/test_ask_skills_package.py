@@ -13,9 +13,10 @@ from ask.commands.skills_impl import skills_package, skills_package_verify, skil
 from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402
 from helpers.ask_skills_package_fixtures import (  # noqa: E402
     write_gold_quality_skill as _write_gold_quality_skill,
-    write_gold_scenario_sdk_companions as _write_gold_scenario_sdk_companions,
     write_minimal_sdk_package_companions as _write_minimal_sdk_package_companions,
+    write_advisory_quality_skill as _write_advisory_quality_skill,
     write_package_metadata_skill as _write_package_metadata_skill,
+    write_weak_quality_skill as _write_weak_quality_skill,
 )
 
 
@@ -24,32 +25,7 @@ class TestAskSkillsPackage(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             skill_dir = repo_root / "Skills" / "agent-ops" / "packaged-skill"
-            skill_dir.mkdir(parents=True)
-            (skill_dir / "SKILL.md").write_text(
-                """---
-name: packaged-skill
-description: Helpful package notes.
-version: "2.0.0"
-metadata:
-  compatible_roles:
-    - worker
-  runtime_needs:
-    - filesystem
-  maturity: beta
-  provenance: internal
-  share_readiness: ready
----
-
-# Packaged Skill
-
-## Workflow
-
-1. Look at the skill.
-2. Say what you think.
-""",
-                encoding="utf-8",
-            )
-            _write_minimal_sdk_package_companions(skill_dir, complete_evals=False)
+            _write_weak_quality_skill(skill_dir)
 
             result = skills_package_verify(repo_root, "Skills/agent-ops/packaged-skill")
 
@@ -153,49 +129,7 @@ metadata:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             skill_dir = repo_root / "Skills" / "agent-ops" / "review-advisory"
-            skill_dir.mkdir(parents=True)
-            (skill_dir / "SKILL.md").write_text(
-                """---
-name: review-advisory
-description: "Review changed code when users need a bounded behavior-preserving maintainability review."
-version: "2.0.0"
-metadata:
-  compatible_roles:
-    - worker
-  runtime_needs:
-    - filesystem
-  maturity: beta
-  provenance: internal
-  share_readiness: ready
----
-
-# Review Advisory
-
-Review a diff from user-provided input and improve the result.
-
-## Workflow
-
-1. Inspect the submitted diff and identify the smallest maintainability finding.
-2. Decide what matters and report the evidence.
-
-## Output Contract
-
-Return schema_version: 1 and a short result summary.
-
-## Validation
-
-Command: pytest tests/test_review_advisory.py -q -> pass|fail|blocked.
-
-## Progressive Disclosure
-
-- Read references/evals.yaml for gold-standard scenarios.
-""",
-                encoding="utf-8",
-            )
-            references_dir = skill_dir / "references"
-            references_dir.mkdir(parents=True, exist_ok=True)
-            (references_dir / "orphaned.md").write_text("# Orphaned\n", encoding="utf-8")
-            _write_gold_scenario_sdk_companions(skill_dir)
+            _write_advisory_quality_skill(skill_dir)
 
             result = skills_package_verify(repo_root, "Skills/agent-ops/review-advisory")
 
