@@ -22,6 +22,78 @@ from skill_gate import (
     check_workflow_fail_fast,
 )
 
+EXPECTED_SIGNALS_EVALS = """
+schema_version: 1
+cases:
+  - name: Discovery smoke
+    prompt: Review this skill locally.
+    acceptance:
+      - {type: contains, value: scorecard}
+    expected_signals:
+      required_terms: [scorecard]
+      required_output_fields: [quality]
+      required_source_reads: [SKILL.md]
+      forbidden_terms: [publish]
+      forbidden_actions: [network upload]
+      flow_steps: [read skill, score skill]
+    budgets:
+      min_expected_signal_score: 0.8
+  - name: Edge case
+    prompt: Review an incomplete skill.
+    acceptance:
+      - {type: contains, value: warnings}
+  - name: Failure case
+    prompt: Review a missing skill.
+    acceptance:
+      - {type: contains, value: blocked}
+""".strip()
+
+MALFORMED_EXPECTED_SIGNALS_EVALS = """
+cases:
+  - name: Bad signals
+    prompt: Review this skill locally.
+    acceptance:
+      - {type: contains, value: scorecard}
+    expected_signals:
+      required_terms: scorecard
+  - name: Edge case
+    prompt: Review an incomplete skill.
+    acceptance:
+      - {type: contains, value: warnings}
+  - name: Failure case
+    prompt: Review a missing skill.
+    acceptance:
+      - {type: contains, value: blocked}
+""".strip()
+
+REALISTIC_EVALS = """
+cases:
+  - id: pr-sweep
+    name: PR sweep
+    category: edge
+    should_trigger: true
+    realistic: true
+    unit: PR closeout rotation
+    given: A maintainer asks the agent to sweep open PRs until they are green.
+    should: The agent reports heartbeat status, blocks unsafe merge paths, and proves latest-head checks.
+    prompt: Sweep this repo's PRs until green, merged, and cleaned up.
+  - id: create-lesson
+    name: Create lesson
+    category: edge
+    should_trigger: true
+    realistic: true
+    unit: lesson creation
+    given: A learner asks the agent to create a first lesson from a clear mission and level.
+    should: The agent creates a compact lesson artifact with source notes and retrieval practice.
+    prompt: Create lesson 0001 for pytest assertions from my current mission.
+  - id: weak
+    name: Weak placeholder
+    category: edge
+    should_trigger: true
+    realistic: true
+    prompt: TODO example prompt.
+""".strip()
+
 
 class SkillGateContractEvalTests(unittest.TestCase):
     def test_required_sections_do_not_warn_for_removed_house_style_headers(self) -> None:
@@ -162,34 +234,7 @@ risks: [stale evidence]
 """.strip(),
                 encoding="utf-8",
             )
-            (refs / "evals.yaml").write_text(
-                """
-schema_version: 1
-cases:
-  - name: Discovery smoke
-    prompt: Review this skill locally.
-    acceptance:
-      - {type: contains, value: scorecard}
-    expected_signals:
-      required_terms: [scorecard]
-      required_output_fields: [quality]
-      required_source_reads: [SKILL.md]
-      forbidden_terms: [publish]
-      forbidden_actions: [network upload]
-      flow_steps: [read skill, score skill]
-    budgets:
-      min_expected_signal_score: 0.8
-  - name: Edge case
-    prompt: Review an incomplete skill.
-    acceptance:
-      - {type: contains, value: warnings}
-  - name: Failure case
-    prompt: Review a missing skill.
-    acceptance:
-      - {type: contains, value: blocked}
-""".strip(),
-                encoding="utf-8",
-            )
+            (refs / "evals.yaml").write_text(EXPECTED_SIGNALS_EVALS, encoding="utf-8")
 
             findings = check_contract_and_evals(skill_dir, require_contract=True, require_evals=True)
 
@@ -200,26 +245,7 @@ cases:
             skill_dir = Path(tmp)
             refs = skill_dir / "references"
             refs.mkdir()
-            (refs / "evals.yaml").write_text(
-                """
-cases:
-  - name: Bad signals
-    prompt: Review this skill locally.
-    acceptance:
-      - {type: contains, value: scorecard}
-    expected_signals:
-      required_terms: scorecard
-  - name: Edge case
-    prompt: Review an incomplete skill.
-    acceptance:
-      - {type: contains, value: warnings}
-  - name: Failure case
-    prompt: Review a missing skill.
-    acceptance:
-      - {type: contains, value: blocked}
-""".strip(),
-                encoding="utf-8",
-            )
+            (refs / "evals.yaml").write_text(MALFORMED_EXPECTED_SIGNALS_EVALS, encoding="utf-8")
 
             findings = check_contract_and_evals(skill_dir, require_contract=False, require_evals=True)
 
@@ -230,36 +256,7 @@ cases:
             skill_dir = Path(tmp)
             refs = skill_dir / "references"
             refs.mkdir()
-            (refs / "evals.yaml").write_text(
-                """
-cases:
-  - id: pr-sweep
-    name: PR sweep
-    category: edge
-    should_trigger: true
-    realistic: true
-    unit: PR closeout rotation
-    given: A maintainer asks the agent to sweep open PRs until they are green.
-    should: The agent reports heartbeat status, blocks unsafe merge paths, and proves latest-head checks.
-    prompt: Sweep this repo's PRs until green, merged, and cleaned up.
-  - id: create-lesson
-    name: Create lesson
-    category: edge
-    should_trigger: true
-    realistic: true
-    unit: lesson creation
-    given: A learner asks the agent to create a first lesson from a clear mission and level.
-    should: The agent creates a compact lesson artifact with source notes and retrieval practice.
-    prompt: Create lesson 0001 for pytest assertions from my current mission.
-  - id: weak
-    name: Weak placeholder
-    category: edge
-    should_trigger: true
-    realistic: true
-    prompt: TODO example prompt.
-""".strip(),
-                encoding="utf-8",
-            )
+            (refs / "evals.yaml").write_text(REALISTIC_EVALS, encoding="utf-8")
             doc = SkillDoc(
                 path=skill_dir / "SKILL.md",
                 raw="",
