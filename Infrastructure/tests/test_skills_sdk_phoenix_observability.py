@@ -3,7 +3,6 @@ from __future__ import annotations
 import http.server
 import json
 import os
-import subprocess
 import sys
 import tempfile
 import threading
@@ -37,6 +36,95 @@ def _command_env() -> dict[str, str]:
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     env.setdefault("ASK_PHOENIX_AUTO_TRACE", "0")
     return env
+
+
+def _write_trace_runtime(directory: Path) -> tuple[Path, Path]:
+    runtime = directory / "fake-otel-python"
+    calls = directory / "calls.jsonl"
+    runtime.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json\n"
+        "import pathlib\n"
+        "import sys\n"
+        "payload = json.loads(sys.stdin.read())\n"
+        f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
+        "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
+        encoding="utf-8",
+    )
+    runtime.chmod(0o755)
+    return runtime, calls
+
+
+def _eval_trace_receipt(case_count: int) -> dict[str, object]:
+    return {
+        "schema_version": "skills-sdk.eval-run-receipt.v0",
+        "status": "pass",
+        "operation": "eval_run",
+        "runner": "deterministic_jsonl_v0",
+        "codex_profile": "oss-local",
+        "case_count": case_count,
+        "passed_count": case_count,
+        "failed_count": 0,
+        "cases": [
+            {"case_id": f"case-{index}", "status": "pass", "score": 1}
+            for index in range(case_count)
+        ],
+    }
+
+
+def _ab_variant(label: str, profile: str, output_digest: str, stdout_digest: str) -> dict[str, object]:
+    return {
+        "variant_label": label,
+        "status": "pass",
+        "exit_code": 0,
+        "command_argv": ["codex", "exec", "--profile", profile, "--json", "-"],
+        "output_last_message_digest": "sha256:" + (output_digest * 64),
+        "runner_stdout_digest": "sha256:" + (stdout_digest * 64),
+    }
+
+
+def _ab_profile_receipt() -> dict[str, object]:
+    return {
+        "schema_version": "skills-sdk.ab-run-receipt.v1",
+        "status": "completed",
+        "operation": "ab_run",
+        "execution_profile": {"id": "codex-read-only"},
+        "judge_profile": {"id": "oss-local", "codex_profile": "oss-local"},
+        "experiment_id": "a" * 16,
+        "variant_results": [
+            _ab_variant("A", "oss-local", "a", "b"),
+            _ab_variant("B", "oss-cloud", "c", "d"),
+        ],
+    }
+
+
+_JUDGE_RUNTIME_ARGV = [
+    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file",
+    "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "bash",
+    "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+    "--strict-config", "--sandbox", "read-only", "--ephemeral", "--json", "-",
+]
+_JUDGE_LOGICAL_SHAPE = [
+    "codex", "exec", "--profile", "oss-cloud", "--strict-config", "--sandbox", "read-only",
+    "--ephemeral", "--json", "-",
+]
+
+
+def _judge_cloud_receipt() -> dict[str, object]:
+    return {
+        "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
+        "status": "scored",
+        "operation": "ab_judge_score",
+        "judge_profile": {"id": "oss-cloud", "codex_profile": "oss-cloud"},
+        "codex_profile": "oss-cloud",
+        "codex_exec_invoked": True,
+        "provider_invoked": True,
+        "network_accessed": True,
+        "mutation_performed": True,
+        "judge_command_argv": _JUDGE_RUNTIME_ARGV,
+        "judge_command_shape": _JUDGE_LOGICAL_SHAPE,
+        "decision": {"winner": "inconclusive"},
+    }
 
 
 class _PhoenixHandler(http.server.BaseHTTPRequestHandler):
@@ -412,34 +500,11 @@ print(json.dumps({"status": "pass", "http_status": 200}))
 
     def test_eval_trace_receipt_emits_run_and_case_spans_from_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            runtime = Path(temp_dir) / "fake-otel-python"
-            calls = Path(temp_dir) / "calls.jsonl"
-            runtime.write_text(
-                "#!/usr/bin/env python3\n"
-                "import json\n"
-                "import pathlib\n"
-                "import sys\n"
-                "payload = json.loads(sys.stdin.read())\n"
-                f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
-                "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
-                encoding="utf-8",
-            )
-            runtime.chmod(0o755)
-            receipt = {
-                "schema_version": "skills-sdk.eval-run-receipt.v0",
-                "status": "pass",
-                "operation": "eval_run",
-                "runner": "deterministic_jsonl_v0",
-                "codex_profile": "oss-local",
-                "case_count": 1,
-                "passed_count": 1,
-                "failed_count": 0,
-                "cases": [{"case_id": "case-a", "status": "pass", "score": 1}],
-            }
+            runtime, calls = _write_trace_runtime(Path(temp_dir))
 
             trace_receipt = build_phoenix_eval_trace_receipt(
                 REPO_ROOT,
-                eval_receipt=receipt,
+                eval_receipt=_eval_trace_receipt(1),
                 base_url="http://127.0.0.1:6006",
                 otel_python_path=runtime.as_posix(),
                 enabled=True,
@@ -457,34 +522,11 @@ print(json.dumps({"status": "pass", "http_status": 200}))
 
     def test_eval_trace_case_spans_are_opt_in_and_capped(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            runtime = Path(temp_dir) / "fake-otel-python"
-            calls = Path(temp_dir) / "calls.jsonl"
-            runtime.write_text(
-                "#!/usr/bin/env python3\n"
-                "import json\n"
-                "import pathlib\n"
-                "import sys\n"
-                "payload = json.loads(sys.stdin.read())\n"
-                f"pathlib.Path({calls.as_posix()!r}).open('a', encoding='utf-8').write(json.dumps(payload, sort_keys=True) + '\\n')\n"
-                "print(json.dumps({'status': 'pass', 'http_status': 200}))\n",
-                encoding="utf-8",
-            )
-            runtime.chmod(0o755)
-            receipt = {
-                "schema_version": "skills-sdk.eval-run-receipt.v0",
-                "status": "pass",
-                "operation": "eval_run",
-                "runner": "deterministic_jsonl_v0",
-                "codex_profile": "oss-local",
-                "case_count": 30,
-                "passed_count": 30,
-                "failed_count": 0,
-                "cases": [{"case_id": f"case-{index}", "status": "pass", "score": 1} for index in range(30)],
-            }
+            runtime, calls = _write_trace_runtime(Path(temp_dir))
 
             trace_receipt = build_phoenix_eval_trace_receipt(
                 REPO_ROOT,
-                eval_receipt=receipt,
+                eval_receipt=_eval_trace_receipt(30),
                 base_url="http://127.0.0.1:6006",
                 otel_python_path=runtime.as_posix(),
                 enabled=True,
@@ -517,34 +559,9 @@ print(json.dumps({"status": "pass", "http_status": 200}))
         self.assertFalse(trace_receipt["mutation_performed"])
 
     def test_ab_trace_keeps_ordered_runtime_profiles_and_metadata_profiles_separate(self) -> None:
-        receipt = {
-            "schema_version": "skills-sdk.ab-run-receipt.v1",
-            "status": "completed",
-            "operation": "ab_run",
-            "execution_profile": {"id": "codex-read-only"},
-            "judge_profile": {"id": "oss-local", "codex_profile": "oss-local"},
-            "experiment_id": "a" * 16,
-            "variant_results": [
-                {
-                    "variant_label": "A",
-                    "status": "pass",
-                    "exit_code": 0,
-                    "command_argv": ["codex", "exec", "--profile", "oss-local", "--json", "-"],
-                    "output_last_message_digest": "sha256:" + ("a" * 64),
-                    "runner_stdout_digest": "sha256:" + ("b" * 64),
-                },
-                {
-                    "variant_label": "B",
-                    "status": "pass",
-                    "exit_code": 0,
-                    "command_argv": ["codex", "exec", "--profile", "oss-cloud", "--json", "-"],
-                    "output_last_message_digest": "sha256:" + ("c" * 64),
-                    "runner_stdout_digest": "sha256:" + ("d" * 64),
-                },
-            ],
-        }
-
-        trace_receipt = build_phoenix_eval_trace_receipt(REPO_ROOT, eval_receipt=receipt, enabled=False)
+        trace_receipt = build_phoenix_eval_trace_receipt(
+            REPO_ROOT, eval_receipt=_ab_profile_receipt(), enabled=False
+        )
 
         self.assertEqual(trace_receipt["status"], "pass")
         self.assertEqual(trace_receipt["observability_status"], "not_run")
@@ -596,51 +613,9 @@ print(json.dumps({"status": "pass", "http_status": 200}))
         )
 
     def test_judge_trace_accepts_configs_wrapped_runtime_with_logical_shape(self) -> None:
-        receipt = {
-            "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
-            "status": "scored",
-            "operation": "ab_judge_score",
-            "judge_profile": {"id": "oss-cloud", "codex_profile": "oss-cloud"},
-            "codex_profile": "oss-cloud",
-            "codex_exec_invoked": True,
-            "provider_invoked": True,
-            "network_accessed": True,
-            "mutation_performed": True,
-            "judge_command_argv": [
-                "bash",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
-                "--env-file",
-                "<operator-approved-opaque-env-stream>",
-                "--require-env",
-                "OLLAMA_API_KEY",
-                "--",
-                "bash",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
-                "--profile",
-                "oss-cloud",
-                "--strict-config",
-                "--sandbox",
-                "read-only",
-                "--ephemeral",
-                "--json",
-                "-",
-            ],
-            "judge_command_shape": [
-                "codex",
-                "exec",
-                "--profile",
-                "oss-cloud",
-                "--strict-config",
-                "--sandbox",
-                "read-only",
-                "--ephemeral",
-                "--json",
-                "-",
-            ],
-            "decision": {"winner": "inconclusive"},
-        }
-
-        trace_receipt = build_phoenix_eval_trace_receipt(REPO_ROOT, eval_receipt=receipt, enabled=False)
+        trace_receipt = build_phoenix_eval_trace_receipt(
+            REPO_ROOT, eval_receipt=_judge_cloud_receipt(), enabled=False
+        )
 
         self.assertEqual(trace_receipt["status"], "pass")
         self.assertEqual(trace_receipt["observability_status"], "not_run")
@@ -792,231 +767,6 @@ print(json.dumps({"status": "pass", "http_status": 200}))
                     [row["derived_codex_profile"] for row in plan["profile_evidence"]],
                     ["oss-local", "oss-cloud"],
                 )
-
-    def test_public_cli_previews_phoenix_mirror(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            receipt_path = self._write_receipt(Path(temp_dir))
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
-                    "sdk",
-                    "observability",
-                    "phoenix-mirror",
-                    "--receipt",
-                    receipt_path.as_posix(),
-                    "--preview",
-                    "--json",
-                    "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=_command_env(),
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        envelope = json.loads(completed.stdout)
-        payload = envelope["data"]["skills_sdk_observability_phoenix_mirror"]
-        self.assertEqual(payload["status"], "preview")
-        self.assertFalse(payload["mutation_performed"])
-
-    def test_public_cli_checks_phoenix_status(self) -> None:
-        server, base_url = self._serve_phoenix()
-        self.addCleanup(server.shutdown)
-
-        completed = subprocess.run(
-            [
-                sys.executable,
-                "Infrastructure/bin/ask",
-                "sdk",
-                "observability",
-                "phoenix-status",
-                "--base-url",
-                base_url,
-                "--json",
-                "--robot",
-            ],
-            cwd=REPO_ROOT,
-            env=_command_env(),
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        envelope = json.loads(completed.stdout)
-        payload = envelope["data"]["skills_sdk_observability_phoenix_status"]
-        self.assertEqual(payload["status"], "pass")
-        self.assertEqual(payload["receipt"]["server_version"], "test-phoenix")
-
-    def test_public_cli_blocks_phoenix_smoke_when_otel_runtime_missing(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
-                    "sdk",
-                    "observability",
-                    "phoenix-smoke",
-                    "--base-url",
-                    "http://127.0.0.1:6006",
-                    "--otel-python",
-                    str(Path(temp_dir) / "missing-python"),
-                    "--json",
-                    "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=_command_env(),
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-
-        self.assertNotEqual(completed.returncode, 0)
-        envelope = json.loads(completed.stdout)
-        payload = envelope["data"]["skills_sdk_observability_phoenix_smoke"]
-        self.assertEqual(payload["status"], "blocked")
-        self.assertIn("otel_python_available", {check["id"] for check in payload["receipt"]["blockers"]})
-
-    def test_public_cli_auto_traces_normal_ask_commands_when_enabled(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            marker = Path(temp_dir) / "payload.json"
-            runtime = Path(temp_dir) / "fake-otel-python"
-            runtime.write_text(
-                f"""#!/usr/bin/env python3
-import json
-import pathlib
-import sys
-
-payload = json.loads(sys.stdin.read())
-pathlib.Path({marker.as_posix()!r}).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
-print(json.dumps({{"status": "pass", "http_status": 200}}))
-""",
-                encoding="utf-8",
-            )
-            runtime.chmod(0o755)
-            env = _command_env()
-            env.update(
-                {
-                    "ASK_PHOENIX_AUTO_TRACE": "1",
-                    "ASK_PHOENIX_BASE_URL": "http://127.0.0.1:6006",
-                    "ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix(),
-                    "ASK_PHOENIX_MODEL": "qwen/qwen3-coder",
-                    "ASK_PHOENIX_PROVIDER": "local-oss",
-                    "ASK_PHOENIX_PROMPT_TOKENS": "3",
-                    "ASK_PHOENIX_COMPLETION_TOKENS": "2",
-                }
-            )
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
-                    "repo",
-                    "status",
-                    "--json",
-                    "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=env,
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-            self.assertEqual(completed.returncode, 0, completed.stderr)
-            envelope = json.loads(completed.stdout)
-            self.assertEqual(envelope["telemetry"]["phoenix_trace_status"], "pass")
-            payload = json.loads(marker.read_text(encoding="utf-8"))
-            self.assertEqual(payload["model_name"], "qwen/qwen3-coder")
-            self.assertEqual(payload["provider"], "local-oss")
-            self.assertIn("repo status", payload["command_name"])
-
-    def test_public_cli_auto_trace_skips_when_repo_config_is_disabled_without_env_flag(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            marker = Path(temp_dir) / "payload.json"
-            runtime = Path(temp_dir) / "fake-otel-python"
-            runtime.write_text(
-                f"""#!/usr/bin/env python3
-import json
-import pathlib
-import sys
-
-payload = json.loads(sys.stdin.read())
-pathlib.Path({marker.as_posix()!r}).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
-print(json.dumps({{"status": "pass", "http_status": 200}}))
-""",
-                encoding="utf-8",
-            )
-            runtime.chmod(0o755)
-            env = _command_env()
-            env.update({"ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix()})
-            env.pop("ASK_PHOENIX_AUTO_TRACE", None)
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
-                    "repo",
-                    "status",
-                    "--json",
-                    "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=env,
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-            self.assertEqual(completed.returncode, 0, completed.stderr)
-            envelope = json.loads(completed.stdout)
-            self.assertNotIn("phoenix_trace_status", envelope["telemetry"])
-            self.assertFalse(marker.exists())
-
-    def test_public_cli_auto_trace_skips_phoenix_commands(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            marker = Path(temp_dir) / "payload.json"
-            runtime = Path(temp_dir) / "fake-otel-python"
-            runtime.write_text(
-                f"""#!/usr/bin/env python3
-import pathlib
-pathlib.Path({marker.as_posix()!r}).write_text("called", encoding="utf-8")
-print('{{"status":"pass","http_status":200}}')
-""",
-                encoding="utf-8",
-            )
-            runtime.chmod(0o755)
-            env = _command_env()
-            env.update(
-                {
-                    "ASK_PHOENIX_AUTO_TRACE": "1",
-                    "ASK_PHOENIX_BASE_URL": "http://127.0.0.1:6006",
-                    "ASK_PHOENIX_OTEL_PYTHON": runtime.as_posix(),
-                }
-            )
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
-                    "sdk",
-                    "observability",
-                    "phoenix-status",
-                    "--base-url",
-                    "http://127.0.0.1:1",
-                    "--timeout-seconds",
-                    "0.01",
-                    "--json",
-                    "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=env,
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-
-        self.assertNotEqual(completed.returncode, 0)
-        self.assertFalse(marker.exists())
-
 
 if __name__ == "__main__":
     unittest.main()

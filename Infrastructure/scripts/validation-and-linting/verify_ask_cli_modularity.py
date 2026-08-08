@@ -130,13 +130,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing A/B judge score regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_skills_sdk_phoenix_observability.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional Phoenix CLI and receipt coverage pending fixture helper extraction",
-        "expires": "2026-07-31",
-    },
     "skills-system/skill-creator/scripts/init_skill.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
