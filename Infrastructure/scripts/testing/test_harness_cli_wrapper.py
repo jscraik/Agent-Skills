@@ -9,7 +9,7 @@ WRAPPER = Path(__file__).resolve().parents[1] / "harness-cli.sh"
 def test_harness_fallback_pin_is_the_approved_release() -> None:
     source = WRAPPER.read_text(encoding="utf-8")
 
-    assert 'SUPPORTED_VERSION="0.15.0"' in source
+    assert 'SUPPORTED_VERSION="0.15.3"' in source
     assert 'FALLBACK_PACKAGE="@brainwav/coding-harness@$SUPPORTED_VERSION"' in source
 
 
@@ -22,7 +22,7 @@ def test_harness_fallback_invokes_the_pinned_package() -> None:
 def test_harness_local_resolution_is_versioned_and_repo_bound() -> None:
     source = WRAPPER.read_text(encoding="utf-8")
 
-    assert 'SUPPORTED_VERSION="0.15.0"' in source
+    assert 'SUPPORTED_VERSION="0.15.3"' in source
     assert 'HARNESS_SUPPORTED_VERSION="$SUPPORTED_VERSION"' in source
     assert 'const expectedPackageRoot = resolve(' in source
     assert '"node_modules/@brainwav/coding-harness",' in source

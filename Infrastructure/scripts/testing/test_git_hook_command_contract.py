@@ -379,7 +379,7 @@ def test_pre_commit_names_and_proves_current_index_lock_policy() -> None:
 
 
 def test_harness_fallback_wrappers_share_supported_version() -> None:
-    expected = re.compile(r'FALLBACK_PACKAGE="@brainwav/coding-harness@(0\.15\.0|\$SUPPORTED_VERSION)"')
+    expected = re.compile(r'FALLBACK_PACKAGE="@brainwav/coding-harness@(0\.15\.3|\$SUPPORTED_VERSION)"')
     global_fallback = 'if command -v harness >/dev/null 2>&1; then\n\t\texec harness "$@"\n\tfi'
     npm_fallback = 'if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then'
     wrapper_paths = [
