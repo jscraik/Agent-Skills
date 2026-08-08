@@ -23,6 +23,10 @@ from ask.skills_sdk.phoenix_observability import (  # noqa: E402
     build_phoenix_smoke_receipt,
     build_phoenix_status_receipt,
 )
+from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
+    CONFIGS_AUTH_WRAPPER,
+    CONFIGS_CODEX_EXEC_WRAPPER,
+)
 from ask.skills_sdk.phoenix_trace_plan import build_eval_trace_plan  # noqa: E402
 
 
@@ -99,9 +103,9 @@ def _ab_profile_receipt() -> dict[str, object]:
 
 
 _JUDGE_RUNTIME_ARGV = [
-    "bash", "<configs-root>/codex/scripts/run-auth-backed.sh", "--env-file",
+    "bash", str(CONFIGS_AUTH_WRAPPER), "--env-file",
     "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "bash",
-    "<configs-root>/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+    str(CONFIGS_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
     "--strict-config", "--sandbox", "read-only", "--ephemeral", "--json", "-",
 ]
 _JUDGE_LOGICAL_SHAPE = [
