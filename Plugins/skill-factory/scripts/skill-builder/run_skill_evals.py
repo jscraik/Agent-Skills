@@ -2993,7 +2993,11 @@ def _scrub_mcp_servers_from_toml(text: str) -> str:
     return "".join(kept)
 
 
-def _isolated_codex_home_for_eval(profile: Optional[str] = None) -> Tuple[Path, List[str]]:
+def _isolated_codex_home_for_eval(
+    profile: Optional[str] = None,
+    *,
+    source_home: Optional[Path] = None,
+) -> Tuple[Path, List[str]]:
     """
     Build a temporary CODEX_HOME for live eval runs.
 
@@ -3002,7 +3006,7 @@ def _isolated_codex_home_for_eval(profile: Optional[str] = None) -> Tuple[Path, 
     auth/config files needed to run `codex exec`; sessions and logs stay isolated.
     """
     warnings: List[str] = []
-    source_home = _effective_codex_home(None)
+    source_home = _effective_codex_home(source_home)
     temp_home_ctx = tempfile.TemporaryDirectory(prefix="skill-evals-codex-home-")
     atexit.register(temp_home_ctx.cleanup)
     target_home = Path(temp_home_ctx.name).resolve()
@@ -4331,9 +4335,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     codex_zai_command = str(args.codex_zai_command or "").strip() or "codex-zai"
     preflight_warnings: List[str] = []
 
-    if "codex" in selected_runners and codex_home is None:
+    if "codex" in selected_runners and (codex_home is None or args.profile == "oss-cloud"):
         try:
-            codex_home, isolation_warnings = _isolated_codex_home_for_eval(args.profile)
+            codex_home, isolation_warnings = _isolated_codex_home_for_eval(
+                args.profile,
+                source_home=codex_home,
+            )
         except ValueError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1

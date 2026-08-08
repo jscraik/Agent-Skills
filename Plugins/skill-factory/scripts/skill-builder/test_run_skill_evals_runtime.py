@@ -131,7 +131,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-smoke"])
 
-
     def test_release_mode_keeps_all_cases_by_default(self) -> None:
         cases = [
             EvalCase(id="happy", name="Happy", prompt="ok", acceptance=["ok"], category="happy"),
@@ -153,7 +152,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
 
         selected = _filter_cases_for_eval_mode(cases, eval_mode="release")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-release"])
-
 
     def test_release_scenario_set_filters_exact_case_ids(self) -> None:
         cases = [
@@ -178,7 +176,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
             exact_case_ids=True,
         )
         self.assertEqual([case.id for case in selected], ["writer-gap-gathering"])
-
 
     def test_non_release_case_filter_keeps_substring_matching(self) -> None:
         cases = [
@@ -238,7 +235,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         routed = [case for case in selected if not _is_smoke_only_case(case)]
         self.assertEqual([case.id for case in routed], ["discovery-round-one", "release-only"])
 
-
     def test_load_evals_parses_eval_modes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             evals_path = Path(tmpdir) / "evals.yaml"
@@ -263,7 +259,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
 
-
     def test_no_case_evidence_marks_summary_blocked_validation(self) -> None:
         summary = {
             "cases": [],
@@ -275,7 +270,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertTrue(marked)
         self.assertTrue(summary["no_case_evidence"])
         self.assertEqual(summary["blocked_class_summary"]["blocked_validation"], 1)
-
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"
@@ -294,7 +288,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
                 "builder-round-metadata-contract",
             }.issubset(selected_ids)
         )
-
 
     def test_preflight_codex_live_runner_rejects_repo_local_home_without_auth(self) -> None:
         """
@@ -327,7 +320,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertIn("Repo-local `.codex` is suitable for discovery/static smoke", errors[0])
         self.assertIn(str(default_home), errors[0])
 
-
     def test_preflight_codex_live_runner_accepts_logged_in_home(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
@@ -350,7 +342,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         mocked_run.assert_called_once()
 
-
     def test_preflight_codex_live_runner_warns_when_env_auth_is_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
@@ -370,6 +361,20 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(len(warnings), 1)
         self.assertIn("auth environment variables are present", warnings[0])
 
+    def test_isolated_codex_home_uses_explicit_cloud_home_only_as_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            explicit_home = home_root / "explicit-codex-home"
+            explicit_home.mkdir(parents=True)
+            (explicit_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (explicit_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
+            (explicit_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud", source_home=explicit_home)
+        self.assertNotEqual(isolated_home, explicit_home)
+        self.assertTrue((isolated_home / "config.toml").is_file())
+        self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
 
     def test_isolated_codex_home_copies_auth_config_and_keeps_sessions_private(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -417,13 +422,15 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
             (default_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
             (default_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
             with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
-                isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud")
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud")
             self.assertTrue((isolated_home / "config.toml").is_file())
             self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
             (default_home / "config.toml").unlink()
             with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
-                with self.assertRaisesRegex(ValueError, "missing: config.toml"):
-                    _isolated_codex_home_for_eval("oss-cloud")
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    with self.assertRaisesRegex(ValueError, "missing: config.toml"):
+                        _isolated_codex_home_for_eval("oss-cloud")
 
     def test_run_codex_exec_keeps_cloud_wrapper_and_no_cross_profile_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
