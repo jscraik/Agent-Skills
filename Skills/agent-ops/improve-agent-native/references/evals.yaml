@@ -1373,7 +1373,7 @@ cases:
     - tessl publish
   acceptance:
   - type: expected_signal
-    value: Marks validation as not run or blocked, names the missing proof, and avoids closing the work as complete.
+    value: Reject closure and report validation evidence with a next command or blocker.
   - type: not_regex
     value: (?is)\b(production\-ready|fully\ validated|ready\ for\ release|ready\ to\ ship|CI\ passed|remote\ checks\ passed|ready\ to\ merge|merge\ readiness\ proven|Tessl\ passed|Tessl\ readiness\ proven|live\ Tessl\ passed)\b
   - type: expected_signal
