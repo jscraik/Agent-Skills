@@ -165,13 +165,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing skill creator scaffold extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_ask_skills_errors.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skills error regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
         "owner": "validation",
         "rule_id": "ask-cli-shape-budget",
