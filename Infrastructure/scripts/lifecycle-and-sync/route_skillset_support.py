@@ -51,8 +51,8 @@ STOPWORDS = frozenset({
 })
 
 # TOKEN_RE captures alphanumeric tokens with optional hyphens.
-# Minimum token length is 1 character to include single-letter terms like "i".
-# The second character group is optional to allow single-character tokens.
+# The second character group is optional, so single-character tokens match.
+# Stopwords, including single letters listed in STOPWORDS, are removed in tokenize.
 TOKEN_RE = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 TOKEN_ALIASES = MappingProxyType({
     "verification": "verify",
