@@ -46,6 +46,20 @@ def test_changed_files_from_scope_miss_falls_back_to_required_baseline() -> None
         )
 
 
+def test_handoff_evidence_uses_skills_sdk_scope_without_baseline_fallback() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = ".harness/evidence/handoff/improve-agent-native/current/oss-local.json"
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "Changed-files scope classification missed all known buckets" not in proc.stdout
+        rows = repo.check_results()
+        by_slug = {row["slug"]: row for row in rows}
+        assert by_slug["skills-sdk-typed-artifacts"]["outcome"] == "pass"
+
+
 def test_lint_changed_skill_metadata_runs_no_command_handles() -> None:
     with TemporaryDirectory() as tmpdir:
         repo = FakeRepo(Path(tmpdir))

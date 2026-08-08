@@ -588,6 +588,8 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
       Infrastructure/tests/test_skills_sdk*.py|\
       Infrastructure/tests/fixtures/skills_sdk/*|\
       Infrastructure/tests/fixtures/skills_sdk/**|\
+      .harness/evidence/handoff/*|\
+      .harness/evidence/handoff/**|\
       .harness/specs/*skills-sdk*.md|\
       .harness/plan/*skills-sdk*.md|\
       .harness/implementation-notes/*skills-sdk*|\
