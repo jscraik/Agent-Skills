@@ -8,7 +8,11 @@
   },
   "command_contract": [
     "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot",
-    "./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot"
+    "./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+    "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-scorecard --case happy-agents-md-audit --json --robot",
+    "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot",
+    "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case edge-ui-action-without-agent-capability --case pressure-prompt-injection --json --robot",
+    "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case eval.harness.local-pass-ci-unknown --case eval.harness.done-without-validation --json --robot"
   ],
   "case_count": 8,
   "passed_count": 8,

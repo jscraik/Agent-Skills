@@ -44,10 +44,10 @@
       }
     },
     "planned_commands": {
-      "plugin_lint": "/Users/jamiecraik/.local/bin/tessl plugin lint /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
-      "plugin_pack": "/Users/jamiecraik/.local/bin/tessl plugin pack --output /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/dist/improve-agent-native.tgz /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
-      "install_file": "/Users/jamiecraik/.local/bin/tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36 --agent codex --yes --strict",
-      "review_run": "/Users/jamiecraik/.local/bin/tessl review run /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/skills/improve-agent-native --workspace jscraik --json --threshold 95"
+      "plugin_lint": "tessl plugin lint /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+      "plugin_pack": "tessl plugin pack --output /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/dist/improve-agent-native.tgz /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+      "install_file": "tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36 --agent codex --yes --strict",
+      "review_run": "tessl review run /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/skills/improve-agent-native --workspace jscraik --json --threshold 95"
     },
     "policy": {
       "native_tessl_only": null,
