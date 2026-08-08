@@ -95,8 +95,6 @@ def _policy_override(
 ) -> dict[str, Any] | None:
     if skill_set == "harness-engineering":
         routing_map_path = skillsets_dir.parent / "Plugins/harness-engineering/references/routing-map.json"
-        if not routing_map_path.is_file():
-            routing_map_path = None
         return harness_engineering_override(task, rows, routing_map_path=routing_map_path)
     if skill_set in {"plugin-factory", "skill-factory"}:
         return factory_override(skill_set, task, rows)
