@@ -1,0 +1,53 @@
+{
+  "schema_version": null,
+  "status": "success",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "tessl_eval": {
+    "status": "pass",
+    "dry_run": true,
+    "live_private": true,
+    "workspace": "jscraik",
+    "project_identity": {
+      "owner_type": "standalone_skill",
+      "project": "improve-agent-native",
+      "workspace": "jscraik",
+      "name": "jscraik/improve-agent-native"
+    },
+    "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+    "plugin_manifest": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/.tessl-plugin/plugin.json",
+    "plugin_version": "0.3.0",
+    "tessl_project_marker": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/tessl.json",
+    "staging_policy": "stable_tmp_private_plugin_evidence",
+    "visibility": "private",
+    "staged_file_count": 93,
+    "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
+    "policy": {
+      "no_install": null,
+      "no_publish": null,
+      "no_registry_upload": null,
+      "native_tessl_only": null,
+      "no_npx": null
+    }
+  },
+  "tessl_dry_run_admission": {
+    "ready_for_tessl_dry_run": true,
+    "readiness_path": ".harness/evidence/handoff/improve-agent-native/eval-handoff-readiness.json",
+    "required_lanes": [
+      "mechanical_validation",
+      "security_risk_modes",
+      "scenario_quality",
+      "scorer_quality",
+      "scorer_calibration",
+      "deterministic_local_gates",
+      "oss-local",
+      "oss-cloud",
+      "tessl-local-proof"
+    ],
+    "blockers": [],
+    "mutation_performed": false
+  }
+}

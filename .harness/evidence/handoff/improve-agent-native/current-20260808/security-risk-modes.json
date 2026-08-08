@@ -1,0 +1,28 @@
+{
+  "schema_version": "skills-sdk.handoff-lane.v1",
+  "status": "pass",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "receipt": {
+    "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+    "status": "pass",
+    "operation": "risk_mode_taxonomy_preview",
+    "query": "Skills/agent-ops/improve-agent-native",
+    "package_id": "improve-agent-native",
+    "source_digest": "sha256:fbe471bf294592e774e887f8fdaecc774cd3249857520364a4afcacac56efdde",
+    "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+    "risk_tier": "high",
+    "primary_mode": "malicious_supply_chain",
+    "detected_modes": [
+      "malicious_supply_chain",
+      "negligent_instruction",
+      "vulnerable_operation"
+    ],
+    "execution_performed": false,
+    "mutation_performed": false,
+    "scanner_execution_performed": false
+  }
+}

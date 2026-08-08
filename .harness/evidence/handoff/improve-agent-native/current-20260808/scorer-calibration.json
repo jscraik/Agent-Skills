@@ -1,0 +1,36 @@
+{
+  "schema_version": "skills-sdk.handoff-lane.v1",
+  "status": "pass",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "receipt": {
+    "schema_version": "skills-sdk.scorer-calibration-receipt.v0",
+    "status": "preview",
+    "operation": "scorer_calibration_preview",
+    "query": "Skills/agent-ops/improve-agent-native",
+    "skill_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "ready": true,
+    "scorer_id": "improve-agent-native-release-scorer",
+    "scorer_version_or_digest": "improve-agent-native-evals-2026-07-01",
+    "threshold": 0.85,
+    "example_count": 6,
+    "confusion_matrix": {
+      "tp": 1,
+      "tn": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    "metrics": {
+      "tpr": 1.0,
+      "tnr": 1.0,
+      "precision": 1.0,
+      "accuracy": 1.0
+    },
+    "blockers": [],
+    "mutation_performed": false,
+    "promotion_performed": false
+  }
+}
