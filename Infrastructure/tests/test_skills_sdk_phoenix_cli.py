@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -43,7 +42,7 @@ print('{{"status":"pass","http_status":200}}')
 
 def _run_ask(env: dict[str, str], *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, "Infrastructure/bin/ask", *args],
+        ["./bin/ask", *args],
         cwd=REPO_ROOT,
         env=env,
         text=True,
@@ -67,10 +66,8 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
     def test_public_cli_previews_phoenix_mirror(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             receipt_path = self._write_receipt(Path(temp_dir))
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
+            completed = _run_ask(
+                _command_env(),
                     "sdk",
                     "observability",
                     "phoenix-mirror",
@@ -79,12 +76,6 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
                     "--preview",
                     "--json",
                     "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=_command_env(),
-                text=True,
-                capture_output=True,
-                check=False,
             )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
@@ -97,10 +88,8 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
         server, base_url = self._serve_phoenix()
         self.addCleanup(server.shutdown)
 
-        completed = subprocess.run(
-            [
-                sys.executable,
-                "Infrastructure/bin/ask",
+        completed = _run_ask(
+            _command_env(),
                 "sdk",
                 "observability",
                 "phoenix-status",
@@ -108,12 +97,6 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
                 base_url,
                 "--json",
                 "--robot",
-            ],
-            cwd=REPO_ROOT,
-            env=_command_env(),
-            text=True,
-            capture_output=True,
-            check=False,
         )
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
@@ -124,10 +107,8 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
 
     def test_public_cli_blocks_phoenix_smoke_when_otel_runtime_missing(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "Infrastructure/bin/ask",
+            completed = _run_ask(
+                _command_env(),
                     "sdk",
                     "observability",
                     "phoenix-smoke",
@@ -137,12 +118,6 @@ class TestSkillsSdkPhoenixCli(unittest.TestCase):
                     str(Path(temp_dir) / "missing-python"),
                     "--json",
                     "--robot",
-                ],
-                cwd=REPO_ROOT,
-                env=_command_env(),
-                text=True,
-                capture_output=True,
-                check=False,
             )
 
         self.assertNotEqual(completed.returncode, 0)

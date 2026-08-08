@@ -228,7 +228,7 @@ def _shape_baseline_for_parent(parent: str) -> dict[str, object]:
     relative = (
         candidates[0].relative_to(REPO_ROOT).as_posix()
         if candidates
-        else ASK_PATH.relative_to(REPO_ROOT).as_posix()
+        else (Path(parent) / ".shape-baseline.py").as_posix()
     )
     command = [str(ASK_COMMAND_PATH), "repo", "status", "--verbose"]
     command.extend(["--baseline-path", relative])

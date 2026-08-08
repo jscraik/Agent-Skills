@@ -233,7 +233,7 @@ class Runner:
         self.assertEqual(baseline, payload["data"]["shape_baseline"])
         command = run.call_args.args[0]
         self.assertIn("--baseline-path", command)
-        self.assertIn("Infrastructure/bin/ask", command)
+        self.assertIn("Infrastructure/bin/.shape-baseline.py", command)
 
 
 if __name__ == "__main__":

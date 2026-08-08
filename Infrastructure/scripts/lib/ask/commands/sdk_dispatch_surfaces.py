@@ -31,7 +31,7 @@ def _validation_error(command: str, message: str, fix_suggestion: str) -> CallRe
 
 
 def _score_target(repo_root: Path, query: str) -> tuple[object, Path | None]:
-    target_info, _audit_target = skills_commands._resolve_doctor_target(repo_root, query)
+    target_info, _audit_target = skills_commands.resolve_doctor_target(repo_root, query)
     value = target_info.get("source_path") if isinstance(target_info, dict) else None
     path = Path(str(value)) if value else None
     if path and not path.is_absolute():
@@ -39,7 +39,7 @@ def _score_target(repo_root: Path, query: str) -> tuple[object, Path | None]:
     return value, path
 
 
-def _blocked_score(query: str, gate: str, source_path_value: object, write_current: bool) -> CallResult:
+def _blocked_score(query: str, gate: str, source_path_value: object, *, write_current: bool) -> CallResult:
     result = CallResult(status="error")
     result.metadata["command"] = "sdk score local"
     result.data["skills_sdk_local_score"] = {
@@ -71,7 +71,7 @@ def _score_receipt(repo_root: Path, query: str, source_path: Path, args: argpars
     )
 
 
-def _score_result(repo_root: Path, query: str, source_path: Path, args: argparse.Namespace, receipt: dict[str, object]) -> CallResult:
+def _score_result(repo_root: Path, query: str, args: argparse.Namespace, receipt: dict[str, object]) -> CallResult:
     paths = write_local_score_receipts(repo_root, receipt) if args.write_current else None
     result = CallResult(status="success")
     result.metadata["command"] = "sdk score local"
@@ -97,8 +97,8 @@ def _dispatch_sdk_score(repo_root: Path, args: argparse.Namespace) -> CallResult
     query = args.target.strip()
     source_path_value, source_path = _score_target(repo_root, query)
     if source_path is None:
-        return _blocked_score(query, args.gate, source_path_value, bool(args.write_current))
-    return _score_result(repo_root, query, source_path, args, _score_receipt(repo_root, query, source_path, args))
+        return _blocked_score(query, args.gate, source_path_value, write_current=bool(args.write_current))
+    return _score_result(repo_root, query, args, _score_receipt(repo_root, query, source_path, args))
 
 
 def _dispatch_sdk_observability(repo_root: Path, args: argparse.Namespace) -> CallResult:

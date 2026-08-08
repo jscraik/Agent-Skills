@@ -182,6 +182,8 @@ def _load_routing_map(routing_map_path: Path) -> dict[str, Any]:
         payload = json.loads(routing_map_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid Harness Engineering routing map at {routing_map_path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"Invalid Harness Engineering routing map at {routing_map_path}: expected an object")
     return payload
 
 
@@ -229,7 +231,18 @@ def _he_rule_override(
     routing_map: dict[str, Any],
 ) -> dict[str, Any] | None:
     stage_ids = {str(row.get("id")) for row in rows}
-    rules = sorted(routing_map.get("deterministic_decision_order", []), key=lambda item: item.get("priority", 999))
+    raw_rules = routing_map.get("deterministic_decision_order", [])
+    if not isinstance(raw_rules, list):
+        raise ValueError("Invalid Harness Engineering routing map: deterministic_decision_order must be a list")
+    rules: list[dict[str, Any]] = []
+    for rule in raw_rules:
+        if not isinstance(rule, dict):
+            raise ValueError("Invalid Harness Engineering routing map: decision rules must be objects")
+        priority = rule.get("priority", 999)
+        if isinstance(priority, bool) or not isinstance(priority, (int, float)):
+            raise ValueError("Invalid Harness Engineering routing map: rule priority must be numeric")
+        rules.append(rule)
+    rules.sort(key=lambda item: item.get("priority", 999))
     for rule in rules:
         result = _he_rule_match(task_text, task_tokens, rows, stage_ids, rule)
         if result:

@@ -3,9 +3,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-# pyright: reportMissingImports=false
+# pyright: reportMissingImports=false  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
-from test_ask_repo_doctor import (  # noqa: E402
+from test_ask_repo_doctor import (  # noqa: E402  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
     COMMAND_HANDLE_CHECK_COMMAND,
     REPO_ROOT,
     _bootstrap_proof,
@@ -21,8 +21,8 @@ from test_ask_repo_doctor import (  # noqa: E402
     repo_closeout,
     repo_doctor,
 )
-from ask.envelope import CallResult, ErrorObject  # noqa: E402
-from helpers.ask_repo_doctor_fixtures import write_runtime_card as _write_runtime_card  # noqa: E402
+from ask.envelope import CallResult, ErrorObject  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from helpers.ask_repo_doctor_fixtures import write_runtime_card as _write_runtime_card  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 
 class TestAskRepoDoctorCloseout(unittest.TestCase):
@@ -54,7 +54,7 @@ class TestAskRepoDoctorCloseout(unittest.TestCase):
 
         Asserts that:
         - runtime evidence status is "present" with a single runtime card and preserved `runtime_status`.
-        - truth boundaries indicate the PR and schema validation are not checked by closeout.
+        - truth boundaries identify PR truth separately while schema proof is recorded by closeout.
         - focused validation includes a `runtime_evidence_cards` step and the schema validation command references `validate_runtime_cards.py`.
         """
         changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]

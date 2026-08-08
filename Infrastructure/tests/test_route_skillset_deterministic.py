@@ -59,6 +59,26 @@ def _write_system_bridge_files(root: Path) -> None:
         skill_file.write_text("# Test system bridge\n", encoding="utf-8")
 
 
+def _write_harness_routing_map(root: Path) -> None:
+    routing_map = root / "Plugins/harness-engineering/references/routing-map.json"
+    routing_map.parent.mkdir(parents=True, exist_ok=True)
+    routing_map.write_text(
+        json.dumps(
+            {
+                "deterministic_decision_order": [
+                    {
+                        "rule": "repeated-review-feedback",
+                        "priority": 1,
+                        "route": "he-code-review",
+                        "signals": ["CodeRabbit and Codex keep flagging"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def _row(skill_id: str, description: str) -> dict[str, object]:
     return {
         "id": skill_id,
@@ -67,6 +87,16 @@ def _row(skill_id: str, description: str) -> dict[str, object]:
         "source_path": SOURCE_PATHS[skill_id],
         "triggers": [skill_id.replace("-", " ")],
     }
+
+
+def _route_process(skillsets_dir: Path, task: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            "python3", ROUTE_SCRIPT, "--skill-set", "skill-factory", "--task", task,
+            "--skillsets-dir", str(skillsets_dir), "--json",
+        ],
+        capture_output=True, text=True, check=False,
+    )
 
 
 class TestRouteSkillsetDeterministic(unittest.TestCase):
@@ -84,6 +114,8 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             _write_source_files(fixture_root, rows)
             if skill_set == "skill-factory":
                 _write_system_bridge_files(fixture_root)
+            if skill_set == "harness-engineering":
+                _write_harness_routing_map(fixture_root)
             _write_manifest(skillsets_dir, skill_set, rows)
             result = subprocess.run(
                 [
@@ -442,6 +474,43 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertIsNone(payload["selected"])
         self.assertIn("Invalid Harness Engineering routing map", payload["error"])
 
+    def test_harness_engineering_rejects_non_object_rules_before_sorting(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:
+            fixture_root = Path(tmp)
+            skillsets_dir = fixture_root / ".skillsets"
+            rows = [_row("he-reconcile", "Route Harness Engineering stages.")]
+            _write_source_files(fixture_root, rows)
+            _write_manifest(skillsets_dir, "harness-engineering", rows)
+            routing_map = fixture_root / "Plugins/harness-engineering/references/routing-map.json"
+            routing_map.parent.mkdir(parents=True)
+            routing_map.write_text(
+                json.dumps({"deterministic_decision_order": ["not-a-rule"]}),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "harness-engineering",
+                    "--task",
+                    "route this stage",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                cwd=fixture_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "routing_policy_invalid")
+        self.assertIn("decision rules must be objects", payload["error"])
+
     def test_manifest_with_missing_source_path_returns_invalid(self) -> None:
         payload = self._route(
             "skill-factory",
@@ -468,44 +537,14 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             _write_source_files(fixture_root, rows)
             _write_manifest(skillsets_dir, "skill-factory", rows)
 
-            result_without_bridge = subprocess.run(
-                [
-                    "python3",
-                    ROUTE_SCRIPT,
-                    "--skill-set",
-                    "skill-factory",
-                    "--task",
-                    "create a skill",
-                    "--skillsets-dir",
-                    str(skillsets_dir),
-                    "--json",
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result_without_bridge = _route_process(skillsets_dir, "create a skill")
             self.assertEqual(result_without_bridge.returncode, 0, result_without_bridge.stderr)
             payload_without_bridge = json.loads(result_without_bridge.stdout)
 
             bridge_file = fixture_root / "skills-system/skill-creator/SKILL.md"
             bridge_file.parent.mkdir(parents=True)
             bridge_file.write_text("# Fixture skill creator\n", encoding="utf-8")
-            result_with_bridge = subprocess.run(
-                [
-                    "python3",
-                    ROUTE_SCRIPT,
-                    "--skill-set",
-                    "skill-factory",
-                    "--task",
-                    "create a skill",
-                    "--skillsets-dir",
-                    str(skillsets_dir),
-                    "--json",
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result_with_bridge = _route_process(skillsets_dir, "create a skill")
 
         self.assertEqual(result_with_bridge.returncode, 0, result_with_bridge.stderr)
         payload_with_bridge = json.loads(result_with_bridge.stdout)

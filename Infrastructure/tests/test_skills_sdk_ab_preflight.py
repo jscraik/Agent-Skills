@@ -554,6 +554,14 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
                 "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
                 "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+                "execution_argv": [
+                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                    "--env-file", "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--",
+                    "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home",
+                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                    "--profile", "oss-cloud", "--strict-config", "--sandbox", "read-only", "--ephemeral",
+                    "--model", "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
+                ],
                 "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [],
             }
             def smoke_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -566,7 +574,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 smoke_runner=smoke_runner, profile_evidence_digest="sha256:" + "a" * 64,
                 codex_executable_identity="sha256:" + "b" * 64,
             )
-
     def test_cloud_catalog_alias_fallback_requires_and_binds_direct_smoke(self) -> None:
         with self._approved_cloud_auth_context() as env_file:
             fact = self._cloud_alias_fact(env_file)
@@ -577,7 +584,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertTrue(fact["direct_smoke_provider_invoked"])
         self.assertEqual(fact["direct_smoke_exit_code"], 0)
         self.assertNotIn(str(env_file), json.dumps(fact))
-
     def test_cloud_catalog_alias_fallback_stays_blocked_when_direct_smoke_fails(self) -> None:
         with self._approved_cloud_auth_context():
             auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
@@ -599,7 +605,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(fact["status"], "blocked")
         self.assertEqual(fact["blocker"]["blocker_class"], "catalog_alias_unlisted")
         self.assertIn("direct provider smoke failed", fact["blocker"]["reason"])
-
     def test_cloud_catalog_rejects_mismatched_payload_and_exit_semantics(self) -> None:
         cases = (
             self._catalog_process(self._catalog_payload(), returncode=2),
@@ -614,7 +619,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 self.assertIsNone(payload)
                 self.assertEqual(failure, "probe_exit_contract_mismatch")
                 self.assertEqual(evidence["probe_exit_code"], completed.returncode)
-
     def test_cloud_catalog_rejects_typed_blocker_with_nonempty_stderr(self) -> None:
         secret = "catalog-probe-secret-text"
         completed = self._catalog_process(
@@ -628,7 +632,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertIsNone(payload)
         self.assertEqual(failure, "probe_stderr_nonempty")
         self.assertNotIn(secret, json.dumps(evidence))
-
     def test_cloud_catalog_requires_exact_integer_zero_process_exit(self) -> None:
         class IntSubclass(int):
             pass
@@ -746,7 +749,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertIsNone(payload)
         self.assertEqual(failure, "invalid_probe_transport_envelope")
         self.assertEqual(evidence["probe_returncode_class"], "invalid_type")
-
     def _assert_nonzero_catalog_returncode(self, returncode: int) -> None:
         completed = self._catalog_process(self._catalog_payload(), returncode=returncode)
         fact = self._catalog_fact_for_process(completed)
@@ -758,7 +760,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(failure, "probe_exit_contract_mismatch")
         self.assertEqual(evidence["probe_exit_class"], "nonzero")
         self.assertEqual(evidence["probe_exit_code"], returncode)
-
     def _catalog_fact_for_process(
         self, completed: subprocess.CompletedProcess[str],
     ) -> dict[str, object]:
@@ -768,7 +769,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
                 lambda _command: completed,
             )
-
     def test_cloud_catalog_rejects_malformed_or_contradictory_child_contracts(self) -> None:
         duplicate = json.dumps(self._catalog_payload()).replace(
             '"result_class": "pass"', '"result_class": "pass", "result_class": "pass"',

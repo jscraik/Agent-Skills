@@ -422,8 +422,6 @@ cases:
       - duplicate read
       - duplicate reads
       - repeated reads
-      - one read
-      - read once
     - id: validate_single_read
       all_of:
       - test
@@ -435,20 +433,12 @@ cases:
       - call-count
     - id: single_read_boundary
       any_of:
-      - once
-      - one lookup
-      - one read
-      - read once
-      - one snapshot
-      - single snapshot read
-      - snapshot
-      - single read
-      - single lookup
-      - one call
-      - second lookup
-      - second
-      - cached
-      - exactly
+      - two calls
+      - two reads
+      - second read
+      - duplicate read
+      - duplicate reads
+      - repeated reads
   - type: not_contains
     value: runtime result without evidence
   realistic: true

@@ -9,9 +9,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402
-from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402
-from helpers.ask_skills_package_fixtures import (  # noqa: E402
+# noqa: E402: test-only Infrastructure imports after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from helpers.ask_skills_package_fixtures import (  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
     write_gold_quality_skill as _write_gold_quality_skill,
     write_minimal_sdk_package_companions as _write_minimal_sdk_package_companions,
     write_advisory_quality_skill as _write_advisory_quality_skill,

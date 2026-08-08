@@ -9,7 +9,8 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import external_review_skill  # noqa: E402
+# noqa: E402: test-only Infrastructure import after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.commands.skills_impl import external_review_skill  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 
 def _completed(args, stdout, *, returncode=0, stderr=""):

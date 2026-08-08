@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import datetime
 from pathlib import Path
 import shutil
 import subprocess
@@ -18,6 +17,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
+from ask.skills_sdk.cloud_smoke_contract import CLOUD_SMOKE_MARKER, valid_cloud_smoke_receipt
 from ask.skills_sdk.ab_transport_contracts import (
     OSS_CLOUD_REQUIRED_ENV,
     actual_opaque_env_path,
@@ -43,7 +43,7 @@ CloudSmokeRunner = Callable[[list[str]], subprocess.CompletedProcess[str]]
 OllamaInventoryResult = tuple[subprocess.CompletedProcess[str] | None, dict[str, Any] | None]
 _CLOUD_CATALOG_PROBE = Path(__file__).with_name("cloud_catalog_probe.py")
 _CLOUD_SMOKE_RUNNER = Path(__file__).parents[3] / "validation-and-linting" / "run_oss_cloud_smoke.py"
-_CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
+_CLOUD_SMOKE_MARKER = CLOUD_SMOKE_MARKER
 
 
 def _profile_filename(lane: str) -> str: return f"{lane}.config.toml"
@@ -296,16 +296,6 @@ def _safe_command_shape(command: list[str]) -> list[str]:
     return safe
 
 
-def _valid_observed_at(value: object) -> bool:
-    if not isinstance(value, str) or not value:
-        return False
-    try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return False
-    return True
-
-
 def _cloud_smoke_result(
     command: list[str], runner: CloudSmokeRunner,
 ) -> tuple[dict[str, Any] | None, str | None, dict[str, Any]]:
@@ -336,7 +326,7 @@ def _cloud_smoke_result(
         return None, "malformed_smoke_output", evidence
     if not isinstance(payload, dict):
         return None, "invalid_smoke_contract", evidence
-    if not _valid_cloud_smoke_receipt(payload):
+    if not valid_cloud_smoke_receipt(payload):
         return None, "invalid_smoke_contract", evidence
     expected_returncode = 0 if payload["status"] == "pass" else 1
     evidence.update({
@@ -346,42 +336,6 @@ def _cloud_smoke_result(
     if returncode != expected_returncode:
         return None, "smoke_exit_contract_mismatch", evidence
     return payload, None, evidence
-
-
-def _valid_cloud_smoke_receipt(payload: dict[str, Any]) -> bool:
-    required = {
-        "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
-        "model_provider", "auth_source", "provider_invoked", "exit_code", "marker",
-        "warnings", "findings",
-    }
-    if not required.issubset(payload) or payload.get("schema_version") != "skills-sdk.oss-cloud-smoke-run.v0":
-        return False
-    return _valid_cloud_smoke_identity(payload) and _valid_cloud_smoke_outcome(payload)
-
-
-def _valid_cloud_smoke_identity(payload: dict[str, Any]) -> bool:
-    return all((
-        payload.get("lane") == "oss-cloud",
-        payload.get("codex_profile") == "oss-cloud",
-        payload.get("model") == "deepseek-v4-flash:cloud",
-        payload.get("model_provider") == "ollama-cloud",
-        payload.get("auth_source") == "1password_desktop_fifo",
-        type(payload.get("provider_invoked")) is bool and payload.get("provider_invoked") is True,
-    ))
-
-
-def _valid_cloud_smoke_outcome(payload: dict[str, Any]) -> bool:
-    return all((
-        payload.get("status") in {"pass", "blocked"},
-        payload.get("exit_code") == 0,
-        payload.get("marker") == _CLOUD_SMOKE_MARKER,
-        payload.get("findings") == [],
-        isinstance(payload.get("warnings"), list),
-        _valid_observed_at(payload.get("observed_at")),
-        payload.get("status") == "pass",
-        payload.get("secret_value_observed", False) is False,
-    ))
-
 
 
 def _catalog_fact_from_payload(

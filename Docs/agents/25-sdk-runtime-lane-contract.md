@@ -57,9 +57,13 @@ sandbox, or permit a dirty/current checkout. Keep `--output-last-message`
 repo-relative, copy the resulting receipt into the evidence root, and retain
 the exact command argv in the judge receipt.
 
-The oss-cloud command shape is logically `codex exec --profile oss-cloud`; the
-Configs wrapper may record the equivalent `run-codex-exec.sh --profile
-oss-cloud` argv in the receipt.
+The logical `codex exec ...` command is display-only. A pass or completed
+oss-cloud receipt must include `execution_argv` proving the complete Configs
+chain: `bash .../run-auth-backed.sh --env-file <opaque FIFO> --require-env
+OLLAMA_API_KEY -- bash .../run-codex-exec.sh --profile oss-cloud --model
+deepseek-v4-flash:cloud --strict-config --sandbox read-only --ephemeral`.
+If that chain is absent or incomplete, classify the lane as blocked; never
+promote from the normalized command alone.
 
 ## Lane Matrix
 

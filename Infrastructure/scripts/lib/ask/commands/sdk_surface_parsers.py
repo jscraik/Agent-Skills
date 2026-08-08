@@ -67,7 +67,7 @@ def add_project_parser(
     global_parser: argparse.ArgumentParser,
 ) -> None:
     parser = sdk_subparsers.add_parser("project", help="Inspect read-only Skills SDK project conformance", parents=[global_parser])
-    subparsers = parser.add_subparsers(dest="project_action")
+    subparsers = parser.add_subparsers(dest="project_action", required=True)
     for project_action in ("status", "doctor"):
         project_parser = subparsers.add_parser(project_action, help=f"Run read-only Skills SDK project {project_action}", parents=[global_parser])
         project_parser.add_argument("--project-root", required=True, help="Absolute marked project root to inspect without mutation")
@@ -89,8 +89,9 @@ def add_lenses_parser(
     select.add_argument("--intent", "--task-intent", dest="task_intent", choices=list(KNOWN_TASK_INTENTS), help="Optional normalized task intent; inferred from prompt when omitted")
     select.add_argument("--repo-file", action="append", default=[], help="Repo-relative file signal to include in selection; repeat for multiple files")
     select.add_argument("--max-lenses", type=int, default=4, help="Maximum selected lenses to return")
-    for registry_parser in (parser, list_parser, explain, validate, select):
-        registry_parser.add_argument("--registry", help="Optional repo-relative or absolute lens registry path")
+    parser.add_argument("--registry", help="Optional repo-relative or absolute lens registry path")
+    for registry_parser in (list_parser, explain, validate, select):
+        registry_parser.add_argument("--registry", default=argparse.SUPPRESS, help="Optional repo-relative or absolute lens registry path")
 
 
 def add_determinism_parser(

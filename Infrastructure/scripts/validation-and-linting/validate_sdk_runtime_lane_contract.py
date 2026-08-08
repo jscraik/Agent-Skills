@@ -32,6 +32,12 @@ REQUIRED_LANES = {
         "codex exec --profile oss-cloud",
         "codex_profile=oss-cloud",
         "oss-cloud.config.toml",
+        "run-auth-backed.sh --env-file ~/.codex/.env --require-env",
+        "run-codex-exec.sh --profile oss-cloud",
+        "--strict-config",
+        "--sandbox read-only",
+        "--ephemeral",
+        "execution_argv",
     ],
     "Tessl local flow": [
         "./bin/ask evals run <skill-path> --mode smoke or release --json --robot",

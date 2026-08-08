@@ -1,44 +1,14 @@
 import copy
-import unittest
-
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
-from test_skills_sdk_schema_spine import (  # noqa: E402
+from helpers.skills_sdk_schema_spine import (  # noqa: E402
     FIXTURE_DIR,
     SCHEMA_DIR,
-    SCHEMA_NAMES,
+    SchemaSpineTestCase,
     _json,
 )
 
 
-class TestSkillsSdkSchemaSpineReceipts(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.schemas = {
-            name: _json(SCHEMA_DIR / schema_name)
-            for name, schema_name in SCHEMA_NAMES.items()
-        }
-        cls.schemas_by_file = {
-            schema_name: _json(SCHEMA_DIR / schema_name)
-            for schema_name in SCHEMA_NAMES.values()
-        }
-
-    def assert_valid(self, schema_key: str, fixture_name: str) -> dict:
-        payload = _json(FIXTURE_DIR / "valid" / fixture_name)
-        _validate_schema_subset(
-            self.schemas[schema_key],
-            payload,
-            {**self.schemas, **self.schemas_by_file},
-        )
-        return payload
-
-    def assert_invalid(self, schema_key: str, fixture_name: str) -> None:
-        payload = _json(FIXTURE_DIR / "invalid" / fixture_name)
-        with self.assertRaises(AssertionError):
-            _validate_schema_subset(
-                self.schemas[schema_key],
-                payload,
-                {**self.schemas, **self.schemas_by_file},
-            )
+class TestSkillsSdkSchemaSpineReceipts(SchemaSpineTestCase):
 
     def test_ab_v1_fixtures_require_typed_ordered_preflight(self) -> None:
         plan = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.v1.json")

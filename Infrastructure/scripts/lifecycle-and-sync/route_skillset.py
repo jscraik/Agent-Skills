@@ -240,7 +240,7 @@ def route(
         return _factory_exclusion_payload(skill_set, bounded_top_k)
 
     augmented_rows = _augmented_rows(skill_set, rows, skillsets_dir)
-    override, policy_error = _safe_policy_override(skill_set, task, rows, skillsets_dir)
+    override, policy_error = _safe_policy_override(skill_set, task, augmented_rows, skillsets_dir)
     if policy_error:
         return _base_payload(
             skill_set,

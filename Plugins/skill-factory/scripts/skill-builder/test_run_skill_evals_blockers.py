@@ -97,6 +97,18 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
         semantic_acceptance = next(item for item in case["acceptance"] if item["type"] == "semantic_requirements")
         self.assertEqual(semantic_acceptance["type"], "semantic_requirements")
 
+        for unrelated in (
+            "store.get; stateful; focused validation test; one snapshot",
+            "store.get; stateful; focused validation test; one call",
+        ):
+            failures = evaluate_assertions_text(
+                unrelated,
+                case["acceptance"],
+                skill_name="simplify",
+                selected_skill=True,
+            )
+            self.assertIn("semantic_requirements failed: single_read_boundary", failures)
+
 
     def test_expected_signal_acceptance_fails_vague_regex_only_response(self) -> None:
         assertions = [
@@ -305,89 +317,35 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
 
 
     def test_runner_blocker_classifier_separates_user_input_auth_and_timeouts(self) -> None:
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text='{"user_input_requested_during_turn": true}',
-                stderr_text="",
-            ),
-            "blocked_user_input",
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text="",
-                stderr_text=(
-                    "Use request_user_input when the brief is sparse.\n"
-                    "ERROR: You've hit your usage limit for GPT-5.3-Codex-Spark. "
-                    "Switch to another model now, or try again at 11:00 PM.\n"
-                ),
-            ),
-            "blocked_runtime",
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text="Not logged in. Run /login before continuing.",
-                stderr_text="",
-            ),
-            "blocked_auth",
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text="",
-                stderr_text='Auth(TokenRefreshFailed("Server returned error response: invalid_grant: Invalid refresh token"))',
-            ),
-            "blocked_auth",
-        )
-        self.assertIsNone(
-            _classify_runner_blocker(
-                output_text="valid final answer",
-                stdout_text="",
-                stderr_text='Auth(TokenRefreshFailed("Server returned error response: invalid_grant: Invalid refresh token"))',
-                exit_code=0,
-            )
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text="",
-                stderr_text="",
-                exit_code=124,
-            ),
-            "timeout_no_output",
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="partial result",
-                stdout_text="",
-                stderr_text="codex exec timed out after 60 seconds",
-                exit_code=124,
-            ),
-            "timeout_partial_output",
-        )
-        self.assertEqual(
-            _classify_runner_blocker(
-                output_text="",
-                stdout_text=(
-                    "{\"type\":\"error\",\"message\":\"You've hit your usage limit. "
-                    "Visit https://chatgpt.com/codex/settings/usage to purchase "
-                    "more credits or try again at 2:59 AM.\"}"
-                ),
-                stderr_text="",
-                exit_code=1,
-            ),
-            "blocked_runtime",
-        )
-        self.assertIsNone(
-            _classify_runner_blocker(
-                output_text="Validation: pass",
-                stdout_text="Skill docs mention that the context window is a public good.",
-                stderr_text="",
-                exit_code=0,
-            )
-        )
+        cases = [
+            ({"stdout_text": '{"user_input_requested_during_turn": true}'}, "blocked_user_input"),
+            ({"stderr_text": "Use request_user_input when the brief is sparse.\nERROR: You've hit your usage limit for GPT-5.3-Codex-Spark."}, "blocked_runtime"),
+            ({"stdout_text": "Not logged in. Run /login before continuing."}, "blocked_auth"),
+            ({"stderr_text": 'Auth(TokenRefreshFailed("invalid_grant: Invalid refresh token"))'}, "blocked_auth"),
+            ({"exit_code": 124}, "timeout_no_output"),
+            ({"output_text": "partial result", "stderr_text": "codex exec timed out after 60 seconds", "exit_code": 124}, "timeout_partial_output"),
+            ({"stdout_text": '{"type":"error","message":"You\'ve hit your usage limit."}', "exit_code": 1}, "blocked_runtime"),
+        ]
+        for kwargs, expected in cases:
+            with self.subTest(expected=expected):
+                self.assertEqual(_classify_runner_blocker(
+                    output_text=kwargs.get("output_text", ""),
+                    stdout_text=kwargs.get("stdout_text", ""),
+                    stderr_text=kwargs.get("stderr_text", ""),
+                    exit_code=kwargs.get("exit_code"),
+                ), expected)
+        self.assertIsNone(_classify_runner_blocker(
+            output_text="valid final answer",
+            stdout_text="",
+            stderr_text='Auth(TokenRefreshFailed("invalid_grant: Invalid refresh token"))',
+            exit_code=0,
+        ))
+        self.assertIsNone(_classify_runner_blocker(
+            output_text="Validation: pass",
+            stdout_text="Skill docs mention that the context window is a public good.",
+            stderr_text="",
+            exit_code=0,
+        ))
 
 
     def test_forbidden_short_command_matches_tokens_not_substrings(self) -> None:
