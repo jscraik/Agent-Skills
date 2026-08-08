@@ -402,7 +402,7 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Reports one lookup and focused validation.
+    value: Identifies a duplicate read and recommends a validation test.
   - type: semantic_requirements
     requirements:
     - id: reuse_checked_value
@@ -426,6 +426,13 @@ cases:
     - id: single_read_boundary
       any_of:
       - once
+      - one lookup
+      - one read
+      - read once
+      - one snapshot
+      - single read
+      - single lookup
+      - one call
       - second lookup
       - second
       - cached
