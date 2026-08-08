@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 import unittest
@@ -213,6 +214,26 @@ class Runner:
 
         self.assertEqual(len(issues), 1)
         self.assertIn("shape baseline unavailable", issues[0])
+
+    def test_shape_baseline_requests_payload_for_repository_wide_lookup(self) -> None:
+        validator = _load_validator()
+        payload = {
+            "data": {
+                "shape_baseline": {
+                    "deleted_python_paths": [],
+                    "head_text": {},
+                    "sibling_python_paths": [],
+                }
+            }
+        }
+        completed = SimpleNamespace(returncode=0, stdout=json.dumps(payload), stderr="")
+        with unittest.mock.patch.object(validator.subprocess, "run", return_value=completed) as run:
+            baseline = validator._shape_baseline()
+
+        self.assertEqual(baseline, payload["data"]["shape_baseline"])
+        command = run.call_args.args[0]
+        self.assertIn("--baseline-path", command)
+        self.assertIn("Infrastructure/bin/ask", command)
 
 
 if __name__ == "__main__":

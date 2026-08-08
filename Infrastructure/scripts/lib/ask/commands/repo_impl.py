@@ -1188,7 +1188,10 @@ def _shape_baseline(repo_root: Path, baseline_path: str | None) -> dict[str, Any
         parent = Path(relative).parent.as_posix()
         siblings = [
             path
-            for path in _git_output_lines(repo_root, ["ls-files", "--", f"{parent}/*.py"])
+            for path in _git_output_lines(
+                repo_root,
+                ["ls-tree", "-r", "--name-only", "HEAD", "--", f"{parent}/*.py"],
+            )
             if path.endswith(".py")
         ]
     paths = list(dict.fromkeys([*deleted, *siblings]))
