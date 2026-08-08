@@ -163,7 +163,7 @@ def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
     }
 
 
-def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool:
+def is_stage_correctness_question(task_text: str, _task_tokens: set[str]) -> bool:
     patterns = (
         r"\bis\s+he-[a-z0-9-]+\s+(correct|right)\b",
         r"\bwhether\s+(to\s+use\s+)?he-[a-z0-9-]+\s+(is\s+)?(correct|right)\b",
