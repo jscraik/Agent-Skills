@@ -53,13 +53,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing repository command extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/scripts/lib/ask/commands/sdk.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional SDK parser and dispatch extraction debt while Phoenix observability commands are stabilized",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/lib/ask/skills_sdk/phoenix_observability.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
