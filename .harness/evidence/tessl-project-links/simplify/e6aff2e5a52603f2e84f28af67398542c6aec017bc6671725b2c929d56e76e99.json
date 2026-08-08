@@ -1,0 +1,53 @@
+{
+  "action": "relinked_existing_project_updated_source",
+  "candidate": {
+    "candidate_digest": "e6aff2e5a52603f2e84f28af67398542c6aec017bc6671725b2c929d56e76e99",
+    "scenario_set_digest": "49186a8c23e1fbc04ecb0626f3137474aae71cc0d8b09f4e5a8c856c640aa053",
+    "source_path": "Skills/agent-ops/simplify/SKILL.md"
+  },
+  "commands": [
+    {
+      "action": "check",
+      "command": "tessl project repair --json --yes",
+      "exit_code": 1,
+      "parsed_output": {
+        "message": "--workspace, --project, and --yes are only valid with a repair action.",
+        "status": "error"
+      },
+      "raw_error": "",
+      "raw_output": "{\n  \"message\": \"--workspace, --project, and --yes are only valid with a repair action.\",\n  \"status\": \"error\"\n}",
+      "signal": null
+    },
+    {
+      "action": "relink",
+      "command": "tessl project repair --relink --workspace jscraik --project simplify --yes --json",
+      "exit_code": 0,
+      "parsed_output": {
+        "message": "Relinked this directory to jscraik/simplify.",
+        "status": "relinked"
+      },
+      "raw_error": "",
+      "raw_output": "{\n  \"message\": \"Relinked this directory to jscraik/simplify.\",\n  \"status\": \"relinked\"\n}",
+      "signal": null
+    },
+    {
+      "action": "update_source",
+      "command": "tessl project repair --update-source --yes --json",
+      "exit_code": 0,
+      "parsed_output": {
+        "message": "Linked project already matches this directory.",
+        "status": "match"
+      },
+      "raw_error": "",
+      "raw_output": "{\n  \"message\": \"Linked project already matches this directory.\",\n  \"status\": \"match\"\n}",
+      "signal": null
+    }
+  ],
+  "issued_at": "2026-08-08T05:24:33Z",
+  "project": "simplify",
+  "purpose": "explicit_project_link_setup_before_live_eval",
+  "schema_version": "skills-sdk.tessl-project-link.v1",
+  "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__simplify-fd7053932644",
+  "status": "pass",
+  "workspace": "jscraik"
+}
