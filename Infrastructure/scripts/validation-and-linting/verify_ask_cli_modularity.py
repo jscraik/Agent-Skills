@@ -95,13 +95,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing package contract extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing routed skillset extraction debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
