@@ -526,6 +526,7 @@ def _write_tessl_project_link_receipt(
         "workspace": workspace,
         "project": identity.get("project"),
         "candidate": candidate,
+        "staged_source": project_link.get("staged_source"),
         "action": project_link.get("action"),
         "commands": project_link.get("commands", []),
         "issued_at": _utc_now_iso(),
@@ -2301,7 +2302,12 @@ def _normalize_tessl_acceptance_item(item: dict[object, object]) -> dict[str, st
     return normalize_tessl_acceptance_item(item)
 
 
-def _tessl_acceptance_description(item: dict[str, str], case: dict[str, object]) -> str:
+def _tessl_acceptance_description(
+    item: dict[str, str],
+    case: dict[str, object],
+    *,
+    source_item: dict[object, object] | None = None,
+) -> str:
     criterion_type = str(item.get("type") or "").strip().lower()
     if criterion_type.startswith("text_field_"):
         field = str(item.get("field") or item.get("path") or item.get("name") or "").strip()
@@ -2318,6 +2324,28 @@ def _tessl_acceptance_description(item: dict[str, str], case: dict[str, object])
         if expected_values:
             parts.append(f"expected={expected_values}")
         return "; ".join(parts)
+    if criterion_type == "semantic_requirements":
+        requirements = (source_item or {}).get("requirements")
+        if isinstance(requirements, list):
+            rendered: list[str] = []
+            for requirement in requirements:
+                if not isinstance(requirement, dict):
+                    continue
+                requirement_id = str(requirement.get("id") or "").strip()
+                required = requirement.get("all_of")
+                alternatives = requirement.get("any_of")
+                clauses: list[str] = []
+                if isinstance(required, list) and required:
+                    terms = [str(term).strip() for term in required if str(term).strip()]
+                    clauses.append("all_of=" + ", ".join(terms))
+                if isinstance(alternatives, list) and alternatives:
+                    terms = [str(term).strip() for term in alternatives if str(term).strip()]
+                    clauses.append("any_of=" + ", ".join(terms))
+                if clauses:
+                    rendered.append(f"{requirement_id}: " + "; ".join(clauses))
+            if rendered:
+                return "semantic_requirements: " + " | ".join(rendered)
+        return "semantic_requirements: satisfy every declared requirement."
     return str(
         item.get("value")
         or item.get("expected_skill")
@@ -2340,7 +2368,7 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
                 continue
             normalized_item = _normalize_tessl_acceptance_item(item)
             criterion_type = str(normalized_item.get("type") or "acceptance").strip().lower()
-            value = _tessl_acceptance_description(normalized_item, case)
+            value = _tessl_acceptance_description(normalized_item, case, source_item=item)
             category = "MUST_NOT" if criterion_type.startswith(("forbidden", "must_not")) else "INTENT"
             criterion = {
                 "name": _safe_slug(f"{criterion_type}-{index}"),
@@ -4184,6 +4212,18 @@ def prepare_tessl_scenario_generation(
             target_tile,
         )
         tool_files = _write_tessl_scenario_tool_project(tool_project)
+        live_staged_source: Path | None = None
+        live_staged_files: list[str] = []
+        if not dry_run:
+            # Tessl binds a project to the concrete directory path. The live
+            # evaluator later stages the private plugin under
+            # /tmp/ask-tessl-evals, so setup must link that exact stable path
+            # rather than the scenario-generation target tile.
+            live_staged_source, live_staged_files = _stage_tessl_live_private_source(
+                repo_root,
+                path,
+                normalized_workspace,
+            )
     except (OSError, ValueError) as e:
         return CallResult(
             status="error",
@@ -4209,6 +4249,8 @@ def prepare_tessl_scenario_generation(
         "target_tessl_project_marker": str(target_tile / "tessl.json"),
         "target_staged_files": target_files,
         "tool_project_files": tool_files,
+        "live_staged_source": str(live_staged_source) if live_staged_source else None,
+        "live_staged_files": live_staged_files,
         "workspace": normalized_workspace,
         "project_identity": _tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         "dry_run": dry_run,
@@ -4260,7 +4302,7 @@ def prepare_tessl_scenario_generation(
 
     project_link = _ensure_tessl_project_link(
         tessl_path,
-        target_tile,
+        live_staged_source or target_tile,
         common["project_identity"],
     )
     common["project_link"] = project_link

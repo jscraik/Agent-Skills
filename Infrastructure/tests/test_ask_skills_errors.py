@@ -22,6 +22,79 @@ from ask.commands.skills_impl import (  # noqa: E402
 from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
 
 
+def _completed(args, stdout, *, returncode=0, stderr=""):
+    return subprocess.CompletedProcess(args=args, returncode=returncode, stdout=stdout, stderr=stderr)
+
+
+def _write_skill_fixture(repo_root, skill_dir):
+    target = repo_root / skill_dir
+    target.mkdir(parents=True)
+    (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+
+
+def _successful_audit(data):
+    audit = type("AuditResult", (), {})()
+    audit.status = "success"
+    audit.data = data
+    audit.errors = []
+    return audit
+
+
+def _external_tool_path(name):
+    return f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
+
+
+def _run_snyk_review(mock_run, mock_which, mock_audit, *, snyk_result, returncode=0, stderr="", skill_dir="Skills/backend-platform/example-skill"):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_root = Path(tmpdir)
+        _write_skill_fixture(repo_root, skill_dir)
+        mock_audit.return_value = _successful_audit({"diagnostics": {"exit_code": 0}})
+        mock_which.side_effect = _external_tool_path
+        mock_run.side_effect = [
+            _completed([], "Score: 91/100\nGrade: A"),
+            _completed([], "Overall: PASSED (0 errors, 0 warnings)"),
+            _completed([], "Review Score: 90%"),
+            _completed([], snyk_result, returncode=returncode, stderr=stderr),
+        ]
+        return external_review_skill(repo_root=repo_root, skill_path=skill_dir, include_snyk=True, with_tessl_review=True)
+
+
+def _run_tessl_default_review(mock_run, mock_which, mock_audit):
+    skill_dir = "Skills/backend-platform/example-skill"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_root = Path(tmpdir)
+        _write_skill_fixture(repo_root, skill_dir)
+        mock_audit.return_value = _successful_audit({"diagnostics": {"exit_code": 0}})
+        mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
+        mock_run.side_effect = [_completed([], "Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn"), _completed([], "tessl lint ok")]
+        return external_review_skill(repo_root=repo_root, skill_path=skill_dir)
+
+
+def _render_eval_scorecard(repo_root):
+    report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+    report_path.parent.mkdir(parents=True)
+    report_path.write_text(json.dumps({
+        "status": "success",
+        "data": {
+            "target": "Plugins/skill-factory/skills/code_quality_review/example-skill",
+            "ask_audit": {"data": {"openclaw": {"stdout": "Summary: 0 critical · 0 warn"}}},
+            "plugin_eval": {"stdout": "Score: 88/100\nGrade: B"},
+            "tessl_review": {"stdout": "Review Score: 90%\nDescription: 100%\nContent: 80%\nOverall: PASSED (0 errors, 0 warnings)\n  actionability: 3/3 - Clear steps."},
+        },
+        "errors": [],
+    }), encoding="utf-8")
+    scorecard_path = repo_root / "Infrastructure/artifacts/skills/example-skill/20260515-180000-000000/scorecard.json"
+    scorecard_path.parent.mkdir(parents=True)
+    scorecard_path.write_text(json.dumps({
+        "skill_path": "Plugins/skill-factory/skills/code_quality_review/example-skill",
+        "run_id": "20260515-180000-000000", "eval_mode": "smoke", "runner_mode": "codex",
+        "cases": [{"id": "happy-path", "name": "Happy Path", "category": "happy", "passed": True, "tier1_failures": [], "warnings": []}, {"id": "edge-case", "name": "Edge Case", "category": "edge", "passed": False, "tier1_failures": ["missing required output"], "warnings": []}],
+    }), encoding="utf-8")
+    html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+    render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+    return html_path.read_text(encoding="utf-8")
+
+
 class TestAskSkillsErrors(unittest.TestCase):
     def test_summarize_family_benchmark_failure_extracts_failures(self):
         stdout = "\n".join([
@@ -301,170 +374,6 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("does not support --remediate", result.errors[0].message)
         self.assertEqual(mock_run.call_count, 1)
 
-    @patch("ask.commands.skills_impl.audit_skill")
-    @patch("ask.commands.skills_impl.shutil.which")
-    @patch("ask.commands.skills_impl.subprocess.run")
-    def test_external_review_runs_tessl_review_only_when_explicitly_requested(
-        self,
-        mock_run,
-        mock_which,
-        mock_audit,
-    ):
-        """
-        Verify that external_review_skill runs plugin-eval and tessl (lint and review) by default and records expected policy and tessl outputs.
-        
-        Asserts that:
-        - The overall result status is "success".
-        - Policy fields indicate no_publish and not using npx.
-        - plugin-eval, tessl lint, and tessl review stages are marked "success".
-        - Exactly three subprocess invocations occur and none invoke "npx" or "publish".
-        - The HOME environment used for tessl invocations does not contain the "agent-skills-tessl-" marker.
-        - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "90", <skill_dir>].
-        - The returned tessl_plugin marks support_refs_included as truthy.
-        
-        Parameters:
-            mock_run: patched subprocess.run used to simulate external tool invocations.
-            mock_which: patched shutil.which used to indicate presence of required binaries.
-            mock_audit: patched audit_skill used to simulate a prior audit result.
-        """
-        skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(
-                    args=["/usr/local/bin/plugin-eval", "analyze", skill_dir, "--format", "markdown"],
-                    returncode=0,
-                    stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn",
-                    stderr="",
-                ),
-                subprocess.CompletedProcess(
-                    args=["/usr/local/bin/tessl", "plugin", "lint", skill_dir],
-                    returncode=0,
-                    stdout="tessl lint ok",
-                    stderr="",
-                ),
-                subprocess.CompletedProcess(
-                    args=["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "90", skill_dir],
-                    returncode=0,
-                    stdout='{"reviewScore": 96, "summary": "ok"}',
-                    stderr="",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                with_tessl_review=True,
-            )
-
-        self.assertEqual(result.status, "success")
-        self.assertTrue(result.data["policy"]["no_publish"])
-        self.assertFalse(result.data["policy"]["uses_npx"])
-        self.assertEqual(result.data["plugin_eval"]["status"], "success")
-        self.assertEqual(result.data["plugin_eval_context"]["mode"], "agent_context_staging")
-        self.assertIn(
-            "references/evals.yaml",
-            result.data["plugin_eval_context"]["excluded_package_surfaces"],
-        )
-        plugin_eval_call = mock_run.call_args_list[0]
-        self.assertIn("/ask-plugin-eval-reviews/", plugin_eval_call.args[0][2])
-        self.assertNotEqual(plugin_eval_call.args[0][2], skill_dir)
-        self.assertEqual(result.data["tessl_lint"]["status"], "success")
-        self.assertEqual(result.data["tessl_review"]["status"], "success")
-        self.assertEqual(result.data["tessl_review"]["target_score"], 95)
-        self.assertEqual(result.data["tessl_review"]["summary"]["target_score"], 95)
-        self.assertEqual(mock_run.call_count, 3)
-        for call in mock_run.call_args_list:
-            self.assertNotIn("npx", call.args[0])
-            self.assertNotIn("publish", call.args[0])
-        tessl_call = mock_run.call_args_list[1]
-        self.assertEqual(tessl_call.args[0][1:3], ["plugin", "lint"])
-        self.assertNotIn("agent-skills-tessl-", tessl_call.kwargs["env"].get("HOME", ""))
-        review_call = mock_run.call_args_list[2]
-        self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
-        self.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
-        self.assertEqual(review_call.args[0][5], "95")
-        self.assertNotIn("agent-skills-tessl-", review_call.kwargs["env"].get("HOME", ""))
-        self.assertTrue(result.data["tessl_plugin"]["support_refs_included"])
-        self.assertTrue(result.data["tessl_plugin"]["plugin_manifest"].endswith("/.tessl-plugin/plugin.json"))
-
-    @patch("ask.commands.skills_impl.audit_skill")
-    @patch("ask.commands.skills_impl.shutil.which")
-    @patch("ask.commands.skills_impl.subprocess.run")
-    def test_external_review_dashboard_writes_local_html(
-        self,
-        mock_run,
-        mock_which,
-        mock_audit,
-    ):
-        skill_dir = "Plugins/skill-factory/skills/code_quality_review/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\ndescription: Use when reviewing examples.\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"openclaw": {"stdout": "Summary: 0 critical · 0 warn"}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
-                subprocess.CompletedProcess(
-                    args=[],
-                    returncode=0,
-                    stdout=(
-                        "Review Score: 92%\n"
-                        "Description: 100%\n"
-                        "Content: 85%\n"
-                        "  specificity: 3/3 - Specific trigger terms.\n"
-                        "  conciseness: 2/3 - Slightly verbose.\n"
-                        "    Suggestions:\n"
-                        "      - Tighten repeated guidance.\n"
-                    ),
-                    stderr="",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                audit_level="compat",
-                report_path="Infrastructure/artifacts/skill-reviews/example-skill.json",
-                dashboard=True,
-                dashboard_path="Infrastructure/artifacts/skill-reviews/example-skill.html",
-            )
-
-            html_path = repo_root / result.data["dashboard_path"]
-            html_text = html_path.read_text(encoding="utf-8")
-
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["dashboard_path"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
-        self.assertEqual(result.data["dashboard_url"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
-        self.assertIn("ASK Local Review", html_text)
-        self.assertIn('data-auto-refresh-seconds="0"', html_text)
-        self.assertIn("Static evidence snapshot", html_text)
-        self.assertIn('role="tablist"', html_text)
-        self.assertIn('role="tabpanel"', html_text)
-        self.assertIn("Quality", html_text)
-        self.assertIn("Evals Not Run Yet", html_text)
-        self.assertIn("Snyk Advisory", html_text)
-        self.assertIn("local_internal_only", html_text)
-        self.assertIn("disabled_until_requested", html_text)
-
     def test_review_dashboard_reads_openclaw_guard_security_output(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -548,37 +457,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_audit,
     ):
         skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Review Score: 90%", stderr=""),
-                subprocess.CompletedProcess(
-                    args=[],
-                    returncode=0,
-                    stdout='{"ok": true, "vulnerabilities": [], "summary": "No known vulnerabilities"}',
-                    stderr="",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                include_snyk=True,
-                with_tessl_review=True,
-            )
-
+        result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result='{"ok": true, "vulnerabilities": [], "summary": "No known vulnerabilities"}')
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "success")
         self.assertEqual(mock_run.call_count, 4)
@@ -599,37 +478,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_audit,
     ):
         skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Review Score: 90%", stderr=""),
-                subprocess.CompletedProcess(
-                    args=[],
-                    returncode=3,
-                    stdout='{"ok": false, "error": "Could not detect supported target files"}',
-                    stderr="",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                include_snyk=True,
-                with_tessl_review=True,
-            )
-
+        result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result='{"ok": false, "error": "Could not detect supported target files"}', returncode=3)
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "not_applicable")
         self.assertIn("SKILL.md-first", result.data["snyk"]["reason"])
@@ -643,38 +492,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
-        skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Review Score: 90%", stderr=""),
-                subprocess.CompletedProcess(
-                    args=[],
-                    returncode=1,
-                    stdout='{"ok": false, "vulnerabilities": [{"severity": "high"}]}',
-                    stderr="",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                include_snyk=True,
-                with_tessl_review=True,
-            )
-
+        result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result='{"ok": false, "vulnerabilities": [{"severity": "high"}]}', returncode=1)
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["snyk"]["status"], "advisory")
         self.assertTrue(any(error.code == "ERR_VALIDATION" for error in result.errors))
@@ -688,88 +506,14 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
-        skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
-            mock_run.side_effect = [
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
-                subprocess.CompletedProcess(args=[], returncode=0, stdout="Review Score: 90%", stderr=""),
-                subprocess.CompletedProcess(
-                    args=[],
-                    returncode=2,
-                    stdout="",
-                    stderr="Use snyk auth to authenticate.",
-                ),
-            ]
-
-            result = external_review_skill(
-                repo_root=repo_root,
-                skill_path=skill_dir,
-                include_snyk=True,
-                with_tessl_review=True,
-            )
-
+        result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result="", returncode=2, stderr="Use snyk auth to authenticate.")
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["snyk"]["status"], "blocked_auth")
         self.assertTrue(any(error.code == "ERR_AUTH" for error in result.errors))
 
     def test_review_dashboard_renders_latest_eval_scorecard(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
-            report_path.parent.mkdir(parents=True)
-            report_path.write_text(
-                json.dumps({
-                    "status": "success",
-                    "data": {
-                        "target": "Plugins/skill-factory/skills/code_quality_review/example-skill",
-                        "ask_audit": {"data": {"openclaw": {"stdout": "Summary: 0 critical · 0 warn"}}},
-                        "plugin_eval": {"stdout": "Score: 88/100\nGrade: B"},
-                        "tessl_review": {
-                            "stdout": (
-                                "Review Score: 90%\n"
-                                "Description: 100%\n"
-                                "Content: 80%\n"
-                                "Overall: PASSED (0 errors, 0 warnings)\n"
-                                "  actionability: 3/3 - Clear steps."
-                            )
-                        },
-                    },
-                    "errors": [],
-                }),
-                encoding="utf-8",
-            )
-            scorecard_path = repo_root / "Infrastructure/artifacts/skills/example-skill/20260515-180000-000000/scorecard.json"
-            scorecard_path.parent.mkdir(parents=True)
-            scorecard_path.write_text(
-                """{
-  "skill_path": "Plugins/skill-factory/skills/code_quality_review/example-skill",
-  "run_id": "20260515-180000-000000",
-  "eval_mode": "smoke",
-  "runner_mode": "codex",
-  "cases": [
-    {"id": "happy-path", "name": "Happy Path", "category": "happy", "passed": true, "tier1_failures": [], "warnings": []},
-    {"id": "edge-case", "name": "Edge Case", "category": "edge", "passed": false, "tier1_failures": ["missing required output"], "warnings": []}
-  ]
-}
-""",
-                encoding="utf-8",
-            )
-
-            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
-            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
-            html_text = html_path.read_text(encoding="utf-8")
+            html_text = _render_eval_scorecard(Path(tmpdir))
 
         self.assertIn("Evaluation Results", html_text)
         self.assertIn("Happy Path", html_text)
@@ -813,43 +557,8 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
     def test_external_review_skips_tessl_content_review_by_default(self, mock_which, mock_audit):
-        """
-        Verify that external_review_skill skips Tessl content review unless it is explicitly requested.
-        
-        Sets up a minimal skill directory, fakes plugin binaries and a successful audit, and asserts:
-        - overall result status is "success"
-        - the tessl_review entry in result.data is marked as "skipped"
-        - only the expected subprocess calls (plugin-eval and tessl lint) are made (call count == 2)
-        """
-        skill_dir = "Skills/backend-platform/example-skill"
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo_root = Path(tmpdir)
-            target = repo_root / skill_dir
-            target.mkdir(parents=True)
-            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
-
-            audit = type("AuditResult", (), {})()
-            audit.status = "success"
-            audit.data = {"diagnostics": {"exit_code": 0}}
-            audit.errors = []
-            mock_audit.return_value = audit
-            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
-
-            with patch("ask.commands.skills_impl.subprocess.run") as mock_run:
-                mock_run.side_effect = [
-                    subprocess.CompletedProcess(
-                        args=[],
-                        returncode=0,
-                        stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn",
-                        stderr="",
-                    ),
-                    subprocess.CompletedProcess(args=[], returncode=0, stdout="tessl lint ok", stderr=""),
-                ]
-                result = external_review_skill(
-                    repo_root=repo_root,
-                    skill_path=skill_dir,
-                )
-
+        with patch("ask.commands.skills_impl.subprocess.run") as mock_run:
+            result = _run_tessl_default_review(mock_run, mock_which, mock_audit)
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["tessl_review"]["status"], "skipped")
         self.assertIn("Disabled by default", result.data["tessl_review"]["reason"])

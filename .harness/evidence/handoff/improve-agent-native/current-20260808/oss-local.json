@@ -1,0 +1,148 @@
+{
+  "schema_version": "skills-sdk.oss-release-rollup.v1",
+  "status": "pass",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "profile": "oss-local",
+  "codex_profile": "oss-local",
+  "lane": "oss-local",
+  "codex_exec_invoked": true,
+  "case_count": 8,
+  "passed_count": 8,
+  "failed_count": 0,
+  "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+  "scenario_set_case_ids": [
+    "happy-scorecard",
+    "happy-agents-md-audit",
+    "happy-proof-loop-gap",
+    "edge-no-validation-entrypoint",
+    "edge-ui-action-without-agent-capability",
+    "pressure-prompt-injection",
+    "eval.harness.local-pass-ci-unknown",
+    "eval.harness.done-without-validation"
+  ],
+  "execution_model": "qwen3.5:9b-mlx",
+  "execution_model_provider": "ollama",
+  "variance_observation": null,
+  "shards": [
+    {
+      "status": "pass",
+      "profile": "oss-local",
+      "codex_profile": "oss-local",
+      "lane": "oss-local",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:e79a81785392f244bae653bd35a058a1875ece442e61d1259a16a333d4eb3bc2",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-011317-457987/scorecard.json",
+      "selected_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "qwen3.5:9b-mlx",
+      "execution_model_provider": "ollama"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-local",
+      "codex_profile": "oss-local",
+      "lane": "oss-local",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:faeb7a7d2517f0f574f86b85514406220b01451dbf3b5a8308b194675948462e",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-011354-907514/scorecard.json",
+      "selected_case_ids": [
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "qwen3.5:9b-mlx",
+      "execution_model_provider": "ollama"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-local",
+      "codex_profile": "oss-local",
+      "lane": "oss-local",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:b8e6bb1eee411ad3edd8966ab46e5df122da17b7577366f21affee370de4156d",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-011445-405013/scorecard.json",
+      "selected_case_ids": [
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "qwen3.5:9b-mlx",
+      "execution_model_provider": "ollama"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-local",
+      "codex_profile": "oss-local",
+      "lane": "oss-local",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:5c288bc5c57540a20f0220b0f64c4b0556b6598141032359083d10790fd870fd",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-011532-502485/scorecard.json",
+      "selected_case_ids": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "qwen3.5:9b-mlx",
+      "execution_model_provider": "ollama"
+    }
+  ]
+}

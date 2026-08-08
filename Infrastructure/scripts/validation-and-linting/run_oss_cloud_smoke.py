@@ -219,6 +219,7 @@ def _receipt(
         "auth_source": _auth_source(Path(args.env_file).expanduser()),
         "provider_invoked": provider_invoked,
         "command": _redacted_command(command),
+        "execution_argv": _redacted_command(command),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
         "marker": args.marker,

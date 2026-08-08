@@ -164,6 +164,9 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertIn("env", command)
             self.assertIn(f"CODEX_HOME={isolated_home}", command)
             self.assertIn("--skip-git-repo-check", command)
+            self.assertIn("--strict-config", command)
+            self.assertIn("--sandbox", command)
+            self.assertIn("--ephemeral", command)
             self.assertTrue((isolated_home / "config.toml").is_file())
             self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
             self.assertNotIn(f"CODEX_HOME={profile.parent.resolve()}", command)
@@ -196,6 +199,27 @@ class TestOssCloudSmoke(unittest.TestCase):
             )
             self.assertNotIn("mcp_servers", (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"))
             self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
+
+    def test_receipt_retains_complete_redacted_execution_argv(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            env_file = root / "env"
+            os.mkfifo(env_file)
+            args = self.runner._parser().parse_args(
+                ["--profile-source", str(profile), "--env-file", str(env_file)]
+            )
+            paths = self.runner._paths(str(root / "out"))
+            command = self.runner._command(args, paths, env_file)
+            receipt = self.runner._receipt(
+                args, paths, profile, [], command=command, exit_code=0,
+                duration_seconds=0.1, provider_invoked=True,
+            )
+            self.assertEqual(receipt["execution_argv"], receipt["command"])
+            self.assertTrue(any(token.endswith("run-auth-backed.sh") for token in receipt["execution_argv"]))
+            self.assertTrue(any(token.endswith("run-codex-exec.sh") for token in receipt["execution_argv"]))
+            self.assertNotIn(str(env_file), receipt["execution_argv"])
 
     def test_command_resolves_relative_profile_from_caller_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

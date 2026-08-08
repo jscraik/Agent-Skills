@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
-from ask.commands.sdk import _dispatch_sdk_review  # noqa: E402
+from ask.commands.sdk_dispatch_surfaces import _dispatch_sdk_review  # noqa: E402
 from ask.skills_sdk.lenses import KNOWN_TASK_INTENTS, LensCatalogError  # noqa: E402
 from ask.skills_sdk.review_plan import (  # noqa: E402
     TRACE_DIR,

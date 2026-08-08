@@ -19,6 +19,7 @@ from ask.skills_sdk.local_score import (  # noqa: E402
     write_local_score_receipts,
 )
 from ask.commands import sdk as sdk_commands  # noqa: E402
+from ask.commands.sdk_dispatch_surfaces import _dispatch_sdk_score  # noqa: E402
 
 
 VALID_SKILL = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -258,7 +259,7 @@ class TestSkillsSdkLocalScore(unittest.TestCase):
             mock.patch.object(sdk_commands.skills_commands, "skills_sdk_eval_scenario_quality", return_value=_impact_payload()),
             mock.patch.object(sdk_commands.skills_commands, "skills_sdk_security_risk_modes_preview", return_value=_security_payload()),
         ):
-            result = sdk_commands._dispatch_sdk_score(REPO_ROOT, args)
+            result = _dispatch_sdk_score(REPO_ROOT, args)
 
         self.assertEqual(result.status, "success")
         resolve_mock.assert_called_once_with(REPO_ROOT, "skills-sdk-valid-fixture")

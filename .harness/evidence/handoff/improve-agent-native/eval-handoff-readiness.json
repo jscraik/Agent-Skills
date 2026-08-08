@@ -1,36 +1,71 @@
 {
-  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
-  "candidate_id": "improve-agent-native-pr311-live-handoff",
+  "schema_version": "skills-sdk.eval-handoff-readiness-input.v2",
+  "issued_at": "2026-08-08T00:32:44Z",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
   "lanes": [
+    {
+      "id": "mechanical_validation",
+      "status": "pass",
+      "command": "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot && ./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/mechanical-validation.json"
+    },
+    {
+      "id": "security_risk_modes",
+      "status": "pass",
+      "command": "./bin/ask sdk security risk-modes Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/security-risk-modes.json"
+    },
+    {
+      "id": "scenario_quality",
+      "status": "pass",
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/scenario-quality.json"
+    },
+    {
+      "id": "scorer_quality",
+      "status": "pass",
+      "command": "./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/scorer-quality.json"
+    },
+    {
+      "id": "scorer_calibration",
+      "status": "pass",
+      "command": "./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/scorer-calibration.json"
+    },
     {
       "id": "deterministic_local_gates",
       "status": "pass",
-      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot && /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot && /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot && /opt/homebrew/bin/uv run --project Infrastructure --python 3.12 python Infrastructure/bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
-      "receipt_path": ".harness/evidence/handoff/improve-agent-native/deterministic-local-gates-current.json"
+      "command": "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot && ./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-scorecard --case happy-agents-md-audit --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case edge-ui-action-without-agent-capability --case pressure-prompt-injection --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case eval.harness.local-pass-ci-unknown --case eval.harness.done-without-validation --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/deterministic-local-gates.json"
     },
     {
       "id": "oss-local",
       "status": "pass",
-      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-local --json --robot",
-      "receipt_path": ".harness/evidence/handoff/improve-agent-native/oss-local-live-handoff-proof.json"
+      "command": "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-scorecard --case happy-agents-md-audit --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case edge-ui-action-without-agent-capability --case pressure-prompt-injection --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-local --timeout-seconds 180 --case eval.harness.local-pass-ci-unknown --case eval.harness.done-without-validation --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/oss-local.json"
     },
     {
       "id": "oss-cloud",
       "status": "pass",
-      "command": "./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --codex-profile oss-cloud --json --robot",
-      "receipt_path": ".harness/evidence/handoff/improve-agent-native/oss-cloud-live-handoff-proof.json"
+      "command": "PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-cloud --timeout-seconds 180 --case happy-scorecard --case happy-agents-md-audit --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-cloud --timeout-seconds 180 --case happy-proof-loop-gap --case edge-no-validation-entrypoint --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-cloud --timeout-seconds 180 --case edge-ui-action-without-agent-capability --case pressure-prompt-injection --json --robot && PYTHONDONTWRITEBYTECODE=1 ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode release --scenario-set improve-agent-native-release-8-v1 --codex-profile oss-cloud --timeout-seconds 180 --case eval.harness.local-pass-ci-unknown --case eval.harness.done-without-validation --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/oss-cloud.json"
     },
     {
       "id": "tessl-local-proof",
       "status": "pass",
       "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/improve-agent-native --workspace jscraik --execute --json --robot",
-      "receipt_path": ".harness/evidence/handoff/improve-agent-native/tessl-local-proof-demo.json"
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/tessl-local-proof.json"
     },
     {
       "id": "tessl-live-dry-run",
       "status": "pass",
-      "command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --runner codex --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --no-dashboard --json --robot",
-      "receipt_path": ".harness/evidence/handoff/improve-agent-native/tessl-dry-run-live-handoff-proof.json"
+      "command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --no-dashboard --json --robot",
+      "receipt_path": ".harness/evidence/handoff/improve-agent-native/current-20260808/tessl-live-dry-run.json"
     }
   ]
 }

@@ -34,7 +34,8 @@ automatic failure conditions, lane separation, or command-evidence requirements.
    model lane.
 3. oss-cloud flow: run the same proof through the Configs-owned
    `run-auth-backed.sh → run-codex-exec.sh` chain for `oss-cloud` in the
-   read-only, strict, ephemeral Codex profile sandbox;
+   read-only, strict, ephemeral Codex profile sandbox (the logical command is
+   `codex exec --profile oss-cloud`);
    iterate until the sandboxed cloud OSS lane is valid, then move to Tessl.
 4. Tessl local flow: run internal/local Tessl staging and rubric checks;
    iterate until the rubric and scenario package are good enough for external
@@ -55,6 +56,14 @@ workspace; it does not widen the filesystem root, change the read-only
 sandbox, or permit a dirty/current checkout. Keep `--output-last-message`
 repo-relative, copy the resulting receipt into the evidence root, and retain
 the exact command argv in the judge receipt.
+
+The logical `codex exec ...` command is display-only. A pass or completed
+oss-cloud receipt must include `execution_argv` proving the complete Configs
+chain: `bash .../run-auth-backed.sh --env-file <opaque FIFO> --require-env
+OLLAMA_API_KEY -- bash .../run-codex-exec.sh --profile oss-cloud --model
+deepseek-v4-flash:cloud --strict-config --sandbox read-only --ephemeral`.
+If that chain is absent or incomplete, classify the lane as blocked; never
+promote from the normalized command alone.
 
 ## Lane Matrix
 
@@ -345,6 +354,9 @@ For a first private Tessl package projection:
 4. Diagnose or repair project identity only through the explicit project-setup
    wrapper: `./bin/ask evals prepare-tessl-scenarios <skill-path>
 --tessl-workspace <workspace> --execute --json --robot`.
+   With `--execute`, that wrapper links the project from the same stable
+   `/tmp/ask-tessl-evals/<skill-path>-<sha12>/` staging directory consumed by
+   live scoring; the scenario-generation `target-tile/` is not the live source.
 5. Preserve its candidate-bound project-link receipt. The later live evaluator
    treats a missing, stale, or mismatched receipt as a blocker and performs no
    project mutation itself.

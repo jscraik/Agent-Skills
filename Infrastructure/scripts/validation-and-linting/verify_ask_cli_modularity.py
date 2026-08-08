@@ -8,6 +8,7 @@ import ast
 import json
 import subprocess
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 
@@ -38,13 +39,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing plugin gate extraction debt",
         "expires": "2026-07-31",
     },
-    "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin gate regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/lib/ask/commands/skills_impl.py": {
         "owner": "ask-cli",
         "rule_id": "ask-cli-shape-budget",
@@ -57,27 +51,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing repository command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/sdk.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional SDK parser and dispatch extraction debt while Phoenix observability commands are stabilized",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/phoenix_auto_trace.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional auto-trace extraction debt pending a smaller observability config object",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skills_sdk/phoenix_observability.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional Phoenix receipt and OTLP helper extraction debt pending provider-specific module split",
         "expires": "2026-07-31",
     },
     "Infrastructure/scripts/lib/ask/skill_review_dashboard.py": {
@@ -94,20 +67,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing package contract extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/scripts/lib/ask/skills_sdk/typed_contracts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing typed contract extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing routed skillset extraction debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
@@ -122,13 +81,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing ask CLI regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_ask_repo_doctor.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing repository doctor regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/tests/test_ask_evals_command.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
@@ -141,13 +93,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing package contract regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_package.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package verification regression suite debt",
         "expires": "2026-07-31",
     },
     "Infrastructure/tests/test_pr_skills_sdk_artifacts.py": {
@@ -171,39 +116,11 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing A/B judge score regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_skills_sdk_schema_spine.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing schema spine regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_phoenix_observability.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PHOENIX-OBSERVABILITY",
-        "reason": "transitional Phoenix CLI and receipt coverage pending fixture helper extraction",
-        "expires": "2026-07-31",
-    },
     "skills-system/skill-creator/scripts/init_skill.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing skill creator scaffold extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing code-quality skill gate regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_errors.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skills error regression suite debt",
         "expires": "2026-07-31",
     },
     "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
@@ -300,11 +217,21 @@ def _repo_path(path_text: str) -> Path:
     return (REPO_ROOT / path_text).resolve()
 
 
-def _shape_baseline(path: Path | None = None) -> dict[str, object]:
-    relative = "" if path is None else path.relative_to(REPO_ROOT).as_posix()
+@lru_cache(maxsize=64)
+def _shape_baseline_for_parent(parent: str) -> dict[str, object]:
+    # `repo status` only includes its shape-baseline payload when a baseline
+    # path is supplied. Use the stable ask entrypoint for the repository-wide
+    # deleted-file lookup so the validator keeps the compact default status
+    # response while still receiving the contract it needs.
+    parent_path = REPO_ROOT / parent
+    candidates = sorted(candidate for candidate in parent_path.glob("*.py") if candidate.is_file())
+    relative = (
+        candidates[0].relative_to(REPO_ROOT).as_posix()
+        if candidates
+        else (Path(parent) / ".shape-baseline.py").as_posix()
+    )
     command = [str(ASK_COMMAND_PATH), "repo", "status", "--verbose"]
-    if relative:
-        command.extend(["--baseline-path", relative])
+    command.extend(["--baseline-path", relative])
     command.extend(["--json", "--robot"])
     result = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
     if result.returncode != 0:
@@ -318,6 +245,11 @@ def _shape_baseline(path: Path | None = None) -> dict[str, object]:
     if not isinstance(baseline, dict):
         raise RuntimeError("ask repo status shape-baseline returned a non-object payload")
     return baseline
+
+
+def _shape_baseline(path: Path | None = None) -> dict[str, object]:
+    relative = (ASK_PATH if path is None else path).relative_to(REPO_ROOT).as_posix()
+    return _shape_baseline_for_parent(Path(relative).parent.as_posix())
 
 
 def _git_head_text(path: Path) -> str | None:
@@ -337,13 +269,16 @@ def _deleted_python_paths() -> list[Path]:
 
 
 def _oversized_sibling_paths(path: Path, max_file_lines: int = 800) -> list[Path]:
-    sibling_paths = _shape_baseline(path).get("sibling_python_paths", [])
+    baseline = _shape_baseline(path)
+    sibling_paths = baseline.get("sibling_python_paths", [])
+    head_text = baseline.get("head_text", {})
     paths: list[Path] = []
     for line in sibling_paths if isinstance(sibling_paths, list) else []:
         candidate = _repo_path(str(line).strip())
         if candidate == path or not candidate.is_file():
             continue
-        text = _git_head_text(candidate)
+        relative = candidate.relative_to(REPO_ROOT).as_posix()
+        text = head_text.get(relative) if isinstance(head_text, dict) else None
         if text is not None and len(text.splitlines()) > max_file_lines:
             paths.append(candidate)
     return paths

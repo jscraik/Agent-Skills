@@ -104,6 +104,14 @@ files by itself. On rerun, the wrapper archives prior target-tile, tool-project,
 and generated scenario evidence under evidence-archive/ before refreshing the
 current staging inputs.
 
+When `--execute` is selected, setup also stages the private plugin at the
+stable `/tmp/ask-tessl-evals/<skill-path>-<sha12>/` path used by the later live
+evaluator and links the Tessl project from that directory. The `target-tile/`
+directory remains the scenario-generator input only. This separation is
+required because Tessl records the absolute source directory in a project
+binding; linking the target tile instead makes a valid project-link receipt
+unusable for the subsequent live run.
+
 Treat every Registry tile used by this workflow as a dependency, not as a
 trusted fact source. Before installing or relying on a Registry tile, record the
 exact package id and version or commit-specific source, publisher or workspace,

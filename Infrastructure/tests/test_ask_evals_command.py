@@ -558,6 +558,34 @@ def test_tessl_criteria_recovers_compact_flow_map_acceptance() -> None:
     assert criteria["checklist"][1]["description"] == "skillify"
 
 
+def test_tessl_criteria_describes_semantic_requirements() -> None:
+    case = {
+        "id": "semantic-boundary",
+        "expected_artifact": "SKILL.md",
+        "acceptance": [
+            {
+                "type": "semantic_requirements",
+                "requirements": [
+                    {
+                        "id": "injection_is_untrusted",
+                        "all_of": ["comment"],
+                        "any_of": ["untrusted text", "not authoritative"],
+                    }
+                ],
+            }
+        ],
+    }
+
+    criteria = evals._tessl_criteria_from_case(case)
+
+    description = criteria["checklist"][0]["description"]
+    assert description.startswith("semantic_requirements:")
+    assert "injection_is_untrusted" in description
+    assert "all_of=comment" in description
+    assert "any_of=untrusted text, not authoritative" in description
+    assert description != "SKILL.md"
+
+
 def test_tessl_compat_parser_keeps_inline_acceptance_detail() -> None:
     cases = evals._parse_tessl_eval_cases_compat(
         "cases:\n"
@@ -4201,6 +4229,13 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
     assert "/.tessl/plugins/" in result.data["scenario_skill"]
     assert "/.tessl/plugins/" in result.data["scenario_reference"]
     assert result.data["generated_output"].endswith("/target-tile/evals")
+    live_source = Path(result.data["live_staged_source"])
+    assert "/ask-tessl-evals/" in str(live_source)
+    assert result.data["project_link"]["staged_source"] == str(live_source)
+    assert (live_source / "skills" / "example-skill" / "SKILL.md").is_file()
+    project_receipt = Path(tmp_path) / ".harness" / "evidence" / "tessl-project-links" / "example-skill"
+    receipt = next(project_receipt.glob("*.json"))
+    assert json.loads(receipt.read_text(encoding="utf-8"))["staged_source"] == str(live_source)
 
 
 def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:

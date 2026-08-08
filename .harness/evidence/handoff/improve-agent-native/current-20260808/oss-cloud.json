@@ -1,0 +1,148 @@
+{
+  "schema_version": "skills-sdk.oss-release-rollup.v1",
+  "status": "pass",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "profile": "oss-cloud",
+  "codex_profile": "oss-cloud",
+  "lane": "oss-cloud",
+  "codex_exec_invoked": true,
+  "case_count": 8,
+  "passed_count": 8,
+  "failed_count": 0,
+  "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+  "scenario_set_case_ids": [
+    "happy-scorecard",
+    "happy-agents-md-audit",
+    "happy-proof-loop-gap",
+    "edge-no-validation-entrypoint",
+    "edge-ui-action-without-agent-capability",
+    "pressure-prompt-injection",
+    "eval.harness.local-pass-ci-unknown",
+    "eval.harness.done-without-validation"
+  ],
+  "execution_model": "deepseek-v4-flash:cloud",
+  "execution_model_provider": "ollama-cloud",
+  "variance_observation": "The first edge-ui-action-without-agent-capability pair had one transient runtime failure; the single-case retry and exact pair rerun passed.",
+  "shards": [
+    {
+      "status": "pass",
+      "profile": "oss-cloud",
+      "codex_profile": "oss-cloud",
+      "lane": "oss-cloud",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:1449dc07608a572f56542911b67d95c1762a7949208d1d0fd7a7f8207288228c",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-012007-365579/scorecard.json",
+      "selected_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "deepseek-v4-flash:cloud",
+      "execution_model_provider": "ollama-cloud"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-cloud",
+      "codex_profile": "oss-cloud",
+      "lane": "oss-cloud",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:5c72df8bfd79024ef3128e7ced0d8f850e4806cda5237d8a3c9c005d40c35e7a",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-012042-915794/scorecard.json",
+      "selected_case_ids": [
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "deepseek-v4-flash:cloud",
+      "execution_model_provider": "ollama-cloud"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-cloud",
+      "codex_profile": "oss-cloud",
+      "lane": "oss-cloud",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:5418b8950f7b04e51b90b0e5869a88ee016090ff9120cb9cc5fa40e2d6541d8d",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-012459-365731/scorecard.json",
+      "selected_case_ids": [
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "deepseek-v4-flash:cloud",
+      "execution_model_provider": "ollama-cloud"
+    },
+    {
+      "status": "pass",
+      "profile": "oss-cloud",
+      "codex_profile": "oss-cloud",
+      "lane": "oss-cloud",
+      "codex_exec_invoked": true,
+      "case_count": 2,
+      "passed_count": 2,
+      "failed_count": 0,
+      "package_digest": "sha256:734aed323e8f9ae288002bc049080e1ddbc7ca67fd5b3cee14f738c4e97d4641",
+      "dataset_digest": "sha256:f6a42155112dccfa79fb7cdc39f5bc828f86f9209fbc6a76481ef9c75a40b792",
+      "dataset_path": "Infrastructure/artifacts/skills/improve-agent-native/20260808-012540-151094/scorecard.json",
+      "selected_case_ids": [
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "scenario_set_case_ids": [
+        "happy-scorecard",
+        "happy-agents-md-audit",
+        "happy-proof-loop-gap",
+        "edge-no-validation-entrypoint",
+        "edge-ui-action-without-agent-capability",
+        "pressure-prompt-injection",
+        "eval.harness.local-pass-ci-unknown",
+        "eval.harness.done-without-validation"
+      ],
+      "execution_model": "deepseek-v4-flash:cloud",
+      "execution_model_provider": "ollama-cloud"
+    }
+  ]
+}

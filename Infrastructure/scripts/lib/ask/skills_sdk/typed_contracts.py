@@ -2,15 +2,19 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from ask.skills_sdk import ab_contracts, ab_contracts_v0, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
 from ask.skills_sdk.eval_closeout_contracts import EvalCloseoutValidation
 from ask.skills_sdk.eval_contracts import EvalQualityGates
-
-
-class _SdkContractModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
+from ask.skills_sdk.typed_contracts_capability import CapabilityRow, CapabilityStatus, CapabilitySummary
+from ask.skills_sdk.typed_contracts_base import SdkContractModel as _SdkContractModel
+from ask.skills_sdk.typed_contracts_risk import (
+    ArtifactStatusRow,
+    RiskClassification,
+    RiskSensor,
+    SourceArtifactContract,
+)
 
 
 class FileRecord(_SdkContractModel):
@@ -215,48 +219,6 @@ class RobotEnvelope(_SdkContractModel):
     data: dict[str, object]
     telemetry: RobotTelemetry
     errors: list[RobotError]
-
-
-class CapabilityRow(_SdkContractModel):
-    id: str
-    title: str
-    status: Literal[
-        "implemented",
-        "preview_only",
-        "placeholder_optional",
-        "placeholder_blocked",
-        "blocked_missing_adapter",
-        "deferred",
-        "out_of_scope",
-    ]
-    owner_surface: str
-    pipeline_sections: list[str]
-    feature_executed: bool
-    mutation_performed: bool
-    evidence_refs: list[str]
-    next_slice: str
-    notes: str
-
-
-class CapabilitySummary(_SdkContractModel):
-    total: int
-    by_status: dict[str, int]
-    feature_executed_count: int
-    mutation_performed_count: int
-
-
-class CapabilityStatus(_SdkContractModel):
-    schema_version: Literal["skills-sdk.capability-status.v1"]
-    schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/capability-status.v1.schema.json"
-    ]
-    status: Literal["truth_surface"]
-    generated_from: str
-    capabilities: list[CapabilityRow]
-    summary: CapabilitySummary
-    source_artifacts: list[str]
-    validation_commands: list[str]
-    agent_summary: str
 
 
 class ManifestSource(_SdkContractModel):
@@ -696,49 +658,6 @@ class SkillsSdkCheck(_SdkContractModel):
         if self.receipt.exit_code != expected_exit_code:
             raise ValueError("skills-sdk check receipt exit_code must match the facade verdict")
         return self
-
-
-class RiskSensor(_SdkContractModel):
-    id: str
-    placement: Literal["source", "schema", "static", "runtime_adapter", "external_adapter", "preview"]
-    required: bool
-    cost: Literal["low", "medium", "high"]
-    blocking_behavior: Literal["block", "warn", "advisory", "skip_optional"]
-    status: Literal["selected", "available_not_run", "skipped_optional", "blocked"]
-    receipt_required: bool
-
-
-class RiskClassification(_SdkContractModel):
-    schema_version: Literal["skills-sdk.risk-classification.v1"]
-    schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/risk-classification.v1.schema.json"
-    ]
-    source_kind: Literal["docs_only", "referenced", "scripted", "external", "placeholder"]
-    risk_tier: Literal["low", "medium", "high", "privileged", "published"]
-    probability: Literal["low", "medium", "high", "unknown"]
-    impact: Literal["low", "medium", "high", "unknown"]
-    detectability: Literal["low", "medium", "high", "unknown"]
-    cost: Literal["low", "medium", "high"]
-    blocking_behavior: Literal["block", "warn", "advisory", "skip_optional"]
-    receipt_required: bool
-    sensor_ids: list[str]
-    sensors: list[RiskSensor]
-    acceptance_trace: list[str]
-
-
-class ArtifactStatusRow(_SdkContractModel):
-    artifact_path: str
-    artifact_type: Literal["json", "json_schema", "markdown", "yaml", "html"]
-    authority: Literal["runtime_truth", "schema_contract", "source_artifact", "visual_projection"]
-    status: Literal["current", "drifted", "blocked", "deferred"]
-    evidence_refs: list[str]
-
-
-class SourceArtifactContract(_SdkContractModel):
-    artifact_path: str
-    artifact_class: Literal["skill_md", "sdk_spec", "sdk_plan", "implementation_notes"]
-    required_sections: list[str]
-    evidence_refs: list[str]
 
 
 def validate_install_receipt(payload: object) -> InstallReceipt:
