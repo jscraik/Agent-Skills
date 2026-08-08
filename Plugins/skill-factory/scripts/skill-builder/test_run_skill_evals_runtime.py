@@ -419,6 +419,27 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertTrue((isolated_home / "config.toml").is_file())
         self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
 
+    def test_isolated_codex_home_warns_when_cloud_profile_missing_base_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "oss-cloud.config.toml").write_text(
+                'model = "deepseek-v4-flash:cloud"\nmodel_provider = "ollama-cloud"\n',
+                encoding="utf-8",
+            )
+
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, warnings = _isolated_codex_home_for_eval("oss-cloud")
+
+        warning_text = "\n".join(warnings)
+        self.assertIn("oss-cloud profile setup incomplete", warning_text)
+        self.assertIn("config.toml is missing", warning_text)
+        self.assertIn("Both files are required", warning_text)
+        self.assertFalse((isolated_home / "config.toml").exists())
+
     def test_run_codex_exec_uses_configs_wrapper_for_cloud_profile(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)

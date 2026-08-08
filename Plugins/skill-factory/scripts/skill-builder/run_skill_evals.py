@@ -3007,6 +3007,12 @@ def _isolated_codex_home_for_eval(profile: Optional[str] = None) -> Tuple[Path, 
     if source_home.exists():
         profile_config = f"{profile}.config.toml" if profile else None
         if profile == "oss-cloud" and profile_config and (source_home / profile_config).is_file():
+            # oss-cloud profile requires both config.toml and oss-cloud.config.toml
+            if not (source_home / "config.toml").is_file():
+                warnings.append(
+                    f"oss-cloud profile setup incomplete: {profile_config} exists but config.toml is missing in {source_home}. "
+                    "Both files are required for oss-cloud execution."
+                )
             names = ("auth.json", "config.toml", profile_config)
         else:
             names = ("auth.json", profile_config) if profile_config and (source_home / profile_config).is_file() else (
