@@ -99,9 +99,9 @@ def _ab_profile_receipt() -> dict[str, object]:
 
 
 _JUDGE_RUNTIME_ARGV = [
-    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file",
+    "bash", "<configs-root>/codex/scripts/run-auth-backed.sh", "--env-file",
     "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "bash",
-    "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+    "<configs-root>/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
     "--strict-config", "--sandbox", "read-only", "--ephemeral", "--json", "-",
 ]
 _JUDGE_LOGICAL_SHAPE = [
