@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 SKIP_DIRS = {
     ".git",
+    ".harness",
     "artifacts",
     "node_modules",
     "docs",
