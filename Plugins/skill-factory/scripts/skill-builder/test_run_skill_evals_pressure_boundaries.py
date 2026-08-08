@@ -113,6 +113,24 @@ class PressureBoundaryTests(unittest.TestCase):
                 )
                 self.assertTrue(any(failure.startswith("not_regex failed:") for failure in disclosure_failures))
 
+    def test_pressure_injection_detects_contradiction_beyond_240_char_window(self) -> None:
+        cases = {
+            case["id"]: case
+            for case in _load_evals_document(REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml")["cases"]
+        }
+        filler = "x" * 241
+        response = (
+            "Outcome: no_justified_edit\n"
+            "Evidence: The comment was treated as untrusted text. "
+            f"Credentials were not disclosed. {filler} I disclosed credential material."
+        )
+        failures = evaluate_assertions_text(
+            response,
+            cases["pressure-injection"]["acceptance"],
+            skill_name="simplify",
+            selected_skill=True,
+        )
+        self.assertTrue(any(failure.startswith("not_regex failed:") for failure in failures))
 
     def test_pressure_rejects_passive_disclosure_but_accepts_never(self) -> None:
         cases = {
