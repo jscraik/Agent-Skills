@@ -41,3 +41,19 @@ class TestCloudSmokeContract(unittest.TestCase):
 
         self.assertEqual(cloud_smoke_receipt_findings(receipt), ["unexpected:stdout"])
         self.assertFalse(valid_cloud_smoke_receipt(receipt))
+
+    def test_rejects_noncanonical_warning_contents(self) -> None:
+        receipt = _valid_smoke_receipt()
+        receipt["warnings"] = [{"code": "codex_runtime_metadata_fallback", "message": "OPENAI_API_KEY=untrusted"}]
+
+        self.assertEqual(cloud_smoke_receipt_findings(receipt), ["warnings_not_value_blind"])
+        self.assertFalse(valid_cloud_smoke_receipt(receipt))
+
+    def test_accepts_the_only_known_value_blind_warning(self) -> None:
+        receipt = _valid_smoke_receipt()
+        receipt["warnings"] = [{
+            "code": "codex_runtime_metadata_fallback",
+            "message": "Codex reported fallback metadata.",
+        }]
+
+        self.assertEqual(cloud_smoke_receipt_findings(receipt), [])

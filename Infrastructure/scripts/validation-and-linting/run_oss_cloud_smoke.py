@@ -138,9 +138,10 @@ def _approved_env_file(path: Path) -> Path | None:
 
 
 def _canonical_wrapper_identity(path: str, expected: Path) -> bool:
-    """Return whether a supplied wrapper resolves to the reviewed identity."""
+    """Return whether a supplied wrapper names the reviewed identity exactly."""
     try:
-        return Path(path).expanduser().resolve() == expected.resolve()
+        candidate = Path(path).expanduser()
+        return candidate == expected and candidate.is_file() and not candidate.is_symlink()
     except OSError:
         return False
 

@@ -42,6 +42,8 @@ def cloud_smoke_receipt_findings(payload: dict[str, Any]) -> list[str]:
     findings.extend(_execution_argv_findings(payload))
     if not _valid_outcome(payload, CLOUD_SMOKE_MARKER):
         findings.append("outcome_mismatch")
+    if not _valid_warnings(payload.get("warnings")):
+        findings.append("warnings_not_value_blind")
     return findings
 
 
@@ -136,6 +138,31 @@ def _valid_identity(payload: dict[str, Any]) -> bool:
         payload.get("auth_source") == "1password_desktop_fifo",
         type(payload.get("provider_invoked")) is bool and payload.get("provider_invoked") is True,
     ))
+
+
+def _valid_warnings(warnings: object) -> bool:
+    if not isinstance(warnings, list):
+        return False
+    seen_codes: set[str] = set()
+    for warning in warnings:
+        if not isinstance(warning, dict) or set(warning) != {"code", "message"}:
+            return False
+        code = warning.get("code")
+        if not isinstance(code, str) or code in seen_codes:
+            return False
+        if warning.get("message") != _public_warning_message(code):
+            return False
+        seen_codes.add(code)
+    return True
+
+
+def _public_warning_message(code: str) -> str | None:
+    for known_code, message in (
+        ("codex_runtime_metadata_fallback", "Codex reported fallback metadata."),
+    ):
+        if code == known_code:
+            return message
+    return None
 
 
 def _valid_outcome(payload: dict[str, Any], marker: str) -> bool:
