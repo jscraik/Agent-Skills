@@ -56,6 +56,7 @@ from run_skill_evals import (  # noqa: E402
     _is_smoke_only_case,
     _mark_no_case_evidence_blocked,
     _repo_mise_node_version,
+    _render_case_references,
     _scrub_mcp_servers_from_toml,
     _weak_acceptance_reasons,
     _write_junit_report,
@@ -76,6 +77,31 @@ from deterministic_trace_checks import evaluate_trace  # noqa: E402
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
+    def test_render_case_references_embeds_package_local_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "operational.md").write_text("# Operational\n", encoding="utf-8")
+
+            rendered = _render_case_references(skill_dir, ["references/operational.md"])
+
+            self.assertIn('<REFERENCE path="references/operational.md">', rendered)
+            self.assertIn("# Operational", rendered)
+
+    def test_render_case_references_rejects_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "must stay under references"):
+                _render_case_references(Path(tmp), ["../outside.md"])
+
+    def test_render_case_references_blocks_removed_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            (skill_dir / "references").mkdir(parents=True)
+
+            with self.assertRaisesRegex(ValueError, "package-local regular file"):
+                _render_case_references(skill_dir, ["references/removed.md"])
+
     def test_bare_regex_acceptance_shorthand_is_supported(self) -> None:
         self.assertEqual(
             evaluate_assertions_text(

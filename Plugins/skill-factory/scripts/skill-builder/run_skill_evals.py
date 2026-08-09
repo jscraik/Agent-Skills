@@ -320,6 +320,7 @@ class EvalCase:
     expected_signals: Optional[Dict[str, Any]] = None
     budgets: Optional[Dict[str, Any]] = None
     prepend_skill: bool = True
+    reference_paths: Tuple[str, ...] = ()
     timeout_sec: Optional[float] = None
     timeout_profile: Optional[str] = None
     smoke_mode: Optional[str] = None
@@ -979,6 +980,11 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
         prepend_skill = c.get("prepend_skill", True)
         if not isinstance(prepend_skill, bool):
             raise ValueError(f"Case #{i} `prepend_skill` must be boolean when provided.")
+        reference_paths = _normalize_string_list(
+            c.get("reference_paths"),
+            field_name="reference_paths",
+            case_number=i,
+        )
 
         timeout_sec = c.get("timeout_sec")
         if timeout_sec is not None:
@@ -1114,6 +1120,7 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 expected_signals=expected_signals,
                 budgets=budgets,
                 prepend_skill=prepend_skill,
+                reference_paths=reference_paths,
                 timeout_sec=timeout_sec,
                 timeout_profile=timeout_profile if timeout_profile else None,
                 smoke_mode=smoke_mode,
@@ -1162,6 +1169,28 @@ def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
 
 def _filter_cases_for_eval_mode(cases: Sequence[EvalCase], *, eval_mode: str) -> List[EvalCase]:
     return [case for case in cases if _case_matches_eval_mode(case, eval_mode=eval_mode)]
+
+
+def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> str:
+    blocks: List[str] = []
+    skill_root = skill_dir.resolve()
+    for declared_path in reference_paths:
+        relative = Path(declared_path)
+        if relative.is_absolute() or ".." in relative.parts or len(relative.parts) < 2 or relative.parts[0] != "references":
+            raise ValueError(f"reference_paths entry must stay under references/: {declared_path}")
+        target = skill_dir / relative
+        if target.is_symlink() or not target.is_file():
+            raise ValueError(f"reference_paths entry must be a package-local regular file: {declared_path}")
+        resolved = target.resolve()
+        try:
+            resolved.relative_to(skill_root)
+        except ValueError as exc:
+            raise ValueError(f"reference_paths entry escapes the skill package: {declared_path}") from exc
+        content = resolved.read_text(encoding="utf-8")
+        blocks.append(f'<REFERENCE path="{declared_path}">\n{content}\n</REFERENCE>')
+    if not blocks:
+        return ""
+    return "\n\nSelected package references:\n\n" + "\n\n".join(blocks) + "\n"
 
 
 def _reporting_metadata(obj: Dict[str, Any]) -> Dict[str, Any]:
@@ -4482,6 +4511,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 return 1
 
         prompt_body = c.prompt.strip() + "\n"
+        try:
+            reference_text = _render_case_references(skill_dir, c.reference_paths)
+        except (OSError, UnicodeError, ValueError) as exc:
+            print(f"ERROR: Case {c.name}: invalid reference_paths: {exc}", file=sys.stderr)
+            return 1
         if c.prepend_skill:
             try:
                 skill_label = skill_md.relative_to(workspace_root)
@@ -4492,10 +4526,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "The local skill handle may not expand inside this isolated eval runner. "
                 "Apply this SKILL.md content directly; do not try to read the skill file.\n\n"
                 f"<SKILL.md path=\"{skill_label}\">\n{skill_contract_text}\n</SKILL.md>\n\n"
+                f"{reference_text}"
                 f"Task:\n{prompt_body}"
             )
         else:
-            composed_prompt = prompt_body
+            composed_prompt = f"{reference_text}Task:\n{prompt_body}" if reference_text else prompt_body
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
         _write_provisional_workflow_closeout(
             reports_base=reports_base,

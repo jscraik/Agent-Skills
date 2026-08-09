@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
+from ask.skills_sdk.operational_references import validate_operational_references
 
 
 SCHEMA_VERSION = "skills-sdk-knowledge-ingest.v1"
@@ -68,6 +69,7 @@ def build_knowledge_ingest(
     if vendored_demand != demand:
         findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
     _validate_source_files(extraction_root, source_files, findings)
+    validate_operational_references(extraction_root, manifest, findings)
     preflight = (
         _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files, manifest=manifest)
         if preflight_security and not findings
@@ -75,7 +77,6 @@ def build_knowledge_ingest(
     )
     if preflight and preflight["status"] != "pass":
         findings.append("staged_security_gate_failed")
-
     copied: list[dict[str, Any]] = []
     eval_routes = _eval_reference_routes(extraction_root, source_files)
     for source_file in source_files:

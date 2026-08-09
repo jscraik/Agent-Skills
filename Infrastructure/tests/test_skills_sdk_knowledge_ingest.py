@@ -107,39 +107,42 @@ def _write_extraction(
         "- `references/harness-evidence-boundary.md` - Evidence boundary\n",
         encoding="utf-8",
     )
-    capsule_text = "# Harness Evidence Boundary\n\nUse evidence before readiness claims.\n"
+    capsule_text = (
+        "# Harness Evidence Boundary\n\n"
+        "## Claim Cards\n\n"
+        "Use evidence before readiness claims.\n\n"
+        "## Checklists\n\n"
+        "- Keep local and hosted evidence separate.\n"
+    )
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
     (refs / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
-    if include_evals and eval_files in {"both", "scenarios"}:
-        (refs / "eval-scenarios.json").write_text(
-            json.dumps(
-                [
-                    {
-                        "id": "eval.harness.local-pass-ci-unknown",
-                        "type": "eval-scenario",
-                        "title": "Local Pass Does Not Prove CI",
-                        "payload": {
-                            "given": "Local validation passed but remote CI is unchecked.",
-                            "should": "Report local pass and CI unknown as separate claims.",
-                            "expected_failure": "Claiming merge readiness from local checks alone.",
-                            "reproduce_with": "references/evals/eval.harness.local-pass-ci-unknown.md",
-                        },
-                    }
-                ],
-                indent=2,
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-    if include_evals and eval_files in {"both", "fixtures"}:
+    if include_evals:
+        _write_eval_references(refs, eval_files)
+    return extraction
+
+
+def _write_eval_references(refs: Path, eval_files: str) -> None:
+    if eval_files in {"both", "scenarios"}:
+        scenario = {
+            "id": "eval.harness.local-pass-ci-unknown",
+            "type": "eval-scenario",
+            "title": "Local Pass Does Not Prove CI",
+            "payload": {
+                "given": "Local validation passed but remote CI is unchecked.",
+                "should": "Report local pass and CI unknown as separate claims.",
+                "expected_failure": "Claiming merge readiness from local checks alone.",
+                "reproduce_with": "references/evals/eval.harness.local-pass-ci-unknown.md",
+            },
+        }
+        (refs / "eval-scenarios.json").write_text(json.dumps([scenario], indent=2) + "\n", encoding="utf-8")
+    if eval_files in {"both", "fixtures"}:
         evals = refs / "evals"
         evals.mkdir()
         (evals / "eval.harness.local-pass-ci-unknown.md").write_text(
             "# Local Pass Does Not Prove CI\n\nKeep CI and local validation as separate proof lanes.\n",
             encoding="utf-8",
         )
-    return extraction
 
 
 def _extraction_skill_payload() -> dict[str, str]:
@@ -200,6 +203,28 @@ def _write_skill_gate(repo_root: Path, *, stdout: str = "gate ok") -> Path:
 
 
 class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
+    def test_preview_blocks_prose_only_capsule(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            capsule = extraction / "references" / "harness-evidence-boundary.md"
+            capsule.write_text("# Harness Evidence Boundary\n\nUseful sounding prose.\n", encoding="utf-8")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=False,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertTrue(
+                any(finding.startswith("references:weak_operational_reference:") for finding in payload["findings"])
+            )
+
     def test_preview_reports_vendored_reference_plan_without_writes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "agent-skills"
