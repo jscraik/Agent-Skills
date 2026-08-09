@@ -693,4 +693,8 @@ def _render_review_mode_details(details: dict[str, Any]) -> str:
 
 
 
-from .skill_review_dashboard_render import render_skill_review_dashboard
+def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_root: Path) -> Path:
+    """Render a dashboard without creating a facade/renderer import cycle."""
+    from .skill_review_dashboard_render import render_skill_review_dashboard as render
+
+    return render(report_path=report_path, output_path=output_path, repo_root=repo_root)

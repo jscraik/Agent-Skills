@@ -44,6 +44,28 @@ def _external_tool_path(name):
     return f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
 
 
+class SkillReviewDashboardImportTests(unittest.TestCase):
+    def test_renderer_is_importable_without_the_facade(self) -> None:
+        """The renderer must not trigger the facade's renderer import while loading."""
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys; "
+                    "sys.path.insert(0, sys.argv[1]); "
+                    "from ask.skill_review_dashboard_render import render_skill_review_dashboard; "
+                    "assert callable(render_skill_review_dashboard)"
+                ),
+                str(repo_root / "Infrastructure" / "scripts" / "lib"),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
 def _run_snyk_review(mock_run, mock_which, mock_audit, *, snyk_result, returncode=0, stderr="", skill_dir="Skills/backend-platform/example-skill"):
     with tempfile.TemporaryDirectory() as tmpdir:
         repo_root = Path(tmpdir)
