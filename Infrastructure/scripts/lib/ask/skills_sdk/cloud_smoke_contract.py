@@ -29,8 +29,8 @@ def cloud_smoke_receipt_findings(payload: dict[str, Any]) -> list[str]:
     required = {
         "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
         "model_provider", "auth_source", "provider_invoked", "execution_argv", "exit_code",
-        "marker", "warnings", "findings", "secret_value_observed",
-        "secret_observation",
+        "marker", "warnings", "findings", "captured_output_safe",
+        "captured_output_scan",
     }
     findings = [f"missing:{key}" for key in sorted(required - payload.keys())]
     if findings:
@@ -71,14 +71,14 @@ def _child_contract_findings(child: list[str]) -> list[str]:
         "--skip-git-repo-check",
         "--sandbox", "read-only",
         "--ephemeral",
-        "--model", "deepseek-v4-flash:cloud",
+        "--model", "deepseek-v4-flash:0731-cloud",
         "Reply exactly CODEX_OSS_CLOUD_OK",
     ]
     findings = ["codex_exec_child_argv_shape"] if child != expected_shape else []
     required_pairs = {
         "--profile": "oss-cloud",
         "--sandbox": "read-only",
-        "--model": "deepseek-v4-flash:cloud",
+        "--model": "deepseek-v4-flash:0731-cloud",
         "-c": 'approval_policy="on-request"',
     }
     findings.extend(
@@ -132,7 +132,7 @@ def _execution_argv_findings(payload: dict[str, Any]) -> list[str]:
 def _valid_identity(payload: dict[str, Any]) -> bool:
     return all((
         payload.get("lane") == "oss-cloud", payload.get("codex_profile") == "oss-cloud",
-        payload.get("model") == "deepseek-v4-flash:cloud", payload.get("model_provider") == "ollama-cloud",
+        payload.get("model") == "deepseek-v4-flash:0731-cloud", payload.get("model_provider") == "ollama-cloud",
         payload.get("auth_source") == "1password_desktop_fifo",
         type(payload.get("provider_invoked")) is bool and payload.get("provider_invoked") is True,
     ))
@@ -144,14 +144,14 @@ def _valid_outcome(payload: dict[str, Any], marker: str) -> bool:
         datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
     except (AttributeError, TypeError, ValueError):
         return False
-    observation = payload.get("secret_observation")
-    valid_observation = isinstance(observation, dict) and observation == {
-        "status": "clear", "source": "captured_output_scan", "redacted": True,
+    output_scan = payload.get("captured_output_scan")
+    valid_output_scan = isinstance(output_scan, dict) and output_scan == {
+        "status": "passed", "source": "captured_output_scan", "redacted": True,
     }
     return all((
         payload.get("status") == "pass", payload.get("exit_code") == 0,
         payload.get("marker") == marker, payload.get("findings") == [],
         isinstance(payload.get("warnings"), list),
-        type(payload.get("secret_value_observed")) is bool and payload["secret_value_observed"] is False,
-        valid_observation,
+        type(payload.get("captured_output_safe")) is bool and payload["captured_output_safe"] is True,
+        valid_output_scan,
     ))

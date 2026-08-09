@@ -18,7 +18,7 @@ CONFIGS_CODEX_EXEC_WRAPPER = Path(
 )
 OSS_CLOUD_REQUIRED_ENV = "OLLAMA_API_KEY"
 OSS_CLOUD_PROFILE = "oss-cloud"
-OSS_CLOUD_MODEL = "deepseek-v4-flash:cloud"
+OSS_CLOUD_MODEL = "deepseek-v4-flash:0731-cloud"
 OSS_LOCAL_PROFILE = "oss-local"
 _OSS_CLOUD_APPROVAL_SETTING = 'approval_policy="on-request"'
 

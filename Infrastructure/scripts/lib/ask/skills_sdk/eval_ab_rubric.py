@@ -59,7 +59,7 @@ AB_RUBRIC_STAGE_POLICIES = [
     {
         "stage": "cloud_oss_loop",
         "judge_profile": "oss-cloud",
-        "default_model": "deepseek-v4-flash:cloud",
+        "default_model": "deepseek-v4-flash:0731-cloud",
         "confidence_weight": "second_pass_signal",
         "promotion_gate": "confirm_local_delta",
     },

@@ -28,7 +28,7 @@ from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
 )
 
 
-EXPECTED_MODEL = "deepseek-v4-flash:cloud"
+EXPECTED_MODEL = "deepseek-v4-flash:0731-cloud"
 EXPECTED_PROVIDER = "ollama-cloud"
 DEFAULT_PROFILE_SOURCE = Path.home() / ".codex" / "oss-cloud.config.toml"
 DEFAULT_AUTH_ENV_FILE = Path.home() / ".codex" / ".env"
@@ -38,22 +38,22 @@ DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
 VALUE_BLIND_FINDING_MESSAGES = (
-    ("oss_cloud_profile_missing", "oss-cloud profile source must be a regular file."),
-    ("oss_cloud_model_mismatch", "The reviewed oss-cloud model did not match."),
-    ("oss_cloud_provider_mismatch", "The reviewed oss-cloud provider did not match."),
-    ("oss_cloud_marker_not_allowlisted", "The bounded cloud smoke requires its fixed marker."),
-    ("oss_cloud_auth_stream_missing", "Desktop-owned OLLAMA_API_KEY FIFO is required."),
-    ("oss_cloud_auth_wrapper_missing", "Configs auth wrapper is required for oss-cloud."),
-    ("oss_cloud_exec_wrapper_missing", "Configs Codex wrapper is required for oss-cloud."),
-    ("oss_cloud_auth_wrapper_identity_mismatch", "The supplied auth wrapper must be canonical."),
-    ("oss_cloud_exec_wrapper_identity_mismatch", "The supplied Codex wrapper must be canonical."),
-    ("codex_runtime_metadata_fallback", "Codex reported fallback metadata."),
-    ("codex_runtime_visible_thinking", "Model output exposed a thinking trace."),
-    ("codex_runtime_token_budget_exceeded", "The smoke transcript exceeded its token budget."),
-    ("oss_cloud_secret_output_observed", "Captured smoke output matched a secret-shaped marker."),
-    ("oss_cloud_secret_output_scan_unavailable", "Captured smoke output could not be safely scanned."),
-    ("oss_cloud_smoke_exit_nonzero", "Codex exited with a non-zero status."),
-    ("oss_cloud_smoke_marker_mismatch", "Cloud smoke marker did not match."),
+    ("oss_cloud_profile_missing", "oss_cloud_profile_missing", "oss-cloud profile source must be a regular file."),
+    ("oss_cloud_model_mismatch", "oss_cloud_model_mismatch", "The reviewed oss-cloud model did not match."),
+    ("oss_cloud_provider_mismatch", "oss_cloud_provider_mismatch", "The reviewed oss-cloud provider did not match."),
+    ("oss_cloud_marker_not_allowlisted", "oss_cloud_marker_not_allowlisted", "The bounded cloud smoke requires its fixed marker."),
+    ("oss_cloud_auth_stream_missing", "oss_cloud_auth_stream_missing", "Desktop-owned OLLAMA_API_KEY FIFO is required."),
+    ("oss_cloud_auth_wrapper_missing", "oss_cloud_auth_wrapper_missing", "Configs auth wrapper is required for oss-cloud."),
+    ("oss_cloud_exec_wrapper_missing", "oss_cloud_exec_wrapper_missing", "Configs Codex wrapper is required for oss-cloud."),
+    ("oss_cloud_auth_wrapper_identity_mismatch", "oss_cloud_auth_wrapper_identity_mismatch", "The supplied auth wrapper must be canonical."),
+    ("oss_cloud_exec_wrapper_identity_mismatch", "oss_cloud_exec_wrapper_identity_mismatch", "The supplied Codex wrapper must be canonical."),
+    ("codex_runtime_metadata_fallback", "codex_runtime_metadata_fallback", "Codex reported fallback metadata."),
+    ("codex_runtime_visible_thinking", "codex_runtime_visible_thinking", "Model output exposed a thinking trace."),
+    ("codex_runtime_token_budget_exceeded", "codex_runtime_token_budget_exceeded", "The smoke transcript exceeded its token budget."),
+    ("oss_cloud_secret_output_observed", "captured_output_scan_blocked", "Captured output failed the value-blind safety check."),
+    ("oss_cloud_secret_output_scan_unavailable", "captured_output_scan_unavailable", "Captured output could not be safely scanned."),
+    ("oss_cloud_smoke_exit_nonzero", "oss_cloud_smoke_exit_nonzero", "Codex exited with a non-zero status."),
+    ("oss_cloud_smoke_marker_mismatch", "oss_cloud_smoke_marker_mismatch", "Cloud smoke marker did not match."),
 )
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
 model_provider = "{EXPECTED_PROVIDER}"
@@ -390,9 +390,9 @@ def _redacted_command(*, executed: bool) -> list[str] | None:
 def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     """Project findings to fixed messages before JSON reaches stdout."""
     projected: list[dict[str, str]] = []
-    for known_code, message in VALUE_BLIND_FINDING_MESSAGES:
+    for known_code, public_code, message in VALUE_BLIND_FINDING_MESSAGES:
         if any(item.get("code") == known_code for item in items):
-            projected.append({"code": known_code, "message": message})
+            projected.append({"code": public_code, "message": message})
     if items and not projected:
         projected.append({
             "code": "unclassified_smoke_finding",
@@ -407,6 +407,14 @@ def _value_blind_status(provider_invoked: bool, findings: list[dict[str, str]]) 
     return "blocked"
 
 
+def _captured_output_scan_status(observation: dict[str, Any]) -> str:
+    return {
+        "clear": "passed",
+        "blocked": "blocked",
+        "unavailable": "unavailable",
+    }.get(observation.get("status"), "unavailable")
+
+
 def _value_blind_receipt(
     *,
     env_file: Path,
@@ -418,8 +426,7 @@ def _value_blind_receipt(
     provider_invoked: bool,
     secret_observation: dict[str, Any],
 ) -> dict[str, Any]:
-    observed_status = secret_observation.get("status")
-    safe_secret_status = observed_status if observed_status in {"clear", "blocked", "unavailable"} else "unavailable"
+    output_scan_status = _captured_output_scan_status(secret_observation)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -440,12 +447,12 @@ def _value_blind_receipt(
         "last_message_path": "<captured-last-message>",
         "warnings": warnings,
         "findings": findings,
-        "secret_observation": {
-            "status": safe_secret_status,
+        "captured_output_scan": {
+            "status": output_scan_status,
             "source": "captured_output_scan",
             "redacted": True,
         },
-        "secret_value_observed": safe_secret_status == "blocked",
+        "captured_output_safe": output_scan_status == "passed",
     }
 
 
@@ -504,7 +511,7 @@ def _public_receipt(
 
 def _public_receipt_command(receipt: dict[str, Any], *, as_json: bool) -> list[str]:
     """Pass only allowlisted scalar fields to the separate public emission boundary."""
-    observation = receipt["secret_observation"]
+    output_scan = receipt["captured_output_scan"]
     command = [
         sys.executable,
         str(PUBLIC_RECEIPT_EMITTER),
@@ -515,7 +522,7 @@ def _public_receipt_command(receipt: dict[str, Any], *, as_json: bool) -> list[s
         "--duration-seconds", str(receipt["duration_seconds"]),
         "--findings", ",".join(item["code"] for item in receipt["findings"]),
         "--warnings", ",".join(item["code"] for item in receipt["warnings"]),
-        "--secret-status", observation["status"],
+        "--captured-output-scan", output_scan["status"],
     ]
     if receipt["exit_code"] is not None:
         command.extend(("--exit-code", str(receipt["exit_code"])))

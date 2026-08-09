@@ -6,9 +6,10 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import math
 
 
-EXPECTED_MODEL = "deepseek-v4-flash:cloud"
+EXPECTED_MODEL = "deepseek-v4-flash:0731-cloud"
 EXPECTED_PROVIDER = "ollama-cloud"
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 _FINDING_MESSAGES = (
@@ -24,8 +25,8 @@ _FINDING_MESSAGES = (
     ("codex_runtime_metadata_fallback", "Codex reported fallback metadata."),
     ("codex_runtime_visible_thinking", "Model output exposed a thinking trace."),
     ("codex_runtime_token_budget_exceeded", "The smoke transcript exceeded its token budget."),
-    ("oss_cloud_secret_output_observed", "Captured smoke output matched a secret-shaped marker."),
-    ("oss_cloud_secret_output_scan_unavailable", "Captured smoke output could not be safely scanned."),
+    ("captured_output_scan_blocked", "Captured output failed the value-blind safety check."),
+    ("captured_output_scan_unavailable", "Captured output could not be safely scanned."),
     ("oss_cloud_smoke_exit_nonzero", "Codex exited with a non-zero status."),
     ("oss_cloud_smoke_marker_mismatch", "Cloud smoke marker did not match."),
     ("unclassified_smoke_finding", "An unclassified smoke finding was observed."),
@@ -50,7 +51,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--duration-seconds", type=float, required=True)
     parser.add_argument("--findings", default="")
     parser.add_argument("--warnings", default="")
-    parser.add_argument("--secret-status", choices=("clear", "blocked", "unavailable"), required=True)
+    parser.add_argument(
+        "--captured-output-scan",
+        choices=("passed", "blocked", "unavailable"),
+        required=True,
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -65,34 +70,34 @@ def _projected_findings(raw_codes: str) -> list[dict[str, str]]:
     ]
 
 
-def _secret_observation(raw_status: str) -> dict[str, object]:
-    """Return a closed, value-blind projection of the scanner's exit classification."""
-    if raw_status == "blocked":
+def _captured_output_scan(status: str) -> dict[str, object]:
+    """Return the closed public status of the value-blind output check."""
+    if status == "blocked":
         return {
             "status": "blocked",
             "source": "captured_output_scan",
             "redacted": True,
         }
-    if raw_status == "unavailable":
+    if status == "unavailable":
         return {
             "status": "unavailable",
             "source": "captured_output_scan",
             "redacted": True,
         }
     return {
-        "status": "clear",
+        "status": "passed",
         "source": "captured_output_scan",
         "redacted": True,
     }
 
 
-def _secret_value_observed(raw_status: str) -> bool:
-    """Return the closed Boolean classification without projecting scanner input."""
-    return raw_status == "blocked"
+def _captured_output_safe(status: str) -> bool:
+    """Return whether the closed output scan completed without a blocker."""
+    return status == "passed"
 
 
 def _receipt(args: argparse.Namespace) -> dict[str, object]:
-    secret_observation = _secret_observation(args.secret_status)
+    captured_output_scan = _captured_output_scan(args.captured_output_scan)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -113,13 +118,15 @@ def _receipt(args: argparse.Namespace) -> dict[str, object]:
         "last_message_path": "<captured-last-message>",
         "warnings": _projected_findings(args.warnings),
         "findings": _projected_findings(args.findings),
-        "secret_observation": secret_observation,
-        "secret_value_observed": _secret_value_observed(args.secret_status),
+        "captured_output_scan": captured_output_scan,
+        "captured_output_safe": _captured_output_safe(args.captured_output_scan),
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if not math.isfinite(args.duration_seconds) or args.duration_seconds < 0:
+        _parser().error("--duration-seconds must be finite and non-negative")
     receipt = _receipt(args)
     print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0

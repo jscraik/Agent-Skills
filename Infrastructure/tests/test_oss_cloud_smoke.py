@@ -32,7 +32,7 @@ def _write_executable(path: Path, contents: str) -> None:
     path.chmod(0o755)
 
 
-def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:cloud", provider: str = "ollama-cloud") -> None:
+def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:0731-cloud", provider: str = "ollama-cloud") -> None:
     path.write_text(
         f'model = "{model}"\nmodel_provider = "{provider}"\n',
         encoding="utf-8",
@@ -145,7 +145,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "oss-cloud.config.toml"
             path.write_text(
-                'model="deepseek-v4-flash:cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
+                'model="deepseek-v4-flash:0731-cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
                 encoding="utf-8",
             )
 
@@ -182,7 +182,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             source.parent.mkdir()
             projected.parent.mkdir()
             source.write_text(
-                'model = "deepseek-v4-flash:cloud"\n'
+                'model = "deepseek-v4-flash:0731-cloud"\n'
                 'model_provider = "ollama-cloud"\n'
                 "\n[mcp_servers.untrusted]\n"
                 'command = "untrusted-mcp"\n'
@@ -420,7 +420,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
             paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
             paths["stderr"].write_text(
-                "warning: Model metadata for deepseek-v4-flash:cloud not found. Defaulting to fallback metadata.\n"
+                "warning: Model metadata for deepseek-v4-flash:0731-cloud not found. Defaulting to fallback metadata.\n"
                 "tokens used\n14916\n",
                 encoding="utf-8",
             )
@@ -486,8 +486,12 @@ class TestOssCloudSmoke(unittest.TestCase):
                 secret_observation={"status": "clear", "source": "captured_output_scan", "redacted": True},
             )
 
-        self.assertEqual(receipt["secret_observation"]["status"], "clear")
-        self.assertFalse(receipt["secret_value_observed"])
+        self.assertEqual(receipt["captured_output_scan"]["status"], "passed")
+        self.assertTrue(receipt["captured_output_safe"])
+        self.assertEqual(
+            self.runner._value_blind_findings([{"code": "oss_cloud_secret_output_observed"}])[0]["code"],
+            "captured_output_scan_blocked",
+        )
 
     def test_secret_marker_after_shell_prefix_blocks_the_smoke_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -678,19 +682,19 @@ class TestOssCloudSmoke(unittest.TestCase):
     def test_cloud_smoke_rejects_codex_wrapper_nested_after_child_argument(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
-            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
             "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
             "execution_argv": [
                 "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
                 "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", "other-wrapper",
                 str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
-                "--strict-config", "--sandbox", "read-only", "--ephemeral", "--model", "deepseek-v4-flash:cloud",
+                "--strict-config", "--sandbox", "read-only", "--ephemeral", "--model", "deepseek-v4-flash:0731-cloud",
                 "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
             "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
-            "secret_value_observed": False,
-            "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
         }
 
         self.assertIn("codex_exec_wrapper_contract", cloud_smoke_receipt_findings(payload))
@@ -698,7 +702,7 @@ class TestOssCloudSmoke(unittest.TestCase):
     def test_cloud_smoke_rejects_duplicate_contract_flags(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
-            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
             "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
             "execution_argv": [
                 "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
@@ -706,12 +710,12 @@ class TestOssCloudSmoke(unittest.TestCase):
                 "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash",
                 str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
                 "--strict-config", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
-                "--model", "deepseek-v4-flash:cloud", "-c", 'approval_policy="on-request"',
+                "--model", "deepseek-v4-flash:0731-cloud", "-c", 'approval_policy="on-request"',
                 "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
             "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
-            "secret_value_observed": False,
-            "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
         }
 
         findings = cloud_smoke_receipt_findings(payload)
@@ -725,7 +729,7 @@ class TestOssCloudSmoke(unittest.TestCase):
     def test_cloud_smoke_rejects_context_expanding_child_options(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
-            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
             "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
             "execution_argv": [
                 "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
@@ -733,11 +737,11 @@ class TestOssCloudSmoke(unittest.TestCase):
                 "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER),
                 "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
                 "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral", "--model",
-                "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
+                "deepseek-v4-flash:0731-cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
             "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
-            "secret_value_observed": False,
-            "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
         }
 
         for option, value in (("--cd", "/workspace/Agent-Skills"), ("--enable", "apps")):
