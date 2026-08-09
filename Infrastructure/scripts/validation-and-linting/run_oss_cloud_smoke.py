@@ -10,11 +10,11 @@ import sys
 import tempfile
 import time
 import tomllib
-import re
 from pathlib import Path
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+SECRET_OUTPUT_SCAN = SCRIPT_DIR / "check_oss_cloud_secret_output.py"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 LIB_DIR = SCRIPT_DIR.parent / "lib"
@@ -51,15 +51,9 @@ VALUE_BLIND_FINDING_MESSAGES = (
     ("codex_runtime_visible_thinking", "Model output exposed a thinking trace."),
     ("codex_runtime_token_budget_exceeded", "The smoke transcript exceeded its token budget."),
     ("oss_cloud_secret_output_observed", "Captured smoke output matched a secret-shaped marker."),
+    ("oss_cloud_secret_output_scan_unavailable", "Captured smoke output could not be safely scanned."),
     ("oss_cloud_smoke_exit_nonzero", "Codex exited with a non-zero status."),
     ("oss_cloud_smoke_marker_mismatch", "Cloud smoke marker did not match."),
-)
-# Match shell, plain-text, and JSON-style diagnostics without capturing or
-# printing the value. Provider-prefixed names are matched as a whole key so
-# `OPENAI_API_KEY=...` is blocked as well as `token=...`.
-SECRET_OUTPUT_RE = re.compile(
-    r'(?im)(?:\bauthorization\b\s*:\s*bearer\s+\S+|["\']?(?:[A-Z][A-Z0-9]*(?:_(?:API_KEY|ACCESS_KEY|KEY|TOKEN|SECRET(?:_ACCESS_KEY|_KEY)?))|(?:api|access)[_-]?key|token|secret(?:[_-]?(?:access_)?key)?)'
-    r'\b["\']?\s*[:=]\s*["\']?\S+)'
 )
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
 model_provider = "{EXPECTED_PROVIDER}"
@@ -273,10 +267,21 @@ def _read(path: Path) -> str:
 def _secret_observation(paths: dict[str, Path], *, executed: bool) -> dict[str, Any]:
     if not executed:
         return {"status": "unavailable", "source": "captured_output_scan", "redacted": True}
-    output = "\n".join((_read(paths["stdout"]), _read(paths["stderr"])))
-    observed = bool(SECRET_OUTPUT_RE.search(output))
+    try:
+        completed = subprocess.run(
+            [sys.executable, str(SECRET_OUTPUT_SCAN), str(paths["stdout"]), str(paths["stderr"])],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {"status": "unavailable", "source": "captured_output_scan", "redacted": True}
+    status = {0: "clear", 1: "blocked"}.get(completed.returncode, "unavailable")
     return {
-        "status": "blocked" if observed else "clear",
+        "status": status,
         "source": "captured_output_scan",
         "redacted": True,
     }
@@ -285,10 +290,12 @@ def _secret_observation(paths: dict[str, Path], *, executed: bool) -> dict[str, 
 def _receipt(
     args: argparse.Namespace, paths: dict[str, Path], profile: Path, findings: list[dict[str, str]], *,
     command: list[str] | None, exit_code: int | None, duration_seconds: float, provider_invoked: bool,
-    runtime_warnings: list[dict[str, str]] | None = None,
+    runtime_warnings: list[dict[str, str]] | None = None, secret_observation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    warnings = runtime_warnings if runtime_warnings is not None else _runtime_findings(args, paths, findings, command, exit_code)
-    secret_observation = _secret_observation(paths, executed=command is not None)
+    observation = secret_observation or _secret_observation(paths, executed=command is not None)
+    warnings = runtime_warnings if runtime_warnings is not None else _runtime_findings(
+        args, paths, findings, command, exit_code, observation,
+    )
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -311,22 +318,24 @@ def _receipt(
         "last_message_path": "<captured-last-message>",
         "warnings": warnings,
         "findings": findings,
-        "secret_observation": secret_observation,
-        "secret_value_observed": secret_observation["status"] == "blocked",
+        "secret_observation": observation,
+        "secret_value_observed": observation["status"] == "blocked",
     }
 
 
 def _runtime_findings(
     args: argparse.Namespace, paths: dict[str, Path], findings: list[dict[str, str]],
-    command: list[str] | None, exit_code: int | None,
+    command: list[str] | None, exit_code: int | None, secret_observation: dict[str, Any],
 ) -> list[dict[str, str]]:
     if command is None:
         return []
     runtime_findings = _findings(
         "\n".join((_read(paths["stdout"]), _read(paths["stderr"]))), CLOUD_SMOKE_MAX_TOKENS_USED,
     )
-    if SECRET_OUTPUT_RE.search("\n".join((_read(paths["stdout"]), _read(paths["stderr"])) )):
+    if secret_observation.get("status") == "blocked":
         runtime_findings.append({"code": "oss_cloud_secret_output_observed", "message": "Captured smoke output matched a redacted secret-shaped marker."})
+    elif secret_observation.get("status") != "clear":
+        runtime_findings.append({"code": "oss_cloud_secret_output_scan_unavailable", "message": "Captured smoke output could not be safely scanned."})
     warnings = [item for item in runtime_findings if item["code"] in CLOUD_SMOKE_NON_BLOCKING_CODES]
     # Promote every other runtime finding, including secret-shaped output, into
     # the blocking findings before either raw or public receipts are built.
@@ -392,12 +401,6 @@ def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     return projected
 
 
-def _safe_secret_status(secret_output_observed: bool, command_present: bool) -> str:
-    if secret_output_observed:
-        return "blocked"
-    return "clear" if command_present else "unavailable"
-
-
 def _value_blind_status(provider_invoked: bool, findings: list[dict[str, str]]) -> str:
     if provider_invoked and not findings:
         return "pass"
@@ -413,9 +416,10 @@ def _value_blind_receipt(
     exit_code: int | None,
     duration_seconds: float,
     provider_invoked: bool,
-    secret_output_observed: bool,
+    secret_observation: dict[str, Any],
 ) -> dict[str, Any]:
-    safe_secret_status = _safe_secret_status(secret_output_observed, command_present)
+    observed_status = secret_observation.get("status")
+    safe_secret_status = observed_status if observed_status in {"clear", "blocked", "unavailable"} else "unavailable"
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -451,13 +455,15 @@ def _run_smoke(
     profile: Path,
     findings: list[dict[str, str]],
     env_file: Path,
-) -> tuple[dict[str, Any], list[dict[str, str]], list[str] | None, int | None, float, bool]:
+) -> tuple[dict[str, Any], list[dict[str, str]], list[str] | None, int | None, float, bool, dict[str, Any]]:
     if findings:
-        receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False)
-        return receipt, [], None, None, 0.0, False
+        observation = _secret_observation(paths, executed=False)
+        receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False, secret_observation=observation)
+        return receipt, [], None, None, 0.0, False, observation
     command = _command(args, paths, env_file)
     exit_code, duration_seconds = _run(command, paths, args)
-    runtime_warnings = _runtime_findings(args, paths, findings, command, exit_code)
+    observation = _secret_observation(paths, executed=True)
+    runtime_warnings = _runtime_findings(args, paths, findings, command, exit_code, observation)
     receipt = _receipt(
         args,
         paths,
@@ -468,8 +474,9 @@ def _run_smoke(
         duration_seconds=duration_seconds,
         provider_invoked=True,
         runtime_warnings=runtime_warnings,
+        secret_observation=observation,
     )
-    return receipt, runtime_warnings, command, exit_code, duration_seconds, True
+    return receipt, runtime_warnings, command, exit_code, duration_seconds, True, observation
 
 
 def _public_receipt(
@@ -480,6 +487,7 @@ def _public_receipt(
     exit_code: int | None,
     duration_seconds: float,
     provider_invoked: bool,
+    secret_observation: dict[str, Any],
 ) -> dict[str, Any]:
     public_findings = _value_blind_findings(findings)
     return _value_blind_receipt(
@@ -490,10 +498,7 @@ def _public_receipt(
         exit_code=exit_code,
         duration_seconds=duration_seconds,
         provider_invoked=provider_invoked,
-        secret_output_observed=any(
-            item.get("code") == "oss_cloud_secret_output_observed"
-            for item in public_findings
-        ),
+        secret_observation=secret_observation,
     )
 
 
@@ -513,14 +518,14 @@ def main(argv: list[str] | None = None) -> int:
     if env_file is None:
         findings.append({"code": "oss_cloud_auth_stream_missing", "message": "Desktop-owned OLLAMA_API_KEY FIFO is required."})
     findings.extend(_wrapper_findings(args))
-    receipt, runtime_warnings, command, exit_code, duration_seconds, provider_invoked = _run_smoke(
+    receipt, runtime_warnings, command, exit_code, duration_seconds, provider_invoked, secret_observation = _run_smoke(
         args, paths, profile, findings, env_file or Path(args.env_file).expanduser()
     )
     # The JSON path is a value-blind, fixed-shape receipt. Projecting explicit
     # constants and allowlisted fields keeps captured stdout/stderr out of the
     # logging sink even when a child process emits secret-shaped text.
     public_receipt = _public_receipt(
-        args, findings, runtime_warnings, command, exit_code, duration_seconds, provider_invoked,
+        args, findings, runtime_warnings, command, exit_code, duration_seconds, provider_invoked, secret_observation,
     )
     # The projection is intentionally value-blind: it contains no captured
     # stdout/stderr bytes or credential values. Suppress the conservative sink

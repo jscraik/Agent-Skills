@@ -483,7 +483,7 @@ class TestOssCloudSmoke(unittest.TestCase):
                 exit_code=1,
                 duration_seconds=1.0,
                 provider_invoked=False,
-                secret_output_observed=False,
+                secret_observation={"status": "clear", "source": "captured_output_scan", "redacted": True},
             )
 
         self.assertEqual(receipt["secret_observation"]["status"], "clear")
@@ -604,6 +604,54 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertEqual(receipt["status"], "blocked")
             self.assertTrue(receipt["secret_value_observed"])
 
+    def test_secret_output_scanner_returns_only_an_exit_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            captured = Path(temp_dir) / "stderr.txt"
+            captured.write_text("SECRET_KEY=redacted-test-value\n", encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(self.runner.SECRET_OUTPUT_SCAN),
+                    str(captured),
+                ],
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+
+        self.assertEqual(completed.returncode, 1)
+        self.assertEqual(completed.stdout, "")
+        self.assertEqual(completed.stderr, "")
+
+    def test_unavailable_secret_output_scan_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            with patch.object(self.runner.subprocess, "run", side_effect=OSError("scanner unavailable")):
+                receipt = self.runner._receipt(
+                    args,
+                    paths,
+                    profile,
+                    [],
+                    command=["bash", "run-auth-backed.sh"],
+                    exit_code=0,
+                    duration_seconds=1.0,
+                    provider_invoked=True,
+                )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["secret_value_observed"])
+        self.assertEqual(receipt["secret_observation"]["status"], "unavailable")
+        self.assertIn(
+            "oss_cloud_secret_output_scan_unavailable",
+            {finding["code"] for finding in receipt["findings"]},
+        )
+
     def test_runtime_secret_finding_is_promoted_before_receipt_projection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -615,7 +663,14 @@ class TestOssCloudSmoke(unittest.TestCase):
             args = self.runner._parser().parse_args(["--profile-source", str(profile)])
             findings: list[dict[str, str]] = []
 
-            warnings = self.runner._runtime_findings(args, paths, findings, ["bash"], 0)
+            warnings = self.runner._runtime_findings(
+                args,
+                paths,
+                findings,
+                ["bash"],
+                0,
+                {"status": "blocked", "source": "captured_output_scan", "redacted": True},
+            )
 
         self.assertNotIn("oss_cloud_secret_output_observed", {item["code"] for item in warnings})
         self.assertIn("oss_cloud_secret_output_observed", {item["code"] for item in findings})
