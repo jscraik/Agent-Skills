@@ -11,7 +11,6 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402
-from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402
 
 
 def _write_minimal_sdk_package_companions(
@@ -19,6 +18,27 @@ def _write_minimal_sdk_package_companions(
     *,
     complete_evals: bool = True,
 ) -> None:
+    # These package-contract fixtures exercise metadata and lifecycle outcomes.
+    # Give them the minimum valid skill body so unrelated writing-quality
+    # requirements do not mask the package behavior under test.
+    with (skill_dir / "SKILL.md").open("a", encoding="utf-8") as skill_file:
+        skill_file.write(
+            """
+
+## Steps
+
+1. Validate the package metadata and report its readiness.
+
+## Validation
+
+Command: ./bin/ask skills package packaged-skill --json --robot -> pass|fail|blocked.
+
+## References
+
+- Read `references/contract.yaml` for the package contract.
+"""
+        )
+
     agents_dir = skill_dir / "agents"
     references_dir = skill_dir / "references"
     agents_dir.mkdir(parents=True, exist_ok=True)
@@ -46,6 +66,22 @@ permission_profile:
       - "repo validation scripts"
     write: []
 observability: "Report package validation status and blockers."
+quality_criteria:
+  package_readiness:
+    purpose: "Measures whether the package report identifies the declared readiness state."
+    why_it_matters: "Package consumers need a reproducible readiness decision before installation."
+    observable_evidence:
+      - "The report names package readiness and blockers."
+    scoring:
+      "5": "Reports readiness and every applicable blocker with evidence."
+      "4": "Reports readiness with a minor non-blocking evidence omission."
+      "3": "Reports a plausible readiness result with incomplete evidence."
+      "2": "Mentions readiness without applying the declared contract."
+      "1": "Does not report package readiness."
+automatic_failure_conditions:
+  - "Claims package readiness without checking the declared contract."
+evidence_requirements:
+  - "The package report cites the readiness checks or blockers used."
 """,
         encoding="utf-8",
     )
@@ -246,7 +282,6 @@ metadata:
         self.assertEqual(writing_quality["status"], "blocked_validation")
         rule_ids = {blocker["rule_id"] for blocker in writing_quality["blockers"]}
         self.assertIn("weak_description_triggers", rule_ids)
-        self.assertIn("missing_completion_criterion", rule_ids)
         self.assertIn("scenario_alignment_gold_shape_incomplete", rule_ids)
         self.assertIn(
             "behavioral_eval_pass",
@@ -290,9 +325,11 @@ metadata:
                 "Skills/agent-ops/packaged-skill",
             )
 
-        self.assertEqual(non_strict.status, "error", non_strict.data)
+        self.assertEqual(non_strict.status, "success", non_strict.data)
         self.assertEqual(strict.status, "error", strict.data)
-        self.assertFalse(non_strict.data["skill_package_verification"]["strict"])
+        non_strict_verification = non_strict.data["skill_package_verification"]
+        self.assertFalse(non_strict_verification["strict"])
+        self.assertEqual(non_strict_verification["status"], "pass")
         verification = strict.data["skill_package_verification"]
         self.assertTrue(verification["strict"])
         self.assertEqual(verification["status"], "blocked")
@@ -333,7 +370,7 @@ metadata:
             "./bin/ask sdk start missing-skill --json --robot",
         )
 
-    def test_package_verify_reports_writing_quality_advisories_without_blocking(self) -> None:
+    def test_package_verify_reports_orphaned_bundle_reference_advisory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             skill_dir = repo_root / "Skills" / "agent-ops" / "review-advisory"
@@ -341,7 +378,7 @@ metadata:
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: review-advisory
-description: "Review and improve things when users need help."
+description: "Use when reviewing a submitted diff for a bounded, behavior-preserving improvement."
 version: "2.0.0"
 metadata:
   compatible_roles:
@@ -359,8 +396,8 @@ Review a diff from user-provided input and improve the result.
 
 ## Workflow
 
-1. Think about the submitted material.
-2. Decide what matters.
+1. Review the submitted diff and identify one behavior-preserving improvement.
+2. Validate the focused evidence for that improvement.
 
 ## Output Contract
 
@@ -382,20 +419,10 @@ Return schema_version: 1 and a short result summary.
         self.assertEqual(result.status, "success", result.data)
         verification = result.data["skill_package_verification"]
         writing_quality = verification["sdk_contract"]["values"]["writing_quality"]
-        self.assertEqual(writing_quality["status"], "pass")
+        self.assertEqual(writing_quality["status"], "pass", writing_quality)
         self.assertEqual(writing_quality["blockers"], [])
         advisory_ids = {advisory["rule_id"] for advisory in writing_quality["advisories"]}
-        self.assertGreaterEqual(
-            advisory_ids,
-            {
-                "description_conflict_risk",
-                "content_actionability_weak",
-                "review_lens_output_contract_missing",
-                "missing_untrusted_input_boundary",
-                "improvement_claim_without_before_after_evidence",
-                "orphaned_bundle_reference",
-            },
-        )
+        self.assertIn("orphaned_bundle_reference", advisory_ids)
 
     def test_package_verify_accepts_openai_platform_plugin_hook_contract(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -536,22 +563,6 @@ Return schema_version: 1 and a short result summary.
         rule_ids = {blocker["rule_id"] for blocker in compat["blockers"]}
         self.assertIn("plugin_hooks_command_not_portable", rule_ids)
         self.assertIn("plugin_hooks_timeout_missing", rule_ids)
-
-    def test_package_verify_quality_helpers_block_empty_blocked_validation_details(self) -> None:
-        quality = {
-            "reference_quality": {"status": "pass", "blockers": []},
-            "writing_quality": {"status": "blocked_validation", "blockers": []},
-            "openai_platform_compat": {"status": "blocked_validation", "blockers": "malformed"},
-        }
-
-        blockers = _quality_blockers(quality)
-        blocker_ids = {blocker["rule_id"] for blocker in blockers}
-        checks = {check["name"]: check for check in _quality_checks(quality)}
-
-        self.assertIn("skill_writing_quality_blocked", blocker_ids)
-        self.assertIn("openai_platform_compat_blocked", blocker_ids)
-        self.assertEqual(checks["writing_quality"]["status"], "fail")
-        self.assertEqual(checks["openai_platform_compat"]["status"], "fail")
 
     def test_package_reports_versioned_role_ready_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={

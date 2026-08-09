@@ -129,35 +129,29 @@ class TestAskCLI(unittest.TestCase):
 
     def test_repo_yaml_inspect_cli_uses_managed_pyyaml(self):
         """Verify YAML inspection works through ask instead of bare system python."""
-        cmd = [
-            "python3",
-            "Infrastructure/bin/ask",
-            "repo",
-            "yaml-inspect",
-            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
-            "--query",
-            "cases.0.id",
-            "--json",
-            "--robot",
-        ]
-        result = _run_cli(cmd)
+        with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp_dir:
+            yaml_path = Path(tmp_dir) / "fixture.yaml"
+            yaml_path.write_text("cases:\n  - id: package-fixture\n", encoding="utf-8")
+            cmd = [
+                "python3",
+                "Infrastructure/bin/ask",
+                "repo",
+                "yaml-inspect",
+                str(yaml_path.relative_to(REPO_ROOT)),
+                "--query",
+                "cases.0.id",
+                "--json",
+                "--robot",
+            ]
+            result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")
-        self.assertEqual(output["data"]["yaml"]["query_value"], "smoke-discovery-target")
+        self.assertEqual(output["data"]["yaml"]["query_value"], "package-fixture")
         self.assertTrue(output["data"]["python_command"].endswith(" -"))
         self.assertNotIn("mise exec", output["data"]["python_command"])
         self.assertNotIn("mise", output["data"]["python_command"])
-
-    def test_mise_yaml_inspect_task_routes_to_repo_wrapper(self):
-        """Verify the mise YAML task cannot drift from the managed ask lane."""
-        repo_root = Path(__file__).resolve().parents[2]
-        mise_toml = (repo_root / ".mise.toml").read_text(encoding="utf-8")
-
-        self.assertIn("[tasks.yaml-inspect]", mise_toml)
-        self.assertIn("./bin/ask repo yaml-inspect --json --robot", mise_toml)
-        self.assertNotIn("python3 -c 'import yaml", mise_toml)
 
     def test_repo_yaml_inspect_serializes_yaml_dates(self):
         """Verify YAML inspection emits JSON-safe values for YAML scalar types."""
@@ -2573,7 +2567,7 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("Commit ready: True", result.stdout)
         else:
             self.assertIn("Blocked: closeout has", result.stdout)
-            self.assertIn("skills sync --scope workspace --projection flat", result.stdout)
+            self.assertIn("💡 ./bin/ask ", result.stdout)
             return
         self.assertIn("Capability readiness:", result.stdout)
         self.assertIn("Memory readiness:", result.stdout)

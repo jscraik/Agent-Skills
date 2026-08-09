@@ -608,7 +608,7 @@
       "pipeline_sections": ["author_golden_path", "compiler_emitter_discipline", "package_hardening"],
       "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py", "Infrastructure/tests/test_pr_skills_sdk_artifacts.py"],
+      "evidence_refs": ["Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py", "Infrastructure/tests/test_ask_skills_package.py"],
       "next_slice": "Connect package verification to signed publish only after signing is approved.",
       "notes": "Package verification is local and read-only."
     },
