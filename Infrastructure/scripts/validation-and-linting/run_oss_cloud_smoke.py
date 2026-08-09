@@ -139,7 +139,18 @@ def _wrapper_findings(args: argparse.Namespace) -> list[dict[str, str]]:
         (Path(args.auth_wrapper), DEFAULT_AUTH_WRAPPER, "oss_cloud_auth_wrapper_missing", "oss_cloud_auth_wrapper_identity_mismatch", "auth"),
         (Path(args.codex_exec_wrapper), DEFAULT_CODEX_EXEC_WRAPPER, "oss_cloud_exec_wrapper_missing", "oss_cloud_exec_wrapper_identity_mismatch", "Codex"),
     ):
-        executable = path.is_file() and bool(path.stat().st_mode & stat.S_IXUSR) if label == "Codex" else True
+        try:
+            executable = (
+                path.is_file() and bool(path.stat().st_mode & stat.S_IXUSR)
+                if label == "Codex"
+                else True
+            )
+        except OSError:
+            findings.append({
+                "code": missing_code,
+                "message": f"Configs {label} wrapper is required for oss-cloud.",
+            })
+            continue
         if not path.is_file() or path.is_symlink() or not executable:
             findings.append({"code": missing_code, "message": f"Configs {label} wrapper is required for oss-cloud."})
         elif not _canonical_wrapper_identity(str(path), expected):
