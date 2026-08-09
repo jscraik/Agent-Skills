@@ -338,6 +338,9 @@ def main(argv: list[str] | None = None) -> int:
         command = _command(args, paths, env_file)
         exit_code, duration_seconds = _run(command, paths, args)
         receipt = _receipt(args, paths, profile, findings, command=command, exit_code=exit_code, duration_seconds=duration_seconds, provider_invoked=True)
+    # lgtm [py/clear-text-logging-sensitive-data] The JSON path is a
+    # value-blind, fixed-shape receipt: it contains only the reviewed env-name
+    # contract and redacted argv, never captured stdout/stderr or a credential.
     print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
