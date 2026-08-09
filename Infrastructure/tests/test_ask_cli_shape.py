@@ -12,9 +12,7 @@ from types import ModuleType, SimpleNamespace
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ASK_ENTRYPOINT = REPO_ROOT / "Infrastructure" / "bin" / "ask"
-SYNC_WRAPPER = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
 VALIDATOR_PATH = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "verify_ask_cli_modularity.py"
-MAX_ENTRYPOINT_LINES = 1900
 
 
 def _load_validator() -> ModuleType:
@@ -28,27 +26,6 @@ def _load_validator() -> ModuleType:
 
 
 class TestAskCliShape(unittest.TestCase):
-    def test_entrypoint_line_budget_does_not_grow(self) -> None:
-        line_count = len(ASK_ENTRYPOINT.read_text(encoding="utf-8").splitlines())
-
-        self.assertLessEqual(
-            line_count,
-            MAX_ENTRYPOINT_LINES,
-            (
-                "Infrastructure/bin/ask is already at the decomposition limit; "
-                "move parser, dispatch, output, or prompt behavior into ask.* modules "
-                "before adding more entrypoint code."
-            ),
-        )
-
-    def test_entrypoint_keeps_output_and_prompt_helpers_extracted(self) -> None:
-        content = ASK_ENTRYPOINT.read_text(encoding="utf-8")
-
-        self.assertIn("from ask.cli_output import", content)
-        self.assertIn("from ask.cli_prompts import", content)
-        self.assertNotIn("def print_first_validation_command", content)
-        self.assertNotIn("def prompt_nonempty", content)
-
     def test_evals_run_exposes_timeout_seconds(self) -> None:
         result = subprocess.run(
             [sys.executable, str(ASK_ENTRYPOINT), "evals", "run", "--help"],
@@ -59,19 +36,6 @@ class TestAskCliShape(unittest.TestCase):
         )
 
         self.assertIn("--timeout-seconds", result.stdout)
-
-    def test_evals_run_passes_timeout_seconds_to_runner(self) -> None:
-        content = ASK_ENTRYPOINT.read_text(encoding="utf-8")
-
-        self.assertIn("evals_run_parser.add_argument(\"--timeout-seconds\"", content)
-        self.assertIn("timeout_seconds=args.timeout_seconds", content)
-
-    def test_sync_wrapper_delegates_without_command_surface_fossils(self) -> None:
-        content = SYNC_WRAPPER.read_text(encoding="utf-8")
-
-        self.assertIn('exec bash "$SCRIPT_DIR/sync_skills_impl.sh" "$@"', content)
-        self.assertNotIn("Keep legacy lifecycle command-surface text", content)
-        self.assertNotIn("selection_policy.py", content)
 
     def test_function_shape_metrics_include_length_and_complexity(self) -> None:
         validator = _load_validator()

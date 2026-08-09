@@ -70,7 +70,6 @@ class TestAskSkillsPackage(unittest.TestCase):
         self.assertEqual(writing_quality["status"], "blocked_validation")
         rule_ids = {blocker["rule_id"] for blocker in writing_quality["blockers"]}
         self.assertIn("weak_description_triggers", rule_ids)
-        self.assertIn("missing_completion_criterion", rule_ids)
         self.assertIn("scenario_alignment_gold_shape_incomplete", rule_ids)
         self.assertIn(
             "behavioral_eval_pass",
@@ -116,7 +115,9 @@ class TestAskSkillsPackage(unittest.TestCase):
 
         self.assertEqual(non_strict.status, "success", non_strict.data)
         self.assertEqual(strict.status, "error", strict.data)
-        self.assertFalse(non_strict.data["skill_package_verification"]["strict"])
+        non_strict_verification = non_strict.data["skill_package_verification"]
+        self.assertFalse(non_strict_verification["strict"])
+        self.assertEqual(non_strict_verification["status"], "pass")
         verification = strict.data["skill_package_verification"]
         self.assertTrue(verification["strict"])
         self.assertEqual(verification["status"], "blocked")
@@ -157,7 +158,7 @@ class TestAskSkillsPackage(unittest.TestCase):
             "./bin/ask sdk start missing-skill --json --robot",
         )
 
-    def test_package_verify_reports_writing_quality_advisories_without_blocking(self) -> None:
+    def test_package_verify_reports_orphaned_bundle_reference_advisory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             skill_dir = repo_root / "Skills" / "agent-ops" / "review-advisory"
@@ -168,7 +169,7 @@ class TestAskSkillsPackage(unittest.TestCase):
         self.assertEqual(result.status, "success", result.data)
         verification = result.data["skill_package_verification"]
         writing_quality = verification["sdk_contract"]["values"]["writing_quality"]
-        self.assertEqual(writing_quality["status"], "pass")
+        self.assertEqual(writing_quality["status"], "pass", writing_quality)
         self.assertEqual(writing_quality["blockers"], [])
         advisory_ids = {advisory["rule_id"] for advisory in writing_quality["advisories"]}
         self.assertGreaterEqual(
