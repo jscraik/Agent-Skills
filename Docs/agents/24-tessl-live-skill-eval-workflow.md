@@ -230,8 +230,16 @@ candidate-bound bundle, records every source receipt's SHA-256, and leaves the
 a stage cannot emit a repository-owned JSON receipt through `handoff-capture`,
 classify that as an SDK receipt-capture gap and repair its owner before
 continuing the handoff.
-Record the successful dry-run receipt, then run `sdk eval handoff-readiness
---preview` before an actual live Tessl submission.
+Run the dry-run against the bundle you just materialized:
+
+    ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> \
+      --tessl-live-dry-run \
+      --handoff-readiness .harness/evidence/handoff/<skill>/<new-bundle>/eval-handoff-readiness.json \
+      --json --robot
+
+A passing dry-run writes `tessl-live-dry-run.json` into that bundle and marks the
+lane `pass` in the manifest. Then run `sdk eval handoff-readiness --preview`
+before an actual live Tessl submission.
 
 Project setup is a separate, explicit side-effect lane. Run
 `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot`
