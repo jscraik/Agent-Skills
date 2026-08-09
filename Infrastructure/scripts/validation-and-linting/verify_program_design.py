@@ -647,16 +647,16 @@ def _is_changed_production_python(
     staged_source: bool,
     source_ref: str | None,
 ) -> bool:
+    parts = Path(normalized).parts
+    if not normalized.startswith(PRODUCTION_PREFIXES) or normalized.startswith("Plugins/cache/") or set(parts) & EXCLUDED_PARTS or any(part.startswith("test_") for part in parts):
+        return False
     is_staged = normalized in staged_paths
     if not path.is_file() and not is_staged and source_ref is None:
         return False
     source_text = None
     if not normalized.endswith((".py", ".pyw")):
         try:
-            if source_ref is None:
-                source_text = _current_source_text(path, staged_source=staged_source)
-            else:
-                source_text = _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
+            source_text = _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
         except UnicodeDecodeError:
             source_text = ""
     return _is_production_python(normalized, path=path, source_text=source_text)

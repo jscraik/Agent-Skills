@@ -609,7 +609,24 @@ def publish(a, b, c, d, e, f, enabled=False):
             paths = validator._changed_paths((relpath,), staged_source=True)
 
         self.assertEqual(paths, [path])
-        source_text.assert_called_once_with(path, staged_source=True)
+        source_text.assert_called_once_with(path, staged_source=True, source_ref=None)
+
+    def test_excluded_path_skips_source_revision_lookup(self) -> None:
+        validator = _load_validator()
+        relpath = "Infrastructure/references/fixtures/retired/evals.yaml"
+        path = validator.REPO_ROOT / relpath
+
+        with mock.patch.object(validator, "_current_source_text") as source_text:
+            selected = validator._is_changed_production_python(
+                relpath,
+                path,
+                frozenset(),
+                staged_source=False,
+                source_ref="HEAD",
+            )
+
+        self.assertFalse(selected)
+        source_text.assert_not_called()
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()
