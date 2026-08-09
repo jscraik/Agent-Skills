@@ -524,7 +524,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             "execution_argv": [
                 "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
-                "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home", "bash", "other-wrapper",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", "other-wrapper",
                 str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
                 "--strict-config", "--sandbox", "read-only", "--ephemeral", "--model", "deepseek-v4-flash:cloud",
                 "Reply exactly CODEX_OSS_CLOUD_OK",
@@ -544,9 +544,9 @@ class TestOssCloudSmoke(unittest.TestCase):
             "execution_argv": [
                 "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
-                "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home", "bash",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash",
                 str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
-                "--strict-config", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
+                "--strict-config", "--dangerously-bypass-approvals-and-sandbox", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
                 "--model", "deepseek-v4-flash:cloud", "-c", 'approval_policy="on-request"',
                 "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
@@ -557,6 +557,11 @@ class TestOssCloudSmoke(unittest.TestCase):
 
         findings = cloud_smoke_receipt_findings(payload)
         self.assertIn("missing_or_nonadjacent:--sandbox", findings)
+        self.assertIn("forbidden:--dangerously-bypass-approvals-and-sandbox", findings)
+
+        non_isolated = {**payload, "execution_argv": list(payload["execution_argv"])}
+        non_isolated["execution_argv"][10] = "CODEX_HOME=/tmp/codex-home"
+        self.assertIn("codex_exec_child_chain_contract", cloud_smoke_receipt_findings(non_isolated))
 
     def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
         config_text = self.runner.ISOLATED_CODEX_CONFIG

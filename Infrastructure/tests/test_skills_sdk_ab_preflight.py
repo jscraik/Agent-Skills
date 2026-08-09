@@ -557,7 +557,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 "execution_argv": [
                     "bash", str(CONFIGS_AUTH_WRAPPER),
                     "--env-file", "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--",
-                    "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home",
+                    "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>",
                     "bash", str(CONFIGS_CODEX_EXEC_WRAPPER),
                     "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
                     "--sandbox", "read-only", "--ephemeral",

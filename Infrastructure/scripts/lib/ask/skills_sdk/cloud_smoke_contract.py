@@ -10,6 +10,10 @@ from ask.skills_sdk.ab_transport_contracts import (
 
 
 CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
+FORBIDDEN_CLOUD_SMOKE_FLAGS = frozenset({
+    "--dangerously-bypass-approvals-and-sandbox",
+    "--no-sandbox",
+})
 
 
 def valid_cloud_smoke_receipt(payload: dict[str, Any]) -> bool:
@@ -68,13 +72,16 @@ def _child_contract_findings(child: list[str]) -> list[str]:
         for flag in ("--strict-config", "--ephemeral")
         if flag not in child
     )
+    findings.extend(
+        f"forbidden:{flag}" for flag in sorted(FORBIDDEN_CLOUD_SMOKE_FLAGS) if flag in child
+    )
     return findings
 
 
 def _child_chain_findings(argv: list[str]) -> list[str]:
     if argv[7] != "env" or argv[8:10] != ["-u", "CODEX_CONFIG_HOME"]:
         return ["codex_exec_child_chain_contract"]
-    if not argv[10].startswith("CODEX_HOME=") or argv[11] != "bash":
+    if argv[10] != "CODEX_HOME=<isolated-codex-home>" or argv[11] != "bash":
         return ["codex_exec_child_chain_contract"]
     return []
 
