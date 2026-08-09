@@ -415,6 +415,30 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(receipt["secret_observation"]["status"], "blocked")
         self.assertIn("oss_cloud_secret_output_observed", {finding["code"] for finding in receipt["findings"]})
 
+    def test_secret_marker_after_shell_prefix_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text("+ export OLLAMA_API_KEY=redacted-test-value\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "run-auth-backed.sh"],
+                exit_code=0,
+                duration_seconds=1.0,
+                provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(receipt["secret_value_observed"])
+
     def test_cloud_smoke_rejects_codex_wrapper_nested_after_child_argument(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
@@ -434,6 +458,28 @@ class TestOssCloudSmoke(unittest.TestCase):
         }
 
         self.assertIn("codex_exec_wrapper_contract", cloud_smoke_receipt_findings(payload))
+
+    def test_cloud_smoke_rejects_duplicate_contract_flags(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+            "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+            "execution_argv": [
+                "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file",
+                "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home", "bash",
+                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+                "--strict-config", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
+                "--model", "deepseek-v4-flash:cloud", "-c", 'approval_policy="on-request"',
+                "Reply exactly CODEX_OSS_CLOUD_OK",
+            ],
+            "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
+            "secret_value_observed": False,
+            "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
+        }
+
+        findings = cloud_smoke_receipt_findings(payload)
+        self.assertIn("missing_or_nonadjacent:--sandbox", findings)
 
     def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
         config_text = self.runner.ISOLATED_CODEX_CONFIG

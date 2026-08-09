@@ -47,7 +47,8 @@ def _child_wrapper_index(argv: list[str]) -> int | None:
 
 
 def _adjacent_pair(child: list[str], flag: str, expected: str) -> bool:
-    return any(value == flag and child[index + 1] == expected for index, value in enumerate(child[:-1]))
+    positions = [index for index, value in enumerate(child[:-1]) if value == flag]
+    return len(positions) == 1 and child[positions[0] + 1] == expected
 
 
 def _child_contract_findings(child: list[str]) -> list[str]:

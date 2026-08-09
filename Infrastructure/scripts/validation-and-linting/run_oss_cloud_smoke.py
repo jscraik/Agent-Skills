@@ -30,7 +30,7 @@ DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/r
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
-SECRET_OUTPUT_RE = re.compile(r"(?im)^\s*(?:OLLAMA_API_KEY|(?:api|access)[_-]?key|token|secret)\s*[:=]\s*\S+")
+SECRET_OUTPUT_RE = re.compile(r"(?im)\b(?:OLLAMA_API_KEY|(?:api|access)[_-]?key|token|secret)\b\s*[:=]\s*\S+")
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
 model_provider = "{EXPECTED_PROVIDER}"
 approval_policy = "on-request"
