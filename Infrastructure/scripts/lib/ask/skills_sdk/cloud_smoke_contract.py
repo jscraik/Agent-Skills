@@ -13,6 +13,8 @@ CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
 FORBIDDEN_CLOUD_SMOKE_FLAGS = frozenset({
     "--dangerously-bypass-approvals-and-sandbox",
     "--no-sandbox",
+    "--cd",
+    "--enable",
 })
 
 

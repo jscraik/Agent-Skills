@@ -607,7 +607,9 @@ class TestOssCloudSmoke(unittest.TestCase):
             expanded = {**payload, "execution_argv": list(payload["execution_argv"])}
             model_index = expanded["execution_argv"].index("--model")
             expanded["execution_argv"][model_index:model_index] = [option, value]
-            self.assertIn("codex_exec_child_argv_shape", cloud_smoke_receipt_findings(expanded))
+            findings = cloud_smoke_receipt_findings(expanded)
+            self.assertIn("codex_exec_child_argv_shape", findings)
+            self.assertIn(f"forbidden:{option}", findings)
 
     def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
         config_text = self.runner.ISOLATED_CODEX_CONFIG
