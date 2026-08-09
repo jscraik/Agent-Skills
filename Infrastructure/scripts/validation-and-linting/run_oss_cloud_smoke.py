@@ -301,8 +301,8 @@ def _receipt(
         "model_provider": EXPECTED_PROVIDER,
         "auth_source": _auth_source(Path(args.env_file).expanduser()),
         "provider_invoked": provider_invoked,
-        "command": _redacted_command(command),
-        "execution_argv": _redacted_command(command),
+        "command": _redacted_command(executed=command is not None),
+        "execution_argv": _redacted_command(executed=command is not None),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
         "marker": DEFAULT_MARKER,
@@ -339,8 +339,8 @@ def _runtime_findings(
     return warnings
 
 
-def _redacted_command(command: list[str] | None) -> list[str] | None:
-    if command is None:
+def _redacted_command(*, executed: bool) -> list[str] | None:
+    if not executed:
         return None
     # Receipts are evidence, not a replay channel. Emit the fixed reviewed
     # command shape rather than echoing operator-controlled argv values, which
@@ -424,8 +424,8 @@ def _value_blind_receipt(
         "model_provider": EXPECTED_PROVIDER,
         "auth_source": _auth_source(env_file),
         "provider_invoked": provider_invoked,
-        "command": _redacted_command(command),
-        "execution_argv": _redacted_command(command),
+        "command": _redacted_command(executed=command is not None),
+        "execution_argv": _redacted_command(executed=command is not None),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
         "marker": DEFAULT_MARKER,
