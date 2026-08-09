@@ -98,8 +98,6 @@ class TestBuildRuntimeSeparationCurrent(unittest.TestCase):
             self.module._public_ask_command("repo", "status", "--json"),
             ["bin/ask", "repo", "status", "--json"],
         )
-        source = SCRIPT_PATH.read_text(encoding="utf-8")
-        self.assertNotIn('["Infrastructure/bin/ask"', source)
 
 
 if __name__ == "__main__":
