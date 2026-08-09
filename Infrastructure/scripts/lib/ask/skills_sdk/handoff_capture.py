@@ -124,17 +124,29 @@ def _run_commands(
     repo_root: Path,
     command_parts: list[list[str]],
     run_command: _RunCommand,
+    timeout_seconds: int,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for arguments in command_parts:
-        process = run_command(
-            [str(repo_root / "bin" / "ask"), *arguments, "--json", "--robot"],
-            cwd=repo_root,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
+        try:
+            process = run_command(
+                [str(repo_root / "bin" / "ask"), *arguments, "--json", "--robot"],
+                cwd=repo_root,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired:
+            results.append({
+                "command": shlex.join(["./bin/ask", *arguments, "--json", "--robot"]),
+                "exit_code": None,
+                "status": "blocked",
+                "result": None,
+                "diagnostic": f"child command exceeded {timeout_seconds}s",
+            })
+            break
         results.append(_command_result(arguments, process))
     return results
 
