@@ -376,7 +376,10 @@ class TestOssCloudSmoke(unittest.TestCase):
             )
         )
         self.assertFalse(
-            self.runner._canonical_wrapper_identity("/tmp/run-auth-backed.sh", self.runner.DEFAULT_AUTH_WRAPPER)
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_AUTH_WRAPPER.with_name("noncanonical-auth-wrapper")),
+                self.runner.DEFAULT_AUTH_WRAPPER,
+            )
         )
 
     def test_runner_blocks_regular_env_before_provider_invocation(self) -> None:
