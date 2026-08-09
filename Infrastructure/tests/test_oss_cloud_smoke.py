@@ -365,23 +365,21 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertNotIn("OLLAMA_API_KEY=", json.dumps(receipt))
         self.assertNotIn(str(env_file), json.dumps(receipt))
 
-    def test_wrapper_identity_is_bound_to_the_shared_configs_contract(self) -> None:
-        self.assertTrue(
-            self.runner._canonical_wrapper_identity(
-                str(self.runner.DEFAULT_AUTH_WRAPPER), self.runner.DEFAULT_AUTH_WRAPPER,
+    def test_wrapper_identity_requires_exact_regular_nonsymlink_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            canonical = root / "run-auth-backed.sh"
+            canonical.write_text("#!/bin/sh\n", encoding="utf-8")
+            alias = root / "run-auth-backed-alias.sh"
+            alias.symlink_to(canonical)
+
+            self.assertTrue(self.runner._canonical_wrapper_identity(str(canonical), canonical))
+            self.assertFalse(self.runner._canonical_wrapper_identity(str(alias), canonical))
+            self.assertFalse(
+                self.runner._canonical_wrapper_identity(
+                    str(root / "noncanonical-auth-wrapper"), canonical,
+                )
             )
-        )
-        self.assertTrue(
-            self.runner._canonical_wrapper_identity(
-                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), self.runner.DEFAULT_CODEX_EXEC_WRAPPER,
-            )
-        )
-        self.assertFalse(
-            self.runner._canonical_wrapper_identity(
-                str(self.runner.DEFAULT_AUTH_WRAPPER.with_name("noncanonical-auth-wrapper")),
-                self.runner.DEFAULT_AUTH_WRAPPER,
-            )
-        )
 
     def test_runner_blocks_regular_env_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
