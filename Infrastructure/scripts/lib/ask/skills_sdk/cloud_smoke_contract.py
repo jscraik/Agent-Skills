@@ -56,17 +56,29 @@ def _adjacent_pair(child: list[str], flag: str, expected: str) -> bool:
 
 
 def _child_contract_findings(child: list[str]) -> list[str]:
+    expected_shape = [
+        child[0] if child else "",
+        "--profile", "oss-cloud",
+        "--strict-config",
+        "-c", 'approval_policy="on-request"',
+        "--skip-git-repo-check",
+        "--sandbox", "read-only",
+        "--ephemeral",
+        "--model", "deepseek-v4-flash:cloud",
+        "Reply exactly CODEX_OSS_CLOUD_OK",
+    ]
+    findings = ["codex_exec_child_argv_shape"] if child != expected_shape else []
     required_pairs = {
         "--profile": "oss-cloud",
         "--sandbox": "read-only",
         "--model": "deepseek-v4-flash:cloud",
         "-c": 'approval_policy="on-request"',
     }
-    findings = [
+    findings.extend(
         f"missing_or_nonadjacent:{flag}"
         for flag, expected in required_pairs.items()
         if not _adjacent_pair(child, flag, expected)
-    ]
+    )
     findings.extend(
         f"missing:{flag}"
         for flag in ("--strict-config", "--ephemeral")

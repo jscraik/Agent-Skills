@@ -549,7 +549,7 @@ class TestOssCloudSmoke(unittest.TestCase):
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
                 "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash",
                 str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
-                "--strict-config", "--dangerously-bypass-approvals-and-sandbox", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
+                "--strict-config", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
                 "--model", "deepseek-v4-flash:cloud", "-c", 'approval_policy="on-request"',
                 "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
@@ -565,6 +565,30 @@ class TestOssCloudSmoke(unittest.TestCase):
         non_isolated = {**payload, "execution_argv": list(payload["execution_argv"])}
         non_isolated["execution_argv"][10] = "CODEX_HOME=/tmp/codex-home"
         self.assertIn("codex_exec_child_chain_contract", cloud_smoke_receipt_findings(non_isolated))
+
+    def test_cloud_smoke_rejects_context_expanding_child_options(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+            "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+            "execution_argv": [
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
+                "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER),
+                "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
+                "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral", "--model",
+                "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
+            ],
+            "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
+            "secret_value_observed": False,
+            "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
+        }
+
+        for option, value in (("--cd", "/workspace/Agent-Skills"), ("--enable", "apps")):
+            expanded = {**payload, "execution_argv": list(payload["execution_argv"])}
+            model_index = expanded["execution_argv"].index("--model")
+            expanded["execution_argv"][model_index:model_index] = [option, value]
+            self.assertIn("codex_exec_child_argv_shape", cloud_smoke_receipt_findings(expanded))
 
     def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
         config_text = self.runner.ISOLATED_CODEX_CONFIG

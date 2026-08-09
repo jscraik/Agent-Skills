@@ -560,7 +560,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                     "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>",
                     "bash", str(CONFIGS_CODEX_EXEC_WRAPPER),
                     "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
-                    "--sandbox", "read-only", "--ephemeral",
+                    "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral",
                     "--model", "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
                 ],
                 "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [], "secret_value_observed": False, "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
