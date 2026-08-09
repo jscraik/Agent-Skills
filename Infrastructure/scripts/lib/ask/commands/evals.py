@@ -1149,7 +1149,10 @@ def _resolve_handoff_readiness_path(
     candidate = Path(raw_path)
     if candidate.is_absolute():
         return None, "--handoff-readiness must be repo-relative beneath .harness/evidence/handoff"
-    path = (repo_root / candidate).resolve(strict=False)
+    requested = repo_root / candidate
+    if requested.is_symlink():
+        return None, "--handoff-readiness must be an existing regular file"
+    path = requested.resolve(strict=False)
     evidence_root = (repo_root / ".harness" / "evidence" / "handoff").resolve()
     try:
         path.relative_to(evidence_root)
@@ -1157,7 +1160,7 @@ def _resolve_handoff_readiness_path(
         return None, "--handoff-readiness must stay beneath .harness/evidence/handoff"
     if path.name != "eval-handoff-readiness.json":
         return None, "--handoff-readiness must name eval-handoff-readiness.json"
-    if path.is_symlink() or not path.is_file():
+    if not path.is_file():
         return None, "--handoff-readiness must be an existing regular file"
     return path, None
 
