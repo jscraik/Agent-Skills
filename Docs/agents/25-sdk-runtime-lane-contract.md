@@ -73,6 +73,14 @@ fixed tokens `<configs-auth-wrapper>` and `<configs-codex-exec-wrapper>`; the
 receipt validator accepts those tokens while execution admission still requires
 the canonical Configs wrapper identities.
 
+For an `oss-local` judge, the profile source is selected from
+`ASK_CODEX_PROFILE_SOURCE_DIR`, then `CODEX_HOME`, then `~/.codex`. The selected
+`oss-local.config.toml` must be a regular file contained in that source
+directory; a symlinked profile is a pre-invocation blocker. Use the canonical
+Configs profile directory for a one-off isolated judge or repair the runtime
+projection through its owning Configs workflow. Do not follow a runtime
+symlink automatically or treat a blocked profile copy as model evidence.
+
 ## Lane Matrix
 
 | Lane                      | Proves                                                                                                                                                                | Required command shape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Authority boundary                                                                                                                                                                                                                                                                                                        | Blocks that do not prove failure                                                                                                                                            |

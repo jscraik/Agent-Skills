@@ -253,6 +253,13 @@ class TestSkillsSdkAbJudgeScore(_SkillsSdkAbJudgeScoreBase):
         self.assertIsNotNone(comma_repaired_decision)
         self.assertAlmostEqual(comma_repaired_decision['normalized_score_b'], 0.81)
 
+    def test_judge_prompt_requires_string_evidence_references(self) -> None:
+        prompt = _judge_prompt(_comparison_payload_for_decision_test('ex_0123456789abcdef'))
+
+        self.assertIn('every evidence_refs member must be a non-empty string', prompt)
+        self.assertIn('never a numeric index', prompt)
+        self.assertIn('must be reported as 1.0, never 5.0', prompt)
+
     def test_builder_blocks_unavailable_local_judge(self) -> None:
 
         def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
