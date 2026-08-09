@@ -223,7 +223,7 @@ class Runner:
             self.assertEqual(kwargs["cwd"], REPO_ROOT)
             if command[1] == "diff":
                 return completed(command, 0, "deleted.py\nnotes.txt\n", "")
-            if command[1] == "ls-files":
+            if command[1] == "ls-tree":
                 return completed(command, 0, "Infrastructure/tests/sibling.py\n", "")
             return completed(command, 0, "def baseline():\n    pass\n", "")
 
@@ -234,6 +234,62 @@ class Runner:
         self.assertEqual(baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"])
         self.assertEqual(set(baseline["head_text"]), {"deleted.py", "Infrastructure/tests/sibling.py"})
         self.assertEqual(run.call_count, 4)
+        self.assertIn(
+            unittest.mock.call(
+                ["git", "ls-tree", "-r", "--name-only", "HEAD", "--", "Infrastructure/tests"],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            ),
+            run.call_args_list,
+        )
+        self.assertNotIn("ls-files", [call.args[0][1] for call in run.call_args_list])
+
+    def test_moved_function_metrics_reuses_loaded_parent_baseline(self) -> None:
+        validator = _load_validator()
+        current_path = REPO_ROOT / "Infrastructure/tests/current.py"
+        baseline = {
+            "deleted_python_paths": ["Infrastructure/tests/deleted.py"],
+            "sibling_python_paths": ["Infrastructure/tests/test_ask_cli_shape.py"],
+            "head_text": {
+                "Infrastructure/tests/deleted.py": "def moved():\n    return 1\n",
+                "Infrastructure/tests/test_ask_cli_shape.py": "def sibling():\n    return 1\n",
+            },
+        }
+
+        with unittest.mock.patch.object(validator, "_shape_baseline") as load_baseline:
+            metrics = validator._moved_function_metrics(current_path, baseline)
+
+        self.assertEqual(metrics, {"moved": (2, 1)})
+        load_baseline.assert_not_called()
+
+    def test_python_shape_passes_loaded_baseline_to_move_scan(self) -> None:
+        validator = _load_validator()
+        args = SimpleNamespace(changed_files=("Infrastructure/tests/test_ask_cli_shape.py",))
+        shape_baseline = {
+            "deleted_python_paths": [],
+            "sibling_python_paths": [],
+            "head_text": {},
+        }
+
+        with (
+            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as load_baseline,
+            unittest.mock.patch.object(validator, "_check_file_size"),
+            unittest.mock.patch.object(validator, "_check_function_shape") as check_function_shape,
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+        load_baseline.assert_called_once_with(REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py")
+        check_function_shape.assert_called_once_with(
+            REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
+            (REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py").read_text(encoding="utf-8"),
+            None,
+            args,
+            issues,
+            shape_baseline,
+        )
 
 
 if __name__ == "__main__":

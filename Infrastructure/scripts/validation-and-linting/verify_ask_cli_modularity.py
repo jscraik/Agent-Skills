@@ -239,20 +239,22 @@ def _shape_baseline(path: Path | None = None) -> dict[str, object]:
         parent = Path(relative).parent.as_posix()
         siblings = [
             item
-            for item in _git_lines(["ls-files", "--", f"{parent}/*.py"])
+            for item in _git_lines(["ls-tree", "-r", "--name-only", "HEAD", "--", parent])
             if item.endswith(PYTHON_SUFFIX)
         ]
     baseline_paths = dict.fromkeys([*deleted, *siblings])
     head_text = {item: _git_output(["show", f"HEAD:{item}"]) for item in baseline_paths}
     return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
-def _git_head_text(path: Path) -> str | None:
+
+
+def _baseline_head_text(path: Path, baseline: dict[str, object]) -> str | None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    head_text = _shape_baseline(path).get("head_text", {})
+    head_text = baseline.get("head_text", {})
     return head_text.get(relpath) if isinstance(head_text, dict) else None
 
 
-def _deleted_python_paths() -> list[Path]:
-    raw_paths = _shape_baseline().get("deleted_python_paths", [])
+def _deleted_python_paths(baseline: dict[str, object]) -> list[Path]:
+    raw_paths = baseline.get("deleted_python_paths", [])
     paths: list[Path] = []
     for line in raw_paths if isinstance(raw_paths, list) else []:
         candidate = _repo_path(str(line).strip())
@@ -261,8 +263,11 @@ def _deleted_python_paths() -> list[Path]:
     return paths
 
 
-def _oversized_sibling_paths(path: Path, max_file_lines: int = 800) -> list[Path]:
-    baseline = _shape_baseline(path)
+def _oversized_sibling_paths(
+    path: Path,
+    baseline: dict[str, object],
+    max_file_lines: int = 800,
+) -> list[Path]:
     sibling_paths = baseline.get("sibling_python_paths", [])
     head_text = baseline.get("head_text", {})
     paths: list[Path] = []
@@ -277,14 +282,21 @@ def _oversized_sibling_paths(path: Path, max_file_lines: int = 800) -> list[Path
     return paths
 
 
-def _moved_function_metrics(path: Path) -> dict[str, tuple[int, int]]:
+def _moved_function_metrics(
+    path: Path,
+    baseline: dict[str, object] | None = None,
+) -> dict[str, tuple[int, int]]:
     """Use uniquely named functions in deleted sibling modules as move baselines."""
+    baseline = baseline or _shape_baseline(path)
     candidates: dict[str, list[tuple[int, int]]] = {}
-    baseline_paths = [*_deleted_python_paths(), *_oversized_sibling_paths(path)]
+    baseline_paths = [
+        *_deleted_python_paths(baseline),
+        *_oversized_sibling_paths(path, baseline),
+    ]
     for deleted_path in dict.fromkeys(baseline_paths):
         if deleted_path.parent != path.parent:
             continue
-        text = _git_head_text(deleted_path)
+        text = _baseline_head_text(deleted_path, baseline)
         if text is None:
             continue
         for name, metrics in _function_metrics(text, source="baseline").items():
@@ -368,7 +380,14 @@ def _check_file_size(path: Path, current: str, baseline: str | None, args: argpa
         issues.append(f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})")
 
 
-def _check_function_shape(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
+def _check_function_shape(
+    path: Path,
+    current: str,
+    baseline: str | None,
+    args: argparse.Namespace,
+    issues: list[str],
+    shape_baseline: dict[str, object] | None = None,
+) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
     if relpath in LEGACY_SHAPE_DEBT_PATHS:
         return
@@ -376,7 +395,7 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
     baseline_metrics = (
         _function_metrics(baseline, source="baseline")
         if baseline is not None
-        else _moved_function_metrics(path)
+        else _moved_function_metrics(path, shape_baseline)
     )
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))
@@ -398,9 +417,10 @@ def _check_python_shape(args: argparse.Namespace) -> list[str]:
     for path in _changed_python_paths(tuple(args.changed_files)):
         current = path.read_text(encoding="utf-8")
         try:
-            baseline = _git_head_text(path)
+            shape_baseline = _shape_baseline(path)
+            baseline = _baseline_head_text(path, shape_baseline)
             _check_file_size(path, current, baseline, args, issues)
-            _check_function_shape(path, current, baseline, args, issues)
+            _check_function_shape(path, current, baseline, args, issues, shape_baseline)
         except RuntimeError as exc:
             issues.append(f"{path.relative_to(REPO_ROOT).as_posix()} shape baseline unavailable: {exc}")
             break
