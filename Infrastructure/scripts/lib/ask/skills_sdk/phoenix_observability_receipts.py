@@ -434,8 +434,6 @@ def _mirror_source(repo_root: Path, receipt_path: str) -> tuple[Path, list[dict[
         raw_bytes = source.read_bytes()
         source_digest = _sha256_bytes(raw_bytes)
         try:
-            raw_bytes = source.read_bytes()
-            source_digest = _sha256_bytes(raw_bytes)
             receipt = _find_receipt(json.loads(raw_bytes.decode("utf-8")))
             raw_paths = _raw_key_paths(receipt)
             rows = _mirror_rows(repo_root, source, source_digest, receipt)
