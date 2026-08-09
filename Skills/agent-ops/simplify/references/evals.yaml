@@ -412,6 +412,8 @@ cases:
       - store.get
       any_of:
       - two calls
+      - two store.get calls
+      - two store.get(key) calls
       - two reads
       - one lookup
       - stateful
@@ -434,6 +436,8 @@ cases:
     - id: single_read_boundary
       any_of:
       - two calls
+      - two store.get calls
+      - two store.get(key) calls
       - two reads
       - second read
       - duplicate read
