@@ -35,7 +35,7 @@ ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
 Keep the model families independent across proof lanes: `oss-local` uses
-`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:cloud`, and Tessl external uses
+`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:0731-cloud`, and Tessl external uses
 `deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
 family, provider, and identity source. A model change starts a new baseline for
 that lane. Do not average scores across model families; compare each lane to its

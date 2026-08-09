@@ -133,7 +133,10 @@ try:
     with urllib.request.urlopen(http_request, timeout=cfg["timeout_seconds"]) as response:
         print(json.dumps({"status": "pass", "http_status": response.status}))
 except urllib.error.HTTPError as exc:
-    print(json.dumps({"status": "blocked", "http_status": exc.code, "error_class": type(exc).__name__}))
+    print(json.dumps({"service": "agent-skills", "status": "blocked", "http_status": exc.code, "error_class": type(exc).__name__}))
+    raise SystemExit(2)
+except (urllib.error.URLError, TimeoutError) as exc:
+    print(json.dumps({"service": "agent-skills", "status": "blocked", "error_class": type(exc).__name__}))
     raise SystemExit(2)
 '''
 
@@ -144,9 +147,18 @@ def _phoenix_config(repo_root: Path) -> dict[str, Any]:
         return {}
     try:
         payload = json.loads(config_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return payload if isinstance(payload, dict) else {}
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return {"__config_error__": type(exc).__name__}
+    if not isinstance(payload, dict):
+        return {"__config_error__": "config_top_level_not_object"}
+    return payload
+
+
+def _config_checks(config: dict[str, Any]) -> list[dict[str, Any]]:
+    error = config.get("__config_error__")
+    if error is None:
+        return []
+    return [_check("phoenix_config", "blocker", "phoenix.json must be valid UTF-8 JSON with an object at the top level.", [f"error_class:{error}"])]
 
 
 def _config_bool(value: Any) -> bool:
@@ -237,7 +249,7 @@ def _smoke_identity(repo_root: Path, base_url: str, profile: str, config: dict[s
     return {"endpoint": base_url.rstrip("/") + "/v1/traces", "project_name": project_name, "span_kind": span_kind, "span_name": span_name, "trace_id": uuid.uuid4().hex, "span_id": uuid.uuid4().hex[:16], "checks": checks, "repo_name": repo_root.name}
 
 
-def _smoke_checks(identity: dict[str, Any], profile: str, prompt_tokens: int, completion_tokens: int, otel_python: Path | None) -> list[dict[str, Any]]:
+def _smoke_checks(identity: dict[str, Any], prompt_tokens: int, completion_tokens: int, otel_python: Path | None) -> list[dict[str, Any]]:
     checks = list(identity["checks"])
     token_errors = [name for name, value in (("prompt_tokens_negative", prompt_tokens), ("completion_tokens_negative", completion_tokens)) if value < 0]
     checks.append(_check("llm_token_counts_valid", "pass" if not token_errors else "blocker", "Phoenix LLM smoke token counts must be non-negative integers.", token_errors))
@@ -273,7 +285,7 @@ def _build_phoenix_smoke_receipt(repo_root: Path, *, base_url: str = "http://loc
     config = _phoenix_config(repo_root)
     identity = _smoke_identity(repo_root, base_url, profile, config, model_name)
     otel_python = Path(otel_python_path).expanduser() if otel_python_path else _config_path(config, "otel_python")
-    checks = _smoke_checks(identity, profile, prompt_tokens, completion_tokens, otel_python)
+    checks = _config_checks(config) + _smoke_checks(identity, prompt_tokens, completion_tokens, otel_python)
     if not [check for check in checks if check["status"] == "blocker"] and otel_python is not None:
         emitted, error = _smoke_export(identity, repo_root, profile, model_name, provider, prompt_tokens, completion_tokens, command_name, command_status, latency_ms, timeout_seconds, otel_python)
         checks.append(_check("phoenix_otlp_export", "pass" if emitted else "blocker", "Phoenix OTLP HTTP endpoint must accept a deterministic smoke span.", [identity["endpoint"]] if error is None else [identity["endpoint"], error]))
@@ -293,7 +305,8 @@ def _eval_plan(eval_receipt: dict[str, Any], trace_case_spans: bool, case_span_l
 
 
 def _eval_checks(eval_receipt: dict[str, Any], plan: dict[str, Any], source_kind: str, profile: str | None) -> list[dict[str, Any]]:
-    checks = [_check("source_kind_supported", "pass" if source_kind in {"eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"} else "blocker", "Phoenix eval tracing accepts eval_run_receipt, ab_run_receipt, and ab_judge_score_receipt.", [source_kind]), _check("eval_trace_redaction", "pass" if not _raw_key_paths(eval_receipt) else "blocker", "Eval trace receipts must not contain raw prompts, outputs, transcripts, tool calls, stdout, or stderr.", [f"raw_keys_seen:{len(_raw_key_paths(eval_receipt))}"]), _check("codex_profile_argv_proof", "blocker" if plan["blockers"] else "pass", "Provider-backed eval traces must derive each Codex runtime profile from the executed argv.", list(plan["blockers"]))]
+    raw_paths = _raw_key_paths(eval_receipt)
+    checks = [_check("source_kind_supported", "pass" if source_kind in {"eval_run_receipt", "ab_run_receipt", "ab_judge_score_receipt"} else "blocker", "Phoenix eval tracing accepts eval_run_receipt, ab_run_receipt, and ab_judge_score_receipt.", [source_kind]), _check("eval_trace_redaction", "pass" if not raw_paths else "blocker", "Eval trace receipts must not contain raw prompts, outputs, transcripts, tool calls, stdout, or stderr.", [f"raw_keys_seen:{len(raw_paths)}"]), _check("codex_profile_argv_proof", "blocker" if plan["blockers"] else "pass", "Provider-backed eval traces must derive each Codex runtime profile from the executed argv.", list(plan["blockers"]))]
     if profile is not None:
         derived = [row.get("derived_codex_profile") for row in plan["profile_evidence"] if row.get("derived_codex_profile") is not None]
         checks.append(_check("profile_argument_matches_argv", "pass" if not derived or derived == [profile] else "blocker", "The optional observer profile argument must not contradict argv-derived runtime profile evidence.", [f"observer_profile:{profile}", f"argv_profiles:{','.join(derived)}"]))
@@ -352,9 +365,17 @@ def _eval_payload_header(eval_receipt: dict[str, Any], plan: dict[str, Any], sou
 
 def _eval_payload_counts(repo_root: Path, eval_receipt: dict[str, Any], plan: dict[str, Any], cases: Any, trace_case_spans: bool, bounded_limit: int, emitted: bool) -> dict[str, Any]:
     spans = plan["spans"]
+    case_items = cases if isinstance(cases, list) else []
+    raw_case_count = eval_receipt.get("case_count")
+    try:
+        case_count = int(raw_case_count) if raw_case_count is not None else len(case_items)
+    except (TypeError, ValueError):
+        case_count = len(case_items)
+    if case_count < 0:
+        case_count = len(case_items)
     return {
         "target_path": _safe_path_value(repo_root, eval_receipt.get("target_path")),
-        "case_count": int(eval_receipt.get("case_count") or len(cases or [])),
+        "case_count": case_count,
         "passed_count": int(eval_receipt.get("passed_count") or 0),
         "failed_count": int(eval_receipt.get("failed_count") or 0),
         "span_plan": spans,
@@ -397,7 +418,7 @@ def _build_phoenix_eval_trace_receipt(repo_root: Path, *, eval_receipt: dict[str
     from ask.skills_sdk.phoenix_trace_plan import emit_eval_trace_plan  # noqa: PLC0415
 
     plan, source_digest, source_kind, cases, bounded_limit = _eval_plan(eval_receipt, trace_case_spans, case_span_limit)
-    checks = _eval_checks(eval_receipt, plan, source_kind, profile)
+    checks = _config_checks(_phoenix_config(repo_root)) + _eval_checks(eval_receipt, plan, source_kind, profile)
     should_emit, endpoint, otel_python = _eval_runtime(repo_root, base_url, otel_python_path, enabled)
     if should_emit:
         checks.append(_check("otel_python_available", "pass" if otel_python is not None and otel_python.is_file() else "blocker", "Phoenix eval trace emission requires the configured OpenTelemetry Python runtime.", [otel_python.as_posix()] if otel_python is not None else ["missing_otel_python"]))
@@ -418,14 +439,17 @@ def _mirror_source(repo_root: Path, receipt_path: str) -> tuple[Path, list[dict[
     rows: list[dict[str, Any]] = []
     raw_paths: list[str] = []
     if checks[0]["status"] == "pass" and source.is_file():
-        raw_bytes = source.read_bytes()
-        source_digest = _sha256_bytes(raw_bytes)
-        receipt = _find_receipt(json.loads(raw_bytes.decode("utf-8")))
-        raw_paths = _raw_key_paths(receipt)
-        rows = _mirror_rows(repo_root, source, source_digest, receipt)
-        checks.append(_check("source_json", "pass", "Source receipt JSON parsed.", [_repo_relative(repo_root, source)]))
-        source_kind = _source_kind(receipt)
-        checks.append(_check("source_kind_supported", "pass" if source_kind in SUPPORTED_SOURCE_KINDS else "blocker", "Phoenix mirror accepts eval_closeout, eval_run_receipt, ab_run_receipt, ab_judge_score_receipt, and observability_receipt.", [source_kind]))
+        try:
+            raw_bytes = source.read_bytes()
+            source_digest = _sha256_bytes(raw_bytes)
+            receipt = _find_receipt(json.loads(raw_bytes.decode("utf-8")))
+            raw_paths = _raw_key_paths(receipt)
+            rows = _mirror_rows(repo_root, source, source_digest, receipt)
+            checks.append(_check("source_json", "pass", "Source receipt JSON parsed.", [_repo_relative(repo_root, source)]))
+            source_kind = _source_kind(receipt)
+            checks.append(_check("source_kind_supported", "pass" if source_kind in SUPPORTED_SOURCE_KINDS else "blocker", "Phoenix mirror accepts eval_closeout, eval_run_receipt, ab_run_receipt, ab_judge_score_receipt, and observability_receipt.", [source_kind]))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
+            checks.append(_check("source_json", "blocker", "Source receipt must be valid UTF-8 JSON with a receipt-shaped object.", [f"error_class:{type(exc).__name__}"]))
     elif checks[0]["status"] == "pass":
         checks.append(_check("source_json", "blocker", "Source receipt path must exist.", [_repo_relative(repo_root, source)]))
     return source, checks, source_digest, receipt, rows, raw_paths
@@ -473,16 +497,6 @@ def _build_phoenix_mirror_receipt(repo_root: Path, *, receipt_path: str, out_pat
     return payload
 
 
-def build_phoenix_smoke_receipt(repo_root: Path, **options: Any) -> dict[str, Any]:
-    """Compatibility facade for the smoke receipt builder."""
-    return _build_phoenix_smoke_receipt(repo_root, **options)
-
-
-def build_phoenix_eval_trace_receipt(repo_root: Path, **options: Any) -> dict[str, Any]:
-    """Compatibility facade for the eval trace receipt builder."""
-    return _build_phoenix_eval_trace_receipt(repo_root, **options)
-
-
-def build_phoenix_mirror_receipt(repo_root: Path, **options: Any) -> dict[str, Any]:
-    """Compatibility facade for the mirror receipt builder."""
-    return _build_phoenix_mirror_receipt(repo_root, **options)
+build_phoenix_eval_trace_receipt = _build_phoenix_eval_trace_receipt
+build_phoenix_mirror_receipt = _build_phoenix_mirror_receipt
+build_phoenix_smoke_receipt = _build_phoenix_smoke_receipt

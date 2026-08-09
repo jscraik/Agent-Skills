@@ -14,6 +14,9 @@ from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RUNNER = REPO_ROOT / "Infrastructure/scripts/validation-and-linting/run_oss_cloud_smoke.py"
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.skills_sdk.cloud_smoke_contract import cloud_smoke_receipt_findings  # noqa: E402
 
 
 def _load_runner() -> object:
@@ -29,7 +32,7 @@ def _write_executable(path: Path, contents: str) -> None:
     path.chmod(0o755)
 
 
-def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:cloud", provider: str = "ollama-cloud") -> None:
+def _write_profile(path: Path, *, model: str = "deepseek-v4-flash:0731-cloud", provider: str = "ollama-cloud") -> None:
     path.write_text(
         f'model = "{model}"\nmodel_provider = "{provider}"\n',
         encoding="utf-8",
@@ -142,7 +145,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "oss-cloud.config.toml"
             path.write_text(
-                'model="deepseek-v4-flash:cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
+                'model="deepseek-v4-flash:0731-cloud" # selected model\nmodel_provider = "ollama-cloud"\n',
                 encoding="utf-8",
             )
 
@@ -179,7 +182,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             source.parent.mkdir()
             projected.parent.mkdir()
             source.write_text(
-                'model = "deepseek-v4-flash:cloud"\n'
+                'model = "deepseek-v4-flash:0731-cloud"\n'
                 'model_provider = "ollama-cloud"\n'
                 "\n[mcp_servers.untrusted]\n"
                 'command = "untrusted-mcp"\n'
@@ -200,6 +203,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertNotIn("mcp_servers", (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"))
             self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
     def test_receipt_retains_complete_redacted_execution_argv(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -217,9 +221,41 @@ class TestOssCloudSmoke(unittest.TestCase):
                 duration_seconds=0.1, provider_invoked=True,
             )
             self.assertEqual(receipt["execution_argv"], receipt["command"])
-            self.assertTrue(any(token.endswith("run-auth-backed.sh") for token in receipt["execution_argv"]))
-            self.assertTrue(any(token.endswith("run-codex-exec.sh") for token in receipt["execution_argv"]))
+            self.assertIn("<configs-auth-wrapper>", receipt["execution_argv"])
+            self.assertIn("<configs-codex-exec-wrapper>", receipt["execution_argv"])
+            self.assertNotIn("/Users/", json.dumps(receipt))
             self.assertNotIn(str(env_file), receipt["execution_argv"])
+
+    def test_receipt_does_not_echo_operator_controlled_marker_or_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(
+                [
+                    "--profile-source",
+                    str(profile),
+                    "--marker",
+                    "OLLAMA_API_KEY=operator-secret",
+                ]
+            )
+            paths = self.runner._paths(str(root / "operator-secret-output"))
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "/tmp/operator-secret-wrapper", "operator-secret"],
+                exit_code=1,
+                duration_seconds=0.1,
+                provider_invoked=True,
+            )
+
+        serialized = json.dumps(receipt, sort_keys=True)
+        self.assertNotIn("OLLAMA_API_KEY=operator-secret", serialized)
+        self.assertNotIn("operator-secret-output", serialized)
+        self.assertEqual(receipt["marker"], self.runner.DEFAULT_MARKER)
+        self.assertEqual(receipt["stdout_path"], "<captured-stdout>")
 
     def test_command_resolves_relative_profile_from_caller_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -303,7 +339,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(findings, [])
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
-    def test_runner_uses_configs_wrappers_and_emits_redacted_pass_receipt(self) -> None:
+    def test_runner_blocks_noncanonical_wrappers_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "oss-cloud.config.toml"
@@ -320,14 +356,32 @@ class TestOssCloudSmoke(unittest.TestCase):
                 codex_exec_wrapper=codex_exec_wrapper, env=env,
             )
 
-        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.returncode, 1, proc.stderr)
         receipt = json.loads(proc.stdout)
-        self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["model"], "deepseek-v4-flash:cloud")
-        self.assertEqual(receipt["model_provider"], "ollama-cloud")
-        self.assertEqual(receipt["auth_source"], "1password_desktop_fifo")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("oss_cloud_auth_wrapper_identity_mismatch", {finding["code"] for finding in receipt["findings"]})
+        self.assertIn("oss_cloud_exec_wrapper_identity_mismatch", {finding["code"] for finding in receipt["findings"]})
+        self.assertFalse(receipt["provider_invoked"])
         self.assertNotIn("OLLAMA_API_KEY=", json.dumps(receipt))
         self.assertNotIn(str(env_file), json.dumps(receipt))
+
+    def test_wrapper_identity_is_bound_to_the_shared_configs_contract(self) -> None:
+        self.assertTrue(
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_AUTH_WRAPPER), self.runner.DEFAULT_AUTH_WRAPPER,
+            )
+        )
+        self.assertTrue(
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), self.runner.DEFAULT_CODEX_EXEC_WRAPPER,
+            )
+        )
+        self.assertFalse(
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_AUTH_WRAPPER.with_name("noncanonical-auth-wrapper")),
+                self.runner.DEFAULT_AUTH_WRAPPER,
+            )
+        )
 
     def test_runner_blocks_regular_env_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -350,7 +404,14 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "blocked")
-        self.assertEqual({finding["code"] for finding in receipt["findings"]}, {"oss_cloud_auth_stream_missing"})
+        self.assertEqual(
+            {finding["code"] for finding in receipt["findings"]},
+            {
+                "oss_cloud_auth_stream_missing",
+                "oss_cloud_auth_wrapper_identity_mismatch",
+                "oss_cloud_exec_wrapper_identity_mismatch",
+            },
+        )
         self.assertFalse(receipt["provider_invoked"])
 
     def test_cloud_metadata_fallback_is_a_warning_when_marker_passes(self) -> None:
@@ -359,7 +420,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             paths = self.runner._paths(str(root / "out"))
             paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
             paths["stderr"].write_text(
-                "warning: Model metadata for deepseek-v4-flash:cloud not found. Defaulting to fallback metadata.\n"
+                "warning: Model metadata for deepseek-v4-flash:0731-cloud not found. Defaulting to fallback metadata.\n"
                 "tokens used\n14916\n",
                 encoding="utf-8",
             )
@@ -384,6 +445,312 @@ class TestOssCloudSmoke(unittest.TestCase):
             [warning["code"] for warning in receipt["warnings"]],
             ["codex_runtime_metadata_fallback"],
         )
+
+    def test_secret_shaped_output_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text("OLLAMA_API_KEY=redacted-test-value\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "run-auth-backed.sh"],
+                exit_code=0,
+                duration_seconds=1.0,
+                provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(receipt["secret_value_observed"])
+        self.assertEqual(receipt["secret_observation"]["status"], "blocked")
+        self.assertIn("oss_cloud_secret_output_observed", {finding["code"] for finding in receipt["findings"]})
+
+    def test_public_projection_does_not_claim_secret_for_other_blockers(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / "env"
+            receipt = self.runner._value_blind_receipt(
+                env_file=env_file,
+                findings=[{"code": "oss_cloud_smoke_exit_nonzero", "message": "redacted"}],
+                warnings=[],
+                command_present=True,
+                exit_code=1,
+                duration_seconds=1.0,
+                provider_invoked=False,
+                secret_observation={"status": "clear", "source": "captured_output_scan", "redacted": True},
+            )
+
+        self.assertEqual(receipt["captured_output_scan"]["status"], "passed")
+        self.assertTrue(receipt["captured_output_safe"])
+        self.assertEqual(
+            self.runner._value_blind_findings([{"code": "oss_cloud_secret_output_observed"}])[0]["code"],
+            "captured_output_scan_blocked",
+        )
+
+    def test_secret_marker_after_shell_prefix_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text("+ export OLLAMA_API_KEY=redacted-test-value\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "run-auth-backed.sh"],
+                exit_code=0,
+                duration_seconds=1.0,
+                provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(receipt["secret_value_observed"])
+
+    def test_json_secret_output_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text('{"token":"redacted-test-value"}\n', encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "run-auth-backed.sh"],
+                exit_code=0,
+                duration_seconds=1.0,
+                provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(receipt["secret_value_observed"])
+
+    def test_provider_prefixed_secret_output_blocks_the_smoke_receipt(self) -> None:
+        for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY"):
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                paths = self.runner._paths(str(root / "out"))
+                paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+                paths["stderr"].write_text(f"{key}=redacted-test-value\n", encoding="utf-8")
+                profile = root / "oss-cloud.config.toml"
+                _write_profile(profile)
+                args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+                receipt = self.runner._receipt(
+                    args, paths, profile, [], command=["bash", "run-auth-backed.sh"],
+                    exit_code=0, duration_seconds=1.0, provider_invoked=True,
+                )
+
+                self.assertEqual(receipt["status"], "blocked")
+                self.assertTrue(receipt["secret_value_observed"])
+
+    def test_bearer_authorization_output_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text(
+                "Authorization: Bearer sk-redacted-test-value\n",
+                encoding="utf-8",
+            )
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            receipt = self.runner._receipt(
+                args, paths, profile, [], command=["bash", "run-auth-backed.sh"],
+                exit_code=0, duration_seconds=1.0, provider_invoked=True,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(receipt["secret_value_observed"])
+        self.assertIn(
+            "oss_cloud_secret_output_observed",
+            {finding["code"] for finding in receipt["findings"]},
+        )
+
+    def test_common_secret_key_assignments_block_the_smoke_receipt(self) -> None:
+        for secret_line in (
+            "SECRET_KEY=redacted-test-value",
+            "SECRET_ACCESS_KEY=redacted-test-value",
+            "SERVICE_SECRET_KEY=redacted-test-value",
+        ):
+            with self.subTest(secret_line=secret_line), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                paths = self.runner._paths(str(root / "out"))
+                paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+                paths["stderr"].write_text(secret_line + "\n", encoding="utf-8")
+                profile = root / "oss-cloud.config.toml"
+                _write_profile(profile)
+                args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+                receipt = self.runner._receipt(
+                    args, paths, profile, [], command=["bash", "run-auth-backed.sh"],
+                    exit_code=0, duration_seconds=1.0, provider_invoked=True,
+                )
+
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertTrue(receipt["secret_value_observed"])
+
+    def test_secret_output_scanner_returns_only_an_exit_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            captured = Path(temp_dir) / "stderr.txt"
+            captured.write_text("SECRET_KEY=redacted-test-value\n", encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(self.runner.SECRET_OUTPUT_SCAN),
+                    str(captured),
+                ],
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+
+        self.assertEqual(completed.returncode, 1)
+        self.assertEqual(completed.stdout, "")
+        self.assertEqual(completed.stderr, "")
+
+    def test_unavailable_secret_output_scan_blocks_the_smoke_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+            with patch.object(self.runner.subprocess, "run", side_effect=OSError("scanner unavailable")):
+                receipt = self.runner._receipt(
+                    args,
+                    paths,
+                    profile,
+                    [],
+                    command=["bash", "run-auth-backed.sh"],
+                    exit_code=0,
+                    duration_seconds=1.0,
+                    provider_invoked=True,
+                )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["secret_value_observed"])
+        self.assertEqual(receipt["secret_observation"]["status"], "unavailable")
+        self.assertIn(
+            "oss_cloud_secret_output_scan_unavailable",
+            {finding["code"] for finding in receipt["findings"]},
+        )
+
+    def test_runtime_secret_finding_is_promoted_before_receipt_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text("OPENAI_API_KEY=redacted-test-value\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+            findings: list[dict[str, str]] = []
+
+            warnings = self.runner._runtime_findings(
+                args,
+                paths,
+                findings,
+                ["bash"],
+                0,
+                {"status": "blocked", "source": "captured_output_scan", "redacted": True},
+            )
+
+        self.assertNotIn("oss_cloud_secret_output_observed", {item["code"] for item in warnings})
+        self.assertIn("oss_cloud_secret_output_observed", {item["code"] for item in findings})
+
+    def test_cloud_smoke_rejects_codex_wrapper_nested_after_child_argument(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
+            "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+            "execution_argv": [
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
+                "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", "other-wrapper",
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
+                "--strict-config", "--sandbox", "read-only", "--ephemeral", "--model", "deepseek-v4-flash:0731-cloud",
+                "Reply exactly CODEX_OSS_CLOUD_OK",
+            ],
+            "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
+        }
+
+        self.assertIn("codex_exec_wrapper_contract", cloud_smoke_receipt_findings(payload))
+
+    def test_cloud_smoke_rejects_duplicate_contract_flags(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
+            "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+            "execution_argv": [
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
+                "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash",
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
+                "--strict-config", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
+                "--model", "deepseek-v4-flash:0731-cloud", "-c", 'approval_policy="on-request"',
+                "Reply exactly CODEX_OSS_CLOUD_OK",
+            ],
+            "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
+        }
+
+        findings = cloud_smoke_receipt_findings(payload)
+        self.assertIn("missing_or_nonadjacent:--sandbox", findings)
+        self.assertIn("forbidden:--dangerously-bypass-approvals-and-sandbox", findings)
+
+        non_isolated = {**payload, "execution_argv": list(payload["execution_argv"])}
+        non_isolated["execution_argv"][10] = "CODEX_HOME=/tmp/codex-home"
+        self.assertIn("codex_exec_child_chain_contract", cloud_smoke_receipt_findings(non_isolated))
+
+    def test_cloud_smoke_rejects_context_expanding_child_options(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
+            "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
+            "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
+            "execution_argv": [
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
+                "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
+                "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>", "bash", str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER),
+                "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
+                "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral", "--model",
+                "deepseek-v4-flash:0731-cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
+            ],
+            "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [], "findings": [],
+            "captured_output_safe": True,
+            "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
+        }
+
+        for option, value in (("--cd", "/workspace/Agent-Skills"), ("--enable", "apps")):
+            expanded = {**payload, "execution_argv": list(payload["execution_argv"])}
+            model_index = expanded["execution_argv"].index("--model")
+            expanded["execution_argv"][model_index:model_index] = [option, value]
+            findings = cloud_smoke_receipt_findings(expanded)
+            self.assertIn("codex_exec_child_argv_shape", findings)
+            self.assertIn(f"forbidden:{option}", findings)
 
     def test_isolated_config_disables_loopback_binding_and_removes_loopback_hosts(self) -> None:
         config_text = self.runner.ISOLATED_CODEX_CONFIG

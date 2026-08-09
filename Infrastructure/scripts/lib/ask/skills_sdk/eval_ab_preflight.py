@@ -17,7 +17,7 @@ from ask.skills_sdk.ab_profile_contracts import (
     resolve_installed_codex_identity,
 )
 from ask.skills_sdk.cloud_catalog_probe import DEFAULT_CATALOG_URL
-from ask.skills_sdk.cloud_smoke_contract import CLOUD_SMOKE_MARKER, valid_cloud_smoke_receipt
+from ask.skills_sdk.cloud_smoke_contract import CLOUD_SMOKE_MARKER, cloud_smoke_receipt_findings, valid_cloud_smoke_receipt
 from ask.skills_sdk.ab_transport_contracts import (
     OSS_CLOUD_REQUIRED_ENV,
     actual_opaque_env_path,
@@ -296,6 +296,25 @@ def _safe_command_shape(command: list[str]) -> list[str]:
     return safe
 
 
+def _parse_cloud_smoke_payload(
+    stdout: str, evidence: dict[str, Any],
+) -> tuple[dict[str, Any] | None, str | None]:
+    try:
+        payload = json.loads(
+            stdout,
+            object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_json_constant,
+        )
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None, "malformed_smoke_output"
+    if not isinstance(payload, dict):
+        return None, "invalid_smoke_contract"
+    if not valid_cloud_smoke_receipt(payload):
+        evidence["smoke_receipt_findings"] = cloud_smoke_receipt_findings(payload)
+        return None, "invalid_smoke_contract"
+    return payload, None
+
+
 def _cloud_smoke_result(
     command: list[str], runner: CloudSmokeRunner,
 ) -> tuple[dict[str, Any] | None, str | None, dict[str, Any]]:
@@ -316,18 +335,9 @@ def _cloud_smoke_result(
     }
     if stderr:
         return None, "smoke_stderr_nonempty", evidence
-    try:
-        payload = json.loads(
-            stdout,
-            object_pairs_hook=_reject_duplicate_json_keys,
-            parse_constant=_reject_json_constant,
-        )
-    except (TypeError, ValueError, json.JSONDecodeError):
-        return None, "malformed_smoke_output", evidence
-    if not isinstance(payload, dict):
-        return None, "invalid_smoke_contract", evidence
-    if not valid_cloud_smoke_receipt(payload):
-        return None, "invalid_smoke_contract", evidence
+    payload, failure = _parse_cloud_smoke_payload(stdout, evidence)
+    if failure is not None:
+        return None, failure, evidence
     expected_returncode = 0 if payload["status"] == "pass" else 1
     evidence.update({
         "smoke_receipt_status": payload["status"],

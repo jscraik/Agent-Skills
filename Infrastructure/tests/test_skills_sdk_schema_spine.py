@@ -9,7 +9,6 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 from helpers.schema_validator import _validate_schema_subset  # noqa: E402
 from helpers.skills_sdk_schema_spine import (  # noqa: E402
     FIXTURE_DIR,
-    SCHEMA_DIR,
     SchemaSpineTestCase,
     _json,
 )
@@ -406,7 +405,7 @@ class TestSkillsSdkSchemaSpine(SchemaSpineTestCase):
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["repeat_penalty"], 1.15)
         self.assertEqual(judge_by_id["oss-security"]["model_settings"]["top_k"], 40)
         self.assertEqual(judge_by_id["oss-cloud"]["provider"], "codex")
-        self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:0731-cloud")
         self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
         self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
         self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")

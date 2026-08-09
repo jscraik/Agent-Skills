@@ -27,7 +27,7 @@ def _payload(*, cloud_cases: list[str] | None = None, baseline_fields: list[str]
             or ["case_ids", "criteria_digest", "rubric_digest", "scorer_version", "package_digest", "execution_model_family"],
             "model_routing": {
                 "oss-local": {"model": "qwen", "model_family": "qwen", "provider": "ollama", "identity_source": "profile-config"},
-                "oss-cloud": {"model": "deepseek-v4-flash:cloud", "model_family": "deepseek", "provider": "ollama-cloud", "identity_source": "profile-config"},
+                "oss-cloud": {"model": "deepseek-v4-flash:0731-cloud", "model_family": "deepseek", "provider": "ollama-cloud", "identity_source": "profile-config"},
                 "tessl-external": {"model": "deepseek", "model_family": "deepseek", "provider": "tessl", "identity_source": "operator-confirmed"},
             },
             "pools": {

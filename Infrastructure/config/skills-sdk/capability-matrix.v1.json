@@ -465,7 +465,7 @@
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Run a bounded deepseek-v4-flash:cloud canary through the Configs-owned authenticated wrapper and Codex oss-cloud profile, then refresh the current cloud challenge receipts before Tessl dry-run.",
+      "next_slice": "Run a bounded deepseek-v4-flash:0731-cloud canary through the Configs-owned authenticated wrapper and Codex oss-cloud profile, then refresh the current cloud challenge receipts before Tessl dry-run.",
       "notes": "The SDK routes to the internal skill-builder eval backend, binds receipts to package, rubric, and execution-model identity, and aggregates bounded release shards only when profile and exact case coverage match. The prior qwen and DeepSeek target-eight aggregates are historical evidence because the package policy, scorer, or OSS-cloud execution identity may have changed. The current policy retains a 20-case qwen local development pool and a bounded DeepSeek cloud challenge pool containing the fixed release eight plus up to two rotating local-growth cases. Changing release case ids, criteria, rubric, scorer, package identity, or execution model family creates a new baseline version. Config and contract checks do not by themselves prove a live provider invocation. No Tessl, distribution, runtime, or release readiness is claimed."
     },
     {
@@ -482,7 +482,7 @@
         "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
       ],
       "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
-      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:9b-mlx, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud through the Configs-owned authenticated wrapper, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:9b-mlx, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:0731-cloud through the Configs-owned authenticated wrapper, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
     },
     {
       "id": "ab_rubric",
@@ -499,7 +499,7 @@
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_rubric_fixture_records_stable_cross_stage_scorecard"
       ],
       "next_slice": "Use this rubric digest for Codex oss-local judge execution before adding current oss-cloud and Tessl confirmation receipts.",
-      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:9b-mlx, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
+      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:9b-mlx, cloud deepseek-v4-flash:0731-cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
     },
     {
       "id": "ab_preview",

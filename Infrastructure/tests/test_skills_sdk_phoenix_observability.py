@@ -26,6 +26,8 @@ from ask.skills_sdk.phoenix_observability import (  # noqa: E402
 from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
     CONFIGS_AUTH_WRAPPER,
     CONFIGS_CODEX_EXEC_WRAPPER,
+    configs_auth_wrapper,
+    configs_codex_exec_wrapper,
 )
 from ask.skills_sdk.phoenix_trace_plan import build_eval_trace_plan  # noqa: E402
 
@@ -76,6 +78,14 @@ def _eval_trace_receipt(case_count: int) -> dict[str, object]:
     }
 
 
+def _configs_auth_path() -> str:
+    return configs_auth_wrapper() or str(CONFIGS_AUTH_WRAPPER)
+
+
+def _configs_exec_path() -> str:
+    return configs_codex_exec_wrapper() or str(CONFIGS_CODEX_EXEC_WRAPPER)
+
+
 def _ab_variant(label: str, profile: str, output_digest: str, stdout_digest: str) -> dict[str, object]:
     return {
         "variant_label": label,
@@ -103,9 +113,9 @@ def _ab_profile_receipt() -> dict[str, object]:
 
 
 _JUDGE_RUNTIME_ARGV = [
-    "bash", str(CONFIGS_AUTH_WRAPPER), "--env-file",
+    "bash", _configs_auth_path(), "--env-file",
     "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "bash",
-    str(CONFIGS_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
+    _configs_exec_path(), "--profile", "oss-cloud",
     "--strict-config", "--sandbox", "read-only", "--ephemeral", "--json", "-",
 ]
 _JUDGE_LOGICAL_SHAPE = [
@@ -268,6 +278,20 @@ class TestSkillsSdkPhoenixObservability(unittest.TestCase):
         receipt = raised.value.receipt
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("source_kind_supported", {check["id"] for check in receipt["blockers"]})
+
+    def test_mirror_reports_malformed_source_json_as_a_blocker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "malformed.json"
+            path.write_text("{not-json", encoding="utf-8")
+
+            with pytest.raises(PhoenixObservabilityError) as raised:
+                build_phoenix_mirror_receipt(REPO_ROOT, receipt_path=path.as_posix())
+
+        receipt = raised.value.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        source_check = next(check for check in receipt["checks"] if check["id"] == "source_json")
+        self.assertEqual(source_check["status"], "blocker")
+        self.assertTrue(any("JSONDecodeError" in item for item in source_check["evidence"]))
 
     def test_mirror_write_emits_jsonl_when_out_is_explicit(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -530,7 +554,7 @@ print(json.dumps({"status": "pass", "http_status": 200}))
 
             trace_receipt = build_phoenix_eval_trace_receipt(
                 REPO_ROOT,
-                eval_receipt=_eval_trace_receipt(30),
+                eval_receipt={**_eval_trace_receipt(30), "case_count": None},
                 base_url="http://127.0.0.1:6006",
                 otel_python_path=runtime.as_posix(),
                 enabled=True,
@@ -639,14 +663,14 @@ print(json.dumps({"status": "pass", "http_status": 200}))
             "mutation_performed": True,
             "judge_command_argv": [
                 "bash",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                _configs_auth_path(),
                 "--env-file",
                 "<operator-approved-opaque-env-stream>",
                 "--require-env",
                 "OLLAMA_API_KEY",
                 "--",
                 "bash",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                _configs_exec_path(),
                 "--profile",
                 "oss-cloud",
                 "--strict-config",

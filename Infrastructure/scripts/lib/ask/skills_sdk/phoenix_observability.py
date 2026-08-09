@@ -67,6 +67,7 @@ def emit_ask_result_to_phoenix(
 
 
 __all__ = [
+    "OSS_CODEX_PROFILES",
     "PHOENIX_ACCEPTANCE_TRACE",
     "PHOENIX_EVAL_TRACE_DEFAULT_CASE_SPAN_LIMIT",
     "PHOENIX_EVAL_TRACE_MAX_CASE_SPAN_LIMIT",
@@ -78,7 +79,6 @@ __all__ = [
     "PHOENIX_SMOKE_SCHEMA_VERSION",
     "PHOENIX_STATUS_SCHEMA_URI",
     "PHOENIX_STATUS_SCHEMA_VERSION",
-    "OSS_CODEX_PROFILES",
     "SUPPORTED_SOURCE_KINDS",
     "PhoenixObservabilityError",
     "build_phoenix_eval_trace_receipt",
