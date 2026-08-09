@@ -358,7 +358,7 @@ def _minimal_lane_evidence(lane_id: str, payloads: list[dict[str, Any]]) -> dict
         cases = _oss_case_evidence(payloads)
         if cases:
             evidence["cases"] = cases
-    if lane_id == "tessl-local-proof":
+    if lane_id == "tessl-local-proof" and payloads:
         evidence.update(_tessl_local_proof_evidence(payloads[0]))
     return evidence
 
