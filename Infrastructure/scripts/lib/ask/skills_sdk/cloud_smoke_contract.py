@@ -91,6 +91,8 @@ def _child_contract_findings(child: list[str]) -> list[str]:
 
 
 def _child_chain_findings(argv: list[str]) -> list[str]:
+    if len(argv) < 12:
+        return ["codex_exec_child_chain_contract"]
     if argv[7] != "env" or argv[8:10] != ["-u", "CODEX_CONFIG_HOME"]:
         return ["codex_exec_child_chain_contract"]
     if argv[10] != "CODEX_HOME=<isolated-codex-home>" or argv[11] != "bash":
