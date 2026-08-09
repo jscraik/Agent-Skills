@@ -338,6 +338,7 @@ def main():
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
     evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")
     evals_run_parser.add_argument("--tessl-live-dry-run", action="store_true", help="Stage private Tessl tile eval inputs without invoking Tessl")
+    evals_run_parser.add_argument("--handoff-readiness", help="Current repo-relative handoff readiness manifest under .harness/evidence/handoff")
     evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
@@ -798,7 +799,7 @@ def main():
         if args.action == "run":
             result = run_evals(
                 repo_root,
-                path=args.path,
+                args.path,
                 mode=args.mode,
                 dashboard=not args.no_dashboard,
                 runner=args.runner,
@@ -807,6 +808,7 @@ def main():
                 tessl_live_private=args.tessl_live_private,
                 tessl_workspace=args.tessl_workspace,
                 tessl_live_dry_run=args.tessl_live_dry_run,
+                handoff_readiness_path=args.handoff_readiness,
                 model=args.model,
                 codex_profile=args.profile,
                 cases=args.case,
@@ -1891,9 +1893,6 @@ def main():
             elif args.topic == "workouts":
                 print_first_validation_command(result.data)
                 print("\n📚 Workout examples:\n   ask workouts list\n   ask workouts run agent-ops/verification-before-completion --attempts 2\n   ask workouts score agent-ops/verification-before-completion\n   ask workouts promote agent-ops/verification-before-completion --dry-run")
-    if result.status == "success":
-        sys.exit(0)
-    else:
-        sys.exit(exit_code_for_errors(result.errors))
+    sys.exit(0 if result.status == "success" else exit_code_for_errors(result.errors))
 if __name__ == "__main__":
     main()

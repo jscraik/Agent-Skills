@@ -501,8 +501,11 @@ commands:
 - ./bin/plugin-eval analyze <skill-path> --format json
 - ./bin/ask skills external-review <skill-path> --json --robot
 - ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot
+- ./bin/ask sdk eval handoff-capture --skill <skill-path> --lane <pre-tessl-lane-id> --receipt-path .harness/evidence/handoff/<skill>/<new-source-receipt>.json --execute --json --robot
+- ./bin/ask sdk eval handoff-materialize --skill <skill-path> --evidence-root .harness/evidence/handoff/<skill>/<new-bundle> --lane-receipt <lane-id>=<receipt.json> [repeat oss-local or oss-cloud receipt assignments for each two-case shard] --execute --json --robot
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 - ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot
+- ./bin/ask sdk eval tessl-view --skill <skill-path> --run-id <submitted-run-id> --workspace <workspace> --execute --json --robot
 
 OSS profile proof must use `codex exec --profile oss-local` and the Configs-backed
 strict `oss-cloud` executor chain, or SDK receipts that prove those exact profile

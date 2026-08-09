@@ -8696,14 +8696,16 @@ def skills_sdk_eval_run(
 
         internal = _eval_commands.run_evals(
             repo_root,
-            target,
-            mode=mode,
-            runner="codex",
-            dashboard=False,
-            skip_tessl=skip_tessl,
-            codex_profile=codex_profile,
-            cases=cases,
-            timeout_seconds=timeout_seconds,
+            _eval_commands.EvalRunRequest(
+                path=target,
+                mode=mode,
+                runner="codex",
+                dashboard=False,
+                skip_tessl=skip_tessl,
+                codex_profile=codex_profile,
+                cases=cases,
+                timeout_seconds=timeout_seconds,
+            ),
         )
         raw_status = str(internal.data.get("eval_status") or ("pass" if internal.status == "success" else "fail"))
         blockers = []

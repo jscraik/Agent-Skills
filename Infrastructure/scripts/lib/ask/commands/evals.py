@@ -13,6 +13,7 @@ import tempfile
 import hashlib
 import time
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
@@ -58,6 +59,36 @@ TESSL_LOCAL_REVIEW_MIN_SCORE = 95
 TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS = 10
 TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS = 900
 TESSL_PROJECT_LINK_TIMEOUT_SECONDS = 60
+
+
+@dataclass(frozen=True)
+class EvalRunRequest:
+    """Typed options for the public evaluation-run entry point."""
+
+    path: str
+    mode: str = "smoke"
+    dashboard: bool = True
+    runner: str = "codex"
+    skip_tessl: bool | None = None
+    allow_tessl_project_save: bool = False
+    tessl_live_private: bool = False
+    tessl_workspace: str | None = None
+    tessl_live_dry_run: bool = False
+    handoff_readiness_path: str | None = None
+    model: str | None = None
+    codex_profile: str | None = None
+    cases: list[str] | None = None
+    timeout_seconds: int | None = None
+
+
+def _coerce_eval_run_request(request: EvalRunRequest | str, legacy_options: Mapping[str, object]) -> EvalRunRequest:
+    if isinstance(request, EvalRunRequest):
+        if legacy_options:
+            raise TypeError("EvalRunRequest cannot be combined with legacy evaluation options")
+        return request
+    if not isinstance(request, str):
+        raise TypeError("run_evals requires an EvalRunRequest or a skill path string")
+    return EvalRunRequest(path=request, **legacy_options)
 
 
 def _pyyaml_eval_python_command() -> list[str]:
@@ -483,6 +514,19 @@ def _write_tessl_live_submission_evidence(
     ):
         return None
     return str(submission_path.relative_to(repo_root))
+
+
+def inspect_tessl_live_private_eval(
+    repo_root: Path,
+    *,
+    skill_path: str,
+    run_id: str,
+    workspace: str,
+) -> CallResult:
+    """Compatibility facade for the modular Tessl-view implementation."""
+    from ask.skills_sdk.tessl_live_view import inspect_tessl_live_private_eval as _inspect  # noqa: PLC0415
+
+    return _inspect(repo_root, skill_path=skill_path, run_id=run_id, workspace=workspace)
 
 
 def _tessl_project_link_receipt_path(
@@ -1051,24 +1095,71 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
     }
 
 
-def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
+def _tessl_live_handoff_readiness(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
 
     return build_handoff_readiness_receipt(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
 
 
-def _tessl_dry_run_admission(repo_root: Path, skill_path: str) -> dict:
+def _tessl_dry_run_admission(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_tessl_dry_run_admission  # noqa: PLC0415
 
     return build_tessl_dry_run_admission(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
+
+
+def _record_tessl_dry_run(
+    repo_root: Path,
+    readiness_path: Path,
+    tessl_eval: dict[str, object],
+) -> str:
+    from ask.skills_sdk.handoff_materialization import record_tessl_dry_run  # noqa: PLC0415
+
+    return record_tessl_dry_run(
+        repo_root,
+        readiness_path=readiness_path,
+        tessl_eval=tessl_eval,
+    )
+
+
+def _resolve_handoff_readiness_path(
+    repo_root: Path,
+    raw_path: str | None,
+) -> tuple[Path | None, str | None]:
+    """Accept only a regular, current-ready manifest in the evidence namespace."""
+    if raw_path is None:
+        return None, None
+    candidate = Path(raw_path)
+    if candidate.is_absolute():
+        return None, "--handoff-readiness must be repo-relative beneath .harness/evidence/handoff"
+    path = (repo_root / candidate).resolve(strict=False)
+    evidence_root = (repo_root / ".harness" / "evidence" / "handoff").resolve()
+    try:
+        path.relative_to(evidence_root)
+    except ValueError:
+        return None, "--handoff-readiness must stay beneath .harness/evidence/handoff"
+    if path.name != "eval-handoff-readiness.json":
+        return None, "--handoff-readiness must name eval-handoff-readiness.json"
+    if path.is_symlink() or not path.is_file():
+        return None, "--handoff-readiness must be an existing regular file"
+    return path, None
 
 
 def _tessl_scenario_generation_root_template() -> str:
@@ -3652,8 +3743,12 @@ def _case_ids_with_pass_status(payload: object) -> set[str]:
     return passed
 
 
-def _tessl_live_readiness_lanes(repo_root: Path, source_path: str) -> dict[str, dict[str, object]]:
-    readiness_path = default_handoff_readiness_path(repo_root, repo_root / source_path)
+def _tessl_live_readiness_lanes(
+    repo_root: Path,
+    source_path: str,
+    readiness_path: Path | None = None,
+) -> dict[str, dict[str, object]]:
+    readiness_path = readiness_path or default_handoff_readiness_path(repo_root, repo_root / source_path)
     readiness = _load_json_file(readiness_path)
     lanes = readiness.get("lanes")
     if not isinstance(lanes, list):
@@ -3695,10 +3790,11 @@ def _tessl_live_oss_scenario_parity(
     repo_root: Path,
     source_path: str,
     staged_source: Path,
+    readiness_path: Path | None = None,
 ) -> dict[str, object]:
     """Block Tessl live when staged cases outrun OSS local/cloud pass evidence."""
     staged_case_ids = _tessl_live_staged_case_ids(staged_source)
-    lanes = _tessl_live_readiness_lanes(repo_root, source_path)
+    lanes = _tessl_live_readiness_lanes(repo_root, source_path, readiness_path)
     lane_case_ids: dict[str, list[str]] = {}
     missing_by_lane: dict[str, list[str]] = {}
     extra_by_lane: dict[str, list[str]] = {}
@@ -4475,6 +4571,7 @@ def _run_tessl_live_private_eval(
     *,
     workspace: str | None,
     dry_run: bool = False,
+    handoff_readiness_path: Path | None = None,
 ) -> dict:
     """Run or preview the opt-in private Tessl plugin eval lane."""
     command_display = "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
@@ -4522,7 +4619,12 @@ def _run_tessl_live_private_eval(
         project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         dry_run=dry_run,
     )
-    parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
+    parity = _tessl_live_oss_scenario_parity(
+        repo_root,
+        path,
+        staged_source,
+        handoff_readiness_path,
+    )
     budget_preflight = _tessl_live_budget_preflight(staged_source)
     common["oss_scenario_parity"] = parity
     common["budget_preflight"] = budget_preflight
@@ -4837,6 +4939,7 @@ def _evals_run_validation_command(
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
+    handoff_readiness_path: str | None = None,
     timeout_seconds: int | None = None,
 ) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
@@ -4848,6 +4951,8 @@ def _evals_run_validation_command(
         parts.extend(["--tessl-workspace", tessl_workspace])
     if tessl_live_dry_run:
         parts.append("--tessl-live-dry-run")
+    if handoff_readiness_path:
+        parts.extend(["--handoff-readiness", handoff_readiness_path])
     if timeout_seconds is not None:
         parts.extend(["--timeout-seconds", str(timeout_seconds)])
     if not dashboard:
@@ -6021,23 +6126,22 @@ def _render_eval_dashboard(repo_root: Path, skill_path: str, mode: str, raw_outp
     }
 
 
-def run_evals(
-    repo_root: Path,
-    path: str,
-    mode: str = "smoke",
-    dashboard: bool = True,
-    runner: str = "codex",
-    skip_tessl: bool | None = None,
-    allow_tessl_project_save: bool = False,
-    tessl_live_private: bool = False,
-    tessl_workspace: str | None = None,
-    tessl_live_dry_run: bool = False,
-    model: str | None = None,
-    codex_profile: str | None = None,
-    cases: list[str] | None = None,
-    timeout_seconds: int | None = None,
-) -> CallResult:
+def run_evals(repo_root: Path, request: EvalRunRequest | str, **legacy_options: object) -> CallResult:
     """Runs evaluation cases for a skill."""
+    request = _coerce_eval_run_request(request, legacy_options)
+    path = request.path
+    mode = request.mode
+    dashboard = request.dashboard
+    runner = request.runner
+    skip_tessl = request.skip_tessl
+    tessl_live_private = request.tessl_live_private
+    tessl_workspace = request.tessl_workspace
+    tessl_live_dry_run = request.tessl_live_dry_run
+    handoff_readiness_path = request.handoff_readiness_path
+    model = request.model
+    codex_profile = request.codex_profile
+    cases = request.cases
+    timeout_seconds = request.timeout_seconds
     result = CallResult()
     effective_skip_tessl = not tessl_live_private if skip_tessl is None else skip_tessl
     requested_path = path
@@ -6113,6 +6217,7 @@ def run_evals(
             tessl_live_private=tessl_live_private,
             tessl_workspace=effective_tessl_workspace,
             tessl_live_dry_run=tessl_live_dry_run,
+            handoff_readiness_path=handoff_readiness_path,
         )
     ]
     effective_codex_profile = codex_profile or SMOKE_EVAL_PROFILE
@@ -6145,6 +6250,32 @@ def run_evals(
         result.errors.append(ErrorObject(
             code="ERR_VALIDATION",
             message="--tessl-live-dry-run requires --tessl-live-private.",
+        ))
+        return result
+
+    resolved_handoff_readiness_path, handoff_readiness_error = _resolve_handoff_readiness_path(
+        repo_root,
+        handoff_readiness_path,
+    )
+    if handoff_readiness_error is not None:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = handoff_readiness_error
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=handoff_readiness_error))
+        return result
+    if resolved_handoff_readiness_path is not None and not tessl_live_private:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = "--handoff-readiness requires --tessl-live-private."
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="--handoff-readiness requires --tessl-live-private.",
         ))
         return result
 
@@ -6203,7 +6334,11 @@ def run_evals(
                 "oss-local, oss-cloud, and Tessl-local receipts pass; a successful dry-run then becomes "
                 "required evidence for live scoring."
             )
-            dry_run_admission = _tessl_dry_run_admission(repo_root, path)
+            dry_run_admission = _tessl_dry_run_admission(
+                repo_root,
+                path,
+                resolved_handoff_readiness_path,
+            )
             result.data["tessl_dry_run_admission"] = dry_run_admission
             if not dry_run_admission.get("ready_for_tessl_dry_run"):
                 result.status = "error"
@@ -6240,7 +6375,11 @@ def run_evals(
                 "live Tessl quota, auth, project-link, or external scoring blockers remain Tessl-lane blockers, "
                 "and oss-local is rerun only for classified local skill regressions."
             )
-            handoff_readiness = _tessl_live_handoff_readiness(repo_root, path)
+            handoff_readiness = _tessl_live_handoff_readiness(
+                repo_root,
+                path,
+                resolved_handoff_readiness_path,
+            )
             result.data["handoff_readiness"] = handoff_readiness
             if not handoff_readiness.get("ready_for_live_tessl"):
                 result.status = "error"
@@ -6275,7 +6414,29 @@ def run_evals(
             path,
             workspace=effective_tessl_workspace,
             dry_run=tessl_live_dry_run,
+            handoff_readiness_path=resolved_handoff_readiness_path,
         )
+        if tessl_live_dry_run and tessl_eval.get("status") == "pass":
+            receipt_readiness_path = (
+                resolved_handoff_readiness_path
+                or default_handoff_readiness_path(repo_root, repo_root / path)
+            )
+            if receipt_readiness_path.is_file() and not receipt_readiness_path.is_symlink():
+                try:
+                    receipt_path = _record_tessl_dry_run(
+                        repo_root,
+                        receipt_readiness_path,
+                        tessl_eval,
+                    )
+                except ValueError as exc:
+                    tessl_eval = {
+                        **tessl_eval,
+                        "status": "blocked",
+                        "blocker": f"Failed to record Tessl dry-run evidence: {exc}",
+                        "blocker_class": "blocked_validation",
+                    }
+                else:
+                    tessl_eval["handoff_dry_run_receipt"] = receipt_path
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
             blocker_class = tessl_eval.get("blocker_class") or "blocked_validation"
@@ -6490,6 +6651,7 @@ def run_evals(
             path,
             workspace=effective_tessl_workspace,
             dry_run=tessl_live_dry_run,
+            handoff_readiness_path=resolved_handoff_readiness_path,
         )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
