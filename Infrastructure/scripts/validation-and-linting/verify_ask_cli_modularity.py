@@ -57,13 +57,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing skill review dashboard extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract extraction debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
@@ -83,13 +76,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing eval command regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_package_contract.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract regression suite debt",
         "expires": "2026-07-31",
     },
     "Infrastructure/tests/test_skills_sdk_scenario_quality.py": {
