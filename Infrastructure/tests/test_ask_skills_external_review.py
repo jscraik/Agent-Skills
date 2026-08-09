@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import tempfile
@@ -92,13 +93,16 @@ def _run_dashboard_review(mock_run, mock_which, mock_audit):
         ]
         result = external_review_skill(repo_root=repo_root, skill_path=skill_dir, audit_level="compat", report_path="Infrastructure/artifacts/skill-reviews/example-skill.json", dashboard=True, dashboard_path="Infrastructure/artifacts/skill-reviews/example-skill.html")
         html_text = (repo_root / result.data["dashboard_path"]).read_text(encoding="utf-8")
-    return result, html_text
+        report_payload = json.loads((repo_root / result.data["report_path"]).read_text(encoding="utf-8"))
+    return result, html_text, report_payload
 
 
-def _assert_dashboard_review(result, html_text):
+def _assert_dashboard_review(result, html_text, report_payload):
     assert result.status == "success"
     assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill.html"
     assert result.data["dashboard_url"] == result.data["dashboard_path"]
+    assert report_payload["data"]["dashboard"] == {"status": "rendered", "tab": "quality"}
+    assert report_payload["data"]["dashboard_path"] == result.data["dashboard_path"]
     for marker in ("ASK Local Review", 'data-auto-refresh-seconds="0"', "Static evidence snapshot", 'role="tablist"', 'role="tabpanel"', "Quality", "Evals Not Run Yet", "Snyk Advisory", "local_internal_only", "disabled_until_requested"):
         assert marker in html_text
 
