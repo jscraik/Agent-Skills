@@ -559,10 +559,11 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                     "--env-file", "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--",
                     "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home",
                     "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
-                    "--profile", "oss-cloud", "--strict-config", "--sandbox", "read-only", "--ephemeral",
+                    "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
+                    "--sandbox", "read-only", "--ephemeral",
                     "--model", "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
                 ],
-                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [],
+                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [], "secret_value_observed": False,
             }
             def smoke_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
                 return subprocess.CompletedProcess(

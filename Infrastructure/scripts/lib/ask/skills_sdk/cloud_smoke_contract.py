@@ -3,46 +3,91 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from ask.skills_sdk.ab_transport_contracts import (
+    is_configs_auth_wrapper,
+    is_configs_codex_exec_wrapper,
+)
+
 
 CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
 
 
 def valid_cloud_smoke_receipt(payload: dict[str, Any]) -> bool:
+    return not cloud_smoke_receipt_findings(payload)
+
+
+def cloud_smoke_receipt_findings(payload: dict[str, Any]) -> list[str]:
+    """Return stable, receipt-safe reasons a cloud smoke is not admissible."""
     required = {
         "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
         "model_provider", "auth_source", "provider_invoked", "execution_argv", "exit_code",
-        "marker", "warnings", "findings",
+        "marker", "warnings", "findings", "secret_value_observed",
     }
-    return (
-        required.issubset(payload)
-        and payload.get("schema_version") == "skills-sdk.oss-cloud-smoke-run.v0"
-        and _valid_identity(payload)
-        and _valid_execution_argv(payload)
-        and _valid_outcome(payload, CLOUD_SMOKE_MARKER)
-    )
+    findings = [f"missing:{key}" for key in sorted(required - payload.keys())]
+    if findings:
+        return findings
+    if payload.get("schema_version") != "skills-sdk.oss-cloud-smoke-run.v0":
+        findings.append("schema_version_mismatch")
+    if not _valid_identity(payload):
+        findings.append("identity_mismatch")
+    findings.extend(_execution_argv_findings(payload))
+    if not _valid_outcome(payload, CLOUD_SMOKE_MARKER):
+        findings.append("outcome_mismatch")
+    return findings
 
 
 def _valid_execution_argv(payload: dict[str, Any]) -> bool:
+    return not _execution_argv_findings(payload)
+
+
+def _child_wrapper_index(argv: list[str]) -> int | None:
+    for index, value in enumerate(argv):
+        if is_configs_codex_exec_wrapper(value):
+            return index
+    return None
+
+
+def _adjacent_pair(child: list[str], flag: str, expected: str) -> bool:
+    return any(value == flag and child[index + 1] == expected for index, value in enumerate(child[:-1]))
+
+
+def _child_contract_findings(child: list[str]) -> list[str]:
+    required_pairs = {
+        "--profile": "oss-cloud",
+        "--sandbox": "read-only",
+        "--model": "deepseek-v4-flash:cloud",
+        "-c": 'approval_policy="on-request"',
+    }
+    findings = [
+        f"missing_or_nonadjacent:{flag}"
+        for flag, expected in required_pairs.items()
+        if not _adjacent_pair(child, flag, expected)
+    ]
+    findings.extend(
+        f"missing:{flag}"
+        for flag in ("--strict-config", "--ephemeral")
+        if flag not in child
+    )
+    return findings
+
+
+def _execution_argv_findings(payload: dict[str, Any]) -> list[str]:
     argv = payload.get("execution_argv")
     if not isinstance(argv, list) or len(argv) < 15 or not all(isinstance(item, str) for item in argv):
-        return False
+        return ["execution_argv_shape"]
     if (
         argv[0] != "bash"
-        or not argv[1].endswith("/run-auth-backed.sh")
+        or not is_configs_auth_wrapper(argv[1])
         or argv[2:7] != [
             "--env-file", "<operator-approved-opaque-env-stream>",
             "--require-env", "OLLAMA_API_KEY", "--",
         ]
     ):
-        return False
-    try:
-        child = argv[next(index for index, value in enumerate(argv) if value.endswith("/run-codex-exec.sh")):]
-    except StopIteration:
-        return False
-    return all(token in child for token in (
-        "--profile", "oss-cloud", "--strict-config", "--sandbox", "read-only",
-        "--ephemeral", "--model", "deepseek-v4-flash:cloud",
-    ))
+        return ["auth_wrapper_contract"]
+    wrapper_index = _child_wrapper_index(argv)
+    if wrapper_index is None:
+        return ["codex_exec_wrapper_contract"]
+    return _child_contract_findings(argv[wrapper_index:])
 
 
 def _valid_identity(payload: dict[str, Any]) -> bool:
@@ -63,5 +108,6 @@ def _valid_outcome(payload: dict[str, Any], marker: str) -> bool:
     return all((
         payload.get("status") == "pass", payload.get("exit_code") == 0,
         payload.get("marker") == marker, payload.get("findings") == [],
-        isinstance(payload.get("warnings"), list), payload.get("secret_value_observed", False) is False,
+        isinstance(payload.get("warnings"), list),
+        type(payload.get("secret_value_observed")) is bool and payload["secret_value_observed"] is False,
     ))

@@ -35,6 +35,7 @@ REQUIRED_LANES = {
         "run-auth-backed.sh --env-file ~/.codex/.env --require-env",
         "run-codex-exec.sh --profile oss-cloud",
         "--strict-config",
+        "-c 'approval_policy=\"on-request\"'",
         "--sandbox read-only",
         "--ephemeral",
         "execution_argv",

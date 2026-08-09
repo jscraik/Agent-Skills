@@ -200,6 +200,7 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertNotIn("mcp_servers", (isolated_home / "oss-cloud.config.toml").read_text(encoding="utf-8"))
             self.assertNotIn(f"CODEX_HOME={source.parent.resolve()}", command)
 
+    @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
     def test_receipt_retains_complete_redacted_execution_argv(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

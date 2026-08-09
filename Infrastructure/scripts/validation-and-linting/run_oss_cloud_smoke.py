@@ -162,6 +162,8 @@ def _command(args: argparse.Namespace, paths: dict[str, Path], env_file: Path) -
         "--profile",
         "oss-cloud",
         "--strict-config",
+        "-c",
+        'approval_policy="on-request"',
         "--skip-git-repo-check",
         "--sandbox",
         "read-only",
@@ -228,6 +230,7 @@ def _receipt(
         "last_message_path": str(paths["last_message"]),
         "warnings": warnings,
         "findings": findings,
+        "secret_value_observed": False,
     }
 
 

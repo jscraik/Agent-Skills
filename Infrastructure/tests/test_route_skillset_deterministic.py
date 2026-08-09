@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,19 +14,15 @@ SOURCE_PATHS = {
     "he-code-review": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
     "he-phase-work": "Plugins/harness-engineering/skills/he-phase-work/SKILL.md",
     "he-ideate": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
-    "he-phase-work": "Plugins/harness-engineering/skills/he-phase-work/SKILL.md",
-    "he-reconcile": "Plugins/harness-engineering/skills/he-reconcile/SKILL.md",
     "he-reconcile": "Plugins/harness-engineering/skills/he-reconcile/SKILL.md",
     "he-technical-review": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
     "he-tdd": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
     "he-work": "Plugins/harness-engineering/skills/he-work/SKILL.md",
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-creator": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
-    "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-installer": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
     "plugin-router": "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
     "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
-    "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
     "skill-installer": "skills-system/skill-installer/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
@@ -92,7 +89,7 @@ def _row(skill_id: str, description: str) -> dict[str, object]:
 def _route_process(skillsets_dir: Path, task: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
-            "python3", ROUTE_SCRIPT, "--skill-set", "skill-factory", "--task", task,
+            sys.executable, ROUTE_SCRIPT, "--skill-set", "skill-factory", "--task", task,
             "--skillsets-dir", str(skillsets_dir), "--json",
         ],
         capture_output=True, text=True, check=False,
@@ -119,7 +116,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             _write_manifest(skillsets_dir, skill_set, rows)
             result = subprocess.run(
                 [
-                    "python3",
+                    sys.executable,
                     ROUTE_SCRIPT,
                     "--skill-set",
                     skill_set,
@@ -452,7 +449,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
             result = subprocess.run(
                 [
-                    "python3",
+                    sys.executable,
                     ROUTE_SCRIPT,
                     "--skill-set",
                     "harness-engineering",
@@ -490,7 +487,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
             result = subprocess.run(
                 [
-                    "python3",
+                    sys.executable,
                     ROUTE_SCRIPT,
                     "--skill-set",
                     "harness-engineering",

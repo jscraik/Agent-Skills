@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -117,9 +118,11 @@ def _find_nested_receipt(data: dict[str, Any]) -> dict[str, Any] | None:
         value = data.get(key)
         if isinstance(value, dict) and isinstance(value.get("receipt"), dict):
             return value["receipt"]
-    for value in data.values():
+    values = [data[key] for key in sorted(data)]
+    for value in values:
         if isinstance(value, dict) and isinstance(value.get("receipt"), dict):
             return value["receipt"]
+    for value in values:
         if isinstance(value, dict) and isinstance(value.get("schema_version"), str):
             return value
     return None
@@ -299,7 +302,20 @@ def _mirror_rows(repo_root: Path, receipt_path: Path, source_digest: str, receip
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        for row in rows:
-            handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")))
-            handle.write("\n")
+    staged_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.",
+            suffix=".tmp", delete=False,
+        ) as handle:
+            staged_path = Path(handle.name)
+            for row in rows:
+                handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")))
+                handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(staged_path, path)
+        staged_path = None
+    finally:
+        if staged_path is not None:
+            staged_path.unlink(missing_ok=True)
