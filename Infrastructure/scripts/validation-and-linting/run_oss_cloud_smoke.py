@@ -446,11 +446,11 @@ def main(argv: list[str] | None = None) -> int:
     # constants and allowlisted fields keeps captured stdout/stderr out of the
     # logging sink even when a child process emits secret-shaped text.
     public_receipt = _value_blind_receipt(receipt)
-    # Do not log secret-derived observation fields; keep output value-blind.
-    logged_receipt = dict(public_receipt)
-    logged_receipt.pop("secret_observation", None)
-    logged_receipt.pop("secret_value_observed", None)
-    print(json.dumps(logged_receipt, sort_keys=True, separators=(",", ":")) if args.json else logged_receipt["status"])
+    print(
+        json.dumps(public_receipt, sort_keys=True, separators=(",", ":"))
+        if args.json
+        else public_receipt["status"]
+    )
     return 0 if receipt["status"] == "pass" else 1
 
 
