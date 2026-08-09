@@ -348,7 +348,11 @@ def _redacted_command(command: list[str] | None) -> list[str] | None:
     # runs ``command``; this projection only governs the persisted receipt.
     return [
         "bash",
-        str(DEFAULT_AUTH_WRAPPER),
+        # Keep these receipt tokens literal.  The identity contract still
+        # validates the actual child argv before execution; the public receipt
+        # must not carry a Path object derived from the workstation boundary
+        # into the logging sink.
+        "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
         "--env-file",
         "<operator-approved-opaque-env-stream>",
         "--require-env",
@@ -359,7 +363,7 @@ def _redacted_command(command: list[str] | None) -> list[str] | None:
         "CODEX_CONFIG_HOME",
         "CODEX_HOME=<isolated-codex-home>",
         "bash",
-        str(DEFAULT_CODEX_EXEC_WRAPPER),
+        "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
         "--profile",
         "oss-cloud",
         "--strict-config",
