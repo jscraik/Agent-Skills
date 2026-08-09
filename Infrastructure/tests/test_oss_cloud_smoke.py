@@ -538,6 +538,22 @@ class TestOssCloudSmoke(unittest.TestCase):
                 self.assertEqual(receipt["status"], "blocked")
                 self.assertTrue(receipt["secret_value_observed"])
 
+    def test_runtime_secret_finding_is_promoted_before_receipt_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = self.runner._paths(str(root / "out"))
+            paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+            paths["stderr"].write_text("OPENAI_API_KEY=redacted-test-value\n", encoding="utf-8")
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+            findings: list[dict[str, str]] = []
+
+            warnings = self.runner._runtime_findings(args, paths, findings, ["bash"], 0)
+
+        self.assertNotIn("oss_cloud_secret_output_observed", {item["code"] for item in warnings})
+        self.assertIn("oss_cloud_secret_output_observed", {item["code"] for item in findings})
+
     def test_cloud_smoke_rejects_codex_wrapper_nested_after_child_argument(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",

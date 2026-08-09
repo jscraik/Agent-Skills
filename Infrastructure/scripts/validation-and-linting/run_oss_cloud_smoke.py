@@ -328,7 +328,10 @@ def _runtime_findings(
     if SECRET_OUTPUT_RE.search("\n".join((_read(paths["stdout"]), _read(paths["stderr"])) )):
         runtime_findings.append({"code": "oss_cloud_secret_output_observed", "message": "Captured smoke output matched a redacted secret-shaped marker."})
     warnings = [item for item in runtime_findings if item["code"] in CLOUD_SMOKE_NON_BLOCKING_CODES]
-    findings.extend(item for item in runtime_findings if item["code"] not in CLOUD_SMOKE_NON_BLOCKING_CODES)
+    # Promote every other runtime finding, including secret-shaped output, into
+    # the blocking findings before either raw or public receipts are built.
+    runtime_blockers = [item for item in runtime_findings if item["code"] not in CLOUD_SMOKE_NON_BLOCKING_CODES]
+    findings.extend(runtime_blockers)
     if exit_code != 0:
         findings.append({"code": "oss_cloud_smoke_exit_nonzero", "message": f"Codex exited with {exit_code}."})
     if _read(paths["stdout"]).strip() != args.marker:
@@ -497,6 +500,8 @@ def main(argv: list[str] | None = None) -> int:
     # The projection is intentionally value-blind: it contains no captured
     # stdout/stderr bytes or credential values. Suppress the conservative sink
     # alert for this reviewed, redacted evidence boundary.
+    # waiver: py/clear-text-logging-sensitive-data; reason: fixed-shape receipt
+    # contains only allowlisted, redacted fields; issue: PR-386; expires: 2026-12-31
     # lgtm[py/clear-text-logging-sensitive-data]
     # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(public_receipt, sort_keys=True, separators=(",", ":")) if args.json else public_receipt["status"])
