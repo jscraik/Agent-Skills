@@ -55,16 +55,13 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _codes(raw_codes: str) -> list[str]:
-    known_codes = {code for code, _ in _FINDING_MESSAGES}
-    return [code for code in raw_codes.split(",") if code in known_codes]
-
-
 def _projected_findings(raw_codes: str) -> list[dict[str, str]]:
-    messages = dict(_FINDING_MESSAGES)
+    """Project only immutable, reviewed receipt strings from requested code names."""
+    requested_codes = frozenset(raw_codes.split(","))
     return [
-        {"code": code, "message": messages[code]}
-        for code in _codes(raw_codes)
+        {"code": code, "message": message}
+        for code, message in _FINDING_MESSAGES
+        if code in requested_codes
     ]
 
 
