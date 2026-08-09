@@ -67,6 +67,11 @@ bash .../run-codex-exec.sh --profile oss-cloud --strict-config -c
 If that chain is absent or incomplete, classify the lane as blocked; never
 promote from the normalized command alone.
 
+Value-blind receipts replace the two developer-specific wrapper paths with the
+fixed tokens `<configs-auth-wrapper>` and `<configs-codex-exec-wrapper>`; the
+receipt validator accepts those tokens while execution admission still requires
+the canonical Configs wrapper identities.
+
 ## Lane Matrix
 
 | Lane                      | Proves                                                                                                                                                                | Required command shape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Authority boundary                                                                                                                                                                                                                                                                                                        | Blocks that do not prove failure                                                                                                                                            |

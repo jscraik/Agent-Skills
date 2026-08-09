@@ -348,11 +348,10 @@ def _redacted_command(*, executed: bool) -> list[str] | None:
     # runs ``command``; this projection only governs the persisted receipt.
     return [
         "bash",
-        # Keep these receipt tokens literal.  The identity contract still
-        # validates the actual child argv before execution; the public receipt
-        # must not carry a Path object derived from the workstation boundary
-        # into the logging sink.
-        "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+        # Keep these receipt tokens literal and non-identifying. The identity
+        # contract validates the actual child argv before execution; the public
+        # receipt must not carry workstation paths into the logging sink.
+        "<configs-auth-wrapper>",
         "--env-file",
         "<operator-approved-opaque-env-stream>",
         "--require-env",
@@ -363,7 +362,7 @@ def _redacted_command(*, executed: bool) -> list[str] | None:
         "CODEX_CONFIG_HOME",
         "CODEX_HOME=<isolated-codex-home>",
         "bash",
-        "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+        "<configs-codex-exec-wrapper>",
         "--profile",
         "oss-cloud",
         "--strict-config",
@@ -393,13 +392,10 @@ def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     return projected
 
 
-def _safe_secret_status(findings: list[dict[str, str]], command: list[str] | None) -> str:
-    # The public projection must not inspect or carry the source-derived
-    # finding values.  Any projected blocker is conservatively represented as
-    # blocked; the internal receipt retains the precise scan classification.
-    if findings:
+def _safe_secret_status(secret_output_observed: bool, command_present: bool) -> str:
+    if secret_output_observed:
         return "blocked"
-    return "clear" if command is not None else "unavailable"
+    return "clear" if command_present else "unavailable"
 
 
 def _value_blind_status(provider_invoked: bool, findings: list[dict[str, str]]) -> str:
@@ -413,12 +409,13 @@ def _value_blind_receipt(
     env_file: Path,
     findings: list[dict[str, str]],
     warnings: list[dict[str, str]],
-    command: list[str] | None,
+    command_present: bool,
     exit_code: int | None,
     duration_seconds: float,
     provider_invoked: bool,
+    secret_output_observed: bool,
 ) -> dict[str, Any]:
-    safe_secret_status = _safe_secret_status(findings, command)
+    safe_secret_status = _safe_secret_status(secret_output_observed, command_present)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -429,8 +426,8 @@ def _value_blind_receipt(
         "model_provider": EXPECTED_PROVIDER,
         "auth_source": _auth_source(env_file),
         "provider_invoked": provider_invoked,
-        "command": _redacted_command(executed=command is not None),
-        "execution_argv": _redacted_command(executed=command is not None),
+        "command": _redacted_command(executed=command_present),
+        "execution_argv": _redacted_command(executed=command_present),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
         "marker": DEFAULT_MARKER,
@@ -475,6 +472,31 @@ def _run_smoke(
     return receipt, runtime_warnings, command, exit_code, duration_seconds, True
 
 
+def _public_receipt(
+    args: argparse.Namespace,
+    findings: list[dict[str, str]],
+    runtime_warnings: list[dict[str, str]],
+    command: list[str] | None,
+    exit_code: int | None,
+    duration_seconds: float,
+    provider_invoked: bool,
+) -> dict[str, Any]:
+    public_findings = _value_blind_findings(findings)
+    return _value_blind_receipt(
+        env_file=Path(args.env_file).expanduser(),
+        findings=public_findings,
+        warnings=_value_blind_findings(runtime_warnings),
+        command_present=command is not None,
+        exit_code=exit_code,
+        duration_seconds=duration_seconds,
+        provider_invoked=provider_invoked,
+        secret_output_observed=any(
+            item.get("code") == "oss_cloud_secret_output_observed"
+            for item in public_findings
+        ),
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.timeout_seconds < 1:
@@ -497,14 +519,8 @@ def main(argv: list[str] | None = None) -> int:
     # The JSON path is a value-blind, fixed-shape receipt. Projecting explicit
     # constants and allowlisted fields keeps captured stdout/stderr out of the
     # logging sink even when a child process emits secret-shaped text.
-    public_receipt = _value_blind_receipt(
-        env_file=Path(args.env_file).expanduser(),
-        findings=_value_blind_findings(findings),
-        warnings=_value_blind_findings(runtime_warnings),
-        command=command,
-        exit_code=exit_code,
-        duration_seconds=duration_seconds,
-        provider_invoked=provider_invoked,
+    public_receipt = _public_receipt(
+        args, findings, runtime_warnings, command, exit_code, duration_seconds, provider_invoked,
     )
     # The projection is intentionally value-blind: it contains no captured
     # stdout/stderr bytes or credential values. Suppress the conservative sink

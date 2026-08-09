@@ -221,8 +221,9 @@ class TestOssCloudSmoke(unittest.TestCase):
                 duration_seconds=0.1, provider_invoked=True,
             )
             self.assertEqual(receipt["execution_argv"], receipt["command"])
-            self.assertTrue(any(token.endswith("run-auth-backed.sh") for token in receipt["execution_argv"]))
-            self.assertTrue(any(token.endswith("run-codex-exec.sh") for token in receipt["execution_argv"]))
+            self.assertIn("<configs-auth-wrapper>", receipt["execution_argv"])
+            self.assertIn("<configs-codex-exec-wrapper>", receipt["execution_argv"])
+            self.assertNotIn("/Users/", json.dumps(receipt))
             self.assertNotIn(str(env_file), receipt["execution_argv"])
 
     def test_receipt_does_not_echo_operator_controlled_marker_or_paths(self) -> None:
@@ -470,6 +471,23 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertTrue(receipt["secret_value_observed"])
         self.assertEqual(receipt["secret_observation"]["status"], "blocked")
         self.assertIn("oss_cloud_secret_output_observed", {finding["code"] for finding in receipt["findings"]})
+
+    def test_public_projection_does_not_claim_secret_for_other_blockers(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / "env"
+            receipt = self.runner._value_blind_receipt(
+                env_file=env_file,
+                findings=[{"code": "oss_cloud_smoke_exit_nonzero", "message": "redacted"}],
+                warnings=[],
+                command_present=True,
+                exit_code=1,
+                duration_seconds=1.0,
+                provider_invoked=False,
+                secret_output_observed=False,
+            )
+
+        self.assertEqual(receipt["secret_observation"]["status"], "clear")
+        self.assertFalse(receipt["secret_value_observed"])
 
     def test_secret_marker_after_shell_prefix_blocks_the_smoke_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

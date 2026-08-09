@@ -10,6 +10,8 @@ from ask.skills_sdk.ab_transport_contracts import (
 
 
 CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
+REDACTED_AUTH_WRAPPER = "<configs-auth-wrapper>"
+REDACTED_CODEX_EXEC_WRAPPER = "<configs-codex-exec-wrapper>"
 FORBIDDEN_CLOUD_SMOKE_FLAGS = frozenset({
     "--dangerously-bypass-approvals-and-sandbox",
     "--no-sandbox",
@@ -49,7 +51,10 @@ def _valid_execution_argv(payload: dict[str, Any]) -> bool:
 
 def _child_wrapper_index(argv: list[str]) -> int | None:
     expected_index = 12
-    return expected_index if len(argv) > expected_index and is_configs_codex_exec_wrapper(argv[expected_index]) else None
+    return expected_index if len(argv) > expected_index and (
+        is_configs_codex_exec_wrapper(argv[expected_index])
+        or argv[expected_index] == REDACTED_CODEX_EXEC_WRAPPER
+    ) else None
 
 
 def _adjacent_pair(child: list[str], flag: str, expected: str) -> bool:
@@ -108,7 +113,7 @@ def _execution_argv_findings(payload: dict[str, Any]) -> list[str]:
         return ["execution_argv_shape"]
     if (
         argv[0] != "bash"
-        or not is_configs_auth_wrapper(argv[1])
+        or not (is_configs_auth_wrapper(argv[1]) or argv[1] == REDACTED_AUTH_WRAPPER)
         or argv[2:7] != [
             "--env-file", "<operator-approved-opaque-env-stream>",
             "--require-env", "OLLAMA_API_KEY", "--",
