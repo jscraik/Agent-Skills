@@ -60,8 +60,10 @@ the exact command argv in the judge receipt.
 The logical `codex exec ...` command is display-only. A pass or completed
 oss-cloud receipt must include `execution_argv` proving the complete Configs
 chain: `bash .../run-auth-backed.sh --env-file <opaque FIFO> --require-env
-OLLAMA_API_KEY -- bash .../run-codex-exec.sh --profile oss-cloud --model
-deepseek-v4-flash:cloud --strict-config -c 'approval_policy="on-request"' --sandbox read-only --ephemeral`.
+OLLAMA_API_KEY -- env -u CODEX_CONFIG_HOME CODEX_HOME=<isolated-codex-home>
+bash .../run-codex-exec.sh --profile oss-cloud --strict-config -c
+'approval_policy="on-request"' --skip-git-repo-check --sandbox read-only
+--ephemeral --model deepseek-v4-flash:cloud`.
 If that chain is absent or incomplete, classify the lane as blocked; never
 promote from the normalized command alone.
 
