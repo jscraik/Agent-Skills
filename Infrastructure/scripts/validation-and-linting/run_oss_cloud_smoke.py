@@ -382,14 +382,14 @@ def _redacted_command(*, executed: bool) -> list[str] | None:
 def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     """Project findings to fixed messages before JSON reaches stdout."""
     projected: list[dict[str, str]] = []
-    for item in items:
-        code = item.get("code")
-        for known_code, message in VALUE_BLIND_FINDING_MESSAGES:
-            if code == known_code:
-                projected.append({"code": known_code, "message": message})
-                break
-        else:
-            projected.append({"code": "unclassified_smoke_finding", "message": "An unclassified smoke finding was observed."})
+    for known_code, message in VALUE_BLIND_FINDING_MESSAGES:
+        if any(item.get("code") == known_code for item in items):
+            projected.append({"code": known_code, "message": message})
+    if items and not projected:
+        projected.append({
+            "code": "unclassified_smoke_finding",
+            "message": "An unclassified smoke finding was observed.",
+        })
     return projected
 
 
@@ -401,6 +401,12 @@ def _safe_secret_status(findings: list[dict[str, str]], command: list[str] | Non
     if _finding_code_present(findings, "oss_cloud_secret_output_observed"):
         return "blocked"
     return "clear" if command is not None else "unavailable"
+
+
+def _value_blind_status(provider_invoked: bool, findings: list[dict[str, str]]) -> str:
+    if provider_invoked and not findings:
+        return "pass"
+    return "blocked"
 
 
 def _value_blind_receipt(
@@ -417,7 +423,7 @@ def _value_blind_receipt(
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
-        "status": "pass" if provider_invoked and not findings else "blocked",
+        "status": _value_blind_status(provider_invoked, findings),
         "lane": "oss-cloud",
         "codex_profile": "oss-cloud",
         "model": EXPECTED_MODEL,
