@@ -16,8 +16,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
-
 from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import CONFIGS_AUTH_WRAPPER, CONFIGS_CODEX_EXEC_WRAPPER  # noqa: E402
 from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402
 from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402
     _approved_cloud_auth_fact,
@@ -555,10 +555,10 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
                 "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
                 "execution_argv": [
-                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh",
+                    "bash", str(CONFIGS_AUTH_WRAPPER),
                     "--env-file", "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--",
                     "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home",
-                    "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
+                    "bash", str(CONFIGS_CODEX_EXEC_WRAPPER),
                     "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
                     "--sandbox", "read-only", "--ephemeral",
                     "--model", "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",

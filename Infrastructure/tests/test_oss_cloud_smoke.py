@@ -338,7 +338,7 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(findings, [])
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "FIFO support unavailable")
-    def test_runner_uses_configs_wrappers_and_emits_redacted_pass_receipt(self) -> None:
+    def test_runner_blocks_noncanonical_wrappers_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             profile = root / "oss-cloud.config.toml"
@@ -355,14 +355,29 @@ class TestOssCloudSmoke(unittest.TestCase):
                 codex_exec_wrapper=codex_exec_wrapper, env=env,
             )
 
-        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.returncode, 1, proc.stderr)
         receipt = json.loads(proc.stdout)
-        self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["model"], "deepseek-v4-flash:cloud")
-        self.assertEqual(receipt["model_provider"], "ollama-cloud")
-        self.assertEqual(receipt["auth_source"], "1password_desktop_fifo")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("oss_cloud_auth_wrapper_identity_mismatch", {finding["code"] for finding in receipt["findings"]})
+        self.assertIn("oss_cloud_exec_wrapper_identity_mismatch", {finding["code"] for finding in receipt["findings"]})
+        self.assertFalse(receipt["provider_invoked"])
         self.assertNotIn("OLLAMA_API_KEY=", json.dumps(receipt))
         self.assertNotIn(str(env_file), json.dumps(receipt))
+
+    def test_wrapper_identity_is_bound_to_the_shared_configs_contract(self) -> None:
+        self.assertTrue(
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_AUTH_WRAPPER), self.runner.DEFAULT_AUTH_WRAPPER,
+            )
+        )
+        self.assertTrue(
+            self.runner._canonical_wrapper_identity(
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), self.runner.DEFAULT_CODEX_EXEC_WRAPPER,
+            )
+        )
+        self.assertFalse(
+            self.runner._canonical_wrapper_identity("/tmp/run-auth-backed.sh", self.runner.DEFAULT_AUTH_WRAPPER)
+        )
 
     def test_runner_blocks_regular_env_before_provider_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -385,7 +400,14 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         receipt = json.loads(proc.stdout)
         self.assertEqual(receipt["status"], "blocked")
-        self.assertEqual({finding["code"] for finding in receipt["findings"]}, {"oss_cloud_auth_stream_missing"})
+        self.assertEqual(
+            {finding["code"] for finding in receipt["findings"]},
+            {
+                "oss_cloud_auth_stream_missing",
+                "oss_cloud_auth_wrapper_identity_mismatch",
+                "oss_cloud_exec_wrapper_identity_mismatch",
+            },
+        )
         self.assertFalse(receipt["provider_invoked"])
 
     def test_cloud_metadata_fallback_is_a_warning_when_marker_passes(self) -> None:
@@ -500,10 +522,10 @@ class TestOssCloudSmoke(unittest.TestCase):
             "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
             "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
             "execution_argv": [
-                "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file",
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
                 "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home", "bash", "other-wrapper",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
                 "--strict-config", "--sandbox", "read-only", "--ephemeral", "--model", "deepseek-v4-flash:cloud",
                 "Reply exactly CODEX_OSS_CLOUD_OK",
             ],
@@ -520,10 +542,10 @@ class TestOssCloudSmoke(unittest.TestCase):
             "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
             "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
             "execution_argv": [
-                "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh", "--env-file",
+                "bash", str(self.runner.DEFAULT_AUTH_WRAPPER), "--env-file",
                 "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--", "env", "-u",
                 "CODEX_CONFIG_HOME", "CODEX_HOME=/tmp/codex-home", "bash",
-                "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh", "--profile", "oss-cloud",
+                str(self.runner.DEFAULT_CODEX_EXEC_WRAPPER), "--profile", "oss-cloud",
                 "--strict-config", "--sandbox", "read-only", "--sandbox", "workspace-write", "--ephemeral",
                 "--model", "deepseek-v4-flash:cloud", "-c", 'approval_policy="on-request"',
                 "Reply exactly CODEX_OSS_CLOUD_OK",

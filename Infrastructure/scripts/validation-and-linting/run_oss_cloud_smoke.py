@@ -17,16 +17,23 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+LIB_DIR = SCRIPT_DIR.parent / "lib"
+if str(LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(LIB_DIR))
 
 from check_oss_local_smoke_output import _findings  # noqa: E402
+from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
+    CONFIGS_AUTH_WRAPPER,
+    CONFIGS_CODEX_EXEC_WRAPPER,
+)
 
 
 EXPECTED_MODEL = "deepseek-v4-flash:cloud"
 EXPECTED_PROVIDER = "ollama-cloud"
 DEFAULT_PROFILE_SOURCE = Path.home() / ".codex" / "oss-cloud.config.toml"
 DEFAULT_AUTH_ENV_FILE = Path.home() / ".codex" / ".env"
-DEFAULT_AUTH_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh")
-DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh")
+DEFAULT_AUTH_WRAPPER = CONFIGS_AUTH_WRAPPER
+DEFAULT_CODEX_EXEC_WRAPPER = CONFIGS_CODEX_EXEC_WRAPPER
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
@@ -116,6 +123,28 @@ def _approved_env_file(path: Path) -> Path | None:
     except OSError:
         return None
     return path if stat.S_ISFIFO(mode) else None
+
+
+def _canonical_wrapper_identity(path: str, expected: Path) -> bool:
+    """Return whether a supplied wrapper resolves to the reviewed identity."""
+    try:
+        return Path(path).expanduser().resolve() == expected.resolve()
+    except OSError:
+        return False
+
+
+def _wrapper_findings(args: argparse.Namespace) -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
+    for path, expected, missing_code, identity_code, label in (
+        (Path(args.auth_wrapper), DEFAULT_AUTH_WRAPPER, "oss_cloud_auth_wrapper_missing", "oss_cloud_auth_wrapper_identity_mismatch", "auth"),
+        (Path(args.codex_exec_wrapper), DEFAULT_CODEX_EXEC_WRAPPER, "oss_cloud_exec_wrapper_missing", "oss_cloud_exec_wrapper_identity_mismatch", "Codex"),
+    ):
+        executable = path.is_file() and bool(path.stat().st_mode & stat.S_IXUSR) if label == "Codex" else True
+        if not path.is_file() or path.is_symlink() or not executable:
+            findings.append({"code": missing_code, "message": f"Configs {label} wrapper is required for oss-cloud."})
+        elif not _canonical_wrapper_identity(str(path), expected):
+            findings.append({"code": identity_code, "message": f"The supplied {label} wrapper must be the canonical Configs wrapper."})
+    return findings
 
 
 def _auth_source(path: Path) -> str:
@@ -328,19 +357,17 @@ def main(argv: list[str] | None = None) -> int:
     env_file = _approved_env_file(Path(args.env_file).expanduser())
     if env_file is None:
         findings.append({"code": "oss_cloud_auth_stream_missing", "message": "Desktop-owned OLLAMA_API_KEY FIFO is required."})
-    if not Path(args.auth_wrapper).is_file() or Path(args.auth_wrapper).is_symlink():
-        findings.append({"code": "oss_cloud_auth_wrapper_missing", "message": "Configs auth-backed wrapper is required for oss-cloud."})
-    if not Path(args.codex_exec_wrapper).is_file() or not Path(args.codex_exec_wrapper).stat().st_mode & stat.S_IXUSR:
-        findings.append({"code": "oss_cloud_exec_wrapper_missing", "message": "Configs Codex execution wrapper is required for oss-cloud."})
+    findings.extend(_wrapper_findings(args))
     if findings:
         receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False)
     else:
         command = _command(args, paths, env_file)
         exit_code, duration_seconds = _run(command, paths, args)
         receipt = _receipt(args, paths, profile, findings, command=command, exit_code=exit_code, duration_seconds=duration_seconds, provider_invoked=True)
-    # lgtm [py/clear-text-logging-sensitive-data] The JSON path is a
-    # value-blind, fixed-shape receipt: it contains only the reviewed env-name
-    # contract and redacted argv, never captured stdout/stderr or a credential.
+    # The JSON path is a value-blind, fixed-shape receipt: it contains only the
+    # reviewed env-name contract and redacted argv, never captured stdout/stderr
+    # or a credential.
+    # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
