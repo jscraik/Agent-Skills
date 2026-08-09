@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import ast
-import json
 import subprocess
 from datetime import date
 from pathlib import Path
@@ -14,7 +13,6 @@ from types import MappingProxyType
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
-ASK_COMMAND_PATH = REPO_ROOT / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
 LEGACY_SHAPE_DEBT = MappingProxyType({
     "Infrastructure/scripts/lib/ask/commands/evals.py": {
@@ -300,24 +298,37 @@ def _repo_path(path_text: str) -> Path:
     return (REPO_ROOT / path_text).resolve()
 
 
-def _shape_baseline(path: Path | None = None) -> dict[str, object]:
-    relative = "" if path is None else path.relative_to(REPO_ROOT).as_posix()
-    command = [str(ASK_COMMAND_PATH), "repo", "status", "--verbose"]
-    if relative:
-        command.extend(["--baseline-path", relative])
-    command.extend(["--json", "--robot"])
+def _git_output(args: list[str]) -> str:
+    command = ["git", *args]
     result = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
     if result.returncode != 0:
         detail = (result.stderr or result.stdout).strip()
-        raise RuntimeError(f"ask repo status shape-baseline failed ({detail})")
-    try:
-        payload = json.loads(result.stdout)
-        baseline = payload["data"]["shape_baseline"]
-    except (KeyError, TypeError, json.JSONDecodeError) as exc:
-        raise RuntimeError("ask repo status shape-baseline returned invalid JSON") from exc
-    if not isinstance(baseline, dict):
-        raise RuntimeError("ask repo status shape-baseline returned a non-object payload")
-    return baseline
+        raise RuntimeError(f"git shape-baseline command failed ({detail})")
+    return result.stdout
+
+
+def _git_lines(args: list[str]) -> list[str]:
+    return [line.strip() for line in _git_output(args).splitlines() if line.strip()]
+
+
+def _shape_baseline(path: Path | None = None) -> dict[str, object]:
+    deleted = [
+        item
+        for item in _git_lines(["diff", "--name-only", "--diff-filter=D", "HEAD", "--"])
+        if item.endswith(PYTHON_SUFFIX)
+    ]
+    siblings: list[str] = []
+    if path is not None:
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        parent = Path(relative).parent.as_posix()
+        siblings = [
+            item
+            for item in _git_lines(["ls-files", "--", f"{parent}/*.py"])
+            if item.endswith(PYTHON_SUFFIX)
+        ]
+    baseline_paths = dict.fromkeys([*deleted, *siblings])
+    head_text = {item: _git_output(["show", f"HEAD:{item}"]) for item in baseline_paths}
+    return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
 
 
 def _git_head_text(path: Path) -> str | None:

@@ -214,6 +214,27 @@ class Runner:
         self.assertEqual(len(issues), 1)
         self.assertIn("shape baseline unavailable", issues[0])
 
+    def test_shape_baseline_uses_git_without_executing_worktree_cli(self) -> None:
+        validator = _load_validator()
+        completed = subprocess.CompletedProcess
+
+        def git_result(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(command[0], "git")
+            self.assertEqual(kwargs["cwd"], REPO_ROOT)
+            if command[1] == "diff":
+                return completed(command, 0, "deleted.py\nnotes.txt\n", "")
+            if command[1] == "ls-files":
+                return completed(command, 0, "Infrastructure/tests/sibling.py\n", "")
+            return completed(command, 0, "def baseline():\n    pass\n", "")
+
+        with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result) as run:
+            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py")
+
+        self.assertEqual(baseline["deleted_python_paths"], ["deleted.py"])
+        self.assertEqual(baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"])
+        self.assertEqual(set(baseline["head_text"]), {"deleted.py", "Infrastructure/tests/sibling.py"})
+        self.assertEqual(run.call_count, 4)
+
 
 if __name__ == "__main__":
     unittest.main()
