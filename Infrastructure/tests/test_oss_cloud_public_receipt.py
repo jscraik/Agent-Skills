@@ -31,6 +31,8 @@ class TestOssCloudPublicReceipt(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         emitted = json.loads(completed.stdout)
         self.assertEqual(emitted["status"], "blocked")
+        self.assertEqual(emitted["secret_observation"]["status"], "clear")
+        self.assertFalse(emitted["secret_value_observed"])
         self.assertEqual(emitted["findings"][0]["code"], "oss_cloud_smoke_exit_nonzero")
         self.assertEqual(emitted["warnings"][0]["code"], "codex_runtime_metadata_fallback")
         self.assertNotIn("/Users/", completed.stdout)

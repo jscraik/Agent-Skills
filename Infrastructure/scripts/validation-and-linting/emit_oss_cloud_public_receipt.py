@@ -65,8 +65,34 @@ def _projected_findings(raw_codes: str) -> list[dict[str, str]]:
     ]
 
 
+def _secret_observation(raw_status: str) -> dict[str, object]:
+    """Return a closed, value-blind projection of the scanner's exit classification."""
+    if raw_status == "blocked":
+        return {
+            "status": "blocked",
+            "source": "captured_output_scan",
+            "redacted": True,
+        }
+    if raw_status == "unavailable":
+        return {
+            "status": "unavailable",
+            "source": "captured_output_scan",
+            "redacted": True,
+        }
+    return {
+        "status": "clear",
+        "source": "captured_output_scan",
+        "redacted": True,
+    }
+
+
+def _secret_value_observed(raw_status: str) -> bool:
+    """Return the closed Boolean classification without projecting scanner input."""
+    return raw_status == "blocked"
+
+
 def _receipt(args: argparse.Namespace) -> dict[str, object]:
-    secret_status = args.secret_status
+    secret_observation = _secret_observation(args.secret_status)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -87,12 +113,8 @@ def _receipt(args: argparse.Namespace) -> dict[str, object]:
         "last_message_path": "<captured-last-message>",
         "warnings": _projected_findings(args.warnings),
         "findings": _projected_findings(args.findings),
-        "secret_observation": {
-            "status": secret_status,
-            "source": "captured_output_scan",
-            "redacted": True,
-        },
-        "secret_value_observed": secret_status == "blocked",
+        "secret_observation": secret_observation,
+        "secret_value_observed": _secret_value_observed(args.secret_status),
     }
 
 
