@@ -12,6 +12,11 @@ from ask.skills_sdk.ab_transport_contracts import (
 CLOUD_SMOKE_MARKER = "CODEX_OSS_CLOUD_OK"
 REDACTED_AUTH_WRAPPER = "<configs-auth-wrapper>"
 REDACTED_CODEX_EXEC_WRAPPER = "<configs-codex-exec-wrapper>"
+_CLOUD_SMOKE_RECEIPT_FIELDS = frozenset({
+    "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
+    "model_provider", "auth_source", "provider_invoked", "execution_argv", "exit_code",
+    "marker", "warnings", "findings", "captured_output_safe", "captured_output_scan",
+})
 FORBIDDEN_CLOUD_SMOKE_FLAGS = frozenset({
     "--dangerously-bypass-approvals-and-sandbox",
     "--no-sandbox",
@@ -26,13 +31,8 @@ def valid_cloud_smoke_receipt(payload: dict[str, Any]) -> bool:
 
 def cloud_smoke_receipt_findings(payload: dict[str, Any]) -> list[str]:
     """Return stable, receipt-safe reasons a cloud smoke is not admissible."""
-    required = {
-        "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
-        "model_provider", "auth_source", "provider_invoked", "execution_argv", "exit_code",
-        "marker", "warnings", "findings", "captured_output_safe",
-        "captured_output_scan",
-    }
-    findings = [f"missing:{key}" for key in sorted(required - payload.keys())]
+    findings = [f"missing:{key}" for key in sorted(_CLOUD_SMOKE_RECEIPT_FIELDS - payload.keys())]
+    findings.extend(f"unexpected:{key}" for key in sorted(payload.keys() - _CLOUD_SMOKE_RECEIPT_FIELDS))
     if findings:
         return findings
     if payload.get("schema_version") != "skills-sdk.oss-cloud-smoke-run.v0":
