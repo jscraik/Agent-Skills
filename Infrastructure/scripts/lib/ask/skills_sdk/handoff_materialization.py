@@ -171,7 +171,8 @@ def _validate_evidence_root(repo_root: Path, requested_root: Path) -> tuple[Path
 
 
 def _validate_readiness_path(repo_root: Path, requested_path: Path) -> tuple[Path | None, str | None]:
-    path = requested_path.resolve(strict=False)
+    candidate = requested_path if requested_path.is_absolute() else repo_root / requested_path
+    path = candidate.resolve(strict=False)
     evidence_root = (repo_root.joinpath(*_EVIDENCE_ROOT)).resolve()
     try:
         path.relative_to(evidence_root)
