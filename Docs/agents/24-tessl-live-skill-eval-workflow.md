@@ -375,6 +375,10 @@ Before claiming completion:
   cases and `ask sdk eval aggregate-shards` passes over repo-owned shard
   receipts with one package, dataset, rubric, profile, and exact release-set
   identity before `oss-cloud` or Tessl runs.
+- Create an aggregatable shard receipt with `./bin/ask sdk eval run`, not the
+  human-facing `./bin/ask evals run` report command. The latter records
+  per-case results but does not create the SDK receipt accepted by
+  `sdk eval aggregate-shards`.
 - Tessl workspace run capacity was checked or explicitly estimated, with the
   operator-approved limit and 20-run remediation reserve preserved.
 - The staged `.tessl-plugin/plugin.json` version matches the canonical SKILL.md frontmatter
