@@ -92,13 +92,6 @@ LEGACY_SHAPE_DEBT = MappingProxyType({
         "reason": "pre-existing package contract regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_skills_sdk_scenario_quality.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing scenario quality regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/tests/test_skills_sdk_ab_judge_score.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
