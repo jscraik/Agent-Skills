@@ -2567,7 +2567,13 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("Commit ready: True", result.stdout)
         else:
             self.assertIn("Blocked: closeout has", result.stdout)
-            self.assertIn("💡 ./bin/ask ", result.stdout)
+            json_result = _run_cli([*cmd, "--json"])
+            self.assertEqual(json_result.returncode, result.returncode, json_result.stderr)
+            closeout = json.loads(json_result.stdout)["data"]["repo_closeout"]
+            next_command = closeout["next_command"]
+            self.assertIsInstance(next_command, str)
+            self.assertTrue(next_command.startswith("./bin/ask "))
+            self.assertIn(f"💡 {next_command}", result.stdout)
             return
         self.assertIn("Capability readiness:", result.stdout)
         self.assertIn("Memory readiness:", result.stdout)
