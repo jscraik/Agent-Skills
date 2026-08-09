@@ -37,6 +37,23 @@ DEFAULT_CODEX_EXEC_WRAPPER = CONFIGS_CODEX_EXEC_WRAPPER
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
+VALUE_BLIND_FINDING_MESSAGES = (
+    ("oss_cloud_profile_missing", "oss-cloud profile source must be a regular file."),
+    ("oss_cloud_model_mismatch", "The reviewed oss-cloud model did not match."),
+    ("oss_cloud_provider_mismatch", "The reviewed oss-cloud provider did not match."),
+    ("oss_cloud_marker_not_allowlisted", "The bounded cloud smoke requires its fixed marker."),
+    ("oss_cloud_auth_stream_missing", "Desktop-owned OLLAMA_API_KEY FIFO is required."),
+    ("oss_cloud_auth_wrapper_missing", "Configs auth wrapper is required for oss-cloud."),
+    ("oss_cloud_exec_wrapper_missing", "Configs Codex wrapper is required for oss-cloud."),
+    ("oss_cloud_auth_wrapper_identity_mismatch", "The supplied auth wrapper must be canonical."),
+    ("oss_cloud_exec_wrapper_identity_mismatch", "The supplied Codex wrapper must be canonical."),
+    ("codex_runtime_metadata_fallback", "Codex reported fallback metadata."),
+    ("codex_runtime_visible_thinking", "Model output exposed a thinking trace."),
+    ("codex_runtime_token_budget_exceeded", "The smoke transcript exceeded its token budget."),
+    ("oss_cloud_secret_output_observed", "Captured smoke output matched a secret-shaped marker."),
+    ("oss_cloud_smoke_exit_nonzero", "Codex exited with a non-zero status."),
+    ("oss_cloud_smoke_marker_mismatch", "Cloud smoke marker did not match."),
+)
 # Match shell, plain-text, and JSON-style diagnostics without capturing or
 # printing the value. Provider-prefixed names are matched as a whole key so
 # `OPENAI_API_KEY=...` is blocked as well as `token=...`.
@@ -354,6 +371,55 @@ def _redacted_command(command: list[str] | None) -> list[str] | None:
     ]
 
 
+def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Project findings to fixed messages before JSON reaches stdout."""
+    projected: list[dict[str, str]] = []
+    for item in items:
+        code = item.get("code")
+        message = next((message for known_code, message in VALUE_BLIND_FINDING_MESSAGES if known_code == code), None)
+        if message is None:
+            projected.append({"code": "unclassified_smoke_finding", "message": "An unclassified smoke finding was observed."})
+        else:
+            projected.append({"code": code, "message": message})
+    return projected
+
+
+def _value_blind_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Return the public receipt without serializing captured transcript data."""
+    findings = _value_blind_findings(receipt.get("findings", []))
+    warnings = _value_blind_findings(receipt.get("warnings", []))
+    secret_observation = receipt.get("secret_observation", {})
+    secret_status = secret_observation.get("status")
+    safe_secret_status = secret_status if secret_status in {"clear", "blocked", "unavailable"} else "unavailable"
+    return {
+        "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
+        "observed_at": receipt.get("observed_at"),
+        "status": "pass" if receipt.get("status") == "pass" else "blocked",
+        "lane": "oss-cloud",
+        "codex_profile": "oss-cloud",
+        "model": EXPECTED_MODEL,
+        "model_provider": EXPECTED_PROVIDER,
+        "auth_source": receipt.get("auth_source") if receipt.get("auth_source") == "1password_desktop_fifo" else "missing_or_invalid",
+        "provider_invoked": bool(receipt.get("provider_invoked")),
+        "command": _redacted_command(receipt.get("command")),
+        "execution_argv": _redacted_command(receipt.get("execution_argv")),
+        "duration_seconds": receipt.get("duration_seconds"),
+        "exit_code": receipt.get("exit_code") if isinstance(receipt.get("exit_code"), int) else None,
+        "marker": DEFAULT_MARKER,
+        "stdout_path": "<captured-stdout>",
+        "stderr_path": "<captured-stderr>",
+        "last_message_path": "<captured-last-message>",
+        "warnings": warnings,
+        "findings": findings,
+        "secret_observation": {
+            "status": safe_secret_status,
+            "source": "captured_output_scan",
+            "redacted": True,
+        },
+        "secret_value_observed": safe_secret_status == "blocked",
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.timeout_seconds < 1:
@@ -376,11 +442,11 @@ def main(argv: list[str] | None = None) -> int:
         command = _command(args, paths, env_file)
         exit_code, duration_seconds = _run(command, paths, args)
         receipt = _receipt(args, paths, profile, findings, command=command, exit_code=exit_code, duration_seconds=duration_seconds, provider_invoked=True)
-    # The JSON path is a value-blind, fixed-shape receipt: it contains only the
-    # reviewed env-name contract and redacted argv, never captured stdout/stderr
-    # or a credential.
-    # codeql[py/clear-text-logging-sensitive-data]
-    print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
+    # The JSON path is a value-blind, fixed-shape receipt. Projecting explicit
+    # constants and allowlisted fields keeps captured stdout/stderr out of the
+    # logging sink even when a child process emits secret-shaped text.
+    public_receipt = _value_blind_receipt(receipt)
+    print(json.dumps(public_receipt, sort_keys=True, separators=(",", ":")) if args.json else public_receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
 
