@@ -285,8 +285,9 @@ def _secret_observation(paths: dict[str, Path], *, executed: bool) -> dict[str, 
 def _receipt(
     args: argparse.Namespace, paths: dict[str, Path], profile: Path, findings: list[dict[str, str]], *,
     command: list[str] | None, exit_code: int | None, duration_seconds: float, provider_invoked: bool,
+    runtime_warnings: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
-    warnings = _runtime_findings(args, paths, findings, command, exit_code)
+    warnings = runtime_warnings if runtime_warnings is not None else _runtime_findings(args, paths, findings, command, exit_code)
     secret_observation = _secret_observation(paths, executed=command is not None)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
@@ -376,35 +377,50 @@ def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     projected: list[dict[str, str]] = []
     for item in items:
         code = item.get("code")
-        message = next((message for known_code, message in VALUE_BLIND_FINDING_MESSAGES if known_code == code), None)
-        if message is None:
-            projected.append({"code": "unclassified_smoke_finding", "message": "An unclassified smoke finding was observed."})
+        for known_code, message in VALUE_BLIND_FINDING_MESSAGES:
+            if code == known_code:
+                projected.append({"code": known_code, "message": message})
+                break
         else:
-            projected.append({"code": code, "message": message})
+            projected.append({"code": "unclassified_smoke_finding", "message": "An unclassified smoke finding was observed."})
     return projected
 
 
-def _value_blind_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
-    """Return the public receipt without serializing captured transcript data."""
-    findings = _value_blind_findings(receipt.get("findings", []))
-    warnings = _value_blind_findings(receipt.get("warnings", []))
-    secret_observation = receipt.get("secret_observation", {})
-    secret_status = secret_observation.get("status")
-    safe_secret_status = secret_status if secret_status in {"clear", "blocked", "unavailable"} else "unavailable"
+def _finding_code_present(items: list[dict[str, str]], wanted: str) -> bool:
+    return any(item.get("code") == wanted for item in items)
+
+
+def _safe_secret_status(findings: list[dict[str, str]], command: list[str] | None) -> str:
+    if _finding_code_present(findings, "oss_cloud_secret_output_observed"):
+        return "blocked"
+    return "clear" if command is not None else "unavailable"
+
+
+def _value_blind_receipt(
+    *,
+    env_file: Path,
+    findings: list[dict[str, str]],
+    warnings: list[dict[str, str]],
+    command: list[str] | None,
+    exit_code: int | None,
+    duration_seconds: float,
+    provider_invoked: bool,
+) -> dict[str, Any]:
+    safe_secret_status = _safe_secret_status(findings, command)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
-        "observed_at": receipt.get("observed_at"),
-        "status": "pass" if receipt.get("status") == "pass" else "blocked",
+        "observed_at": datetime.now(timezone.utc).isoformat(),
+        "status": "pass" if provider_invoked and not findings else "blocked",
         "lane": "oss-cloud",
         "codex_profile": "oss-cloud",
         "model": EXPECTED_MODEL,
         "model_provider": EXPECTED_PROVIDER,
-        "auth_source": receipt.get("auth_source") if receipt.get("auth_source") == "1password_desktop_fifo" else "missing_or_invalid",
-        "provider_invoked": bool(receipt.get("provider_invoked")),
-        "command": _redacted_command(receipt.get("command")),
-        "execution_argv": _redacted_command(receipt.get("execution_argv")),
-        "duration_seconds": receipt.get("duration_seconds"),
-        "exit_code": receipt.get("exit_code") if isinstance(receipt.get("exit_code"), int) else None,
+        "auth_source": _auth_source(env_file),
+        "provider_invoked": provider_invoked,
+        "command": _redacted_command(command),
+        "execution_argv": _redacted_command(command),
+        "duration_seconds": duration_seconds,
+        "exit_code": exit_code,
         "marker": DEFAULT_MARKER,
         "stdout_path": "<captured-stdout>",
         "stderr_path": "<captured-stderr>",
@@ -418,6 +434,33 @@ def _value_blind_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
         },
         "secret_value_observed": safe_secret_status == "blocked",
     }
+
+
+def _run_smoke(
+    args: argparse.Namespace,
+    paths: dict[str, Path],
+    profile: Path,
+    findings: list[dict[str, str]],
+    env_file: Path,
+) -> tuple[dict[str, Any], list[dict[str, str]], list[str] | None, int | None, float, bool]:
+    if findings:
+        receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False)
+        return receipt, [], None, None, 0.0, False
+    command = _command(args, paths, env_file)
+    exit_code, duration_seconds = _run(command, paths, args)
+    runtime_warnings = _runtime_findings(args, paths, findings, command, exit_code)
+    receipt = _receipt(
+        args,
+        paths,
+        profile,
+        findings,
+        command=command,
+        exit_code=exit_code,
+        duration_seconds=duration_seconds,
+        provider_invoked=True,
+        runtime_warnings=runtime_warnings,
+    )
+    return receipt, runtime_warnings, command, exit_code, duration_seconds, True
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -436,21 +479,22 @@ def main(argv: list[str] | None = None) -> int:
     if env_file is None:
         findings.append({"code": "oss_cloud_auth_stream_missing", "message": "Desktop-owned OLLAMA_API_KEY FIFO is required."})
     findings.extend(_wrapper_findings(args))
-    if findings:
-        receipt = _receipt(args, paths, profile, findings, command=None, exit_code=None, duration_seconds=0.0, provider_invoked=False)
-    else:
-        command = _command(args, paths, env_file)
-        exit_code, duration_seconds = _run(command, paths, args)
-        receipt = _receipt(args, paths, profile, findings, command=command, exit_code=exit_code, duration_seconds=duration_seconds, provider_invoked=True)
+    receipt, runtime_warnings, command, exit_code, duration_seconds, provider_invoked = _run_smoke(
+        args, paths, profile, findings, env_file or Path(args.env_file).expanduser()
+    )
     # The JSON path is a value-blind, fixed-shape receipt. Projecting explicit
     # constants and allowlisted fields keeps captured stdout/stderr out of the
     # logging sink even when a child process emits secret-shaped text.
-    public_receipt = _value_blind_receipt(receipt)
-    print(
-        json.dumps(public_receipt, sort_keys=True, separators=(",", ":"))
-        if args.json
-        else public_receipt["status"]
+    public_receipt = _value_blind_receipt(
+        env_file=Path(args.env_file).expanduser(),
+        findings=_value_blind_findings(findings),
+        warnings=_value_blind_findings(runtime_warnings),
+        command=command,
+        exit_code=exit_code,
+        duration_seconds=duration_seconds,
+        provider_invoked=provider_invoked,
     )
+    print(json.dumps(public_receipt, sort_keys=True, separators=(",", ":")) if args.json else public_receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
 
