@@ -59,7 +59,7 @@ def _test_execution_argv(command_argv: list[str]) -> list[str]:
         return [
             "bash", auth_wrapper, "--env-file", str(_TEST_CLOUD_ENV_FILE),
             "--require-env", "OLLAMA_API_KEY", "--", "bash", codex_exec_wrapper,
-            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud", "--strict-config", "-c",
+            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:0731-cloud", "--strict-config", "-c",
             'approval_policy="on-request"', "--cd", command_argv[command_argv.index("--cd") + 1],
             "--sandbox", "read-only", "--ephemeral", "--json", "--output-last-message",
             command_argv[command_argv.index("--output-last-message") + 1], "-",
@@ -411,9 +411,9 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         ):
             from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact
 
-            approved = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             fact = _cloud_catalog_fact(
-                "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), approved,
                 lambda _command: (_ for _ in ()).throw(
                     subprocess.TimeoutExpired(["bash", "/mock/configs/run-auth-backed.sh"], 1)
                 ),

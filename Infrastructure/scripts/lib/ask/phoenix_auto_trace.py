@@ -98,6 +98,20 @@ def maybe_emit_phoenix_trace(repo_root: Path, args: argparse.Namespace, result: 
         result.telemetry["phoenix_trace_error_class"] = type(exc).__name__
 
 
+def _phoenix_trace_options(config: dict[str, Any], result: CallResult) -> dict[str, Any]:
+    return {
+        "latency_ms": int(result.telemetry.get("latency_ms", 0)) if result.telemetry.get("latency_ms") is not None else None,
+        "base_url": os.environ.get("ASK_PHOENIX_BASE_URL") or _config_str(config, "base_url", "http://localhost:6006") or "http://localhost:6006",
+        "profile": os.environ.get("ASK_PHOENIX_PROFILE") or _config_str(config, "profile", "oss-local") or "oss-local",
+        "otel_python_path": os.environ.get("ASK_PHOENIX_OTEL_PYTHON") or _config_str(config, "otel_python") or None,
+        "model_name": os.environ.get("ASK_PHOENIX_MODEL") or _config_str(config, "model") or None,
+        "provider": os.environ.get("ASK_PHOENIX_PROVIDER") or _config_str(config, "provider") or None,
+        "prompt_tokens": _env_int("ASK_PHOENIX_PROMPT_TOKENS", _config_int(config, "prompt_tokens", 0)),
+        "completion_tokens": _env_int("ASK_PHOENIX_COMPLETION_TOKENS", _config_int(config, "completion_tokens", 0)),
+        "timeout_seconds": _env_float("ASK_PHOENIX_TIMEOUT_SECONDS", _config_float(config, "timeout_seconds", 2.0)),
+    }
+
+
 def _emit_phoenix_trace(repo_root: Path, config: dict[str, Any], result: CallResult) -> None:
     from ask.skills_sdk.phoenix_observability import emit_ask_result_to_phoenix
 
@@ -105,15 +119,7 @@ def _emit_phoenix_trace(repo_root: Path, config: dict[str, Any], result: CallRes
         repo_root,
         command_name=str(result.metadata.get("command") or "unknown"),
         command_status=result.status,
-        latency_ms=int(result.telemetry.get("latency_ms", 0)) if result.telemetry.get("latency_ms") is not None else None,
-        base_url=os.environ.get("ASK_PHOENIX_BASE_URL") or _config_str(config, "base_url", "http://localhost:6006") or "http://localhost:6006",
-        profile=os.environ.get("ASK_PHOENIX_PROFILE") or _config_str(config, "profile", "oss-local") or "oss-local",
-        otel_python_path=os.environ.get("ASK_PHOENIX_OTEL_PYTHON") or _config_str(config, "otel_python") or None,
-        model_name=os.environ.get("ASK_PHOENIX_MODEL") or _config_str(config, "model") or None,
-        provider=os.environ.get("ASK_PHOENIX_PROVIDER") or _config_str(config, "provider") or None,
-        prompt_tokens=_env_int("ASK_PHOENIX_PROMPT_TOKENS", _config_int(config, "prompt_tokens", 0)),
-        completion_tokens=_env_int("ASK_PHOENIX_COMPLETION_TOKENS", _config_int(config, "completion_tokens", 0)),
-        timeout_seconds=_env_float("ASK_PHOENIX_TIMEOUT_SECONDS", _config_float(config, "timeout_seconds", 2.0)),
+        **_phoenix_trace_options(config, result),
     )
     result.telemetry["phoenix_trace_status"] = receipt["status"]
     result.telemetry["phoenix_trace_id"] = receipt["trace_id"]

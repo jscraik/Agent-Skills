@@ -10,6 +10,7 @@ from __future__ import annotations
 from types import ModuleType
 import importlib.util
 from pathlib import Path
+from typing import Any
 
 
 def _load_impl() -> ModuleType:
@@ -83,6 +84,11 @@ def _call_impl(name: str, *args, **kwargs):
     finally:
         for impl_name, value in original_values.items():
             setattr(_impl, impl_name, value)
+
+
+def resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any], str | None]:
+    """Resolve a public skill target for SDK dispatch surfaces."""
+    return _resolve_doctor_target(repo_root, target)
 
 
 def skills_proof(*args, **kwargs):
@@ -372,6 +378,7 @@ __all__ = [
     "skills_profiles",
     "skills_proof",
     "skills_prove",
+    "resolve_doctor_target",
     "skills_render_preview",
     "skills_resolve",
     "skills_sdk_check",

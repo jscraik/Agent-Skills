@@ -89,7 +89,7 @@ evaluation_lane_policy:
       provider: ollama
       identity_source: codex-profile-config
     oss-cloud:
-      model: deepseek-v4-flash:cloud
+      model: deepseek-v4-flash:0731-cloud
       model_family: deepseek
       provider: ollama-cloud
       identity_source: codex-profile-config

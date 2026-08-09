@@ -96,7 +96,7 @@ def _execution_identity(profile: str) -> dict[str, str]:
             "execution_model_provider": "ollama",
         }
     return {
-        "execution_model": "deepseek-v4-flash:cloud",
+        "execution_model": "deepseek-v4-flash:0731-cloud",
         "execution_model_family": "deepseek",
         "execution_model_provider": "ollama-cloud",
     }

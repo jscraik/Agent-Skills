@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT_FALLBACK="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-SUPPORTED_VERSION="0.15.0"
+SUPPORTED_VERSION="0.15.3"
 FALLBACK_PACKAGE="@brainwav/coding-harness@$SUPPORTED_VERSION"
 if REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
 	:

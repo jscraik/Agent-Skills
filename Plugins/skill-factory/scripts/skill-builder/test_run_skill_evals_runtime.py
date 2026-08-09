@@ -53,6 +53,46 @@ from run_skill_evals import (  # noqa: E402
 )
 
 
+def _exercise_cloud_wrapper(
+    workspace_root: Path,
+    env_path: Path,
+    invocation: unittest.mock.Mock,
+    fake_proc: unittest.mock.Mock,
+    *,
+    fallback_profile: str | None = None,
+) -> tuple[tuple[int, str, str, list[str]], unittest.mock.Mock, unittest.mock.Mock, unittest.mock.Mock]:
+    output_path = workspace_root / "reports" / "last.txt"
+    output_path.parent.mkdir()
+    kwargs = {
+        "workspace_root": workspace_root,
+        "prompt": "Route only.",
+        "output_last_message_path": output_path,
+        "output_schema_path": None,
+        "sandbox": "read-only",
+        "ask_for_approval": None,
+        "model": "deepseek-v4-flash:cloud",
+        "profile": "oss-cloud",
+        "codex_home": workspace_root / ".codex",
+        "jsonl_path": workspace_root / "trace.jsonl",
+        "codex_bin": None,
+        "timeout_sec": 1,
+        "timeout_profile": "default",
+        "fallback_profile": fallback_profile,
+    }
+    with (
+        unittest.mock.patch("run_skill_evals.actual_opaque_env_path", return_value=env_path),
+        unittest.mock.patch(
+            "run_skill_evals.configs_auth_backed_invocation",
+            return_value=unittest.mock.MagicMock(__enter__=lambda _self: invocation),
+        ) as auth_context,
+        unittest.mock.patch(
+            "run_skill_evals.configs_oss_cloud_exec_command",
+            wraps=run_skill_evals.configs_oss_cloud_exec_command,
+        ) as cloud_command,
+        unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run,
+    ):
+        result = run_codex_exec(**kwargs)
+    return result, auth_context, cloud_command, mocked_run
 
 
 class RunSkillEvalsRuntimeTests(unittest.TestCase):
@@ -91,7 +131,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-smoke"])
 
-
     def test_release_mode_keeps_all_cases_by_default(self) -> None:
         cases = [
             EvalCase(id="happy", name="Happy", prompt="ok", acceptance=["ok"], category="happy"),
@@ -113,7 +152,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
 
         selected = _filter_cases_for_eval_mode(cases, eval_mode="release")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-release"])
-
 
     def test_release_scenario_set_filters_exact_case_ids(self) -> None:
         cases = [
@@ -138,7 +176,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
             exact_case_ids=True,
         )
         self.assertEqual([case.id for case in selected], ["writer-gap-gathering"])
-
 
     def test_non_release_case_filter_keeps_substring_matching(self) -> None:
         cases = [
@@ -198,7 +235,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         routed = [case for case in selected if not _is_smoke_only_case(case)]
         self.assertEqual([case.id for case in routed], ["discovery-round-one", "release-only"])
 
-
     def test_load_evals_parses_eval_modes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             evals_path = Path(tmpdir) / "evals.yaml"
@@ -223,7 +259,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
 
-
     def test_no_case_evidence_marks_summary_blocked_validation(self) -> None:
         summary = {
             "cases": [],
@@ -235,7 +270,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertTrue(marked)
         self.assertTrue(summary["no_case_evidence"])
         self.assertEqual(summary["blocked_class_summary"]["blocked_validation"], 1)
-
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"
@@ -254,7 +288,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
                 "builder-round-metadata-contract",
             }.issubset(selected_ids)
         )
-
 
     def test_preflight_codex_live_runner_rejects_repo_local_home_without_auth(self) -> None:
         """
@@ -287,7 +320,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertIn("Repo-local `.codex` is suitable for discovery/static smoke", errors[0])
         self.assertIn(str(default_home), errors[0])
 
-
     def test_preflight_codex_live_runner_accepts_logged_in_home(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
@@ -310,7 +342,6 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         mocked_run.assert_called_once()
 
-
     def test_preflight_codex_live_runner_warns_when_env_auth_is_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
@@ -330,6 +361,20 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(len(warnings), 1)
         self.assertIn("auth environment variables are present", warnings[0])
 
+    def test_isolated_codex_home_uses_explicit_cloud_home_only_as_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            explicit_home = home_root / "explicit-codex-home"
+            explicit_home.mkdir(parents=True)
+            (explicit_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (explicit_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
+            (explicit_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud", source_home=explicit_home)
+        self.assertNotEqual(isolated_home, explicit_home)
+        self.assertTrue((isolated_home / "config.toml").is_file())
+        self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
 
     def test_isolated_codex_home_copies_auth_config_and_keeps_sessions_private(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -369,6 +414,42 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertTrue((isolated_home / "oss-local.config.toml").is_file())
         self.assertFalse((isolated_home / "config.toml").exists())
 
+    def test_isolated_codex_home_copies_and_requires_cloud_base_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root, default_home = Path(tmpdir) / "home-root", Path(tmpdir) / "home-root" / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
+            (default_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud")
+            self.assertTrue((isolated_home / "config.toml").is_file())
+            self.assertTrue((isolated_home / "oss-cloud.config.toml").is_file())
+            (default_home / "config.toml").unlink()
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    with self.assertRaisesRegex(ValueError, "missing: config.toml"):
+                        _isolated_codex_home_for_eval("oss-cloud")
+
+    def test_run_codex_exec_keeps_cloud_wrapper_and_no_cross_profile_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root, env_path = Path(tmpdir), Path(tmpdir) / "opaque.env"
+            invocation = unittest.mock.Mock()
+            invocation.runtime_argv.side_effect = lambda command: ["bash", "auth-wrapper", "--", *command]
+            ok_proc = unittest.mock.Mock(returncode=0, stdout="{}\n", stderr="")
+            result, auth_context, cloud_command, mocked_run = _exercise_cloud_wrapper(root, env_path, invocation, ok_proc)
+            self.assertEqual(result[:3], (0, "{}\n", ""))
+            auth_context.assert_called_once_with(env_path)
+            self.assertEqual(cloud_command.call_args.args[0][:4], ["codex", "exec", "--profile", "oss-cloud"])
+            self.assertEqual(mocked_run.call_args.args[0][:2], ["bash", "auth-wrapper"])
+            failed_proc = unittest.mock.Mock(returncode=1, stdout="", stderr="unsupported parameter reasoning.summary")
+            fallback_root = root / "fallback"
+            fallback_root.mkdir()
+            result, _context, _command, failed_run = _exercise_cloud_wrapper(fallback_root, env_path, invocation, failed_proc, fallback_profile="oss-local")
+            self.assertEqual(result[0], 1)
+            self.assertEqual(failed_run.call_count, 1)
+            self.assertTrue(any("skipped cross-profile fallback" in warning for warning in result[3]))
 
     def test_isolated_codex_config_drops_mcp_servers(self) -> None:
         source = textwrap.dedent(

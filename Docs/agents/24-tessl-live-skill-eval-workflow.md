@@ -35,7 +35,7 @@ ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
 Keep the model families independent across proof lanes: `oss-local` uses
-`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:cloud`, and Tessl external uses
+`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:0731-cloud`, and Tessl external uses
 `deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
 family, provider, and identity source. A model change starts a new baseline for
 that lane. Do not average scores across model families; compare each lane to its
@@ -103,6 +103,14 @@ The wrapper stops at preparation and install; it does not generate scenario
 files by itself. On rerun, the wrapper archives prior target-tile, tool-project,
 and generated scenario evidence under evidence-archive/ before refreshing the
 current staging inputs.
+
+When `--execute` is selected, setup also stages the private plugin at the
+stable `/tmp/ask-tessl-evals/<skill-path>-<sha12>/` path used by the later live
+evaluator and links the Tessl project from that directory. The `target-tile/`
+directory remains the scenario-generator input only. This separation is
+required because Tessl records the absolute source directory in a project
+binding; linking the target tile instead makes a valid project-link receipt
+unusable for the subsequent live run.
 
 Treat every Registry tile used by this workflow as a dependency, not as a
 trusted fact source. Before installing or relying on a Registry tile, record the

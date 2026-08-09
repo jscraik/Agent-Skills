@@ -1,0 +1,60 @@
+{
+  "schema_version": "skills-sdk.handoff-lane.v1",
+  "status": "pass",
+  "candidate": {
+    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "candidate_digest": "a8efd23bbebd665394e5dc227a272ea7e67c065688b49377e4ab3b0f14c807d3",
+    "scenario_set_digest": "7fabdb736c49dee052bd8c1fcea697838757d7a71ec53157f4f3920c882bdace"
+  },
+  "receipt": {
+    "schema_version": "skills-sdk.tessl-local-proof.v1",
+    "status": "pass",
+    "execute": true,
+    "workspace": "jscraik",
+    "source_path": "Skills/agent-ops/improve-agent-native",
+    "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+    "dist_path": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/dist/improve-agent-native.tgz",
+    "install_workspace": "/tmp/ask-tessl-local-install/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+    "staged_file_count": 93,
+    "proof_path": "Skills/agent-ops/improve-agent-native",
+    "commands": {
+      "plugin_lint": {
+        "status": "success",
+        "command": "tessl plugin lint Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+        "cwd": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+        "exit_code": 0,
+        "stdout": "\n✔ Plugin jscraik/improve-agent-native@0.3.0 is valid\n",
+        "stderr": ""
+      },
+      "plugin_pack": {
+        "status": "success",
+        "command": "tessl plugin pack --output improve-agent-native.tgz Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+        "cwd": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+        "exit_code": 0,
+        "stdout": "✔ Plugin packaged to /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/dist/improve-agent-native.tgz\n",
+        "stderr": ""
+      },
+      "install_file": {
+        "status": "success",
+        "command": "tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36 --agent codex --yes --strict",
+        "cwd": "/tmp/ask-tessl-local-install/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+        "exit_code": 0,
+        "stdout": "✓ Authenticated as <redacted-email>\n\n\n\n✔ Created MCP client configuration for 1 agent(s):\n- Codex: .codex/config.toml\n\n\n✓ Init complete!\n✔ Installed jscraik/improve-agent-native@0.3.0\n",
+        "stderr": "⚠ Project not initialized. Running init to set up your project...\n⚠ Creating tessl.json...\n- Preparing installation...\n- Installing 1 plugin...\n"
+      }
+    },
+    "planned_commands": {
+      "plugin_lint": "tessl plugin lint /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+      "plugin_pack": "tessl plugin pack --output /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/dist/improve-agent-native.tgz /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+      "install_file": "tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36 --agent codex --yes --strict",
+      "review_run": "tessl review run /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/skills/improve-agent-native --workspace jscraik --json --threshold 95"
+    },
+    "policy": {
+      "native_tessl_only": null,
+      "no_npx": null,
+      "no_publish": null,
+      "no_registry_upload": null
+    },
+    "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection"
+  }
+}

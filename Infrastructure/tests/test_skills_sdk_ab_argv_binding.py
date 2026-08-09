@@ -86,7 +86,7 @@ class TestSkillsSdkAbArgvBinding(unittest.TestCase):
         self.assertEqual(result.executed_argv[:7], captured[0][:7])
         self.assertEqual(captured[0][7:13], [
             "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
-            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:0731-cloud",
         ])
 
     def test_default_cloud_runner_rejects_non_fifo_stream_before_subprocess(self) -> None:

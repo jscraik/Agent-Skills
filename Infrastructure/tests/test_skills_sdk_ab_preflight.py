@@ -16,18 +16,18 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
-
-from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402
-from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402
-from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402
+from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+from ask.skills_sdk.ab_transport_contracts import CONFIGS_AUTH_WRAPPER, CONFIGS_CODEX_EXEC_WRAPPER  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
     _approved_cloud_auth_fact,
     _cloud_catalog_fact,
     _cloud_runtime_fact,
     _catalog_probe_result,
     build_lane_preflight,
 )
-from ask.skills_sdk.eval_profiles import select_judge_profile  # noqa: E402
-from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402
+from ask.skills_sdk.eval_profiles import select_judge_profile  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
 
 
 class _CustomBoundarySignal(BaseException):
@@ -88,7 +88,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             "network_accessed": True,
             "http_status": 200,
             "catalog_digest": "sha256:" + "a" * 64,
-            "matched_model": "deepseek-v4-flash:cloud" if result_class == "pass" else None,
+            "matched_model": "deepseek-v4-flash:0731-cloud" if result_class == "pass" else None,
             "match_count": 1 if result_class == "pass" else 0,
             "secret_value_observed": False,
             "secret_not_observed": True,
@@ -195,7 +195,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         cloud = declared_profile_preflight(select_judge_profile("oss-cloud"))
         self.assertEqual(local["profile_config"]["configured_model_id"], "qwen3.5:9b-mlx")
         self.assertEqual(local["profile_config"]["configured_provider_id"], "ollama")
-        self.assertEqual(cloud["profile_config"]["configured_model_id"], "deepseek-v4-flash:cloud")
+        self.assertEqual(cloud["profile_config"]["configured_model_id"], "deepseek-v4-flash:0731-cloud")
         self.assertEqual(cloud["profile_config"]["configured_provider_id"], "ollama-cloud")
     def test_required_typed_blockers_are_preserved(self) -> None:
         matrix = {
@@ -379,7 +379,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 return 200
             @staticmethod
             def read(_limit: int) -> bytes:
-                return json.dumps({"models": [{"name": "deepseek-v4-flash:cloud"}]}).encode()
+                return json.dumps({"models": [{"name": "deepseek-v4-flash:0731-cloud"}]}).encode()
         def opener(request: object, *, timeout: int) -> Response:
             captured["request"] = request
             captured["timeout"] = timeout
@@ -387,7 +387,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         with patch.dict(os.environ, {"OLLAMA_API_KEY": "fixture-secret"}, clear=True):
             result = probe_catalog(
                 url="https://ollama.com/api/tags",
-                selected_model="deepseek-v4-flash:cloud",
+                selected_model="deepseek-v4-flash:0731-cloud",
                 timeout_s=10,
                 opener=opener,
             )
@@ -395,7 +395,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(request.get_method(), "GET")  # type: ignore[union-attr]
         self.assertEqual(request.get_header("Authorization"), "Bearer fixture-secret")  # type: ignore[union-attr]
         self.assertEqual(result["result_class"], "pass")
-        self.assertEqual(result["matched_model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(result["matched_model"], "deepseek-v4-flash:0731-cloud")
         self.assertTrue(result["network_accessed"])
         self.assertFalse(result["generation_performed"])
         self.assertFalse(result["provider_invoked"])
@@ -415,13 +415,13 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 return json.dumps({"models": [{"name": name} for name in self.names]}).encode()
         with patch.dict(os.environ, {"OLLAMA_API_KEY": "fixture-secret"}, clear=True):
             missing = probe_catalog(
-                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
+                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:0731-cloud",
                 timeout_s=10, opener=lambda *_args, **_kwargs: Response(["fast"]),
             )
             duplicate = probe_catalog(
-                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
+                url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:0731-cloud",
                 timeout_s=10,
-                opener=lambda *_args, **_kwargs: Response(["deepseek-v4-flash:cloud", "deepseek-v4-flash:cloud"]),
+                opener=lambda *_args, **_kwargs: Response(["deepseek-v4-flash:0731-cloud", "deepseek-v4-flash:0731-cloud"]),
             )
         self.assertEqual(missing["result_class"], "model_missing")
         self.assertEqual(duplicate["result_class"], "model_ambiguous")
@@ -449,7 +449,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
             for expected, opener in cases.items():
                 with self.subTest(expected=expected):
                     result = probe_catalog(
-                        url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:cloud",
+                        url="https://ollama.com/api/tags", selected_model="deepseek-v4-flash:0731-cloud",
                         timeout_s=10, opener=opener,
                     )
                     self.assertEqual(result["result_class"], expected)
@@ -457,13 +457,13 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
     def test_cloud_auth_fifo_is_never_read_and_configs_wrapper_is_the_only_catalog_path(self) -> None:
         with self._approved_cloud_auth_context() as env_file:
             with patch.object(Path, "read_text", side_effect=AssertionError("opaque env stream was read")):
-                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
                 seen: list[list[str]] = []
                 def runner(command: list[str]) -> subprocess.CompletedProcess[str]:
                     seen.append(command)
                     return self._catalog_process(self._catalog_payload())
                 fact = _cloud_catalog_fact(
-                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth, runner,
+                    "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), auth, runner,
                 )
         self.assertEqual(auth["status"], "pass")
         self.assertEqual(auth["auth_source"], "1password_desktop_fifo")
@@ -483,7 +483,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         def forbidden_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
             raise AssertionError("catalog runner must not start without Configs wrapper auth")
         blocked = _cloud_catalog_fact(
-            "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth, forbidden_runner,
+            "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), auth, forbidden_runner,
         )
         self.assertEqual(blocked["blocker"]["blocker_class"], "cloud_auth_unavailable")
         self.assertFalse(blocked["network_accessed"])
@@ -500,7 +500,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": str(env_file)}, clear=True),
                 patch("ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper", return_value=None),
             ):
-                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
         self.assertEqual(auth["blocker"]["blocker_class"], "cloud_auth_unavailable")
         unsafe = self._catalog_payload(secret_value_observed=True)
         fact = self._catalog_fact_for_process(self._catalog_process(unsafe))
@@ -549,44 +549,51 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             profile = Path(temp_dir) / "oss-cloud.config.toml"
             profile.write_text('[model_providers.ollama-cloud]\nbase_url = "https://ollama.com/v1"\n', encoding="utf-8")
-            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             smoke = {
                 "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
-                "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:cloud",
+                "status": "pass", "lane": "oss-cloud", "codex_profile": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud",
                 "model_provider": "ollama-cloud", "auth_source": "1password_desktop_fifo", "provider_invoked": True,
-                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [],
+                "execution_argv": [
+                    "bash", str(CONFIGS_AUTH_WRAPPER),
+                    "--env-file", "<operator-approved-opaque-env-stream>", "--require-env", "OLLAMA_API_KEY", "--",
+                    "env", "-u", "CODEX_CONFIG_HOME", "CODEX_HOME=<isolated-codex-home>",
+                    "bash", str(CONFIGS_CODEX_EXEC_WRAPPER),
+                    "--profile", "oss-cloud", "--strict-config", "-c", 'approval_policy="on-request"',
+                    "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral",
+                    "--model", "deepseek-v4-flash:0731-cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
+                ],
+                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [], "captured_output_safe": True, "captured_output_scan": {"status": "passed", "source": "captured_output_scan", "redacted": True},
             }
             def smoke_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
                 return subprocess.CompletedProcess(
                     ["python", "run_oss_cloud_smoke.py"], 0, stdout=json.dumps(smoke), stderr="",
                 )
             return _cloud_catalog_fact(
-                "deepseek-v4-flash:cloud", profile, auth,
+                "deepseek-v4-flash:0731-cloud", profile, auth,
                 lambda _command: self._catalog_process(self._catalog_payload(result_class="model_missing"), returncode=2),
                 smoke_runner=smoke_runner, profile_evidence_digest="sha256:" + "a" * 64,
                 codex_executable_identity="sha256:" + "b" * 64,
             )
-
     def test_cloud_catalog_alias_fallback_requires_and_binds_direct_smoke(self) -> None:
         with self._approved_cloud_auth_context() as env_file:
             fact = self._cloud_alias_fact(env_file)
         self.assertEqual(fact["status"], "pass")
         self.assertEqual(fact["catalog_match_source"], "direct_provider_smoke")
-        self.assertEqual(fact["matched_model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(fact["matched_model"], "deepseek-v4-flash:0731-cloud")
         self.assertEqual(fact["direct_smoke_provider_endpoint"], "https://ollama.com/v1")
         self.assertTrue(fact["direct_smoke_provider_invoked"])
         self.assertEqual(fact["direct_smoke_exit_code"], 0)
         self.assertNotIn(str(env_file), json.dumps(fact))
-
     def test_cloud_catalog_alias_fallback_stays_blocked_when_direct_smoke_fails(self) -> None:
         with self._approved_cloud_auth_context():
-            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             smoke = subprocess.CompletedProcess(
                 ["python", "run_oss_cloud_smoke.py"], 1,
                 stdout=json.dumps({"status": "blocked"}), stderr="",
             )
             fact = _cloud_catalog_fact(
-                "deepseek-v4-flash:cloud",
+                "deepseek-v4-flash:0731-cloud",
                 Path("/mock/oss-cloud.config.toml"),
                 auth,
                 lambda _command: self._catalog_process(
@@ -599,7 +606,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(fact["status"], "blocked")
         self.assertEqual(fact["blocker"]["blocker_class"], "catalog_alias_unlisted")
         self.assertIn("direct provider smoke failed", fact["blocker"]["reason"])
-
     def test_cloud_catalog_rejects_mismatched_payload_and_exit_semantics(self) -> None:
         cases = (
             self._catalog_process(self._catalog_payload(), returncode=2),
@@ -614,7 +620,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 self.assertIsNone(payload)
                 self.assertEqual(failure, "probe_exit_contract_mismatch")
                 self.assertEqual(evidence["probe_exit_code"], completed.returncode)
-
     def test_cloud_catalog_rejects_typed_blocker_with_nonempty_stderr(self) -> None:
         secret = "catalog-probe-secret-text"
         completed = self._catalog_process(
@@ -628,7 +633,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertIsNone(payload)
         self.assertEqual(failure, "probe_stderr_nonempty")
         self.assertNotIn(secret, json.dumps(evidence))
-
     def test_cloud_catalog_requires_exact_integer_zero_process_exit(self) -> None:
         class IntSubclass(int):
             pass
@@ -746,7 +750,6 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertIsNone(payload)
         self.assertEqual(failure, "invalid_probe_transport_envelope")
         self.assertEqual(evidence["probe_returncode_class"], "invalid_type")
-
     def _assert_nonzero_catalog_returncode(self, returncode: int) -> None:
         completed = self._catalog_process(self._catalog_payload(), returncode=returncode)
         fact = self._catalog_fact_for_process(completed)
@@ -758,17 +761,15 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertEqual(failure, "probe_exit_contract_mismatch")
         self.assertEqual(evidence["probe_exit_class"], "nonzero")
         self.assertEqual(evidence["probe_exit_code"], returncode)
-
     def _catalog_fact_for_process(
         self, completed: subprocess.CompletedProcess[str],
     ) -> dict[str, object]:
         with self._approved_cloud_auth_context():
-            approved = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             return _cloud_catalog_fact(
-                "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), approved,
                 lambda _command: completed,
             )
-
     def test_cloud_catalog_rejects_malformed_or_contradictory_child_contracts(self) -> None:
         duplicate = json.dumps(self._catalog_payload()).replace(
             '"result_class": "pass"', '"result_class": "pass", "result_class": "pass"',
