@@ -31,8 +31,6 @@ from ask.skills_sdk.handoff_readiness import (  # noqa: E402
     build_handoff_readiness_receipt,
     build_tessl_dry_run_admission,
 )
-
-
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
 AB_RUN_RECEIPT_FIXTURE = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.v1.json"
 PRE_TESSL_LANES = (
@@ -106,20 +104,7 @@ def _scenario_prompt() -> str:
 def _write_cloud_ab_source(root: Path, source: Path, fixture_bytes: bytes | None = None) -> None:
     fixture = root / "oss-cloud-scenario.md"
     fixture.write_bytes(fixture_bytes if fixture_bytes is not None else _scenario_prompt().encode("utf-8"))
-    receipt = json.loads((REPO_ROOT / AB_RUN_RECEIPT_FIXTURE).read_text(encoding="utf-8"))
-    cloud_gate = next(gate for gate in receipt["runtime_profile_gates"] if gate["lane"] == "oss-cloud")
-    cloud_gate["order"] = 1
-    receipt["runtime_profile_gates"] = [cloud_gate]
-    receipt["execution_lane"] = "oss-cloud"
-    receipt["codex_profile"] = "oss-cloud"
-    receipt["command_plan"] = cloud_gate["command_plan"]
-    receipt["variant_results"] = cloud_gate["variant_results"]
-    bytes_value = fixture.read_bytes()
-    receipt["fixture"] = {
-        "digest": f"sha256:{sha256(bytes_value).hexdigest()}",
-        "path": fixture.relative_to(REPO_ROOT).as_posix(),
-        "size_bytes": len(bytes_value),
-    }
+    receipt = _static_cloud_ab_receipt(fixture)
     source.write_text(json.dumps({
         "status": "success",
         "data": {"skills_sdk_eval_ab_run": {
@@ -130,6 +115,24 @@ def _write_cloud_ab_source(root: Path, source: Path, fixture_bytes: bytes | None
             "receipt": receipt,
         }},
     }), encoding="utf-8")
+
+
+def _static_cloud_ab_receipt(fixture: Path) -> dict[str, object]:
+    receipt = json.loads((REPO_ROOT / AB_RUN_RECEIPT_FIXTURE).read_text(encoding="utf-8"))
+    cloud_gate = next(gate for gate in receipt["runtime_profile_gates"] if gate["lane"] == "oss-cloud")
+    cloud_gate["order"] = 1
+    receipt["runtime_profile_gates"] = [cloud_gate]
+    receipt["execution_lane"] = "oss-cloud"
+    receipt["codex_profile"] = "oss-cloud"
+    receipt["command_plan"] = cloud_gate["command_plan"]
+    receipt["variant_results"] = cloud_gate["variant_results"]
+    fixture_bytes = fixture.read_bytes()
+    receipt["fixture"] = {
+        "digest": f"sha256:{sha256(fixture_bytes).hexdigest()}",
+        "path": fixture.relative_to(REPO_ROOT).as_posix(),
+        "size_bytes": len(fixture_bytes),
+    }
+    return receipt
 
 
 def _stale_source_payload(lane_id: str) -> dict[str, object]:
