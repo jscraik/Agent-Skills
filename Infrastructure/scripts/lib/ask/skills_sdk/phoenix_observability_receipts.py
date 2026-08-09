@@ -133,10 +133,10 @@ try:
     with urllib.request.urlopen(http_request, timeout=cfg["timeout_seconds"]) as response:
         print(json.dumps({"status": "pass", "http_status": response.status}))
 except urllib.error.HTTPError as exc:
-    print(json.dumps({"status": "blocked", "http_status": exc.code, "error_class": type(exc).__name__}))
+    print(json.dumps({"service": "agent-skills", "status": "blocked", "http_status": exc.code, "error_class": type(exc).__name__}))
     raise SystemExit(2)
 except (urllib.error.URLError, TimeoutError) as exc:
-    print(json.dumps({"status": "blocked", "error_class": type(exc).__name__}))
+    print(json.dumps({"service": "agent-skills", "status": "blocked", "error_class": type(exc).__name__}))
     raise SystemExit(2)
 '''
 
@@ -431,9 +431,9 @@ def _mirror_source(repo_root: Path, receipt_path: str) -> tuple[Path, list[dict[
     rows: list[dict[str, Any]] = []
     raw_paths: list[str] = []
     if checks[0]["status"] == "pass" and source.is_file():
-        raw_bytes = source.read_bytes()
-        source_digest = _sha256_bytes(raw_bytes)
         try:
+            raw_bytes = source.read_bytes()
+            source_digest = _sha256_bytes(raw_bytes)
             receipt = _find_receipt(json.loads(raw_bytes.decode("utf-8")))
             raw_paths = _raw_key_paths(receipt)
             rows = _mirror_rows(repo_root, source, source_digest, receipt)

@@ -563,7 +563,7 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                     "--sandbox", "read-only", "--ephemeral",
                     "--model", "deepseek-v4-flash:cloud", "Reply exactly CODEX_OSS_CLOUD_OK",
                 ],
-                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [], "secret_value_observed": False,
+                "exit_code": 0, "marker": "CODEX_OSS_CLOUD_OK", "warnings": [{"code": "codex_runtime_metadata_fallback"}], "findings": [], "secret_value_observed": False, "secret_observation": {"status": "clear", "source": "captured_output_scan", "redacted": True},
             }
             def smoke_runner(_command: list[str]) -> subprocess.CompletedProcess[str]:
                 return subprocess.CompletedProcess(

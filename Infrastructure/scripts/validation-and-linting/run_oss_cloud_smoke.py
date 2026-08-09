@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import tomllib
+import re
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/r
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
+SECRET_OUTPUT_RE = re.compile(r"(?im)^\s*(?:OLLAMA_API_KEY|(?:api|access)[_-]?key|token|secret)\s*[:=]\s*\S+")
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
 model_provider = "{EXPECTED_PROVIDER}"
 approval_policy = "on-request"
@@ -205,11 +207,24 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.is_file() else ""
 
 
+def _secret_observation(paths: dict[str, Path], *, executed: bool) -> dict[str, Any]:
+    if not executed:
+        return {"status": "unavailable", "source": "captured_output_scan", "redacted": True}
+    output = "\n".join((_read(paths["stdout"]), _read(paths["stderr"])))
+    observed = bool(SECRET_OUTPUT_RE.search(output))
+    return {
+        "status": "blocked" if observed else "clear",
+        "source": "captured_output_scan",
+        "redacted": True,
+    }
+
+
 def _receipt(
     args: argparse.Namespace, paths: dict[str, Path], profile: Path, findings: list[dict[str, str]], *,
     command: list[str] | None, exit_code: int | None, duration_seconds: float, provider_invoked: bool,
 ) -> dict[str, Any]:
     warnings = _runtime_findings(args, paths, findings, command, exit_code)
+    secret_observation = _secret_observation(paths, executed=command is not None)
     return {
         "schema_version": "skills-sdk.oss-cloud-smoke-run.v0",
         "observed_at": datetime.now(timezone.utc).isoformat(),
@@ -230,7 +245,8 @@ def _receipt(
         "last_message_path": str(paths["last_message"]),
         "warnings": warnings,
         "findings": findings,
-        "secret_value_observed": False,
+        "secret_observation": secret_observation,
+        "secret_value_observed": secret_observation["status"] == "blocked",
     }
 
 
@@ -243,6 +259,8 @@ def _runtime_findings(
     runtime_findings = _findings(
         "\n".join((_read(paths["stdout"]), _read(paths["stderr"]))), CLOUD_SMOKE_MAX_TOKENS_USED,
     )
+    if SECRET_OUTPUT_RE.search("\n".join((_read(paths["stdout"]), _read(paths["stderr"])) )):
+        runtime_findings.append({"code": "oss_cloud_secret_output_observed", "message": "Captured smoke output matched a redacted secret-shaped marker."})
     warnings = [item for item in runtime_findings if item["code"] in CLOUD_SMOKE_NON_BLOCKING_CODES]
     findings.extend(item for item in runtime_findings if item["code"] not in CLOUD_SMOKE_NON_BLOCKING_CODES)
     if exit_code != 0:

@@ -22,6 +22,7 @@ def cloud_smoke_receipt_findings(payload: dict[str, Any]) -> list[str]:
         "schema_version", "observed_at", "status", "lane", "codex_profile", "model",
         "model_provider", "auth_source", "provider_invoked", "execution_argv", "exit_code",
         "marker", "warnings", "findings", "secret_value_observed",
+        "secret_observation",
     }
     findings = [f"missing:{key}" for key in sorted(required - payload.keys())]
     if findings:
@@ -41,10 +42,8 @@ def _valid_execution_argv(payload: dict[str, Any]) -> bool:
 
 
 def _child_wrapper_index(argv: list[str]) -> int | None:
-    for index, value in enumerate(argv):
-        if is_configs_codex_exec_wrapper(value):
-            return index
-    return None
+    expected_index = 12
+    return expected_index if len(argv) > expected_index and is_configs_codex_exec_wrapper(argv[expected_index]) else None
 
 
 def _adjacent_pair(child: list[str], flag: str, expected: str) -> bool:
@@ -71,6 +70,14 @@ def _child_contract_findings(child: list[str]) -> list[str]:
     return findings
 
 
+def _child_chain_findings(argv: list[str]) -> list[str]:
+    if argv[7] != "env" or argv[8:10] != ["-u", "CODEX_CONFIG_HOME"]:
+        return ["codex_exec_child_chain_contract"]
+    if not argv[10].startswith("CODEX_HOME=") or argv[11] != "bash":
+        return ["codex_exec_child_chain_contract"]
+    return []
+
+
 def _execution_argv_findings(payload: dict[str, Any]) -> list[str]:
     argv = payload.get("execution_argv")
     if not isinstance(argv, list) or len(argv) < 15 or not all(isinstance(item, str) for item in argv):
@@ -87,6 +94,9 @@ def _execution_argv_findings(payload: dict[str, Any]) -> list[str]:
     wrapper_index = _child_wrapper_index(argv)
     if wrapper_index is None:
         return ["codex_exec_wrapper_contract"]
+    chain_findings = _child_chain_findings(argv)
+    if chain_findings:
+        return chain_findings
     return _child_contract_findings(argv[wrapper_index:])
 
 
@@ -105,9 +115,14 @@ def _valid_outcome(payload: dict[str, Any], marker: str) -> bool:
         datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
     except (AttributeError, TypeError, ValueError):
         return False
+    observation = payload.get("secret_observation")
+    valid_observation = isinstance(observation, dict) and observation == {
+        "status": "clear", "source": "captured_output_scan", "redacted": True,
+    }
     return all((
         payload.get("status") == "pass", payload.get("exit_code") == 0,
         payload.get("marker") == marker, payload.get("findings") == [],
         isinstance(payload.get("warnings"), list),
         type(payload.get("secret_value_observed")) is bool and payload["secret_value_observed"] is False,
+        valid_observation,
     ))

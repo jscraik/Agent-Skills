@@ -301,6 +301,11 @@ def _mirror_rows(repo_root: Path, receipt_path: Path, source_digest: str, receip
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    created_directories: list[Path] = []
+    parent = path.parent
+    while not parent.exists() and parent != parent.parent:
+        created_directories.append(parent)
+        parent = parent.parent
     path.parent.mkdir(parents=True, exist_ok=True)
     staged_path: Path | None = None
     try:
@@ -315,6 +320,13 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(staged_path, path)
+        if hasattr(os, "O_DIRECTORY"):
+            for directory in [path.parent, *reversed(created_directories)]:
+                directory_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
         staged_path = None
     finally:
         if staged_path is not None:
