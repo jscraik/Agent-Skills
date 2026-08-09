@@ -30,7 +30,12 @@ DEFAULT_CODEX_EXEC_WRAPPER = Path("/Users/jamiecraik/dev/configs/codex/scripts/r
 DEFAULT_MARKER = "CODEX_OSS_CLOUD_OK"
 CLOUD_SMOKE_MAX_TOKENS_USED = 20000
 CLOUD_SMOKE_NON_BLOCKING_CODES = frozenset({"codex_runtime_metadata_fallback"})
-SECRET_OUTPUT_RE = re.compile(r"(?im)\b(?:OLLAMA_API_KEY|(?:api|access)[_-]?key|token|secret)\b\s*[:=]\s*\S+")
+# Match shell, plain-text, and JSON-style diagnostics without capturing or
+# printing the value. The optional quote is deliberately part of the key
+# boundary so `{"token":"..."}` is blocked as well as `token=...`.
+SECRET_OUTPUT_RE = re.compile(
+    r'(?im)["\']?\b(?:OLLAMA_API_KEY|(?:api|access)[_-]?key|token|secret)\b["\']?\s*[:=]\s*["\']?\S+'
+)
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"
 model_provider = "{EXPECTED_PROVIDER}"
 approval_policy = "on-request"

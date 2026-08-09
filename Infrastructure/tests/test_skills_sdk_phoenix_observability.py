@@ -554,7 +554,7 @@ print(json.dumps({"status": "pass", "http_status": 200}))
 
             trace_receipt = build_phoenix_eval_trace_receipt(
                 REPO_ROOT,
-                eval_receipt=_eval_trace_receipt(30),
+                eval_receipt={**_eval_trace_receipt(30), "case_count": None},
                 base_url="http://127.0.0.1:6006",
                 otel_python_path=runtime.as_posix(),
                 enabled=True,

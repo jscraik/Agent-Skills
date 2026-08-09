@@ -365,9 +365,17 @@ def _eval_payload_header(eval_receipt: dict[str, Any], plan: dict[str, Any], sou
 
 def _eval_payload_counts(repo_root: Path, eval_receipt: dict[str, Any], plan: dict[str, Any], cases: Any, trace_case_spans: bool, bounded_limit: int, emitted: bool) -> dict[str, Any]:
     spans = plan["spans"]
+    case_items = cases if isinstance(cases, list) else []
+    raw_case_count = eval_receipt.get("case_count")
+    try:
+        case_count = int(raw_case_count) if raw_case_count is not None else len(case_items)
+    except (TypeError, ValueError):
+        case_count = len(case_items)
+    if case_count < 0:
+        case_count = len(case_items)
     return {
         "target_path": _safe_path_value(repo_root, eval_receipt.get("target_path")),
-        "case_count": int(eval_receipt["case_count"] if "case_count" in eval_receipt else len(cases or [])),
+        "case_count": case_count,
         "passed_count": int(eval_receipt.get("passed_count") or 0),
         "failed_count": int(eval_receipt.get("failed_count") or 0),
         "span_plan": spans,
