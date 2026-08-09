@@ -264,6 +264,26 @@ class Runner:
         self.assertEqual(metrics, {"moved": (2, 1)})
         load_baseline.assert_not_called()
 
+    def test_moved_function_metrics_disambiguates_duplicate_names_by_syntax(self) -> None:
+        validator = _load_validator()
+        current_path = REPO_ROOT / "Infrastructure/tests/current.py"
+        current = "def main(value):\n    if value:\n        return 1\n    return 0\n"
+        baseline = {
+            "deleted_python_paths": [
+                "Infrastructure/tests/first.py",
+                "Infrastructure/tests/second.py",
+            ],
+            "sibling_python_paths": [],
+            "head_text": {
+                "Infrastructure/tests/first.py": current,
+                "Infrastructure/tests/second.py": "def main(value):\n    return value + 1\n",
+            },
+        }
+
+        metrics = validator._moved_function_metrics(current_path, baseline, current)
+
+        self.assertEqual(metrics, {"main": (4, 2)})
+
     def test_python_shape_passes_loaded_baseline_to_move_scan(self) -> None:
         validator = _load_validator()
         args = SimpleNamespace(changed_files=("Infrastructure/tests/test_ask_cli_shape.py",))

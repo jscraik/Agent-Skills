@@ -14,113 +14,7 @@ from types import MappingProxyType
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-LEGACY_SHAPE_DEBT = MappingProxyType({
-    "Infrastructure/scripts/lib/ask/commands/evals.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing eval command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin eval runner extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Plugins/skill-factory/scripts/skill-builder/skill_gate.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing plugin gate extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/skills_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skills command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/commands/repo_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing repository command extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skill_review_dashboard.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill review dashboard extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill authoring benchmark extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_cli_impl.py": {
-        "owner": "ask-cli",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing ask CLI regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_evals_command.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing eval command regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_ask_skills_package_contract.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing package contract regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_scenario_quality.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing scenario quality regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_ab_judge_score.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing A/B judge score regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "skills-system/skill-creator/scripts/init_skill.py": {
-        "owner": "skill-factory",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing skill creator scaffold extraction debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/scripts/testing/test_validate_all_runtime_separation_impl.py": {
-        "owner": "validation",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "PROGRAM-DESIGN-RATCHET",
-        "reason": "pre-existing validation integration fixture exceeds file budget; split in follow-up",
-        "expires": "2026-07-31",
-    },
-})
+LEGACY_SHAPE_DEBT = MappingProxyType({})
 LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
     """
@@ -278,10 +172,11 @@ def _oversized_sibling_paths(
 def _moved_function_metrics(
     path: Path,
     baseline: dict[str, object] | None = None,
+    current: str | None = None,
 ) -> dict[str, tuple[int, int]]:
-    """Use uniquely named functions in deleted sibling modules as move baselines."""
+    """Use unique names or exact syntax matches in sibling modules as move baselines."""
     baseline = baseline or _shape_baseline(path)
-    candidates: dict[str, list[tuple[int, int]]] = {}
+    candidates: dict[str, list[tuple[tuple[int, int], str]]] = {}
     baseline_paths = [
         *_deleted_python_paths(baseline),
         *_oversized_sibling_paths(path, baseline),
@@ -292,9 +187,20 @@ def _moved_function_metrics(
         text = _baseline_head_text(deleted_path, baseline)
         if text is None:
             continue
-        for name, metrics in _function_metrics(text, source="baseline").items():
-            candidates.setdefault(name, []).append(metrics)
-    return {name: values[0] for name, values in candidates.items() if len(values) == 1}
+        for name, record in _function_fingerprint_metrics(text, source="baseline").items():
+            candidates.setdefault(name, []).append(record)
+    moved = {name: values[0][0] for name, values in candidates.items() if len(values) == 1}
+    if current is None:
+        return moved
+    for name, (_, fingerprint) in _function_fingerprint_metrics(current).items():
+        exact_metrics = {
+            metrics
+            for metrics, candidate_fingerprint in candidates.get(name, [])
+            if candidate_fingerprint == fingerprint
+        }
+        if len(exact_metrics) == 1:
+            moved[name] = exact_metrics.pop()
+    return moved
 
 
 def _complexity(node: ast.AST) -> int:
@@ -351,6 +257,47 @@ def _function_metrics(
     return metrics
 
 
+def _function_fingerprint_metrics(
+    text: str,
+    *,
+    source: str = "current",
+) -> dict[str, tuple[tuple[int, int], str]]:
+    """Return function metrics bound to normalized syntax for exact move detection."""
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        if source == "baseline":
+            return {}
+        raise
+    metrics = _function_metrics(text, source=source)
+    records: dict[str, tuple[tuple[int, int], str]] = {}
+
+    class _FingerprintVisitor(ast.NodeVisitor):
+        def __init__(self) -> None:
+            self.qualifiers: list[str] = []
+
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:
+            self.qualifiers.append(node.name)
+            self.generic_visit(node)
+            self.qualifiers.pop()
+
+        def _visit_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+            name = ".".join([*self.qualifiers, node.name])
+            records[name] = (metrics[name], ast.dump(node, include_attributes=False))
+            self.qualifiers.append(node.name)
+            self.generic_visit(node)
+            self.qualifiers.pop()
+
+        def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+            self._visit_function(node)
+
+        def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+            self._visit_function(node)
+
+    _FingerprintVisitor().visit(tree)
+    return records
+
+
 def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
     python_paths: list[Path] = []
     for path_text in paths:
@@ -388,7 +335,7 @@ def _check_function_shape(
     baseline_metrics = (
         _function_metrics(baseline, source="baseline")
         if baseline is not None
-        else _moved_function_metrics(path, shape_baseline)
+        else _moved_function_metrics(path, shape_baseline, current)
     )
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))

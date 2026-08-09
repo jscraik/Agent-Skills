@@ -70,7 +70,7 @@ def _exercise_cloud_wrapper(
         "output_schema_path": None,
         "sandbox": "read-only",
         "ask_for_approval": None,
-        "model": "deepseek-v4-flash:cloud",
+        "model": run_skill_evals.OSS_CLOUD_MODEL,
         "profile": "oss-cloud",
         "codex_home": workspace_root / ".codex",
         "jsonl_path": workspace_root / "trace.jsonl",
@@ -368,7 +368,9 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
             explicit_home.mkdir(parents=True)
             (explicit_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
             (explicit_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
-            (explicit_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
+            (explicit_home / "oss-cloud.config.toml").write_text(
+                f'model = "{run_skill_evals.OSS_CLOUD_MODEL}"\n', encoding="utf-8"
+            )
             with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
                 with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
                     isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud", source_home=explicit_home)
@@ -420,7 +422,9 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
             default_home.mkdir(parents=True)
             (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
             (default_home / "config.toml").write_text('model_provider = "openai"\n', encoding="utf-8")
-            (default_home / "oss-cloud.config.toml").write_text('model = "deepseek-v4-flash:cloud"\n', encoding="utf-8")
+            (default_home / "oss-cloud.config.toml").write_text(
+                f'model = "{run_skill_evals.OSS_CLOUD_MODEL}"\n', encoding="utf-8"
+            )
             with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
                 with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
                     isolated_home, _warnings = _isolated_codex_home_for_eval("oss-cloud")

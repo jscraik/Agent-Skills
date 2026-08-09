@@ -376,6 +376,68 @@ class Factory:
         with self.assertRaises(validator.BaselineUnavailable):
             validator._validate_baseline_ref("not-a-real-revision")
 
+    def test_exact_helper_extraction_reuses_baseline_design_metrics(self) -> None:
+        validator = _load_validator()
+        original = """CACHE = {}
+
+def publish(a, b, c, d, e, f, enabled=False):
+    try:
+        return enabled
+    except Exception:
+        return None
+"""
+        extracted = """from original import dependency
+
+__all__ = ["publish"]
+
+def publish(a, b, c, d, e, f, enabled=False):
+    try:
+        return enabled
+    except Exception:
+        return None
+"""
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertEqual(
+                validator._exact_move_baseline(path, extracted, "origin/main"),
+                extracted,
+            )
+
+    def test_changed_helper_body_is_not_treated_as_an_exact_move(self) -> None:
+        validator = _load_validator()
+        original = """def publish(value):
+    return value
+"""
+        changed = """def publish(value):
+    return str(value)
+"""
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertIsNone(validator._exact_move_baseline(path, changed, "origin/main"))
+
+    def test_exact_helper_extraction_ignores_docstring_layout_cleanup(self) -> None:
+        validator = _load_validator()
+        original = 'def publish(value):\n    """\n    \tReturn the supplied value.   \n    """\n    return value\n'
+        extracted = 'def publish(value):\n    """\n        Return the supplied value.\n    """\n    return value\n'
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertEqual(
+                validator._exact_move_baseline(path, extracted, "origin/main"),
+                extracted,
+            )
+
+    def test_exact_helper_extraction_keeps_docstring_content_significant(self) -> None:
+        validator = _load_validator()
+        original = 'def publish(value):\n    """Return the supplied value."""\n    return value\n'
+        changed = 'def publish(value):\n    """Return a converted value."""\n    return value\n'
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertIsNone(validator._exact_move_baseline(path, changed, "origin/main"))
+
     def test_staged_source_uses_head_as_default_baseline(self) -> None:
         validator = _load_validator()
         self.assertEqual(validator._default_baseline_ref(staged_source=True), "HEAD")
