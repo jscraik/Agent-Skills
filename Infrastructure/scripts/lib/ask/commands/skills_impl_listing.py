@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_catalog import *  # noqa: F403
 
 def list_skills(

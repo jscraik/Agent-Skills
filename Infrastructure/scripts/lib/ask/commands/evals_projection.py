@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_quality import *  # noqa: F403
 
 def _tessl_case_source(case: dict[str, object]) -> str:

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -197,6 +198,19 @@ class SkillGatePublicPathTests(unittest.TestCase):
         codes = {finding.code for finding in self.module.check_codex_frontmatter(doc, min_desc_len=10)}
 
         self.assertIn("FM_METADATA_NOT_MAPPING", codes)
+
+    def test_pyyaml_fallback_reexecutes_the_public_gate_facade(self) -> None:
+        preferred = Path("/tmp/pyyaml-python")
+        environment = {"SKILL_CREATOR_PYYAML_REEXEC": "1"}
+
+        with mock.patch.object(self.module.os, "execve") as execve:
+            self.module._reexec_gate_facade(preferred, environment)
+
+        execve.assert_called_once_with(
+            str(preferred),
+            [str(preferred), str(SKILL_GATE), *sys.argv[1:]],
+            environment,
+        )
 
 
 if __name__ == "__main__":

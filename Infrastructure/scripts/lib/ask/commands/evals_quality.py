@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_staging_parse import *  # noqa: F403
 
 def _acceptance_type(item: object) -> str:

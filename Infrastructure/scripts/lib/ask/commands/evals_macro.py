@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_live_run import *  # noqa: F403
 
 def _repo_relative_text(repo_root: Path, text: str) -> str:

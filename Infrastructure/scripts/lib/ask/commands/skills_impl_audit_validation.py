@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_project_conformance import *  # noqa: F403
 
 def audit_skill(

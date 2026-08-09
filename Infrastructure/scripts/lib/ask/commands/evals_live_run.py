@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_local_scenario import *  # noqa: F403
 
 def _tessl_eval_result_common(

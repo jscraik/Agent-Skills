@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_install_improve import *  # noqa: F403
 
 def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str, Any] | None:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_listing import *  # noqa: F403
 
 CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {

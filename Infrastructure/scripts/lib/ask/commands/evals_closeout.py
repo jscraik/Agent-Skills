@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_macro import *  # noqa: F403
 
 def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool = False) -> str | None:

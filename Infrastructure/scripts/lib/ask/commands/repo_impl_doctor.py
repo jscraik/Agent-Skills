@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .repo_impl_core import *  # noqa: F403
 
 def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:

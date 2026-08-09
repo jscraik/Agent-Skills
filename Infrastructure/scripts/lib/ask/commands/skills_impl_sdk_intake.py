@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_doctor_intake import *  # noqa: F403
 
 def skills_sdk_intake_review(

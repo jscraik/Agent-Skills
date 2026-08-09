@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_capabilities import *  # noqa: F403
 
 def skills_doctor(

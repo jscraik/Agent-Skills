@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_closeout import *  # noqa: F403
 
 def run_evals(

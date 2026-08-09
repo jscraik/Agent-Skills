@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_audit_validation import *  # noqa: F403
 
 def external_review_skill(

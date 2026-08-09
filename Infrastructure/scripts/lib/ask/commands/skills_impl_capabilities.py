@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_profile_ops import *  # noqa: F403
 
 def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallResult:

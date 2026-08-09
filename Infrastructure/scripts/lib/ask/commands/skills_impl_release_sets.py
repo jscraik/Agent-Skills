@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_ab_receipts import *  # noqa: F403
 
 def _skills_sdk_prepare_release_case_filters(

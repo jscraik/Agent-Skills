@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_core import *  # noqa: F403
 
 def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, object]:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_sdk_calibration import *  # noqa: F403
 
 def skills_sdk_plugin_install(

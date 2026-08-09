@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_live_preflight import *  # noqa: F403
 
 def run_tessl_local_proof(

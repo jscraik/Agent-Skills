@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_project_improve import *  # noqa: F403
 
 def skills_sdk_project_conformance(

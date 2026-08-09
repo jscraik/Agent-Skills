@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_sdk_eval import *  # noqa: F403
 
 def skills_sdk_eval_scorer_calibration(repo_root: Path, target: str) -> CallResult:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_release_sets import *  # noqa: F403
 
 def _sdk_improve_redact_sensitive_values(value: Any) -> Any:

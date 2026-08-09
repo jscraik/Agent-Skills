@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_improve_fallback import *  # noqa: F403
 
 def _verify_user_runtime_relinks(

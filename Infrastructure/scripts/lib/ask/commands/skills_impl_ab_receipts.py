@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_plugin_ab import *  # noqa: F403
 
 def _ab_receipt_kwargs(repo_root: Path, request: AbEvalRequest) -> dict[str, object]:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_external_review import *  # noqa: F403
 
 def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:

@@ -41,15 +41,19 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
+
+def _reexec_gate_facade(preferred: Path, env: dict[str, str]) -> None:
+    facade_path = _SCRIPT_DIR / "skill_gate.py"
+    os.execve(str(preferred), [str(preferred), str(facade_path), *sys.argv[1:]], env)
+
+
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover
     preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
     already_reexec = os.environ.get("SKILL_CREATOR_PYYAML_REEXEC") == "1"
     if preferred.exists() and not already_reexec:
-        env = dict(os.environ)
-        env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
-        os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+        _reexec_gate_facade(preferred, {**os.environ, "SKILL_CREATOR_PYYAML_REEXEC": "1"})
 
     sys.stderr.write(
         "ERROR: PyYAML is required to run skill_gate.py.\n\n"
@@ -126,11 +130,11 @@ def _read_yaml_mapping(path: Path) -> Dict[str, Any]:
 
 # Space and colon variants support case-insensitive `contains foo` and `contains: foo` shorthand matching.
 _ACCEPTANCE_STRING_PREFIXES = ("contains ", "not_contains ", "regex ", "not_regex ", "contains:", "not_contains:", "regex:", "not_regex:")
-_SCAN_IGNORED_NAMES = {
+_SCAN_IGNORED_NAMES = frozenset({
     ".DS_Store",
     "Thumbs.db",
     "desktop.ini",
-}
+})
 
 
 def _is_bare_acceptance_string(value: Any) -> bool:
@@ -167,12 +171,12 @@ def _find_section_text(body: str, aliases: Sequence[str]) -> str:
     return ""
 
 
-_CANONICAL_SKILLS_SDK_SECTION_ORDER: List[Tuple[str, str, List[str]]] = [
-    ("when_to_use", "When To Use", ["when to use", "usage", "triggers", "invocation"]),
-    ("inputs", "Inputs", ["inputs", "preconditions", "assumptions", "requirements"]),
-    ("outputs", "Outputs", ["outputs", "output format", "deliverables", "result"]),
-    ("workflow", "Workflow", ["workflow", "procedure", "steps", "process"]),
-    ("failure_mode", "Failure Mode", [
+_CANONICAL_SKILLS_SDK_SECTION_ORDER: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    ("when_to_use", "When To Use", ("when to use", "usage", "triggers", "invocation")),
+    ("inputs", "Inputs", ("inputs", "preconditions", "assumptions", "requirements")),
+    ("outputs", "Outputs", ("outputs", "output format", "deliverables", "result")),
+    ("workflow", "Workflow", ("workflow", "procedure", "steps", "process")),
+    ("failure_mode", "Failure Mode", (
         "failure mode",
         "failure modes",
         "failure handling",
@@ -182,10 +186,10 @@ _CANONICAL_SKILLS_SDK_SECTION_ORDER: List[Tuple[str, str, List[str]]] = [
         "stopping conditions",
         "rollback path",
         "handoff rules",
-    ]),
-    ("validation", "Validation", ["validation", "checks", "verify", "acceptance", "gates"]),
-    ("references", "References", ["references", "progressive disclosure"]),
-]
+    )),
+    ("validation", "Validation", ("validation", "checks", "verify", "acceptance", "gates")),
+    ("references", "References", ("references", "progressive disclosure")),
+)
 
 
 def _matches_section_alias(title: str, aliases: Sequence[str]) -> bool:
@@ -283,7 +287,7 @@ def _focus_language_count(text: str) -> int:
     return sum(1 for phrase in phrases if phrase in text.lower())
 
 
-_TEXT_EXTENSIONS = {
+_TEXT_EXTENSIONS = frozenset({
     ".md",
     ".txt",
     ".yaml",
@@ -299,7 +303,7 @@ _TEXT_EXTENSIONS = {
     ".zsh",
     ".js",
     ".ts",
-}
+})
 
 
 def _default_prompt_patterns() -> List[Dict[str, str]]:
@@ -379,7 +383,7 @@ def _load_allow_block_patterns() -> Tuple[List[re.Pattern[str]], List[Tuple[re.P
             if not regex:
                 raise ValueError("blocklist entries must include regex")
             blocklist.append((re.compile(regex, re.IGNORECASE | re.DOTALL), message, severity))
-    except Exception as exc:
+    except (OSError, json.JSONDecodeError, re.error, ValueError) as exc:
         findings.append(Finding(
             Level.WARN,
             "PI_LOCAL_CONFIG",
@@ -439,7 +443,7 @@ def _load_prompt_patterns(
                     ))
                     severity = "medium"
                 patterns.append((code, re.compile(regex, re.IGNORECASE | re.DOTALL), message, severity))
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError, re.error, ValueError) as exc:
             findings.append(Finding(
                 Level.WARN,
                 "PI_PATTERN_CONFIG",

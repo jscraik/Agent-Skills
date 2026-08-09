@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_projection import *  # noqa: F403
 
 def _tessl_auth_blocked(*texts: str) -> bool:

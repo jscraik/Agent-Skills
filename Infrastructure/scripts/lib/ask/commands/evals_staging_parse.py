@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_policy import *  # noqa: F403
 
 def _should_skip_tessl_staging_path(source_root: Path, source_path: Path) -> bool:

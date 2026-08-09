@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .evals_project import *  # noqa: F403
 
 def _stage_tessl_eval_source(

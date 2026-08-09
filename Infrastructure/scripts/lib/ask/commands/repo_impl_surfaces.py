@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .repo_impl_core import *  # noqa: F403
 from .repo_impl_doctor import *  # noqa: F403
 from .repo_impl_closeout import *  # noqa: F403

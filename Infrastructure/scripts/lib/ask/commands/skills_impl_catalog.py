@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_core import *  # noqa: F403
 
 def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:

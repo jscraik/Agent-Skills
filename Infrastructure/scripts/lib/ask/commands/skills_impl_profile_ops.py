@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .skills_impl_memory_profiles import *  # noqa: F403
 
 def _skill_profile_event_coverage(
