@@ -396,6 +396,27 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(output['data']['diagnostics']['exit_code'], 0)
         self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot'])
 
+    def test_skills_audit_source_only_contract(self):
+        """Source-only audit must not require a generated workspace projection."""
+        cmd = [
+            'python3', './bin/ask', 'skills', 'audit',
+            'Plugins/skill-factory/skills/code_quality_review/skill-builder',
+            '--source-only', '--json',
+        ]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output['status'], 'success')
+        self.assertEqual(output['data']['audit_scope']['validation_scope'], 'source')
+        self.assertEqual(
+            output['data']['validation_commands'],
+            [
+                './bin/ask skills audit '
+                'Plugins/skill-factory/skills/code_quality_review/skill-builder '
+                '--source-only --json --robot'
+            ],
+        )
+
     def test_skills_audit_accepts_explicit_external_project_skill(self):
         """Verify Skill Factory audit can inspect project-local skills outside the foundry."""
         with tempfile.TemporaryDirectory() as temp_dir:

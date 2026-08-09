@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .skills_impl_core import _normalize_skill_target_path, _project_local_skill_target, _validate_repo_relative_skill_path
+from .skills_impl_listing import _repo_relative_path, _skill_audit_target
 from .skills_impl_profile_ops import *  # noqa: F403
-
 
 def _operation_context_events(*event_types: str) -> dict[str, dict[str, Any]]:
     """Copy immutable event routes into JSON-safe operation-context data."""

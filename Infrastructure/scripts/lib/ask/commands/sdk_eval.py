@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Callable
 from pathlib import Path
 
+from ask.commands import evals as eval_commands
 import ask.commands.skills as skills_commands
 from ask.cli_errors import build_unknown_action_result, build_validation_error
 from ask.commands.skills_impl import TESSL_REVIEW_MIN_SCORE
@@ -27,9 +28,12 @@ def add_sdk_eval_parser(
     _add_scenario_quality_parser(subparsers, global_parser)
     _add_scorer_quality_parser(subparsers, global_parser)
     _add_scorer_calibration_parser(subparsers, global_parser)
+    _add_tessl_view_parser(subparsers, global_parser)
     _add_tessl_score_parser(subparsers, global_parser)
     _add_tessl_local_proof_parser(subparsers, global_parser)
     _add_regression_plan_parser(subparsers, global_parser)
+    _add_handoff_capture_parser(subparsers, global_parser)
+    _add_handoff_materialize_parser(subparsers, global_parser)
     _add_handoff_readiness_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
     _add_ab_rubric_parser(subparsers, global_parser)
@@ -92,6 +96,18 @@ def _add_tessl_score_parser(subparsers: argparse._SubParsersAction, global_parse
     score.add_argument("--preview", action="store_true", help="Emit a non-mutating Tessl score receipt")
 
 
+def _add_tessl_view_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    view = subparsers.add_parser(
+        "tessl-view",
+        help="Fetch and record one submitted private Tessl eval view without submitting another run",
+        parents=[global_parser],
+    )
+    view.add_argument("--skill", required=True, help="Skill handle or repo-relative source path bound to the submitted run")
+    view.add_argument("--run-id", required=True, help="Existing Tessl eval run id recorded by the live submission receipt")
+    view.add_argument("--workspace", required=True, help="Workspace that owns the submitted private Tessl eval")
+    view.add_argument("--execute", action="store_true", help="Required explicit gate before fetching the remote view")
+
+
 def _add_tessl_local_proof_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     proof = subparsers.add_parser(
         "tessl-local-proof",
@@ -123,6 +139,37 @@ def _add_handoff_readiness_parser(subparsers: argparse._SubParsersAction, global
     readiness.add_argument("--receipt-json", help="Optional explicit handoff readiness JSON artifact")
     readiness.add_argument("--tessl-score", help="Optional SDK Tessl score receipt JSON used as a live feedback-loop blocker")
     readiness.add_argument("--preview", action="store_true", help="Emit a non-mutating handoff readiness receipt")
+
+
+def _add_handoff_materialize_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    materialize = subparsers.add_parser(
+        "handoff-materialize",
+        help="Assemble current pre-Tessl receipts into a candidate-bound handoff bundle",
+        parents=[global_parser],
+    )
+    materialize.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the handoff")
+    materialize.add_argument("--evidence-root", required=True, help="New repo-relative bundle directory below .harness/evidence/handoff")
+    materialize.add_argument("--lane-receipt", action="append", required=True, help="Lane receipt assignment: lane-id=receipt.json")
+    mode = materialize.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--preview", action="store_true", help="Validate handoff inputs without writing an evidence bundle")
+    mode.add_argument("--execute", action="store_true", help="Write the validated candidate-bound evidence bundle")
+
+
+def _add_handoff_capture_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    capture = subparsers.add_parser(
+        "handoff-capture",
+        help="Run one pre-Tessl lane and write its candidate-bound source receipt",
+        parents=[global_parser],
+    )
+    capture.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the lane")
+    capture.add_argument("--lane", required=True, help="One pre-Tessl lane id to capture")
+    capture.add_argument("--receipt-path", required=True, help="New repo-relative receipt JSON below .harness/evidence/handoff")
+    capture.add_argument("--case", action="append", dest="cases", help="Optional internal-eval case id filter")
+    capture.add_argument("--timeout-seconds", type=_positive_int, default=180, help="Timeout for one internal or Tessl command")
+    capture.add_argument("--workspace", default="jscraik", help="Tessl workspace for tessl-local-proof")
+    mode = capture.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--preview", action="store_true", help="Validate one lane capture without running the child command")
+    mode.add_argument("--execute", action="store_true", help="Run the child command and write a new receipt")
 
 
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -195,9 +242,12 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "scenario-quality": _dispatch_scenario_quality,
         "scorer-quality": _dispatch_scorer_quality,
         "scorer-calibration": _dispatch_scorer_calibration,
+        "tessl-view": _dispatch_tessl_view,
         "tessl-score": _dispatch_tessl_score,
         "tessl-local-proof": _dispatch_tessl_local_proof,
         "regression-plan": _dispatch_regression_plan,
+        "handoff-capture": _dispatch_handoff_capture,
+        "handoff-materialize": _dispatch_handoff_materialize,
         "handoff-readiness": _dispatch_handoff_readiness,
         "profiles": _dispatch_profiles,
         "ab-rubric": _dispatch_ab_rubric,
@@ -292,6 +342,21 @@ def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResu
     )
 
 
+def _dispatch_tessl_view(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if not args.execute:
+        return build_validation_error(
+            "sdk eval tessl-view",
+            "Tessl view inspection requires --execute.",
+            "ask sdk eval tessl-view --skill <skill> --run-id <submitted-run-id> --workspace <workspace> --execute --json --robot",
+        )
+    return eval_commands.inspect_tessl_live_private_eval(
+        repo_root,
+        skill_path=args.skill,
+        run_id=args.run_id,
+        workspace=args.workspace,
+    )
+
+
 def _dispatch_tessl_local_proof(repo_root: Path, args: argparse.Namespace) -> CallResult:
     return skills_commands.skills_sdk_eval_tessl_local_proof(
         repo_root,
@@ -324,6 +389,39 @@ def _dispatch_handoff_readiness(repo_root: Path, args: argparse.Namespace) -> Ca
         skill=args.skill,
         receipt_json=args.receipt_json,
         tessl_score=args.tessl_score,
+    )
+
+
+def _dispatch_handoff_materialize(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    from ask.skills_sdk.handoff_materialization import HandoffMaterializationRequest
+    from ask.skills_sdk.handoff_commands import materialize_handoff_command
+
+    return materialize_handoff_command(
+        repo_root,
+        request=HandoffMaterializationRequest(
+            skill=args.skill,
+            evidence_root=Path(args.evidence_root),
+            lane_receipts=tuple(args.lane_receipt),
+            operation="execute" if args.execute else "preview",
+        ),
+    )
+
+
+def _dispatch_handoff_capture(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    from ask.skills_sdk.handoff_capture import HandoffCaptureRequest
+    from ask.skills_sdk.handoff_commands import capture_handoff_command
+
+    return capture_handoff_command(
+        repo_root,
+        request=HandoffCaptureRequest(
+            skill=args.skill,
+            lane_id=args.lane,
+            receipt_path=Path(args.receipt_path),
+            operation="execute" if args.execute else "preview",
+            cases=tuple(args.cases or ()),
+            timeout_seconds=args.timeout_seconds,
+            workspace=args.workspace,
+        ),
     )
 
 
@@ -439,6 +537,14 @@ def _regression_plan_next() -> str:
 
 def _handoff_readiness_next() -> str:
     return "ask sdk eval handoff-readiness --skill <skill> --preview --json --robot"
+
+
+def _handoff_materialize_next() -> str:
+    return (
+        "ask sdk eval handoff-materialize --skill <skill> --evidence-root "
+        ".harness/evidence/handoff/<skill>/<bundle> --lane-receipt <lane>=<receipt> "
+        "--preview --json --robot"
+    )
 
 
 def _ab_preview_next() -> str:

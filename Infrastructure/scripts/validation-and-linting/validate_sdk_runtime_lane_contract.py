@@ -22,7 +22,7 @@ REQUIRED_LANES = {
         "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot",
         "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot",
         "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot",
-        "./bin/ask skills audit <skill-path>/SKILL.md --level strict --json --robot",
+        "./bin/ask skills audit <skill-path> --level strict --source-only --json --robot",
     ],
     "oss-local flow": [
         "codex exec --profile oss-local",

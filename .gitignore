@@ -235,5 +235,6 @@ plugins/.plugin-appserver/
 # selected, digest-bound receipt instead of committing an entire rerun tree.
 .harness/evidence/continuation-*/
 .harness/evidence/handoff/simplify/
+.harness/evidence/handoff/improve-agent-native/
 Infrastructure/artifacts/evals/closeouts/sdk-eval-run-receipt.json
 Infrastructure/artifacts/evals/closeouts/*-Skills-agent-ops-simplify-*-codex.json

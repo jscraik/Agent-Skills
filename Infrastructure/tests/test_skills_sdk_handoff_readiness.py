@@ -85,21 +85,24 @@ def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
 def _readiness_lane_command(lane_id: str) -> str:
     commands = {
         "mechanical_validation": (
-            "./bin/ask skills audit Skills/example --level strict --json --robot && "
+            "./bin/ask skills audit Skills/example --level strict --source-only --json --robot && "
             "./bin/ask skills package verify Skills/example --json --robot"
         ),
         "security_risk_modes": "./bin/ask sdk security risk-modes Skills/example --preview --json --robot",
         "scenario_quality": "./bin/ask sdk eval scenario-quality Skills/example --preview --json --robot",
         "scorer_quality": "./bin/ask sdk eval scorer-quality Skills/example --preview --json --robot",
         "scorer_calibration": "./bin/ask sdk eval scorer-calibration Skills/example --preview --json --robot",
-        "deterministic_local_gates": "./bin/ask sdk eval run Skills/example --runner internal --mode smoke --json --robot",
+        "deterministic_local_gates": (
+            "./bin/ask sdk eval run Skills/example --runner internal --mode smoke "
+            "--codex-profile oss-local --json --robot"
+        ),
         "oss-local": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode smoke --codex-profile oss-local --json --robot"
+            "--mode release --codex-profile oss-local --json --robot"
         ),
         "oss-cloud": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode smoke --codex-profile oss-cloud --json --robot"
+            "--mode release --codex-profile oss-cloud --json --robot"
         ),
         "tessl-local-proof": (
             "./bin/ask sdk eval tessl-local-proof --skill Skills/example "

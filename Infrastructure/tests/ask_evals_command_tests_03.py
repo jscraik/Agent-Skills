@@ -607,6 +607,44 @@ def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: 
     assert result.data["lifecycle_events"][-1]["event_type"] == "eval_blocked"
 
 
+def test_evals_live_private_dry_run_accepts_versioned_handoff_readiness_path(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    default_path = (
+        tmp_path / ".harness" / "evidence" / "handoff" / skill_root.name / "eval-handoff-readiness.json"
+    )
+    versioned_path = (
+        tmp_path
+        / ".harness"
+        / "evidence"
+        / "handoff"
+        / skill_root.name
+        / "20260809-release"
+        / "eval-handoff-readiness.json"
+    )
+    versioned_path.parent.mkdir(parents=True)
+    versioned_path.write_bytes(default_path.read_bytes())
+    default_path.unlink()
+
+    with mock.patch.object(
+        evals,
+        "_tessl_dry_run_admission",
+        return_value={"ready_for_tessl_dry_run": True, "blockers": [], "required_next_actions": []},
+    ) as admission:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            tessl_workspace="jscraik",
+            handoff_readiness_path=versioned_path.relative_to(tmp_path).as_posix(),
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    assert admission.call_args.args[2] == versioned_path.resolve()
+
+
 def test_evals_rejects_dry_run_without_live_private(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
 

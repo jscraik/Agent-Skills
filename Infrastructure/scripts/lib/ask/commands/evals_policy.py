@@ -206,23 +206,33 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
     }
 
 
-def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
+def _tessl_live_handoff_readiness(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
 
     return build_handoff_readiness_receipt(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
 
 
-def _tessl_dry_run_admission(repo_root: Path, skill_path: str) -> dict:
+def _tessl_dry_run_admission(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_tessl_dry_run_admission  # noqa: PLC0415
 
     return build_tessl_dry_run_admission(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
 
 
