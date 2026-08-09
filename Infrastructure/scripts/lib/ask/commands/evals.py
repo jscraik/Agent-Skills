@@ -6253,6 +6253,21 @@ def run_evals(repo_root: Path, request: EvalRunRequest | str, **legacy_options: 
         ))
         return result
 
+    if handoff_readiness_path is not None and not tessl_live_private:
+        message = "--handoff-readiness requires --tessl-live-private."
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = message
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": message,
+            "blocker_class": "blocked_validation",
+        }
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message))
+        return result
     resolved_handoff_readiness_path, handoff_readiness_error = _resolve_handoff_readiness_path(
         repo_root,
         handoff_readiness_path,
@@ -6264,19 +6279,12 @@ def run_evals(repo_root: Path, request: EvalRunRequest | str, **legacy_options: 
         result.data["eval_status"] = "blocked_validation"
         result.data["blocker_class"] = "blocked_validation"
         result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": handoff_readiness_error,
+            "blocker_class": "blocked_validation",
+        }
         result.errors.append(ErrorObject(code="ERR_VALIDATION", message=handoff_readiness_error))
-        return result
-    if resolved_handoff_readiness_path is not None and not tessl_live_private:
-        result.status = "error"
-        result.data["raw_output"] = ""
-        result.data["raw_error"] = "--handoff-readiness requires --tessl-live-private."
-        result.data["eval_status"] = "blocked_validation"
-        result.data["blocker_class"] = "blocked_validation"
-        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message="--handoff-readiness requires --tessl-live-private.",
-        ))
         return result
 
     if effective_skip_tessl and tessl_live_private:
