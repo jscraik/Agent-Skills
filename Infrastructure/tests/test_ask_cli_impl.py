@@ -134,7 +134,7 @@ class TestAskCLI(unittest.TestCase):
             yaml_path.write_text("cases:\n  - id: package-fixture\n", encoding="utf-8")
             cmd = [
                 "python3",
-                "Infrastructure/bin/ask",
+                "./bin/ask",
                 "repo",
                 "yaml-inspect",
                 str(yaml_path.relative_to(REPO_ROOT)),
