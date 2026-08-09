@@ -127,6 +127,18 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if not math.isfinite(args.duration_seconds) or args.duration_seconds < 0:
         _parser().error("--duration-seconds must be finite and non-negative")
+    if args.status == "pass" and any((
+        args.auth_source != "1password_desktop_fifo",
+        args.provider_invoked != "true",
+        args.command_present != "true",
+        args.exit_code != 0,
+        args.captured_output_scan != "passed",
+        bool(args.findings),
+    )):
+        _parser().error(
+            "--status pass requires the FIFO source, provider invocation, command, exit code 0, "
+            "a passed output scan, and no findings",
+        )
     receipt = _receipt(args)
     print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0

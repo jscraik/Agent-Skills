@@ -53,23 +53,24 @@ class TestOssCloudPublicReceipt(unittest.TestCase):
         self.assertEqual(completed.stderr, "")
 
     def test_json_authorization_output_is_classified_without_echoing_it(self) -> None:
-        for scheme in ("Basic", "Bearer"):
-            with self.subTest(scheme=scheme), tempfile.TemporaryDirectory() as temp_dir:
-                captured = Path(temp_dir) / "stderr.json"
-                captured.write_text(
-                    f'{{"Authorization": "{scheme} redacted-test-value"}}\n',
-                    encoding="utf-8",
-                )
-                completed = subprocess.run(
-                    [sys.executable, str(SECRET_OUTPUT_SCANNER), str(captured)],
-                    check=False,
-                    text=True,
-                    capture_output=True,
-                )
+        for delimiter in (":", "="):
+            for scheme in ("Basic", "Bearer"):
+                with self.subTest(delimiter=delimiter, scheme=scheme), tempfile.TemporaryDirectory() as temp_dir:
+                    captured = Path(temp_dir) / "stderr.json"
+                    captured.write_text(
+                        f'{{"Authorization"{delimiter} "{scheme} redacted-test-value"}}\n',
+                        encoding="utf-8",
+                    )
+                    completed = subprocess.run(
+                        [sys.executable, str(SECRET_OUTPUT_SCANNER), str(captured)],
+                        check=False,
+                        text=True,
+                        capture_output=True,
+                    )
 
-            self.assertEqual(completed.returncode, 1)
-            self.assertEqual(completed.stdout, "")
-            self.assertEqual(completed.stderr, "")
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(completed.stdout, "")
+                self.assertEqual(completed.stderr, "")
 
     def test_emitter_rejects_non_finite_or_negative_duration(self) -> None:
         for duration in ("nan", "inf", "-inf", "-0.01"):
@@ -87,6 +88,27 @@ class TestOssCloudPublicReceipt(unittest.TestCase):
 
                 self.assertEqual(completed.returncode, 2)
                 self.assertIn("--duration-seconds must be finite and non-negative", completed.stderr)
+
+    def test_emitter_rejects_contradictory_pass_receipts(self) -> None:
+        base = {
+            "--status": "pass", "--auth-source": "1password_desktop_fifo",
+            "--provider-invoked": "true", "--command-present": "true", "--exit-code": "0",
+            "--duration-seconds": "1.25", "--captured-output-scan": "passed", "--findings": "",
+        }
+        cases = (
+            ("--auth-source", "missing_or_invalid"), ("--provider-invoked", "false"),
+            ("--command-present", "false"), ("--exit-code", "1"),
+            ("--captured-output-scan", "unavailable"), ("--findings", "oss_cloud_smoke_exit_nonzero"),
+        )
+        for option, value in cases:
+            with self.subTest(option=option, value=value):
+                arguments = {**base, option: value}
+                command = [sys.executable, str(EMITTER)]
+                for argument, argument_value in arguments.items():
+                    command.extend((argument, argument_value))
+                completed = subprocess.run(command, check=False, text=True, capture_output=True)
+                self.assertEqual(completed.returncode, 2)
+                self.assertIn("--status pass requires", completed.stderr)
 
 
 if __name__ == "__main__":

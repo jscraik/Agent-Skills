@@ -40,7 +40,7 @@
     }
   },
   "rubric_id": "skills-sdk.ab-rubric.v0",
-  "rubric_digest": "sha256:65e2c3a27f20e18ff2199f840045ac1b62b6d1babce538391b084b8a8a9824d1",
+  "rubric_digest": "sha256:3ce6c354022f0787cabd7be0b3897e9f8ed369c4beb52aab67d33d2a1bf20b43",
   "comparison_payload": {
     "schema_version": "skills-sdk.ab-judge-decision.v0",
     "experiment_id": "2f17c65de51f3a24",
@@ -151,7 +151,7 @@
         "unvalidated_judges_are_advisory": true
       }
     },
-    "rubric_digest": "sha256:65e2c3a27f20e18ff2199f840045ac1b62b6d1babce538391b084b8a8a9824d1",
+    "rubric_digest": "sha256:3ce6c354022f0787cabd7be0b3897e9f8ed369c4beb52aab67d33d2a1bf20b43",
     "skill_a": {
       "package_id": "skills-sdk-valid-fixture",
       "package_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"

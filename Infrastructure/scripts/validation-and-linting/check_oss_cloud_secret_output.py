@@ -15,7 +15,7 @@ EXIT_UNAVAILABLE = 2
 # Match shell, plain-text, and JSON-style diagnostics without capturing or
 # emitting a value. The caller receives only this process's exit status.
 SECRET_OUTPUT_RE = re.compile(
-    r'(?im)(?:\bauthorization\b["\']?\s*:\s*["\']?(?:basic|bearer)\s+\S+|["\']?(?:[A-Z][A-Z0-9]*(?:_(?:API_KEY|ACCESS_KEY|KEY|TOKEN|SECRET(?:_ACCESS_KEY|_KEY)?))|(?:api|access)[_-]?key|token|secret(?:[_-]?(?:access_)?key)?)'
+    r'(?im)(?:\bauthorization\b["\']?\s*[:=]\s*["\']?(?:basic|bearer)\s+\S+|["\']?(?:[A-Z][A-Z0-9]*(?:_(?:API_KEY|ACCESS_KEY|KEY|TOKEN|SECRET(?:_ACCESS_KEY|_KEY)?))|(?:api|access)[_-]?key|token|secret(?:[_-]?(?:access_)?key)?)'
     r'\b["\']?\s*[:=]\s*["\']?\S+)'
 )
 
