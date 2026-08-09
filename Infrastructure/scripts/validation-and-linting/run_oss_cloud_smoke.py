@@ -393,12 +393,11 @@ def _value_blind_findings(items: list[dict[str, str]]) -> list[dict[str, str]]:
     return projected
 
 
-def _finding_code_present(items: list[dict[str, str]], wanted: str) -> bool:
-    return any(item.get("code") == wanted for item in items)
-
-
 def _safe_secret_status(findings: list[dict[str, str]], command: list[str] | None) -> str:
-    if _finding_code_present(findings, "oss_cloud_secret_output_observed"):
+    # The public projection must not inspect or carry the source-derived
+    # finding values.  Any projected blocker is conservatively represented as
+    # blocked; the internal receipt retains the precise scan classification.
+    if findings:
         return "blocked"
     return "clear" if command is not None else "unavailable"
 
