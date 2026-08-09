@@ -150,7 +150,8 @@ def _valid_warnings(warnings: object) -> bool:
         code = warning.get("code")
         if not isinstance(code, str) or code in seen_codes:
             return False
-        if warning.get("message") != _public_warning_message(code):
+        expected_message = _public_warning_message(code)
+        if expected_message is None or warning.get("message") != expected_message:
             return False
         seen_codes.add(code)
     return True

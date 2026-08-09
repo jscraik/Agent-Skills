@@ -75,9 +75,10 @@ class TestOssCloudPublicReceipt(unittest.TestCase):
         self.assertEqual(completed.stderr, "")
 
     def test_password_style_output_is_classified_without_echoing_it(self) -> None:
-        for secret_line in ("PASSWORD=redacted-test-value", "DB_PASSWORD=redacted-test-value"):
-            with self.subTest(secret_line=secret_line), tempfile.TemporaryDirectory() as temp_dir:
+        for secret_name in ("PASSWORD", "DB_PASSWORD"):
+            with self.subTest(secret_name=secret_name), tempfile.TemporaryDirectory() as temp_dir:
                 captured = Path(temp_dir) / "stderr.txt"
+                secret_line = f"{secret_name}={captured.parent.name}"
                 captured.write_text(secret_line + "\n", encoding="utf-8")
                 completed = subprocess.run(
                     [sys.executable, str(SECRET_OUTPUT_SCANNER), str(captured)],

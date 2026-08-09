@@ -49,6 +49,13 @@ class TestCloudSmokeContract(unittest.TestCase):
         self.assertEqual(cloud_smoke_receipt_findings(receipt), ["warnings_not_value_blind"])
         self.assertFalse(valid_cloud_smoke_receipt(receipt))
 
+    def test_rejects_unknown_warning_code_with_null_message(self) -> None:
+        receipt = _valid_smoke_receipt()
+        receipt["warnings"] = [{"code": "OPENAI_API_KEY=untrusted", "message": None}]
+
+        self.assertEqual(cloud_smoke_receipt_findings(receipt), ["warnings_not_value_blind"])
+        self.assertFalse(valid_cloud_smoke_receipt(receipt))
+
     def test_accepts_the_only_known_value_blind_warning(self) -> None:
         receipt = _valid_smoke_receipt()
         receipt["warnings"] = [{

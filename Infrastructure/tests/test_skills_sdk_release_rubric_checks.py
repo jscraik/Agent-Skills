@@ -30,6 +30,14 @@ class TestSkillsSdkReleaseRubricChecks(unittest.TestCase):
 
         self.assertIsNone(evaluate_semantic_requirements(output, _efficiency_requirements()))
 
+    def test_efficiency_rubric_accepts_unkeyed_checked_read_evidence(self) -> None:
+        output = (
+            "The supplied diff replaces two store.get calls with one cached read. "
+            "Add a focused test with a call-count assertion."
+        )
+
+        self.assertIsNone(evaluate_semantic_requirements(output, _efficiency_requirements()))
+
     def test_efficiency_rubric_rejects_a_vague_read_claim(self) -> None:
         output = "The store.get call is safe. Add a focused test."
 
