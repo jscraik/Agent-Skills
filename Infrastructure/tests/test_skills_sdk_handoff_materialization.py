@@ -543,24 +543,16 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
             receipt["blockers"],
         )
 
-    def test_capture_runs_one_lane_and_preserves_the_real_command_envelope(self) -> None:
+    def test_capture_rejects_unwrapped_cloud_lane_before_running_a_child(self) -> None:
         handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
         handoff_root.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
-            root = Path(temp_dir)
-            source_receipt = root / "oss-cloud-source.json"
+            invoked = False
 
-            def fake_run(arguments: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
-                envelope = {
-                    "status": "success",
-                    "data": {"skills_sdk_eval_run": {"receipt": {
-                        "status": "pass",
-                        "codex_profile": "oss-cloud",
-                        "codex_exec_invoked": True,
-                        "cases": [{"case_id": "happy-diff", "status": "pass"}],
-                    }}},
-                }
-                return subprocess.CompletedProcess(arguments, 0, json.dumps(envelope), "")
+            def fake_run(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+                nonlocal invoked
+                invoked = True
+                raise AssertionError("cloud child must not run")
 
             receipt = capture_handoff_lane(
                 REPO_ROOT,
@@ -568,25 +560,17 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
                 request=HandoffCaptureRequest(
                     skill=FIXTURE_SKILL,
                     lane_id="oss-cloud",
-                    receipt_path=source_receipt,
+                    receipt_path=Path(temp_dir) / "cloud.json",
                     operation="execute",
                     cases=("happy-diff",),
                 ),
                 run_command=fake_run,
             )
-            persisted = json.loads(source_receipt.read_text(encoding="utf-8"))
 
-        self.assertEqual(receipt["status"], "pass")
-        self.assertTrue(receipt["mutation_performed"])
-        self.assertTrue(persisted["mutation_performed"])
-        self.assertEqual(persisted["candidate"], build_candidate_identity(REPO_ROOT, REPO_ROOT / FIXTURE_SKILL))
-        self.assertEqual(persisted["data"]["skills_sdk_eval_run"]["receipt"]["codex_profile"], "oss-cloud")
-        self.assertEqual(
-            persisted["data"]["skills_sdk_eval_run"]["receipt"]["cases"],
-            [{"case_id": "happy-diff", "status": "pass"}],
-        )
-        self.assertIn("--codex-profile oss-cloud", persisted["commands"][0])
-        self.assertNotIn("trace_id", persisted["command_results"][0])
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(invoked)
+        self.assertIn("Configs FIFO wrapper contract", receipt["blockers"][0])
+        self.assertEqual(receipt["commands"], [])
 
     def test_capture_rejects_unbounded_oss_lane_before_running_a_child(self) -> None:
         request = HandoffCaptureRequest(

@@ -1,5 +1,34 @@
 from ask_evals_command_tests_07 import *  # noqa: F403
 
+
+def test_codex_eval_uses_projected_executable_identity(tmp_path: Path, monkeypatch) -> None:
+    codex_bin = tmp_path / "codex"
+    codex_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+    codex_bin.chmod(0o755)
+    monkeypatch.setenv("CODEX_CLI_PATH", str(codex_bin))
+
+    with mock.patch.object(evals.subprocess, "run", return_value=_completed_eval_with_report(tmp_path)) as run:
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False, skip_tessl=True, codex_profile="oss-local", cases=["happy-path"])
+
+    assert result.status == "success"
+    command = run.call_args.args[0]
+    assert command[command.index("--codex-bin") + 1] == str(codex_bin)
+
+
+def test_codex_eval_rejects_a_symlinked_projected_executable(tmp_path: Path, monkeypatch) -> None:
+    target = tmp_path / "codex-target"
+    target.write_text("#!/bin/sh\n", encoding="utf-8")
+    target.chmod(0o755)
+    codex_link = tmp_path / "codex"
+    codex_link.symlink_to(target)
+    monkeypatch.setenv("CODEX_CLI_PATH", str(codex_link))
+
+    with mock.patch.object(evals.subprocess, "run", return_value=_completed_eval_with_report(tmp_path)) as run:
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False, skip_tessl=True, codex_profile="oss-local", cases=["happy-path"])
+
+    assert result.status == "success"
+    assert "--codex-bin" not in run.call_args.args[0]
+
 def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:
     report_path = tmp_path / "review.json"
     output_path = tmp_path / "review.html"

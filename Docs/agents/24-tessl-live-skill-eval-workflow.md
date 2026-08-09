@@ -205,12 +205,29 @@ lane receipt, or reuse a prior candidate's manifest:
 
 Rerun that exact lane with `--execute` to write its source receipt. Use one
 fresh capture invocation per non-sharded lane and one fresh invocation for each
-one- or two-case OSS shard. For `oss-cloud`, put only one cloud shard capture
-inside each Configs FIFO wrapper; do not source the FIFO, use the older
-Environment-ID transport, or reuse a stream for later stages. The capture
-receipt binds its current candidate identity and timestamp to the child command's
-status and lane-specific proving facts, rather than storing a transcript. A
-stale, wrong-candidate, or arbitrary JSON file is rejected by materialization.
+one- or two-case `oss-local` shard. Do not use generic `handoff-capture` for
+`oss-cloud`: assign the completed current-candidate `sdk eval ab-run
+--execution-lane oss-cloud` receipt directly to materialization. That receipt
+retains the Configs FIFO wrapper, provider invocation, and execution-lane proof;
+the materializer accepts it only when its B variant exactly matches the current
+source candidate and its raw controlled fixture bytes match exactly one current
+`references/evals.yaml` prompt. Materialization derives that case id itself;
+do not hand-write a case list or use a generic task fixture. Do not source the
+FIFO, use the older Environment-ID transport, or reuse a stream for later
+stages. A stale, wrong-candidate, mismatched-scenario, or arbitrary JSON file
+is rejected by materialization.
+
+Stage each cloud fixture from the owning current scenario instead of composing
+task text by hand. Preview first, then write a new fixture only after the
+preview identifies the intended candidate and prompt digest:
+
+    ./bin/ask sdk eval ab-fixture-stage --skill <skill-path> --case <canonical-case-id> \
+      --fixture-path .harness/evidence/handoff/<skill>/<new-run>/fixtures/<canonical-case-id>.md \
+      --preview --json --robot
+
+Run the same command with `--execute`, then use that exact fixture path for the
+single matching cloud A/B receipt. This command stages source bytes only; it
+does not invoke Codex, the provider, Tessl, or the 1Password FIFO.
 
 After every required pre-Tessl lane passes, assemble them with the SDK-owned
 bridge:
@@ -221,15 +238,17 @@ bridge:
       --preview --json --robot
 
 Supply one captured `--lane-receipt` for every non-sharded lane and repeat
-`--lane-receipt oss-local=<receipt.json>` or `oss-cloud=<receipt.json>` for
-every current two-case shard, then rerun the same command with `--execute`.
+`--lane-receipt oss-local=<receipt.json>` for every current two-case local
+shard. For `oss-cloud`, provide one completed A/B receipt for each canonical
+scenario prompt instead of a capture receipt, then rerun the same command with
+`--execute`.
 Materialization derives each replay command from those captures instead of
 accepting typed command text. It copies only validated lane facts into a new
 candidate-bound bundle, records every source receipt's SHA-256, and leaves the
 `tessl-live-dry-run` row explicitly blocked until that stage actually runs. If
-a stage cannot emit a repository-owned JSON receipt through `handoff-capture`,
-classify that as an SDK receipt-capture gap and repair its owner before
-continuing the handoff.
+a stage cannot emit its canonical repository-owned JSON receipt, classify that
+as an SDK receipt-capture gap and repair its owner before continuing the
+handoff.
 Record the successful dry-run receipt, then run `sdk eval handoff-readiness
 --preview` before an actual live Tessl submission.
 

@@ -10,6 +10,7 @@ from ask.skills_sdk.handoff_materialization import (
     materialize_handoff_bundle,
 )
 from ask.skills_sdk.handoff_capture import HandoffCaptureRequest, capture_handoff_lane
+from ask.skills_sdk.eval_ab_fixture import AbFixtureStageRequest, stage_ab_fixture
 
 
 def materialize_handoff_command(
@@ -90,6 +91,44 @@ def capture_handoff_command(
     return result
 
 
+def stage_ab_fixture_command(
+    repo_root: Path,
+    *,
+    request: AbFixtureStageRequest,
+) -> CallResult:
+    """Stage one source scenario as the controlled fixture for an A/B run."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval ab-fixture-stage"
+    target_info, _audit_target = skills_commands.resolve_doctor_target(repo_root, request.skill.strip())
+    source_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_value)) if source_value else None
+    if source_path is not None and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if source_path is None:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"A/B fixture staging is missing a canonical SKILL.md source for '{request.skill}'.",
+        ))
+        return result
+
+    receipt = stage_ab_fixture(repo_root, source_path=source_path, request=request)
+    payload = {
+        "schema_version": "skills-sdk-ab-fixture-stage.v0",
+        "status": receipt["status"],
+        "skill": request.skill,
+        "receipt": receipt,
+        "mutation_performed": receipt["mutation_performed"],
+        "validation_commands": [_fixture_stage_command(request)],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_ab_fixture_stage"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=payload["agent_summary"]))
+    return result
+
+
 def _validation_command(request: HandoffMaterializationRequest) -> str:
     operation = "--execute" if request.operation == "execute" else "--preview"
     command = [
@@ -106,3 +145,12 @@ def _validation_command(request: HandoffMaterializationRequest) -> str:
         command.extend(["--lane-receipt", receipt])
     command.extend([operation, "--json", "--robot"])
     return shlex.join(command)
+
+
+def _fixture_stage_command(request: AbFixtureStageRequest) -> str:
+    operation = "--execute" if request.operation == "execute" else "--preview"
+    return (
+        "./bin/ask sdk eval ab-fixture-stage "
+        f"--skill {request.skill} --case {request.case_id} "
+        f"--fixture-path {request.fixture_path} {operation}"
+    )

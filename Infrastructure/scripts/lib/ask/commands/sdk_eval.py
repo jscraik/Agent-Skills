@@ -33,6 +33,7 @@ def add_sdk_eval_parser(
     _add_tessl_local_proof_parser(subparsers, global_parser)
     _add_regression_plan_parser(subparsers, global_parser)
     _add_handoff_capture_parser(subparsers, global_parser)
+    _add_ab_fixture_stage_parser(subparsers, global_parser)
     _add_handoff_materialize_parser(subparsers, global_parser)
     _add_handoff_readiness_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
@@ -172,6 +173,20 @@ def _add_handoff_capture_parser(subparsers: argparse._SubParsersAction, global_p
     mode.add_argument("--execute", action="store_true", help="Run the child command and write a new receipt")
 
 
+def _add_ab_fixture_stage_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    stage = subparsers.add_parser(
+        "ab-fixture-stage",
+        help="Stage one canonical scenario prompt as a controlled A/B fixture",
+        parents=[global_parser],
+    )
+    stage.add_argument("--skill", required=True, help="Skill handle or repo-relative source path owning the scenario")
+    stage.add_argument("--case", required=True, help="Canonical references/evals.yaml scenario id")
+    stage.add_argument("--fixture-path", required=True, help="New repo-relative fixture file below .harness/evidence/handoff")
+    mode = stage.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--preview", action="store_true", help="Validate staging inputs without writing a fixture")
+    mode.add_argument("--execute", action="store_true", help="Write the exact canonical scenario prompt bytes")
+
+
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     profiles = subparsers.add_parser("profiles", help="Preview Codex execution and judge profiles", parents=[global_parser])
     profiles.add_argument("--preview", action="store_true", help="Emit a non-mutating eval profile receipt")
@@ -247,6 +262,7 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "tessl-local-proof": _dispatch_tessl_local_proof,
         "regression-plan": _dispatch_regression_plan,
         "handoff-capture": _dispatch_handoff_capture,
+        "ab-fixture-stage": _dispatch_ab_fixture_stage,
         "handoff-materialize": _dispatch_handoff_materialize,
         "handoff-readiness": _dispatch_handoff_readiness,
         "profiles": _dispatch_profiles,
@@ -421,6 +437,21 @@ def _dispatch_handoff_capture(repo_root: Path, args: argparse.Namespace) -> Call
             cases=tuple(args.cases or ()),
             timeout_seconds=args.timeout_seconds,
             workspace=args.workspace,
+        ),
+    )
+
+
+def _dispatch_ab_fixture_stage(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    from ask.skills_sdk.eval_ab_fixture import AbFixtureStageRequest
+    from ask.skills_sdk.handoff_commands import stage_ab_fixture_command
+
+    return stage_ab_fixture_command(
+        repo_root,
+        request=AbFixtureStageRequest(
+            skill=args.skill,
+            case_id=args.case,
+            fixture_path=Path(args.fixture_path),
+            operation="execute" if args.execute else "preview",
         ),
     )
 

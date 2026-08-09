@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
+from pathlib import Path
 
 from .evals_closeout import *  # noqa: F403
 
@@ -419,12 +421,25 @@ def _eval_command(context: _EvalRunContext, selected_cases: list[str]) -> tuple[
     return [*cmd, *[item for case in selected_cases for item in ("--case", case)]], timeout
 
 
+def _configured_codex_cli_path() -> str | None:
+    """Return the projected immutable Codex executable only when safe to invoke."""
+    configured = os.environ.get("CODEX_CLI_PATH", "").strip()
+    if not configured:
+        return None
+    path = Path(configured)
+    if not path.is_absolute() or path.is_symlink() or not path.is_file() or not os.access(path, os.X_OK):
+        return None
+    return str(path)
+
+
 def _add_codex_eval_options(cmd: list[str], context: _EvalRunContext, selected_cases: list[str]) -> int:
     sandbox = "read-only" if context.codex_profile in {"oss-local", "oss-cloud", "codex-fast"} else "workspace-write"
     case_timeout = context.timeout_seconds or SMOKE_CASE_TIMEOUT_SECONDS
     cmd.extend(["--profile", context.effective_codex_profile, "--sandbox", sandbox, "--timeout-sec", str(case_timeout)])
     if context.mode == "smoke" and (context.model or not context.codex_profile):
         cmd.extend(["--model", context.model or SMOKE_EVAL_MODEL])
+    if codex_cli_path := _configured_codex_cli_path():
+        cmd.extend(["--codex-bin", codex_cli_path])
     return _eval_timeout(context.mode, int(case_timeout), len(selected_cases))
 
 

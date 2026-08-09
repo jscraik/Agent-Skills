@@ -501,8 +501,10 @@ commands:
 - ./bin/plugin-eval analyze <skill-path> --format json
 - ./bin/ask skills external-review <skill-path> --json --robot
 - ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot
-- ./bin/ask sdk eval handoff-capture --skill <skill-path> --lane <pre-tessl-lane-id> --receipt-path .harness/evidence/handoff/<skill>/<new-source-receipt>.json --execute --json --robot
-- ./bin/ask sdk eval handoff-materialize --skill <skill-path> --evidence-root .harness/evidence/handoff/<skill>/<new-bundle> --lane-receipt <lane-id>=<receipt.json> [repeat oss-local or oss-cloud receipt assignments for each two-case shard] --execute --json --robot
+- ./bin/ask sdk eval handoff-capture --skill <skill-path> --lane <pre-tessl-lane-id-except-oss-cloud> --receipt-path .harness/evidence/handoff/<skill>/<new-source-receipt>.json --execute --json --robot
+- For `oss-cloud`, assign one completed current-candidate `sdk eval ab-run --execution-lane oss-cloud` receipt for every canonical `references/evals.yaml` prompt directly to `handoff-materialize`; the materializer verifies the FIFO wrapper and derives each case id by exact raw fixture-byte matching rather than accepting a hand-written case list or generic cloud child.
+- ./bin/ask sdk eval ab-fixture-stage --skill <skill-path> --case <canonical-case-id> --fixture-path .harness/evidence/handoff/<skill>/<new-run>/fixtures/<canonical-case-id>.md --execute --json --robot
+- ./bin/ask sdk eval handoff-materialize --skill <skill-path> --evidence-root .harness/evidence/handoff/<skill>/<new-bundle> --lane-receipt <lane-id>=<receipt.json> [repeat oss-local receipt assignments for each two-case shard] [repeat oss-cloud A/B receipt assignments for each canonical scenario] --execute --json --robot
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 - ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot
 - ./bin/ask sdk eval tessl-view --skill <skill-path> --run-id <submitted-run-id> --workspace <workspace> --execute --json --robot

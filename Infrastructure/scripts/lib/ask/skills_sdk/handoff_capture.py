@@ -72,6 +72,11 @@ def _validate_request(repo_root: Path, request: HandoffCaptureRequest) -> tuple[
     blockers: list[str] = []
     if request.lane_id not in PRE_TESSL_DRY_RUN_LANE_IDS:
         blockers.append(f"unsupported pre-Tessl lane: {request.lane_id}")
+    if request.lane_id == "oss-cloud":
+        blockers.append(
+            "oss-cloud handoff capture is disabled: materialize a current candidate-bound "
+            "A/B oss-cloud receipt so the Configs FIFO wrapper contract is preserved"
+        )
     if request.timeout_seconds < 1:
         blockers.append("timeout_seconds must be >= 1")
     case_blocker = _capture_case_blocker(request)
@@ -111,6 +116,8 @@ def _requested_receipt_path(repo_root: Path, receipt_path: Path) -> Path:
 
 def _command_parts(request: HandoffCaptureRequest) -> list[list[str]]:
     target = request.skill
+    if request.lane_id == "oss-cloud":
+        return []
     previews = {
         "security_risk_modes": ["sdk", "security", "risk-modes", target, "--preview"],
         "scenario_quality": ["sdk", "eval", "scenario-quality", target, "--preview"],
