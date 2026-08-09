@@ -519,6 +519,25 @@ class TestOssCloudSmoke(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertTrue(receipt["secret_value_observed"])
 
+    def test_provider_prefixed_secret_output_blocks_the_smoke_receipt(self) -> None:
+        for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY"):
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                paths = self.runner._paths(str(root / "out"))
+                paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+                paths["stderr"].write_text(f"{key}=redacted-test-value\n", encoding="utf-8")
+                profile = root / "oss-cloud.config.toml"
+                _write_profile(profile)
+                args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+                receipt = self.runner._receipt(
+                    args, paths, profile, [], command=["bash", "run-auth-backed.sh"],
+                    exit_code=0, duration_seconds=1.0, provider_invoked=True,
+                )
+
+                self.assertEqual(receipt["status"], "blocked")
+                self.assertTrue(receipt["secret_value_observed"])
+
     def test_cloud_smoke_rejects_codex_wrapper_nested_after_child_argument(self) -> None:
         payload = {
             "schema_version": "skills-sdk.oss-cloud-smoke-run.v0", "observed_at": "2026-08-06T12:00:00+00:00",
