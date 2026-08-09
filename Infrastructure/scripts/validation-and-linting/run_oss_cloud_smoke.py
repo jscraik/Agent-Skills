@@ -58,7 +58,7 @@ VALUE_BLIND_FINDING_MESSAGES = (
 # printing the value. Provider-prefixed names are matched as a whole key so
 # `OPENAI_API_KEY=...` is blocked as well as `token=...`.
 SECRET_OUTPUT_RE = re.compile(
-    r'(?im)(?:\bauthorization\b\s*:\s*bearer\s+\S+|["\']?(?:[A-Z][A-Z0-9]*(?:_API_KEY|_SECRET(?:_ACCESS_KEY)?|_TOKEN)|\b(?:api|access)[_-]?key|token|secret)'
+    r'(?im)(?:\bauthorization\b\s*:\s*bearer\s+\S+|["\']?(?:[A-Z][A-Z0-9]*(?:_(?:API_KEY|ACCESS_KEY|KEY|TOKEN|SECRET(?:_ACCESS_KEY|_KEY)?))|(?:api|access)[_-]?key|token|secret(?:[_-]?(?:access_)?key)?)'
     r'\b["\']?\s*[:=]\s*["\']?\S+)'
 )
 ISOLATED_CODEX_CONFIG = f'''model = "{EXPECTED_MODEL}"

@@ -581,6 +581,29 @@ class TestOssCloudSmoke(unittest.TestCase):
             {finding["code"] for finding in receipt["findings"]},
         )
 
+    def test_common_secret_key_assignments_block_the_smoke_receipt(self) -> None:
+        for secret_line in (
+            "SECRET_KEY=redacted-test-value",
+            "SECRET_ACCESS_KEY=redacted-test-value",
+            "SERVICE_SECRET_KEY=redacted-test-value",
+        ):
+            with self.subTest(secret_line=secret_line), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                paths = self.runner._paths(str(root / "out"))
+                paths["stdout"].write_text("CODEX_OSS_CLOUD_OK\n", encoding="utf-8")
+                paths["stderr"].write_text(secret_line + "\n", encoding="utf-8")
+                profile = root / "oss-cloud.config.toml"
+                _write_profile(profile)
+                args = self.runner._parser().parse_args(["--profile-source", str(profile)])
+
+                receipt = self.runner._receipt(
+                    args, paths, profile, [], command=["bash", "run-auth-backed.sh"],
+                    exit_code=0, duration_seconds=1.0, provider_invoked=True,
+                )
+
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertTrue(receipt["secret_value_observed"])
+
     def test_runtime_secret_finding_is_promoted_before_receipt_projection(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
