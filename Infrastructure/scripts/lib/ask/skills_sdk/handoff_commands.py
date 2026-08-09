@@ -89,9 +89,14 @@ def capture_handoff_command(
     return result
 
 
+import shlex
+
+
 def _validation_command(request: HandoffMaterializationRequest) -> str:
     operation = "--execute" if request.operation == "execute" else "--preview"
-    return (
-        "./bin/ask sdk eval handoff-materialize "
-        f"--skill {request.skill} --evidence-root {request.evidence_root} {operation}"
-    )
+    return shlex.join([
+        "./bin/ask", "sdk", "eval", "handoff-materialize",
+        "--skill", request.skill,
+        "--evidence-root", str(request.evidence_root),
+        operation,
+    ])
