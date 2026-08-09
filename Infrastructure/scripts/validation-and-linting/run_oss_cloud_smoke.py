@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-import json
 import stat
 import subprocess
 import sys
@@ -15,6 +14,7 @@ from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SECRET_OUTPUT_SCAN = SCRIPT_DIR / "check_oss_cloud_secret_output.py"
+PUBLIC_RECEIPT_EMITTER = SCRIPT_DIR / "emit_oss_cloud_public_receipt.py"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 LIB_DIR = SCRIPT_DIR.parent / "lib"
@@ -502,6 +502,42 @@ def _public_receipt(
     )
 
 
+def _public_receipt_command(receipt: dict[str, Any], *, as_json: bool) -> list[str]:
+    """Pass only allowlisted scalar fields to the separate public emission boundary."""
+    observation = receipt["secret_observation"]
+    command = [
+        sys.executable,
+        str(PUBLIC_RECEIPT_EMITTER),
+        "--status", receipt["status"],
+        "--auth-source", receipt["auth_source"],
+        "--provider-invoked", str(receipt["provider_invoked"]).lower(),
+        "--command-present", str(receipt["command"] is not None).lower(),
+        "--duration-seconds", str(receipt["duration_seconds"]),
+        "--findings", ",".join(item["code"] for item in receipt["findings"]),
+        "--warnings", ",".join(item["code"] for item in receipt["warnings"]),
+        "--secret-status", observation["status"],
+    ]
+    if receipt["exit_code"] is not None:
+        command.extend(("--exit-code", str(receipt["exit_code"])))
+    if as_json:
+        command.append("--json")
+    return command
+
+
+def _emit_public_receipt(receipt: dict[str, Any], *, as_json: bool) -> bool:
+    """Delegate stdout emission so the runner never writes captured-output taint."""
+    try:
+        completed = subprocess.run(
+            _public_receipt_command(receipt, as_json=as_json),
+            stdin=subprocess.DEVNULL,
+            check=False,
+            text=True,
+        )
+    except OSError:
+        return False
+    return completed.returncode == 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.timeout_seconds < 1:
@@ -521,20 +557,15 @@ def main(argv: list[str] | None = None) -> int:
     receipt, runtime_warnings, command, exit_code, duration_seconds, provider_invoked, secret_observation = _run_smoke(
         args, paths, profile, findings, env_file or Path(args.env_file).expanduser()
     )
-    # The JSON path is a value-blind, fixed-shape receipt. Projecting explicit
-    # constants and allowlisted fields keeps captured stdout/stderr out of the
-    # logging sink even when a child process emits secret-shaped text.
+    # The public emission process accepts only allowlisted scalars and owns the
+    # stdout sink. The runner must never write data-flow from captured child
+    # stdout or stderr to its own logging boundary.
     public_receipt = _public_receipt(
         args, findings, runtime_warnings, command, exit_code, duration_seconds, provider_invoked, secret_observation,
     )
-    # The projection is intentionally value-blind: it contains no captured
-    # stdout/stderr bytes or credential values. Suppress the conservative sink
-    # alert for this reviewed, redacted evidence boundary.
-    # waiver: py/clear-text-logging-sensitive-data; reason: fixed-shape receipt
-    # contains only allowlisted, redacted fields; issue: PR-386; expires: 2026-12-31
-    # lgtm[py/clear-text-logging-sensitive-data]
-    # codeql[py/clear-text-logging-sensitive-data]
-    print(json.dumps(public_receipt, sort_keys=True, separators=(",", ":")) if args.json else public_receipt["status"])
+    if not _emit_public_receipt(public_receipt, as_json=args.json):
+        print("oss-cloud public receipt emission failed", file=sys.stderr)
+        return 2
     return 0 if receipt["status"] == "pass" else 1
 
 
