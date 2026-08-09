@@ -231,18 +231,20 @@ def _receipt(
         "status": "pass" if provider_invoked and not findings else "blocked",
         "lane": "oss-cloud",
         "codex_profile": "oss-cloud",
-        "model": _profile_value(profile, "model") if profile.is_file() else None,
-        "model_provider": _profile_value(profile, "model_provider") if profile.is_file() else None,
+        # Keep profile mismatches as typed findings without echoing arbitrary
+        # profile values into the value-blind receipt.
+        "model": EXPECTED_MODEL,
+        "model_provider": EXPECTED_PROVIDER,
         "auth_source": _auth_source(Path(args.env_file).expanduser()),
         "provider_invoked": provider_invoked,
         "command": _redacted_command(command),
         "execution_argv": _redacted_command(command),
         "duration_seconds": duration_seconds,
         "exit_code": exit_code,
-        "marker": args.marker,
-        "stdout_path": str(paths["stdout"]),
-        "stderr_path": str(paths["stderr"]),
-        "last_message_path": str(paths["last_message"]),
+        "marker": DEFAULT_MARKER,
+        "stdout_path": "<captured-stdout>",
+        "stderr_path": "<captured-stderr>",
+        "last_message_path": "<captured-last-message>",
         "warnings": warnings,
         "findings": findings,
         "secret_observation": secret_observation,
@@ -273,11 +275,37 @@ def _runtime_findings(
 def _redacted_command(command: list[str] | None) -> list[str] | None:
     if command is None:
         return None
-    redacted = list(command)
-    for index, value in enumerate(redacted[:-1]):
-        if value == "--env-file":
-            redacted[index + 1] = "<operator-approved-opaque-env-stream>"
-    return redacted
+    # Receipts are evidence, not a replay channel. Emit the fixed reviewed
+    # command shape rather than echoing operator-controlled argv values, which
+    # could include a secret-shaped marker or path. The actual child still
+    # runs ``command``; this projection only governs the persisted receipt.
+    return [
+        "bash",
+        str(DEFAULT_AUTH_WRAPPER),
+        "--env-file",
+        "<operator-approved-opaque-env-stream>",
+        "--require-env",
+        "OLLAMA_API_KEY",
+        "--",
+        "env",
+        "-u",
+        "CODEX_CONFIG_HOME",
+        "CODEX_HOME=<isolated-codex-home>",
+        "bash",
+        str(DEFAULT_CODEX_EXEC_WRAPPER),
+        "--profile",
+        "oss-cloud",
+        "--strict-config",
+        "-c",
+        'approval_policy="on-request"',
+        "--skip-git-repo-check",
+        "--sandbox",
+        "read-only",
+        "--ephemeral",
+        "--model",
+        EXPECTED_MODEL,
+        f"Reply exactly {DEFAULT_MARKER}",
+    ]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -287,6 +315,11 @@ def main(argv: list[str] | None = None) -> int:
     profile = Path(args.profile_source).expanduser()
     paths = _paths(args.output_dir)
     findings = _profile_findings(profile)
+    if args.marker != DEFAULT_MARKER:
+        findings.append({
+            "code": "oss_cloud_marker_not_allowlisted",
+            "message": "The bounded cloud smoke requires its fixed marker.",
+        })
     env_file = _approved_env_file(Path(args.env_file).expanduser())
     if env_file is None:
         findings.append({"code": "oss_cloud_auth_stream_missing", "message": "Desktop-owned OLLAMA_API_KEY FIFO is required."})

@@ -225,6 +225,37 @@ class TestOssCloudSmoke(unittest.TestCase):
             self.assertTrue(any(token.endswith("run-codex-exec.sh") for token in receipt["execution_argv"]))
             self.assertNotIn(str(env_file), receipt["execution_argv"])
 
+    def test_receipt_does_not_echo_operator_controlled_marker_or_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            profile = root / "oss-cloud.config.toml"
+            _write_profile(profile)
+            args = self.runner._parser().parse_args(
+                [
+                    "--profile-source",
+                    str(profile),
+                    "--marker",
+                    "OLLAMA_API_KEY=operator-secret",
+                ]
+            )
+            paths = self.runner._paths(str(root / "operator-secret-output"))
+            receipt = self.runner._receipt(
+                args,
+                paths,
+                profile,
+                [],
+                command=["bash", "/tmp/operator-secret-wrapper", "operator-secret"],
+                exit_code=1,
+                duration_seconds=0.1,
+                provider_invoked=True,
+            )
+
+        serialized = json.dumps(receipt, sort_keys=True)
+        self.assertNotIn("OLLAMA_API_KEY=operator-secret", serialized)
+        self.assertNotIn("operator-secret-output", serialized)
+        self.assertEqual(receipt["marker"], self.runner.DEFAULT_MARKER)
+        self.assertEqual(receipt["stdout_path"], "<captured-stdout>")
+
     def test_command_resolves_relative_profile_from_caller_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
