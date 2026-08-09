@@ -4,6 +4,8 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 
+from ask.skill_review_dashboard import dashboard_not_requested_receipt, render_optional_dashboard
+
 from .evals_closeout import *  # noqa: F403
 
 
@@ -137,6 +139,11 @@ def run_evals(
     """Runs evaluation cases for a skill."""
     request = _coerce_eval_run_request(request_or_path, legacy_options)
     result = CallResult()
+    result.data["dashboard"] = (
+        {"status": "not_run", "reason": "evaluation_not_completed", "tab": "evals"}
+        if request.dashboard
+        else dashboard_not_requested_receipt(tab="evals")
+    )
     context = _prepare_eval_context(repo_root, request, result)
     if context is None or _invalid_tessl_flags(result, context):
         return result
@@ -498,12 +505,13 @@ def _apply_eval_process_result(repo_root: Path, context: _EvalRunContext, result
 def _render_eval_dashboard_if_requested(repo_root: Path, context: _EvalRunContext, result: CallResult, output: str, *, succeeded: bool) -> None:
     if not context.dashboard or (not succeeded and _scorecard_path_from_output(repo_root, output) is None):
         return
-    try:
-        result.data.update(_render_eval_dashboard(repo_root, context.path, context.mode, output))
-    except (KeyError, OSError, TypeError, ValueError) as exc:
-        message = "Evaluation passed, but dashboard rendering failed" if succeeded else "Evaluation failed, and dashboard rendering also failed"
-        suggestion = "Inspect raw_output and rerun ./bin/ask skills external-review <skill> --dashboard if the dashboard report is malformed." if succeeded else "Inspect raw_output and raw_error; the scorecard path may be malformed or unreadable."
-        result.errors.append(ErrorObject(code="ERR_RUNTIME", message=f"{message}: {exc}", fix_suggestion=suggestion))
+    dashboard_data, dashboard_receipt = render_optional_dashboard(
+        lambda: _render_eval_dashboard(repo_root, context.path, context.mode, output),
+        tab="evals",
+    )
+    result.data["dashboard"] = dashboard_receipt
+    if dashboard_data is not None:
+        result.data.update(dashboard_data)
 
 
 def _apply_eval_timeout(repo_root: Path, context: _EvalRunContext, result: CallResult, exc: subprocess.TimeoutExpired, timeout: int) -> None:

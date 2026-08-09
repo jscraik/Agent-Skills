@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 from ask.skill_review_dashboard_content import (
     _as_dict,
@@ -35,6 +36,40 @@ from eval_signal_contract import (  # noqa: E402
     EXPECTED_SIGNAL_MISSING_KEY,
     EXPECTED_SIGNAL_RISK_FACTORS_KEY,
 )
+
+
+_DashboardPayload = TypeVar("_DashboardPayload")
+
+
+def dashboard_not_requested_receipt(*, tab: str) -> dict[str, str]:
+    """Describe an intentionally omitted optional HTML projection."""
+    return {
+        "status": "not_requested",
+        "reason": "disabled_by_option",
+        "tab": tab,
+    }
+
+
+def render_optional_dashboard(
+    renderer: Callable[[], _DashboardPayload],
+    *,
+    tab: str,
+) -> tuple[_DashboardPayload | None, dict[str, str]]:
+    """Render a human dashboard without invalidating the canonical JSON receipt.
+
+    Expected file, encoding, report-shape, and path failures in a derived local
+    HTML projection remain observable in the JSON receipt but never change the
+    independently established eval or review outcome.
+    """
+    try:
+        return renderer(), {"status": "rendered", "tab": tab}
+    except (OSError, UnicodeError, ValueError, KeyError, TypeError) as exc:
+        return None, {
+            "status": "unavailable",
+            "reason": "render_failed",
+            "error_type": type(exc).__name__,
+            "tab": tab,
+        }
 
 
 def _evidence_href(path: Path, *, repo_root: Path, output_path: Path) -> str:

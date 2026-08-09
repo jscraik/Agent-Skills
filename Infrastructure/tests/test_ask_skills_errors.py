@@ -729,6 +729,14 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["tessl_review"]["status"], "skipped")
         self.assertIn("Disabled by default", result.data["tessl_review"]["reason"])
+        self.assertEqual(
+            result.data["dashboard"],
+            {
+                "status": "not_requested",
+                "reason": "disabled_by_option",
+                "tab": "quality",
+            },
+        )
         self.assertEqual(mock_run.call_count, 2)
 
     def test_external_review_rejects_conflicting_tessl_review_flags(self):
@@ -756,6 +764,36 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["external_review"]["blocker_class"], "blocked_validation")
         self.assertIn("--skip-tessl", result.data["external_review"]["blocker"])
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+
+    @patch("ask.commands.skills_impl.audit_skill")
+    def test_external_review_keeps_review_result_when_dashboard_report_staging_is_unavailable(self, mock_audit):
+        skill_dir = "Skills/backend-platform/example-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            _write_skill_fixture(repo_root, skill_dir)
+            mock_audit.return_value = _successful_audit({"diagnostics": {"exit_code": 0}})
+
+            with patch.object(Path, "mkdir", side_effect=OSError("read-only dashboard root")):
+                result = external_review_skill(
+                    repo_root=repo_root,
+                    skill_path=skill_dir,
+                    skip_plugin_eval=True,
+                    skip_tessl=True,
+                    dashboard=True,
+                )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.errors, [])
+        self.assertEqual(
+            result.data["dashboard"],
+            {
+                "status": "unavailable",
+                "reason": "render_failed",
+                "error_type": "OSError",
+                "tab": "quality",
+            },
+        )
+        self.assertNotIn("report_path", result.data)
 
 
 if __name__ == "__main__":

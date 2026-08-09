@@ -627,6 +627,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
         result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
+    assert result.data["dashboard"] == {"status": "rendered", "tab": "evals"}
     assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill-dashboard-smoke.html"
     assert result.data["dashboard_tab"] == "evals"
     assert result.data["scorecard_path"] == "Infrastructure/artifacts/skills/example-skill/run-1/scorecard.json"

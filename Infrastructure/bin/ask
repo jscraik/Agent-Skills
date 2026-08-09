@@ -341,7 +341,7 @@ def main():
     evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")
     evals_run_parser.add_argument("--tessl-live-dry-run", action="store_true", help="Stage private Tessl tile eval inputs without invoking Tessl")
     evals_run_parser.add_argument("--handoff-readiness", help="Current repo-relative handoff readiness manifest under .harness/evidence/handoff")
-    evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
+    evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Do not render the optional local HTML dashboard; JSON remains the canonical eval result")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
     evals_closeout_parser = evals_subparsers.add_parser("closeout", help="Inspect eval workflow closeout receipts", parents=[global_parser])

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ask.skill_review_dashboard import dashboard_not_requested_receipt, render_optional_dashboard
+
 from .skills_impl_audit_validation import *  # noqa: F403
 
 def external_review_skill(
@@ -26,6 +28,11 @@ def external_review_skill(
     """
     result = CallResult()
     result.status = "success"
+    result.data["dashboard"] = (
+        {"status": "not_run", "reason": "review_not_completed", "tab": "quality"}
+        if dashboard
+        else dashboard_not_requested_receipt(tab="quality")
+    )
 
     if with_tessl_review and (skip_tessl_review or skip_tessl):
         result.status = "error"
@@ -449,6 +456,12 @@ def external_review_skill(
         if report_error:
             return report_error
         assert report_target is not None
+    elif dashboard:
+        default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_abs.name}.json"
+        report_target = (repo_root / default_report).resolve()
+
+    def write_report() -> None:
+        assert report_target is not None
         report_target.parent.mkdir(parents=True, exist_ok=True)
         report_payload = {
             "status": result.status,
@@ -456,20 +469,17 @@ def external_review_skill(
             "errors": [getattr(error, "__dict__", error) for error in result.errors],
         }
         report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    def record_report_path() -> None:
+        assert report_target is not None
         result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
 
+    if report_target is not None and not dashboard:
+        write_report()
+        record_report_path()
+
     if dashboard:
-        if report_target is None:
-            default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_abs.name}.json"
-            report_target = (repo_root / default_report).resolve()
-            report_target.parent.mkdir(parents=True, exist_ok=True)
-            report_payload = {
-                "status": result.status,
-                "data": result.data,
-                "errors": [getattr(error, "__dict__", error) for error in result.errors],
-            }
-            report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-            result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
+        assert report_target is not None
 
         if dashboard_path:
             dashboard_target, dashboard_error = _validate_repo_relative_skill_path(repo_root, dashboard_path)
@@ -478,23 +488,36 @@ def external_review_skill(
             assert dashboard_target is not None
         else:
             dashboard_target = report_target.with_suffix(".html")
-        try:
-            rendered_dashboard = render_skill_review_dashboard(
+
+        def render_dashboard() -> Path:
+            write_report()
+            record_report_path()
+            rendered = render_skill_review_dashboard(
                 report_path=report_target,
                 output_path=dashboard_target,
                 repo_root=repo_root,
             )
-        except Exception as exc:
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_RUNTIME",
-                message=f"Failed to render local skill review dashboard: {exc}",
-                fix_suggestion="Inspect the JSON report and rerun with --dashboard once the report shape is valid.",
-            ))
-        else:
+            dashboard_rel_path = rendered.relative_to(repo_root.resolve()).as_posix()
+            result.data["dashboard"] = {"status": "rendered", "tab": "quality"}
+            result.data["dashboard_path"] = dashboard_rel_path
+            result.data["dashboard_url"] = dashboard_rel_path
+            write_report()
+            return rendered
+
+        rendered_dashboard, dashboard_receipt = render_optional_dashboard(render_dashboard, tab="quality")
+        result.data["dashboard"] = dashboard_receipt
+        if rendered_dashboard is not None:
             dashboard_rel_path = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
             result.data["dashboard_path"] = dashboard_rel_path
             result.data["dashboard_url"] = dashboard_rel_path
+        else:
+            result.data.pop("dashboard_path", None)
+            result.data.pop("dashboard_url", None)
+            if "report_path" in result.data:
+                try:
+                    write_report()
+                except (OSError, UnicodeError, ValueError, KeyError, TypeError):
+                    pass
 
     return result
 

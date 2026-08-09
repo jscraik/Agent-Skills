@@ -252,6 +252,15 @@ When any rung is blocked, record the exact command, status, blocker class, and
 the next minimal diagnostic. Do not replace a blocked rung with a different tool
 and call the ladder complete.
 
+When `ask evals run` or `ask skills external-review` receives `--dashboard`,
+its JSON result is the canonical receipt and its HTML dashboard is a derived
+local projection. The receipt's `dashboard.status` is one of `not_requested`,
+`not_run`, `rendered`, or `unavailable`. A staging or rendering failure must
+return `unavailable` without changing an otherwise established eval or review
+result, and `report_path` appears only after its JSON receipt was written. A
+rendered dashboard must be reflected in the final persisted JSON receipt. Use
+JSON for automation and HTML only for human inspection.
+
 ## PR gate structure
 
 See [CI Required Checks](/Docs/agents/12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
