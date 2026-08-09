@@ -21,7 +21,7 @@ LIB_DIR = SCRIPT_DIR.parent / "lib"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
 
-from check_oss_local_smoke_output import _findings  # noqa: E402
+from check_oss_local_smoke_output import _findings  # noqa: E402  # reason: local script-path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
 from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
     CONFIGS_AUTH_WRAPPER,
     CONFIGS_CODEX_EXEC_WRAPPER,
