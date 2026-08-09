@@ -4162,7 +4162,7 @@ def skills_doctor(
     warnings: list[dict[str, str]] = []
 
     resolution = target_info.get("resolution")
-    if target_kind == "skill_handle":
+    if target_kind == "command_handle":
         resolver_pass = isinstance(resolution, dict) and resolution.get("status") == "ok"
         checks["resolver"] = _doctor_check(
             _status_from_bool(resolver_pass),
@@ -4248,18 +4248,18 @@ def skills_doctor(
 
     projection_path_value = None
     target_path_value = target_info.get("requested_path") or target_info.get("target_path")
-    ownership_source_path = target_path_value if target_kind != "skill_handle" else source_path_value
+    ownership_source_path = target_path_value if target_kind != "command_handle" else source_path_value
     source_ownership = _skill_root_ownership_for_path(
         str(ownership_source_path) if ownership_source_path else None,
         repo_root=repo_root,
     )
     target_ownership = (
         _skill_root_ownership_for_path(str(target_path_value), repo_root=repo_root)
-        if target_kind != "skill_handle" and target_path_value
+        if target_kind != "command_handle" and target_path_value
         else source_ownership
     )
     if (
-        target_kind != "skill_handle"
+        target_kind != "command_handle"
         and not projection_path_value
         and target_ownership.get("classification")
         in {
