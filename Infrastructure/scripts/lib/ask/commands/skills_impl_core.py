@@ -191,10 +191,14 @@ from ask.skill_review_dashboard import (  # noqa: E402
     _parse_tessl_review,
     render_skill_review_dashboard,
 )
+from ask.skills_sdk.tessl_acceptance_policy import (  # noqa: E402
+    TESSL_ACCEPTANCE_SCORE,
+    TESSL_TARGET_SCORE,
+)
 
 
-TESSL_REVIEW_MIN_SCORE = 95
-TESSL_REVIEW_TARGET_SCORE = 95
+TESSL_REVIEW_MIN_SCORE = TESSL_ACCEPTANCE_SCORE
+TESSL_REVIEW_TARGET_SCORE = TESSL_TARGET_SCORE
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
 PLUGIN_EVAL_EXCLUDED_PACKAGE_SURFACES = (
     "README.md",

@@ -105,6 +105,10 @@ def test_tessl_live_private_policy_names_tessl_local_proof_gate() -> None:
     policy = evals._tessl_live_private_policy("jscraik")
     feedback_loop = policy["pre_tessl_feedback_loop"]
 
+    assert policy["min_score_required"] == 0.85
+    assert policy["target_score"] == 0.9
+    assert "usage score >= 85%" in policy["readiness_gate"]
+    assert "90% remains the target" in policy["readiness_gate"]
     assert "tessl_local_proof" in feedback_loop["required_order"]
     assert any(step["stage"] == "tessl_local_proof" for step in feedback_loop["tessl_sequence"])
     assert "Tessl local-proof" in feedback_loop["failure_loop"]

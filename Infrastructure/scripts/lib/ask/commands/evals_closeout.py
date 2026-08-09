@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from .evals_macro import *  # noqa: F403
 from .evals_shared import EvalArtifactReadError, _load_json_file
+from ask.skills_sdk.tessl_acceptance_policy import (
+    TESSL_ACCEPTANCE_SCORE,
+    TESSL_TARGET_SCORE,
+)
 
 def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool = False) -> str | None:
     text = "\n".join([raw_output or "", raw_error or ""])
@@ -663,8 +667,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "mode": "local_internal_only",
                 "primary_gate": "local_eval_ask_audit",
                 "plugin_eval_min_acceptable_grade": "B+",
-                "tessl_review_min_score": 90,
-                "tessl_review_target_score": 95,
+                "tessl_review_min_score": TESSL_ACCEPTANCE_SCORE,
+                "tessl_review_target_score": TESSL_TARGET_SCORE,
                 "codex_smoke_profile": "[profiles.fast]",
                 "tessl_eval_staging_root": tessl_staging_root,
                 "tessl_project_marker": "tessl.json",

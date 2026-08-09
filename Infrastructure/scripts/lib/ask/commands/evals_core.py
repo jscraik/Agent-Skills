@@ -29,6 +29,7 @@ from ask.skills_sdk.release_scenario_sets import (
     RELEASE_SCENARIO_TARGET,
     release_scenario_set_case_ids,
 )
+from ask.skills_sdk import tessl_acceptance_policy as _tessl_acceptance_policy
 from .evals_shared import (
     _summarize_tessl_live_eval_view as _build_tessl_live_eval_view,
     _load_json_file,
@@ -78,9 +79,9 @@ TESSL_LIVE_PRIVATE_MODEL_TASKS_PER_VARIANT = 2
 TESSL_WORKSPACE_RUN_LIMIT = 300
 TESSL_WORKSPACE_RUN_LIMIT_SOURCE = "operator_provided_limit"
 TESSL_WORKSPACE_RUN_RESERVE = 20
-TESSL_LIVE_PRIVATE_MIN_SCORE = 0.90
-TESSL_LIVE_PRIVATE_TARGET_SCORE = 0.95
-TESSL_LOCAL_REVIEW_MIN_SCORE = 95
+TESSL_LIVE_PRIVATE_MIN_SCORE = _tessl_acceptance_policy.TESSL_ACCEPTANCE_SCORE_RATE
+TESSL_LIVE_PRIVATE_TARGET_SCORE = _tessl_acceptance_policy.TESSL_TARGET_SCORE_RATE
+TESSL_LOCAL_REVIEW_MIN_SCORE = _tessl_acceptance_policy.TESSL_ACCEPTANCE_SCORE
 TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS = 10
 TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS = 900
 TESSL_PROJECT_LINK_TIMEOUT_SECONDS = 60

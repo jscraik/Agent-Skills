@@ -374,8 +374,8 @@ Treat Tessl scores as evidence, not proof by themselves.
 - If the live run would exceed the operator-approved workspace budget or consume
   the 20-run reserve, classify the lane as `blocked_environment` for live
   scoring and continue with dry-run/local validation only.
-- The live-private readiness gate is: usage-spec score is at least 90% and is
-  not below the baseline score. A 95%+ score remains the improvement target.
+- The live-private readiness gate is: usage-spec score is at least 85% and is
+  not below the baseline score. A 90%+ score remains the improvement target.
   A lower score, lower baseline comparison, or
   missing viewable score summary is a failed or blocked gate, not a pass.
 - If the score UI shows an in-progress or lower live score, that live score is
