@@ -95,7 +95,11 @@ def record_tessl_dry_run(
         "issued_at": datetime.now(UTC).isoformat(),
         "tessl_eval": _minimal_dry_run_evidence(tessl_eval),
     }
-    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        with open(receipt_path, "x", encoding="utf-8") as f:
+            f.write(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    except FileExistsError as exc:
+        raise ValueError("Tessl dry-run receipt already exists; materialize a fresh handoff bundle before retrying") from exc
     lane["status"] = "pass"
     lane["receipt_path"] = _repo_relative(repo_root, receipt_path)
     lane["blocker"] = None
@@ -172,8 +176,8 @@ def _validate_evidence_root(repo_root: Path, requested_root: Path) -> tuple[Path
 
 def _validate_readiness_path(repo_root: Path, requested_path: Path) -> tuple[Path | None, str | None]:
     candidate = requested_path if requested_path.is_absolute() else repo_root / requested_path
-    path = candidate.resolve(strict=False)
     evidence_root = (repo_root.joinpath(*_EVIDENCE_ROOT)).resolve()
+    path = candidate.resolve(strict=False)
     try:
         path.relative_to(evidence_root)
     except ValueError:
@@ -272,6 +276,8 @@ def _source_receipt(
     candidate: dict[str, str],
 ) -> tuple[dict[str, Any], Path | None, str | None, str | None]:
     path = Path(value)
+    if not path.is_absolute():
+        path = repo_root / path
     if not path.is_file() or path.is_symlink():
         return {}, path, None, "receipt must be a regular non-symlink JSON file"
     try:
@@ -379,12 +385,10 @@ def _oss_case_evidence(payloads: list[dict[str, Any]]) -> list[dict[str, str]]:
                 if isinstance(case_id, str) and isinstance(status, str):
                     observed[case_id] = status
                     has_direct_cases = True
-        if has_direct_cases:
+        # Omit receipts without an asserted cases array to avoid converting
+        # command-derived case IDs into per-case "pass" evidence.
+        if not has_direct_cases:
             continue
-        if _receipt_status(payload) != "pass":
-            continue
-        for case_id in _captured_case_ids(payload):
-            observed[case_id] = "pass"
     return [
         {"case_id": case_id, "status": status}
         for case_id, status in sorted(observed.items())

@@ -215,8 +215,8 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
                 build_candidate_identity(REPO_ROOT, REPO_ROOT / FIXTURE_SKILL),
             )
             payload["commands"] = [
-                "./bin/ask sdk eval run Skills/example --runner internal --mode release "
-                "--codex-profile oss-local --case second-shard --json --robot"
+                ("./bin/ask sdk eval run Skills/example --runner internal --mode release "
+                 "--codex-profile oss-local --case second-shard --json --robot")
             ]
             extra_source.write_text(json.dumps(payload), encoding="utf-8")
             lane_receipts.append(f"oss-local={extra_source}")
@@ -276,6 +276,97 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
         self.assertTrue(receipt_exists)
         self.assertTrue(readiness["ready_for_live_tessl"], readiness)
 
+    def test_record_tessl_dry_run_rejects_non_pass_status(self) -> None:
+        handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
+        handoff_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
+            root = Path(temp_dir)
+            bundle_root = root / "current-candidate"
+            materialize_handoff_bundle(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                request=_request(
+                    evidence_root=bundle_root,
+                    lane_receipts=_inputs(root),
+                    operation="execute",
+                ),
+            )
+            with self.assertRaises(ValueError) as ctx:
+                record_tessl_dry_run(
+                    REPO_ROOT,
+                    readiness_path=bundle_root / "eval-handoff-readiness.json",
+                    tessl_eval={
+                        "status": "blocked",
+                        "dry_run": True,
+                        "live_private": True,
+                    },
+                )
+        self.assertIn("successful private Tessl dry-run", str(ctx.exception))
+
+    def test_record_tessl_dry_run_rejects_non_dry_run_result(self) -> None:
+        handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
+        handoff_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
+            root = Path(temp_dir)
+            bundle_root = root / "current-candidate"
+            materialize_handoff_bundle(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                request=_request(
+                    evidence_root=bundle_root,
+                    lane_receipts=_inputs(root),
+                    operation="execute",
+                ),
+            )
+            with self.assertRaises(ValueError) as ctx:
+                record_tessl_dry_run(
+                    REPO_ROOT,
+                    readiness_path=bundle_root / "eval-handoff-readiness.json",
+                    tessl_eval={
+                        "status": "pass",
+                        "dry_run": False,
+                        "live_private": True,
+                    },
+                )
+        self.assertIn("successful private Tessl dry-run", str(ctx.exception))
+
+    def test_record_tessl_dry_run_rejects_existing_receipt(self) -> None:
+        handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
+        handoff_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
+            root = Path(temp_dir)
+            bundle_root = root / "current-candidate"
+            materialize_handoff_bundle(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                request=_request(
+                    evidence_root=bundle_root,
+                    lane_receipts=_inputs(root),
+                    operation="execute",
+                ),
+            )
+            tessl_eval = {
+                "status": "pass",
+                "dry_run": True,
+                "live_private": True,
+                "workspace": "jscraik",
+                "visibility": "private",
+                "oss_scenario_parity": {"status": "pass", "staged_case_count": 8, "staged_case_ids": []},
+                "budget_preflight": {"status": "pass", "scenario_count": 8, "max_scenarios_default": 10},
+            }
+            record_tessl_dry_run(
+                REPO_ROOT,
+                readiness_path=bundle_root / "eval-handoff-readiness.json",
+                tessl_eval=tessl_eval,
+            )
+            with self.assertRaises(ValueError) as ctx:
+                record_tessl_dry_run(
+                    REPO_ROOT,
+                    readiness_path=bundle_root / "eval-handoff-readiness.json",
+                    tessl_eval=tessl_eval,
+                )
+        self.assertIn("already exists", str(ctx.exception))
+
     def test_materializes_case_evidence_from_a_passing_captured_shard_command(self) -> None:
         handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
         handoff_root.mkdir(parents=True, exist_ok=True)
@@ -286,8 +377,8 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
             payload = json.loads(legacy_source.read_text(encoding="utf-8"))
             payload["data"]["skills_sdk_eval_run"]["receipt"].pop("cases")
             payload["commands"] = [
-                "./bin/ask sdk eval run Skills/example --runner internal --mode release "
-                "--codex-profile oss-cloud --case happy-diff --case happy-polish --json --robot"
+                ("./bin/ask sdk eval run Skills/example --runner internal --mode release "
+                 "--codex-profile oss-cloud --case happy-diff --case happy-polish --json --robot")
             ]
             legacy_source.write_text(json.dumps(payload), encoding="utf-8")
             receipt = materialize_handoff_bundle(
@@ -417,37 +508,45 @@ class TestSkillsSdkHandoffMaterialization(unittest.TestCase):
         self.assertNotIn("trace_id", persisted["command_results"][0])
 
     def test_capture_rejects_unbounded_oss_lane_before_running_a_child(self) -> None:
-        request = HandoffCaptureRequest(
-            skill=FIXTURE_SKILL,
-            lane_id="oss-local",
-            receipt_path=REPO_ROOT / ".harness/evidence/handoff/oss-local.json",
-            operation="execute",
-        )
+        handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
+        handoff_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
+            receipt_path = Path(temp_dir) / "oss-local.json"
+            request = HandoffCaptureRequest(
+                skill=FIXTURE_SKILL,
+                lane_id="oss-local",
+                receipt_path=receipt_path,
+                operation="execute",
+            )
 
-        receipt = capture_handoff_lane(
-            REPO_ROOT,
-            source_path=REPO_ROOT / FIXTURE_SKILL,
-            request=request,
-            run_command=self.fail,
-        )
+            receipt = capture_handoff_lane(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                request=request,
+                run_command=self.fail,
+            )
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("oss-local capture requires explicit one- or two-case shards", receipt["blockers"])
 
     def test_capture_rejects_oversized_oss_shards(self) -> None:
-        request = HandoffCaptureRequest(
-            skill=FIXTURE_SKILL,
-            lane_id="oss-local",
-            receipt_path=REPO_ROOT / ".harness/evidence/handoff/oss-local.json",
-            operation="execute",
-            cases=("one", "two", "three"),
-        )
+        handoff_root = REPO_ROOT / ".harness" / "evidence" / "handoff"
+        handoff_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=handoff_root) as temp_dir:
+            receipt_path = Path(temp_dir) / "oss-local.json"
+            request = HandoffCaptureRequest(
+                skill=FIXTURE_SKILL,
+                lane_id="oss-local",
+                receipt_path=receipt_path,
+                operation="execute",
+                cases=("one", "two", "three"),
+            )
 
-        receipt = capture_handoff_lane(
-            REPO_ROOT,
-            source_path=REPO_ROOT / FIXTURE_SKILL,
-            request=request,
-        )
+            receipt = capture_handoff_lane(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                request=request,
+            )
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("oss-local capture supports at most two cases per shard", receipt["blockers"])

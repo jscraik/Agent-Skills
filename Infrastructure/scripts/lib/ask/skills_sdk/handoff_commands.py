@@ -11,6 +11,16 @@ from ask.skills_sdk.handoff_materialization import (
 from ask.skills_sdk.handoff_capture import HandoffCaptureRequest, capture_handoff_lane
 
 
+def _resolve_skill_source_path(repo_root: Path, skill_query: str) -> Path | None:
+    """Resolve skill query to absolute source path relative to repo_root."""
+    target_info, _audit_target = skills_commands.resolve_doctor_target(repo_root, skill_query.strip())
+    source_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_value)) if source_value else None
+    if source_path is not None and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    return source_path
+
+
 def materialize_handoff_command(
     repo_root: Path,
     *,
@@ -19,11 +29,7 @@ def materialize_handoff_command(
     """Expose the candidate-bound materializer without extending skills_impl."""
     result = CallResult()
     result.metadata["command"] = "sdk eval handoff-materialize"
-    target_info, _audit_target = skills_commands.resolve_doctor_target(repo_root, request.skill.strip())
-    source_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-    source_path = Path(str(source_value)) if source_value else None
-    if source_path is not None and not source_path.is_absolute():
-        source_path = repo_root / source_path
+    source_path = _resolve_skill_source_path(repo_root, request.skill)
     if source_path is None:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -32,7 +38,15 @@ def materialize_handoff_command(
         ))
         return result
 
-    receipt = materialize_handoff_bundle(repo_root, source_path=source_path, request=request)
+    try:
+        receipt = materialize_handoff_bundle(repo_root, source_path=source_path, request=request)
+    except (OSError, ValueError, FileExistsError) as exc:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Skills SDK handoff materialization failed: {exc}",
+        ))
+        return result
     payload = {
         "schema_version": "skills-sdk-eval-handoff-materialize.v0",
         "status": receipt["status"],
@@ -58,11 +72,7 @@ def capture_handoff_command(
     """Run one canonical pre-Tessl command and persist its receipt."""
     result = CallResult()
     result.metadata["command"] = "sdk eval handoff-capture"
-    target_info, _audit_target = skills_commands.resolve_doctor_target(repo_root, request.skill.strip())
-    source_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-    source_path = Path(str(source_value)) if source_value else None
-    if source_path is not None and not source_path.is_absolute():
-        source_path = repo_root / source_path
+    source_path = _resolve_skill_source_path(repo_root, request.skill)
     if source_path is None:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -71,7 +81,15 @@ def capture_handoff_command(
         ))
         return result
 
-    receipt = capture_handoff_lane(repo_root, source_path=source_path, request=request)
+    try:
+        receipt = capture_handoff_lane(repo_root, source_path=source_path, request=request)
+    except (OSError, ValueError, FileExistsError) as exc:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Skills SDK handoff capture failed: {exc}",
+        ))
+        return result
     payload = {
         "schema_version": "skills-sdk-eval-handoff-capture.v1",
         "status": receipt["status"],

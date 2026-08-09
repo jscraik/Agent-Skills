@@ -94,19 +94,19 @@ def _readiness_lane_command(lane_id: str) -> str:
         "scorer_calibration": "./bin/ask sdk eval scorer-calibration Skills/example --preview --json --robot",
         "deterministic_local_gates": (
             "./bin/ask sdk eval run Skills/example --runner internal --mode smoke "
-            "--codex-profile oss-local --json --robot"
+            "--codex-profile oss-local --timeout-seconds 180 --json --robot"
         ),
         "oss-local": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode release --codex-profile oss-local --json --robot"
+            "--mode release --codex-profile oss-local --timeout-seconds 180 --json --robot"
         ),
         "oss-cloud": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode release --codex-profile oss-cloud --json --robot"
+            "--mode release --codex-profile oss-cloud --timeout-seconds 180 --json --robot"
         ),
         "tessl-local-proof": (
             "./bin/ask sdk eval tessl-local-proof --skill Skills/example "
-            "--workspace jscraik --execute --json --robot"
+            "--workspace jscraik --execute --timeout-seconds 180 --json --robot"
         ),
         "tessl-live-dry-run": (
             "./bin/ask evals run Skills/example --tessl-live-private "

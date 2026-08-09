@@ -70,7 +70,7 @@ class EvalRunRequest:
     dashboard: bool = True
     runner: str = "codex"
     skip_tessl: bool | None = None
-    allow_tessl_project_save: bool = False
+    allow_tessl_project_save: bool = False  # Retained CLI/API option is a compatibility no-op with no effect on Tessl execution.
     tessl_live_private: bool = False
     tessl_workspace: str | None = None
     tessl_live_dry_run: bool = False

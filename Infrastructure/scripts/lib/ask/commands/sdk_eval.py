@@ -391,8 +391,8 @@ def _dispatch_handoff_readiness(repo_root: Path, args: argparse.Namespace) -> Ca
 
 
 def _dispatch_handoff_materialize(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    from ask.skills_sdk.handoff_materialization import HandoffMaterializationRequest
-    from ask.skills_sdk.handoff_commands import materialize_handoff_command
+    from ask.skills_sdk.handoff_materialization import HandoffMaterializationRequest  # noqa: PLC0415
+    from ask.skills_sdk.handoff_commands import materialize_handoff_command  # noqa: PLC0415
 
     return materialize_handoff_command(
         repo_root,
@@ -406,8 +406,8 @@ def _dispatch_handoff_materialize(repo_root: Path, args: argparse.Namespace) -> 
 
 
 def _dispatch_handoff_capture(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    from ask.skills_sdk.handoff_capture import HandoffCaptureRequest
-    from ask.skills_sdk.handoff_commands import capture_handoff_command
+    from ask.skills_sdk.handoff_capture import HandoffCaptureRequest  # noqa: PLC0415
+    from ask.skills_sdk.handoff_commands import capture_handoff_command  # noqa: PLC0415
 
     return capture_handoff_command(
         repo_root,
@@ -535,14 +535,6 @@ def _regression_plan_next() -> str:
 
 def _handoff_readiness_next() -> str:
     return "ask sdk eval handoff-readiness --skill <skill> --preview --json --robot"
-
-
-def _handoff_materialize_next() -> str:
-    return (
-        "ask sdk eval handoff-materialize --skill <skill> --evidence-root "
-        ".harness/evidence/handoff/<skill>/<bundle> --lane-receipt <lane>=<receipt> "
-        "--preview --json --robot"
-    )
 
 
 def _ab_preview_next() -> str:

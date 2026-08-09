@@ -48,7 +48,7 @@ def capture_handoff_lane(
     if blockers or request.operation == "preview":
         return receipt
 
-    command_results = _run_commands(repo_root, command_parts, run_command)
+    command_results = _run_commands(repo_root, command_parts, run_command, request.timeout_seconds)
     receipt = _receipt(candidate, request, command_parts, command_results=command_results, blockers=[])
     if any(item["status"] != "pass" for item in command_results):
         receipt["status"] = "blocked"
@@ -59,7 +59,8 @@ def capture_handoff_lane(
         return receipt
     receipt["mutation_performed"] = True
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
-    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    with open(receipt_path, "x", encoding="utf-8") as f:
+        f.write(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     return receipt
 
 

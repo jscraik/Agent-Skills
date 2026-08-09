@@ -205,9 +205,12 @@ lane receipt, or reuse a prior candidate's manifest:
 
 Rerun that exact lane with `--execute` to write its source receipt. Use one
 fresh capture invocation per non-sharded lane and one fresh invocation for each
-one- or two-case OSS shard. For `oss-cloud`, put only one cloud shard capture
-inside each Configs FIFO wrapper; do not source the FIFO, use the older
-Environment-ID transport, or reuse a stream for later stages. The capture
+one- or two-case OSS shard. For `oss-cloud`, each shard capture must run inside
+a separate isolated environment (using the Infrastructure Configs streaming FIFO
+pattern documented in `.harness/configs/README.md`) to ensure clean credential
+rotation; do not source FIFO state directly into the agent shell, do not reuse a
+configuration stream across multiple capture stages, and do not use the
+deprecated Environment-ID file transport for sensitive values. The capture
 receipt binds its current candidate identity and timestamp to the child command's
 status and lane-specific proving facts, rather than storing a transcript. A
 stale, wrong-candidate, or arbitrary JSON file is rejected by materialization.
