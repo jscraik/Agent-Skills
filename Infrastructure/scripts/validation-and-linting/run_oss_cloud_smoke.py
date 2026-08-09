@@ -380,7 +380,6 @@ def main(argv: list[str] | None = None) -> int:
     # reviewed env-name contract and redacted argv, never captured stdout/stderr
     # or a credential.
     # codeql[py/clear-text-logging-sensitive-data]
-
     print(json.dumps(receipt, sort_keys=True, separators=(",", ":")) if args.json else receipt["status"])
     return 0 if receipt["status"] == "pass" else 1
 
