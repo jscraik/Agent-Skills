@@ -562,10 +562,8 @@ def _scenario_alignment_checks(
         acceptance = case.get("acceptance")
         expected_evidence = case.get("expected_evidence")
         if not (
-            isinstance(acceptance, list)
-            and acceptance
-            or isinstance(expected_evidence, list)
-            and expected_evidence
+            (isinstance(acceptance, list) and acceptance)
+            or (isinstance(expected_evidence, list) and expected_evidence)
         ):
             missing.append("acceptance_or_expected_evidence")
         if missing:
