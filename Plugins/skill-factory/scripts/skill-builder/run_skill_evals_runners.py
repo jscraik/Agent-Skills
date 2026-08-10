@@ -378,7 +378,7 @@ def _rewrite_dash_prefixed_codex_args(argv: Sequence[str]) -> List[str]:
     out: List[str] = []
     i = 0
     n = len(argv)
-    rewritable = {"--codex-arg", "--codex-arg", "--openai-arg"}
+    rewritable = {"--codex-arg", "--openai-arg"}
     while i < n:
         tok = argv[i]
         if tok in rewritable and i + 1 < n:
