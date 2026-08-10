@@ -121,6 +121,12 @@ def _tessl_live_blocked(command: str, path: str, workspace: str | None, dry_run:
 
 
 def _tessl_live_effects_block(command: str, path: str, workspace: str | None, dry_run: bool) -> dict | None:
+    unmocked_test_process = os.environ.get("PYTEST_CURRENT_TEST") and type(subprocess.run).__module__ != "unittest.mock"
+    if not dry_run and unmocked_test_process:
+        return _tessl_live_blocked(
+            command, path, workspace, dry_run, "",
+            "Tessl live evaluation is blocked by the hermetic test effect policy unless subprocess execution is an in-process mock.",
+        )
     if dry_run or os.environ.get("ASK_EXTERNAL_EFFECTS", "deny") == "allow":
         return None
     return _tessl_live_blocked(

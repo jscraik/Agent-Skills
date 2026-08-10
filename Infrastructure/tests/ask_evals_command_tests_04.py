@@ -71,9 +71,10 @@ def test_tessl_live_private_policy_names_tessl_local_proof_gate() -> None:
 def test_tessl_live_private_rejects_denied_external_effects(monkeypatch) -> None:
     monkeypatch.setenv("ASK_EXTERNAL_EFFECTS", "deny")
 
-    result = evals._tessl_live_effects_block(
-        "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
-    )
+    with mock.patch.object(evals.subprocess, "run"):
+        result = evals._tessl_live_effects_block(
+            "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
+        )
 
     assert result is not None
     assert result["status"] == "blocked"
@@ -84,6 +85,21 @@ def test_tessl_live_private_rejects_denied_external_effects(monkeypatch) -> None
 def test_tessl_live_private_requires_explicit_external_effect_permission(monkeypatch) -> None:
     monkeypatch.delenv("ASK_EXTERNAL_EFFECTS", raising=False)
 
+    with mock.patch.object(evals.subprocess, "run"):
+        blocked = evals._tessl_live_effects_block(
+            "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
+        )
+
+    assert blocked is not None
+    assert blocked["status"] == "blocked"
+    assert blocked["blocker_class"] == "blocked_validation"
+    assert "ASK_EXTERNAL_EFFECTS=allow" in blocked["blocker"]
+
+
+def test_tessl_live_private_rejects_unmocked_test_process(monkeypatch) -> None:
+    monkeypatch.setenv("PYTEST_CURRENT_TEST", "test_guard")
+    monkeypatch.setenv("ASK_EXTERNAL_EFFECTS", "allow")
+
     blocked = evals._tessl_live_effects_block(
         "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
     )
@@ -91,7 +107,26 @@ def test_tessl_live_private_requires_explicit_external_effect_permission(monkeyp
     assert blocked is not None
     assert blocked["status"] == "blocked"
     assert blocked["blocker_class"] == "blocked_validation"
-    assert "ASK_EXTERNAL_EFFECTS=allow" in blocked["blocker"]
+    assert "hermetic test effect policy" in blocked["blocker"]
+
+
+def test_run_evals_accepts_legacy_path_keyword(tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    def capture_request(_repo_root: Path, request: object, _result: object) -> None:
+        captured["request"] = request
+
+    with mock.patch.object(evals, "_prepare_eval_context", side_effect=capture_request):
+        evals.run_evals(tmp_path, path="Skills/example-skill")
+
+    request = captured["request"]
+    assert isinstance(request, evals.EvalRunRequest)
+    assert request.path == "Skills/example-skill"
+
+
+def test_evals_facade_reexports_taxonomy_constants() -> None:
+    assert evals.EVAL_BLOCKER_TAXONOMY["blocked_validation"]
+    assert evals.EVAL_LIFECYCLE_EVENT_TYPES["eval_completed"]
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
