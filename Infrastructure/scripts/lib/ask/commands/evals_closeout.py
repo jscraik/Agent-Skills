@@ -402,6 +402,88 @@ def eval_closeout_doctor(repo_root: Path, path: str) -> CallResult:
     return result
 
 
+def _eval_closeout_cases(repo_root: Path, report_dir: Path | None, summary: dict) -> list[dict[str, object]]:
+    if isinstance(summary.get("cases"), list):
+        return [_case_closeout_from_record(case) for case in summary["cases"] if isinstance(case, dict)]
+    if report_dir is None or not report_dir.is_dir():
+        return []
+    case_dirs = [path for path in sorted(report_dir.iterdir()) if path.is_dir() and re.match(r"^\d+-", path.name)]
+    return [_case_closeout_from_partial_dir(path, repo_root) for path in case_dirs]
+
+
+def _eval_closeout_state(
+    eval_status: str,
+    blocker_class: str | None,
+    report_dir: Path | None,
+    summary: dict,
+    cases: list[dict[str, object]],
+    no_case_reason: str | None,
+) -> tuple[str, str | None, bool]:
+    status = _eval_closeout_status(eval_status, blocker_class)
+    missing_suite_artifacts = _missing_suite_artifacts(report_dir, summary, no_case_reason)
+    if missing_suite_artifacts or _missing_case_evidence(cases, no_case_reason):
+        return "blocked", blocker_class or "blocked_missing_artifact", missing_suite_artifacts
+    if any(case.get("status") == "blocked" for case in cases):
+        return "blocked", blocker_class or "blocked_missing_artifact", missing_suite_artifacts
+    if status == "pass" and any(case.get("status") == "fail" for case in cases):
+        status = "fail"
+    return status, blocker_class, missing_suite_artifacts
+
+
+def _missing_suite_artifacts(report_dir: Path | None, summary: dict, no_case_reason: str | None) -> bool:
+    return (report_dir is None or not summary) and not no_case_reason
+
+
+def _missing_case_evidence(cases: list[dict[str, object]], no_case_reason: str | None) -> bool:
+    return not cases and not no_case_reason
+
+
+def _eval_closeout_path(
+    repo_root: Path, report_dir: Path | None, skill_path: str, mode: str, runner: str,
+    raw_output: str, raw_error: str, no_case_reason: str | None,
+) -> Path | None:
+    if report_dir is not None:
+        return report_dir / "workflow-closeout.json"
+    if not (raw_output.strip() or raw_error.strip() or no_case_reason):
+        return None
+    closeout_root = repo_root / "Infrastructure" / "artifacts" / "evals" / "closeouts"
+    stamp = _utc_now_iso().replace(":", "").replace("-", "")
+    return closeout_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.json"
+
+
+def _eval_closeout_payload(
+    repo_root: Path, skill_path: str, mode: str, runner: str, report_dir: Path | None,
+    cases: list[dict[str, object]], status: str, blocker_class: str | None,
+    raw_output: str, raw_error: str, missing_suite_artifacts: bool,
+    timeout_seconds: int | None, no_case_reason: str | None,
+) -> dict[str, object]:
+    return {
+        "schema_version": EVAL_CLOSEOUT_SCHEMA_VERSION, "status": status, "skill_path": skill_path,
+        "mode": mode, "runner": runner,
+        "report_dir": _repo_relative_path(repo_root, report_dir) if report_dir is not None else None,
+        "cases_expected": [str(case.get("id")) for case in cases], "cases": cases,
+        "blocker_class": blocker_class, "mutation_allowed": status == "pass",
+        "registry_update_allowed": status == "pass" and mode == "release",
+        "raw_output_present": bool(raw_output.strip()), "raw_error_present": bool(raw_error.strip()),
+        "missing_suite_artifacts": missing_suite_artifacts, "case_evidence_present": bool(cases),
+        "no_case_reason": no_case_reason,
+        "next_reproduce_command": _evals_run_validation_command(
+            skill_path, mode=mode, runner=runner, dashboard=True, tessl_live_private=False,
+            tessl_workspace=None, tessl_live_dry_run=False, timeout_seconds=timeout_seconds,
+        ),
+    }
+
+
+def _persist_eval_closeout(repo_root: Path, closeout: dict[str, object], closeout_path: Path | None) -> dict[str, object]:
+    if closeout_path is not None:
+        closeout_path.parent.mkdir(parents=True, exist_ok=True)
+        closeout["path"] = _repo_relative_path(repo_root, closeout_path)
+    closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
+    if closeout_path is not None:
+        closeout_path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return closeout
+
+
 def _write_eval_closeout(
     repo_root: Path,
     *,
@@ -414,88 +496,22 @@ def _write_eval_closeout(
     blocker_class: str | None,
     started_at: float,
     timeout_seconds: int | None = None,
+    no_case_reason: str | None = None,
 ) -> dict[str, object]:
-    report_dir = _eval_report_dir(
-        repo_root,
-        skill_path=skill_path,
-        raw_output=raw_output,
-        started_at=started_at,
-    )
+    report_dir = _eval_report_dir(repo_root, skill_path=skill_path, raw_output=raw_output, started_at=started_at)
     summary = _load_eval_summary(report_dir) if report_dir is not None else {}
-    cases: list[dict[str, object]] = []
-    if isinstance(summary.get("cases"), list):
-        cases = [
-            _case_closeout_from_record(case)
-            for case in summary["cases"]
-            if isinstance(case, dict)
-        ]
-    elif report_dir is not None and report_dir.is_dir():
-        case_dirs = [
-            path
-            for path in sorted(report_dir.iterdir())
-            if path.is_dir() and re.match(r"^\d+-", path.name)
-        ]
-        cases = [_case_closeout_from_partial_dir(path, repo_root) for path in case_dirs]
-
-    closeout_blocker = blocker_class
-    status = _eval_closeout_status(eval_status, blocker_class)
-    missing_suite_artifacts = report_dir is None or not summary
-    if missing_suite_artifacts:
-        status = "blocked"
-        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
-    if not cases:
-        status = "blocked"
-        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
-    if cases and any(case.get("status") == "blocked" for case in cases):
-        status = "blocked"
-        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
-    elif cases and status == "pass" and any(case.get("status") == "fail" for case in cases):
-        status = "fail"
-
-    closeout_path = None
-    if report_dir is not None:
-        closeout_path = report_dir / "workflow-closeout.json"
-    elif raw_output.strip() or raw_error.strip():
-        closeout_root = repo_root / "Infrastructure" / "artifacts" / "evals" / "closeouts"
-        closeout_root.mkdir(parents=True, exist_ok=True)
-        stamp = _utc_now_iso().replace(":", "").replace("-", "")
-        closeout_path = closeout_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.json"
-
-    closeout: dict[str, object] = {
-        "schema_version": EVAL_CLOSEOUT_SCHEMA_VERSION,
-        "status": status,
-        "skill_path": skill_path,
-        "mode": mode,
-        "runner": runner,
-        "report_dir": _repo_relative_path(repo_root, report_dir) if report_dir is not None else None,
-        "cases_expected": [str(case.get("id")) for case in cases],
-        "cases": cases,
-        "blocker_class": closeout_blocker,
-        "mutation_allowed": status == "pass",
-        "registry_update_allowed": status == "pass" and mode == "release",
-        "raw_output_present": bool(raw_output.strip()),
-        "raw_error_present": bool(raw_error.strip()),
-        "missing_suite_artifacts": missing_suite_artifacts,
-        "case_evidence_present": bool(cases),
-        "next_reproduce_command": _evals_run_validation_command(
-            skill_path,
-            mode=mode,
-            runner=runner,
-            dashboard=True,
-            tessl_live_private=False,
-            tessl_workspace=None,
-            tessl_live_dry_run=False,
-            timeout_seconds=timeout_seconds,
-        ),
-    }
-    if closeout_path is not None:
-        closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
-        closeout_path.parent.mkdir(parents=True, exist_ok=True)
-        closeout["path"] = _repo_relative_path(repo_root, closeout_path)
-        closeout_path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    else:
-        closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
-    return closeout
+    cases = _eval_closeout_cases(repo_root, report_dir, summary)
+    status, closeout_blocker, missing_suite_artifacts = _eval_closeout_state(
+        eval_status, blocker_class, report_dir, summary, cases, no_case_reason,
+    )
+    closeout = _eval_closeout_payload(
+        repo_root, skill_path, mode, runner, report_dir, cases, status, closeout_blocker,
+        raw_output, raw_error, missing_suite_artifacts, timeout_seconds, no_case_reason,
+    )
+    closeout_path = _eval_closeout_path(
+        repo_root, report_dir, skill_path, mode, runner, raw_output, raw_error, no_case_reason,
+    )
+    return _persist_eval_closeout(repo_root, closeout, closeout_path)
 
 
 def _write_timeout_partial_artifact(

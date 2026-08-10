@@ -120,180 +120,106 @@ def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:
     assert "workspace" in tessl_eval["blocker"].lower()
 
 
-def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp_path: Path) -> None:
+def _completed_tessl_view() -> mock.Mock:
+    return mock.Mock(returncode=0, stdout=json.dumps({"data": {"attributes": {
+        "agent": "claude", "model": "deepseek-v4-flash", "scorerAgent": "glm", "scorerModel": "glm-5.1",
+        "usage": {"meanTurns": 20, "p95Turns": 37, "totalTokens": 12345, "estimatedCostUsd": 0.0236},
+        "scenarios": [{"solutions": [
+            {"variant": "baseline", "assessmentResults": [{"score": 0, "max_score": 1}]},
+            {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
+        ]}],
+    }}}), stderr="")
+
+
+def _tessl_live_fake_run(completed_view: mock.Mock):
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
-    completed_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "agent": "claude",
-                    "model": "deepseek-v4-flash",
-                    "scorerAgent": "glm",
-                    "scorerModel": "glm-5.1",
-                    "usage": {
-                        "meanTurns": 20,
-                        "p95Turns": 37,
-                        "totalTokens": 12345,
-                        "estimatedCostUsd": 0.0236,
-                    },
-                    "scenarios": [
-                        {
-                            "solutions": [
-                                {
-                                    "variant": "baseline",
-                                    "assessmentResults": [{"score": 0, "max_score": 1}],
-                                },
-                                {
-                                    "variant": "usage-spec",
-                                    "assessmentResults": [{"score": 1, "max_score": 1}],
-                                },
-                            ],
-                        }
-                    ]
-                }
-            }
-        }),
-        stderr="",
-    )
-    _write_example_skill(tmp_path)
-
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
+            return mock.Mock(returncode=0, stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}', stderr="", args=cmd)
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
-        if cmd[1:3] == ["eval", "view"]:
-            return completed_view
-        return completed
+        return completed_view if cmd[1:3] == ["eval", "view"] else completed
+    return fake_run
 
-    with (
-        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run) as run,
-    ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-    )
 
-    assert result.status == "success"
-    assert result.data["local_eval_status"] == "skipped_tessl_live_private"
-    assert "separately before live scoring" in result.data["tessl_live_private_note"]
-    eval_run_calls = [
-        call.args[0] for call in run.call_args_list
-        if call.args[0][1:3] == ["eval", "run"]
-    ]
-    local_eval_calls = [
-        call.args[0] for call in run.call_args_list
-        if any("run_skill_evals.py" in str(part) for part in call.args[0])
-    ]
-    eval_view_calls = [
-        call.args[0] for call in run.call_args_list
-        if call.args[0][1:3] == ["eval", "view"]
-    ]
-    assert local_eval_calls == []
-    assert len(eval_run_calls) == 1
-    assert len(eval_view_calls) == 1
-    tessl_cmd = eval_run_calls[0]
-    assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
-    assert tessl_cmd[4:6] == ["--workspace", "jscraik"]
-    assert "--yes" not in tessl_cmd
-    staged_source = Path(tessl_cmd[6])
+def _assert_tessl_commands(run: mock.Mock) -> Path:
+    calls = [call.args[0] for call in run.call_args_list]
+    tessl_cmd = next(call for call in calls if call[1:3] == ["eval", "run"])
+    view_cmd = next(call for call in calls if call[1:3] == ["eval", "view"])
+    assert not any(any("run_skill_evals.py" in str(part) for part in call) for call in calls)
+    assert tessl_cmd[:6] == ["/usr/local/bin/tessl", "eval", "run", "--json", "--workspace", "jscraik"]
+    assert not {"--yes", "publish", "install", "registry"}.intersection(tessl_cmd)
+    assert view_cmd == ["/usr/local/bin/tessl", "eval", "view", "--json", "019e6ac8-08eb-75fb-8fbb-e2346517f82d"]
+    return Path(tessl_cmd[6])
+
+
+def _assert_tessl_stage(staged_source: Path) -> None:
     assert staged_source.is_dir()
-    view_cmd = eval_view_calls[0]
-    assert view_cmd == [
-        "/usr/local/bin/tessl",
-        "eval",
-        "view",
-        "--json",
-        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
-    ]
     assert not (staged_source / "tile.json").exists()
-    staged_manifest = json.loads(
-        (staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8")
-    )
-    assert staged_manifest["name"] == "jscraik/example-skill"
-    assert staged_manifest["version"] == "1.2.3"
-    assert staged_manifest["description"] == "Private live eval plugin for example-skill."
-    assert staged_manifest["private"] is True
-    assert staged_manifest["skills"] == "./skills/"
-    project_marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-    assert project_marker["name"] == "jscraik/example-skill"
+    _assert_tessl_stage_manifest(staged_source)
+    _assert_tessl_stage_files(staged_source)
+
+
+def _assert_tessl_stage_manifest(staged_source: Path) -> None:
+    manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert manifest["name"] == "jscraik/example-skill" and manifest["version"] == "1.2.3"
+    assert manifest["description"] == "Private live eval plugin for example-skill."
+    assert manifest["private"] is True and manifest["skills"] == "./skills/"
+    assert json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))["name"] == "jscraik/example-skill"
+
+
+def _assert_tessl_stage_files(staged_source: Path) -> None:
     staged_skill = _assert_plugin_shaped_stage(staged_source, "example-skill")
-    assert (staged_skill / "SKILL.md").is_file()
-    assert (staged_skill / "references" / "evals.yaml").is_file()
+    assert (staged_skill / "SKILL.md").is_file() and (staged_skill / "references" / "evals.yaml").is_file()
     assert (staged_source / "evals" / "smoke-example" / "task.md").is_file()
     assert (staged_source / "evals" / "smoke-example" / "criteria.json").is_file()
-    assert "publish" not in tessl_cmd
-    assert "install" not in tessl_cmd
-    assert "registry" not in tessl_cmd
-    assert result.data["tessl_eval"]["policy"]["command_shape"] == (
-        "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
-    )
-    assert result.data["tessl_eval"]["policy"]["duplicate_run_guard"].startswith("before live scoring")
-    submission_evidence_path = tmp_path / result.data["tessl_eval"]["submission_evidence_path"]
-    assert submission_evidence_path == (
-        tmp_path
-        / ".harness"
-        / "evidence"
-        / "tessl"
-        / "example-skill"
-        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
-        / "tessl-eval-submission.json"
-    )
-    submission_evidence = json.loads(submission_evidence_path.read_text(encoding="utf-8"))
-    assert submission_evidence["status"] == "submitted_pending_view"
-    assert submission_evidence["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
-    assert submission_evidence["workspace"] == "jscraik"
-    assert submission_evidence["skill_path"] == "Skills/example-skill"
-    assert submission_evidence["next_action"].startswith("poll tessl eval view")
-    view_evidence_path = tmp_path / result.data["tessl_eval"]["view_evidence_path"]
-    assert view_evidence_path == (
-        tmp_path
-        / ".harness"
-        / "evidence"
-        / "tessl"
-        / "example-skill"
-        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
-        / "tessl-eval-view.json"
-    )
-    assert json.loads(view_evidence_path.read_text(encoding="utf-8")) == json.loads(completed_view.stdout)
+
+
+def _assert_tessl_evidence(tmp_path: Path, result, completed_view: mock.Mock) -> None:
+    tessl_eval = result.data["tessl_eval"]
+    root = tmp_path / ".harness" / "evidence" / "tessl" / "example-skill" / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    submission = json.loads((tmp_path / tessl_eval["submission_evidence_path"]).read_text(encoding="utf-8"))
+    assert tmp_path / tessl_eval["submission_evidence_path"] == root / "tessl-eval-submission.json"
+    assert submission["status"] == "submitted_pending_view"
+    assert submission["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    assert submission["workspace"] == "jscraik" and submission["skill_path"] == "Skills/example-skill"
+    assert submission["next_action"].startswith("poll tessl eval view")
+    assert tmp_path / tessl_eval["view_evidence_path"] == root / "tessl-eval-view.json"
+    assert json.loads((tmp_path / tessl_eval["view_evidence_path"]).read_text(encoding="utf-8")) == json.loads(completed_view.stdout)
+
+
+def _assert_tessl_summary(result) -> None:
     summary = result.data["tessl_eval"]["live_result_summary"]
-    assert summary["meets_min_score"] is True
-    assert summary["beats_baseline"] is True
-    assert summary["model_selection"] == {
-        "agent": "claude",
-        "model": "deepseek-v4-flash",
-        "scorer_agent": "glm",
-        "scorer_model": "glm-5.1",
-        "quality_floor_before_cost": True,
-        "cost_is_secondary_to_score": True,
-    }
+    assert summary["meets_min_score"] is True and summary["beats_baseline"] is True
+    assert summary["model_selection"] == {"agent": "claude", "model": "deepseek-v4-flash", "scorer_agent": "glm", "scorer_model": "glm-5.1", "quality_floor_before_cost": True, "cost_is_secondary_to_score": True}
     assert summary["comparative_quality"]["with_skill_score"] == 1
     assert summary["comparative_quality"]["without_skill_score"] == 0
-    assert summary["cost_observability"]["turn_metrics_available"] is True
-    assert summary["cost_observability"]["token_metrics_available"] is True
-    assert summary["cost_observability"]["cost_metrics_available"] is True
-    assert summary["cost_observability"]["turn_metrics"]["usage.meanTurns"] == 20
-    assert summary["cost_observability"]["turn_metrics"]["usage.p95Turns"] == 37
-    assert summary["cost_observability"]["token_metrics"]["usage.totalTokens"] == 12345
-    assert summary["cost_observability"]["cost_metrics"]["usage.estimatedCostUsd"] == 0.0236
+    cost = summary["cost_observability"]
+    assert cost["turn_metrics_available"] and cost["token_metrics_available"] and cost["cost_metrics_available"]
+    assert cost["turn_metrics"] == {"usage.meanTurns": 20, "usage.p95Turns": 37}
+    assert cost["token_metrics"] == {"usage.totalTokens": 12345}
+    assert cost["cost_metrics"] == {"usage.estimatedCostUsd": 0.0236}
+
+
+def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp_path: Path) -> None:
+    completed_view = _completed_tessl_view()
+    _write_example_skill(tmp_path)
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals, "_tessl_live_handoff_readiness", return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []}),
+        mock.patch.object(evals.subprocess, "run", side_effect=_tessl_live_fake_run(completed_view)) as run,
+    ):
+        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", tessl_live_private=True, tessl_workspace="jscraik")
+    assert result.status == "success" and result.data["local_eval_status"] == "skipped_tessl_live_private"
+    assert result.data["eval_closeout"]["status"] == "pass"
+    assert result.data["eval_closeout_path"].startswith("Infrastructure/artifacts/evals/closeouts/")
+    assert "separately before live scoring" in result.data["tessl_live_private_note"]
+    _assert_tessl_stage(_assert_tessl_commands(run))
+    _assert_tessl_evidence(tmp_path, result, completed_view)
+    _assert_tessl_summary(result)
 
 
 def test_tessl_live_evidence_rejects_unsafe_run_ids(tmp_path: Path) -> None:

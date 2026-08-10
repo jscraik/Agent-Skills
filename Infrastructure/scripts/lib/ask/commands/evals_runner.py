@@ -2,6 +2,61 @@ from __future__ import annotations
 
 from .evals_closeout import *  # noqa: F403
 
+
+def _attach_eval_closeout(
+    result: CallResult,
+    repo_root: Path,
+    path: str,
+    mode: str,
+    runner: str,
+    started_at: float,
+    timeout_seconds: int | None,
+    tessl_live_private: bool = False,
+) -> None:
+    no_case_reason = _tessl_no_case_reason(result, tessl_live_private)
+    closeout = _write_eval_closeout(
+        repo_root, skill_path=path, mode=mode, runner=runner,
+        raw_output=str(result.data.get("raw_output") or ""),
+        raw_error=str(result.data.get("raw_error") or ""),
+        eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
+        blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
+        started_at=started_at, timeout_seconds=timeout_seconds, no_case_reason=no_case_reason,
+    )
+    result.data["eval_closeout"] = closeout
+    if closeout.get("path"):
+        result.data["eval_closeout_path"] = closeout["path"]
+    if not _closeout_blocks_result(closeout, result):
+        return
+    _apply_closeout_block(result, closeout, path, mode, runner)
+
+
+def _tessl_no_case_reason(result: CallResult, tessl_live_private: bool) -> str | None:
+    if tessl_live_private and isinstance(result.data.get("tessl_eval"), dict):
+        return "Tessl live-private result evidence is retained in data.tessl_eval."
+    return None
+
+
+def _closeout_blocks_result(closeout: dict[str, object], result: CallResult) -> bool:
+    return closeout.get("status") == "blocked" and result.status != "error"
+
+
+def _apply_closeout_block(
+    result: CallResult, closeout: dict[str, object], path: str, mode: str, runner: str,
+) -> None:
+    blocker_class = str(closeout.get("blocker_class") or "blocked_missing_artifact")
+    result.status = "error"
+    result.data.update(eval_status=blocker_class, blocker_class=blocker_class)
+    lifecycle_events = result.data.setdefault("lifecycle_events", [])
+    if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+        lifecycle_events.pop()
+    _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status=blocker_class, blocker_class=blocker_class)
+    result.errors.append(ErrorObject(
+        code="ERR_VALIDATION",
+        message=f"Evaluation run blocked by closeout contract: {blocker_class}.",
+        fix_suggestion=str(closeout.get("next_reproduce_command") or result.data["validation_commands"][0]),
+    ))
+
+
 def run_evals(
     repo_root: Path,
     path: str,
@@ -20,6 +75,7 @@ def run_evals(
 ) -> CallResult:
     """Runs evaluation cases for a skill."""
     result = CallResult()
+    eval_started_at = time.time()
     effective_skip_tessl = not tessl_live_private if skip_tessl is None else skip_tessl
     requested_path = path
     path = _resolve_eval_skill_path(repo_root, path)
@@ -279,6 +335,7 @@ def run_evals(
             )
         else:
             _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
+        _attach_eval_closeout(result, repo_root, path, mode, runner, eval_started_at, timeout_seconds, True)
         return result
 
     selected_cases: list[str] = []
@@ -350,7 +407,6 @@ def run_evals(
         cmd.extend(["--case", case])
 
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
-    eval_started_at = time.time()
 
     try:
         process = subprocess.run(
@@ -527,42 +583,7 @@ def run_evals(
                 lifecycle_events.pop()
             _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
 
-    closeout = _write_eval_closeout(
-        repo_root,
-        skill_path=path,
-        mode=mode,
-        runner=runner,
-        raw_output=str(result.data.get("raw_output") or ""),
-        raw_error=str(result.data.get("raw_error") or ""),
-        eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
-        blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
-        started_at=eval_started_at,
-        timeout_seconds=timeout_seconds,
-    )
-    result.data["eval_closeout"] = closeout
-    if closeout.get("path"):
-        result.data["eval_closeout_path"] = closeout["path"]
-    if closeout.get("status") == "blocked" and result.status != "error":
-        blocker_class = str(closeout.get("blocker_class") or "blocked_missing_artifact")
-        result.status = "error"
-        result.data["eval_status"] = blocker_class
-        result.data["blocker_class"] = blocker_class
-        lifecycle_events = result.data.setdefault("lifecycle_events", [])
-        if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
-            lifecycle_events.pop()
-        _finish_eval_lifecycle(
-            result,
-            path=path,
-            mode=mode,
-            runner=runner,
-            eval_status=blocker_class,
-            blocker_class=blocker_class,
-        )
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message=f"Evaluation run blocked by closeout contract: {blocker_class}.",
-            fix_suggestion=str(closeout.get("next_reproduce_command") or result.data["validation_commands"][0]),
-        ))
+    _attach_eval_closeout(result, repo_root, path, mode, runner, eval_started_at, timeout_seconds)
 
     return result
 
