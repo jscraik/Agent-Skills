@@ -13,9 +13,9 @@ def test_eval_closeout_persistence_failure_returns_classified_blocker(tmp_path: 
         None,
         "RESULT: FAIL",
         "",
-        False,
-        None,
-        None,
+        missing_suite_artifacts=False,
+        timeout_seconds=None,
+        no_case_reason=None,
     )
     closeout_path = tmp_path / "blocked" / "workflow-closeout.json"
 

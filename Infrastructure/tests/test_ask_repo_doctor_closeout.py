@@ -4,6 +4,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 # pyright: reportMissingImports=false  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 from test_ask_repo_doctor import (  # noqa: E402  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
@@ -55,7 +57,7 @@ class TestAskRepoDoctorCloseout(unittest.TestCase):
         options = RepoCloseoutOptions(changed=True)
 
         self.assertEqual(_coerce_repo_closeout_options(options, {}), options)
-        with self.assertRaisesRegex(TypeError, "RepoCloseoutOptions"):
+        with pytest.raises(TypeError, match="RepoCloseoutOptions"):
             _coerce_repo_closeout_options(object(), {})  # type: ignore[arg-type]
 
     def test_closeout_changed_runtime_evidence_exposes_shared_workspace_boundary(self) -> None:

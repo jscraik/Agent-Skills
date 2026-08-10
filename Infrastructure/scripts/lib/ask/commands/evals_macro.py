@@ -1,9 +1,20 @@
 from __future__ import annotations
 
-from ask.envelope import ErrorObject
+import json
+import re
+import shlex
+import shutil
+from pathlib import Path
 
-from .evals_live_run import *  # noqa: F403
-from .evals_shared import EvalArtifactReadError
+from ask.envelope import CallResult, ErrorObject
+
+from .evals_core import (
+    DEFAULT_MACRO_EVAL_REPORTS_GLOB,
+    _eval_lifecycle_event_types,
+    _safe_slug,
+    _utc_now_iso,
+)
+from .evals_shared import EvalArtifactReadError, _load_json_file
 
 def _repo_relative_text(repo_root: Path, text: str) -> str:
     if not text:

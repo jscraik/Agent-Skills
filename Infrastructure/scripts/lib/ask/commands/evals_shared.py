@@ -55,7 +55,9 @@ def _load_json_file(path: Path) -> dict:
         loaded = json.loads(text)
     except json.JSONDecodeError as exc:
         raise EvalArtifactReadError(f"Could not parse JSON evidence artifact: {path}") from exc
-    return loaded if isinstance(loaded, dict) else {}
+    if not isinstance(loaded, dict):
+        raise EvalArtifactReadError(f"JSON evidence artifact must be an object: {path}")
+    return loaded
 
 
 def _tessl_live_view_inputs(payload: dict[str, object]) -> tuple[dict[str, object], list[object]]:

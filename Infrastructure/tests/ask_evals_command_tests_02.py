@@ -298,6 +298,21 @@ def test_macro_eval_report_blocks_on_malformed_existing_summary(tmp_path: Path) 
     }]
 
 
+def test_macro_eval_report_blocks_on_non_object_existing_summary(tmp_path: Path) -> None:
+    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
+    report_dir.mkdir(parents=True)
+    (report_dir / "summary.json").write_text("[]", encoding="utf-8")
+
+    result = evals.macro_eval_report(tmp_path)
+
+    assert result.status == "error"
+    assert result.errors[0].code == "ERR_VALIDATION"
+    assert result.data["artifact_errors"] == [{
+        "path": "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json",
+        "message": "JSON evidence artifact must be an object: " + str(report_dir / "summary.json"),
+    }]
+
+
 def test_evals_run_default_does_not_stage_or_submit_tessl_source(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path)
     skill_root = _write_example_skill(tmp_path)
