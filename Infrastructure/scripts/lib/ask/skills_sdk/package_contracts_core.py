@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+from types import MappingProxyType
 from typing import Any
 
 from ask.skills_sdk.contracts import (
@@ -73,46 +74,46 @@ OPERATING_MODEL_FORMAT_DOCS: tuple[tuple[str, tuple[str, ...], str], ...] = (
         "references/learning-record-format.md",
     ),
 )
-SOURCE_OPERATING_MODEL_KINDS: set[str] = {
+SOURCE_OPERATING_MODEL_KINDS = frozenset({
     "source_operating_model",
     "operating_model_source",
     "operating_model_reference",
     "operating_model_format",
-}
-PACKAGE_IGNORED_FILE_NAMES: set[str] = {".DS_Store", "Thumbs.db", "desktop.ini"}
-CENTRAL_RUBRIC_PROFILES: dict[str, str] = {
+})
+PACKAGE_IGNORED_FILE_NAMES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
+CENTRAL_RUBRIC_PROFILES = MappingProxyType({
     "skills-sdk.gold-standard.v1": "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json",
-}
+})
 OPENAI_PLATFORM_COMPAT_SCHEMA_VERSION = "skills-sdk.openai-platform-compat.v1"
-SKILLFLOW_NODE_TYPES: set[str] = {
+SKILLFLOW_NODE_TYPES = frozenset({
     "command",
     "llm",
     "router",
     "validator",
     "human_gate",
     "subflow",
-}
-SKILLFLOW_EXECUTION_MODES: set[str] = {
+})
+SKILLFLOW_EXECUTION_MODES = frozenset({
     "prose",
     "deterministic_flow",
     "hybrid",
-}
-OPTIMIZATION_MODES: set[str] = {"bounded_patch", "reviewed_rewrite"}
-OPTIMIZATION_EDIT_MODES: set[str] = {"patch", "reviewed_rewrite"}
-OPTIMIZATION_EDIT_OPERATIONS: set[str] = {"add", "delete", "replace"}
-OPTIMIZATION_ACCEPTANCE_RULES: set[str] = {"strict_improvement", "min_delta"}
-OPTIMIZATION_TIE_POLICIES: set[str] = {"reject", "allow_with_review"}
-OPTIMIZATION_GUARD_FAILURE_POLICIES: set[str] = {"discard", "block"}
-OPTIMIZATION_METRIC_DIRECTIONS: set[str] = {"maximize", "minimize"}
-OPTIMIZATION_SPLIT_ROLES: dict[str, str] = {
+})
+OPTIMIZATION_MODES = frozenset({"bounded_patch", "reviewed_rewrite"})
+OPTIMIZATION_EDIT_MODES = frozenset({"patch", "reviewed_rewrite"})
+OPTIMIZATION_EDIT_OPERATIONS = frozenset({"add", "delete", "replace"})
+OPTIMIZATION_ACCEPTANCE_RULES = frozenset({"strict_improvement", "min_delta"})
+OPTIMIZATION_TIE_POLICIES = frozenset({"reject", "allow_with_review"})
+OPTIMIZATION_GUARD_FAILURE_POLICIES = frozenset({"discard", "block"})
+OPTIMIZATION_METRIC_DIRECTIONS = frozenset({"maximize", "minimize"})
+OPTIMIZATION_SPLIT_ROLES = MappingProxyType({
     "train": "proposal_generation",
     "selection": "candidate_acceptance",
     "test": "final_report_only",
-}
+})
 PACKAGE_FILE_STEM_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SKILL_DESCRIPTION_HANDLE_RE = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
-GENERIC_PACKAGE_FILE_STEMS = {"details", "misc", "notes", "scratch", "todo", "tmp"}
-GENERIC_REFERENCE_HEADING_TERMS = {
+GENERIC_PACKAGE_FILE_STEMS = frozenset({"details", "misc", "notes", "scratch", "todo", "tmp"})
+GENERIC_REFERENCE_HEADING_TERMS = frozenset({
     "details",
     "misc",
     "notes",
@@ -121,8 +122,8 @@ GENERIC_REFERENCE_HEADING_TERMS = {
     "scratch",
     "todo",
     "tmp",
-}
-DESCRIPTION_ACTION_TERMS = {
+})
+DESCRIPTION_ACTION_TERMS = frozenset({
     "audit",
     "build",
     "check",
@@ -142,8 +143,8 @@ DESCRIPTION_ACTION_TERMS = {
     "update",
     "use",
     "validate",
-}
-CONSTRUCTION_OBLIGATION_TERMS = DESCRIPTION_ACTION_TERMS | {
+})
+CONSTRUCTION_OBLIGATION_TERMS = DESCRIPTION_ACTION_TERMS | frozenset({
     "accept",
     "ask",
     "block",
@@ -165,8 +166,8 @@ CONSTRUCTION_OBLIGATION_TERMS = DESCRIPTION_ACTION_TERMS | {
     "route",
     "select",
     "stop",
-}
-CONSTRUCTION_TRIGGER_BOUNDARY_TERMS = {
+})
+CONSTRUCTION_TRIGGER_BOUNDARY_TERMS = frozenset({
     "avoid",
     "boundary",
     "delegate",
@@ -180,8 +181,8 @@ CONSTRUCTION_TRIGGER_BOUNDARY_TERMS = {
     "refuse",
     "unless",
     "when",
-}
-CONSTRUCTION_PHASE_TERMS = {
+})
+CONSTRUCTION_PHASE_TERMS = frozenset({
     "after",
     "before",
     "block",
@@ -192,15 +193,15 @@ CONSTRUCTION_PHASE_TERMS = {
     "step",
     "stop",
     "validate",
-}
-CONSTRUCTION_GENERIC_TRIGGER_TERMS = {
+})
+CONSTRUCTION_GENERIC_TRIGGER_TERMS = frozenset({
     "anything",
     "everything",
     "general",
     "misc",
     "stuff",
     "things",
-}
+})
 CONSTRUCTION_SEDIMENT_WORD_LIMIT = 55
 CONSTRUCTION_DUPLICATE_LINE_WORD_LIMIT = 8
 CANONICAL_SKILL_H2_HEADERS: tuple[str, ...] = (
@@ -670,13 +671,13 @@ def _basic_requirement_rubric_check(
     return check, blockers
 
 
-ANALYTIC_RUBRIC_FIELDS = {
+ANALYTIC_RUBRIC_FIELDS = frozenset({
     "purpose",
     "why_it_matters",
     "observable_evidence",
     "scoring",
-}
-ANALYTIC_RUBRIC_SCORES = {"5", "4", "3", "2", "1"}
+})
+ANALYTIC_RUBRIC_SCORES = frozenset({"5", "4", "3", "2", "1"})
 
 
 def _token_set(text: str) -> set[str]:
