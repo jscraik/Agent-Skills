@@ -16,14 +16,18 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
     canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []
 
+    skill_dir = (REPO_ROOT / skill_rel).resolve()
+    canonical_rel = _canonical_skill_rel(skill_rel)
+    findings: List[Finding] = []
+
+    if not skill_dir.exists():
+        return [Finding("FAIL", "SKILL_DIR_MISSING", skill_rel, "skill directory not found")]
+
     try:
         expected_scope_skill = _resolve_scope_skill_for_path(canonical_rel)
     except RuntimeError as exc:
         findings.append(Finding("FAIL", "TASK_PROFILE_SCOPE_RESOLVER", skill_rel, str(exc)))
         expected_scope_skill = canonical_rel
-
-    if not skill_dir.exists():
-        return [Finding("FAIL", "SKILL_DIR_MISSING", skill_rel, "skill directory not found")]
 
     skill_md = skill_dir / "SKILL.md"
     if not skill_md.exists():
