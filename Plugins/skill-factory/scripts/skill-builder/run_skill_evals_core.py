@@ -69,10 +69,11 @@ except ModuleNotFoundError:  # pragma: no cover
     if preferred_site_packages is not None and str(preferred_site_packages) not in sys.path:
         sys.path.insert(0, str(preferred_site_packages))
         import yaml  # type: ignore
-    elif preferred.exists() and not already_reexec and __name__ == "__main__":
+    elif preferred.exists() and not already_reexec:
         env = dict(os.environ)
         env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
-        os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+        facade = SCRIPT_DIR / "run_skill_evals.py"
+        os.execve(str(preferred), [str(preferred), str(facade), *sys.argv[1:]], env)
     else:
         sys.stderr.write(
             "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
