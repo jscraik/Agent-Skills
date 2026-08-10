@@ -318,7 +318,7 @@ def main():
     plugins_uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview uninstallation without making changes")
     plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
     plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
-    plugins_harden_parser.add_argument("--marketplace-path", default=".agents/Plugins/marketplace.json", help="Marketplace manifest path")
+    plugins_harden_parser.add_argument("--marketplace-path", default="Plugins/marketplace.json", help="Marketplace manifest path")
     plugins_harden_parser.add_argument("--skip-compat", action="store_true", help="Skip audit-compat step")
     plugins_harden_parser.add_argument("--skip-marketplace-audit", action="store_true", help="Skip audit-marketplace step")
     plugins_harden_parser.add_argument("--no-require-marketplace", action="store_true", help="Do not require a matching marketplace entry")

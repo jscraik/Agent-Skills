@@ -711,7 +711,7 @@ def _plugin_harden_validation_command(
     plugin_path: str,
     *,
     require_marketplace: bool = True,
-    marketplace_path: str = ".agents/Plugins/marketplace.json",
+    marketplace_path: str = "Plugins/marketplace.json",
     run_compat: bool = True,
     run_marketplace_audit: bool = True,
     allow_legacy_marketplace_path: bool = True,
@@ -731,7 +731,7 @@ def _plugin_harden_validation_command(
         str: A shell-quoted command string ready to be executed (e.g. via subprocess) to run the harden action with `--json --robot` appended.
     """
     parts = ["./bin/ask", "plugins", "harden", plugin_path]
-    if marketplace_path != ".agents/Plugins/marketplace.json":
+    if marketplace_path != "Plugins/marketplace.json":
         parts.extend(["--marketplace-path", marketplace_path])
     if not run_compat:
         parts.append("--skip-compat")
@@ -1615,7 +1615,7 @@ def harden_plugin(
     plugin_path: str,
     *,
     require_marketplace: bool = True,
-    marketplace_path: str = ".agents/Plugins/marketplace.json",
+    marketplace_path: str = "Plugins/marketplace.json",
     run_compat: bool = True,
     run_marketplace_audit: bool = True,
     allow_legacy_marketplace_path: bool = True,
