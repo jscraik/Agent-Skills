@@ -209,6 +209,7 @@ def skills_handles(
                 fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills list --json --robot.",
             )
         )
+        return result
 
     candidates = build_sdk_skill_record_candidates(repo_root_path=repo_root, visibility="advanced")
     records = build_sdk_skill_records(repo_root_path=repo_root, visibility="advanced")
