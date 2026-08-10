@@ -20,6 +20,7 @@ EVALS_CORE_EXPORTS = tuple(
     TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS
     TESSL_PROJECT_LINK_TIMEOUT_SECONDS EVAL_CLOSEOUT_SCHEMA_VERSION EVAL_CLOSEOUT_REQUIRED_FIELDS
     _pyyaml_eval_python_command _eval_blocker_taxonomy _eval_lifecycle_event_types
+    EVAL_BLOCKER_TAXONOMY EVAL_LIFECYCLE_EVENT_TYPES
     _qwen_oss_local_batch_blocker _safe_slug _frontmatter_scalar _read_skill_frontmatter
     _skill_tessl_tile_version _canonical_skill_identifier _utc_now_iso _as_text
     _parse_json_value_from_text _parse_json_object_from_text _extract_tessl_eval_run_id

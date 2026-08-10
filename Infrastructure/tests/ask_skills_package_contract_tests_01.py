@@ -42,6 +42,16 @@ def _assert_sdk_package_contract(case, sdk_contract: dict[str, object]) -> None:
 
 
 class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
+    def test_source_operating_model_parser_resets_incomplete_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_context = Path(temp_dir) / 'source-context.yaml'
+            source_context.write_text(
+                'references:\n  - path: references/incomplete.md\n'
+                '  - kind: source_operating_model\n', encoding='utf-8'
+            )
+            paths = package_contracts._source_operating_model_paths_from_text(source_context)
+        self.assertEqual(paths, [])
+
     def test_package_contract_logic_lives_in_skills_sdk_service(self) -> None:
         command_source = (REPO_ROOT / 'Infrastructure/scripts/lib/ask/commands/skills_impl.py').read_text(encoding='utf-8')
         service_source = (REPO_ROOT / 'Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py').read_text(encoding='utf-8')

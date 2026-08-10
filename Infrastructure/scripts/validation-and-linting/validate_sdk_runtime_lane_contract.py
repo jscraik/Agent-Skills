@@ -14,6 +14,7 @@ CONTRACT_PATH = ROOT / "Docs/agents/25-sdk-runtime-lane-contract.md"
 README_PATH = ROOT / "Docs/agents/README.md"
 VALIDATION_PATH = ROOT / "Docs/agents/04-validation.md"
 EVALS_PATH = ROOT / "Infrastructure/scripts/lib/ask/commands/evals.py"
+LIVE_EVALS_PATH = ROOT / "Infrastructure/scripts/lib/ask/commands/evals_live_run.py"
 
 REQUIRED_LANES = {
     "SDK mechanical validation": [
@@ -268,21 +269,15 @@ def _validate_index_links() -> list[Finding]:
 
 def _validate_external_effect_routes() -> list[Finding]:
     findings: list[Finding] = []
-    source = _read(EVALS_PATH)
-    start = source.find("def _run_tessl_live_private_eval(")
-    if start < 0:
-        live_body = ""
-    else:
-        end = source.find("\ndef ", start + 1)
-        live_body = source[start:] if end < 0 else source[start:end]
-    if not live_body:
-        findings.append(Finding("missing_live_tessl_route", "Live Tessl evaluator source is missing or unreadable.", _relative(EVALS_PATH)))
-    elif "_ensure_tessl_project_link(" in live_body:
-        findings.append(Finding("live_eval_mutates_project", "Live Tessl evaluator must consume a receipt, not repair, relink, update, or create a Tessl project.", _relative(EVALS_PATH)))
-    elif "_validate_tessl_project_link_receipt(" not in live_body:
-        findings.append(Finding("missing_project_link_receipt_gate", "Live Tessl evaluator must require a candidate-bound project-link receipt.", _relative(EVALS_PATH)))
-    if "PYTEST_CURRENT_TEST" not in live_body or "unittest.mock" not in live_body or "ASK_ALLOW_TEST_TESSL_LIVE" in live_body:
-        findings.append(Finding("missing_hermetic_test_firewall", "Live Tessl evaluator must block pytest provider effects unless subprocess is an in-process mock, without a test-only opt-in escape hatch.", _relative(EVALS_PATH)))
+    source = _read(LIVE_EVALS_PATH)
+    if "def _run_tessl_live_private_eval(" not in source:
+        findings.append(Finding("missing_live_tessl_route", "Live Tessl evaluator source is missing or unreadable.", _relative(LIVE_EVALS_PATH)))
+    elif "_ensure_tessl_project_link(" in source:
+        findings.append(Finding("live_eval_mutates_project", "Live Tessl evaluator must consume a receipt, not repair, relink, update, or create a Tessl project.", _relative(LIVE_EVALS_PATH)))
+    elif "_validate_tessl_project_link_receipt(" not in source:
+        findings.append(Finding("missing_project_link_receipt_gate", "Live Tessl evaluator must require a candidate-bound project-link receipt.", _relative(LIVE_EVALS_PATH)))
+    if "PYTEST_CURRENT_TEST" not in source or "unittest.mock" not in source or "ASK_ALLOW_TEST_TESSL_LIVE" in source:
+        findings.append(Finding("missing_hermetic_test_firewall", "Live Tessl evaluator must block pytest provider effects unless subprocess is an in-process mock, without a test-only opt-in escape hatch.", _relative(LIVE_EVALS_PATH)))
     return findings
 
 

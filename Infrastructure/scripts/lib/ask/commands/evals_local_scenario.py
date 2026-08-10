@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import tempfile
 
 from .evals_live_preflight import *  # noqa: F403
 
@@ -31,7 +32,10 @@ def run_tessl_local_proof(repo_root: Path, request: TesslLocalProofRequest) -> d
     proof_path = _tessl_proof_path(request.path)
     try:
         normalized_workspace = _validate_tessl_workspace(request.workspace)
-        staged_source, copied_files = _stage_tessl_live_private_source(repo_root, proof_path, normalized_workspace)
+        staged_source, copied_files = _stage_tessl_live_private_source(
+            repo_root, proof_path, normalized_workspace,
+            temp_root=Path(tempfile.gettempdir()) / "ask-tessl-local-proof",
+        )
     except (OSError, ValueError) as e:
         return _tessl_local_proof_staging_blocker(request, proof_path, e)
 
@@ -125,7 +129,7 @@ def _tessl_local_proof_receipt(
 
 def _tessl_local_proof_evidence_retention() -> str:
     return (
-        f"staged package is left under {tempfile.gettempdir()}/ask-tessl-evals-live and "
+        f"staged package is left under {tempfile.gettempdir()}/ask-tessl-local-proof and "
         f"install evidence under {tempfile.gettempdir()}/ask-tessl-local-install for inspection"
     )
 
@@ -305,262 +309,151 @@ def _tessl_scenario_tool_paths(tool_project: Path) -> tuple[Path, Path]:
     )
 
 
-def prepare_tessl_scenario_generation(
-    repo_root: Path, request: TesslScenarioGenerationRequest
-) -> CallResult:
-    """Prepare a temp Tessl scenario-generation workspace for a skill.
+def _coerce_tessl_scenario_generation_request(
+    request: TesslScenarioGenerationRequest | None,
+    *,
+    path: str | None,
+    workspace: str | None,
+    dry_run: bool | None,
+) -> TesslScenarioGenerationRequest:
+    if request is not None:
+        if path is not None or workspace is not None or dry_run is not None:
+            raise TypeError("scenario generation received both a request and legacy options")
+        return request
+    if path is None or dry_run is None:
+        raise TypeError("scenario generation requires path and dry_run when no request is supplied")
+    return TesslScenarioGenerationRequest(path=path, workspace=workspace, dry_run=dry_run)
 
-    Staging-only is the safe default. Callers must explicitly opt into the
-    Tessl tile install because that command can alter the staged project state.
-    """
-    policy = _tessl_scenario_generation_policy(request.workspace)
-    tool_spec = f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}"
-    command_display = f"tessl install {tool_spec} --agent codex --yes"
-    if not request.dry_run and os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny":
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                "command": command_display,
-                "source_path": request.path,
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": "Tessl project setup is blocked by the hermetic test effect policy; use --dry-run in test lanes.",
-                "blocker_class": "blocked_validation",
-                "policy": policy,
-            },
-            errors=[ErrorObject(code="ERR_VALIDATION", message="Tessl project setup is blocked by the hermetic test effect policy.")],
-        )
+
+@dataclass(frozen=True)
+class _TesslScenarioStaging:
+    workspace: str
+    staged_root: Path
+    target_tile: Path
+    tool_project: Path
+    target_files: list[str]
+    tool_files: list[str]
+    live_source: Path | None
+    live_files: list[str]
+
+
+def _scenario_generation_error(
+    command: str, source_path: str, policy: dict[str, object], blocker: str,
+    blocker_class: str, *, raw_error: str = "", raw_output: str = "", common: dict[str, object] | None = None,
+) -> CallResult:
+    data = {"status": "blocked", "source_path": source_path, "policy": policy, **(common or {})}
+    data.update(command=command, raw_output=raw_output, raw_error=raw_error, blocker=blocker, blocker_class=blocker_class)
+    code = "ERR_RUNTIME" if blocker_class == "blocked_runtime" else "ERR_VALIDATION"
+    return CallResult(status="error", data=data, errors=[ErrorObject(code=code, message=blocker)])
+
+
+def _stage_tessl_scenario_generation(
+    repo_root: Path, request: TesslScenarioGenerationRequest, command: str, policy: dict[str, object],
+) -> _TesslScenarioStaging | CallResult:
     try:
-        normalized_workspace = _validate_tessl_workspace(request.workspace)
+        workspace = _validate_tessl_workspace(request.workspace)
         staged_root = _stable_tessl_scenario_generation_parent(request.path)
         staged_root.mkdir(parents=True, exist_ok=True)
-        target_tile = staged_root / "target-tile"
+        target_tile, target_files = _stage_tessl_scenario_target_tile(repo_root, request.path, workspace, staged_root / "target-tile")
         tool_project = staged_root / "tool-project"
-        target_tile, target_files = _stage_tessl_scenario_target_tile(
-            repo_root,
-            request.path,
-            normalized_workspace,
-            target_tile,
-        )
         tool_files = _write_tessl_scenario_tool_project(tool_project)
-        live_staged_source: Path | None = None
-        live_staged_files: list[str] = []
-        if not request.dry_run:
-            # Tessl binds a project to the concrete directory path. The live
-            # evaluator later stages the private plugin under
-            # /tmp/ask-tessl-evals-live, so setup must link that exact stable path
-            # rather than the scenario-generation target tile.
-            live_staged_source, live_staged_files = _stage_tessl_live_private_source(
-                repo_root,
-                request.path,
-                normalized_workspace,
-            )
-    except (OSError, ValueError) as e:
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                "command": command_display,
-                "source_path": request.path,
-                "raw_output": "",
-                "raw_error": str(e),
-                "blocker": f"Failed to prepare Tessl scenario-generation staging: {e}",
-                "blocker_class": "blocked_validation",
-                "policy": policy,
-            },
-            errors=[ErrorObject(code="ERR_VALIDATION", message=str(e))],
-        )
+        live_source, live_files = (None, []) if request.dry_run else _stage_tessl_live_private_source(repo_root, request.path, workspace)
+        return _TesslScenarioStaging(workspace, staged_root, target_tile, tool_project, target_files, tool_files, live_source, live_files)
+    except (OSError, ValueError) as exc:
+        return _scenario_generation_error(command, request.path, policy, f"Failed to prepare Tessl scenario-generation staging: {exc}", "blocked_validation", raw_error=str(exc))
 
-    common = {
-        "source_path": request.path,
-        "staged_root": str(staged_root),
-        "target_tile": str(target_tile),
-        "tool_project": str(tool_project),
-        "target_plugin_manifest": str(target_tile / ".tessl-plugin" / "plugin.json"),
-        "target_tessl_project_marker": str(target_tile / "tessl.json"),
-        "target_staged_files": target_files,
-        "tool_project_files": tool_files,
-        "live_staged_source": str(live_staged_source) if live_staged_source else None,
-        "live_staged_files": live_staged_files,
-        "workspace": normalized_workspace,
-        "project_identity": _tessl_project_identity((repo_root / request.path).resolve(), normalized_workspace),
-        "dry_run": request.dry_run,
-        "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
-        "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
+
+def _scenario_generation_common(
+    repo_root: Path, request: TesslScenarioGenerationRequest, staging: _TesslScenarioStaging,
+) -> dict[str, object]:
+    return {
+        "source_path": request.path, "staged_root": str(staging.staged_root), "target_tile": str(staging.target_tile),
+        "tool_project": str(staging.tool_project), "target_plugin_manifest": str(staging.target_tile / ".tessl-plugin" / "plugin.json"),
+        "target_tessl_project_marker": str(staging.target_tile / "tessl.json"), "target_staged_files": staging.target_files,
+        "tool_project_files": staging.tool_files, "live_staged_source": str(staging.live_source) if staging.live_source else None,
+        "live_staged_files": staging.live_files, "workspace": staging.workspace,
+        "project_identity": _tessl_project_identity((repo_root / request.path).resolve(), staging.workspace), "dry_run": request.dry_run,
+        "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE, "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
         "staging_policy": "stable_tmp_scenario_generation_evidence",
         "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-scenario-generation for inspection",
-        "policy": _tessl_scenario_generation_policy(normalized_workspace),
+        "policy": _tessl_scenario_generation_policy(staging.workspace),
     }
 
-    if request.dry_run:
-        brief_path = _write_tessl_scenario_generation_brief(
-            staged_root,
-            source_path=request.path,
-            workspace=normalized_workspace,
-            target_tile=target_tile,
-            tool_project=tool_project,
-        )
-        return CallResult(
-            status="success",
-            data={
-                "status": "pass",
-                **common,
-                "command": command_display,
-                "scenario_generation_brief": str(brief_path),
-                "raw_output": "",
-                "raw_error": "",
-                "exit_code": 0,
-                "blocker": None,
-                "blocker_class": None,
-            },
-        )
 
-    tessl_path = shutil.which("tessl")
-    if not tessl_path:
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                **common,
-                "command": command_display,
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": "Installed native tessl CLI was not found on PATH.",
-                "blocker_class": "blocked_runtime",
-            },
-            errors=[ErrorObject(code="ERR_RUNTIME", message="Installed native tessl CLI was not found on PATH.")],
-        )
+def _scenario_generation_dry_run(
+    request: TesslScenarioGenerationRequest, staging: _TesslScenarioStaging, common: dict[str, object], command: str,
+) -> CallResult:
+    brief = _write_tessl_scenario_generation_brief(staging.staged_root, source_path=request.path, workspace=staging.workspace, target_tile=staging.target_tile, tool_project=staging.tool_project)
+    return CallResult(status="success", data={"status": "pass", **common, "command": command, "scenario_generation_brief": str(brief), "raw_output": "", "raw_error": "", "exit_code": 0, "blocker": None, "blocker_class": None})
 
-    project_link = _ensure_tessl_project_link(
-        tessl_path,
-        live_staged_source or target_tile,
-        common["project_identity"],
-    )
-    common["project_link"] = project_link
-    if project_link.get("status") == "blocked":
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                **common,
-                "command": command_display,
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": project_link.get("blocker"),
-                "blocker_class": project_link.get("blocker_class"),
-            },
-            errors=[ErrorObject(
-                code="ERR_RUNTIME" if project_link.get("blocker_class") == "blocked_runtime" else "ERR_VALIDATION",
-                message=str(project_link.get("blocker") or "Tessl project link check failed."),
-            )],
-        )
 
-    project_link_receipt = _write_tessl_project_link_receipt(
-        repo_root,
-        request.path,
-        workspace=normalized_workspace,
-        identity=common["project_identity"],
-        project_link=project_link,
-    )
-    if project_link_receipt is None:
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                **common,
-                "command": command_display,
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": "Tessl project link completed but a current project-link receipt could not be written.",
-                "blocker_class": "blocked_validation",
-            },
-            errors=[ErrorObject(code="ERR_VALIDATION", message="Tessl project link receipt could not be written.")],
-        )
-    common["project_link_receipt"] = project_link_receipt
+def _link_tessl_scenario_project(
+    repo_root: Path, request: TesslScenarioGenerationRequest, staging: _TesslScenarioStaging,
+    common: dict[str, object], command: str, tessl_path: str,
+) -> CallResult | None:
+    link = _ensure_tessl_project_link(tessl_path, staging.live_source or staging.target_tile, common["project_identity"])
+    common["project_link"] = link
+    if link.get("status") == "blocked":
+        return _scenario_generation_error(command, request.path, common["policy"], str(link.get("blocker") or "Tessl project link check failed."), str(link.get("blocker_class") or "blocked_validation"), common=common)
+    receipt = _write_tessl_project_link_receipt(repo_root, request.path, workspace=staging.workspace, identity=common["project_identity"], project_link=link)
+    if receipt is None:
+        return _scenario_generation_error(command, request.path, common["policy"], "Tessl project link completed but a current project-link receipt could not be written.", "blocked_validation", common=common)
+    common["project_link_receipt"] = receipt
+    return None
 
-    cmd = [tessl_path, "install", tool_spec, "--agent", "codex", "--yes"]
-    tessl_env = dict(os.environ)
-    tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+
+def _install_tessl_scenario_tool(
+    tessl_path: str, tool_project: Path, tool_spec: str, request: TesslScenarioGenerationRequest,
+    common: dict[str, object], command: str,
+) -> subprocess.CompletedProcess | CallResult:
     try:
-        process = subprocess.run(
-            cmd,
-            cwd=str(tool_project),
-            capture_output=True,
-            text=True,
-            timeout=600,
-            env=tessl_env,
-        )
-    except subprocess.TimeoutExpired as e:
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                **common,
-                "command": command_display,
-                "raw_output": _as_text(e.stdout),
-                "raw_error": _as_text(e.stderr),
-                "blocker": "Tessl scenario tool install timed out after 600 seconds.",
-                "blocker_class": "blocked_runtime",
-            },
-            errors=[ErrorObject(code="ERR_RUNTIME", message="Tessl scenario tool install timed out after 600 seconds.")],
-        )
-    except OSError as e:
-        return CallResult(
-            status="error",
-            data={
-                "status": "blocked",
-                **common,
-                "command": command_display,
-                "raw_output": "",
-                "raw_error": str(e),
-                "blocker": f"Failed to run Tessl scenario tool install: {e}",
-                "blocker_class": "blocked_runtime",
-            },
-            errors=[ErrorObject(code="ERR_RUNTIME", message=f"Failed to run Tessl scenario tool install: {e}")],
-        )
+        return subprocess.run([tessl_path, "install", tool_spec, "--agent", "codex", "--yes"], cwd=str(tool_project), capture_output=True, text=True, timeout=600, env={**os.environ, "TESSL_AUTO_UPDATE_INTERVAL_MINUTES": "0"})
+    except subprocess.TimeoutExpired as exc:
+        return _scenario_generation_error(command, request.path, common["policy"], "Tessl scenario tool install timed out after 600 seconds.", "blocked_runtime", raw_output=_as_text(exc.stdout), raw_error=_as_text(exc.stderr), common=common)
+    except OSError as exc:
+        return _scenario_generation_error(command, request.path, common["policy"], f"Failed to run Tessl scenario tool install: {exc}", "blocked_runtime", raw_error=str(exc), common=common)
 
-    raw_output = process.stdout
-    raw_error = process.stderr
-    combined = f"{raw_output}\n{raw_error}".lower()
-    if process.returncode != 0 and "authenticate with tessl" in combined:
-        status = "blocked"
-        blocker = "Tessl CLI is installed locally, but authentication is required before scenario tool install can run."
-        blocker_class = "blocked_auth"
-    else:
-        status = "pass" if process.returncode == 0 else "fail"
-        blocker = None
-        blocker_class = None
 
-    scenario_skill, scenario_reference = _tessl_scenario_tool_paths(tool_project)
-    brief_path = _write_tessl_scenario_generation_brief(
-        staged_root,
-        source_path=request.path,
-        workspace=normalized_workspace,
-        target_tile=target_tile,
-        tool_project=tool_project,
-    )
-    data = {
-        "status": status,
-        **common,
-        "command": command_display,
-        "exit_code": process.returncode,
-        "raw_output": raw_output,
-        "raw_error": raw_error,
-        "blocker": blocker,
-        "blocker_class": blocker_class,
-        "scenario_skill": str(scenario_skill) if scenario_skill.exists() else None,
-        "scenario_reference": str(scenario_reference) if scenario_reference.exists() else None,
-        "scenario_generation_brief": str(brief_path),
-        "generated_output": str(target_tile / "evals"),
-        "prepared_only": True,
-    }
+def _scenario_generation_install_result(
+    process: subprocess.CompletedProcess, request: TesslScenarioGenerationRequest, staging: _TesslScenarioStaging,
+    common: dict[str, object], command: str,
+) -> CallResult:
+    raw_output, raw_error = process.stdout, process.stderr
+    authenticated = process.returncode != 0 and "authenticate with tessl" in f"{raw_output}\n{raw_error}".lower()
+    status, blocker, blocker_class = ("blocked", "Tessl CLI is installed locally, but authentication is required before scenario tool install can run.", "blocked_auth") if authenticated else ("pass" if process.returncode == 0 else "fail", None, None)
+    scenario_skill, scenario_reference = _tessl_scenario_tool_paths(staging.tool_project)
+    brief = _write_tessl_scenario_generation_brief(staging.staged_root, source_path=request.path, workspace=staging.workspace, target_tile=staging.target_tile, tool_project=staging.tool_project)
+    data = {"status": status, **common, "command": command, "exit_code": process.returncode, "raw_output": raw_output, "raw_error": raw_error, "blocker": blocker, "blocker_class": blocker_class, "scenario_skill": str(scenario_skill) if scenario_skill.exists() else None, "scenario_reference": str(scenario_reference) if scenario_reference.exists() else None, "scenario_generation_brief": str(brief), "generated_output": str(staging.target_tile / "evals"), "prepared_only": True}
     if status == "pass":
         return CallResult(status="success", data=data)
-    return CallResult(
-        status="error",
-        data=data,
-        errors=[ErrorObject(code="ERR_RUNTIME" if blocker_class == "blocked_runtime" else "ERR_VALIDATION", message=blocker or "Tessl scenario tool install failed.")],
-    )
+    return CallResult(status="error", data=data, errors=[ErrorObject(code="ERR_VALIDATION", message=blocker or "Tessl scenario tool install failed.")])
+
+
+def prepare_tessl_scenario_generation(
+    repo_root: Path, request: TesslScenarioGenerationRequest | None = None, *, path: str | None = None,
+    workspace: str | None = None, dry_run: bool | None = None,
+) -> CallResult:
+    """Prepare a disposable Tessl scenario-generation workspace for one skill."""
+    request = _coerce_tessl_scenario_generation_request(request, path=path, workspace=workspace, dry_run=dry_run)
+    policy = _tessl_scenario_generation_policy(request.workspace)
+    tool_spec = f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}"
+    command = f"tessl install {tool_spec} --agent codex --yes"
+    if not request.dry_run and os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny":
+        return _scenario_generation_error(command, request.path, policy, "Tessl project setup is blocked by the hermetic test effect policy; use --dry-run in test lanes.", "blocked_validation")
+    staging = _stage_tessl_scenario_generation(repo_root, request, command, policy)
+    if isinstance(staging, CallResult):
+        return staging
+    common = _scenario_generation_common(repo_root, request, staging)
+    if request.dry_run:
+        return _scenario_generation_dry_run(request, staging, common, command)
+    tessl_path = shutil.which("tessl")
+    if not tessl_path:
+        return _scenario_generation_error(command, request.path, common["policy"], "Installed native tessl CLI was not found on PATH.", "blocked_runtime", common=common)
+    if linked := _link_tessl_scenario_project(repo_root, request, staging, common, command, tessl_path):
+        return linked
+    process = _install_tessl_scenario_tool(tessl_path, staging.tool_project, tool_spec, request, common, command)
+    if isinstance(process, CallResult):
+        return process
+    return _scenario_generation_install_result(process, request, staging, common, command)
 
 __all__ = [name for name in globals() if not name.startswith("__")]

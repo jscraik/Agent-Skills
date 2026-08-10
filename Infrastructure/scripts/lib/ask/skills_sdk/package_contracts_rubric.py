@@ -364,8 +364,9 @@ def _source_operating_model_paths_from_text(path: Path) -> list[str]:
         stripped = line.strip()
         item_start = stripped.startswith("- ")
         entry = stripped[2:] if item_start else stripped
-        if item_start and current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
-            paths.append(current_path)
+        if item_start:
+            if current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
+                paths.append(current_path)
             current_path = None
             current_kind = None
         if entry.startswith("path:"):

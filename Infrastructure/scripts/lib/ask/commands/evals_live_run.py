@@ -258,7 +258,13 @@ def _tessl_live_assess_view(returncode: int, payload: dict | None, deadline: flo
     try:
         summary = _tessl_live_view_summary(payload, deadline, result["view_status"])
     except ValueError as exc:
-        result.update(status="blocked", blocker=f"Failed to parse Tessl private plugin eval score summary: {exc}", blocker_class=result["blocker_class"] or "blocked_validation")
+        detail = str(exc)
+        quota_block = "EVAL_QUOTA_EXCEEDED" in detail
+        result.update(
+            status="blocked",
+            blocker=detail if quota_block else f"Failed to parse Tessl private plugin eval score summary: {detail}",
+            blocker_class="blocked_environment" if quota_block else result["blocker_class"] or "blocked_validation",
+        )
         return result
     result["summary"] = summary
     if not summary["meets_min_score"] or not summary["beats_baseline"]:

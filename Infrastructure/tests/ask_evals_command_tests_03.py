@@ -318,7 +318,7 @@ def _assert_tessl_local_preview_metadata(receipt: dict[str, object]) -> None:
     assert receipt["execute"] is False
     assert receipt["policy"]["no_publish"] is True
     assert receipt["policy"]["install_scope"] == "temporary project workspace under /tmp/ask-tessl-local-install"
-    assert "ask-tessl-evals-live" in receipt["evidence_retention"]
+    assert "ask-tessl-local-proof" in receipt["evidence_retention"]
     assert "ask-tessl-local-install" in receipt["evidence_retention"]
     assert receipt["staged_file_count"] > 0
 
@@ -353,6 +353,8 @@ def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands
 
     _assert_tessl_local_preview_metadata(receipt)
     _assert_tessl_local_preview_commands(receipt)
+    assert "/ask-tessl-local-proof/" in receipt["staged_source"]
+    assert "/ask-tessl-evals-live/" not in receipt["staged_source"]
     run.assert_not_called()
 
 

@@ -704,7 +704,7 @@ def skills_sdk_plugin_review(repo_root: Path, request: SkillsSdkPluginReviewRequ
         "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "review"),
         "mutation_performed": False,
         "validation_commands": [command],
-        "agent_summary": f"SDK plugin review executed bounded {kind} checks.",
+        "agent_summary": f"SDK plugin review executed bounded {request.kind} checks.",
     }
     result = _sdk_plugin_result(command="sdk plugin review", payload_key="skills_sdk_plugin_review", payload=payload)
     result.status = delegated.status

@@ -10,6 +10,7 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
+from ask.commands import skills_impl_core  # noqa: E402
 from ask.commands.skills_impl import (  # noqa: E402
     _safe_tessl_staging_path,
     _subprocess_env_with_uv_cache,
@@ -24,6 +25,21 @@ from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E4
 
 def _completed(args, stdout, *, returncode=0, stderr=""):
     return subprocess.CompletedProcess(args=args, returncode=returncode, stdout=stdout, stderr=stderr)
+
+
+def test_validation_timeout_retains_decoded_output() -> None:
+    timeout = subprocess.TimeoutExpired(
+        cmd=["fixture-check"], timeout=1, output=b"partial\xff", stderr=b"slow\xff"
+    )
+
+    with patch.object(skills_impl_core.subprocess, "run", side_effect=timeout):
+        result = skills_impl_core._run_validation_command(
+            repo_root, ["fixture-check"], "fixture", "Fixture validation failed.", timeout=1
+        )
+
+    payload = json.loads(result.to_json())
+    assert payload["data"]["fixture"]["stdout"] == "partial\ufffd"
+    assert payload["data"]["fixture"]["stderr"] == "slow\ufffd\nvalidation command timed out after 1 seconds"
 
 
 def _write_skill_fixture(repo_root, skill_dir):

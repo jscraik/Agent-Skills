@@ -452,6 +452,8 @@ def _eval_closeout_payload(
     cases: list[dict[str, object]], status: str, blocker_class: str | None,
     raw_output: str, raw_error: str, missing_suite_artifacts: bool,
     timeout_seconds: int | None, no_case_reason: str | None, artifact_read_error: str | None = None,
+    *, tessl_live_private: bool = False, tessl_workspace: str | None = None,
+    tessl_live_dry_run: bool = False,
 ) -> dict[str, object]:
     return {
         "schema_version": EVAL_CLOSEOUT_SCHEMA_VERSION, "status": status, "skill_path": skill_path,
@@ -464,8 +466,9 @@ def _eval_closeout_payload(
         "missing_suite_artifacts": missing_suite_artifacts, "case_evidence_present": bool(cases),
         "no_case_reason": no_case_reason, "artifact_read_error": artifact_read_error,
         "next_reproduce_command": _evals_run_validation_command(
-            skill_path, mode=mode, runner=runner, dashboard=True, tessl_live_private=False,
-            tessl_workspace=None, tessl_live_dry_run=False, timeout_seconds=timeout_seconds,
+            skill_path, mode=mode, runner=runner, dashboard=True,
+            tessl_live_private=tessl_live_private, tessl_workspace=tessl_workspace,
+            tessl_live_dry_run=tessl_live_dry_run, timeout_seconds=timeout_seconds,
         ),
     }
 
@@ -512,6 +515,8 @@ def _write_eval_closeout(
     started_at: float,
     timeout_seconds: int | None = None,
     no_case_reason: str | None = None,
+    tessl_live_private: bool = False,
+    tessl_workspace: str | None = None, tessl_live_dry_run: bool = False,
 ) -> dict[str, object]:
     report_dir = _eval_report_dir(repo_root, skill_path=skill_path, raw_output=raw_output, started_at=started_at)
     artifact_read_error = None
@@ -530,7 +535,8 @@ def _write_eval_closeout(
     closeout = _eval_closeout_payload(
         repo_root, skill_path, mode, runner, report_dir, cases, status, closeout_blocker,
         raw_output, raw_error, missing_suite_artifacts, timeout_seconds, no_case_reason,
-        artifact_read_error,
+        artifact_read_error, tessl_live_private=tessl_live_private,
+        tessl_workspace=tessl_workspace, tessl_live_dry_run=tessl_live_dry_run,
     )
     closeout_path = _eval_closeout_path(
         repo_root, report_dir, skill_path, mode, runner, raw_output, raw_error, no_case_reason,

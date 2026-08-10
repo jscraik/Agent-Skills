@@ -684,6 +684,54 @@ def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     return audit_target, audit_target.as_posix()
 
 
+def _timeout_stream_text(value: str | bytes | None) -> str:
+    """Return subprocess timeout output as JSON-serializable text."""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value or ""
+
+
+def _timeout_stderr(stderr: str, timeout_message: str) -> str:
+    """Append timeout context without discarding captured stderr."""
+    return f"{stderr.rstrip()}\n{timeout_message}" if stderr else timeout_message
+
+
+def _validation_timeout_result(
+    command: list[str], data_key: str, failure_message: str, fix_suggestion: Optional[str],
+    timeout: float, exc: subprocess.TimeoutExpired,
+) -> CallResult:
+    """Return a JSON-safe validation timeout failure result."""
+    timeout_message = f"validation command timed out after {timeout} seconds"
+    result = CallResult(status="error")
+    result.data[data_key] = {
+        "command": command, "exit_code": None,
+        "stdout": _timeout_stream_text(exc.stdout),
+        "stderr": _timeout_stderr(_timeout_stream_text(exc.stderr), timeout_message),
+    }
+    result.errors.append(ErrorObject(
+        code="ERR_TIMEOUT", message=f"{failure_message} (timed out after {timeout} seconds)",
+        fix_suggestion=fix_suggestion,
+    ))
+    return result
+
+
+def _validation_process_result(
+    command: list[str], data_key: str, failure_message: str, fix_suggestion: Optional[str],
+    proc: subprocess.CompletedProcess[str],
+) -> CallResult:
+    """Return a validation result from a completed subprocess."""
+    result = CallResult(status="success" if proc.returncode == 0 else "error")
+    result.data[data_key] = {
+        "command": command, "exit_code": proc.returncode,
+        "stdout": proc.stdout, "stderr": proc.stderr,
+    }
+    if proc.returncode != 0:
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION", message=failure_message, fix_suggestion=fix_suggestion,
+        ))
+    return result
+
+
 def _run_validation_command(
     repo_root: Path,
     command: list[str],
@@ -693,7 +741,6 @@ def _run_validation_command(
     timeout: float = 600.0,
 ) -> CallResult:
     """Run a validation subprocess and return a CallResult with captured output."""
-    result = CallResult()
     try:
         proc = subprocess.run(
             command,
@@ -705,40 +752,11 @@ def _run_validation_command(
             env=_subprocess_env_with_uv_cache(),
         )
     except subprocess.TimeoutExpired as exc:
-        result.status = "error"
-        result.data[data_key] = {
-            "command": command,
-            "exit_code": None,
-            "stdout": exc.stdout or "",
-            "stderr": f"validation command timed out after {timeout} seconds",
-        }
-        result.errors.append(
-            ErrorObject(
-                code="ERR_TIMEOUT",
-                message=f"{failure_message} (timed out after {timeout} seconds)",
-                fix_suggestion=fix_suggestion,
-            )
+        return _validation_timeout_result(
+            command, data_key, failure_message, fix_suggestion, timeout, exc
         )
-        return result
-
-    result.data[data_key] = {
-        "command": command,
-        "exit_code": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr,
-    }
-    if proc.returncode == 0:
-        result.status = "success"
-        return result
-
-    result.status = "error"
-    result.errors.append(
-        ErrorObject(
-            code="ERR_VALIDATION",
-            message=failure_message,
-            fix_suggestion=fix_suggestion,
-        )
+    return _validation_process_result(
+        command, data_key, failure_message, fix_suggestion, proc
     )
-    return result
 
 __all__ = [name for name in globals() if not name.startswith("__")]

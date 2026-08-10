@@ -56,63 +56,53 @@ def test_eval_closeout_records_malformed_summary_as_validation_blocker(tmp_path:
     assert closeout["artifact_read_error"] == f"Could not parse JSON evidence artifact: {summary_path}"
 
 
-def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    completed_eval = mock.Mock(
-        returncode=0,
-        stdout='[{"evalRunId":"019ecadc-9870-7323-8098-58145a211f26","scenariosCount":32}]',
-        stderr="",
+def test_eval_closeout_preserves_live_tessl_reproduction_flags(tmp_path: Path) -> None:
+    closeout = evals._eval_closeout_payload(
+        tmp_path, "Skills/example-skill", "smoke", "codex", None, [], "pass", None,
+        "", "", missing_suite_artifacts=False, timeout_seconds=42,
+        no_case_reason="Tessl result retained separately.", tessl_live_private=True,
+        tessl_workspace="jscraik", tessl_live_dry_run=True,
     )
-    failed_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "status": "failed",
-                    "failureReason": {
-                        "code": "EVAL_QUOTA_EXCEEDED",
-                        "message": "Your organisation has reached its daily eval limit.",
-                    },
-                    "scenarios": [{"solutions": []}],
-                }
-            }
-        }),
-        stderr="",
-    )
-    _write_example_skill(tmp_path)
 
+    assert closeout["next_reproduce_command"] == (
+        "./bin/ask evals run Skills/example-skill --mode smoke --runner codex "
+        "--tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run "
+        "--timeout-seconds 42 --json --robot"
+    )
+
+
+def _quota_tessl_processes() -> tuple[mock.Mock, mock.Mock, mock.Mock]:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed_eval = mock.Mock(returncode=0, stdout='[{"evalRunId":"019ecadc-9870-7323-8098-58145a211f26","scenariosCount":32}]', stderr="")
+    failed_view = mock.Mock(returncode=0, stdout=json.dumps({"data": {"attributes": {"status": "failed", "failureReason": {"code": "EVAL_QUOTA_EXCEEDED", "message": "Your organisation has reached its daily eval limit."}, "scenarios": [{"solutions": []}]}}}), stderr="")
+    return completed, completed_eval, failed_view
+
+
+def _quota_fake_run(completed: mock.Mock, completed_eval: mock.Mock, failed_view: mock.Mock):
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
             return failed_view
         return completed
+    return fake_run
 
+
+def _run_tessl_quota_case(tmp_path: Path):
+    completed, completed_eval, failed_view = _quota_tessl_processes()
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
+        mock.patch.object(evals, "_tessl_live_handoff_readiness", return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []}),
+        mock.patch.object(evals, "_tessl_live_scenario_preflight", return_value=None),
+        mock.patch.object(evals, "_tessl_live_runtime_preflight", return_value=("/usr/local/bin/tessl", {})),
+        mock.patch.object(evals.subprocess, "run", side_effect=_quota_fake_run(completed, completed_eval, failed_view)),
     ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-        )
+        return evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", tessl_live_private=True, tessl_workspace="jscraik")
+
+
+def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    result = _run_tessl_quota_case(tmp_path)
 
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]

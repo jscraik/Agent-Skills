@@ -27,6 +27,11 @@ def _load_validator() -> ModuleType:
 
 
 class TestProgramDesign(unittest.TestCase):
+    def test_exact_move_baseline_handles_invalid_current_source(self) -> None:
+        validator = _load_validator()
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+        self.assertIsNone(validator._exact_move_baseline(path, "def broken(:\n", "origin/main"))
+
     def test_new_public_interface_with_six_parameters_is_rejected(self) -> None:
         validator = _load_validator()
         issues = validator._check_source(

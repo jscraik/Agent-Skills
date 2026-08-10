@@ -122,6 +122,8 @@ def _eval_lifecycle_event_types() -> dict[str, str]:
     }
 
 
+EVAL_BLOCKER_TAXONOMY = _eval_blocker_taxonomy()
+EVAL_LIFECYCLE_EVENT_TYPES = _eval_lifecycle_event_types()
 EVAL_CLOSEOUT_SCHEMA_VERSION = "skills-sdk.eval-closeout.v1"
 EVAL_CLOSEOUT_REQUIRED_FIELDS = frozenset({
     "schema_version",

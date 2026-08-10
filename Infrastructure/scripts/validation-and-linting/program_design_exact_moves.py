@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import ast
+import logging
 import subprocess
 from collections import Counter
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path, PurePosixPath
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class MoveBaselineUnavailable(RuntimeError):

@@ -12,8 +12,23 @@ class DoctorCatalogOptions:
     strict: bool
 
 
-def doctor_catalog(repo_root: Path, options: DoctorCatalogOptions) -> CallResult:
+def _coerce_doctor_catalog_options(
+    options: DoctorCatalogOptions | bool | None, strict: bool | None,
+) -> DoctorCatalogOptions:
+    if isinstance(options, bool):
+        if strict is not None:
+            raise TypeError("doctor_catalog received strict both positionally and by keyword")
+        return DoctorCatalogOptions(strict=options)
+    if options is None:
+        return DoctorCatalogOptions(strict=bool(strict))
+    if strict is not None:
+        raise TypeError("DoctorCatalogOptions does not accept a strict keyword")
+    return options
+
+
+def doctor_catalog(repo_root: Path, options: DoctorCatalogOptions | bool | None = None, *, strict: bool | None = None) -> CallResult:
     """Run catalog parity diagnostics and expose the full report in a CallResult."""
+    options = _coerce_doctor_catalog_options(options, strict)
     result = CallResult()
     report = compute_catalog_parity(repo_root, strict=options.strict)
     result.data["catalog_parity"] = report

@@ -15,6 +15,8 @@ def _attach_eval_closeout(
     timeout_seconds: int | None,
     *,
     tessl_live_private: bool = False,
+    tessl_workspace: str | None = None,
+    tessl_live_dry_run: bool = False,
 ) -> None:
     no_case_reason = _tessl_no_case_reason(result, tessl_live_private=tessl_live_private)
     closeout = _write_eval_closeout(
@@ -24,6 +26,8 @@ def _attach_eval_closeout(
         eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
         blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
         started_at=started_at, timeout_seconds=timeout_seconds, no_case_reason=no_case_reason,
+        tessl_live_private=tessl_live_private, tessl_workspace=tessl_workspace,
+        tessl_live_dry_run=tessl_live_dry_run,
     )
     result.data["eval_closeout"] = closeout
     if closeout.get("path"):
@@ -98,10 +102,14 @@ class _EvalRunContext:
 
 
 def _coerce_eval_run_request(
-    request_or_path: EvalRunRequest | str,
+    request_or_path: EvalRunRequest | str | None,
     legacy_options: dict[str, object],
 ) -> EvalRunRequest:
     """Accept the value-object contract while preserving existing internal callers."""
+    if request_or_path is None:
+        request_or_path = legacy_options.pop("path", None)
+    elif "path" in legacy_options:
+        raise TypeError("run_evals received both a positional request and path keyword")
     if isinstance(request_or_path, EvalRunRequest):
         if legacy_options:
             unexpected = ", ".join(sorted(legacy_options))
@@ -119,7 +127,7 @@ def _coerce_eval_run_request(
 
 def run_evals(
     repo_root: Path,
-    request_or_path: EvalRunRequest | str,
+    request_or_path: EvalRunRequest | str | None = None,
     **legacy_options: object,
 ) -> CallResult:
     """Runs evaluation cases for a skill."""
@@ -229,6 +237,8 @@ def _run_tessl_private_eval(repo_root: Path, context: _EvalRunContext, result: C
         _attach_eval_closeout(
             result, repo_root, context.path, context.mode, context.runner, started_at,
             context.timeout_seconds, tessl_live_private=True,
+            tessl_workspace=context.tessl_workspace,
+            tessl_live_dry_run=context.tessl_live_dry_run,
         )
         return result
     tessl_eval = _run_tessl_live_private_eval(repo_root, context.path, workspace=context.tessl_workspace, dry_run=context.tessl_live_dry_run)
@@ -237,6 +247,8 @@ def _run_tessl_private_eval(repo_root: Path, context: _EvalRunContext, result: C
     _attach_eval_closeout(
         result, repo_root, context.path, context.mode, context.runner, started_at,
         context.timeout_seconds, tessl_live_private=True,
+        tessl_workspace=context.tessl_workspace,
+        tessl_live_dry_run=context.tessl_live_dry_run,
     )
     return result
 

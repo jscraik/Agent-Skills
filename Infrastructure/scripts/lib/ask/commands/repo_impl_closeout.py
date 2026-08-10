@@ -663,10 +663,14 @@ class RepoCloseoutOptions:
 
 
 def _coerce_repo_closeout_options(
-    options: RepoCloseoutOptions | None,
+    options: RepoCloseoutOptions | bool | None,
     legacy_options: dict[str, object],
 ) -> RepoCloseoutOptions:
     """Accept explicit options while retaining the established keyword callers."""
+    if isinstance(options, bool):
+        if "changed" in legacy_options:
+            raise TypeError("repo_closeout received changed both positionally and by keyword")
+        return RepoCloseoutOptions(changed=options, **legacy_options)
     if options is not None:
         if not isinstance(options, RepoCloseoutOptions):
             raise TypeError("repo_closeout options must be RepoCloseoutOptions")
@@ -748,7 +752,7 @@ def _closeout_payload(
     }
 
 
-def repo_closeout(repo_root: Path, options: RepoCloseoutOptions | None = None, **legacy_options: object) -> CallResult:
+def repo_closeout(repo_root: Path, options: RepoCloseoutOptions | bool | None = None, **legacy_options: object) -> CallResult:
     """Build a closeout readiness report for the selected repository scope."""
     selected = _coerce_repo_closeout_options(options, legacy_options)
     result = CallResult()
