@@ -168,10 +168,6 @@ def run_codex_exec(
                 jsonl_path.write_text(stdout, encoding="utf-8")
             timeout_message = f"codex exec timed out after {timeout} seconds."
             stderr = f"{stderr.rstrip()}\n{timeout_message}".strip()
-            # Preserve partial JSONL data before returning
-            if jsonl_path and stdout:
-                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
-                jsonl_path.write_text(stdout, encoding="utf-8")
             return 124, stdout, stderr
 
         if jsonl_path:
