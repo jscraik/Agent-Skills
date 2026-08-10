@@ -459,7 +459,7 @@ def _package_agent_summary(state: _PackageReadinessState) -> str:
         return f"{state.query} is blocked: {state.blockers[0]['message']}"
     if state.warnings:
         blockers = state.package_contract["install_gate"]["blocked_reasons"]
-        return f"{state.query} has package gate blockers: {', '.join(blockers)}."
+        return f"{state.query} has package gate " + (f"warnings: {state.warnings[0]['message']}" if not blockers else f"blockers: {', '.join(blockers)}.")
     promotion_status = state.package_contract["promotion_gate"]["status"]
     if promotion_status == "ready_pending_checkout":
         return f"{state.query} is package/share ready; run --checkout-test before promotion."
