@@ -3,7 +3,7 @@ from ask_cli_impl_tests_05 import *  # noqa: F403
 class TestAskCLI(_AskCliTestBase):
     def test_runtime_missing_action_human_output_exposes_validation(self):
         """Verify incomplete runtime commands render the recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'runtime', '--robot']
+        cmd = ['python3', './bin/ask', 'runtime', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'runtime output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("missing action for topic 'runtime'", result.stdout)
@@ -11,7 +11,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_runtime_missing_action_json_contract_exposes_validation(self):
         """Verify incomplete runtime commands expose the surface recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'runtime', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'runtime', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'runtime output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -22,7 +22,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_repo_surface_json_contract_exposes_validation(self):
         """Verify repo surface exposes its replay command."""
-        cmd = [__import__('sys').executable, 'Infrastructure/bin/ask', 'repo', 'surface', '--json', '--robot']
+        cmd = [__import__('sys').executable, './bin/ask', 'repo', 'surface', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'repo surface output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -31,7 +31,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_repo_surface_human_output_exposes_validation(self):
         """Verify repo surface human output names its replay command."""
-        cmd = [__import__('sys').executable, 'Infrastructure/bin/ask', 'repo', 'surface', '--robot']
+        cmd = [__import__('sys').executable, './bin/ask', 'repo', 'surface', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'repo surface output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('Repo surface:', result.stdout)
@@ -42,7 +42,7 @@ class TestAskCLI(_AskCliTestBase):
         saved_projection_mode = os.environ.get('SYNC_SKILLS_PROJECTION_MODE')
         try:
             os.environ['SYNC_SKILLS_PROJECTION_MODE'] = 'flat'
-            cmd = ['python3', 'Infrastructure/bin/ask', 'runtime', 'budget', '--json']
+            cmd = ['python3', './bin/ask', 'runtime', 'budget', '--json']
             result = _run_cli(cmd)
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
@@ -61,7 +61,7 @@ class TestAskCLI(_AskCliTestBase):
         saved_projection_mode = os.environ.get('SYNC_SKILLS_PROJECTION_MODE')
         try:
             os.environ['SYNC_SKILLS_PROJECTION_MODE'] = 'flat'
-            cmd = ['python3', 'Infrastructure/bin/ask', 'runtime', 'budget', '--robot']
+            cmd = ['python3', './bin/ask', 'runtime', 'budget', '--robot']
             result = _run_cli(cmd)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('Runtime budget:', result.stdout)
@@ -74,7 +74,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_list_json_contract_exposes_validation(self):
         """Verify graph list exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'list', '--topic-filter', 'agent-ops', '--tier', 'experimental', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'list', '--topic-filter', 'agent-ops', '--tier', 'experimental', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph list output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -83,7 +83,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_list_human_output_exposes_validation(self):
         """Verify graph list human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'list', '--topic-filter', 'agent-ops', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'list', '--topic-filter', 'agent-ops', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph list output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('Skills [topic=agent-ops]', result.stdout)
@@ -91,7 +91,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_topics_json_contract_exposes_validation(self):
         """Verify graph topics exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'topics', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'topics', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph topics output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -100,7 +100,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_topics_human_output_exposes_validation(self):
         """Verify graph topics human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'topics', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'topics', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph topics output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('Topic Clusters', result.stdout)
@@ -108,7 +108,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_missing_action_exposes_validation(self):
         """Verify incomplete graph commands expose the read-only recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'graph output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -119,7 +119,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_missing_action_human_output_exposes_validation(self):
         """Verify incomplete graph commands render the read-only recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'graph output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("missing action for topic 'graph'", result.stdout)
@@ -127,7 +127,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_related_json_contract_exposes_validation(self):
         """Verify graph related exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'related', 'agents-md', '--depth', '2', '--reverse', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'related', 'agents-md', '--depth', '2', '--reverse', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph related output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -136,7 +136,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_related_human_output_exposes_validation(self):
         """Verify graph related human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'related', 'agents-md', '--depth', '2', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'related', 'agents-md', '--depth', '2', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph related output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('agents-md [out-links, depth=2]', result.stdout)
@@ -144,7 +144,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_find_json_contract_exposes_validation(self):
         """Verify graph find exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'find', 'agent', '--topic-filter', 'agent-ops', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'find', 'agent', '--topic-filter', 'agent-ops', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph find output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -153,7 +153,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_find_human_output_exposes_validation(self):
         """Verify graph find human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'find', 'agent', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'find', 'agent', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph find output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("Search: 'agent'", result.stdout)
@@ -161,7 +161,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_info_json_contract_exposes_validation(self):
         """Verify graph info exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'info', 'agents-md', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'info', 'agents-md', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph info output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -170,7 +170,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_info_unknown_skill_exposes_recovery_commands(self):
         """Verify an unknown graph skill points agents to inspect valid ids."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'info', 'definitely-missing', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'info', 'definitely-missing', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'graph info output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -180,7 +180,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_info_human_output_exposes_validation(self):
         """Verify graph info human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'info', 'agents-md', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'info', 'agents-md', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph info output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('agents-md', result.stdout)
@@ -188,7 +188,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_chain_json_contract_exposes_validation(self):
         """Verify graph chain exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'chain', 'agents-md', 'verification-before-completion', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'chain', 'agents-md', 'verification-before-completion', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph chain output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -198,7 +198,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_graph_chain_human_output_exposes_validation(self):
         """Verify graph chain human output names its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'graph', 'chain', 'agents-md', 'verification-before-completion', '--robot']
+        cmd = ['python3', './bin/ask', 'graph', 'chain', 'agents-md', 'verification-before-completion', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'graph chain output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn('Chain (', result.stdout)
@@ -206,7 +206,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_sync_projection_reaches_engine(self):
         """Verify --projection is dispatched and cannot be silently ignored."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'flat', '--dry-run', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'flat', '--dry-run', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -217,7 +217,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_sync_rejects_removed_rooted_projection(self):
         """Rooted mode is removed from the SDK-flat sync contract."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'rooted', '--dry-run', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'rooted', '--dry-run', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -228,7 +228,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_sync_rejects_removed_skill_tree_alias(self):
         """Rooted aliases are removed with rooted mode."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'skill-tree', '--dry-run', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'skill-tree', '--dry-run', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -239,7 +239,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_sync_rejects_deferred_hybrid_projection(self):
         """Hybrid remains out of mutating scope until a named consumer exists."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'hybrid', '--dry-run', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'sync', '--scope', 'workspace', '--projection', 'hybrid', '--dry-run', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -250,7 +250,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_install_dry_run(self):
         """CA2: Verify ask skills install --dry-run returns a plan without making changes."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'install', 'https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication', '--dry-run', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'install', 'https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication', '--dry-run', '--json']
         result = _run_cli(cmd)
         output = json.loads(result.stdout)
         self.assertIn(output['status'], ['success', 'error'])
@@ -269,7 +269,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_install_dry_run_human_output_exposes_validation(self):
         """Verify ask skills install --dry-run renders its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'install', 'https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication', '--dry-run', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'install', 'https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication', '--dry-run', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Dry run - would install:', result.stdout)
@@ -277,7 +277,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_external_review_skip_tools_json_contract(self):
         """Verify ask skills external-review exposes a replayable local-only contract."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'external-review', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--skip-plugin-eval', '--skip-tessl', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'external-review', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--skip-plugin-eval', '--skip-tessl', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -296,7 +296,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_external_review_skip_tools_human_output_exposes_validation(self):
         """Verify ask skills external-review renders local-only status and validation."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'external-review', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--skip-plugin-eval', '--skip-tessl', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'external-review', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--skip-plugin-eval', '--skip-tessl', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('External review:', result.stdout)
@@ -304,7 +304,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_fold_dependency_error_exposes_validation(self):
         """Verify ask skills fold dependency blockers remain replayable."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'fold', 'simplify', 'imagegen', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'fold', 'simplify', 'imagegen', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -315,7 +315,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_fold_dependency_error_human_output_exposes_validation(self):
         """Verify ask skills fold dependency blockers render their replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'fold', 'simplify', 'imagegen', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'fold', 'simplify', 'imagegen', '--robot']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Skill router or builder catalog not available.', result.stdout)
@@ -325,7 +325,7 @@ class TestAskCLI(_AskCliTestBase):
         """CA2: ASK_TRACE_ID environment variable propagates to output."""
         env = os.environ.copy()
         env['ASK_TRACE_ID'] = 'test-trace-123'
-        cmd = ['python3', 'Infrastructure/bin/ask', 'repo', 'status', '--json']
+        cmd = ['python3', './bin/ask', 'repo', 'status', '--json']
         result = _run_cli(cmd, env=env)
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -335,7 +335,7 @@ class TestAskCLI(_AskCliTestBase):
         """CA2: --trace-id flag overrides ASK_TRACE_ID environment variable."""
         env = os.environ.copy()
         env['ASK_TRACE_ID'] = 'env-trace-456'
-        cmd = ['python3', 'Infrastructure/bin/ask', 'repo', 'status', '--json', '--trace-id', 'flag-trace-789']
+        cmd = ['python3', './bin/ask', 'repo', 'status', '--json', '--trace-id', 'flag-trace-789']
         result = _run_cli(cmd, env=env)
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -343,7 +343,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_robot_mode_recovers_swapped_topic_action(self):
         """Robot mode should recover clear intent when topic/action are swapped."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'list', 'skills', '--robot', '--json']
+        cmd = ['python3', './bin/ask', 'list', 'skills', '--robot', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'Expected success, stderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -353,7 +353,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_robot_mode_recovers_action_after_flags(self):
         """Robot mode should recover when action token is after option flags."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', '--advanced', 'ls', '--robot', '--json']
+        cmd = ['python3', './bin/ask', 'skills', '--advanced', 'ls', '--robot', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, f'Expected success, stderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -363,7 +363,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_robot_mode_returns_detailed_error_for_ambiguous_intent(self):
         """Robot mode should return rich guidance when intent cannot be resolved."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'status', '--robot', '--json']
+        cmd = ['python3', './bin/ask', 'status', '--robot', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -375,7 +375,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_robot_mode_returns_argument_guidance_when_intent_clear(self):
         """Robot mode should explain missing arguments with command-specific examples."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'audit', '--robot', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'audit', '--robot', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -388,7 +388,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_audit_json_contract(self):
         """Verify ask skills audit exposes its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'audit', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'audit', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -432,7 +432,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_audit_human_output_exposes_validation(self):
         """Verify ask skills audit renders its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'audit', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'audit', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Audit passed:', result.stdout)
@@ -440,7 +440,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_openai_format_json_contract(self):
         """Verify ask exposes OpenAI skill format as a first-class validation surface."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-openai-format', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-openai-format', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -452,7 +452,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_openai_format_human_output_exposes_validation(self):
         """Verify ask skills validate-openai-format renders its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-openai-format', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-openai-format', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('OpenAI skill format passed:', result.stdout)
@@ -460,7 +460,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_skill_gate_json_contract(self):
         """Verify ask exposes skill gate as a first-class validation surface."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-skill-gate', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-skill-gate', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -473,7 +473,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_skill_gate_human_output_exposes_validation(self):
         """Verify ask skills validate-skill-gate renders its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-skill-gate', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-skill-gate', 'Plugins/skill-factory/skills/code_quality_review/skill-builder', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Skill gate passed:', result.stdout)
@@ -481,7 +481,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_boundaries_json_contract(self):
         """Verify ask exposes canonical-versus-projection ownership as a first-class check."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-boundaries', 'Skills/agent-ops/autofix', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-boundaries', 'Skills/agent-ops/autofix', '--json']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -494,7 +494,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_validate_boundaries_human_output_exposes_validation(self):
         """Verify ask skills validate-boundaries renders its validation command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'validate-boundaries', 'Skills/agent-ops/autofix', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'validate-boundaries', 'Skills/agent-ops/autofix', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Skill boundaries passed: $autofix', result.stdout)
@@ -504,7 +504,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_init_validation_error_exposes_validation(self):
         """Verify ask skills init validation errors remain replayable without writing files."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'init', 'example-skill', '--category', '/tmp/not-repo-relative', '--description', 'Example description', '--json']
+        cmd = ['python3', './bin/ask', 'skills', 'init', 'example-skill', '--category', '/tmp/not-repo-relative', '--description', 'Example description', '--json']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -514,7 +514,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_skills_init_validation_error_human_output_exposes_validation(self):
         """Verify ask skills init validation errors render their replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'skills', 'init', 'example-skill', '--category', '/tmp/not-repo-relative', '--description', 'Example description', '--robot']
+        cmd = ['python3', './bin/ask', 'skills', 'init', 'example-skill', '--category', '/tmp/not-repo-relative', '--description', 'Example description', '--robot']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Skill category must be repo-relative.', result.stdout)
@@ -522,7 +522,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_workouts_list_json_contract_exposes_validation(self):
         """Verify ask workouts list exposes its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', 'list', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', 'list', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -532,7 +532,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_workouts_list_human_output_exposes_validation(self):
         """Verify ask workouts list renders its replay command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', 'list', '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', 'list', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Workout list: success', result.stdout)
@@ -540,7 +540,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_workouts_missing_action_exposes_validation(self):
         """Verify incomplete workout commands expose the list recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'workouts output: {result.stdout}\nstderr: {result.stderr}')
         output = json.loads(result.stdout)
@@ -551,7 +551,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_workouts_missing_action_human_output_exposes_validation(self):
         """Verify incomplete workout commands render the list recovery command."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', '--robot']
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'workouts output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("missing action for topic 'workouts'", result.stdout)
@@ -560,7 +560,7 @@ class TestAskCLI(_AskCliTestBase):
     def test_workouts_score_error_json_contract_exposes_validation(self):
         """Verify ask workouts score validation errors remain replayable."""
         workout_id = 'agent-ops/not-a-real-workout'
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', 'score', workout_id, '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', 'score', workout_id, '--json', '--robot']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
@@ -570,7 +570,7 @@ class TestAskCLI(_AskCliTestBase):
     def test_workouts_score_error_human_output_exposes_validation(self):
         """Verify ask workouts score validation errors render their replay command."""
         workout_id = 'agent-ops/not-a-real-workout'
-        cmd = ['python3', 'Infrastructure/bin/ask', 'workouts', 'score', workout_id, '--robot']
+        cmd = ['python3', './bin/ask', 'workouts', 'score', workout_id, '--robot']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(f'No scorecard found for workout {workout_id}.', result.stdout)
@@ -578,7 +578,7 @@ class TestAskCLI(_AskCliTestBase):
 
     def test_plugins_init_validation_error_exposes_validation(self):
         """Verify plugins init validation errors expose a replay command without writing."""
-        cmd = ['python3', 'Infrastructure/bin/ask', 'plugins', 'init', 'example-plugin', '--category', '/tmp/not-a-plugin-category', '--with-marketplace', '--with-scripts', '--json', '--robot']
+        cmd = ['python3', './bin/ask', 'plugins', 'init', 'example-plugin', '--category', '/tmp/not-a-plugin-category', '--with-marketplace', '--with-scripts', '--json', '--robot']
         result = _run_cli(cmd)
         self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
