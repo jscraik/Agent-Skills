@@ -29,3 +29,10 @@ or independently edit the extracted template module from a runtime projection.
 The extraction is covered by the skill-creator lifecycle/scaffold tests and
 the upstream-lock validator. The modularity-debt retirement change additionally
 checks that the extracted module remains within the repository module budget.
+
+## Not proven
+
+Runtime projection of the extracted module is not proven by this change. The
+local tests and the upstream-lock validator run against the canonical bridge
+source only. Runtime-skill usability requires the separate runtime projection
+or promotion lane.
