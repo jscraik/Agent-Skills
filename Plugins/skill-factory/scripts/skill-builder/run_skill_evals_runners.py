@@ -191,8 +191,9 @@ def run_codex_exec(
                 content = output_last_message_path.read_text(encoding="utf-8").strip()
                 if not content:
                     output_last_message_path.unlink()
-            except Exception:
-                output_last_message_path.unlink()
+            except OSError as exc:
+                warnings.append(f"Could not read {output_last_message_path} before retry: {exc}")
+                output_last_message_path.unlink(missing_ok=True)
         if jsonl_path and jsonl_path.exists():
             jsonl_path.unlink()
         rc, stdout, stderr = _invoke(profile)
