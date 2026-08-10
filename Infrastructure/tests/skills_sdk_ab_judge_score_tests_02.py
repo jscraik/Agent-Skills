@@ -81,10 +81,10 @@ class TestSkillsSdkAbJudgeScore(_SkillsSdkAbJudgeScoreBase):
             with patch.dict(os.environ, {'SKILLS_SDK_OSS_CLOUD_ENV_FILE': str(env_file)}, clear=False), patch('ask.skills_sdk.ab_transport_contracts.operator_account_home', return_value=profile_root), patch('ask.skills_sdk.eval_ab_judge_codex.subprocess.run', side_effect=fake_run):
                 result = _run_codex_judge('prompt', profile, 5, REPO_ROOT, output_file)
             expected_work_dir = codex_judge._codex_judge_work_dir(output_file)
+            self.addCleanup(shutil.rmtree, expected_work_dir, ignore_errors=True)
             self.assertEqual(captured['cwd'], expected_work_dir)
             self.assertEqual(result.output_text, '{"winner":"skill_b"}')
             self.assertEqual(output_file.read_text(encoding='utf-8'), '{"winner":"skill_b"}')
             self.assertEqual(result.executed_argv[result.executed_argv.index('--output-last-message') + 1], 'codex-last-message.json')
-            shutil.rmtree(expected_work_dir, ignore_errors=True)
 
 __all__ = [name for name in globals() if not name.startswith("__")]
