@@ -45,8 +45,8 @@ def _external_tool_path(name):
 
 
 class SkillReviewDashboardImportTests(unittest.TestCase):
-    def test_renderer_is_importable_without_the_facade(self) -> None:
-        """The renderer must not trigger the facade's renderer import while loading."""
+    def test_facade_defers_renderer_import_until_rendering(self) -> None:
+        """The public dashboard module must keep renderer loading lazy."""
         result = subprocess.run(
             [
                 sys.executable,
@@ -54,10 +54,10 @@ class SkillReviewDashboardImportTests(unittest.TestCase):
                 (
                     "import sys; "
                     "sys.path.insert(0, sys.argv[1]); "
-                    "from ask.skill_review_dashboard_render import render_skill_review_dashboard; "
+                    "from ask.skill_review_dashboard import render_skill_review_dashboard; "
                     "assert callable(render_skill_review_dashboard); "
-                    "assert 'ask.skill_review_dashboard' not in sys.modules, "
-                    "'renderer import pulled in the dashboard facade'"
+                    "assert 'ask.skill_review_dashboard_render' not in sys.modules, "
+                    "'dashboard facade imported the renderer eagerly'"
                 ),
                 str(repo_root / "Infrastructure" / "scripts" / "lib"),
             ],

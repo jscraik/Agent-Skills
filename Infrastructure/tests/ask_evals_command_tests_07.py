@@ -275,6 +275,7 @@ def test_run_evals_live_private_uses_jscraik_default_workspace(tmp_path: Path, m
     monkeypatch.delenv("ASK_TESSL_WORKSPACE", raising=False)
     monkeypatch.delenv("TESSL_WORKSPACE", raising=False)
     monkeypatch.delenv("TESSL_WORKSPACE_NAME", raising=False)
+    monkeypatch.setenv("ASK_EXTERNAL_EFFECTS", "deny")
     _write_example_skill(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run") as run:
