@@ -17,10 +17,11 @@ def audit_skill(
         repo_root (Path): Repository root against which `skill_path` is resolved.
         skill_path (str): Repository-relative path to the skill directory to audit.
         level (str): Validation level; `"compat"` runs structural diagnostics only, `"strict"` also runs security and benchmark guards.
+        validation_scope (Literal["runtime", "source"]): Diagnostics scope. `"source"` adds `--source-only` to the structural diagnostics command; `"runtime"` runs the default runtime-aware diagnostics.
 
     Returns:
         CallResult: Result with `status` set to `"success"` when diagnostics pass (and all strict checks pass if requested), or `"error"` with `errors` containing one or more `ErrorObject`s. Possible error codes include `ERR_PATH_TRAVERSAL` and `ERR_VALIDATION`.
-    """
+    """ 
     result = CallResult()
     validation_args = [skill_path]
     if level != "compat":
