@@ -21,9 +21,7 @@ def _evaluate_expected_signal_assertion(output_text: str, expected: Any) -> Opti
 
     expected_terms = _expected_signal_terms(expected_text)
     if not expected_terms:
-        if not _contains_text(output_text, expected_text):
-            return f"expected_signal failed: {expected_text!r}"
-        return None
+        return f"expected_signal failed: {expected_text!r}"
 
     output_terms = set(_expected_signal_terms(output_text))
     matched = [term for term in expected_terms if term in output_terms]
