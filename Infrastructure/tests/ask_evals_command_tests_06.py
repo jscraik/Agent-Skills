@@ -649,7 +649,6 @@ def test_eval_closeout_validation_blocks_non_pass_mutation() -> None:
     assert "non_pass_blocks_source_mutation" in blocker_ids
     assert "non_pass_blocks_registry_promotion" in blocker_ids
 
-
 def test_evals_run_validation_command_preserves_timeout_seconds() -> None:
     command = evals._evals_run_validation_command(
         "Skills/example",
