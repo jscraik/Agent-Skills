@@ -130,7 +130,7 @@ def _run_codex_with_captured_subprocess(
     def fake_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
         nonlocal captured_profile_text
         captured_command.extend(args)
-        captured_env.update(kwargs["env"])
+        captured_env.update(kwargs.get("env") or {})
         if "CODEX_HOME" in captured_env:
             copied_profile = Path(captured_env["CODEX_HOME"]) / f"{profile_id}.config.toml"
             captured_profile_text = copied_profile.read_text(encoding="utf-8")
@@ -140,28 +140,24 @@ def _run_codex_with_captured_subprocess(
         output_file.write_text("{}", encoding="utf-8")
         return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
 
-    original_run = subprocess.run
-    try:
-        with tempfile.TemporaryDirectory() as profile_dir:
-            env_dir = Path(profile_dir) / ".codex"
-            env_dir.mkdir()
-            auth_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
-            if auth_env_file is not None:
-                os.mkfifo(auth_env_file)
-            Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
-            env = {"ASK_CODEX_PROFILE_SOURCE_DIR": profile_dir, **(extra_env or {})}
-            if auth_env_file is not None:
-                env["SKILLS_SDK_OSS_CLOUD_ENV_FILE"] = str(auth_env_file)
-            subprocess.run = fake_run  # type: ignore[assignment]
-            base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
-            with (
-                patch.dict(os.environ, {**base_env, **env}, clear=True),
-                patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
-            ):
-                result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
-            return result, captured_command, captured_env, captured_profile_text, auth_env_file
-    finally:
-        subprocess.run = original_run  # type: ignore[assignment]
+    with tempfile.TemporaryDirectory() as profile_dir:
+        env_dir = Path(profile_dir) / ".codex"
+        env_dir.mkdir()
+        auth_env_file = env_dir / ".env" if profile_id == "oss-cloud" else None
+        if auth_env_file is not None:
+            os.mkfifo(auth_env_file)
+        Path(profile_dir, f"{profile_id}.config.toml").write_text(config_text, encoding="utf-8")
+        env = {"ASK_CODEX_PROFILE_SOURCE_DIR": profile_dir, **(extra_env or {})}
+        if auth_env_file is not None:
+            env["SKILLS_SDK_OSS_CLOUD_ENV_FILE"] = str(auth_env_file)
+        base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
+        with (
+            patch.object(subprocess, "run", fake_run),
+            patch.dict(os.environ, {**base_env, **env}, clear=True),
+            patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
+        ):
+            result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
+        return result, captured_command, captured_env, captured_profile_text, auth_env_file
 
 class _SkillsSdkAbJudgeScoreBase(unittest.TestCase):
     def setUp(self) -> None:
