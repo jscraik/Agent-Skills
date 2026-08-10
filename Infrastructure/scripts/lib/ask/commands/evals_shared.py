@@ -71,8 +71,10 @@ def _tessl_live_view_case_summary(
         return None
     usage_score, max_score = score_solution(usage)
     baseline_score, baseline_max = score_solution(baseline)
+    if max_score <= 0:
+        max_score = baseline_max
     return _tessl_live_view_case_payload(
-        scenario, usage, baseline, usage_score, baseline_score, max_score or baseline_max,
+        scenario, usage, baseline, usage_score, baseline_score, max_score,
         failed_criteria, missing_observable_output,
     )
 
