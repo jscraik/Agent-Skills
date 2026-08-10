@@ -521,10 +521,10 @@ class TestSkillsSdkAbJudgeScore(_SkillsSdkAbJudgeScoreBase):
         prompt_file = score_dir / 'prompt.txt'
         score_dir.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text('old prompt', encoding='utf-8')
-        prompt_file.chmod(420)
+        prompt_file.chmod(0o644)
         _write_text_evidence(REPO_ROOT, prompt_file, 'new prompt')
         self.assertEqual(prompt_file.read_text(encoding='utf-8'), 'new prompt')
-        self.assertEqual(prompt_file.stat().st_mode & 511, 384)
+        self.assertEqual(prompt_file.stat().st_mode & 0o777, 0o600)
 
     def test_evidence_preflight_rejects_existing_file_experiment_root(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root
