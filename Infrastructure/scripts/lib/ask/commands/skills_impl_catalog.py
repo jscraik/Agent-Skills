@@ -427,7 +427,10 @@ def _load_builder_module(repo_root: Path, module_name: str):
         return None
     scripts_dir = module_path.parent
 
-    internal_name = f"ask_builder_{module_name}"
+    module_identity = hashlib.sha256(
+        str(module_path.resolve()).encode("utf-8")
+    ).hexdigest()[:12]
+    internal_name = f"ask_builder_{module_name}_{module_identity}"
     if internal_name in sys.modules:
         return sys.modules[internal_name]
 

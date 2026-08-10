@@ -165,45 +165,60 @@ def _record_install_failure(result: CallResult) -> None:
     ))
 
 
-def _install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
-    result = CallResult()
-    try:
-        dest_path, dest_rel = _resolve_canonical_install_dest(repo_root, dest)
-    except ValueError as exc:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Invalid install destination '{dest}': {exc}",
-                fix_suggestion="Use a category under Skills/ such as 'Skills/github' or shorthand 'github'.",
-            )
-        )
+def _invalid_install_destination(dest: str, exc: ValueError) -> CallResult:
+    """Return a stable validation error for an invalid canonical destination."""
+    result = CallResult(status="error")
+    result.errors.append(ErrorObject(
+        code="ERR_VALIDATION",
+        message=f"Invalid install destination '{dest}': {exc}",
+        fix_suggestion="Use a category under Skills/ such as 'Skills/github' or shorthand 'github'.",
+    ))
+    return result
+
+
+def _execute_skill_install(
+    result: CallResult, repo_root: Path, command: list[str], dest_rel: str,
+    skill_name: str, intake_decision: dict,
+) -> CallResult:
+    """Execute one bounded install and classify its process result."""
+    process, timeout_result = _run_bounded_subprocess(
+        repo_root, command, "install_process", "Skill installer timed out."
+    )
+    if timeout_result is not None:
+        result.status = timeout_result.status
+        result.data.update(timeout_result.data)
+        result.data.update({"canonical_dest": dest_rel, "intake_decision": intake_decision})
+        result.errors.extend(timeout_result.errors)
         return result
-
-    # Parse skill name from URL for preview
-    skill_name = (url.split("/")[-1] if "/" in url else url).removesuffix(".git")
-    target_path = dest_path / skill_name
-    intake_decision = _skill_install_intake_decision(repo_root, skill_name, target_path)
-
-    if dry_run:
-        return _install_dry_run_result(repo_root, url, remediate, dest_rel, skill_name, target_path, intake_decision)
-
-    if intake_decision["outcome"] in {"reject_duplicate", "needs_human_choice"}:
-        return _install_conflict_result(repo_root, dest_rel, skill_name, target_path, intake_decision)
-
-    cmd = _install_command(repo_root, url, dest_path, remediate, result)
-    if cmd is None:
-        return result
-
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    assert process is not None
     _record_install_process(result, process, dest_rel, intake_decision)
-
     if process.returncode == 0:
         _complete_installation(result, repo_root, dest_rel, skill_name, intake_decision)
     else:
         _record_install_failure(result)
-
     return result
+
+
+def _install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
+    """Validate intake ownership and execute one canonical skill installation."""
+    result = CallResult()
+    try:
+        dest_path, dest_rel = _resolve_canonical_install_dest(repo_root, dest)
+    except ValueError as exc:
+        return _invalid_install_destination(dest, exc)
+    skill_name = (url.split("/")[-1] if "/" in url else url).removesuffix(".git")
+    target_path = dest_path / skill_name
+    intake_decision = _skill_install_intake_decision(repo_root, skill_name, target_path)
+    if dry_run:
+        return _install_dry_run_result(repo_root, url, remediate, dest_rel, skill_name, target_path, intake_decision)
+    if intake_decision["outcome"] in {"reject_duplicate", "needs_human_choice"}:
+        return _install_conflict_result(repo_root, dest_rel, skill_name, target_path, intake_decision)
+    command = _install_command(repo_root, url, dest_path, remediate, result)
+    if command is None:
+        return result
+    return _execute_skill_install(
+        result, repo_root, command, dest_rel, skill_name, intake_decision
+    )
 
 
 def install_skill(

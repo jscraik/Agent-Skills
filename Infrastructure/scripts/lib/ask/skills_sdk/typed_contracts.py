@@ -414,7 +414,7 @@ class EvalRunReceipt(_SdkContractModel):
     status: Literal["pass", "fail", "blocked"]
     runner: Literal["deterministic_jsonl_v0", "internal_skill_builder_v0"]
     dataset_path: str = Field(min_length=1)
-    dataset_digest: str = Field(min_length=71)
+    dataset_digest: str | None = Field(min_length=71)
     skill_ir_schema_version: str | None
     package_id: str | None = Field(default=None, min_length=1)
     package_digest: str | None = Field(default=None, min_length=71)

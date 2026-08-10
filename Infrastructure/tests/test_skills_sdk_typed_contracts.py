@@ -180,6 +180,17 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_eval_run_receipt(payload)
 
+    def test_blocked_eval_run_contract_accepts_unavailable_dataset_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["status"] = "blocked"
+        payload["dataset_digest"] = None
+        payload["blockers"] = ["blocked_missing_artifact:dataset"]
+
+        receipt = contracts.validate_eval_run_receipt(payload)
+
+        self.assertIsNone(receipt.dataset_digest)
+
     def test_emitter_preview_contract_rejects_emission_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
         self.assertIsInstance(payload, dict)

@@ -24,6 +24,21 @@
     "/Users/jamiecraik/dev/agent-skills/.harness/artifacts/sdk-ab-judges/2f17c65de51f3a24/judge/codex-last-message.json",
     "-"
   ],
+  "judge_command_shape": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--cd",
+    "<judge-workspace>",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--output-last-message",
+    "<judge-output>",
+    "-"
+  ],
   "codex_profile": "oss-local",
   "judge_profile": {
     "id": "oss-local",

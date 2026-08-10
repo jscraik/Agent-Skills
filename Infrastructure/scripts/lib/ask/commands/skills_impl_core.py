@@ -732,6 +732,33 @@ def _validation_process_result(
     return result
 
 
+def _run_bounded_subprocess(
+    repo_root: Path,
+    command: list[str],
+    data_key: str,
+    failure_message: str,
+    fix_suggestion: Optional[str] = None,
+    timeout: float = 600.0,
+    env: Optional[dict[str, str]] = None,
+) -> tuple[Optional[subprocess.CompletedProcess[str]], Optional[CallResult]]:
+    """Run a captured subprocess and return a structured timeout result when it hangs."""
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+            env=env,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return None, _validation_timeout_result(
+            command, data_key, failure_message, fix_suggestion, timeout, exc
+        )
+    return proc, None
+
+
 def _run_validation_command(
     repo_root: Path,
     command: list[str],
@@ -741,20 +768,18 @@ def _run_validation_command(
     timeout: float = 600.0,
 ) -> CallResult:
     """Run a validation subprocess and return a CallResult with captured output."""
-    try:
-        proc = subprocess.run(
-            command,
-            cwd=str(repo_root),
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=timeout,
-            env=_subprocess_env_with_uv_cache(),
-        )
-    except subprocess.TimeoutExpired as exc:
-        return _validation_timeout_result(
-            command, data_key, failure_message, fix_suggestion, timeout, exc
-        )
+    proc, timeout_result = _run_bounded_subprocess(
+        repo_root,
+        command,
+        data_key,
+        failure_message,
+        fix_suggestion,
+        timeout,
+        _subprocess_env_with_uv_cache(),
+    )
+    if timeout_result is not None:
+        return timeout_result
+    assert proc is not None
     return _validation_process_result(
         command, data_key, failure_message, fix_suggestion, proc
     )

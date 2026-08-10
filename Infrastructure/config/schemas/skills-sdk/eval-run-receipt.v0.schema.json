@@ -10,7 +10,7 @@
     "status": {"type": "string", "enum": ["pass", "fail", "blocked"]},
     "runner": {"type": "string", "enum": ["deterministic_jsonl_v0", "internal_skill_builder_v0"]},
     "dataset_path": {"type": "string", "minLength": 1},
-    "dataset_digest": {"type": "string", "minLength": 71},
+    "dataset_digest": {"type": ["string", "null"], "minLength": 71},
     "skill_ir_schema_version": {"type": ["string", "null"]},
     "package_id": {"type": ["string", "null"], "minLength": 1},
     "package_digest": {"type": ["string", "null"], "minLength": 71},

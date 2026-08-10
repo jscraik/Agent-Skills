@@ -47,7 +47,7 @@ def _blocked_receipt(
         "status": "blocked",
         "runner": "deterministic_jsonl_v0",
         "dataset_path": _repo_relative(repo_root, dataset_path),
-        "dataset_digest": "sha256:" + ("0" * 64),
+        "dataset_digest": None,
         "skill_ir_schema_version": skill_ir_schema_version,
         "package_id": package_id,
         "package_digest": package_digest,

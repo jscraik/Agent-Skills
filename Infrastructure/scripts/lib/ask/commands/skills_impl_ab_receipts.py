@@ -257,7 +257,7 @@ def _skills_sdk_internal_eval_receipt_counts(
         dataset_digest = (
             _skills_sdk_digest_file(scorecard_path)
             if scorecard_path is not None and scorecard_path.is_file()
-            else "sha256:" + ("0" * 64)
+            else None
         )
         return {
             "status": receipt_status,
@@ -317,7 +317,7 @@ def _skills_sdk_internal_eval_receipt_counts(
         dataset_digest = (
             _skills_sdk_digest_file(digest_path)
             if closeout_path and digest_path.is_file()
-            else "sha256:" + ("0" * 64)
+            else None
         )
         failed_count = sum(1 for item in cases if item["status"] == "fail")
         return {
@@ -352,7 +352,7 @@ def _skills_sdk_internal_eval_receipt_counts(
     return {
         "status": receipt_status,
         "dataset_path": "internal:skill-builder",
-        "dataset_digest": "sha256:" + ("0" * 64),
+        "dataset_digest": None,
         "case_count": internal_case_count,
         "passed_count": 0,
         "failed_count": 1 if receipt_status in {"fail", "blocked"} else 0,
@@ -475,7 +475,7 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
         from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
 
         payload = _yaml_safe_load(text) or {}
-    except (ImportError, OSError, TypeError, ValueError, YAMLError):
+    except (ImportError, OSError, RuntimeError, TypeError, ValueError, YAMLError):
         payload = {}
     raw_sets = payload.get("release_scenario_sets") if isinstance(payload, dict) else None
     if not isinstance(raw_sets, list):
@@ -651,7 +651,7 @@ def _skills_sdk_release_set_blocked_result(
         "status": "blocked",
         "runner": "internal_skill_builder_v0",
         "dataset_path": _skills_sdk_repo_relative(repo_root, evals_path),
-        "dataset_digest": _skills_sdk_digest_file(evals_path) if evals_path.is_file() else "sha256:" + ("0" * 64),
+        "dataset_digest": _skills_sdk_digest_file(evals_path) if evals_path.is_file() else None,
         "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
         "package_id": package_identity["package_id"] if package_identity else None,
         "package_digest": package_identity["package_digest"] if package_identity else None,
