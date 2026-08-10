@@ -317,8 +317,10 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     local_absolute_refs = sorted(
         set(re.findall(r"(?<![\w:])/(?:Users|home|Volumes|private|tmp|var|etc|opt)/[^\s)`>]+", body))
     )
-    if re.search(r"(?m)^\s*/", body) or local_absolute_refs:
-        evidence = ", ".join(local_absolute_refs[:3])
+    line_start_match = re.search(r"(?m)^\s*/.*$", body)
+    if line_start_match or local_absolute_refs:
+        samples = local_absolute_refs[:3] or [line_start_match.group(0).strip()[:120]]
+        evidence = ", ".join(samples)
         out.append(
             Finding(
                 Level.WARN,
