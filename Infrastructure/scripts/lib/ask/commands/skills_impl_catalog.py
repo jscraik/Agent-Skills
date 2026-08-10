@@ -581,9 +581,11 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
 
     skill_index_path = repo_root / "SKILL.md"
     rendered_index = render_index(entries, source="catalog", visibility="default") + "\n"
+    existing_index = skill_index_path.read_text(encoding="utf-8") if skill_index_path.exists() else None
     if dry_run:
-        logs.append(f"Would refresh catalog index: {skill_index_path}")
-    else:
+        if existing_index != rendered_index:
+            logs.append(f"Would refresh catalog index: {skill_index_path}")
+    elif existing_index != rendered_index:
         skill_index_path.write_text(rendered_index, encoding="utf-8")
         logs.append(f"Refreshed catalog index: {skill_index_path}")
 
