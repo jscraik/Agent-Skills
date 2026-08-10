@@ -619,6 +619,17 @@ def skills_package_verify_strict(
         return result
     if verification.get("target_kind") == "skill_directory":
         verification = _apply_strict_package_readiness(repo_root, query, verification)
+    else:
+        verification = {
+            **verification,
+            "strict_package_readiness": {
+                "status": "not_applicable",
+                "reason": (
+                    "Strict package readiness is skill-directory scoped; it did not run for "
+                    f"target_kind '{verification.get('target_kind')}'."
+                ),
+            },
+        }
     verification = _normalize_package_verification(
         query=query,
         validation_command=_skills_validation_command("package", "verify", query, "--strict"),
