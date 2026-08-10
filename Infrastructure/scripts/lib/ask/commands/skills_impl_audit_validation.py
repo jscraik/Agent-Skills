@@ -132,14 +132,18 @@ def audit_skill(
             return result
 
         result.data["security_gate"] = {
-            "exit_code": 0,
-            "stdout": "skipped: preserved Codex .system SKILL.md body; local strict contract is enforced through attached Skill Factory references and system overlay validators\n",
-            "stderr": "",
+            "status": "skipped_skill_factory_system_overlay",
+            "reason": (
+                "Preserved Codex .system SKILL.md body; the local strict contract is enforced through "
+                "attached Skill Factory references and system overlay validators."
+            ),
         }
         result.data["openclaw_guard"] = {
-            "exit_code": 0,
-            "stdout": "skipped: preserved Codex .system SKILL.md body; run overlay/family validators for local Skill Factory additions\n",
-            "stderr": "",
+            "status": "skipped_skill_factory_system_overlay",
+            "reason": (
+                "Preserved Codex .system SKILL.md body; run the overlay and family validators for "
+                "local Skill Factory additions."
+            ),
         }
     elif level == "strict":
         # Security gate (skill_gate.py)
