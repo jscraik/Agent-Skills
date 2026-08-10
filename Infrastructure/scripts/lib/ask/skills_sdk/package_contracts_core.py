@@ -718,9 +718,7 @@ def normalized_command_candidate(line: str) -> str | None:
 
 def sdk_contract_field_present(field: str, value: Any) -> bool:
     """Return whether an SDK package contract field has real declared evidence."""
-    if field == "evals" and isinstance(value, dict):
-        return bool(value.get("declared"))
-    if field in {"agent_metadata", "reference_contract", "task_profile"} and isinstance(value, dict):
+    if field in {"evals", "agent_metadata", "reference_contract", "task_profile"} and isinstance(value, dict):
         return bool(value.get("declared"))
     if field == "portability_profile" and isinstance(value, dict):
         return any(bool(item) for item in value.values())
