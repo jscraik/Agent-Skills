@@ -504,10 +504,6 @@ def _stable_tessl_local_install_workspace(path: str) -> Path:
     return Path(tempfile.gettempdir()) / "ask-tessl-local-install" / f"{safe_name}-{digest}"
 
 
-def _tessl_archive_suffix() -> str:
-    return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-
-
 def _unique_archive_dir(archive_root: Path, label: str) -> Path:
     archive_root.mkdir(parents=True, exist_ok=True)
     safe_label = _safe_slug(label)

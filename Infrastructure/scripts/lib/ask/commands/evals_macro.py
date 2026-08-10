@@ -59,14 +59,6 @@ def _macro_eval_validation_command(output_dir: str | None = None, summaries_glob
     return " ".join(shlex.quote(part) for part in parts)
 
 
-def _load_json_file(path: Path) -> dict:
-    try:
-        loaded = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return loaded if isinstance(loaded, dict) else {}
-
-
 def _macro_case_type(case: dict) -> str:
     category = case.get("category")
     if isinstance(category, str) and category.strip():

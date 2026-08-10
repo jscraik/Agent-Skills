@@ -353,6 +353,8 @@ def _case_tessl_enabled(raw_case: dict[object, object], *, lane: str) -> bool:
 
 
 def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> list[str]:
+    from .evals_projection import _tessl_criteria_from_case
+
     copied: list[str] = []
     evals_path = source_root / "references" / "evals.yaml"
     cases, scenario_manifest = _merge_tessl_cases_with_generated_fixtures(

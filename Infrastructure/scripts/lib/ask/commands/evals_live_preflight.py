@@ -293,40 +293,6 @@ def _tessl_local_command_payload(
     }
 
 
-def _portable_command_part(part: str) -> str:
-    if Path(part).is_absolute():
-        return Path(part).name
-    return part
-
-
-def _sanitize_tessl_live_private_payload(value: object) -> object:
-    if isinstance(value, dict):
-        sanitized: dict[str, object] = {}
-        for key, item in value.items():
-            if key in {"createdBy", "user", "userId", "firstName", "lastName"}:
-                sanitized[key] = "<redacted-actor>"
-            elif key in {"command", "cliInvocation", "cwd", "path", "staged_source"}:
-                sanitized[key] = _sanitize_tessl_live_private_payload(item)
-            else:
-                sanitized[key] = _sanitize_tessl_live_private_payload(item)
-        return sanitized
-    if isinstance(value, list):
-        return [_sanitize_tessl_live_private_payload(item) for item in value]
-    if isinstance(value, str):
-        stripped = value.strip()
-        if stripped.startswith(("{", "[")):
-            try:
-                parsed = json.loads(stripped)
-            except json.JSONDecodeError:
-                parsed = None
-            if isinstance(parsed, (dict, list)):
-                return json.dumps(_sanitize_tessl_live_private_payload(parsed), indent=2, sort_keys=True)
-        redacted = re.sub(r"/Users/[^\s\"']+", "<user-path>", value)
-        redacted = re.sub(r"[-A-Za-z0-9._%+]+@[-A-Za-z0-9.]+\.[A-Za-z]{2,}", "<redacted-email>", redacted)
-        return redacted
-    return value
-
-
 def _run_tessl_local_command(
     command: list[str],
     *,

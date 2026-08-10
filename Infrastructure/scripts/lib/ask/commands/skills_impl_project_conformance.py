@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from .skills_impl_project_improve import *  # noqa: F403
 
+
+SKILL_INIT_TIMEOUT_SECONDS = 60
+
 def skills_sdk_project_conformance(
     repo_root: Path,
     project_root: str | None = None,
@@ -607,8 +610,7 @@ def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
     return result
 
 
-def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
-    """Initializes a new skill scaffold using the repo template logic."""
+def _init_skill_result(name: str, category: str, description: str) -> CallResult:
     result = CallResult()
     result.data["validation_commands"] = [
         _skills_validation_command(
@@ -620,28 +622,21 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
             description,
         )
     ]
+    return result
+
+
+def _init_skill_error(result: CallResult, code: str, message: str, fix_suggestion: str) -> CallResult:
+    result.status = "error"
+    result.errors.append(ErrorObject(code=code, message=message, fix_suggestion=fix_suggestion))
+    return result
+
+
+def _init_skill_destination(repo_root: Path, category: str) -> tuple[Path, str] | None:
     category_token = (category or "").strip()
     if not category_token:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message="Skill category cannot be empty.",
-                fix_suggestion="Use a category such as 'ui' or 'code_quality_review'.",
-            )
-        )
-        return result
+        return None
     if Path(category_token).is_absolute():
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message="Skill category must be repo-relative.",
-                fix_suggestion="Use a category token such as 'ui' (not an absolute path).",
-            )
-        )
-        return result
-
+        return None
     if category_token.startswith("Skills/"):
         out_dir = repo_root / category_token
         category_rel = category_token
@@ -651,40 +646,61 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
     try:
         out_dir.resolve().relative_to(repo_root.resolve())
     except ValueError:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_PATH_TRAVERSAL",
-                message=f"Category '{category}' escapes repository root.",
-                fix_suggestion="Use a category path under Skills/.",
-            )
-        )
-        return result
+        return None
+    return out_dir, category_rel
 
-    init_skill_script = _resolve_skill_builder_script(repo_root, "init_skill")
-    cmd = _get_python_command(["pyyaml"]) + [
-        init_skill_script,
-        name,
-        "--path",
-        str(out_dir),
-        "--description", description,
-        "--owner", "Agent Skills Kit",
-        "--review-cadence", "quarterly",
-        "--maturity", "experimental",
-        "--lifecycle-state", "incubating"
+
+def _init_skill_category_error(category: str) -> tuple[str, str, str]:
+    category_token = (category or "").strip()
+    if not category_token:
+        return "ERR_VALIDATION", "Skill category cannot be empty.", "Use a category such as 'ui' or 'code_quality_review'."
+    if Path(category_token).is_absolute():
+        return "ERR_VALIDATION", "Skill category must be repo-relative.", "Use a category token such as 'ui' (not an absolute path)."
+    return "ERR_PATH_TRAVERSAL", f"Category '{category}' escapes repository root.", "Use a category path under Skills/."
+
+
+def _init_skill_command(repo_root: Path, name: str, out_dir: Path, description: str) -> list[str]:
+    return _get_python_command(["pyyaml"]) + [
+        _resolve_skill_builder_script(repo_root, "init_skill"), name, "--path", str(out_dir),
+        "--description", description, "--owner", "Agent Skills Kit", "--review-cadence", "quarterly",
+        "--maturity", "experimental", "--lifecycle-state", "incubating",
     ]
 
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+
+def _run_skill_init(repo_root: Path, command: list[str]) -> subprocess.CompletedProcess[str] | Exception:
+    try:
+        return subprocess.run(
+            command, cwd=str(repo_root), capture_output=True, text=True, timeout=SKILL_INIT_TIMEOUT_SECONDS,
+            check=False, env=_subprocess_env_with_uv_cache(),
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return exc
+
+
+def _init_skill_runtime_error(result: CallResult, exc: Exception) -> CallResult:
+    return _init_skill_error(
+        result, "ERR_RUNTIME", f"Skill scaffold command could not complete: {exc}",
+        "Verify the managed PyYAML interpreter and Skill Factory scaffolder are available, then rerun ask skills init.",
+    )
+
+
+def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
+    """Initialize a new skill scaffold using the repository template logic."""
+    result = _init_skill_result(name, category, description)
+    destination = _init_skill_destination(repo_root, category)
+    if destination is None:
+        return _init_skill_error(result, *_init_skill_category_error(category))
+    out_dir, category_rel = destination
+    process = _run_skill_init(repo_root, _init_skill_command(repo_root, name, out_dir, description))
+    if isinstance(process, Exception):
+        return _init_skill_runtime_error(result, process)
 
     if process.returncode == 0:
         result.status = "success"
         result.data["message"] = f"Initialized skill '{name}' in '{category_rel}'"
         result.data["canonical_dest"] = category_rel
         result.metadata["next_steps"] = [f"ask skills audit {category_rel}/{name} --level strict"]
-    else:
-        result.status = "error"
-        result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip()))
-
-    return result
+        return result
+    return _init_skill_error(result, "ERR_RUNTIME", process.stderr.strip(), "Inspect the Skill Factory scaffold error and rerun ask skills init.")
 
 __all__ = [name for name in globals() if not name.startswith("__")]

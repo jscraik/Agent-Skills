@@ -343,14 +343,24 @@ def _runtime_evidence_schema_validation(repo_root: Path, card_paths: list[Path])
             "command": command,
             "reason": "No existing changed RuntimeCard files to schema-validate.",
         }
-    process = subprocess.run(
-        shlex.split(command),
-        cwd=str(repo_root),
-        capture_output=True,
-        text=True,
-        timeout=SCRIPT_TIMEOUT_SECONDS,
-        check=False,
-    )
+    try:
+        process = subprocess.run(
+            shlex.split(command),
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "status": "fail",
+            "command": command,
+            "returncode": None,
+            "findings": [],
+            "checked": [],
+            "stderr": f"Runtime evidence validator could not complete: {exc}",
+        }
     try:
         payload = json.loads(process.stdout) if process.stdout.strip() else {}
     except json.JSONDecodeError:

@@ -1,4 +1,5 @@
 from ask_evals_command_tests_core import *  # noqa: F403
+from ask_evals_command_tests_core import _write_example_skill
 
 def test_tessl_compat_parser_preserves_wrapped_plain_scalars() -> None:
     cases = evals._parse_tessl_eval_cases_compat(

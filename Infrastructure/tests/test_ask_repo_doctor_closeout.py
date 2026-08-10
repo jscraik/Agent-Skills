@@ -1,3 +1,4 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,6 +23,7 @@ from test_ask_repo_doctor import (  # noqa: E402  # test-only cross-module impor
     repo_doctor,
 )
 from ask.envelope import CallResult, ErrorObject  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.commands.repo_impl import _runtime_evidence_schema_validation  # noqa: E402  # test-only Infrastructure import; JSC-388; expires 2026-12-31; ADR: closeout subprocess failure coverage
 from helpers.ask_repo_doctor_fixtures import write_runtime_card as _write_runtime_card  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 
@@ -158,6 +160,22 @@ class TestAskRepoDoctorCloseout(unittest.TestCase):
         self.assertIn("changed_file_detection_failed", closeout["commit_readiness"]["blockers"])
         self.assertIn("git command could not start", closeout["changed_files_error"])
         self.assertIn("git missing", closeout["changed_files_error"])
+
+    def test_runtime_evidence_validation_normalizes_subprocess_startup_failures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            card_path = repo_root / "runtime-card.json"
+            card_path.write_text("{}", encoding="utf-8")
+            for error in (OSError("python3 missing"), subprocess.TimeoutExpired(["python3"], 30)):
+                with self.subTest(error=type(error).__name__), patch(
+                    "ask.commands.repo_impl.subprocess.run",
+                    side_effect=error,
+                ):
+                    report = _runtime_evidence_schema_validation(repo_root, [card_path])
+
+                self.assertEqual(report["status"], "fail")
+                self.assertIsNone(report["returncode"])
+                self.assertIn("could not complete", report["stderr"])
 
     def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]

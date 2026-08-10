@@ -78,6 +78,104 @@ def _assert_plugin_shaped_stage(staged_source: Path, skill_name: str) -> Path:
     return staged_skill
 
 
+def _handoff_lane_commands() -> dict[str, str]:
+    return {
+        "mechanical_validation": (
+            "./bin/ask skills audit Skills/example-skill --level strict --json --robot && "
+            "./bin/ask skills package verify Skills/example-skill --json --robot"
+        ),
+        "security_risk_modes": "./bin/ask sdk security risk-modes Skills/example-skill --preview --json --robot",
+        "scenario_quality": "./bin/ask sdk eval scenario-quality Skills/example-skill --preview --json --robot",
+        "scorer_quality": "./bin/ask sdk eval scorer-quality Skills/example-skill --preview --json --robot",
+        "scorer_calibration": "./bin/ask sdk eval scorer-calibration Skills/example-skill --preview --json --robot",
+        "deterministic_local_gates": "./bin/ask sdk eval local-gates Skills/example-skill --json --robot",
+        "oss-local": "./bin/ask sdk eval run Skills/example-skill --codex-profile oss-local --json --robot",
+        "oss-cloud": "./bin/ask sdk eval run Skills/example-skill --codex-profile oss-cloud --json --robot",
+        "tessl-local-proof": "./bin/ask sdk eval tessl-local-proof Skills/example-skill --execute --json --robot",
+        "tessl-live-dry-run": (
+            "./bin/ask evals run Skills/example-skill --tessl-live-private "
+            "--tessl-live-dry-run --json --robot"
+        ),
+    }
+
+
+def _handoff_lane_receipt(lane_id: str, candidate: dict[str, object]) -> dict[str, object]:
+    receipt: dict[str, object] = {"status": "pass", "lane": lane_id, "candidate": candidate}
+    if lane_id in {"oss-local", "oss-cloud"}:
+        receipt.update({"profile": lane_id, "codex_profile": lane_id, "codex_exec_invoked": True, "cases": [{"case_id": "smoke-example", "status": "pass"}]})
+    if lane_id == "tessl-local-proof":
+        receipt["receipt"] = {"schema_version": "skills-sdk.tessl-local-proof.v1", "status": "pass", "execute": True}
+    if lane_id == "tessl-live-dry-run":
+        receipt["tessl_eval"] = {"status": "pass", "live_private": True, "dry_run": True}
+    return receipt
+
+
+def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / skill_name
+    evidence_root.mkdir(parents=True, exist_ok=True)
+    candidate = build_candidate_identity(tmp_path, tmp_path / "Skills" / skill_name)
+    lanes = []
+    for lane_id, command in _handoff_lane_commands().items():
+        receipt_path = evidence_root / f"{lane_id}.json"
+        receipt_path.write_text(json.dumps(_handoff_lane_receipt(lane_id, candidate)) + "\n", encoding="utf-8")
+        lanes.append({
+            "id": lane_id,
+            "status": "pass",
+            "command": command,
+            "receipt_path": receipt_path.relative_to(tmp_path).as_posix(),
+        })
+    readiness_path = evidence_root / "eval-handoff-readiness.json"
+    readiness_path.write_text(
+        json.dumps({
+            "schema_version": "skills-sdk.eval-handoff-readiness-input.v2",
+            "candidate": candidate,
+            "issued_at": datetime.now(UTC).isoformat(),
+            "lanes": lanes,
+        }) + "\n",
+        encoding="utf-8",
+    )
+    return readiness_path
+
+
+def _write_example_skill(tmp_path: Path) -> Path:
+    skill_root = tmp_path / "Skills" / "example-skill"
+    references = skill_root / "references"
+    references.mkdir(parents=True)
+    agents = skill_root / "agents"
+    agents.mkdir(parents=True)
+    (skill_root / "SKILL.md").write_text(
+        '---\nname: example-skill\nmetadata:\n  version: "1.2.3"\n---\n# Example Skill\n',
+        encoding="utf-8",
+    )
+    (agents / "openai.yaml").write_text(
+        "schema_version: openai.skill.v1\nname: example-skill\n",
+        encoding="utf-8",
+    )
+    (references / "evals.yaml").write_text(EXAMPLE_TESSL_EVAL_YAML, encoding="utf-8")
+    (references / "contract.yaml").write_text(
+        "version: 1\ntessl_scenario_policy:\n  structure_only: true\n",
+        encoding="utf-8",
+    )
+    (skill_root / "secret-not-staged.txt").write_text("do not copy\n", encoding="utf-8")
+    _write_handoff_readiness(tmp_path, "example-skill")
+    candidate = build_candidate_identity(tmp_path, skill_root)
+    project_receipt = evals._tessl_project_link_receipt_path(tmp_path, "Skills/example-skill", candidate)
+    assert project_receipt is not None
+    project_receipt.parent.mkdir(parents=True, exist_ok=True)
+    project_receipt.write_text(
+        json.dumps({
+            "schema_version": "skills-sdk.tessl-project-link.v1",
+            "status": "pass",
+            "workspace": "jscraik",
+            "project": "example-skill",
+            "candidate": candidate,
+            "issued_at": datetime.now(UTC).isoformat(),
+        }) + "\n",
+        encoding="utf-8",
+    )
+    return skill_root
+
+
 def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     payload = 'tessl output\n{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}'
 
@@ -114,7 +212,7 @@ def test_shard_aggregate_dispatch_selects_preview_or_write_artifact_mode() -> No
     preview_aggregate.assert_called_once_with(REPO_ROOT, **expected_kwargs)
 
 
-def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
+def test_internal_skill_eval_subprocess_runs_in_isolated_session(tmp_path: Path) -> None:
     completed = subprocess.CompletedProcess(
         args=["run_skill_evals.py"],
         returncode=2,
@@ -124,7 +222,7 @@ def test_internal_skill_eval_subprocess_runs_in_isolated_session() -> None:
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run_mock:
         result = evals.run_evals(
-            REPO_ROOT,
+            tmp_path,
             "Skills/agent-ops/technical-writer",
             mode="release",
             runner="codex",

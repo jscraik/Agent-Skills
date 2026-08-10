@@ -29,6 +29,13 @@ from ask.skills_sdk.release_scenario_sets import (
     RELEASE_SCENARIO_TARGET,
     release_scenario_set_case_ids,
 )
+from .evals_shared import (
+    _summarize_tessl_live_eval_view as _build_tessl_live_eval_view,
+    _load_json_file,
+    _portable_command_part,
+    _sanitize_tessl_live_private_payload,
+    _tessl_archive_suffix,
+)
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -389,6 +396,18 @@ def _tessl_solution_missing_observable_output(solution: dict[str, object]) -> bo
         or "only the fixture/context files" in text
         or "only the fixture/skill package files" in text
         or "only the vendored skill package" in text
+    )
+
+
+def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, object]:
+    return _build_tessl_live_eval_view(
+        payload,
+        score_solution=_score_solution,
+        failed_criteria=_tessl_solution_failed_criteria,
+        missing_observable_output=_tessl_solution_missing_observable_output,
+        collect_metrics=_collect_tessl_metric_fields,
+        minimum_score=TESSL_LIVE_PRIVATE_MIN_SCORE,
+        target_score=TESSL_LIVE_PRIVATE_TARGET_SCORE,
     )
 
 
