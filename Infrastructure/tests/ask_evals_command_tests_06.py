@@ -248,7 +248,7 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
     assert "/.tessl/plugins/" in result.data["scenario_reference"]
     assert result.data["generated_output"].endswith("/target-tile/evals")
     live_source = Path(result.data["live_staged_source"])
-    assert "/ask-tessl-evals/" in str(live_source)
+    assert "/ask-tessl-evals-live/" in str(live_source)
     assert result.data["project_link"]["staged_source"] == str(live_source)
     assert (live_source / "skills" / "example-skill" / "SKILL.md").is_file()
     project_receipt = Path(tmp_path) / ".harness" / "evidence" / "tessl-project-links" / "example-skill"

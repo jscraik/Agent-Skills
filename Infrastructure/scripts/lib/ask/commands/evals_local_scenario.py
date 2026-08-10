@@ -77,7 +77,7 @@ def run_tessl_local_proof(
         "planned_commands": planned_commands,
         "commands": {},
         "policy": _tessl_local_proof_policy(normalized_workspace),
-        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
+        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals-live for inspection",
     }
     if not execute:
         return receipt
@@ -103,7 +103,7 @@ def run_tessl_local_proof(
         if payload.get("status") != "success":
             receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
             receipt["blocker"] = payload.get("blocker") or f"Tessl local proof step failed: {key}"
-            receipt["blocker_class"] = payload.get("blocker_class") or "failed_validation"
+            receipt["blocker_class"] = payload.get("blocker_class") or "blocked_validation"
             receipt["commands"] = commands
             return receipt
 
@@ -113,7 +113,7 @@ def run_tessl_local_proof(
         if payload.get("status") != "success":
             receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
             receipt["blocker"] = payload.get("blocker") or "Tessl review run did not meet the requested threshold."
-            receipt["blocker_class"] = payload.get("blocker_class") or "failed_validation"
+            receipt["blocker_class"] = payload.get("blocker_class") or "blocked_validation"
             receipt["commands"] = commands
             return receipt
 
@@ -296,7 +296,7 @@ def prepare_tessl_scenario_generation(
         if not dry_run:
             # Tessl binds a project to the concrete directory path. The live
             # evaluator later stages the private plugin under
-            # /tmp/ask-tessl-evals, so setup must link that exact stable path
+            # /tmp/ask-tessl-evals-live, so setup must link that exact stable path
             # rather than the scenario-generation target tile.
             live_staged_source, live_staged_files = _stage_tessl_live_private_source(
                 repo_root,

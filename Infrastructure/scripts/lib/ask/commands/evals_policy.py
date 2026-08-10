@@ -10,7 +10,7 @@ def _tessl_staging_root_template() -> str:
 
 def _tessl_live_staging_root_template() -> str:
     """Return the human-readable template for private Tessl live tile staging."""
-    return str(Path(tempfile.gettempdir()) / "ask-tessl-evals" / "<skill-path>-<sha12>")
+    return str(Path(tempfile.gettempdir()) / "ask-tessl-evals-live" / "<skill-path>-<sha12>")
 
 
 def _tessl_policy() -> dict:

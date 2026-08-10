@@ -495,7 +495,7 @@ def _stable_tessl_stage_parent(path: str) -> Path:
 def _stable_tessl_live_stage_parent(path: str) -> Path:
     safe_name = path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
-    return Path(tempfile.gettempdir()) / "ask-tessl-evals" / f"{safe_name}-{digest}"
+    return Path(tempfile.gettempdir()) / "ask-tessl-evals-live" / f"{safe_name}-{digest}"
 
 
 def _stable_tessl_local_install_workspace(path: str) -> Path:
@@ -530,7 +530,7 @@ def _sanitize_tessl_archive_ingestable_dirs(archive_root: Path) -> None:
 def _archive_stage_children(stage_root: Path, label: str) -> Path | None:
     if not stage_root.exists():
         return None
-    archive_root = stage_root.parent / f"{stage_root.name}-evidence-archive"
+    archive_root = stage_root.parent / "evidence-archive"
     legacy_archive_root = stage_root / "evidence-archive"
     if legacy_archive_root.exists():
         legacy_archive_dir = _unique_archive_dir(archive_root, "legacy-evidence-archive")

@@ -403,6 +403,28 @@ def test_tessl_local_proof_execute_uses_temp_install_workspace_and_no_publish(tm
         assert call.kwargs["env"]["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] == "0"
 
 
+def test_tessl_local_proof_uses_canonical_blocked_validation_fallback(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_run_tessl_local_command",
+            return_value={"status": "blocked", "blocker": "lint receipt was unavailable"},
+        ),
+    ):
+        receipt = evals.run_tessl_local_proof(
+            tmp_path,
+            "Skills/example-skill",
+            workspace="jscraik",
+            execute=True,
+        )
+
+    assert receipt["status"] == "blocked"
+    assert receipt["blocker_class"] == "blocked_validation"
+
+
 def test_tessl_live_private_requires_five_behavioral_scenarios(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")

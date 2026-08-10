@@ -456,7 +456,7 @@ def test_tessl_archive_retains_prior_scenarios_without_ingestable_path(tmp_path:
     archive_dir = evals._archive_stage_children(staged_root, "local-eval")
 
     assert archive_dir is not None
-    assert archive_dir.parent == tmp_path / "staged-evidence-archive"
+    assert archive_dir.parent == tmp_path / "evidence-archive"
     assert not (archive_dir / "scenarios").exists()
     assert (archive_dir / "archived-scenarios" / "old-case" / "task.md").read_text(encoding="utf-8") == (
         "prior scenario evidence\n"
@@ -473,7 +473,7 @@ def test_tessl_archive_sanitizes_existing_ingestable_archive_paths(tmp_path: Pat
     current_task.write_text("current scenario evidence\n", encoding="utf-8")
 
     archive_dir = evals._archive_stage_children(staged_root, "local-eval")
-    external_archive_root = tmp_path / "staged-evidence-archive"
+    external_archive_root = tmp_path / "evidence-archive"
 
     assert archive_dir is not None
     assert not (staged_root / "evidence-archive").exists()
@@ -483,6 +483,18 @@ def test_tessl_archive_sanitizes_existing_ingestable_archive_paths(tmp_path: Pat
     assert not (archive_dir / "scenarios").exists()
     assert (archive_dir / "archived-scenarios" / "current-case" / "task.md").read_text(encoding="utf-8") == (
         "current scenario evidence\n"
+    )
+
+
+def test_tessl_local_and_live_staging_use_separate_stable_roots() -> None:
+    local_root = evals._stable_tessl_stage_parent("Skills/example-skill")
+    live_root = evals._stable_tessl_live_stage_parent("Skills/example-skill")
+
+    assert local_root.parent.name == "ask-tessl-evals"
+    assert live_root.parent.name == "ask-tessl-evals-live"
+    assert local_root != live_root
+    assert evals._tessl_live_private_policy("jscraik")["stable_staging_root"].startswith(
+        str(live_root.parent)
     )
 
 
