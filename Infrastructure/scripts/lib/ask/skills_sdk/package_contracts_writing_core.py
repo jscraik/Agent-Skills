@@ -203,7 +203,7 @@ def _long_paragraphs_without_behavior(text: str) -> list[dict[str, Any]]:
 def _duplicate_instruction_lines(text: str) -> list[dict[str, Any]]:
     """Return repeated instruction-shaped lines that should be deduplicated."""
     seen: dict[str, dict[str, Any]] = {}
-    for line_number, item in enumerate(_construction_line_items(text), start=1):
+    for line_number, item in _construction_line_items(text):
         tokens = _token_set(item)
         if len(tokens) < CONSTRUCTION_DUPLICATE_LINE_WORD_LIMIT:
             continue
