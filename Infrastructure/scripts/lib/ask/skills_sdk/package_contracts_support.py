@@ -1,5 +1,28 @@
-from .package_contracts_core import *  # noqa: F403
-from .package_contracts_rubric import *  # noqa: F403
+from .package_contracts_core import (
+    Any,
+    DESCRIPTION_ACTION_TERMS,
+    GENERIC_PACKAGE_FILE_STEMS,
+    GENERIC_REFERENCE_HEADING_TERMS,
+    PACKAGE_FILE_STEM_RE,
+    PACKAGE_IGNORED_FILE_NAMES,
+    Path,
+    SKILLFLOW_EXECUTION_MODES,
+    SKILLFLOW_NODE_TYPES,
+    SKILLFLOW_SCHEMA_PATH,
+    SKILLFLOW_SCHEMA_VERSION,
+    SKILL_DESCRIPTION_HANDLE_RE,
+    _token_set,
+    json,
+    metadata_value,
+    re,
+    read_structured_reference,
+    repo_relative_path,
+)
+from .package_contracts_rubric import (
+    package_local_reference_path,
+    package_local_regular_file,
+    skill_markdown_text,
+)
 
 def package_file_stem_ok(path: Path) -> bool:
     """Return whether a package support filename uses purpose-readable kebab-case."""
@@ -41,6 +64,128 @@ def markdown_reference_heading_weak(path: Path, text: str) -> bool:
     if meaningful_stem_tokens and not (meaningful_stem_tokens & meaningful_title_tokens):
         return True
     return False
+
+
+def _package_support_files(skill_md: Path | None) -> list[Path]:
+    """Return package-local support files that should have a routing pointer."""
+    if not skill_md:
+        return []
+    package_root = skill_md.parent
+    support_roots = [
+        package_root / "references",
+        package_root / "scripts",
+        package_root / "assets",
+        package_root / "agents",
+        package_root / "workflows",
+    ]
+    files: list[Path] = []
+    for root in support_roots:
+        if not root.is_dir():
+            continue
+        for candidate in sorted(path for path in root.rglob("*") if path.is_file()):
+            if candidate.name.startswith(".") or candidate.name in PACKAGE_IGNORED_FILE_NAMES:
+                continue
+            files.append(candidate)
+    return files
+
+
+def _package_text_surfaces(skill_md: Path | None, text: str) -> str:
+    """Return the bounded package text used to detect routed support files."""
+    if not skill_md:
+        return text
+    surfaces = [text]
+    for relative_path in (
+        "agents/openai.yaml",
+        "references/contract.yaml",
+        "references/evals.yaml",
+        "references/knowledge-capsule-routing.md",
+        "references/source-provenance.md",
+        "references/source-context.yaml",
+        "workflows/skillflow.json",
+    ):
+        candidate = skill_md.parent / relative_path
+        if not candidate.is_file():
+            continue
+        try:
+            surfaces.append(candidate.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+    return "\n".join(surfaces)
+
+
+def _orphaned_support_files(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+) -> list[str]:
+    """Return support files not mentioned by package entrypoints or contracts."""
+    if not skill_md:
+        return []
+    package_text = _package_text_surfaces(skill_md, text)
+    package_root = skill_md.parent
+    orphaned: list[str] = []
+    implicitly_routed = {
+        "agents/openai.yaml",
+        "references/contract.yaml",
+        "references/evals.yaml",
+        "references/knowledge-capsule.manifest.yaml",
+        "references/knowledge-demand.yaml",
+        "references/task-profile.json",
+    }
+    for candidate in _package_support_files(skill_md):
+        relative = candidate.relative_to(package_root).as_posix()
+        if relative in implicitly_routed:
+            continue
+        if relative.startswith("references/evals/") and (
+            package_root / "references" / "evals.yaml"
+        ).is_file():
+            continue
+        if relative.startswith("references/scorer-calibration/") and (
+            package_root / "references" / "scorer-calibration" / "manifest.json"
+        ).is_file():
+            continue
+        if relative in package_text or candidate.name in package_text:
+            continue
+        orphaned.append(repo_relative_path(repo_root, candidate) if repo_root else relative)
+    return [path for path in orphaned if path]
+
+
+def _package_relative_path(skill_md: Path | None, path: str) -> str:
+    """Return a package-relative path when a repo-relative path points into a skill."""
+    if not skill_md:
+        return path
+    package_root = skill_md.parent
+    marker = f"{package_root.as_posix()}/"
+    if path.startswith(marker):
+        return path.removeprefix(marker)
+    parts = path.split("/")
+    for index, part in enumerate(parts):
+        if part == "references":
+            return "/".join(parts[index:])
+    return path
+
+
+def _manifest_orphaned_bundle_files(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+) -> list[str]:
+    """Return bundle support files that must be routed when a capsule manifest exists."""
+    if not skill_md:
+        return []
+    manifest_path = skill_md.parent / "references" / "knowledge-capsule.manifest.yaml"
+    if not manifest_path.is_file():
+        return []
+    orphaned = _orphaned_support_files(repo_root, skill_md, text)
+    bundle_paths: list[str] = []
+    for path in orphaned:
+        package_path = _package_relative_path(skill_md, path)
+        if package_path.startswith("references/knowledge-capsules/") or package_path in {
+            "references/source-context.yaml",
+            "references/source-provenance.md",
+        }:
+            bundle_paths.append(path)
+    return sorted(bundle_paths)
 
 
 def structured_reference_has_description(path: Path, text: str) -> bool:

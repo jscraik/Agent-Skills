@@ -1,4 +1,18 @@
-from ask_skills_package_contract_tests_01 import *  # noqa: F403
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+from ask_skills_package_contract_tests_core import (
+    REPO_ROOT,
+    _AskSkillsPackageContractBase,
+    _load_snapshot,
+    _snapshot_projection,
+    _validate_schema_subset,
+)
+from ask.commands.skills_impl import skills_package
+from ask.skills_sdk import package_contracts
+from ask.skills_sdk.contracts import read_skill_frontmatter_fields
 
 class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
     def test_reference_inventory_blocks_generic_markdown_headings(self) -> None:
@@ -508,5 +522,3 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
             (skill_dir / 'SKILL.md').write_text('---\nversion: "2.0.0"\nmetadata:\n  compatible_roles:\n    - worker\n  runtime_needs:\n    - filesystem\n  maturity: beta\n  provenance: internal\n  share_readiness: ready\n---\n\n# Packaged Skill\n', encoding='utf-8')
             strict_incomplete_package = skills_package(repo_root, 'Skills/agent-ops/packaged-skill', strict=True).data['skill_package']
         self.assertEqual({'valid_share_ready_package': _snapshot_projection(valid_package), 'missing_source_package': _snapshot_projection(missing_package), 'strict_incomplete_package': _snapshot_projection(strict_incomplete_package)}, snapshots)
-
-__all__ = [name for name in globals() if not name.startswith("__")]

@@ -2,6 +2,7 @@
 
 from types import FunctionType
 from typing import Any
+from pathlib import Path
 
 from . import package_contracts_core as _core
 from . import package_contracts_optimization as _optimization
@@ -11,6 +12,7 @@ from . import package_contracts_rubric as _rubric
 from . import package_contracts_support as _support
 from . import package_contracts_writing_checks as _writing_checks
 from . import package_contracts_writing_core as _writing_core
+from .package_contracts_readiness import skill_package_contract as _skill_package_contract_impl
 
 
 def _facade_value(value: Any, module_name: str) -> Any:
@@ -42,9 +44,6 @@ for _module in (
         globals()[_name] = _facade_value(getattr(_module, _name), _module.__name__)
 
 del _module, _name
-
-_skill_package_contract_impl = skill_package_contract
-
 
 def skill_package_contract(
     repo_root: Path,

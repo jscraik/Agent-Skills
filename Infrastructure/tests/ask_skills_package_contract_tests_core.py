@@ -1,20 +1,12 @@
 import json
-import os
 import sys
-import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-
-from ask.commands.skills_impl import skills_package  # noqa: E402
-from ask.skills_sdk.contracts import read_skill_frontmatter_fields  # noqa: E402
-from ask.skills_sdk import package_contracts  # noqa: E402
-
 
 SUPPORTED_SCHEMA_KEYS = {
     "$id",

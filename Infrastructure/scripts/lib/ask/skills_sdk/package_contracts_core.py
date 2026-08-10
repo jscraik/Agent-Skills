@@ -12,8 +12,6 @@ from ask.skills_sdk.contracts import (
     PACKAGE_CONTRACT_FIELDS,
     parse_frontmatter_scalar,
 )
-from ask.skills_sdk.skill_authoring_contract import authoring_contract
-
 try:
     import yaml  # type: ignore
 except ImportError:  # pragma: no cover - exercised only in minimal runtimes
@@ -679,4 +677,53 @@ ANALYTIC_RUBRIC_FIELDS = {
     "scoring",
 }
 ANALYTIC_RUBRIC_SCORES = {"5", "4", "3", "2", "1"}
+
+
+def _token_set(text: str) -> set[str]:
+    """Return normalized natural-language tokens without broad regex parsing."""
+    punctuation = ".,:;!?()[]{}\"'<>"
+    return {
+        token.strip(punctuation).lower()
+        for token in text.replace("/", " ").replace("-", " ").split()
+        if token.strip(punctuation)
+    }
+
+
+def skill_command_candidates(text: str) -> list[str]:
+    """Extract a conservative command list from skill prose."""
+    commands: list[str] = []
+    for line in text.splitlines():
+        command = normalized_command_candidate(line)
+        if command and command not in commands:
+            commands.append(command)
+    return commands[:8]
+
+
+def normalized_command_candidate(line: str) -> str | None:
+    """Return a command only when the line itself is shaped like a command."""
+    stripped = line.strip().strip(chr(96))
+    while stripped.startswith(("-", "*")):
+        stripped = stripped[1:].strip()
+    if len(stripped) >= 3 and stripped[0].isdigit() and stripped[1] == ".":
+        stripped = stripped[2:].strip()
+    stripped = stripped.strip(chr(96))
+    if stripped.lower().startswith("command:"):
+        stripped = stripped.split(":", 1)[1].strip().strip(chr(96))
+    for prefix in ("./bin/ask ", "python3 ", "bash "):
+        if stripped.startswith(prefix):
+            return stripped
+    return None
+
+
+def sdk_contract_field_present(field: str, value: Any) -> bool:
+    """Return whether an SDK package contract field has real declared evidence."""
+    if field == "evals" and isinstance(value, dict):
+        return bool(value.get("declared"))
+    if field in {"agent_metadata", "reference_contract", "task_profile"} and isinstance(value, dict):
+        return bool(value.get("declared"))
+    if field == "portability_profile" and isinstance(value, dict):
+        return any(bool(item) for item in value.values())
+    return bool(value)
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]

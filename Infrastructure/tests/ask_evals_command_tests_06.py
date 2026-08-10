@@ -630,7 +630,7 @@ def test_run_evals_blocks_success_without_report_directory(tmp_path: Path) -> No
 
 def test_eval_closeout_validation_blocks_non_pass_mutation() -> None:
     closeout = {
-        "schema_version": "jscraik.eval-closeout.v1",
+        "schema_version": evals.EVAL_CLOSEOUT_SCHEMA_VERSION,
         "status": "blocked",
         "skill_path": "Skills/example/SKILL.md",
         "mode": "smoke",
@@ -668,7 +668,7 @@ def test_eval_closeout_doctor_reports_missing_case_result(tmp_path: Path) -> Non
     case_dir.mkdir(parents=True)
     (case_dir / "prompt.txt").write_text("Task: sparse brief\n", encoding="utf-8")
     closeout = {
-        "schema_version": "jscraik.eval-closeout.v1",
+        "schema_version": evals.EVAL_CLOSEOUT_SCHEMA_VERSION,
         "status": "blocked",
         "skill_path": "Skills/example/SKILL.md",
         "mode": "smoke",
