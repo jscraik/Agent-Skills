@@ -90,6 +90,7 @@ def test_tessl_live_private_requires_explicit_external_effect_permission(monkeyp
 
     assert blocked is not None
     assert blocked["status"] == "blocked"
+    assert blocked["blocker_class"] == "blocked_validation"
     assert "ASK_EXTERNAL_EFFECTS=allow" in blocked["blocker"]
 
 
