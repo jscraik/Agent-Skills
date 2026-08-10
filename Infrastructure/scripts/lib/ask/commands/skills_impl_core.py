@@ -690,16 +690,37 @@ def _run_validation_command(
     data_key: str,
     failure_message: str,
     fix_suggestion: Optional[str] = None,
+    timeout: float = 600.0,
 ) -> CallResult:
     """Run a validation subprocess and return a CallResult with captured output."""
     result = CallResult()
-    proc = subprocess.run(
-        command,
-        cwd=str(repo_root),
-        capture_output=True,
-        text=True,
-        env=_subprocess_env_with_uv_cache(),
-    )
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+            env=_subprocess_env_with_uv_cache(),
+        )
+    except subprocess.TimeoutExpired as exc:
+        result.status = "error"
+        result.data[data_key] = {
+            "command": command,
+            "exit_code": None,
+            "stdout": exc.stdout or "",
+            "stderr": f"validation command timed out after {timeout} seconds",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_TIMEOUT",
+                message=f"{failure_message} (timed out after {timeout} seconds)",
+                fix_suggestion=fix_suggestion,
+            )
+        )
+        return result
+
     result.data[data_key] = {
         "command": command,
         "exit_code": proc.returncode,
