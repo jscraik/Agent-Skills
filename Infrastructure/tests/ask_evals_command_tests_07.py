@@ -277,13 +277,15 @@ def test_run_evals_live_private_uses_jscraik_default_workspace(tmp_path: Path, m
     monkeypatch.delenv("TESSL_WORKSPACE_NAME", raising=False)
     _write_example_skill(tmp_path)
 
-    result = evals.run_evals(
-        tmp_path,
-        "Skills/example-skill",
-        mode="smoke",
-        dashboard=False,
-        tessl_live_private=True,
-    )
+    with mock.patch.object(evals.subprocess, "run") as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            dashboard=False,
+            tessl_live_private=True,
+        )
+    run.assert_not_called()
 
     assert result.status == "error"
     assert result.data["tessl_workspace"] == "jscraik"
