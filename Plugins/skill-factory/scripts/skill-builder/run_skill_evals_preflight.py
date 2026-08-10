@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from run_skill_evals_runners import *  # noqa: F403
 
 def _filter_cases(
@@ -375,6 +377,7 @@ def _preflight_codex_live_runner(
     return errors, warnings
 
 
+@lru_cache(maxsize=None)
 def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
     """
     Retrieve and cache the combined help text for the Codex CLI.
@@ -385,10 +388,6 @@ def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
     Returns:
         Optional[str]: Combined stdout and stderr produced by running the help command, or `None` if the executable is not available or the help invocation failed.
     """
-    key = str(codex_bin.resolve()) if codex_bin else "codex"
-    if key in _CODEX_HELP_CACHE:
-        return _CODEX_HELP_CACHE[key]
-
     cmd = _codex_exec_prefix(codex_bin) + ["--help"]
     env = os.environ.copy()
     if codex_bin:
@@ -396,12 +395,10 @@ def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
 
     try:
         proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10, start_new_session=True)
-    except Exception:  # noqa: BLE001
-        _CODEX_HELP_CACHE[key] = None
+    except (OSError, sp.SubprocessError):
         return None
 
     text = (proc.stdout or "") + "\n" + (proc.stderr or "")
-    _CODEX_HELP_CACHE[key] = text
     return text
 
 

@@ -27,8 +27,69 @@ class TesslScenarioGenerationRequest:
     dry_run: bool
 
 
-def run_tessl_local_proof(repo_root: Path, request: TesslLocalProofRequest) -> dict[str, object]:
+def _coerce_tessl_local_proof_request(
+    request_or_path: TesslLocalProofRequest | str | None,
+    legacy_options: dict[str, object],
+) -> TesslLocalProofRequest:
+    """Accept the request object while retaining the former path-and-keyword form."""
+    path, workspace, execute, include_review, review_threshold, timeout_seconds = _legacy_tessl_local_proof_values(
+        legacy_options
+    )
+    if isinstance(request_or_path, TesslLocalProofRequest):
+        if any(value is not None for value in (path, workspace, execute, include_review, review_threshold, timeout_seconds)):
+            raise TypeError("TesslLocalProofRequest cannot be combined with legacy proof options")
+        return request_or_path
+    if request_or_path is None:
+        request_or_path = path
+    elif path is not None:
+        raise TypeError("run_tessl_local_proof received both a positional path and path keyword")
+    if not isinstance(request_or_path, str):
+        raise TypeError("run_tessl_local_proof expects a TesslLocalProofRequest or skill path string")
+    if workspace is None:
+        raise TypeError("run_tessl_local_proof requires workspace when called with a skill path")
+    return TesslLocalProofRequest(
+        path=request_or_path,
+        workspace=workspace,
+        execute=False if execute is None else execute,
+        include_review=False if include_review is None else include_review,
+        review_threshold=TESSL_LOCAL_REVIEW_MIN_SCORE if review_threshold is None else review_threshold,
+        timeout_seconds=180 if timeout_seconds is None else timeout_seconds,
+    )
+
+
+def _legacy_tessl_local_proof_values(legacy_options: dict[str, object]) -> tuple[object | None, ...]:
+    """Validate and consume the legacy local-proof keyword options."""
+    allowed = {
+        "path",
+        "workspace",
+        "execute",
+        "include_review",
+        "review_threshold",
+        "timeout_seconds",
+    }
+    unexpected = sorted(set(legacy_options) - allowed)
+    if unexpected:
+        raise TypeError(f"run_tessl_local_proof received unexpected option(s): {', '.join(unexpected)}")
+    return (
+        legacy_options.pop("path", None),
+        legacy_options.pop("workspace", None),
+        legacy_options.pop("execute", None),
+        legacy_options.pop("include_review", None),
+        legacy_options.pop("review_threshold", None),
+        legacy_options.pop("timeout_seconds", None),
+    )
+
+
+def run_tessl_local_proof(
+    repo_root: Path,
+    request_or_path: TesslLocalProofRequest | str | None = None,
+    **legacy_options: object,
+) -> dict[str, object]:
     """Stage a Tessl package and optionally run local lint, pack, file install, and review checks."""
+    request = _coerce_tessl_local_proof_request(
+        request_or_path,
+        legacy_options,
+    )
     proof_path = _tessl_proof_path(request.path)
     try:
         normalized_workspace = _validate_tessl_workspace(request.workspace)

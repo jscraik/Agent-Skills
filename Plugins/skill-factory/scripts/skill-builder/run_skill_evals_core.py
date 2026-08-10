@@ -40,6 +40,7 @@ import tempfile
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -49,6 +50,14 @@ for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
 sys.path.insert(0, str(WORKSPACE_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+
+def _reexec_with_preferred_yaml(preferred: Path, facade: Path) -> None:
+    """Re-execute the public facade using the approved PyYAML interpreter."""
+    reexec_env = dict(os.environ)
+    reexec_env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
+    os.execve(str(preferred), [str(preferred), str(facade), *sys.argv[1:]], reexec_env)
+
 
 try:
     import yaml  # type: ignore
@@ -70,10 +79,8 @@ except ModuleNotFoundError:  # pragma: no cover
         sys.path.insert(0, str(preferred_site_packages))
         import yaml  # type: ignore
     elif preferred.exists() and not already_reexec:
-        env = dict(os.environ)
-        env["SKILL_CREATOR_PYYAML_REEXEC"] = "1"
         facade = SCRIPT_DIR / "run_skill_evals.py"
-        os.execve(str(preferred), [str(preferred), str(facade), *sys.argv[1:]], env)
+        _reexec_with_preferred_yaml(preferred, facade)
     else:
         sys.stderr.write(
             "ERROR: PyYAML is required to run run_skill_evals.py.\n\n"
@@ -104,20 +111,19 @@ from ask.skills_sdk.ab_transport_contracts import (  # noqa: E402
 )
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
-_CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
-_RUNNER_CHOICES = ["codex", "codex-kimi", "codex-zai", "openai", "discovery-smoke"]
-_TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
-_EVAL_MODE_CHOICES = ["standard", "smoke", "release"]
+_RUNNER_CHOICES = ("codex", "codex-kimi", "codex-zai", "openai", "discovery-smoke")
+_TIMEOUT_PROFILE_CHOICES = ("default", "codex-heavy", "discovery-heavy")
+_EVAL_MODE_CHOICES = ("standard", "smoke", "release")
 _CODEX_AUTH_ENV_VARS = ("OPENAI_API_KEY", "OPENAI_API_TOKEN", "OPENAI_ACCESS_TOKEN")
-_BASELINE_TYPE_CHOICES = {
+_BASELINE_TYPE_CHOICES = frozenset({
     "no_skill",
     "previous_version",
     "prior_skill_snapshot",
     "neutral_repo_baseline",
     "competing_skill",
     "human_reference",
-}
-_KNOWN_HARD_GATES = {
+})
+_KNOWN_HARD_GATES = frozenset({
     "no_false_completion",
     "no_validation_bypass",
     "no_unsafe_command",
@@ -125,31 +131,31 @@ _KNOWN_HARD_GATES = {
     "no_unredacted_secret",
     "no_unresolved_source_projection_ownership",
     "versioned_release_evidence",
-}
-_ROUND_STATE_CHOICES = {
+})
+_ROUND_STATE_CHOICES = frozenset({
     "prepared",
     "running",
     "evidence_captured",
     "reviewed",
     "decision_recorded",
     "blocked",
-}
-_READINESS_STATE_CHOICES = {
+})
+_READINESS_STATE_CHOICES = frozenset({
     "starter_valid",
     "comparison_incomplete",
     "comparison_blocked",
     "downstream_ready",
-}
-_METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
-RUNNER_BLOCKER_TAXONOMY: Dict[str, str] = {
+})
+_METRIC_AVAILABILITY_CHOICES = frozenset({"available", "unavailable"})
+RUNNER_BLOCKER_TAXONOMY: Mapping[str, str] = MappingProxyType({
     "blocked_validation": "The selected eval configuration was invalid or produced no executable case evidence.",
     "blocked_user_input": "The runner requested user input and should not be classified as a hang.",
     "blocked_auth": "The runner stopped on authentication or credential setup.",
     "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
     "timeout_no_output": "The runner timed out without producing final output.",
     "timeout_partial_output": "The runner timed out after producing partial output.",
-}
-SNYK_MANIFEST_NAMES: Set[str] = {
+})
+SNYK_MANIFEST_NAMES: frozenset[str] = frozenset({
     "package.json",
     "package-lock.json",
     "pnpm-lock.yaml",
@@ -174,9 +180,9 @@ SNYK_MANIFEST_NAMES: Set[str] = {
     "Paket.dependencies",
     "pubspec.yaml",
     "Package.swift",
-}
+})
 SNYK_MANIFEST_SUFFIXES: Tuple[str, ...] = (".csproj", ".fsproj", ".vbproj")
-SNYK_MANIFEST_EXCLUDED_DIRS: Set[str] = {
+SNYK_MANIFEST_EXCLUDED_DIRS: frozenset[str] = frozenset({
     ".git",
     ".venv",
     "__pycache__",
@@ -186,10 +192,10 @@ SNYK_MANIFEST_EXCLUDED_DIRS: Set[str] = {
     "artifacts",
     "fixtures",
     "tmp",
-}
+})
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
-_SCRIPT_OPTIONS: Set[str] = {
+_SCRIPT_OPTIONS: frozenset[str] = frozenset({
     "--list-cases",
     "--runner",
     "--runners",
@@ -226,7 +232,7 @@ _SCRIPT_OPTIONS: Set[str] = {
     "--tier2-mode",
     "-h",
     "--help",
-}
+})
 
 
 def _resolve_skill_md_path(path_like: str) -> Path:
@@ -304,7 +310,7 @@ def _git_metadata(path: Path) -> Dict[str, Optional[str]]:
                 capture_output=True,
                 text=True,
             )
-        except Exception:
+        except OSError:
             metadata[key] = None
             continue
         if proc.returncode == 0:
@@ -357,9 +363,9 @@ class EvalCase:
     pass_rate_calibration_artifact: Optional[str] = None
 
 
-_VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
+_VALID_CATEGORIES = frozenset({"happy", "edge", "negative", "pressure"})
 _RITEWAY_CASE_FIELDS = ("unit", "given", "should", "actual_artifact", "expected_artifact", "reproduce")
-_GENERIC_ACCEPTANCE_TERMS = {
+_GENERIC_ACCEPTANCE_TERMS = frozenset({
     "done",
     "pass",
     "passes",
@@ -375,7 +381,7 @@ _GENERIC_ACCEPTANCE_TERMS = {
     "uses skill",
     "skill selected",
     "expected skill",
-}
+})
 
 
 def _utc_now_iso() -> str:

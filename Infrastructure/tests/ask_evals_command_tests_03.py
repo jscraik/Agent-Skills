@@ -358,6 +358,21 @@ def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands
     run.assert_not_called()
 
 
+def test_tessl_local_proof_preserves_legacy_path_keyword_contract(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    receipt = evals.run_tessl_local_proof(
+        tmp_path,
+        "Skills/example-skill",
+        workspace="jscraik",
+    )
+
+    assert receipt["status"] == "preview"
+    assert receipt["source_path"] == "Skills/example-skill"
+    assert receipt["execute"] is False
+    assert receipt["include_review"] is False
+
+
 def test_tessl_local_proof_accepts_skill_md_path(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
 
