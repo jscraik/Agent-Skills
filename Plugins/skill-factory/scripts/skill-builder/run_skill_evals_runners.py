@@ -88,7 +88,15 @@ def _oss_cloud_exec_command(context: _CodexExecContext) -> list[str]:
     env_file = actual_opaque_env_path()
     if env_file is None:
         raise ValueError("oss-cloud execution requires an operator-approved opaque environment stream")
-    relative_output = request.output_last_message_path.resolve().relative_to(request.workspace_root.resolve())
+    resolved_output = request.output_last_message_path.resolve()
+    resolved_root = request.workspace_root.resolve()
+    try:
+        relative_output = resolved_output.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(
+            "run_skill_evals: oss-cloud execution requires output_last_message_path inside the workspace root "
+            f"({resolved_output} is outside {resolved_root})"
+        ) from exc
     logical_command = [
         "codex", "exec", "--profile", "oss-cloud", "-c", 'approval_policy="on-request"',
         "--cd", ".", "--sandbox", "read-only", "--output-last-message",
