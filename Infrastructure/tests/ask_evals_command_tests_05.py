@@ -120,6 +120,30 @@ def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:
     assert "workspace" in tessl_eval["blocker"].lower()
 
 
+def test_tessl_live_private_blocks_when_preflight_evidence_is_not_an_object(tmp_path: Path) -> None:
+    staged_source = tmp_path / "staged"
+    staged_source.mkdir()
+
+    with (
+        mock.patch.object(evals, "_stage_tessl_live_private_source", return_value=(staged_source, [])),
+        mock.patch.object(
+            evals,
+            "_tessl_live_oss_scenario_parity",
+            side_effect=evals.EvalArtifactReadError("JSON evidence artifact must be an object: handoff.json"),
+        ),
+    ):
+        result = evals._run_tessl_live_private_eval(
+            tmp_path,
+            "Skills/example-skill",
+            workspace="jscraik",
+            dry_run=True,
+        )
+
+    assert result["status"] == "blocked"
+    assert result["blocker_class"] == "blocked_validation"
+    assert result["raw_error"] == "JSON evidence artifact must be an object: handoff.json"
+
+
 def _completed_tessl_view() -> mock.Mock:
     return mock.Mock(returncode=0, stdout=json.dumps({"data": {"attributes": {
         "agent": "claude", "model": "deepseek-v4-flash", "scorerAgent": "glm", "scorerModel": "glm-5.1",

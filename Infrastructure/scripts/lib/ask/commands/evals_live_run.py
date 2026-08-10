@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .evals_local_scenario import *  # noqa: F403
+from .evals_shared import EvalArtifactReadError
 
 def _tessl_eval_result_common(
     *,
@@ -37,6 +38,40 @@ def _tessl_eval_result_common(
         "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
         "policy": _tessl_live_private_policy(workspace),
     }
+
+
+def _tessl_live_scenario_preflight(
+    repo_root: Path,
+    path: str,
+    staged_source: Path,
+    common: dict,
+) -> dict | None:
+    try:
+        parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
+        budget_preflight = _tessl_live_budget_preflight(staged_source)
+    except EvalArtifactReadError as exc:
+        return {
+            "status": "blocked", **common, "raw_output": "", "raw_error": str(exc),
+            "blocker": "Tessl live preflight could not read a JSON evidence artifact.",
+            "blocker_class": "blocked_validation",
+        }
+    common["oss_scenario_parity"] = parity
+    common["budget_preflight"] = budget_preflight
+    if parity.get("status") != "pass":
+        return {
+            "status": "blocked", **common, "raw_output": "", "raw_error": "",
+            "blocker": "Tessl live scenario set includes scenarios without both oss-local and oss-cloud pass evidence.",
+            "blocker_class": "blocked_validation",
+        }
+    if budget_preflight.get("status") != "pass":
+        blockers = budget_preflight.get("blockers")
+        blocker_text = "; ".join(str(item) for item in blockers) if isinstance(blockers, list) else None
+        return {
+            "status": "blocked", **common, "raw_output": "", "raw_error": "",
+            "blocker": blocker_text or "Tessl live budget preflight blocked the staged scenario set.",
+            "blocker_class": budget_preflight.get("blocker_class") or "blocked_validation",
+        }
+    return None
 
 
 def _run_tessl_live_private_eval(
@@ -92,33 +127,9 @@ def _run_tessl_live_private_eval(
         project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         dry_run=dry_run,
     )
-    parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
-    budget_preflight = _tessl_live_budget_preflight(staged_source)
-    common["oss_scenario_parity"] = parity
-    common["budget_preflight"] = budget_preflight
-    if parity.get("status") != "pass":
-        return {
-            "status": "blocked",
-            **common,
-            "raw_output": "",
-            "raw_error": "",
-            "blocker": (
-                "Tessl live scenario set includes scenarios without both oss-local "
-                "and oss-cloud pass evidence."
-            ),
-            "blocker_class": "blocked_validation",
-        }
-    if budget_preflight.get("status") != "pass":
-        blockers = budget_preflight.get("blockers")
-        blocker_text = "; ".join(str(item) for item in blockers) if isinstance(blockers, list) else None
-        return {
-            "status": "blocked",
-            **common,
-            "raw_output": "",
-            "raw_error": "",
-            "blocker": blocker_text or "Tessl live budget preflight blocked the staged scenario set.",
-            "blocker_class": budget_preflight.get("blocker_class") or "blocked_validation",
-        }
+    preflight_block = _tessl_live_scenario_preflight(repo_root, path, staged_source, common)
+    if preflight_block:
+        return preflight_block
     if dry_run:
         return {
             "status": "pass",
