@@ -193,7 +193,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         doc = load_skill(args.path, strict_line1=args.strict_frontmatter_line1)
     except Exception as e:
-        print(f"ERROR: {e}", file=sys.stderr)
+        print(
+            f"skill_gate: ERROR loading {args.path}: {type(e).__name__}: {e}",
+            file=sys.stderr,
+        )
         return 1
 
     findings = run_gate(
