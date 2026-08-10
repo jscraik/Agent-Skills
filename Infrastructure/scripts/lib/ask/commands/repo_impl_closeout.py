@@ -43,7 +43,12 @@ def _shape_baseline(repo_root: Path, baseline_path: str | None) -> dict[str, Any
     ]
     siblings: list[str] = []
     if baseline_path:
-        relative = Path(baseline_path).resolve().relative_to(repo_root.resolve()).as_posix()
+        try:
+            relative = Path(baseline_path).resolve().relative_to(repo_root.resolve()).as_posix()
+        except ValueError as exc:
+            raise RuntimeError(
+                f"shape baseline path must stay inside the repository: {baseline_path}"
+            ) from exc
         parent = Path(relative).parent.as_posix()
         siblings = [
             path
