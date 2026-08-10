@@ -124,7 +124,6 @@ def skills_doctor(
     )
     if (
         target_kind != "command_handle"
-        and not projection_path_value
         and target_ownership.get("classification")
         in {
             "generated_runtime_projection",
