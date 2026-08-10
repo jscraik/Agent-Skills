@@ -38,7 +38,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         return result
 
     # Parse skill name from URL for preview
-    skill_name = url.split("/")[-1].replace(".git", "") if "/" in url else url
+    skill_name = (url.split("/")[-1] if "/" in url else url).removesuffix(".git")
     target_path = dest_path / skill_name
     intake_decision = _skill_install_intake_decision(repo_root, skill_name, target_path)
 
