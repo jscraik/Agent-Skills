@@ -208,7 +208,6 @@ _SCRIPT_OPTIONS: Set[str] = {
     "--codex-fallback-profile",
     "--codex-home",
     "--codex-bin",
-    "--codex-bin",
     "--openai-bin",
     "--codex-output-format",
     "--openai-output-format",
@@ -222,9 +221,9 @@ _SCRIPT_OPTIONS: Set[str] = {
     "--capture-jsonl",
     "--reports-dir",
     "--scorecard-out",
+    "--junit-out",
     "--format",
     "--tier2-mode",
-    "--codex-arg",
     "-h",
     "--help",
 }
