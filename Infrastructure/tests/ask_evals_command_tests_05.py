@@ -155,17 +155,78 @@ def _completed_tessl_view() -> mock.Mock:
     }}}), stderr="")
 
 
-def _tessl_live_fake_run(completed_view: mock.Mock):
+def _repair_project_response(cmd: list[str]) -> mock.Mock:
+    return mock.Mock(
+        returncode=0,
+        stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+        stderr="",
+        args=cmd,
+    )
+
+
+def _tessl_live_fake_run(completed_view: mock.Mock, *, pending_payload: dict | None = None):
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
+
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(returncode=0, stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}', stderr="", args=cmd)
+            return _repair_project_response(cmd)
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout=json.dumps(pending_payload or []), stderr="", args=cmd)
+        if cmd[1:3] == ["eval", "run"]:
+            if pending_payload:
+                raise AssertionError("duplicate pending run guard must block before tessl eval run")
+            return completed_eval
+        return completed_view if cmd[1:3] == ["eval", "view"] else completed
+
+    return fake_run
+
+
+def _allow_tessl_external_effects(monkeypatch) -> None:
+    monkeypatch.setenv("ASK_EXTERNAL_EFFECTS", "allow")
+
+
+def _run_tessl_live_private(tmp_path: Path, fake_run) -> object:
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals, "_tessl_live_handoff_readiness", return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []}),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
+        mock.patch.object(evals.time, "sleep", return_value=None),
+    ):
+        return evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+
+def _tessl_score_view(description: str, baseline_score: int, skill_score: int | None, *, status: str | None = None) -> mock.Mock:
+    skill_results = None if skill_score is None else [{"score": skill_score, "max_score": 1}]
+    attributes = {"scenarios": [{"shortDescription": description, "solutions": [
+        {"variant": "baseline", "assessmentResults": [{"score": baseline_score, "max_score": 1}]},
+        {"variant": "usage-spec", "assessmentResults": skill_results},
+    ]}]}
+    if status is not None:
+        attributes["status"] = status
+    return mock.Mock(returncode=0, stdout=json.dumps({"data": {"attributes": attributes}}), stderr="")
+
+
+def _polling_tessl_live_fake_run(pending_view: mock.Mock, completed_view: mock.Mock):
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
+    views = iter((pending_view, completed_view))
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return _repair_project_response(cmd)
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
-        return completed_view if cmd[1:3] == ["eval", "view"] else completed
+        return next(views) if cmd[1:3] == ["eval", "view"] else completed
+
     return fake_run
 
 
@@ -228,9 +289,10 @@ def _assert_tessl_summary(result) -> None:
     assert cost["cost_metrics"] == {"usage.estimatedCostUsd": 0.0236}
 
 
-def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp_path: Path) -> None:
+def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp_path: Path, monkeypatch) -> None:
     completed_view = _completed_tessl_view()
     _write_example_skill(tmp_path)
+    _allow_tessl_external_effects(monkeypatch)
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
         mock.patch.object(evals, "_tessl_live_handoff_readiness", return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []}),
@@ -318,8 +380,8 @@ def test_tessl_live_evidence_archives_prior_raw_file_before_overwrite(tmp_path: 
     assert archived_payload["data"]["attributes"]["status"] == "running"
 
 
-def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path, monkeypatch) -> None:
+    _allow_tessl_external_effects(monkeypatch)
     pending_payload = {
         "data": [
             {
@@ -333,37 +395,7 @@ def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_pat
         ]
     }
     _write_example_skill(tmp_path)
-
-    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout=json.dumps(pending_payload), stderr="", args=cmd)
-        if cmd[1:3] == ["eval", "run"]:
-            raise AssertionError("duplicate pending run guard must block before tessl eval run")
-        return completed
-
-    with (
-        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
-    ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-        )
+    result = _run_tessl_live_private(tmp_path, _tessl_live_fake_run(mock.Mock(), pending_payload=pending_payload))
 
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]
@@ -374,68 +406,11 @@ def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_pat
     ]
 
 
-def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
-    completed_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "scenarios": [
-                        {
-                            "shortDescription": "regressed handoff",
-                            "solutions": [
-                                {
-                                    "variant": "baseline",
-                                    "assessmentResults": [{"score": 1, "max_score": 1}],
-                                },
-                                {
-                                    "variant": "usage-spec",
-                                    "assessmentResults": [{"score": 0, "max_score": 1}],
-                                },
-                            ],
-                        }
-                    ]
-                }
-            }
-        }),
-        stderr="",
-    )
+def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path, monkeypatch) -> None:
+    _allow_tessl_external_effects(monkeypatch)
+    completed_view = _tessl_score_view("regressed handoff", 1, 0)
     _write_example_skill(tmp_path)
-
-    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
-        if cmd[1:3] == ["eval", "run"]:
-            return completed_eval
-        if cmd[1:3] == ["eval", "view"]:
-            return completed_view
-        return completed
-
-    with (
-        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
-    ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-        )
+    result = _run_tessl_live_private(tmp_path, _tessl_live_fake_run(completed_view))
 
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]
@@ -446,68 +421,11 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
     assert tessl_eval["live_result_summary"]["regressions_count"] == 1
 
 
-def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
-    completed_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "scenarios": [
-                        {
-                            "shortDescription": "non-discriminating perfect score",
-                            "solutions": [
-                                {
-                                    "variant": "baseline",
-                                    "assessmentResults": [{"score": 1, "max_score": 1}],
-                                },
-                                {
-                                    "variant": "usage-spec",
-                                    "assessmentResults": [{"score": 1, "max_score": 1}],
-                                },
-                            ],
-                        }
-                    ]
-                }
-            }
-        }),
-        stderr="",
-    )
+def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path, monkeypatch) -> None:
+    _allow_tessl_external_effects(monkeypatch)
+    completed_view = _tessl_score_view("non-discriminating perfect score", 1, 1)
     _write_example_skill(tmp_path)
-
-    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
-        if cmd[1:3] == ["eval", "run"]:
-            return completed_eval
-        if cmd[1:3] == ["eval", "view"]:
-            return completed_view
-        return completed
-
-    with (
-        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
-    ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-        )
+    result = _run_tessl_live_private(tmp_path, _tessl_live_fake_run(completed_view))
 
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]
@@ -520,81 +438,12 @@ def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) 
     assert summary["regressions_count"] == 0
 
 
-def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
-    pending_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "status": "pending",
-                    "scenarios": [{
-                        "solutions": [
-                            {"variant": "baseline", "assessmentResults": [{"score": 1, "max_score": 1}]},
-                            {"variant": "usage-spec", "assessmentResults": None},
-                        ],
-                    }],
-                }
-            }
-        }),
-        stderr="",
-    )
-    completed_view = mock.Mock(
-        returncode=0,
-        stdout=json.dumps({
-            "data": {
-                "attributes": {
-                    "status": "completed",
-                    "scenarios": [{
-                            "solutions": [
-                                {"variant": "baseline", "assessmentResults": [{"score": 0, "max_score": 1}]},
-                                {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
-                            ],
-                    }],
-                }
-            }
-        }),
-        stderr="",
-    )
+def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path, monkeypatch) -> None:
+    _allow_tessl_external_effects(monkeypatch)
+    pending_view = _tessl_score_view("pending scores", 1, None, status="pending")
+    completed_view = _tessl_score_view("completed scores", 0, 1, status="completed")
     _write_example_skill(tmp_path)
-    view_calls = 0
-
-    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        nonlocal view_calls
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
-                stderr="",
-                args=cmd,
-            )
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
-        if cmd[1:3] == ["eval", "run"]:
-            return completed_eval
-        if cmd[1:3] == ["eval", "view"]:
-            view_calls += 1
-            return pending_view if view_calls == 1 else completed_view
-        return completed
-
-    with (
-        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(
-            evals,
-            "_tessl_live_handoff_readiness",
-            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
-        ),
-        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
-        mock.patch.object(evals.time, "sleep", return_value=None),
-    ):
-        result = evals.run_evals(
-            tmp_path,
-            "Skills/example-skill",
-            mode="smoke",
-            tessl_live_private=True,
-            tessl_workspace="jscraik",
-        )
+    result = _run_tessl_live_private(tmp_path, _polling_tessl_live_fake_run(pending_view, completed_view))
 
     assert result.status == "success"
     tessl_eval = result.data["tessl_eval"]

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from yaml import YAMLError
+
 from .skills_impl_plugin_ab import *  # noqa: F403
 
 def _ab_receipt_kwargs(repo_root: Path, request: AbEvalRequest) -> dict[str, object]:
@@ -473,7 +475,7 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
         from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
 
         payload = _yaml_safe_load(text) or {}
-    except Exception:
+    except (ImportError, OSError, TypeError, ValueError, YAMLError):
         payload = {}
     raw_sets = payload.get("release_scenario_sets") if isinstance(payload, dict) else None
     if not isinstance(raw_sets, list):

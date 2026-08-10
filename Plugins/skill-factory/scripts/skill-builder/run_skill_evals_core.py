@@ -29,6 +29,7 @@ import atexit
 import datetime as dt
 import html
 import json
+import logging
 import math
 import os
 import re
@@ -42,6 +43,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
+
+_LOGGER = logging.getLogger(__name__)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
@@ -310,7 +313,8 @@ def _git_metadata(path: Path) -> Dict[str, Optional[str]]:
                 capture_output=True,
                 text=True,
             )
-        except OSError:
+        except OSError as exc:
+            _LOGGER.warning("eval Git metadata lookup failed", extra={"operation": "git_metadata", "repository": repo_hint, "error": str(exc)})
             metadata[key] = None
             continue
         if proc.returncode == 0:

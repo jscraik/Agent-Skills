@@ -121,12 +121,11 @@ def _tessl_live_blocked(command: str, path: str, workspace: str | None, dry_run:
 
 
 def _tessl_live_effects_block(command: str, path: str, workspace: str | None, dry_run: bool) -> dict | None:
-    test_process_without_mock = os.environ.get("PYTEST_CURRENT_TEST") and type(subprocess.run).__module__ != "unittest.mock"
-    if dry_run or not (test_process_without_mock or os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny"):
+    if dry_run or os.environ.get("ASK_EXTERNAL_EFFECTS", "deny") == "allow":
         return None
     return _tessl_live_blocked(
         command, path, workspace, dry_run, "",
-        "Tessl live evaluation is blocked by the hermetic test effect policy; pytest requires an in-process subprocess mock and provider submission requires a separately authorised operator process.",
+        "Tessl live evaluation is blocked by the external-effect policy; provider submission requires a separately authorised operator process with ASK_EXTERNAL_EFFECTS=allow.",
     )
 
 
@@ -302,14 +301,14 @@ def _tessl_live_result(common: dict, exit_code: int, raw_output: str, raw_error:
 def _run_tessl_live_private_eval(repo_root: Path, path: str, *, workspace: str | None, dry_run: bool = False) -> dict:
     """Run or preview the opt-in private Tessl plugin eval lane."""
     command = "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
-    if blocked := _tessl_live_effects_block(command, path, workspace, dry_run):
-        return blocked
     prepared = _tessl_live_prepare(repo_root, path, workspace, dry_run, command)
     if isinstance(prepared, dict):
         return prepared
     normalized_workspace, staged_source, copied_files, command = prepared
     common = _tessl_eval_result_common(command=command, source_path=path, staged_source=staged_source, copied_files=copied_files, workspace=normalized_workspace, project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace), dry_run=dry_run)
     if blocked := _tessl_live_scenario_preflight(repo_root, path, staged_source, common):
+        return blocked
+    if blocked := _tessl_live_effects_block(command, path, normalized_workspace, dry_run):
         return blocked
     if dry_run:
         return _tessl_live_dry_result(common)

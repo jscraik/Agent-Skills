@@ -68,22 +68,29 @@ def test_tessl_live_private_policy_names_tessl_local_proof_gate() -> None:
     assert "Tessl local-proof" in feedback_loop["live_blocked_until"]
 
 
-def test_tessl_live_private_rejects_unmocked_test_process_execution(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("PYTEST_CURRENT_TEST", "test_guard")
-    monkeypatch.setenv("ASK_ALLOW_TEST_TESSL_LIVE", "1")
+def test_tessl_live_private_rejects_denied_external_effects(monkeypatch) -> None:
     monkeypatch.setenv("ASK_EXTERNAL_EFFECTS", "deny")
 
-    with mock.patch.object(evals.subprocess, "run") as run:
-        result = evals._run_tessl_live_private_eval(
-            tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
-        )
+    result = evals._tessl_live_effects_block(
+        "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
+    )
 
+    assert result is not None
     assert result["status"] == "blocked"
     assert result["blocker_class"] == "blocked_validation"
-    assert "hermetic test effect policy" in result["blocker"]
-    run.assert_not_called()
+    assert "external-effect policy" in result["blocker"]
+
+
+def test_tessl_live_private_requires_explicit_external_effect_permission(monkeypatch) -> None:
+    monkeypatch.delenv("ASK_EXTERNAL_EFFECTS", raising=False)
+
+    blocked = evals._tessl_live_effects_block(
+        "ask evals run", "Skills/example-skill", "jscraik", dry_run=False,
+    )
+
+    assert blocked is not None
+    assert blocked["status"] == "blocked"
+    assert "ASK_EXTERNAL_EFFECTS=allow" in blocked["blocker"]
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:

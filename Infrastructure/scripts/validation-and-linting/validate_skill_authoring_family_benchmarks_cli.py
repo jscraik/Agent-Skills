@@ -121,7 +121,7 @@ def main(argv: Sequence[str]) -> int:
                 profile = _load_json(profile_path)
                 rv = str(profile.get("rubric_version", "")).strip()
                 rubric_dates.append((skill, datetime.strptime(rv, "%Y-%m-%d").date()))
-            except Exception as exc:  # noqa: BLE001
+            except (OSError, TypeError, ValueError) as exc:
                 findings.append(
                     Finding(
                         "WARN",
@@ -206,7 +206,7 @@ def main(argv: Sequence[str]) -> int:
                         )
                 else:
                     print("[family-benchmark] baseline check: no regressions detected")
-            except Exception as exc:  # noqa: BLE001
+            except (OSError, TypeError, ValueError) as exc:
                 print(f"[family-benchmark] ERROR: could not load/parse baseline: {exc}", file=sys.stderr)
                 return 1
 

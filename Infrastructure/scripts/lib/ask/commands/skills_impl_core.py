@@ -496,7 +496,7 @@ def _validate_repo_relative_skill_path(repo_root: Path, skill_path: str) -> tupl
                     )
                 )
                 return None, result
-    except Exception as exc:
+    except (OSError, ValueError) as exc:
         result.status = "error"
         result.errors.append(
             ErrorObject(

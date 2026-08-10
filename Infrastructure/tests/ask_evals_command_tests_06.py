@@ -91,6 +91,7 @@ def _quota_fake_run(completed: mock.Mock, completed_eval: mock.Mock, failed_view
 def _run_tessl_quota_case(tmp_path: Path):
     completed, completed_eval, failed_view = _quota_tessl_processes()
     with (
+        mock.patch.dict(evals.os.environ, {"ASK_EXTERNAL_EFFECTS": "allow"}),
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
         mock.patch.object(evals, "_tessl_live_handoff_readiness", return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []}),
         mock.patch.object(evals, "_tessl_live_scenario_preflight", return_value=None),

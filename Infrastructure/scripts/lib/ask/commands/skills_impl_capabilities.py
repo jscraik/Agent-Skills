@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .skills_impl_profile_ops import *  # noqa: F403
 
 def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallResult:
@@ -289,207 +291,267 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
     }, audit_target
 
 
-def skills_package(
+@dataclass(frozen=True)
+class SkillsPackageOptions:
+    strict: bool = False
+    checkout_test: bool = False
+
+
+@dataclass
+class _PackageReadinessState:
+    query: str
+    target_info: dict[str, object]
+    audit_target: str | None
+    source_path_value: object | None
+    source_path: Path | None
+    blockers: list[dict[str, str]]
+    warnings: list[dict[str, str]]
+    package_contract: dict[str, object]
+    skill_package_contract: dict[str, object]
+
+
+def _missing_source_package_contract(repo_root: Path) -> dict[str, object]:
+    return {
+        "readiness_level": "blocked_missing_source",
+        "required_fields": {"present": [], "missing": list(PACKAGE_CONTRACT_FIELDS)},
+        "values": {},
+        "role_compatibility": {"declared": False, "roles": []},
+        "runtime_contract": {"declared": False, "needs": []},
+        "install_gate": {
+            "install_ready": False,
+            "required_checks": list(PACKAGE_CONTRACT_FIELDS),
+            "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
+            "checkout_test": {"required": True, "status": "not_run", "evidence": []},
+        },
+        "promotion_gate": {
+            "status": "blocked_missing_source",
+            "promotion_ready": False,
+            "share_ready": False,
+            "share_readiness": None,
+            "checkout_test_status": "not_run",
+            "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
+            "recommended_next_fields": list(PACKAGE_CONTRACT_FIELDS),
+        },
+        "sdk_contract": _sdk_package_contract(repo_root, None, {}),
+    }
+
+
+def _package_source_path(repo_root: Path, source_path_value: object | None) -> Path | None:
+    if not source_path_value:
+        return None
+    source_path = Path(str(source_path_value))
+    return source_path if source_path.is_absolute() else repo_root / source_path
+
+
+def _missing_source_package_state(
     repo_root: Path,
-    target: str,
-    strict: bool = False,
-    checkout_test: bool = False,
-) -> CallResult:
-    """Report version and role-aware package readiness for one skill."""
-    result = CallResult()
-    result.metadata["command"] = "skills package"
+    query: str,
+    target_info: dict[str, object],
+    audit_target: str | None,
+    source_path_value: object | None,
+    source_path: Path | None,
+) -> _PackageReadinessState:
+    blockers = [_doctor_blocker("blocked_missing_source", f"Canonical source is missing for '{query}'.")]
+    return _PackageReadinessState(
+        query=query,
+        target_info=target_info,
+        audit_target=audit_target,
+        source_path_value=source_path_value,
+        source_path=source_path,
+        blockers=blockers,
+        warnings=[],
+        package_contract=_missing_source_package_contract(repo_root),
+        skill_package_contract=_empty_skill_package_contract(),
+    )
+
+
+def _package_source_contracts(
+    repo_root: Path,
+    source_path: Path,
+    strict: bool,
+) -> tuple[dict[str, object], dict[str, object], list[dict[str, str]], list[dict[str, str]]]:
+    blockers: list[dict[str, str]] = []
+    warnings: list[dict[str, str]] = []
+    try:
+        frontmatter = _read_skill_frontmatter_fields(source_path)
+    except OSError:
+        frontmatter = {}
+    skill_package_contract = _skill_package_contract(repo_root, source_path, frontmatter)
+    package_contract = _skill_package_readiness(frontmatter, repo_root, source_path)
+    missing_fields = package_contract["required_fields"]["missing"]
+    gate_blockers = package_contract["install_gate"]["blocked_reasons"]
+    if gate_blockers:
+        warnings.append(
+            _doctor_warning(
+                "capability_contract_incomplete",
+                "Package readiness metadata is incomplete."
+                if missing_fields
+                else "Package promotion gate is blocked.",
+            )
+        )
+        if strict:
+            blocker_message = (
+                "Strict package readiness failed; missing package metadata: "
+                f"{', '.join(missing_fields)}."
+                if missing_fields
+                else (
+                    "Strict package readiness failed; package gate blockers: "
+                    f"{', '.join(gate_blockers)}."
+                )
+            )
+            blockers.append(_doctor_blocker("blocked_validation", blocker_message))
+    return package_contract, skill_package_contract, blockers, warnings
+
+
+def _package_readiness_state(repo_root: Path, target: str, strict: bool) -> _PackageReadinessState:
     query = target.strip()
     target_info, audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path")
-    source_path = Path(str(source_path_value)) if source_path_value else None
-    if source_path and not source_path.is_absolute():
-        source_path = repo_root / source_path
-
-    blockers: list[dict[str, str]] = []
-    warnings: list[dict[str, str]] = []
+    source_path = _package_source_path(repo_root, source_path_value)
     if not source_path or not source_path.is_file():
-        blockers.append(
-            _doctor_blocker(
-                "blocked_missing_source",
-                f"Canonical source is missing for '{query}'.",
-            )
-        )
-        package_contract = {
-            "readiness_level": "blocked_missing_source",
-            "required_fields": {"present": [], "missing": list(PACKAGE_CONTRACT_FIELDS)},
-            "values": {},
-            "role_compatibility": {"declared": False, "roles": []},
-            "runtime_contract": {"declared": False, "needs": []},
-            "install_gate": {
-                "install_ready": False,
-                "required_checks": list(PACKAGE_CONTRACT_FIELDS),
-                "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
-                "checkout_test": {
-                    "required": True,
-                    "status": "not_run",
-                    "evidence": [],
-                },
-            },
-            "promotion_gate": {
-                "status": "blocked_missing_source",
-                "promotion_ready": False,
-                "share_ready": False,
-                "share_readiness": None,
-                "checkout_test_status": "not_run",
-                "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
-                "recommended_next_fields": list(PACKAGE_CONTRACT_FIELDS),
-            },
-            "sdk_contract": _sdk_package_contract(repo_root, None, {}),
-        }
-        skill_package_contract = _empty_skill_package_contract()
-    else:
-        try:
-            frontmatter = _read_skill_frontmatter_fields(source_path)
-        except OSError:
-            frontmatter = {}
-        skill_package_contract = _skill_package_contract(repo_root, source_path, frontmatter)
-        package_contract = _skill_package_readiness(frontmatter, repo_root, source_path)
-        missing_fields = package_contract["required_fields"]["missing"]
-        gate_blockers = package_contract["install_gate"]["blocked_reasons"]
-        if gate_blockers:
-            warning_message = (
-                "Package readiness metadata is incomplete."
-                if missing_fields
-                else "Package promotion gate is blocked."
-            )
-            warnings.append(
-                _doctor_warning(
-                    "capability_contract_incomplete",
-                    warning_message,
-                )
-            )
-            if strict:
-                blocker_message = (
-                    "Strict package readiness failed; missing package metadata: "
-                    f"{', '.join(missing_fields)}."
-                    if missing_fields
-                    else (
-                        "Strict package readiness failed; package gate blockers: "
-                        f"{', '.join(gate_blockers)}."
-                    )
-                )
-                blockers.append(
-                    _doctor_blocker(
-                        "blocked_validation",
-                        blocker_message,
-                    )
-                )
-
-    if checkout_test:
-        package_contract["install_gate"]["checkout_test"] = _skill_package_checkout_test(
+        return _missing_source_package_state(
             repo_root,
-            source_path,
+            query,
+            target_info,
             audit_target,
-            package_contract,
+            source_path_value,
+            source_path,
         )
-    _refresh_package_promotion_gate(package_contract)
-    gate_summary = _skill_package_gate_summary(package_contract)
-    readiness_summary = _skill_package_readiness_summary(package_contract)
-
-    status = "blocked" if blockers else ("warning" if warnings else "pass")
-    lifecycle_event = _capability_lifecycle_event(
-        event_type="skill_loaded",
+    package_contract, skill_package_contract, blockers, warnings = _package_source_contracts(
+        repo_root,
+        source_path,
+        strict,
+    )
+    return _PackageReadinessState(
         query=query,
-        target_kind=str(target_info.get("target_kind") or "unknown"),
-        handle=target_info.get("handle"),
-        source_path=source_path_value,
+        target_info=target_info,
         audit_target=audit_target,
-        status=status,
+        source_path_value=source_path_value,
+        source_path=source_path,
         blockers=blockers,
         warnings=warnings,
+        package_contract=package_contract,
+        skill_package_contract=skill_package_contract,
     )
+
+
+def _package_readiness_events(
+    state: _PackageReadinessState,
+    status: str,
+    gate_summary: dict[str, object],
+) -> tuple[dict[str, object], dict[str, object]]:
+    event_kwargs = {
+        "query": state.query, "target_kind": str(state.target_info.get("target_kind") or "unknown"),
+        "handle": state.target_info.get("handle"), "source_path": state.source_path_value,
+        "audit_target": state.audit_target, "status": status, "blockers": state.blockers, "warnings": state.warnings,
+    }
+    lifecycle_event = _capability_lifecycle_event(event_type="skill_loaded", **event_kwargs)
     readiness_event = _capability_lifecycle_event(
         event_type="package_readiness_checked",
-        query=query,
-        target_kind=str(target_info.get("target_kind") or "unknown"),
-        handle=target_info.get("handle"),
-        source_path=source_path_value,
-        audit_target=audit_target,
-        status=status,
-        blockers=blockers,
-        warnings=warnings,
         details={"gate_summary": gate_summary},
+        **event_kwargs,
     )
-    lifecycle_events = [lifecycle_event, readiness_event]
-    payload = {
+    return lifecycle_event, readiness_event
+
+
+def _package_agent_summary(state: _PackageReadinessState) -> str:
+    if state.blockers:
+        return f"{state.query} is blocked: {state.blockers[0]['message']}"
+    if state.warnings:
+        blockers = state.package_contract["install_gate"]["blocked_reasons"]
+        return f"{state.query} has package gate blockers: {', '.join(blockers)}."
+    promotion_status = state.package_contract["promotion_gate"]["status"]
+    if promotion_status == "ready_pending_checkout":
+        return f"{state.query} is package/share ready; run --checkout-test before promotion."
+    return f"{state.query} is package/share ready with checkout evidence."
+
+
+def _package_payload_identity(state: _PackageReadinessState, strict: bool, status: str) -> dict[str, object]:
+    target_info = state.target_info
+    return {
         "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
-        "query": query,
+        "query": state.query,
         "target_kind": target_info.get("target_kind"),
         "handle": target_info.get("handle"),
-        "canonical_source_path": source_path_value,
-        "audit_target": audit_target,
+        "canonical_source_path": state.source_path_value,
+        "audit_target": state.audit_target,
         "target_summary": _skill_target_summary(
-            query=query,
+            query=state.query,
             target_kind=target_info.get("target_kind"),
             handle=target_info.get("handle"),
-            source_path=source_path_value,
-            audit_target=audit_target,
+            source_path=state.source_path_value,
+            audit_target=state.audit_target,
         ),
         "status": status,
         "strict": strict,
-        "package_schema": {
-            "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
-            "path": SKILL_PACKAGE_SCHEMA_PATH,
+    }
+
+
+def _package_payload_contract_schemas() -> dict[str, object]:
+    return {
+        "package_schema": {"schema_version": SKILL_PACKAGE_SCHEMA_VERSION, "path": SKILL_PACKAGE_SCHEMA_PATH},
+        "package_readiness_schema": {"schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION, "path": SKILL_PACKAGE_READINESS_SCHEMA_PATH},
+        "contract_schemas": {
+            "package": SKILL_PACKAGE_READINESS_SCHEMA_VERSION, "skill_package": SKILL_PACKAGE_SCHEMA_VERSION,
+            "skillflow": SKILLFLOW_SCHEMA_VERSION, "optimization": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
+            "events": "skill-events.v1", "lifecycle_event": "capability-lifecycle-event.v1",
+            "profiles": "skill-operation-profiles.v1", "doctor": "skill-doctor.v1", "memory": "skill-memory-provider.v1",
         },
-        "package_readiness_schema": {
-            "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
-            "path": SKILL_PACKAGE_READINESS_SCHEMA_PATH,
-        },
+        "workflow_schema": {"schema_version": SKILLFLOW_SCHEMA_VERSION, "path": SKILLFLOW_SCHEMA_PATH},
+        "optimization_schema": {"schema_version": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION, "path": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_PATH},
+    }
+
+
+def _package_payload_contracts(
+    state: _PackageReadinessState,
+    gate_summary: dict[str, object],
+    readiness_summary: dict[str, object],
+) -> dict[str, object]:
+    return {
         "compatibility_snapshot": _skill_package_compatibility_snapshot(),
-        "skill_package_contract": skill_package_contract,
-        "package_contract": package_contract,
+        "skill_package_contract": state.skill_package_contract,
+        "package_contract": state.package_contract,
         "gate_summary": gate_summary,
         "readiness_summary": readiness_summary,
-        "contract_schemas": {
-            "package": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
-            "skill_package": SKILL_PACKAGE_SCHEMA_VERSION,
-            "skillflow": SKILLFLOW_SCHEMA_VERSION,
-            "optimization": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
-            "events": "skill-events.v1",
-            "lifecycle_event": "capability-lifecycle-event.v1",
-            "profiles": "skill-operation-profiles.v1",
-            "doctor": "skill-doctor.v1",
-            "memory": "skill-memory-provider.v1",
-        },
-        "workflow_schema": {
-            "schema_version": SKILLFLOW_SCHEMA_VERSION,
-            "path": SKILLFLOW_SCHEMA_PATH,
-        },
-        "optimization_schema": {
-            "schema_version": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
-            "path": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_PATH,
-        },
         "operation_context": _skill_package_operation_context(),
-        "blockers": blockers,
-        "warnings": warnings,
-        "lifecycle_event": readiness_event,
-        "lifecycle_events": lifecycle_events,
-        "agent_summary": (
-            f"{query} is blocked: {blockers[0]['message']}"
-            if blockers
-            else (
-                f"{query} has package gate blockers: {', '.join(package_contract['install_gate']['blocked_reasons'])}."
-                if warnings
-                else (
-                    f"{query} is package/share ready; run --checkout-test before promotion."
-                    if package_contract["promotion_gate"]["status"] == "ready_pending_checkout"
-                    else f"{query} is package/share ready with checkout evidence."
-                )
-            )
-        ),
-        "next_command": (
-            _skills_validation_command("doctor", query)
-            if blockers
-            else _skills_validation_command("doctor", query, "--strict")
-        ),
     }
+
+
+def _package_readiness_payload(
+    state: _PackageReadinessState,
+    strict: bool,
+    status: str,
+    gate_summary: dict[str, object],
+    readiness_summary: dict[str, object],
+    lifecycle_event: dict[str, object],
+    readiness_event: dict[str, object],
+) -> dict[str, object]:
+    payload = _package_payload_identity(state, strict, status)
+    payload.update(_package_payload_contract_schemas())
+    payload.update(_package_payload_contracts(state, gate_summary, readiness_summary))
+    payload.update({
+        "blockers": state.blockers,
+        "warnings": state.warnings,
+        "lifecycle_event": readiness_event,
+        "lifecycle_events": [lifecycle_event, readiness_event],
+        "agent_summary": _package_agent_summary(state),
+        "next_command": (
+            _skills_validation_command("doctor", state.query)
+            if state.blockers
+            else _skills_validation_command("doctor", state.query, "--strict")
+        ),
+    })
+    return payload
+
+
+def _apply_package_result(
+    result: CallResult,
+    payload: dict[str, object],
+    state: _PackageReadinessState,
+    strict: bool,
+) -> None:
     result.data["skill_package"] = payload
-    if blockers or (strict and warnings):
+    if state.blockers or (strict and state.warnings):
         result.status = "error"
         result.errors.append(
             ErrorObject(
@@ -498,7 +560,54 @@ def skills_package(
                 fix_suggestion=payload["next_command"],
             )
         )
+
+
+def _skills_package(
+    repo_root: Path,
+    target: str,
+    strict: bool = False,
+    checkout_test: bool = False,
+) -> CallResult:
+    """Report version and role-aware package readiness for one skill."""
+    result = CallResult()
+    result.metadata["command"] = "skills package"
+    state = _package_readiness_state(repo_root, target, strict)
+    if checkout_test:
+        state.package_contract["install_gate"]["checkout_test"] = _skill_package_checkout_test(
+            repo_root,
+            state.source_path,
+            state.audit_target,
+            state.package_contract,
+        )
+    _refresh_package_promotion_gate(state.package_contract)
+    gate_summary = _skill_package_gate_summary(state.package_contract)
+    readiness_summary = _skill_package_readiness_summary(state.package_contract)
+    status = "blocked" if state.blockers else ("warning" if state.warnings else "pass")
+    lifecycle_event, readiness_event = _package_readiness_events(state, status, gate_summary)
+    payload = _package_readiness_payload(
+        state,
+        strict,
+        status,
+        gate_summary,
+        readiness_summary,
+        lifecycle_event,
+        readiness_event,
+    )
+    _apply_package_result(result, payload, state, strict)
     return result
+
+
+def skills_package(
+    repo_root: Path,
+    target: str,
+    options: SkillsPackageOptions | None = None,
+    **legacy_options: object,
+) -> CallResult:
+    """Report package readiness from typed options, retaining legacy keywords during migration."""
+    if options is not None and legacy_options:
+        raise TypeError("pass either SkillsPackageOptions or legacy keyword arguments, not both")
+    resolved = options or SkillsPackageOptions(**legacy_options)
+    return _skills_package(repo_root, target, strict=resolved.strict, checkout_test=resolved.checkout_test)
 
 
 def skills_package_verify(

@@ -480,8 +480,8 @@ def _scenario_generation_install_result(
     common: dict[str, object], command: str,
 ) -> CallResult:
     raw_output, raw_error = process.stdout, process.stderr
-    authenticated = process.returncode != 0 and "authenticate with tessl" in f"{raw_output}\n{raw_error}".lower()
-    status, blocker, blocker_class = ("blocked", "Tessl CLI is installed locally, but authentication is required before scenario tool install can run.", "blocked_auth") if authenticated else ("pass" if process.returncode == 0 else "fail", None, None)
+    auth_required = process.returncode != 0 and "authenticate with tessl" in f"{raw_output}\n{raw_error}".lower()
+    status, blocker, blocker_class = ("blocked", "Tessl CLI is installed locally, but authentication is required before scenario tool install can run.", "blocked_auth") if auth_required else ("pass" if process.returncode == 0 else "fail", None, None)
     scenario_skill, scenario_reference = _tessl_scenario_tool_paths(staging.tool_project)
     brief = _write_tessl_scenario_generation_brief(staging.staged_root, source_path=request.path, workspace=staging.workspace, target_tile=staging.target_tile, tool_project=staging.tool_project)
     data = {"status": status, **common, "command": command, "exit_code": process.returncode, "raw_output": raw_output, "raw_error": raw_error, "blocker": blocker, "blocker_class": blocker_class, "scenario_skill": str(scenario_skill) if scenario_skill.exists() else None, "scenario_reference": str(scenario_reference) if scenario_reference.exists() else None, "scenario_generation_brief": str(brief), "generated_output": str(staging.target_tile / "evals"), "prepared_only": True}

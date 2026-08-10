@@ -2,6 +2,8 @@ from skill_gate_core import *  # noqa: F403
 from skill_gate_security_checks import *  # noqa: F403
 from skill_gate_research_checks import *  # noqa: F403
 
+from dataclasses import dataclass
+
 def _lvl_name(level: Level) -> str:
     return {Level.INFO: "INFO", Level.WARN: "WARN", Level.FAIL: "FAIL"}[level]
 
@@ -112,20 +114,33 @@ def _build_sarif_payload(doc: SkillDoc, findings: Sequence[Finding], *, failed: 
     }
 
 
-def run_gate(
-    doc: SkillDoc,
-    *,
-    max_lines: int,
-    max_codeblock_lines: int,
-    min_desc_len: int,
-    require_contract: bool,
-    require_evals: bool,
-    require_philosophy: bool,
-    require_redaction: bool,
-    require_fail_fast: bool,
-    require_security_evals: bool,
-    pi_high_fail: bool,
-) -> List[Finding]:
+@dataclass(frozen=True)
+class SkillGateRequest:
+    doc: SkillDoc
+    max_lines: int
+    max_codeblock_lines: int
+    min_desc_len: int
+    require_contract: bool
+    require_evals: bool
+    require_philosophy: bool
+    require_redaction: bool
+    require_fail_fast: bool
+    require_security_evals: bool
+    pi_high_fail: bool
+
+
+def _run_gate(request: SkillGateRequest) -> List[Finding]:
+    doc = request.doc
+    max_lines = request.max_lines
+    max_codeblock_lines = request.max_codeblock_lines
+    min_desc_len = request.min_desc_len
+    require_contract = request.require_contract
+    require_evals = request.require_evals
+    require_philosophy = request.require_philosophy
+    require_redaction = request.require_redaction
+    require_fail_fast = request.require_fail_fast
+    require_security_evals = request.require_security_evals
+    pi_high_fail = request.pi_high_fail
     findings: List[Finding] = []
 
     findings.extend(check_codex_frontmatter(doc, min_desc_len=min_desc_len))
@@ -149,6 +164,14 @@ def run_gate(
 
     findings.sort(key=lambda f: (-int(f.level), f.code))
     return findings
+
+
+def run_gate(request: SkillGateRequest | None = None, **legacy_options: object) -> List[Finding]:
+    """Evaluate a skill gate request while retaining the keyword adapter temporarily."""
+    if request is not None and legacy_options:
+        raise TypeError("pass either SkillGateRequest or legacy keyword arguments, not both")
+    resolved = request or SkillGateRequest(**legacy_options)
+    return _run_gate(resolved)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -187,20 +210,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return p
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
-    args = build_arg_parser().parse_args(argv)
-
+def _load_cli_skill(args) -> SkillDoc | None:
     try:
-        doc = load_skill(args.path, strict_line1=args.strict_frontmatter_line1)
-    except Exception as e:
+        return load_skill(args.path, strict_line1=args.strict_frontmatter_line1)
+    except (OSError, TypeError, ValueError) as e:
         print(
             f"skill_gate: ERROR loading {args.path}: {type(e).__name__}: {e}",
             file=sys.stderr,
         )
-        return 1
+        return None
 
-    findings = run_gate(
-        doc,
+
+def _request_from_args(doc: SkillDoc, args) -> SkillGateRequest:
+    return SkillGateRequest(
+        doc=doc,
         max_lines=args.max_lines,
         max_codeblock_lines=args.max_codeblock_lines,
         min_desc_len=args.min_description_len,
@@ -213,32 +236,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pi_high_fail=bool(args.pi_high_fail),
     )
 
-    failed = any(f.level == Level.FAIL for f in findings)
 
-    rendered = ""
-    if args.format == "json":
-        payload = _build_json_payload(doc, findings, failed=failed)
-        rendered = json.dumps(payload, indent=2, ensure_ascii=False)
-    else:
-        lines = [f"Skill: {doc.frontmatter.get('name', 'unknown')}", f"Path:  {doc.path}", ""]
-        for f in findings:
-            ev = f" | {f.evidence}" if f.evidence else ""
-            lines.append(f"{_lvl_name(f.level)} {f.code}: {f.message}{ev}")
-        lines.extend(["", f"RESULT: {'FAIL' if failed else 'PASS'}"])
-        rendered = "\n".join(lines)
+def _render_findings(doc: SkillDoc, findings: Sequence[Finding], *, failed: bool, output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(_build_json_payload(doc, findings, failed=failed), indent=2, ensure_ascii=False)
+    lines = [f"Skill: {doc.frontmatter.get('name', 'unknown')}", f"Path:  {doc.path}", ""]
+    for finding in findings:
+        evidence = f" | {finding.evidence}" if finding.evidence else ""
+        lines.append(f"{_lvl_name(finding.level)} {finding.code}: {finding.message}{evidence}")
+    lines.extend(["", f"RESULT: {'FAIL' if failed else 'PASS'}"])
+    return "\n".join(lines)
 
-    if args.output:
-        output_path = Path(args.output).expanduser().resolve()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
 
-    if args.sarif_out:
-        sarif_path = Path(args.sarif_out).expanduser().resolve()
-        sarif_path.parent.mkdir(parents=True, exist_ok=True)
-        sarif_payload = _build_sarif_payload(doc, findings, failed=failed)
-        sarif_path.write_text(json.dumps(sarif_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def _write_optional_output(path_value: str | None, rendered: str) -> None:
+    if not path_value:
+        return
+    output_path = Path(path_value).expanduser().resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
 
+
+def _write_optional_sarif(path_value: str | None, doc: SkillDoc, findings: Sequence[Finding], *, failed: bool) -> None:
+    if not path_value:
+        return
+    sarif_path = Path(path_value).expanduser().resolve()
+    sarif_path.parent.mkdir(parents=True, exist_ok=True)
+    sarif_payload = _build_sarif_payload(doc, findings, failed=failed)
+    sarif_path.write_text(json.dumps(sarif_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    args = build_arg_parser().parse_args(argv)
+    doc = _load_cli_skill(args)
+    if doc is None:
+        return 1
+    findings = run_gate(_request_from_args(doc, args))
+    failed = any(finding.level == Level.FAIL for finding in findings)
+    rendered = _render_findings(doc, findings, failed=failed, output_format=args.format)
+    _write_optional_output(args.output, rendered)
+    _write_optional_sarif(args.sarif_out, doc, findings, failed=failed)
     print(rendered)
-
     return 2 if failed else 0
 __all__ = [name for name in globals() if not name.startswith("__")]

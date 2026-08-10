@@ -29,7 +29,7 @@ def _load_expected_pi_context(
             raise ValueError("skip_binary_globs must be a non-empty string list")
 
         return list(raw_paths), list(raw_signals), list(raw_binary), findings
-    except Exception as exc:
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         findings.append(
             Finding(
                 Level.WARN,
@@ -649,7 +649,7 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
 
     try:
         obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
-    except Exception as exc:  # noqa: BLE001
+    except (OSError, TypeError, ValueError, yaml.YAMLError) as exc:
         out.append(Finding(Level.WARN, "SEC_EVALS_PARSE", f"Could not parse evals.yaml for security coverage checks: {exc}"))
         return out
 

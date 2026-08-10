@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import MappingProxyType
+
 from .skills_impl_core import *  # noqa: F403
 
 def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
@@ -373,7 +375,7 @@ class _RouterSkill:
     skill_path: str
 
 
-STARTER_ARCHETYPES = {
+STARTER_ARCHETYPES = MappingProxyType({
     "general": (
         "autofix",
         "testing",
@@ -385,7 +387,7 @@ STARTER_ARCHETYPES = {
     "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "technical-writer"),
     "review": ("improve-codebase-architecture", "he-code-review", "autofix", "testing"),
     "docs": ("agents-md", "technical-writer", "context7", "openai-docs"),
-}
+})
 
 
 _SKILL_INSTALLER_SCRIPT_CANDIDATES = (
@@ -418,16 +420,7 @@ def _resolve_skill_builder_script(repo_root: Path, module_name: str) -> str:
 
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
-    """
-    Load a skill-builder script from the repository and return it as an imported module.
-
-    Parameters:
-        repo_root (Path): Repository root used to locate `<skill-builder>/scripts/<module_name>.py`.
-        module_name (str): Script base name (without `.py`) to load.
-
-    Returns:
-        module (types.ModuleType | None): The imported module object if the script exists and is loaded, `None` otherwise.
-    """
+    """Load a skill-builder module from this repository, if its script exists."""
     module_rel = _resolve_skill_builder_script(repo_root, module_name)
     module_path = repo_root / module_rel
     if not module_path.exists():
@@ -448,11 +441,13 @@ def _load_builder_module(repo_root: Path, module_name: str):
         if spec and spec.loader:
             mod = importlib.util.module_from_spec(spec)
             sys.modules[internal_name] = mod  # Register BEFORE exec
+            loaded = False
             try:
                 spec.loader.exec_module(mod)
-            except BaseException:
-                sys.modules.pop(internal_name, None)
-                raise
+                loaded = True
+            finally:
+                if not loaded:
+                    sys.modules.pop(internal_name, None)
             return mod
     finally:
         if inserted and scripts_dir_str in sys.path:
@@ -517,7 +512,7 @@ def _sdk_handle_owner_index(repo_root: Path) -> dict[str, str]:
     """Return SDK skill owners keyed by handle name."""
     try:
         records = build_sdk_skill_records(repo_root_path=repo_root, visibility="advanced")
-    except Exception as exc:  # noqa: BLE001 - SDK registry errors must not break skill listing.
+    except (OSError, ValueError) as exc:
         print(f"warning: failed to load SDK skill owner index: {exc}", file=sys.stderr)
         return {}
     owner_by_handle = {}

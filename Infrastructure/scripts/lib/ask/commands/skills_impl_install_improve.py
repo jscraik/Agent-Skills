@@ -1,28 +1,171 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .skills_impl_external_review import *  # noqa: F403
 
-def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
-    """
-    Install a GitHub-hosted skill into the repository's canonical skill directory.
+@dataclass(frozen=True)
+class InstallSkillOptions:
+    remediate: bool = False
+    dest: str = "Skills/github"
+    dry_run: bool = False
 
-    Dest is validated and normalised to a repo-relative category (for example "github" or "backend"). In dry-run mode no changes are made and a preview of the planned install is returned. If the installer supports `--validation-level` the command will request `compat` validation; if `--remediate` is requested but unsupported the call returns an error result. After a successful install the workspace projection is synchronised.
 
-    Parameters:
-        repo_root (Path): Root path of the repository used to resolve and validate the install destination.
-        url (str): URL or repository path of the skill to install (may end with `.git`).
-        remediate (bool): Request installer remediation; fails with `ERR_VALIDATION` if the installer does not support `--remediate`.
-        dest (str): Repo-relative category directory for installation under Skills/ (must not be absolute or escape the repo).
-        dry_run (bool): If true, return a preview without performing any filesystem or network changes.
+def _install_dry_run_result(
+    repo_root: Path,
+    url: str,
+    remediate: bool,
+    dest_rel: str,
+    skill_name: str,
+    target_path: Path,
+    intake_decision: dict,
+) -> CallResult:
+    """Build the non-mutating install preview with its canonical next command."""
+    result = CallResult(status="success")
+    try:
+        display_path = str(target_path.relative_to(repo_root))
+    except ValueError:
+        display_path = str(target_path)
+    validation_args = [url, "--dest", dest_rel]
+    if remediate:
+        validation_args.append("--remediate")
+    validation_args.append("--dry-run")
+    result.data.update({
+        "dry_run": True, "skill_name": skill_name, "target_path": display_path,
+        "url": url, "remediate": remediate, "canonical_dest": dest_rel,
+        "intake_decision": intake_decision,
+        "readiness_policy": {
+            "full_evals_required_before_promotion": True,
+            "external_skill_install_is_intake_not_copy": True,
+            "preserve_operating_model_docs_as_references": True,
+            "promotion_rule": intake_decision["promotion_rule"],
+        },
+        "validation_commands": [_skills_validation_command("install", *validation_args)],
+    })
+    result.metadata["next_steps"] = [
+        "Review data.intake_decision.outcome before writing canonical source.",
+        f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else ""),
+    ]
+    return result
 
-    Returns:
-        CallResult: Result object with `status` set to `"success"` or `"error"`. On success `data` includes at least:
-            - `skill_name`: installed skill name,
-            - `canonical_dest`: repo-relative destination used,
-            - `workspace_sync`: status and logs from the post-install sync.
-        On dry-run success `data` includes a preview (`dry_run`, `skill_name`, `target_path`, `url`, `remediate`, `canonical_dest`) and `metadata.next_steps` showing the equivalent install command.
-        On error the result contains `errors` with codes such as `ERR_VALIDATION`, `ERR_CONFLICT`, or `ERR_RUNTIME` and a `fix_suggestion`.
-    """
+
+def _install_conflict_result(
+    repo_root: Path, dest_rel: str, skill_name: str, target_path: Path, intake_decision: dict,
+) -> CallResult:
+    """Return the explicit duplicate or ownership-choice result before mutation."""
+    try:
+        display_path = str(target_path.relative_to(repo_root))
+    except ValueError:
+        display_path = str(target_path)
+    duplicate = intake_decision["outcome"] == "reject_duplicate"
+    result = CallResult(status="error")
+    result.errors.append(ErrorObject(
+        code="ERR_CONFLICT" if duplicate else "ERR_REQUIRES_HUMAN_CHOICE",
+        message=(f"Skill '{skill_name}' already exists at '{display_path}'." if duplicate else f"Skill '{skill_name}' is similar to existing local skills; choose install_new, blend_into_existing, keep_separate, or reject_duplicate before writing."),
+        fix_suggestion=("Remove the existing skill or choose a different destination with --dest." if duplicate else "Inspect data.intake_decision.local_overlap_candidates and rerun only after the ownership decision is explicit."),
+    ))
+    result.data.update({
+        "skill_name": skill_name, "canonical_dest": dest_rel,
+        "existing_path": display_path, "intake_decision": intake_decision,
+    })
+    return result
+
+
+def _install_command(
+    repo_root: Path, url: str, dest_path: Path, remediate: bool, result: CallResult,
+) -> list[str] | None:
+    """Build the installer invocation after checking its advertised optional flags."""
+    python_cmd = _get_python_command(["pyyaml"])
+    flags = _install_script_supported_flags(repo_root, python_cmd)
+    cmd = python_cmd + [
+        _resolve_skill_installer_script(repo_root), "--url", url, "--dest", str(dest_path),
+    ]
+    if "--validation-level" in flags:
+        cmd.extend(["--validation-level", "compat"])
+        result.data["validation_level"] = "compat"
+    else:
+        result.data["validation_level"] = "compat_skipped_unsupported"
+    if not remediate or "--remediate" in flags:
+        return [*cmd, *( ["--remediate"] if remediate else [])]
+    result.status = "error"
+    result.errors.append(ErrorObject(
+        code="ERR_VALIDATION", message="Installed skill installer does not support --remediate.",
+        fix_suggestion="Re-run without --remediate, or update the installer to a version that supports remediation.",
+    ))
+    return None
+
+
+def _post_install_readiness_policy(installed_path: str, intake_decision: dict) -> dict:
+    """Return the required post-install gates for an admitted source package."""
+    return {
+        "full_evals_required_before_promotion": True,
+        "external_skill_install_is_intake_not_copy": True,
+        "preserve_operating_model_docs_as_references": True,
+        "promotion_rule": intake_decision["promotion_rule"],
+        "post_install_gates": [
+            f"ask skills audit {installed_path} --level strict --json --robot",
+            f"ask sdk eval scenario-quality {installed_path} --preview --json --robot",
+            f"ask sdk eval scorer-quality {installed_path} --preview --json --robot",
+            f"ask sdk eval scorer-calibration {installed_path} --preview --json --robot",
+            f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-local --json --robot",
+            f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
+            f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace jscraik --execute --json --robot",
+            f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot once scenario-quality passes",
+            f"ask sdk eval handoff-readiness --skill {installed_path} --preview --json --robot",
+            f"ask skills external-review {installed_path} --json --robot",
+            f"ask evals run {installed_path} --mode release --json --robot only after SDK handoff gates are current",
+        ],
+    }
+
+
+def _record_install_process(
+    result: CallResult, process: subprocess.CompletedProcess[str], dest_rel: str, intake_decision: dict,
+) -> None:
+    """Attach the installer process evidence before classifying its outcome."""
+    result.data.update({
+        "raw_output": process.stdout,
+        "raw_error": process.stderr,
+        "canonical_dest": dest_rel,
+        "intake_decision": intake_decision,
+    })
+
+
+def _complete_installation(
+    result: CallResult, repo_root: Path, dest_rel: str, fallback_name: str, intake_decision: dict,
+) -> None:
+    """Synchronise a successful install and attach its post-install gate list."""
+    match = re.search(r"Installed (.*?) to", result.data["raw_output"])
+    installed_name = match.group(1) if match else fallback_name
+    result.status = "success"
+    result.data["skill_name"] = installed_name
+    sync_result = sync_skills(repo_root, scope="workspace", dry_run=False)
+    result.data["workspace_sync"] = {
+        "status": sync_result.status,
+        "logs": sync_result.data.get("logs", []),
+    }
+    if sync_result.status != "success":
+        sync_error = sync_result.errors[0].message if sync_result.errors else "Unknown sync failure."
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Skill installed to '{dest_rel}', but workspace sync failed: {sync_error}",
+            fix_suggestion="Run `ask skills sync --scope workspace` after resolving the sync error.",
+        ))
+        return
+    policy = _post_install_readiness_policy(f"{dest_rel}/{installed_name}", intake_decision)
+    result.data["readiness_policy"] = policy
+    result.metadata["next_steps"] = policy["post_install_gates"]
+
+
+def _record_install_failure(result: CallResult) -> None:
+    """Classify a non-zero installer process without changing its captured evidence."""
+    result.status = "error"
+    result.errors.append(ErrorObject(
+        code="ERR_RUNTIME", message=result.data["raw_error"].strip() or "Installation failed.",
+    ))
+
+
+def _install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
     result = CallResult()
     try:
         dest_path, dest_rel = _resolve_canonical_install_dest(repo_root, dest)
@@ -42,153 +185,38 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
     target_path = dest_path / skill_name
     intake_decision = _skill_install_intake_decision(repo_root, skill_name, target_path)
 
-    # Handle dry-run first (before any side-effect checks)
     if dry_run:
-        # Preview mode: show what would happen without making changes
-        result.status = "success"
-        result.data["dry_run"] = True
-        result.data["skill_name"] = skill_name
-        # Handle absolute paths gracefully - only relativize if within repo
-        try:
-            display_path = str(target_path.relative_to(repo_root))
-        except ValueError:
-            display_path = str(target_path)
-        result.data["target_path"] = display_path
-        result.data["url"] = url
-        result.data["remediate"] = remediate
-        result.data["canonical_dest"] = dest_rel
-        result.data["intake_decision"] = intake_decision
-        result.data["readiness_policy"] = {
-            "full_evals_required_before_promotion": True,
-            "external_skill_install_is_intake_not_copy": True,
-            "preserve_operating_model_docs_as_references": True,
-            "promotion_rule": intake_decision["promotion_rule"],
-        }
-        validation_args = [url, "--dest", dest_rel]
-        if remediate:
-            validation_args.append("--remediate")
-        validation_args.append("--dry-run")
-        result.data["validation_commands"] = [_skills_validation_command("install", *validation_args)]
-        result.metadata["next_steps"] = [
-            "Review data.intake_decision.outcome before writing canonical source.",
-            f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else ""),
-        ]
-        return result
+        return _install_dry_run_result(repo_root, url, remediate, dest_rel, skill_name, target_path, intake_decision)
 
-    # Check for existing skill conflict (only for actual installation)
     if intake_decision["outcome"] in {"reject_duplicate", "needs_human_choice"}:
-        # Handle absolute paths gracefully - only relativize if within repo
-        try:
-            display_path = str(target_path.relative_to(repo_root))
-        except ValueError:
-            display_path = str(target_path)
-        result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_CONFLICT" if intake_decision["outcome"] == "reject_duplicate" else "ERR_REQUIRES_HUMAN_CHOICE",
-            message=(
-                f"Skill '{skill_name}' already exists at '{display_path}'."
-                if intake_decision["outcome"] == "reject_duplicate"
-                else f"Skill '{skill_name}' is similar to existing local skills; choose install_new, blend_into_existing, keep_separate, or reject_duplicate before writing."
-            ),
-            fix_suggestion=(
-                "Remove the existing skill or choose a different destination with --dest."
-                if intake_decision["outcome"] == "reject_duplicate"
-                else "Inspect data.intake_decision.local_overlap_candidates and rerun only after the ownership decision is explicit."
-            )
-        ))
-        result.data["skill_name"] = skill_name
-        result.data["canonical_dest"] = dest_rel
-        result.data["existing_path"] = display_path
-        result.data["intake_decision"] = intake_decision
+        return _install_conflict_result(repo_root, dest_rel, skill_name, target_path, intake_decision)
+
+    cmd = _install_command(repo_root, url, dest_path, remediate, result)
+    if cmd is None:
         return result
-
-    python_cmd = _get_python_command(["pyyaml"])
-    installer_script = _resolve_skill_installer_script(repo_root)
-    supported_flags = _install_script_supported_flags(repo_root, python_cmd)
-    cmd = python_cmd + [
-        installer_script,
-        "--url", url,
-        "--dest", str(dest_path),
-    ]
-    if "--validation-level" in supported_flags:
-        cmd.extend(["--validation-level", "compat"])
-        result.data["validation_level"] = "compat"
-    else:
-        result.data["validation_level"] = "compat_skipped_unsupported"
-
-    if remediate:
-        if "--remediate" in supported_flags:
-            cmd.append("--remediate")
-        else:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message="Installed skill installer does not support --remediate.",
-                    fix_suggestion=(
-                        "Re-run without --remediate, or update the installer to a version "
-                        "that supports remediation."
-                    ),
-                )
-            )
-            return result
 
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
-    result.data["raw_output"] = process.stdout
-    result.data["raw_error"] = process.stderr
-    result.data["canonical_dest"] = dest_rel
-    result.data["intake_decision"] = intake_decision
+    _record_install_process(result, process, dest_rel, intake_decision)
 
     if process.returncode == 0:
-        result.status = "success"
-        match = re.search(r"Installed (.*?) to", process.stdout)
-        installed_name = match.group(1) if match else skill_name
-        result.data["skill_name"] = installed_name
-
-        # Keep repo projections current so canonical install and loader symlinks
-        # remain in lockstep.
-        sync_result = sync_skills(repo_root, scope="workspace", dry_run=False)
-        result.data["workspace_sync"] = {
-            "status": sync_result.status,
-            "logs": sync_result.data.get("logs", []),
-        }
-        if sync_result.status != "success":
-            sync_error = sync_result.errors[0].message if sync_result.errors else "Unknown sync failure."
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_RUNTIME",
-                    message=f"Skill installed to '{dest_rel}', but workspace sync failed: {sync_error}",
-                    fix_suggestion="Run `ask skills sync --scope workspace` after resolving the sync error.",
-                )
-            )
-            return result
-        installed_path = f"{dest_rel}/{installed_name}"
-        result.data["readiness_policy"] = {
-            "full_evals_required_before_promotion": True,
-            "external_skill_install_is_intake_not_copy": True,
-            "preserve_operating_model_docs_as_references": True,
-            "promotion_rule": intake_decision["promotion_rule"],
-            "post_install_gates": [
-                f"ask skills audit {installed_path} --level strict --json --robot",
-                f"ask sdk eval scenario-quality {installed_path} --preview --json --robot",
-                f"ask sdk eval scorer-quality {installed_path} --preview --json --robot",
-                f"ask sdk eval scorer-calibration {installed_path} --preview --json --robot",
-                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-local --json --robot",
-                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
-                f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace jscraik --execute --json --robot",
-                f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot once scenario-quality passes",
-                f"ask sdk eval handoff-readiness --skill {installed_path} --preview --json --robot",
-                f"ask skills external-review {installed_path} --json --robot",
-                f"ask evals run {installed_path} --mode release --json --robot only after SDK handoff gates are current",
-            ],
-        }
-        result.metadata["next_steps"] = result.data["readiness_policy"]["post_install_gates"]
+        _complete_installation(result, repo_root, dest_rel, skill_name, intake_decision)
     else:
-        result.status = "error"
-        result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip() or "Installation failed."))
+        _record_install_failure(result)
 
     return result
+
+
+def install_skill(
+    repo_root: Path,
+    url: str,
+    options: InstallSkillOptions | None = None,
+    **legacy_options: object,
+) -> CallResult:
+    """Install from typed options, retaining legacy keywords during migration."""
+    if options is not None and legacy_options:
+        raise TypeError("pass either InstallSkillOptions or legacy keyword arguments, not both")
+    resolved = options or InstallSkillOptions(**legacy_options)
+    return _install_skill(repo_root, url, remediate=resolved.remediate, dest=resolved.dest, dry_run=resolved.dry_run)
 
 
 def _install_script_supported_flags(repo_root: Path, python_cmd: List[str]) -> set[str]:
@@ -264,7 +292,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
 
     try:
         catalog = builder_catalog.load_catalog(repo_root)
-    except Exception as exc:  # noqa: BLE001 - convert optional Skill Factory loader failures into ASK errors.
+    except (ImportError, OSError, TypeError, ValueError) as exc:
         result.status = "error"
         result.data["dependency_status"] = {
             "skill_catalog": "load_failed",

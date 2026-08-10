@@ -1,90 +1,124 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from types import MappingProxyType
+
 from .skills_impl_catalog import *  # noqa: F403
+
+@dataclass(frozen=True)
+class ListSkillsOptions:
+    starter: bool = False
+    archetype: str = "general"
+    limit: int = 12
+    advanced: bool = False
+    visible_only: bool = False
+
+
+@dataclass(frozen=True)
+class SkillsHandlesOptions:
+    check: bool = False
+    include_handles: bool = True
+    write_projection: bool = False
+    check_projection: bool = False
+    dry_run: bool = False
+
+
+def _list_discovery_mode(category: Optional[str], starter: bool, visible_only: bool) -> tuple[str, bool]:
+    category_token = category.lower().strip() if category else ""
+    explicit_visible_only = bool(visible_only)
+    return category_token, bool(
+        (category_token and not explicit_visible_only) or (not explicit_visible_only and not starter)
+    )
+
+
+def _list_catalog_entries(
+    repo_root: Path, *, discovery_advanced: bool, visible_only: bool, starter: bool, archetype: str, limit: int
+) -> list[Any]:
+    entries = [
+        entry for entry in discover_catalog_entries(advanced=discovery_advanced)
+        if entry.source_dir.is_relative_to(repo_root)
+    ]
+    if visible_only:
+        entries = [entry for entry in entries if _entry_visible_for_picker(entry, repo_root)]
+    return _starter_entries(entries, archetype=archetype, limit=limit) if starter else entries
+
+
+def _list_skill_data(repo_root: Path, entries: list[Any], category_token: str) -> list[dict[str, str]]:
+    owner_by_handle = _sdk_handle_owner_index(repo_root) if category_token else {}
+    return [
+        {
+            "name": entry.name,
+            "path": str(entry.source_dir.relative_to(repo_root)),
+            "category": entry.category,
+            "description": entry.description,
+        }
+        for entry in entries
+        if not category_token or _entry_matches_category(entry, category_token, owner_by_handle, repo_root)
+    ]
+
+
+def _list_validation_arguments(
+    category: Optional[str], *, starter: bool, archetype: str, limit: int, advanced: bool, visible_only: bool
+) -> tuple[str, list[str]]:
+    args = ["--category", category] if category else []
+    if advanced and not starter and not visible_only:
+        args.append("--advanced")
+    if visible_only and not starter:
+        args.append("--visible-only")
+    if starter:
+        args.extend(["--archetype", archetype, "--limit", str(max(1, int(limit)))])
+    return ("starter" if starter else "list"), args
+
+
+def _list_skills(
+    repo_root: Path, category: Optional[str] = None, *, starter: bool = False, archetype: str = "general",
+    limit: int = 12, advanced: bool = False, visible_only: bool = False,
+) -> CallResult:
+    """List catalog skills using the current picker and starter-selection policy."""
+    category_token, discovery_advanced = _list_discovery_mode(category, starter, visible_only)
+    entries = _list_catalog_entries(
+        repo_root, discovery_advanced=discovery_advanced, visible_only=visible_only,
+        starter=starter, archetype=archetype, limit=limit,
+    )
+    result = CallResult()
+    result.data.update({
+        "skills": _list_skill_data(repo_root, entries, category_token),
+        "policy_identity": get_policy_identity(),
+        "advanced_mode": discovery_advanced,
+        "inventory_mode": "repo" if discovery_advanced else "visible",
+        "visible_only": bool(visible_only),
+    })
+    action, args = _list_validation_arguments(
+        category, starter=starter, archetype=archetype, limit=limit, advanced=advanced, visible_only=visible_only,
+    )
+    if starter:
+        result.data.update({
+            "starter_mode": True, "starter_archetype": archetype if archetype in STARTER_ARCHETYPES else "general",
+            "starter_limit": max(1, int(limit)),
+        })
+    result.data["validation_commands"] = [_skills_validation_command(action, *args)]
+    result.status = "success"
+    return result
 
 def list_skills(
     repo_root: Path,
     category: Optional[str] = None,
-    *,
-    starter: bool = False,
-    archetype: str = "general",
-    limit: int = 12,
-    advanced: bool = False,
-    visible_only: bool = False,
+    options: ListSkillsOptions | None = None,
+    **legacy_options: object,
 ) -> CallResult:
-    """
-    List discovered catalog skills within the repository, optionally filtered by category or reduced to a deterministic starter subset.
-
-    Parameters:
-        repo_root (Path): Repository root used to filter discovered catalog entries; entries outside this root are excluded.
-        category (Optional[str]): Case-insensitive substring applied to each entry's category; omit to include all categories.
-        starter (bool): When true, return a deterministic subset selected by `archetype` and limited by `limit`.
-        archetype (str): Archetype key used to pick starter skills; unknown keys fall back to "general".
-        limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-        advanced (bool): Backward-compatible no-op alias for the full repo inventory.
-        visible_only (bool): When true, return only the narrower picker/runtime-visible subset.
-
-    Returns:
-        CallResult: Result with `status == "success"` and `data` containing:
-            - "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, and `description`
-            - "policy_identity": current policy identity string
-            - "advanced_mode": boolean showing whether full repo inventory discovery was used
-            - "inventory_mode": "repo" for the full repo inventory or "visible" for the narrower subset
-            - "visible_only": boolean indicating whether the narrower runtime-visible subset was explicitly requested
-            - When `starter` is true, also includes:
-                - "starter_mode": true
-                - "starter_archetype": resolved archetype key
-                - "starter_limit": effective integer limit
-    """
-    result = CallResult()
-    category_token = category.lower().strip() if category else ""
-    explicit_visible_only = bool(visible_only)
-    discovery_advanced = bool(
-        (category_token and not explicit_visible_only)
-        or (not explicit_visible_only and not starter)
+    """List skills from typed options, retaining legacy keyword arguments during migration."""
+    if options is not None and legacy_options:
+        raise TypeError("pass either ListSkillsOptions or legacy keyword arguments, not both")
+    resolved = options or ListSkillsOptions(**legacy_options)
+    return _list_skills(
+        repo_root,
+        category,
+        starter=resolved.starter,
+        archetype=resolved.archetype,
+        limit=resolved.limit,
+        advanced=resolved.advanced,
+        visible_only=resolved.visible_only,
     )
-    entries = [
-        entry
-        for entry in discover_catalog_entries(advanced=discovery_advanced)
-        if entry.source_dir.is_relative_to(repo_root)
-    ]
-    if explicit_visible_only:
-        entries = [entry for entry in entries if _entry_visible_for_picker(entry, repo_root)]
-    if starter:
-        entries = _starter_entries(entries, archetype=archetype, limit=limit)
-    skills_data = []
-    owner_by_handle = _sdk_handle_owner_index(repo_root) if category_token else {}
-    for entry in entries:
-        if category_token and not _entry_matches_category(entry, category_token, owner_by_handle, repo_root):
-            continue
-        skills_data.append({
-            "name": entry.name,
-            "path": str(entry.source_dir.relative_to(repo_root)) if entry.source_dir.is_relative_to(repo_root) else str(entry.source_dir),
-            "category": entry.category,
-            "description": entry.description
-        })
-    result.data["skills"] = skills_data
-    result.data["policy_identity"] = get_policy_identity()
-    result.data["advanced_mode"] = discovery_advanced
-    result.data["inventory_mode"] = "repo" if discovery_advanced else "visible"
-    result.data["visible_only"] = explicit_visible_only
-    validation_action = "starter" if starter else "list"
-    validation_args: list[str] = []
-    if category:
-        validation_args.extend(["--category", category])
-    if advanced and not starter and not explicit_visible_only:
-        validation_args.append("--advanced")
-    if explicit_visible_only and not starter:
-        validation_args.append("--visible-only")
-    if starter:
-        validation_args.extend(["--archetype", archetype])
-        validation_args.extend(["--limit", str(max(1, int(limit)))])
-        result.data["starter_mode"] = True
-        result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
-        result.data["starter_limit"] = max(1, int(limit))
-    result.data["validation_commands"] = [_skills_validation_command(validation_action, *validation_args)]
-    result.status = "success"
-    return result
 
 
 def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
@@ -177,43 +211,33 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
     return result
 
 
-def skills_handles(
-    repo_root: Path,
-    check: bool = False,
-    include_handles: bool = True,
-    write_projection: bool = False,
-    check_projection: bool = False,
-    dry_run: bool = False,
-) -> CallResult:
-    """Return or validate SDK-visible skill handles."""
-    result = CallResult()
-    result.metadata["command"] = "skills handles"
-    validation_args: list[str] = []
-    if check:
-        validation_args.append("--check")
-    if not include_handles:
-        validation_args.append("--no-handles")
-    if write_projection:
-        validation_args.append("--write-projection")
-    if check_projection:
-        validation_args.append("--check-projection")
-    if dry_run:
-        validation_args.append("--dry-run")
+def _handles_validation_arguments(options: SkillsHandlesOptions) -> list[str]:
+    flags = (
+        (options.check, "--check"),
+        (not options.include_handles, "--no-handles"),
+        (options.write_projection, "--write-projection"),
+        (options.check_projection, "--check-projection"),
+        (options.dry_run, "--dry-run"),
+    )
+    return [flag for enabled, flag in flags if enabled]
 
-    if write_projection or check_projection:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_INVALID_PROJECTION_MODE",
-                message="Removed projection flags are not part of the SDK target registry path.",
-                fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills list --json --robot.",
-            )
+
+def _handles_projection_error(result: CallResult) -> CallResult:
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_INVALID_PROJECTION_MODE",
+            message="Removed projection flags are not part of the SDK target registry path.",
+            fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills list --json --robot.",
         )
-        return result
+    )
+    return result
 
+
+def _handles_report(repo_root: Path, options: SkillsHandlesOptions) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     candidates = build_sdk_skill_record_candidates(repo_root_path=repo_root, visibility="advanced")
     records = build_sdk_skill_records(repo_root_path=repo_root, visibility="advanced")
-    handles = [record.to_resolution() for record in records] if include_handles else []
+    handles = [record.to_resolution() for record in records] if options.include_handles else []
     violations = sdk_duplicate_handle_violations(candidates)
     report = {
         "schema_version": "sdk-skill-handles.v1",
@@ -222,18 +246,28 @@ def skills_handles(
         "handle_count": len(records),
         "handles": handles,
         "violations": violations,
-        "validation_commands": [_skills_validation_command("handles", *validation_args)],
+        "validation_commands": [_skills_validation_command("handles", *_handles_validation_arguments(options))],
     }
-    result.data["sdk_handles"] = report
-    result.data["command_surface"] = {
-        **report,
-        "schema_version": "command-surface.v1",
-        "generated_from": "sdk_flat_registry_compat_alias",
-    }
-    result.data["handles"] = handles
-    result.data["violations"] = violations
-    result.data["policy_identity"] = get_policy_identity()
-    if check and violations:
+    return report, violations
+
+
+def _skills_handles(repo_root: Path, options: SkillsHandlesOptions) -> CallResult:
+    """Return or validate SDK-visible skill handles from one typed options value."""
+    result = CallResult()
+    result.metadata["command"] = "skills handles"
+    if options.write_projection or options.check_projection:
+        return _handles_projection_error(result)
+    report, violations = _handles_report(repo_root, options)
+    result.data.update({
+        "sdk_handles": report,
+        "command_surface": {
+            **report, "schema_version": "command-surface.v1", "generated_from": "sdk_flat_registry_compat_alias",
+        },
+        "handles": report["handles"],
+        "violations": violations,
+        "policy_identity": get_policy_identity(),
+    })
+    if options.check and violations:
         result.status = "error"
         result.errors.append(
             ErrorObject(
@@ -243,6 +277,17 @@ def skills_handles(
             )
         )
     return result
+
+def skills_handles(
+    repo_root: Path,
+    options: SkillsHandlesOptions | None = None,
+    **legacy_options: object,
+) -> CallResult:
+    """Return skill handles from typed options, retaining legacy keyword arguments during migration."""
+    if options is not None and legacy_options:
+        raise TypeError("pass either SkillsHandlesOptions or legacy keyword arguments, not both")
+    resolved = options or SkillsHandlesOptions(**legacy_options)
+    return _skills_handles(repo_root, resolved)
 
 
 
@@ -680,7 +725,7 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
         return None
 
 
-CAPABILITY_LIFECYCLE_EVENT_TYPES: dict[str, str] = {
+CAPABILITY_LIFECYCLE_EVENT_TYPES = MappingProxyType({
     "skill_loaded": "A skill source or handle was loaded for inspection or execution.",
     "skill_doctor_completed": "A capability doctor run completed with pass, warning, or blocked status.",
     "package_readiness_checked": "A skill package readiness gate completed with pass, warning, or blocked status.",
@@ -689,6 +734,6 @@ CAPABILITY_LIFECYCLE_EVENT_TYPES: dict[str, str] = {
     "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status.",
     "projection_synced": "A canonical skill source was projected into runtime handles or manifests.",
     "manifest_changed": "A skill or skillset manifest changed and may need validation.",
-}
+})
 
 __all__ = [name for name in globals() if not name.startswith("__")]

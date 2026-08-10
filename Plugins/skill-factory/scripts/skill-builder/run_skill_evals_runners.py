@@ -1,23 +1,245 @@
 from run_skill_evals_assertions import *  # noqa: F403
 
-def run_codex_exec(
-    *,
-    workspace_root: Path,
-    prompt: str,
-    output_last_message_path: Path,
-    output_schema_path: Optional[Path],
-    sandbox: str,
-    ask_for_approval: Optional[str],
-    model: Optional[str],
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class CodexExecRequest:
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    output_schema_path: Optional[Path]
+    sandbox: str
+    ask_for_approval: Optional[str]
+    model: Optional[str]
+    profile: Optional[str]
+    codex_home: Optional[Path]
+    jsonl_path: Optional[Path]
+    codex_bin: Optional[Path]
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_codex_args: Optional[List[str]] = None
+    fallback_profile: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class AltCodexExecRequest:
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    codex_bin: Optional[Path]
+    output_format: str
+    settings_path: Optional[Path]
+    cli_command: Optional[str]
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_codex_args: Optional[List[str]] = None
+
+
+@dataclass(frozen=True)
+class OpenAiExecRequest:
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    openai_bin: Optional[Path]
+    output_format: str
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_openai_args: Optional[List[str]] = None
+
+
+@dataclass
+class _CodexExecContext:
+    request: CodexExecRequest
+    env: dict[str, str]
+    timeout: float
+    warnings: List[str]
+
+
+def _codex_exec_context(request: CodexExecRequest) -> _CodexExecContext:
+    env = os.environ.copy()
+    if request.codex_home:
+        env["CODEX_HOME"] = str(request.codex_home)
+    if request.codex_bin:
+        env["PATH"] = f"{request.codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
+    timeout = _eval_timeout_seconds(
+        timeout_sec=request.timeout_sec,
+        timeout_profile=request.timeout_profile,
+    )
+    return _CodexExecContext(request=request, env=env, timeout=timeout, warnings=[])
+
+
+def _validate_oss_cloud_exec(request: CodexExecRequest) -> None:
+    if request.sandbox != "read-only":
+        raise ValueError("oss-cloud execution requires the read-only sandbox")
+    if request.ask_for_approval not in (None, "on-request"):
+        raise ValueError("oss-cloud execution requires on-request approval")
+    if request.model and request.model != OSS_CLOUD_MODEL:
+        raise ValueError(f"oss-cloud execution requires model {OSS_CLOUD_MODEL}")
+    if request.output_schema_path is not None:
+        raise ValueError("oss-cloud execution does not support an output schema")
+    if request.extra_codex_args:
+        raise ValueError("oss-cloud execution does not accept ad hoc Codex arguments")
+
+
+def _oss_cloud_exec_command(context: _CodexExecContext) -> list[str]:
+    request = context.request
+    _validate_oss_cloud_exec(request)
+    env_file = actual_opaque_env_path()
+    if env_file is None:
+        raise ValueError("oss-cloud execution requires an operator-approved opaque environment stream")
+    relative_output = request.output_last_message_path.resolve().relative_to(request.workspace_root.resolve())
+    logical_command = [
+        "codex", "exec", "--profile", "oss-cloud", "-c", 'approval_policy="on-request"',
+        "--cd", ".", "--sandbox", "read-only", "--output-last-message",
+        relative_output.as_posix(), "--json", "-",
+    ]
+    with configs_auth_backed_invocation(env_file) as invocation:
+        return invocation.runtime_argv(configs_oss_cloud_exec_command(logical_command))
+
+
+def _add_codex_profile_isolation_args(
+    cmd: list[str],
+    context: _CodexExecContext,
+    effective_profile: Optional[str],
+) -> None:
+    request = context.request
+    ignore_user_config_support = _codex_supports_exec_flag(request.codex_bin, "--ignore-user-config")
+    if effective_profile and ignore_user_config_support is not False:
+        cmd.append("--ignore-user-config")
+        context.warnings.append(
+            "Ignored base Codex user config while preserving the explicit --profile for noninteractive eval subprocesses."
+        )
+    elif effective_profile:
+        context.warnings.append(
+            "Codex CLI does not support --ignore-user-config; profile eval subprocess may inherit base user config."
+        )
+    elif ignore_user_config_support is not False:
+        cmd.append("--ignore-user-config")
+    else:
+        context.warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
+    if effective_profile:
+        disable_support = _codex_supports_exec_flag(request.codex_bin, "--disable")
+        if disable_support is not False:
+            cmd.extend(["--disable", "apps"])
+            context.warnings.append("Disabled Codex apps for noninteractive profile eval subprocesses.")
+        else:
+            context.warnings.append("Codex CLI does not support --disable; eval runner could not disable apps.")
+
+
+def _standard_codex_exec_command(
+    context: _CodexExecContext,
+    effective_profile: Optional[str],
+) -> list[str]:
+    request = context.request
+    cmd = _codex_exec_prefix(request.codex_bin)
+    _add_codex_profile_isolation_args(cmd, context, effective_profile)
+    cmd.extend(["--sandbox", request.sandbox])
+    if request.ask_for_approval and _codex_supports_exec_flag(request.codex_bin, "--ask-for-approval") is not False:
+        cmd.extend(["--ask-for-approval", request.ask_for_approval])
+    cmd.extend(["--output-last-message", str(request.output_last_message_path)])
+    if request.extra_codex_args:
+        cmd.extend(request.extra_codex_args)
+    if effective_profile:
+        cmd.extend(["--profile", effective_profile])
+    if request.model:
+        cmd.extend(["--model", request.model])
+    if request.output_schema_path:
+        cmd.extend(["--output-schema", str(request.output_schema_path)])
+    if request.jsonl_path:
+        cmd.append("--json")
+    cmd.append("-")
+    return cmd
+
+
+def _write_codex_jsonl(path: Optional[Path], stdout: str) -> None:
+    if path and stdout:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(stdout, encoding="utf-8")
+
+
+def _codex_timeout_result(context: _CodexExecContext, exc: sp.TimeoutExpired) -> Tuple[int, str, str]:
+    stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout or ""
+    stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr or ""
+    _write_codex_jsonl(context.request.jsonl_path, stdout)
+    timeout_message = f"codex exec timed out after {context.timeout} seconds."
+    return 124, stdout, f"{stderr.rstrip()}\n{timeout_message}".strip()
+
+
+def _invoke_codex_exec(
+    context: _CodexExecContext,
+    effective_profile: Optional[str],
+) -> Tuple[int, str, str]:
+    request = context.request
+    try:
+        cmd = _oss_cloud_exec_command(context) if effective_profile == "oss-cloud" else _standard_codex_exec_command(context, effective_profile)
+        proc = sp.run(
+            cmd, input=request.prompt, text=True, capture_output=True, env=context.env,
+            cwd=request.workspace_root, timeout=context.timeout, start_new_session=True,
+        )
+    except FileNotFoundError:
+        return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
+    except (OSError, ValueError) as exc:
+        return 2, "", str(exc)
+    except sp.TimeoutExpired as exc:
+        return _codex_timeout_result(context, exc)
+    _write_codex_jsonl(request.jsonl_path, proc.stdout)
+    return proc.returncode, proc.stdout, proc.stderr
+
+
+def _has_last_message_artifact(path: Path) -> bool:
+    return path.exists() and path.read_text(encoding="utf-8").strip()
+
+
+def _retry_empty_timeout(
+    context: _CodexExecContext,
     profile: Optional[str],
-    codex_home: Optional[Path],
-    jsonl_path: Optional[Path],
-    codex_bin: Optional[Path],
-    timeout_sec: Optional[float],
-    timeout_profile: str,
-    extra_codex_args: Optional[List[str]] = None,
-    fallback_profile: Optional[str] = None,
-) -> Tuple[int, str, str, List[str]]:
+    result: Tuple[int, str, str],
+) -> Tuple[int, str, str]:
+    rc, stdout, stderr = result
+    request = context.request
+    if rc != 124 or stdout.strip() or _has_last_message_artifact(request.output_last_message_path):
+        return result
+    if not stderr.startswith("codex exec timed out after "):
+        return result
+    context.warnings.append("Codex timed out without output; retrying once with a fresh exec process.")
+    if request.output_last_message_path.exists():
+        try:
+            if not request.output_last_message_path.read_text(encoding="utf-8").strip():
+                request.output_last_message_path.unlink()
+        except OSError as exc:
+            context.warnings.append(f"Could not read {request.output_last_message_path} before retry: {exc}")
+            request.output_last_message_path.unlink(missing_ok=True)
+    if request.jsonl_path and request.jsonl_path.exists():
+        request.jsonl_path.unlink()
+    return _invoke_codex_exec(context, profile)
+
+
+def _apply_codex_fallback(
+    context: _CodexExecContext,
+    profile: Optional[str],
+    result: Tuple[int, str, str],
+) -> Tuple[int, str, str]:
+    rc, stdout, stderr = result
+    fallback_profile = context.request.fallback_profile
+    if rc == 0 or not fallback_profile or fallback_profile == profile:
+        return result
+    if not _is_codex_reasoning_summary_unsupported(f"{stderr}\n{stdout}"):
+        return result
+    if profile == "oss-cloud":
+        context.warnings.append(
+            "Codex rejected reasoning.summary for oss-cloud; skipped cross-profile fallback "
+            "to preserve the authenticated Configs transport and requested provider identity."
+        )
+        return result
+    context.warnings.append(
+        "Codex rejected reasoning.summary for the active profile/model; "
+        f"retrying with fallback profile `{fallback_profile}`."
+    )
+    return _invoke_codex_exec(context, fallback_profile)
+
+
+def _run_codex_exec(request: CodexExecRequest) -> Tuple[int, str, str, List[str]]:
     """
     Run the Codex CLI `exec` command with the provided prompt and capture outputs and warnings.
 
@@ -43,257 +265,104 @@ def run_codex_exec(
         127 when the Codex CLI is not found and 124 on timeout. `stdout` and `stderr` are the subprocess outputs;
         `warnings` contains non-fatal diagnostics (e.g., unsupported flags, automatic fallback retries).
     """
-    warnings: List[str] = []
-    env = os.environ.copy()
-    if codex_home:
-        env["CODEX_HOME"] = str(codex_home)
-    if codex_bin:
-        env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
-
-    timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
-
-    def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
-        if effective_profile == "oss-cloud":
-            try:
-                if sandbox != "read-only":
-                    raise ValueError("oss-cloud execution requires the read-only sandbox")
-                if ask_for_approval not in (None, "on-request"):
-                    raise ValueError("oss-cloud execution requires on-request approval")
-                if model and model != OSS_CLOUD_MODEL:
-                    raise ValueError(f"oss-cloud execution requires model {OSS_CLOUD_MODEL}")
-                if output_schema_path is not None:
-                    raise ValueError("oss-cloud execution does not support an output schema")
-                if extra_codex_args:
-                    raise ValueError("oss-cloud execution does not accept ad hoc Codex arguments")
-                env_file = actual_opaque_env_path()
-                if env_file is None:
-                    raise ValueError("oss-cloud execution requires an operator-approved opaque environment stream")
-                relative_output = output_last_message_path.resolve().relative_to(workspace_root.resolve())
-                logical_command = [
-                    "codex",
-                    "exec",
-                    "--profile",
-                    "oss-cloud",
-                    "-c",
-                    'approval_policy="on-request"',
-                    "--cd",
-                    ".",
-                    "--sandbox",
-                    "read-only",
-                    "--output-last-message",
-                    relative_output.as_posix(),
-                    "--json",
-                    "-",
-                ]
-                with configs_auth_backed_invocation(env_file) as invocation:
-                    cmd = invocation.runtime_argv(configs_oss_cloud_exec_command(logical_command))
-            except (OSError, ValueError) as exc:
-                return 2, "", str(exc)
-        else:
-            cmd = _codex_exec_prefix(codex_bin)
-        # Eval cases pass prompt/context explicitly. When a named runtime lane
-        # profile is requested, keep profile config available while still using
-        # the isolated CODEX_HOME copied below.
-        if effective_profile != "oss-cloud":
-            ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
-            if effective_profile:
-                if ignore_user_config_support is not False:
-                    cmd.append("--ignore-user-config")
-                    warnings.append(
-                        "Ignored base Codex user config while preserving the explicit --profile for noninteractive eval subprocesses."
-                    )
-                else:
-                    warnings.append(
-                        "Codex CLI does not support --ignore-user-config; profile eval subprocess may inherit base user config."
-                    )
-                disable_support = _codex_supports_exec_flag(codex_bin, "--disable")
-                if disable_support is not False:
-                    cmd.extend(["--disable", "apps"])
-                    warnings.append("Disabled Codex apps for noninteractive profile eval subprocesses.")
-                else:
-                    warnings.append("Codex CLI does not support --disable; eval runner could not disable apps.")
-            elif ignore_user_config_support is not False:
-                cmd.append("--ignore-user-config")
-            else:
-                warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
-            cmd.extend(["--sandbox", sandbox])
-
-            if ask_for_approval:
-                supports = _codex_supports_exec_flag(codex_bin, "--ask-for-approval")
-                if supports is not False:
-                    cmd.extend(["--ask-for-approval", ask_for_approval])
-
-            cmd.extend([
-                "--output-last-message",
-                str(output_last_message_path),
-            ])
-
-            if extra_codex_args:
-                cmd.extend(extra_codex_args)
-
-            if effective_profile:
-                cmd.extend(["--profile", effective_profile])
-            if model:
-                cmd.extend(["--model", model])
-            if output_schema_path:
-                cmd.extend(["--output-schema", str(output_schema_path)])
-
-            if jsonl_path:
-                cmd.append("--json")
-
-            cmd.append("-")
-
-        try:
-            proc = sp.run(
-                cmd,
-                input=prompt,
-                text=True,
-                capture_output=True,
-                env=env,
-                cwd=workspace_root,
-                timeout=timeout,
-                start_new_session=True,
-            )
-        except FileNotFoundError:
-            return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
-        except sp.TimeoutExpired as exc:
-            stdout = exc.stdout or ""
-            stderr = exc.stderr or ""
-            if isinstance(stdout, bytes):
-                stdout = stdout.decode("utf-8", errors="replace")
-            if isinstance(stderr, bytes):
-                stderr = stderr.decode("utf-8", errors="replace")
-            if jsonl_path and stdout:
-                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
-                jsonl_path.write_text(stdout, encoding="utf-8")
-            timeout_message = f"codex exec timed out after {timeout} seconds."
-            stderr = f"{stderr.rstrip()}\n{timeout_message}".strip()
-            return 124, stdout, stderr
-
-        if jsonl_path:
-            jsonl_path.parent.mkdir(parents=True, exist_ok=True)
-            jsonl_path.write_text(proc.stdout, encoding="utf-8")
-
-        return proc.returncode, proc.stdout, proc.stderr
-
-    rc, stdout, stderr = _invoke(profile)
-
-    has_last_message_artifact = output_last_message_path.exists() and output_last_message_path.read_text(encoding="utf-8").strip()
-    if rc == 124 and not stdout.strip() and not has_last_message_artifact and stderr.startswith("codex exec timed out after "):
-        warnings.append("Codex timed out without output; retrying once with a fresh exec process.")
-        # Only delete output_last_message_path if no usable artifact exists
-        if output_last_message_path.exists():
-            try:
-                content = output_last_message_path.read_text(encoding="utf-8").strip()
-                if not content:
-                    output_last_message_path.unlink()
-            except OSError as exc:
-                warnings.append(f"Could not read {output_last_message_path} before retry: {exc}")
-                output_last_message_path.unlink(missing_ok=True)
-        if jsonl_path and jsonl_path.exists():
-            jsonl_path.unlink()
-        rc, stdout, stderr = _invoke(profile)
-
-    if (
-        rc != 0
-        and fallback_profile
-        and fallback_profile != profile
-        and _is_codex_reasoning_summary_unsupported(f"{stderr}\n{stdout}")
-    ):
-        if profile == "oss-cloud":
-            warnings.append(
-                "Codex rejected reasoning.summary for oss-cloud; skipped cross-profile fallback "
-                "to preserve the authenticated Configs transport and requested provider identity."
-            )
-        else:
-            warnings.append(
-                "Codex rejected reasoning.summary for the active profile/model; "
-                f"retrying with fallback profile `{fallback_profile}`."
-            )
-            rc, stdout, stderr = _invoke(fallback_profile)
-
-    return rc, stdout, stderr, warnings
+    context = _codex_exec_context(request)
+    result = _invoke_codex_exec(context, request.profile)
+    result = _retry_empty_timeout(context, request.profile, result)
+    result = _apply_codex_fallback(context, request.profile, result)
+    return *result, context.warnings
 
 
-def run_alt_codex_exec(
-    *,
-    workspace_root: Path,
-    prompt: str,
-    output_last_message_path: Path,
-    codex_bin: Optional[Path],
-    output_format: str,
-    settings_path: Optional[Path],
-    cli_command: Optional[str],
-    timeout_sec: Optional[float],
-    timeout_profile: str,
-    extra_codex_args: Optional[List[str]] = None,
-) -> Tuple[int, str, str]:
-    command_name = (cli_command or "").strip() or "codex"
+def run_codex_exec(request: CodexExecRequest | None = None, **legacy_options: object) -> Tuple[int, str, str, List[str]]:
+    """Run Codex from a typed request; accept legacy keyword arguments during migration."""
+    if request is not None and legacy_options:
+        raise TypeError("pass either CodexExecRequest or legacy keyword arguments, not both")
+    resolved = request or CodexExecRequest(**legacy_options)
+    return _run_codex_exec(resolved)
+
+
+def _alt_codex_command(request: AltCodexExecRequest) -> tuple[list[str], bool, str]:
+    command_name = (request.cli_command or "").strip() or "codex"
     use_shell_function = command_name != "codex"
-
-    base_args: List[str] = [command_name, "-p"]
-    if settings_path:
-        base_args.extend(["--settings", str(settings_path)])
-    base_args.extend(["--output-format", output_format])
-    if extra_codex_args:
-        base_args.extend(extra_codex_args)
-
+    base_args = [command_name, "-p"]
+    if request.settings_path:
+        base_args.extend(["--settings", str(request.settings_path)])
+    base_args.extend(["--output-format", request.output_format])
+    if request.extra_codex_args:
+        base_args.extend(request.extra_codex_args)
     if use_shell_function:
-        command_str = " ".join(shlex.quote(x) for x in base_args)
-        cmd = ["zsh", "-ic", command_str]
-    else:
-        if codex_bin:
-            cmd = [str(codex_bin), *base_args[1:]]
-        else:
-            cmd = base_args
+        return ["zsh", "-ic", " ".join(shlex.quote(arg) for arg in base_args)], True, command_name
+    if request.codex_bin:
+        return [str(request.codex_bin), *base_args[1:]], False, command_name
+    return base_args, False, command_name
 
-    timeout = _eval_timeout_seconds(timeout_sec=timeout_sec, timeout_profile=timeout_profile)
 
+def _run_alt_codex_process(
+    request: AltCodexExecRequest,
+    cmd: list[str],
+    *,
+    use_shell_function: bool,
+    command_name: str,
+) -> Tuple[int, str, str]:
+    timeout = _eval_timeout_seconds(
+        timeout_sec=request.timeout_sec,
+        timeout_profile=request.timeout_profile,
+    )
     try:
         proc = sp.run(
-            cmd,
-            input=prompt,
-            text=True,
-            capture_output=True,
-            cwd=workspace_root,
-            timeout=timeout,
-            start_new_session=True,
+            cmd, input=request.prompt, text=True, capture_output=True,
+            cwd=request.workspace_root, timeout=timeout, start_new_session=True,
         )
     except FileNotFoundError:
-        if use_shell_function:
-            return 127, "", f"{command_name} is not available in interactive zsh. Check your shell setup."
-        return 127, "", "codex CLI not found on PATH. Install Codex CLI and ensure it is on PATH."
+        message = (
+            f"{command_name} is not available in interactive zsh. Check your shell setup."
+            if use_shell_function
+            else "codex CLI not found on PATH. Install Codex CLI and ensure it is on PATH."
+        )
+        return 127, "", message
     except sp.TimeoutExpired:
         return 124, "", f"codex headless timed out after {timeout} seconds."
-
-    output_last_message_path.write_text(proc.stdout or "", encoding="utf-8")
-    stderr = proc.stderr or ""
-    stdout = proc.stdout or ""
-
-    if proc.returncode != 0 and ("not logged in" in stdout.lower() or "/login" in stdout.lower()):
-        hint = (
-            "Codex CLI appears to be unauthenticated.\n"
-            "Fix:\n"
-            "  1) Run `codex` interactively and execute `/login`, then re-run evals.\n"
-            "  2) Or run `codex setup-token` if you use token-based auth.\n"
-            "Note: if you maintain multiple Codex setups/profiles, ensure the intended one is active.\n"
-        )
-        stderr = (hint + "\n" + stderr).strip() + "\n"
-
+    stdout, stderr = proc.stdout or "", proc.stderr or ""
+    request.output_last_message_path.write_text(stdout, encoding="utf-8")
     return proc.returncode, stdout, stderr
 
 
-def run_openai_exec(
-    *,
-    workspace_root: Path,
-    prompt: str,
-    output_last_message_path: Path,
-    openai_bin: Optional[Path],
-    output_format: str,
-    timeout_sec: Optional[float],
-    timeout_profile: str,
-    extra_openai_args: Optional[List[str]] = None,
-) -> Tuple[int, str, str]:
+def _alt_codex_authentication_hint(returncode: int, stdout: str, stderr: str) -> str:
+    if returncode == 0 or ("not logged in" not in stdout.lower() and "/login" not in stdout.lower()):
+        return stderr
+    hint = (
+        "Codex CLI appears to be unauthenticated.\nFix:\n"
+        "  1) Run `codex` interactively and execute `/login`, then re-run evals.\n"
+        "  2) Or run `codex setup-token` if you use token-based auth.\n"
+        "Note: if you maintain multiple Codex setups/profiles, ensure the intended one is active.\n"
+    )
+    return (hint + "\n" + stderr).strip() + "\n"
+
+
+def _run_alt_codex_exec(request: AltCodexExecRequest) -> Tuple[int, str, str]:
+    cmd, use_shell_function, command_name = _alt_codex_command(request)
+    returncode, stdout, stderr = _run_alt_codex_process(
+        request, cmd, use_shell_function=use_shell_function, command_name=command_name,
+    )
+    return returncode, stdout, _alt_codex_authentication_hint(returncode, stdout, stderr)
+
+
+def run_alt_codex_exec(request: AltCodexExecRequest | None = None, **legacy_options: object) -> Tuple[int, str, str]:
+    """Run the alternate Codex transport from a typed request or legacy keywords."""
+    if request is not None and legacy_options:
+        raise TypeError("pass either AltCodexExecRequest or legacy keyword arguments, not both")
+    resolved = request or AltCodexExecRequest(**legacy_options)
+    return _run_alt_codex_exec(resolved)
+
+
+def _run_openai_exec(request: OpenAiExecRequest) -> Tuple[int, str, str]:
+    workspace_root = request.workspace_root
+    prompt = request.prompt
+    output_last_message_path = request.output_last_message_path
+    openai_bin = request.openai_bin
+    output_format = request.output_format
+    timeout_sec = request.timeout_sec
+    timeout_profile = request.timeout_profile
+    extra_openai_args = request.extra_openai_args
     if openai_bin:
         cmd = [str(openai_bin)]
     else:
@@ -320,6 +389,14 @@ def run_openai_exec(
 
     output_last_message_path.write_text(proc.stdout or "", encoding="utf-8")
     return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+
+def run_openai_exec(request: OpenAiExecRequest | None = None, **legacy_options: object) -> Tuple[int, str, str]:
+    """Run the OpenAI transport from a typed request or legacy keywords."""
+    if request is not None and legacy_options:
+        raise TypeError("pass either OpenAiExecRequest or legacy keyword arguments, not both")
+    resolved = request or OpenAiExecRequest(**legacy_options)
+    return _run_openai_exec(resolved)
 
 
 def _eval_timeout_seconds(

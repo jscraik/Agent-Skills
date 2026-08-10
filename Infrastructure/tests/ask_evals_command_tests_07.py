@@ -292,7 +292,7 @@ def test_run_evals_live_private_uses_jscraik_default_workspace(tmp_path: Path, m
     assert result.data["tessl_workspace"] == "jscraik"
     assert result.data["tessl_workspace_source"] == "default"
     assert result.errors[0].message.startswith("Tessl eval blocked")
-    assert "hermetic test effect policy" in result.errors[0].message
+    assert "external-effect policy" in result.errors[0].message
 
 
 def test_run_evals_blocks_invalid_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:
