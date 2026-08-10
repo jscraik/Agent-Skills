@@ -113,7 +113,6 @@ def _repo_mise_node_version() -> Optional[str]:
         return None
     value = tools.get("node")
     return value if isinstance(value, str) and value.strip() else None
-    return None
 
 
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
