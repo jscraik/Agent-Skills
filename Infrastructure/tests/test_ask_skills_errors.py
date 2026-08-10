@@ -55,13 +55,16 @@ class SkillReviewDashboardImportTests(unittest.TestCase):
                     "import sys; "
                     "sys.path.insert(0, sys.argv[1]); "
                     "from ask.skill_review_dashboard_render import render_skill_review_dashboard; "
-                    "assert callable(render_skill_review_dashboard)"
+                    "assert callable(render_skill_review_dashboard); "
+                    "assert 'ask.skill_review_dashboard' not in sys.modules, "
+                    "'renderer import pulled in the dashboard facade'"
                 ),
                 str(repo_root / "Infrastructure" / "scripts" / "lib"),
             ],
             check=False,
             capture_output=True,
             text=True,
+            timeout=120,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
