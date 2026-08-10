@@ -100,7 +100,12 @@ def exact_move_baseline(
 
     try:
         current_nodes = _top_level_move_fingerprints(current_text)
-    except SyntaxError:
+    except SyntaxError as exc:
+        _LOGGER.debug(
+            "program_design_exact_moves: current source does not parse; skipping exact-move check for %s: %s",
+            path,
+            exc,
+        )
         return None
     if not current_nodes:
         return None
@@ -109,7 +114,12 @@ def exact_move_baseline(
     for source_text in baseline_sources(revision, parent):
         try:
             baseline_nodes = _top_level_move_fingerprints(source_text)
-        except SyntaxError:
+        except SyntaxError as exc:
+            _LOGGER.debug(
+                "program_design_exact_moves: baseline sibling under %s does not parse; skipping it: %s",
+                parent,
+                exc,
+            )
             continue
         if all(baseline_nodes[fingerprint] >= count for fingerprint, count in current_nodes.items()):
             return current_text
