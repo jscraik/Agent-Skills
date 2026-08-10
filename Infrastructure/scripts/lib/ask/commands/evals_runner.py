@@ -13,9 +13,10 @@ def _attach_eval_closeout(
     runner: str,
     started_at: float,
     timeout_seconds: int | None,
+    *,
     tessl_live_private: bool = False,
 ) -> None:
-    no_case_reason = _tessl_no_case_reason(result, tessl_live_private)
+    no_case_reason = _tessl_no_case_reason(result, tessl_live_private=tessl_live_private)
     closeout = _write_eval_closeout(
         repo_root, skill_path=path, mode=mode, runner=runner,
         raw_output=str(result.data.get("raw_output") or ""),
@@ -32,7 +33,7 @@ def _attach_eval_closeout(
     _apply_closeout_block(result, closeout, path, mode, runner)
 
 
-def _tessl_no_case_reason(result: CallResult, tessl_live_private: bool) -> str | None:
+def _tessl_no_case_reason(result: CallResult, *, tessl_live_private: bool) -> str | None:
     if tessl_live_private and isinstance(result.data.get("tessl_eval"), dict):
         return "Tessl live-private result evidence is retained in data.tessl_eval."
     return None
@@ -225,12 +226,18 @@ def _run_tessl_private_eval(repo_root: Path, context: _EvalRunContext, result: C
     result.data["blocker_taxonomy"] = _eval_blocker_taxonomy()
     result.data["local_eval_status"] = "skipped_tessl_live_dry_run" if context.tessl_live_dry_run else "skipped_tessl_live_private"
     if not _admit_tessl_private_eval(repo_root, context, result):
-        _attach_eval_closeout(result, repo_root, context.path, context.mode, context.runner, started_at, context.timeout_seconds, True)
+        _attach_eval_closeout(
+            result, repo_root, context.path, context.mode, context.runner, started_at,
+            context.timeout_seconds, tessl_live_private=True,
+        )
         return result
     tessl_eval = _run_tessl_live_private_eval(repo_root, context.path, workspace=context.tessl_workspace, dry_run=context.tessl_live_dry_run)
     result.data["tessl_eval"] = tessl_eval
     _finish_tessl_private_eval(result, context, tessl_eval)
-    _attach_eval_closeout(result, repo_root, context.path, context.mode, context.runner, started_at, context.timeout_seconds, True)
+    _attach_eval_closeout(
+        result, repo_root, context.path, context.mode, context.runner, started_at,
+        context.timeout_seconds, tessl_live_private=True,
+    )
     return result
 
 

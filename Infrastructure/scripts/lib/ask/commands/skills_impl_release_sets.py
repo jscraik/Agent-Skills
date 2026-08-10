@@ -266,6 +266,8 @@ def _coerce_sdk_eval_run_request(
 ) -> SdkEvalRunRequest:
     """Accept the value object while retaining existing command-dispatch callers."""
     if request is not None:
+        if not isinstance(request, SdkEvalRunRequest):
+            raise TypeError("skills_sdk_eval_run request must be SdkEvalRunRequest")
         if legacy_options:
             names = ", ".join(sorted(legacy_options))
             raise TypeError(f"SdkEvalRunRequest does not accept legacy options: {names}")
@@ -405,7 +407,7 @@ def _internal_receipt_payload(
         "codex_profile": profile["codex_profile"], "codex_exec_invoked": profile["codex_exec_invoked"], "codex_exec_command_shape": profile["codex_exec_command_shape"],
         **_skills_sdk_eval_identity_fields(execution), "scenario_set_id": metadata.get("scenario_set_id", request.scenario_set), "scenario_set_case_ids": metadata.get("scenario_set_case_ids"),
         "selected_case_ids": _flatten_case_filters(context.cases), "release_set_minimum": metadata.get("release_set_minimum"), "case_count": counts["case_count"],
-        "passed_count": counts["passed_count"], "failed_count": max(1, counts["failed_count"]) if blockers else counts["failed_count"], "quality_gates": counts["quality_gates"],
+        "passed_count": counts["passed_count"], "failed_count": counts["failed_count"], "quality_gates": counts["quality_gates"],
         "closeout_validation": counts.get("closeout_validation"), "cases": counts["cases"], "blockers": sorted(set([*counts["blockers"], *blockers])),
         "mutation_performed": False, "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
     }

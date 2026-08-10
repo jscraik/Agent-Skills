@@ -24,6 +24,7 @@ from test_ask_repo_doctor import (  # noqa: E402  # test-only cross-module impor
 )
 from ask.envelope import CallResult, ErrorObject  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 from ask.commands.repo_impl import _runtime_evidence_schema_validation  # noqa: E402  # test-only Infrastructure import; JSC-388; expires 2026-12-31; ADR: closeout subprocess failure coverage
+from ask.commands.repo_impl_closeout import RepoCloseoutOptions, _coerce_repo_closeout_options  # noqa: E402  # test-only Infrastructure import; JSC-388; expires 2026-12-31; ADR: typed closeout options coverage
 from helpers.ask_repo_doctor_fixtures import write_runtime_card as _write_runtime_card  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 
@@ -49,6 +50,13 @@ class TestAskRepoDoctorCloseout(unittest.TestCase):
         }))
         self.package_patch.start()
         self.addCleanup(self.package_patch.stop)
+
+    def test_closeout_options_reject_an_untyped_value_object(self) -> None:
+        options = RepoCloseoutOptions(changed=True)
+
+        self.assertEqual(_coerce_repo_closeout_options(options, {}), options)
+        with self.assertRaisesRegex(TypeError, "RepoCloseoutOptions"):
+            _coerce_repo_closeout_options(object(), {})  # type: ignore[arg-type]
 
     def test_closeout_changed_runtime_evidence_exposes_shared_workspace_boundary(self) -> None:
         """

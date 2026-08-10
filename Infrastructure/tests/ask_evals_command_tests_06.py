@@ -1,5 +1,37 @@
 from ask_evals_command_tests_05 import *  # noqa: F403
 
+
+def test_eval_closeout_persistence_failure_returns_classified_blocker(tmp_path: Path) -> None:
+    closeout = evals._eval_closeout_payload(
+        tmp_path,
+        "Skills/example-skill",
+        "smoke",
+        "codex",
+        None,
+        [],
+        "fail",
+        None,
+        "RESULT: FAIL",
+        "",
+        False,
+        None,
+        None,
+    )
+    closeout_path = tmp_path / "blocked" / "workflow-closeout.json"
+
+    with mock.patch.object(Path, "mkdir", side_effect=OSError("read-only evidence root")):
+        persisted = evals._persist_eval_closeout(tmp_path, closeout, closeout_path)
+
+    assert persisted["status"] == "blocked"
+    assert persisted["blocker_class"] == "blocked_artifact_persistence"
+    assert persisted["mutation_allowed"] is False
+    assert persisted["registry_update_allowed"] is False
+    assert persisted["persistence_error"] == {
+        "operation": "create parent directory",
+        "error": "read-only evidence root",
+    }
+
+
 def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(

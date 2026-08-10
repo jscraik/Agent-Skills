@@ -663,6 +663,8 @@ def _coerce_repo_closeout_options(
 ) -> RepoCloseoutOptions:
     """Accept explicit options while retaining the established keyword callers."""
     if options is not None:
+        if not isinstance(options, RepoCloseoutOptions):
+            raise TypeError("repo_closeout options must be RepoCloseoutOptions")
         if legacy_options:
             names = ", ".join(sorted(legacy_options))
             raise TypeError(f"RepoCloseoutOptions does not accept legacy options: {names}")

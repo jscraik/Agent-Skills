@@ -476,11 +476,30 @@ def _eval_closeout_payload(
 
 def _persist_eval_closeout(repo_root: Path, closeout: dict[str, object], closeout_path: Path | None) -> dict[str, object]:
     if closeout_path is not None:
-        closeout_path.parent.mkdir(parents=True, exist_ok=True)
-        closeout["path"] = _repo_relative_path(repo_root, closeout_path)
+        try:
+            closeout_path.parent.mkdir(parents=True, exist_ok=True)
+            closeout["path"] = _repo_relative_path(repo_root, closeout_path)
+        except OSError as exc:
+            return _closeout_persistence_block(closeout, exc, "create parent directory")
     closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
     if closeout_path is not None:
-        closeout_path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        try:
+            closeout_path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        except OSError as exc:
+            return _closeout_persistence_block(closeout, exc, "write receipt")
+    return closeout
+
+
+def _closeout_persistence_block(closeout: dict[str, object], exc: OSError, operation: str) -> dict[str, object]:
+    """Return a classified closeout when its required receipt cannot be persisted."""
+    closeout.update(
+        status="blocked",
+        blocker_class="blocked_artifact_persistence",
+        mutation_allowed=False,
+        registry_update_allowed=False,
+        persistence_error={"operation": operation, "error": str(exc)},
+    )
+    closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
     return closeout
 
 
