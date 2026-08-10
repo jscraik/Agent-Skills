@@ -117,8 +117,16 @@ def main(argv: Sequence[str]) -> int:
                 profile = _load_json(profile_path)
                 rv = str(profile.get("rubric_version", "")).strip()
                 rubric_dates.append((skill, datetime.strptime(rv, "%Y-%m-%d").date()))
-            except (ValueError, Exception):  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                findings.append(
+                    Finding(
+                        "WARN",
+                        "TASK_PROFILE_RUBRIC_UNREADABLE",
+                        skill,
+                        f"could not read rubric_version from {profile_path.name}: {exc}; "
+                        "this skill is excluded from the family divergence check",
+                    )
+                )
     if len(rubric_dates) >= 2:
         dates_only = [d for _, d in rubric_dates]
         spread_days = (max(dates_only) - min(dates_only)).days
