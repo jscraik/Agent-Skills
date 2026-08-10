@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from .evals_policy import *  # noqa: F403
+import re
+import shutil
+from pathlib import Path
+
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
+
+from .evals_core import (
+    TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+    _safe_slug,
+)
+from .evals_policy import TESSL_STAGING_IGNORED_DIRS, TESSL_STAGING_IGNORED_NAMES
 
 def _should_skip_tessl_staging_path(source_root: Path, source_path: Path) -> bool:
     try:

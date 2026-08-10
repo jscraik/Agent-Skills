@@ -19,11 +19,17 @@ def _load_impl() -> ModuleType:
         from . import skills_impl as _impl
 
         return _impl
-    except Exception:  # pragma: no cover - fallback when run as a file
+    except ImportError as relative_import_error:  # pragma: no cover - fallback when run as a file
         package_root = Path(__file__).resolve().parents[2]
         if str(package_root) not in sys.path:
             sys.path.insert(0, str(package_root))
-        return importlib.import_module("ask.commands.skills_impl")
+        try:
+            return importlib.import_module("ask.commands.skills_impl")
+        except ImportError as package_import_error:
+            raise ImportError(
+                "ask.commands.skills could not load skills_impl through relative or package import; "
+                f"relative import failed: {relative_import_error}"
+            ) from package_import_error
 
 
 _impl = _load_impl()

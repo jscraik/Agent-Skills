@@ -1,6 +1,38 @@
 from __future__ import annotations
 
-from .evals_staging_parse import *  # noqa: F403
+import json
+import os
+import re
+from pathlib import Path
+
+from ask.skills_sdk.tessl_eval_quality import (
+    normalize_tessl_acceptance_item,
+    tessl_eval_quality_findings,
+)
+
+from .evals_core import TESSL_DEFAULT_WORKSPACE, _safe_slug
+from .evals_staging_parse import (
+    BEHAVIORAL_TESSL_ACCEPTANCE_TYPES,
+    FAIL_RATIONALE_RE,
+    GENERIC_EXPECTED_SIGNAL_RE,
+    GUARDRAIL_CASE_RE,
+    GUARDRAIL_DIMENSION_RE,
+    GUARDRAIL_FAIL_CLOSED_RE,
+    GUARDRAIL_LABEL_RE,
+    GUARDRAIL_OUTCOME_TERMS,
+    GUARDRAIL_RESPONSE_SCHEMA_TERMS,
+    GUARDRAIL_STRUCTURED_OUTPUT_RE,
+    JUDGE_CASE_RE,
+    KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES,
+    PROVENANCE_FIXTURE_PATH_RE,
+    PROVENANCE_ONLY_VERBS_RE,
+    ROLE_TERMS,
+    SHALLOW_EXPECTED_SIGNAL_VALUES,
+    SOURCE_REFERENCE_PASS_RE,
+    UNSTAGED_TESSL_REPO_PATH_RE,
+    _merge_tessl_cases_with_generated_fixtures,
+    _parse_tessl_eval_cases,
+)
 
 def _acceptance_type(item: object) -> str:
     if not isinstance(item, dict):

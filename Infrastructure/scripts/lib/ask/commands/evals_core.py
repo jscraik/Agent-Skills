@@ -5,37 +5,38 @@ import json
 import os
 import re
 import shlex
-import signal
-import subprocess
+import signal  # noqa: F401 - compatibility facade export
+import subprocess  # noqa: F401 - compatibility facade export
 import sys
 import shutil
-import tempfile
+import tempfile  # noqa: F401 - compatibility facade export
 import hashlib
-import time
+import time  # noqa: F401 - compatibility facade export
 from collections.abc import Mapping
 from pathlib import Path
-from ask.envelope import CallResult, ErrorObject
-from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
-from ask.skill_review_dashboard import render_skill_review_dashboard
+from ask.envelope import CallResult, ErrorObject  # noqa: F401 - compatibility facade export
+from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache  # noqa: F401 - compatibility facade export
+from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: F401 - compatibility facade export
 from ask.skills_sdk.tessl_eval_quality import (
-    normalize_tessl_acceptance_item,
-    tessl_eval_quality_findings,
-)
-from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
-from ask.skills_sdk.handoff_readiness import build_candidate_identity, default_handoff_readiness_path
+    normalize_tessl_acceptance_item,  # noqa: F401 - compatibility facade export
+    tessl_eval_quality_findings,  # noqa: F401 - compatibility facade export
+)  # noqa: F401 - compatibility facade export
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: F401 - compatibility facade export
+from ask.skills_sdk.handoff_readiness import build_candidate_identity, default_handoff_readiness_path  # noqa: F401 - compatibility facade export
 from ask.skills_sdk.release_scenario_sets import (
     RELEASE_SCENARIO_MAXIMUM,
     RELEASE_SCENARIO_MINIMUM,
     RELEASE_SCENARIO_TARGET,
-    release_scenario_set_case_ids,
-)
+    release_scenario_set_case_ids,  # noqa: F401 - compatibility facade export
+)  # noqa: F401 - compatibility facade export
 from .evals_shared import (
     _summarize_tessl_live_eval_view as _build_tessl_live_eval_view,
-    _load_json_file,
-    _portable_command_part,
+    _load_json_file,  # noqa: F401 - compatibility facade export
+    _portable_command_part,  # noqa: F401 - compatibility facade export
     _sanitize_tessl_live_private_payload,
     _tessl_archive_suffix,
-)
+)  # noqa: F401 - compatibility facade export
+from .evals_core_exports import EVALS_CORE_EXPORTS
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -775,4 +776,4 @@ def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> d
 def _is_discovery_smoke_filter_blocker(raw_error: object) -> bool:
     return "discovery-smoke runner requires eval cases with `smoke_mode`" in _as_text(raw_error)
 
-__all__ = [name for name in globals() if not name.startswith("__")]
+__all__ = EVALS_CORE_EXPORTS

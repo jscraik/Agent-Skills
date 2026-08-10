@@ -1,6 +1,20 @@
 from __future__ import annotations
 
-from .evals_core import *  # noqa: F403
+import tempfile
+from pathlib import Path
+
+from .evals_core import (
+    TESSL_LIVE_PRIVATE_MAX_SCENARIOS,
+    TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+    TESSL_LIVE_PRIVATE_MIN_SCORE,
+    TESSL_LIVE_PRIVATE_TARGET_SCENARIOS,
+    TESSL_LIVE_PRIVATE_TARGET_SCORE,
+    TESSL_SCENARIO_TOOL_TILE,
+    TESSL_SCENARIO_TOOL_VERSION,
+    TESSL_WORKSPACE_RUN_LIMIT,
+    TESSL_WORKSPACE_RUN_LIMIT_SOURCE,
+    TESSL_WORKSPACE_RUN_RESERVE,
+)
 
 
 def _tessl_staging_root_template() -> str:

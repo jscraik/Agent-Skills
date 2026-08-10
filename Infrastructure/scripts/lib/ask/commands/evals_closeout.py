@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .evals_macro import *  # noqa: F403
+from .evals_shared import EvalArtifactReadError, _load_json_file
 
 def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool = False) -> str | None:
     text = "\n".join([raw_output or "", raw_error or ""])
@@ -240,12 +241,7 @@ def _load_eval_summary(report_dir: Path) -> dict:
         path = report_dir / name
         if not path.is_file():
             continue
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if isinstance(data, dict):
-            return data
+        return _load_json_file(path)
     return {}
 
 
@@ -455,7 +451,7 @@ def _eval_closeout_payload(
     repo_root: Path, skill_path: str, mode: str, runner: str, report_dir: Path | None,
     cases: list[dict[str, object]], status: str, blocker_class: str | None,
     raw_output: str, raw_error: str, missing_suite_artifacts: bool,
-    timeout_seconds: int | None, no_case_reason: str | None,
+    timeout_seconds: int | None, no_case_reason: str | None, artifact_read_error: str | None = None,
 ) -> dict[str, object]:
     return {
         "schema_version": EVAL_CLOSEOUT_SCHEMA_VERSION, "status": status, "skill_path": skill_path,
@@ -466,7 +462,7 @@ def _eval_closeout_payload(
         "registry_update_allowed": status == "pass" and mode == "release",
         "raw_output_present": bool(raw_output.strip()), "raw_error_present": bool(raw_error.strip()),
         "missing_suite_artifacts": missing_suite_artifacts, "case_evidence_present": bool(cases),
-        "no_case_reason": no_case_reason,
+        "no_case_reason": no_case_reason, "artifact_read_error": artifact_read_error,
         "next_reproduce_command": _evals_run_validation_command(
             skill_path, mode=mode, runner=runner, dashboard=True, tessl_live_private=False,
             tessl_workspace=None, tessl_live_dry_run=False, timeout_seconds=timeout_seconds,
@@ -518,14 +514,23 @@ def _write_eval_closeout(
     no_case_reason: str | None = None,
 ) -> dict[str, object]:
     report_dir = _eval_report_dir(repo_root, skill_path=skill_path, raw_output=raw_output, started_at=started_at)
-    summary = _load_eval_summary(report_dir) if report_dir is not None else {}
+    artifact_read_error = None
+    try:
+        summary = _load_eval_summary(report_dir) if report_dir is not None else {}
+    except EvalArtifactReadError as exc:
+        summary = {}
+        artifact_read_error = str(exc)
     cases = _eval_closeout_cases(repo_root, report_dir, summary)
-    status, closeout_blocker, missing_suite_artifacts = _eval_closeout_state(
-        eval_status, blocker_class, report_dir, summary, cases, no_case_reason,
-    )
+    if artifact_read_error:
+        status, closeout_blocker, missing_suite_artifacts = "blocked", "blocked_validation", False
+    else:
+        status, closeout_blocker, missing_suite_artifacts = _eval_closeout_state(
+            eval_status, blocker_class, report_dir, summary, cases, no_case_reason,
+        )
     closeout = _eval_closeout_payload(
         repo_root, skill_path, mode, runner, report_dir, cases, status, closeout_blocker,
         raw_output, raw_error, missing_suite_artifacts, timeout_seconds, no_case_reason,
+        artifact_read_error,
     )
     closeout_path = _eval_closeout_path(
         repo_root, report_dir, skill_path, mode, runner, raw_output, raw_error, no_case_reason,
@@ -565,23 +570,21 @@ def _read_scorecard(path: Path | None) -> dict:
     if path is None or not path.is_file():
         return {}
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return data if isinstance(data, dict) else {}
+        return _load_json_file(path)
+    except EvalArtifactReadError as exc:
+        return {"artifact_read_error": str(exc)}
 
 
-def _scorecard_blocker_class(scorecard: dict) -> str | None:
-    decision = str(scorecard.get("decision") or "").strip().lower()
-    if decision != "blocked":
-        return None
-
+def _scorecard_summary_blocker_class(scorecard: dict) -> str | None:
     summary = scorecard.get("blocked_class_summary")
     if isinstance(summary, dict):
         for blocker_class, count in summary.items():
             if blocker_class in _eval_blocker_taxonomy() and isinstance(count, int) and count > 0:
                 return str(blocker_class)
+    return None
 
+
+def _scorecard_case_blocker_class(scorecard: dict) -> str | None:
     for case in scorecard.get("cases") or []:
         if not isinstance(case, dict):
             continue
@@ -596,7 +599,15 @@ def _scorecard_blocker_class(scorecard: dict) -> str | None:
                 blocker_class = runner.get("blocker_class")
                 if blocker_class in _eval_blocker_taxonomy():
                     return str(blocker_class)
-    return "blocked_validation"
+    return None
+
+
+def _scorecard_blocker_class(scorecard: dict) -> str | None:
+    if scorecard.get("artifact_read_error"):
+        return "blocked_validation"
+    if str(scorecard.get("decision") or "").strip().lower() != "blocked":
+        return None
+    return _scorecard_summary_blocker_class(scorecard) or _scorecard_case_blocker_class(scorecard) or "blocked_validation"
 
 
 def _latest_review_report(repo_root: Path, skill_identifier: str) -> Path | None:

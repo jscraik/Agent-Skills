@@ -32,6 +32,30 @@ def test_eval_closeout_persistence_failure_returns_classified_blocker(tmp_path: 
     }
 
 
+def test_eval_closeout_records_malformed_summary_as_validation_blocker(tmp_path: Path) -> None:
+    report_dir = tmp_path / "reports"
+    report_dir.mkdir()
+    summary_path = report_dir / "summary.json"
+    summary_path.write_text("{ malformed", encoding="utf-8")
+
+    closeout = evals._write_eval_closeout(
+        tmp_path,
+        skill_path="Skills/example-skill",
+        mode="smoke",
+        runner="codex",
+        raw_output=f"Reports: {report_dir}",
+        raw_error="",
+        eval_status="fail",
+        blocker_class=None,
+        started_at=0,
+    )
+
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_validation"
+    assert closeout["missing_suite_artifacts"] is False
+    assert closeout["artifact_read_error"] == f"Could not parse JSON evidence artifact: {summary_path}"
+
+
 def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(
