@@ -273,6 +273,31 @@ def test_tessl_live_private_sanitizer_preserves_staged_evidence_root() -> None:
     assert sanitized["stdout"] == "contact <redacted-email> and inspect <user-path>"
 
 
+def test_tessl_live_private_sanitizer_redacts_cross_platform_home_paths() -> None:
+    payload = {
+        "stdout": "linux /home/runner/private.txt and windows C:\\Users\\Jamie\\private.txt",
+    }
+
+    sanitized = evals._sanitize_tessl_live_private_payload(payload)
+
+    assert sanitized["stdout"] == "linux <user-path> and windows <user-path>"
+
+
+def test_macro_eval_report_blocks_on_malformed_existing_summary(tmp_path: Path) -> None:
+    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
+    report_dir.mkdir(parents=True)
+    (report_dir / "summary.json").write_text("{ not valid json", encoding="utf-8")
+
+    result = evals.macro_eval_report(tmp_path)
+
+    assert result.status == "error"
+    assert result.errors[0].code == "ERR_VALIDATION"
+    assert result.data["artifact_errors"] == [{
+        "path": "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json",
+        "message": "Could not parse JSON evidence artifact: " + str(report_dir / "summary.json"),
+    }]
+
+
 def test_evals_run_default_does_not_stage_or_submit_tessl_source(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path)
     skill_root = _write_example_skill(tmp_path)

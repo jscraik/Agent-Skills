@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from ask.envelope import ErrorObject
+
 from .evals_live_run import *  # noqa: F403
+from .evals_shared import EvalArtifactReadError
 
 def _repo_relative_text(repo_root: Path, text: str) -> str:
     if not text:
@@ -349,6 +352,68 @@ def _copy_macro_mdx_components(repo_root: Path, target_dir: Path) -> Path | None
     return component_target
 
 
+def _append_macro_summary_events(
+    result: CallResult,
+    events: list[dict],
+    repo_root: Path,
+    summary_path: Path,
+) -> bool:
+    try:
+        events.extend(_macro_eval_events_from_summary(repo_root, summary_path))
+    except EvalArtifactReadError as exc:
+        result.status = "error"
+        result.data["artifact_errors"] = [{
+            "path": _repo_relative_path(repo_root, summary_path),
+            "message": str(exc),
+        }]
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Macro eval report could not read summary evidence: {exc}",
+            fix_suggestion="Repair or replace the malformed summary artifact, then rerun ./bin/ask evals macro-report --json --robot.",
+        ))
+        return False
+    return True
+
+
+def _macro_eval_totals(summary_paths: list[Path], events: list[dict]) -> dict[str, int]:
+    return {
+        "summaries_scanned": len(summary_paths),
+        "events": len(events),
+        "skills": len({event.get("skill") for event in events if event.get("skill")}),
+        "behavior_patterns": len({event.get("behavior_pattern") for event in events if event.get("behavior_pattern")}),
+    }
+
+
+def _macro_eval_artifacts(
+    repo_root: Path,
+    events_path: Path,
+    report_path: Path,
+    mdx_path: Path,
+    components_path: Path | None,
+) -> dict[str, str | None]:
+    return {
+        "events_jsonl": _repo_relative_path(repo_root, events_path),
+        "report_json": _repo_relative_path(repo_root, report_path),
+        "report_mdx": _repo_relative_path(repo_root, mdx_path),
+        "report_components": _repo_relative_path(repo_root, components_path) if components_path else None,
+    }
+
+
+def _macro_eval_groups(events: list[dict]) -> dict[str, list[dict]]:
+    return {
+        "by_skill": _macro_group_counts(events, ("skill",)),
+        "by_case_type": _macro_group_counts(events, ("case_type",)),
+        "by_run_outcome": _macro_group_counts(events, ("run_outcome",)),
+        "by_eval_finding": _macro_group_counts(events, ("eval_finding",)),
+        "by_behavior_pattern": _macro_group_counts(events, ("behavior_pattern",)),
+        "by_verification_strategy": _macro_group_counts(events, ("verification_strategy",)),
+        "by_baseline_status": _macro_group_counts(events, ("baseline_status",)),
+        "by_verifier_type": _macro_group_list_counts(events, "verifier_types"),
+        "by_case_outcome_finding": _macro_group_counts(events, ("case_type", "run_outcome", "eval_finding")),
+        "by_skill_behavior_pattern": _macro_group_counts(events, ("skill", "behavior_pattern")),
+    }
+
+
 def macro_eval_report(
     repo_root: Path,
     *,
@@ -361,7 +426,8 @@ def macro_eval_report(
     summary_paths = _macro_summary_paths(repo_root, summaries_glob)
     events: list[dict] = []
     for summary_path in summary_paths:
-        events.extend(_macro_eval_events_from_summary(repo_root, summary_path))
+        if not _append_macro_summary_events(result, events, repo_root, summary_path):
+            return result
 
     target_dir = repo_root / (output_dir or "Infrastructure/artifacts/evals/macro")
     events_path = target_dir / "macro-eval-events.jsonl"
@@ -369,36 +435,14 @@ def macro_eval_report(
     mdx_path = target_dir / "macro-eval-report.mdx"
     _write_jsonl(events_path, events)
     components_path = _copy_macro_mdx_components(repo_root, target_dir)
-
     report = {
         "schema_version": "1.0",
         "generated_at": _utc_now_iso(),
         "source": "ask_evals_macro_report",
         "summaries_glob": summaries_glob,
-        "totals": {
-            "summaries_scanned": len(summary_paths),
-            "events": len(events),
-            "skills": len({event.get("skill") for event in events if event.get("skill")}),
-            "behavior_patterns": len({event.get("behavior_pattern") for event in events if event.get("behavior_pattern")}),
-        },
-        "artifacts": {
-            "events_jsonl": _repo_relative_path(repo_root, events_path),
-            "report_json": _repo_relative_path(repo_root, report_path),
-            "report_mdx": _repo_relative_path(repo_root, mdx_path),
-            "report_components": _repo_relative_path(repo_root, components_path) if components_path else None,
-        },
-        "groups": {
-            "by_skill": _macro_group_counts(events, ("skill",)),
-            "by_case_type": _macro_group_counts(events, ("case_type",)),
-            "by_run_outcome": _macro_group_counts(events, ("run_outcome",)),
-            "by_eval_finding": _macro_group_counts(events, ("eval_finding",)),
-            "by_behavior_pattern": _macro_group_counts(events, ("behavior_pattern",)),
-            "by_verification_strategy": _macro_group_counts(events, ("verification_strategy",)),
-            "by_baseline_status": _macro_group_counts(events, ("baseline_status",)),
-            "by_verifier_type": _macro_group_list_counts(events, "verifier_types"),
-            "by_case_outcome_finding": _macro_group_counts(events, ("case_type", "run_outcome", "eval_finding")),
-            "by_skill_behavior_pattern": _macro_group_counts(events, ("skill", "behavior_pattern")),
-        },
+        "totals": _macro_eval_totals(summary_paths, events),
+        "artifacts": _macro_eval_artifacts(repo_root, events_path, report_path, mdx_path, components_path),
+        "groups": _macro_eval_groups(events),
     }
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     _write_macro_mdx_report(mdx_path, report)

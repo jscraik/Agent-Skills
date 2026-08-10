@@ -7,6 +7,10 @@ from collections.abc import Callable
 from pathlib import Path
 
 
+class EvalArtifactReadError(ValueError):
+    """Raised when an existing JSON evidence artifact cannot be read safely."""
+
+
 def _portable_command_part(part: str) -> str:
     return Path(part).name if Path(part).is_absolute() else part
 
@@ -30,7 +34,8 @@ def _sanitize_tessl_live_private_payload(value: object) -> object:
                 parsed = None
             if isinstance(parsed, (dict, list)):
                 return json.dumps(_sanitize_tessl_live_private_payload(parsed), indent=2, sort_keys=True)
-        redacted = re.sub(r"/Users/[^\s\"']+", "<user-path>", value)
+        redacted = re.sub(r"/(?:Users|home)/[^\s\"']+", "<user-path>", value)
+        redacted = re.sub(r"(?i)\b[A-Z]:\\Users\\[^\s\"']+", "<user-path>", redacted)
         return re.sub(r"[-A-Za-z0-9._%+]+@[-A-Za-z0-9.]+\.[A-Za-z]{2,}", "<redacted-email>", redacted)
     return value
 
@@ -40,10 +45,16 @@ def _tessl_archive_suffix() -> str:
 
 
 def _load_json_file(path: Path) -> dict:
-    try:
-        loaded = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    if not path.is_file():
         return {}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise EvalArtifactReadError(f"Could not read JSON evidence artifact: {path}") from exc
+    try:
+        loaded = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise EvalArtifactReadError(f"Could not parse JSON evidence artifact: {path}") from exc
     return loaded if isinstance(loaded, dict) else {}
 
 
