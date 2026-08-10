@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .skills_impl_ab_receipts import *  # noqa: F403
 
 def _skills_sdk_prepare_release_case_filters(
@@ -234,290 +236,246 @@ def _attach_phoenix_eval_trace(
         }
 
 
+@dataclass(frozen=True)
+class SdkEvalRunRequest:
+    """Explicit options for one Skills SDK eval command."""
+
+    dataset: str | None = None
+    target: str | None = None
+    mode: str = "smoke"
+    runner: str = "auto"
+    skip_tessl: bool = True
+    codex_profile: str | None = None
+    cases: list[str] | None = None
+    scenario_set: str | None = None
+    timeout_seconds: int | None = None
+
+
+@dataclass(frozen=True)
+class _InternalSdkEvalContext:
+    target_path: str
+    package_identity: dict[str, str] | None
+    cases: list[str] | None
+    release_set_metadata: dict[str, object] | None
+    internal: CallResult
+
+
+def _coerce_sdk_eval_run_request(
+    request: SdkEvalRunRequest | None,
+    legacy_options: dict[str, object],
+) -> SdkEvalRunRequest:
+    """Accept the value object while retaining existing command-dispatch callers."""
+    if request is not None:
+        if legacy_options:
+            names = ", ".join(sorted(legacy_options))
+            raise TypeError(f"SdkEvalRunRequest does not accept legacy options: {names}")
+        return request
+    allowed = set(SdkEvalRunRequest.__dataclass_fields__)
+    unexpected = set(legacy_options) - allowed
+    if unexpected:
+        names = ", ".join(sorted(unexpected))
+        raise TypeError(f"skills_sdk_eval_run received unexpected option(s): {names}")
+    return SdkEvalRunRequest(**legacy_options)
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
-    dataset: str | None = None,
-    target: str | None = None,
-    mode: str = "smoke",
-    runner: str = "auto",
-    skip_tessl: bool = True,
-    codex_profile: str | None = None,
-    cases: list[str] | None = None,
-    scenario_set: str | None = None,
-    timeout_seconds: int | None = None,
+    request: SdkEvalRunRequest | None = None,
+    **legacy_options: object,
 ) -> CallResult:
     """Run SDK evals through deterministic JSONL or the internal skill-builder backend."""
+    eval_request = _coerce_sdk_eval_run_request(request, legacy_options)
     result = CallResult()
     result.metadata["command"] = "sdk eval run"
-    if not skip_tessl:
-        result.status = "error"
-        result.data["skills_sdk_eval_run"] = {
-            "schema_version": "skills-sdk-eval-run.v0",
-            "status": "blocked",
-            "dataset": dataset,
-            "target": target,
-            "runner": runner,
-            "receipt": None,
-            "mutation_performed": False,
-            "validation_commands": [
-                "./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
-                "./bin/ask evals run <skill> --tessl-live-private --tessl-workspace <workspace> --json --robot",
-            ],
-            "agent_summary": "sdk eval run is local-only; direct Tessl continuation is retired in favor of the guarded live-private handoff route.",
-        }
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message="sdk eval run does not submit Tessl evals; use the guarded live-private handoff route.",
-            fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
-        ))
-        return result
-    resolved_runner = "deterministic-jsonl" if runner == "auto" and dataset else runner
-    if resolved_runner == "auto":
-        resolved_runner = "internal"
-    if resolved_runner == "internal":
-        if not target:
-            result.status = "error"
-            result.data["skills_sdk_eval_run"] = {
-                "schema_version": "skills-sdk-eval-run.v0",
-                "status": "blocked",
-                "dataset": dataset,
-                "target": target,
-                "runner": "internal_skill_builder_v0",
-                "receipt": None,
-                "mutation_performed": False,
-                "validation_commands": [_ask_validation_command("sdk", "eval", "run", "<skill>", "--runner", "internal")],
-                "agent_summary": "skills-sdk eval run is blocked: internal runner requires a skill target.",
-            }
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message="Skills SDK internal eval run requires a skill target.",
-                    fix_suggestion="Run ask sdk eval run <skill> --runner internal --mode smoke --json --robot.",
-                )
-            )
-            return result
-        from ask.commands import evals as _eval_commands  # noqa: PLC0415
+    if not eval_request.skip_tessl:
+        return _blocked_sdk_tessl_result(result, eval_request)
+    runner = _resolved_sdk_eval_runner(eval_request)
+    if runner == "internal":
+        return _run_internal_sdk_eval(repo_root, result, eval_request)
+    return _run_deterministic_sdk_eval(repo_root, result, eval_request, runner)
 
-        target_path = str(_skills_sdk_eval_source_path(repo_root, target) or target)
-        package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
-        cases, release_set_metadata, release_set_blocked = _skills_sdk_prepare_release_case_filters(
-            repo_root,
-            target=target,
-            target_path=target_path,
-            mode=mode,
-            codex_profile=codex_profile,
-            cases=cases,
-            scenario_set=scenario_set,
-            package_identity=package_identity,
-        )
-        if release_set_blocked is not None:
-            return release_set_blocked
 
-        internal = _eval_commands.run_evals(
-            repo_root,
-            target,
-            mode=mode,
-            runner="codex",
-            dashboard=False,
-            skip_tessl=skip_tessl,
-            codex_profile=codex_profile,
-            cases=cases,
-            timeout_seconds=timeout_seconds,
-        )
-        raw_status = str(internal.data.get("eval_status") or ("pass" if internal.status == "success" else "fail"))
-        blockers = []
-        if internal.status != "success":
-            blockers = [error.message for error in internal.errors] or [raw_status]
-        status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
-        target_path = str(internal.data.get("resolved_skill_path") or target_path)
-        if package_identity is None:
-            package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
-        receipt_counts = _skills_sdk_internal_eval_receipt_counts(
-            repo_root,
-            internal,
-            status=status,
-            fallback_blockers=blockers,
-            eval_commands=_eval_commands,
-        )
-        profile_proof = _skills_sdk_eval_codex_profile_proof(internal, codex_profile=codex_profile)
-        identity_source_path = _skills_sdk_eval_source_path(repo_root, target)
-        eval_lane = _skills_sdk_eval_receipt_lane(mode, codex_profile)
-        execution_identity = _skills_sdk_eval_execution_identity(
-            identity_source_path.parent / "references" / "evals.yaml"
-            if identity_source_path is not None
-            else Path(""),
-            eval_lane,
-        )
-        if execution_identity is None:
-            execution_identity = _skills_sdk_eval_profile_execution_identity(codex_profile)
-        profile_blockers: list[str] = []
-        if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
-            profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
-        identity_blockers: list[str] = []
-        if eval_lane in {"oss-local", "oss-cloud"} and execution_identity is None:
-            identity_blockers.append(f"blocked_missing_artifact:execution_identity_missing:{eval_lane}")
-        proof_blockers = [*profile_blockers, *identity_blockers]
-        receipt = {
-            "schema_version": "skills-sdk.eval-run-receipt.v0",
-            "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": "blocked" if proof_blockers and receipt_counts["status"] == "pass" else receipt_counts["status"],
-            "runner": "internal_skill_builder_v0",
-            "dataset_path": receipt_counts["dataset_path"],
-            "dataset_digest": receipt_counts["dataset_digest"],
-            "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
-            "package_id": package_identity["package_id"] if package_identity else None,
-            "package_digest": package_identity["package_digest"] if package_identity else None,
-            "rubric_digest": _skills_sdk_digest_file(repo_root / "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json"),
-            "target_path": target_path,
-            "mode": mode,
-            "lane": eval_lane,
-            "lane_type": release_set_metadata["lane_type"] if release_set_metadata else mode,
-            "profile": codex_profile,
-            "codex_profile": profile_proof["codex_profile"],
-            "codex_exec_invoked": profile_proof["codex_exec_invoked"],
-            "codex_exec_command_shape": profile_proof["codex_exec_command_shape"],
-            **_skills_sdk_eval_identity_fields(execution_identity),
-            "scenario_set_id": release_set_metadata["scenario_set_id"] if release_set_metadata else scenario_set,
-            "scenario_set_case_ids": release_set_metadata["scenario_set_case_ids"] if release_set_metadata else None,
-            "selected_case_ids": _flatten_case_filters(cases),
-            "release_set_minimum": release_set_metadata["release_set_minimum"] if release_set_metadata else None,
-            "case_count": receipt_counts["case_count"],
-            "passed_count": receipt_counts["passed_count"],
-            "failed_count": max(1, receipt_counts["failed_count"]) if proof_blockers else receipt_counts["failed_count"],
-            "quality_gates": receipt_counts["quality_gates"],
-            "closeout_validation": receipt_counts.get("closeout_validation"),
-            "cases": receipt_counts["cases"],
-            "blockers": sorted(set([*receipt_counts["blockers"], *proof_blockers])),
-            "mutation_performed": False,
-            "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
-        }
-        status = receipt["status"]
-        receipt_path = _skills_sdk_persist_eval_run_receipt(repo_root, receipt)
-        payload = {
-            "schema_version": "skills-sdk-eval-run.v0",
-            "status": status,
-            "dataset": dataset,
-            "target": target,
-            "runner": "internal_skill_builder_v0",
-            "mode": mode,
-            "receipt": receipt,
-            "receipt_path": receipt_path,
-            "internal_eval": internal.data,
-            "mutation_performed": False,
-            "validation_commands": [
-                _skills_sdk_eval_run_validation_command(
-                    target,
-                    mode=mode,
-                    codex_profile=codex_profile,
-                    cases=cases,
-                    scenario_set=scenario_set,
-                    timeout_seconds=timeout_seconds,
-                )
-            ],
-            "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
-        }
-        _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
-        result.data["skills_sdk_eval_run"] = payload
-        if status != "pass":
-            result.status = "error"
-            result.errors.extend(internal.errors)
-            if not result.errors:
-                result.errors.append(
-                    ErrorObject(
-                        code="ERR_VALIDATION",
-                        message=f"Skills SDK internal eval run did not pass for {target}.",
-                        fix_suggestion=_ask_validation_command("sdk", "eval", "run", target, "--runner", "internal", "--mode", mode),
-                    )
-                )
-        return result
-
-    if resolved_runner != "deterministic-jsonl":
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Unsupported Skills SDK eval runner: {runner}.",
-                fix_suggestion="Use --runner internal or --runner deterministic-jsonl.",
-            )
-        )
-        return result
-    if not dataset:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message="Skills SDK deterministic eval run requires --dataset.",
-                fix_suggestion="Run ask sdk eval run --runner deterministic-jsonl --dataset <cases.jsonl> --json --robot.",
-            )
-        )
-        return result
-    package_identity: dict[str, str] | None = None
-    if target:
-        query = target.strip()
-        package_identity = _skills_sdk_eval_package_identity(repo_root, query)
-        if package_identity is None:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message=f"Skills SDK eval run is missing a canonical SKILL.md source for '{query}'.",
-                    fix_suggestion=_ask_validation_command("sdk", "ir", "build", query),
-                )
-            )
-            result.data["skills_sdk_eval_run"] = {
-                "schema_version": "skills-sdk-eval-run.v0",
-                "status": "blocked",
-                "dataset": dataset,
-                "target": query,
-                "receipt": None,
-                "mutation_performed": False,
-                "validation_commands": [_ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", query)],
-                "agent_summary": f"skills-sdk eval run is blocked for {query}: canonical source is missing.",
-            }
-            return result
-
-    receipt = _run_deterministic_eval(
-        repo_root,
-        dataset=dataset,
-        skill_ir_schema_version=package_identity["skill_ir_schema_version"] if package_identity else None,
-        package_id=package_identity["package_id"] if package_identity else None,
-        package_digest=package_identity["package_digest"] if package_identity else None,
-    )
-    payload = {
-        "schema_version": "skills-sdk-eval-run.v0",
-        "status": receipt["status"],
-        "dataset": dataset,
-        "target": target,
-        "runner": receipt["runner"],
-        "case_count": receipt["case_count"],
-        "passed_count": receipt["passed_count"],
-        "failed_count": receipt["failed_count"],
-        "receipt": receipt,
-        "mutation_performed": False,
-        "validation_commands": [_ask_validation_command("sdk", "eval", "run", "--dataset", dataset)],
-        "agent_summary": (
-            f"skills-sdk eval run {receipt['status']} with "
-            f"{receipt['passed_count']}/{receipt['case_count']} deterministic JSONL case(s) passing."
-        ),
+def _blocked_sdk_tessl_result(result: CallResult, request: SdkEvalRunRequest) -> CallResult:
+    result.status = "error"
+    result.data["skills_sdk_eval_run"] = {
+        "schema_version": "skills-sdk-eval-run.v0", "status": "blocked", "dataset": request.dataset,
+        "target": request.target, "runner": request.runner, "receipt": None, "mutation_performed": False,
+        "validation_commands": ["./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot", "./bin/ask evals run <skill> --tessl-live-private --tessl-workspace <workspace> --json --robot"],
+        "agent_summary": "sdk eval run is local-only; direct Tessl continuation is retired in favor of the guarded live-private handoff route.",
     }
-    _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=codex_profile)
-    if target:
-        payload["validation_commands"] = [
-            _ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", target)
-        ]
+    result.errors.append(ErrorObject(code="ERR_VALIDATION", message="sdk eval run does not submit Tessl evals; use the guarded live-private handoff route.", fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot"))
+    return result
+
+
+def _resolved_sdk_eval_runner(request: SdkEvalRunRequest) -> str:
+    if request.runner != "auto":
+        return request.runner
+    return "deterministic-jsonl" if request.dataset else "internal"
+
+
+def _run_internal_sdk_eval(repo_root: Path, result: CallResult, request: SdkEvalRunRequest) -> CallResult:
+    if not request.target:
+        return _blocked_internal_target(result, request)
+    prepared = _prepare_internal_sdk_eval(repo_root, request)
+    if isinstance(prepared, CallResult):
+        return prepared
+    receipt = _internal_sdk_eval_receipt(repo_root, request, prepared)
+    return _finish_internal_sdk_eval(repo_root, result, request, prepared, receipt)
+
+
+def _blocked_internal_target(result: CallResult, request: SdkEvalRunRequest) -> CallResult:
+    result.status = "error"
+    result.data["skills_sdk_eval_run"] = {
+        "schema_version": "skills-sdk-eval-run.v0", "status": "blocked", "dataset": request.dataset,
+        "target": request.target, "runner": "internal_skill_builder_v0", "receipt": None, "mutation_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "run", "<skill>", "--runner", "internal")],
+        "agent_summary": "skills-sdk eval run is blocked: internal runner requires a skill target.",
+    }
+    result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Skills SDK internal eval run requires a skill target.", fix_suggestion="Run ask sdk eval run <skill> --runner internal --mode smoke --json --robot."))
+    return result
+
+
+def _prepare_internal_sdk_eval(repo_root: Path, request: SdkEvalRunRequest) -> _InternalSdkEvalContext | CallResult:
+    from ask.commands import evals as _eval_commands  # noqa: PLC0415
+    target_path = str(_skills_sdk_eval_source_path(repo_root, request.target or "") or request.target)
+    package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
+    cases, metadata, blocked = _skills_sdk_prepare_release_case_filters(
+        repo_root, target=request.target or "", target_path=target_path, mode=request.mode, codex_profile=request.codex_profile,
+        cases=request.cases, scenario_set=request.scenario_set, package_identity=package_identity,
+    )
+    if blocked is not None:
+        return blocked
+    internal = _eval_commands.run_evals(
+        repo_root,
+        request.target or "",
+        mode=request.mode,
+        runner="codex",
+        dashboard=False,
+        skip_tessl=request.skip_tessl,
+        codex_profile=request.codex_profile,
+        cases=cases,
+        timeout_seconds=request.timeout_seconds,
+    )
+    return _InternalSdkEvalContext(str(internal.data.get("resolved_skill_path") or target_path), package_identity, cases, metadata, internal)
+
+
+def _internal_sdk_eval_receipt(repo_root: Path, request: SdkEvalRunRequest, context: _InternalSdkEvalContext) -> dict[str, Any]:
+    from ask.commands import evals as _eval_commands  # noqa: PLC0415
+    raw_status = str(context.internal.data.get("eval_status") or ("pass" if context.internal.status == "success" else "fail"))
+    blockers = [error.message for error in context.internal.errors] or [raw_status] if context.internal.status != "success" else []
+    status = "pass" if context.internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
+    identity = context.package_identity or _skills_sdk_eval_package_identity(repo_root, context.target_path)
+    counts = _skills_sdk_internal_eval_receipt_counts(repo_root, context.internal, status=status, fallback_blockers=blockers, eval_commands=_eval_commands)
+    profile = _skills_sdk_eval_codex_profile_proof(context.internal, codex_profile=request.codex_profile)
+    return _build_internal_sdk_eval_receipt(repo_root, request, context, identity, counts, profile)
+
+
+def _build_internal_sdk_eval_receipt(
+    repo_root: Path, request: SdkEvalRunRequest, context: _InternalSdkEvalContext, identity: dict[str, str] | None,
+    counts: dict[str, Any], profile: dict[str, Any],
+) -> dict[str, Any]:
+    lane = _skills_sdk_eval_receipt_lane(request.mode, request.codex_profile)
+    source = _skills_sdk_eval_source_path(repo_root, request.target or "")
+    execution = _skills_sdk_eval_execution_identity(source.parent / "references" / "evals.yaml" if source else Path(""), lane) or _skills_sdk_eval_profile_execution_identity(request.codex_profile)
+    blockers = _internal_eval_proof_blockers(request.codex_profile, lane, profile, execution)
+    return _internal_receipt_payload(repo_root, request, context, identity, counts, profile, lane, execution, blockers)
+
+
+def _internal_eval_proof_blockers(profile_name: str | None, lane: str, profile: dict[str, Any], execution: dict[str, Any] | None) -> list[str]:
+    blockers: list[str] = []
+    if profile_name in {"oss-local", "oss-cloud"} and not profile["matches_requested_profile"]:
+        blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{profile_name}")
+    if lane in {"oss-local", "oss-cloud"} and execution is None:
+        blockers.append(f"blocked_missing_artifact:execution_identity_missing:{lane}")
+    return blockers
+
+
+def _internal_receipt_payload(
+    repo_root: Path, request: SdkEvalRunRequest, context: _InternalSdkEvalContext, identity: dict[str, str] | None,
+    counts: dict[str, Any], profile: dict[str, Any], lane: str, execution: dict[str, Any] | None, blockers: list[str],
+) -> dict[str, Any]:
+    metadata = context.release_set_metadata or {}
+    return {
+        "schema_version": "skills-sdk.eval-run-receipt.v0", "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+        "status": "blocked" if blockers and counts["status"] == "pass" else counts["status"], "runner": "internal_skill_builder_v0",
+        "dataset_path": counts["dataset_path"], "dataset_digest": counts["dataset_digest"], "skill_ir_schema_version": identity["skill_ir_schema_version"] if identity else None,
+        "package_id": identity["package_id"] if identity else None, "package_digest": identity["package_digest"] if identity else None,
+        "rubric_digest": _skills_sdk_digest_file(repo_root / "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json"), "target_path": context.target_path,
+        "mode": request.mode, "lane": lane, "lane_type": metadata.get("lane_type", request.mode), "profile": request.codex_profile,
+        "codex_profile": profile["codex_profile"], "codex_exec_invoked": profile["codex_exec_invoked"], "codex_exec_command_shape": profile["codex_exec_command_shape"],
+        **_skills_sdk_eval_identity_fields(execution), "scenario_set_id": metadata.get("scenario_set_id", request.scenario_set), "scenario_set_case_ids": metadata.get("scenario_set_case_ids"),
+        "selected_case_ids": _flatten_case_filters(context.cases), "release_set_minimum": metadata.get("release_set_minimum"), "case_count": counts["case_count"],
+        "passed_count": counts["passed_count"], "failed_count": max(1, counts["failed_count"]) if blockers else counts["failed_count"], "quality_gates": counts["quality_gates"],
+        "closeout_validation": counts.get("closeout_validation"), "cases": counts["cases"], "blockers": sorted(set([*counts["blockers"], *blockers])),
+        "mutation_performed": False, "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
+    }
+
+
+def _finish_internal_sdk_eval(
+    repo_root: Path, result: CallResult, request: SdkEvalRunRequest, context: _InternalSdkEvalContext, receipt: dict[str, Any],
+) -> CallResult:
+    receipt_path = _skills_sdk_persist_eval_run_receipt(repo_root, receipt)
+    payload = _internal_sdk_eval_payload(request, context, receipt, receipt_path)
+    _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=request.codex_profile)
     result.data["skills_sdk_eval_run"] = payload
     if receipt["status"] != "pass":
         result.status = "error"
-        message = "Skills SDK deterministic eval run did not pass."
-        if receipt["status"] == "blocked" and receipt["blockers"]:
-            message = f"Skills SDK deterministic eval run blocked: {receipt['blockers'][0]}"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=message,
-                fix_suggestion="Fix the JSONL eval dataset or expected/actual exact-match values and rerun ask sdk eval run.",
-            )
-        )
+        result.errors.extend(context.internal.errors)
+        if not result.errors:
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message=f"Skills SDK internal eval run did not pass for {request.target}.", fix_suggestion=_ask_validation_command("sdk", "eval", "run", request.target or "<skill>", "--runner", "internal", "--mode", request.mode)))
+    return result
+
+
+def _internal_sdk_eval_payload(request: SdkEvalRunRequest, context: _InternalSdkEvalContext, receipt: dict[str, Any], receipt_path: str) -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk-eval-run.v0", "status": receipt["status"], "dataset": request.dataset, "target": request.target,
+        "runner": "internal_skill_builder_v0", "mode": request.mode, "receipt": receipt, "receipt_path": receipt_path,
+        "internal_eval": context.internal.data, "mutation_performed": False,
+        "validation_commands": [_skills_sdk_eval_run_validation_command(request.target or "<skill>", mode=request.mode, codex_profile=request.codex_profile, cases=context.cases, scenario_set=request.scenario_set, timeout_seconds=request.timeout_seconds)],
+        "agent_summary": f"skills-sdk internal eval run {receipt['status']} for {request.target} in {request.mode} mode.",
+    }
+
+
+def _run_deterministic_sdk_eval(repo_root: Path, result: CallResult, request: SdkEvalRunRequest, runner: str) -> CallResult:
+    if runner != "deterministic-jsonl":
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=f"Unsupported Skills SDK eval runner: {request.runner}.", fix_suggestion="Use --runner internal or --runner deterministic-jsonl."))
+        return result
+    if not request.dataset:
+        result.status = "error"
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Skills SDK deterministic eval run requires --dataset.", fix_suggestion="Run ask sdk eval run --runner deterministic-jsonl --dataset <cases.jsonl> --json --robot."))
+        return result
+    identity = _deterministic_eval_identity(repo_root, result, request)
+    if isinstance(identity, CallResult):
+        return identity
+    receipt = _run_deterministic_eval(repo_root, dataset=request.dataset, skill_ir_schema_version=identity["skill_ir_schema_version"] if identity else None, package_id=identity["package_id"] if identity else None, package_digest=identity["package_digest"] if identity else None)
+    return _finish_deterministic_sdk_eval(repo_root, result, request, receipt)
+
+
+def _deterministic_eval_identity(repo_root: Path, result: CallResult, request: SdkEvalRunRequest) -> dict[str, str] | None | CallResult:
+    if not request.target:
+        return None
+    query = request.target.strip()
+    identity = _skills_sdk_eval_package_identity(repo_root, query)
+    if identity is not None:
+        return identity
+    result.status = "error"
+    result.errors.append(ErrorObject(code="ERR_VALIDATION", message=f"Skills SDK eval run is missing a canonical SKILL.md source for '{query}'.", fix_suggestion=_ask_validation_command("sdk", "ir", "build", query)))
+    result.data["skills_sdk_eval_run"] = {"schema_version": "skills-sdk-eval-run.v0", "status": "blocked", "dataset": request.dataset, "target": query, "receipt": None, "mutation_performed": False, "validation_commands": [_ask_validation_command("sdk", "eval", "run", "--dataset", request.dataset or "<dataset>", "--skill", query)], "agent_summary": f"skills-sdk eval run is blocked for {query}: canonical source is missing."}
+    return result
+
+
+def _finish_deterministic_sdk_eval(repo_root: Path, result: CallResult, request: SdkEvalRunRequest, receipt: dict[str, Any]) -> CallResult:
+    commands = [_ask_validation_command("sdk", "eval", "run", "--dataset", request.dataset or "<dataset>")]
+    if request.target:
+        commands = [_ask_validation_command("sdk", "eval", "run", "--dataset", request.dataset or "<dataset>", "--skill", request.target)]
+    payload = {"schema_version": "skills-sdk-eval-run.v0", "status": receipt["status"], "dataset": request.dataset, "target": request.target, "runner": receipt["runner"], "case_count": receipt["case_count"], "passed_count": receipt["passed_count"], "failed_count": receipt["failed_count"], "receipt": receipt, "mutation_performed": False, "validation_commands": commands, "agent_summary": f"skills-sdk eval run {receipt['status']} with {receipt['passed_count']}/{receipt['case_count']} deterministic JSONL case(s) passing."}
+    _attach_phoenix_eval_trace(payload, repo_root, receipt, profile=request.codex_profile)
+    result.data["skills_sdk_eval_run"] = payload
+    if receipt["status"] != "pass":
+        result.status = "error"
+        blocker = receipt["blockers"][0] if receipt["status"] == "blocked" and receipt["blockers"] else None
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=f"Skills SDK deterministic eval run blocked: {blocker}" if blocker else "Skills SDK deterministic eval run did not pass.", fix_suggestion="Fix the JSONL eval dataset or expected/actual exact-match values and rerun ask sdk eval run."))
     return result
 
 

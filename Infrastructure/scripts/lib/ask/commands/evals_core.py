@@ -97,28 +97,32 @@ def _pyyaml_eval_python_command() -> list[str]:
     return ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
 
 
-EVAL_BLOCKER_TAXONOMY = {
-    "blocked_user_input": "The runner requested user input and should not be treated as hung.",
-    "blocked_auth": "The runner stopped on authentication or credential setup.",
-    "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
-    "timeout_no_output": "The eval timed out without producing final output.",
-    "timeout_partial_output": "The eval timed out after producing partial output.",
-    "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
-    "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
-    "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
-    "blocked_validation": "A structural or policy validation gate failed for the capability.",
-}
+def _eval_blocker_taxonomy() -> dict[str, str]:
+    """Return a serializable blocker taxonomy without shared mutable state."""
+    return {
+        "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+        "blocked_auth": "The runner stopped on authentication or credential setup.",
+        "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+        "timeout_no_output": "The eval timed out without producing final output.",
+        "timeout_partial_output": "The eval timed out after producing partial output.",
+        "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+        "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+        "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+        "blocked_validation": "A structural or policy validation gate failed for the capability.",
+    }
 
 
-EVAL_LIFECYCLE_EVENT_TYPES = {
-    "eval_started": "A workout, smoke eval, or proof run started for a capability.",
-    "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
-    "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status.",
-}
+def _eval_lifecycle_event_types() -> dict[str, str]:
+    """Return serializable lifecycle labels without shared mutable state."""
+    return {
+        "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+        "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+        "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status.",
+    }
 
 
 EVAL_CLOSEOUT_SCHEMA_VERSION = "skills-sdk.eval-closeout.v1"
-EVAL_CLOSEOUT_REQUIRED_FIELDS = {
+EVAL_CLOSEOUT_REQUIRED_FIELDS = frozenset({
     "schema_version",
     "status",
     "skill_path",
@@ -128,7 +132,7 @@ EVAL_CLOSEOUT_REQUIRED_FIELDS = {
     "mutation_allowed",
     "registry_update_allowed",
     "next_reproduce_command",
-}
+})
 
 
 def _qwen_oss_local_batch_blocker(

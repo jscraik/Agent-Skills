@@ -450,7 +450,7 @@ def _eval_lifecycle_event(
     return {
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": event_type,
-        "event_definition": EVAL_LIFECYCLE_EVENT_TYPES.get(event_type),
+        "event_definition": _eval_lifecycle_event_types().get(event_type),
         "occurred_at": _utc_now_iso(),
         "subject": {
             "query": path,
@@ -478,7 +478,7 @@ def _start_eval_lifecycle(result: CallResult, *, path: str, mode: str, runner: s
     )
     result.data["lifecycle_events"] = [started]
     result.data["lifecycle_event"] = started
-    result.data["lifecycle_event_types"] = EVAL_LIFECYCLE_EVENT_TYPES
+    result.data["lifecycle_event_types"] = _eval_lifecycle_event_types()
 
 
 def _finish_eval_lifecycle(

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .repo_impl_core import *  # noqa: F403
 from .repo_impl_doctor import *  # noqa: F403
 
@@ -647,118 +649,114 @@ def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str 
     return None
 
 
-def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
-    """
-    Build a closeout readiness report describing detected blockers and a recommended next command.
+@dataclass(frozen=True)
+class RepoCloseoutOptions:
+    """Explicit switches for closeout readiness collection."""
 
-    Parameters:
-        repo_root (Path): Repository root to analyze.
-        changed (bool): When True, detect changed files and run changed-scope validations including runtime-evidence checks.
-        strict (bool): When True, treat existing diagnostic debt as a blocker for closeout.
+    changed: bool = False
+    strict: bool = False
 
-    Returns:
-        CallResult: Result whose `data["repo_closeout"]` contains the closeout payload with at least the following keys:
-            - agent_summary: human-readable readiness summary.
-            - changed_files, changed_file_count, changed_mode_requested, changed_files_error
-            - sync: sync report and suggested sync/validation commands.
-            - runtime_budget, capability_readiness, memory_readiness, package_readiness, surface_policy
-            - runtime_evidence: runtime-evidence closeout report (changed and workspace scope).
-            - focused_validation: list of focused validation commands for closeout.
-            - diagnostic_debt: diagnostic debt entries from the doctor payload.
-            - commit_readiness: { ready (bool), blockers (list[str]), strict (bool) }.
-            - doctor: original doctor payload used to build the report.
-            - next_command: suggested command to address the highest-priority blocker (or status command if ready).
 
-        The CallResult `status` is set to "success" when ready (no blockers) and "error" otherwise; when blocked an ErrorObject with code `ERR_VALIDATION` is appended describing the blocking summary and suggested fix.
-    """
-    result = CallResult()
-    doctor_result = repo_doctor(repo_root)
-    doctor_payload = doctor_result.data.get("doctor", {})
-    changed_files_error = None
-    changed_files: list[str] = []
-    if changed:
-        try:
-            changed_files = collect_changed_files(repo_root)
-        except RuntimeError as exc:
-            changed_files_error = str(exc)
-    sync_report = _closeout_sync_report(changed_files)
-    blockers: list[str] = []
+def _coerce_repo_closeout_options(
+    options: RepoCloseoutOptions | None,
+    legacy_options: dict[str, object],
+) -> RepoCloseoutOptions:
+    """Accept explicit options while retaining the established keyword callers."""
+    if options is not None:
+        if legacy_options:
+            names = ", ".join(sorted(legacy_options))
+            raise TypeError(f"RepoCloseoutOptions does not accept legacy options: {names}")
+        return options
+    allowed = set(RepoCloseoutOptions.__dataclass_fields__)
+    unexpected = set(legacy_options) - allowed
+    if unexpected:
+        names = ", ".join(sorted(unexpected))
+        raise TypeError(f"repo_closeout received unexpected option(s): {names}")
+    return RepoCloseoutOptions(**legacy_options)
+
+
+def _closeout_changed_files(repo_root: Path, changed: bool) -> tuple[list[str], str | None]:
+    if not changed:
+        return [], None
+    try:
+        return collect_changed_files(repo_root), None
+    except RuntimeError as exc:
+        return [], str(exc)
+
+
+def _closeout_blockers(
+    doctor_payload: dict[str, Any], sync_report: dict[str, Any], diagnostic_debt: list[dict[str, Any]],
+    runtime_evidence: dict[str, Any], changed_files_error: str | None, strict: bool,
+) -> list[str]:
+    blockers = [
+        name for name, active in (
+            ("changed_file_detection_failed", bool(changed_files_error)),
+            ("repo_doctor_blocking", bool(doctor_payload.get("blocking"))),
+            ("sync_required", bool(sync_report["needed"])),
+            ("strict_diagnostic_debt", strict and bool(diagnostic_debt)),
+        ) if active
+    ]
+    runtime_status = runtime_evidence.get("changed_scope", {}).get("status")
+    if runtime_status in {"invalid", "deleted"}:
+        blockers.append(f"runtime_evidence_{runtime_status}")
+    return blockers
+
+
+def _closeout_next_command(
+    doctor_payload: dict[str, Any], sync_report: dict[str, Any], diagnostic_debt: list[dict[str, Any]],
+    runtime_evidence: dict[str, Any], changed_files: list[str], changed_files_error: str | None, strict: bool,
+) -> str:
     if changed_files_error:
-        blockers.append("changed_file_detection_failed")
+        return _repo_validation_command("status")
     if doctor_payload.get("blocking"):
-        blockers.append("repo_doctor_blocking")
+        return doctor_payload.get("next_command") or _repo_validation_command("doctor")
     if sync_report["needed"]:
-        blockers.append("sync_required")
-    diagnostic_debt = doctor_payload.get("diagnostic_debt", [])
-    focused_validation = _closeout_focused_validation(repo_root, changed_files)
-    runtime_evidence = _closeout_runtime_evidence(repo_root, include_cards=changed, changed_files=changed_files)
+        return sync_report["commands"][0]
     if strict and diagnostic_debt:
-        blockers.append("strict_diagnostic_debt")
-    runtime_evidence_status = runtime_evidence.get("changed_scope", {}).get("status")
-    if runtime_evidence_status == "invalid":
-        blockers.append("runtime_evidence_invalid")
-    if runtime_evidence_status == "deleted":
-        blockers.append("runtime_evidence_deleted")
-    ready = not blockers
-    next_command: str | None
-    if changed_files_error:
-        next_command = _repo_validation_command("status")
-    elif doctor_payload.get("blocking"):
-        next_command = doctor_payload.get("next_command")
-    elif sync_report["needed"]:
-        next_command = sync_report["commands"][0]
-    elif strict and diagnostic_debt:
-        next_command = (
-            _diagnostic_debt_next_command(diagnostic_debt)
-            or doctor_payload.get("next_command")
-            or _repo_validation_command("doctor")
-        )
-    elif "runtime_evidence_invalid" in blockers or "runtime_evidence_deleted" in blockers:
-        next_command = runtime_evidence["schema_validation"]["command"]
-    elif sync_report["validation_commands"]:
-        next_command = sync_report["validation_commands"][0]
-    elif changed_files:
-        next_command = _validation_command_for_changed_files(changed_files)
-    else:
-        next_command = _repo_validation_command("status")
+        return _diagnostic_debt_next_command(diagnostic_debt) or doctor_payload.get("next_command") or _repo_validation_command("doctor")
+    if runtime_evidence.get("changed_scope", {}).get("status") in {"invalid", "deleted"}:
+        return runtime_evidence["schema_validation"]["command"]
+    if sync_report["validation_commands"]:
+        return sync_report["validation_commands"][0]
+    return _validation_command_for_changed_files(changed_files) if changed_files else _repo_validation_command("status")
 
-    payload = {
-        "agent_summary": (
-            "Ready: no closeout blockers detected."
-            if ready
-            else f"Blocked: closeout has {len(blockers)} blocker(s)."
-        ),
-        "changed_files": changed_files,
-        "changed_file_count": len(changed_files),
-        "changed_mode_requested": changed,
-        "changed_files_error": changed_files_error,
-        "sync": sync_report,
+
+def _closeout_payload(
+    doctor_payload: dict[str, Any], changed_files: list[str], changed_files_error: str | None,
+    sync_report: dict[str, Any], runtime_evidence: dict[str, Any], diagnostic_debt: list[dict[str, Any]],
+    focused_validation: list[str], blockers: list[str], changed: bool, strict: bool, next_command: str,
+) -> dict[str, Any]:
+    ready = not blockers
+    return {
+        "agent_summary": "Ready: no closeout blockers detected." if ready else f"Blocked: closeout has {len(blockers)} blocker(s).",
+        "changed_files": changed_files, "changed_file_count": len(changed_files), "changed_mode_requested": changed,
+        "changed_files_error": changed_files_error, "sync": sync_report,
         "runtime_budget": _closeout_runtime_budget(doctor_payload),
         "capability_readiness": _closeout_capability_readiness(doctor_payload),
         "memory_readiness": _closeout_memory_readiness(doctor_payload),
-        "package_readiness": _closeout_package_readiness(doctor_payload),
-        "surface_policy": _closeout_surface_policy(doctor_payload),
-        "runtime_evidence": runtime_evidence,
-        "focused_validation": focused_validation,
-        "diagnostic_debt": diagnostic_debt,
-        "commit_readiness": {
-            "ready": ready,
-            "blockers": blockers,
-            "strict": strict,
-        },
-        "doctor": doctor_payload,
-        "next_command": next_command,
+        "package_readiness": _closeout_package_readiness(doctor_payload), "surface_policy": _closeout_surface_policy(doctor_payload),
+        "runtime_evidence": runtime_evidence, "focused_validation": focused_validation,
+        "diagnostic_debt": diagnostic_debt, "commit_readiness": {"ready": ready, "blockers": blockers, "strict": strict},
+        "doctor": doctor_payload, "next_command": next_command,
     }
+
+
+def repo_closeout(repo_root: Path, options: RepoCloseoutOptions | None = None, **legacy_options: object) -> CallResult:
+    """Build a closeout readiness report for the selected repository scope."""
+    selected = _coerce_repo_closeout_options(options, legacy_options)
+    result = CallResult()
+    doctor_payload = repo_doctor(repo_root).data.get("doctor", {})
+    changed_files, changed_files_error = _closeout_changed_files(repo_root, selected.changed)
+    sync_report = _closeout_sync_report(changed_files)
+    diagnostic_debt = doctor_payload.get("diagnostic_debt", [])
+    runtime_evidence = _closeout_runtime_evidence(repo_root, include_cards=selected.changed, changed_files=changed_files)
+    blockers = _closeout_blockers(doctor_payload, sync_report, diagnostic_debt, runtime_evidence, changed_files_error, selected.strict)
+    next_command = _closeout_next_command(doctor_payload, sync_report, diagnostic_debt, runtime_evidence, changed_files, changed_files_error, selected.strict)
+    payload = _closeout_payload(doctor_payload, changed_files, changed_files_error, sync_report, runtime_evidence, diagnostic_debt, _closeout_focused_validation(repo_root, changed_files), blockers, selected.changed, selected.strict, next_command)
     result.data["repo_closeout"] = payload
     result.data.update(payload)
-    result.status = "success" if ready else "error"
-    if not ready:
-        result.errors.append(
-            ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=payload["agent_summary"],
-                fix_suggestion=next_command,
-            )
-        )
+    result.status = "success" if not blockers else "error"
+    if blockers:
+        result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=payload["agent_summary"], fix_suggestion=next_command))
     return result
 __all__ = [name for name in globals() if not name.startswith("__")]

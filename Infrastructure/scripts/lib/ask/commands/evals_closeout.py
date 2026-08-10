@@ -560,14 +560,14 @@ def _scorecard_blocker_class(scorecard: dict) -> str | None:
     summary = scorecard.get("blocked_class_summary")
     if isinstance(summary, dict):
         for blocker_class, count in summary.items():
-            if blocker_class in EVAL_BLOCKER_TAXONOMY and isinstance(count, int) and count > 0:
+            if blocker_class in _eval_blocker_taxonomy() and isinstance(count, int) and count > 0:
                 return str(blocker_class)
 
     for case in scorecard.get("cases") or []:
         if not isinstance(case, dict):
             continue
         for blocker_class in case.get("blocker_classes") or []:
-            if blocker_class in EVAL_BLOCKER_TAXONOMY:
+            if blocker_class in _eval_blocker_taxonomy():
                 return str(blocker_class)
         runners = case.get("runners")
         if isinstance(runners, dict):
@@ -575,7 +575,7 @@ def _scorecard_blocker_class(scorecard: dict) -> str | None:
                 if not isinstance(runner, dict):
                     continue
                 blocker_class = runner.get("blocker_class")
-                if blocker_class in EVAL_BLOCKER_TAXONOMY:
+                if blocker_class in _eval_blocker_taxonomy():
                     return str(blocker_class)
     return "blocked_validation"
 
