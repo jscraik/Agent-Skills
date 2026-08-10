@@ -66,6 +66,19 @@ class SkillReviewDashboardImportTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
 
+class CommandFacadeScriptModeTests(unittest.TestCase):
+    def test_refactored_facades_remain_importable_as_scripts(self) -> None:
+        """File-mode facades must retain package context for relative imports."""
+        for command in ("skills.py", "repo.py"):
+            result = subprocess.run(
+                [sys.executable, str(repo_root / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / command)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, f"{command}: {result.stderr}")
+
+
 def _run_snyk_review(mock_run, mock_which, mock_audit, *, snyk_result, returncode=0, stderr="", skill_dir="Skills/backend-platform/example-skill"):
     with tempfile.TemporaryDirectory() as tmpdir:
         repo_root = Path(tmpdir)
@@ -499,7 +512,6 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
-        skill_dir = "Skills/backend-platform/example-skill"
         result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result='{"ok": false, "error": "Could not detect supported target files"}', returncode=3)
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "not_applicable")
