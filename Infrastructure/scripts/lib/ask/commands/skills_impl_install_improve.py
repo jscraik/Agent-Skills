@@ -195,7 +195,30 @@ def _install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str
     if cmd is None:
         return result
 
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=INSTALL_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        result.status = "error"
+        result.data.update({
+            "raw_output": _decode_stream(exc.stdout),
+            "raw_error": _decode_stream(exc.stderr),
+            "canonical_dest": dest_rel,
+            "intake_decision": intake_decision,
+        })
+        result.errors.append(ErrorObject(
+            code="ERR_TIMEOUT",
+            message=f"ask skills install: installer timed out after {INSTALL_TIMEOUT_SECONDS} seconds.",
+            fix_suggestion="Check network access to the source URL, then rerun the install.",
+        ))
+        return result
+    _record_install_process(result, process, dest_rel, intake_decision)
     _record_install_process(result, process, dest_rel, intake_decision)
 
     if process.returncode == 0:
