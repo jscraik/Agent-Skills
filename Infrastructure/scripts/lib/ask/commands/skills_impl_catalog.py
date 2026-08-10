@@ -448,7 +448,11 @@ def _load_builder_module(repo_root: Path, module_name: str):
         if spec and spec.loader:
             mod = importlib.util.module_from_spec(spec)
             sys.modules[internal_name] = mod  # Register BEFORE exec
-            spec.loader.exec_module(mod)
+            try:
+                spec.loader.exec_module(mod)
+            except BaseException:
+                sys.modules.pop(internal_name, None)
+                raise
             return mod
     finally:
         if inserted and scripts_dir_str in sys.path:
