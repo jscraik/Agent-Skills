@@ -736,10 +736,8 @@ def _scan_paths(
     paths = _changed_paths(changed_files, staged_source=staged_source, source_ref=source_ref)
     for path in paths:
         relpath = path.relative_to(REPO_ROOT).as_posix()
-        current_text = (
-            _current_source_text(path, staged_source=staged_source)
-            if source_ref is None
-            else _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
+        current_text = _current_source_text(
+            path, staged_source=staged_source, source_ref=source_ref
         )
         baseline_text = _git_revision_text(path, baseline_ref)
         if baseline_text is None:
