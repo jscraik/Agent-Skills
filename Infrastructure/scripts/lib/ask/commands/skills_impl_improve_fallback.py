@@ -214,6 +214,11 @@ def improve_skills(
         if fallback and fallback_handle and fallback_handle != handle:
             fallback_proof_result = skills_proof(repo_root, handle=fallback_handle)
             fallback_proof = fallback_proof_result.data.get("proof", {})
+            improvement["fallback_attempt"] = {
+                "handle": fallback_handle,
+                "accepted": fallback_proof_result.status == "success",
+                "proof_status": fallback_proof.get("status") if isinstance(fallback_proof, dict) else None,
+            }
             if fallback_proof_result.status == "success":
                 fallback_gates = fallback_proof.get("gates", {}) if isinstance(fallback_proof, dict) else {}
                 fallback_required = (
@@ -253,7 +258,6 @@ def improve_skills(
                 improvement["next_command"] = _skills_validation_command("proof", fallback_handle)
                 improvement["validation_commands"] = [improvement["next_command"]]
                 return result
-
     improvement["status"] = "blocked"
     improvement["route_state"], improvement["route_state_reason"] = _improvement_route_state(
         route_decision_status,
