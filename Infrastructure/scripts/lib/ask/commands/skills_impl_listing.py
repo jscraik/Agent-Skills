@@ -115,10 +115,7 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
     wrapper = Path(cmd[0]).name.lower() if cmd else ""
     should_retry_with_sys_python = (
         wrapper in {"uv", "mise"}
-        and (
-            run_error is not None
-            or (process is not None and process.returncode != 0)
-        )
+        and run_error is not None
     )
     if should_retry_with_sys_python:
         fallback_cmd = [sys.executable] + script_args
@@ -128,7 +125,6 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
             run_error = None
         elif process is None:
             run_error = fallback_error
-
     if process is None:
         error_detail = (
             f"Failed to execute runtime budget verifier: {run_error}"
