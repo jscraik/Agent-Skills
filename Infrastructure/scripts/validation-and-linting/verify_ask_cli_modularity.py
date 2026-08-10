@@ -269,7 +269,6 @@ def _function_fingerprint_metrics(
         if source == "baseline":
             return {}
         raise
-    metrics = _function_metrics(text, source=source)
     records: dict[str, tuple[tuple[int, int], str]] = {}
 
     class _FingerprintVisitor(ast.NodeVisitor):
@@ -283,7 +282,9 @@ def _function_fingerprint_metrics(
 
         def _visit_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
             name = ".".join([*self.qualifiers, node.name])
-            records[name] = (metrics[name], ast.dump(node, include_attributes=False))
+            end_lineno = getattr(node, "end_lineno", node.lineno)
+            metrics = (end_lineno - node.lineno + 1, _complexity(node))
+            records[name] = (metrics, ast.dump(node, include_attributes=False))
             self.qualifiers.append(node.name)
             self.generic_visit(node)
             self.qualifiers.pop()
