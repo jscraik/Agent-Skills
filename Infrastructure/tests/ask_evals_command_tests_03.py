@@ -313,23 +313,17 @@ def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path)
     assert not list(staged_source.rglob(".AppleDouble"))
 
 
-def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands(tmp_path: Path) -> None:
-    _write_example_skill(tmp_path)
-
-    with mock.patch.object(evals.subprocess, "run") as run:
-        receipt = evals.run_tessl_local_proof(
-            tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
-            execute=False,
-            include_review=True,
-        )
-
+def _assert_tessl_local_preview_metadata(receipt: dict[str, object]) -> None:
     assert receipt["status"] == "preview"
     assert receipt["execute"] is False
     assert receipt["policy"]["no_publish"] is True
     assert receipt["policy"]["install_scope"] == "temporary project workspace under /tmp/ask-tessl-local-install"
+    assert "ask-tessl-evals-live" in receipt["evidence_retention"]
+    assert "ask-tessl-local-install" in receipt["evidence_retention"]
     assert receipt["staged_file_count"] > 0
+
+
+def _assert_tessl_local_preview_commands(receipt: dict[str, object]) -> None:
     commands = receipt["planned_commands"]
     assert "tessl plugin lint" in commands["plugin_lint"]
     assert "tessl plugin pack --output" in commands["plugin_pack"]
@@ -339,6 +333,26 @@ def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands
     assert "--workspace jscraik" in commands["review_run"]
     assert not any("publish" in command for command in commands.values())
     assert not any("npx" in command for command in commands.values())
+
+
+def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run") as run:
+        receipt = evals.run_tessl_local_proof(
+            tmp_path,
+            evals.TesslLocalProofRequest(
+                path="Skills/example-skill",
+                workspace="jscraik",
+                execute=False,
+                include_review=True,
+                review_threshold=evals.TESSL_LOCAL_REVIEW_MIN_SCORE,
+                timeout_seconds=180,
+            ),
+        )
+
+    _assert_tessl_local_preview_metadata(receipt)
+    _assert_tessl_local_preview_commands(receipt)
     run.assert_not_called()
 
 
@@ -347,9 +361,14 @@ def test_tessl_local_proof_accepts_skill_md_path(tmp_path: Path) -> None:
 
     receipt = evals.run_tessl_local_proof(
         tmp_path,
-        "Skills/example-skill/SKILL.md",
-        workspace="jscraik",
-        execute=False,
+        evals.TesslLocalProofRequest(
+            path="Skills/example-skill/SKILL.md",
+            workspace="jscraik",
+            execute=False,
+            include_review=False,
+            review_threshold=evals.TESSL_LOCAL_REVIEW_MIN_SCORE,
+            timeout_seconds=180,
+        ),
     )
 
     assert receipt["status"] == "preview"
@@ -375,18 +394,32 @@ def test_tessl_local_proof_execute_uses_temp_install_workspace_and_no_publish(tm
     ):
         receipt = evals.run_tessl_local_proof(
             tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
-            execute=True,
-            include_review=True,
-            timeout_seconds=17,
+            evals.TesslLocalProofRequest(
+                path="Skills/example-skill",
+                workspace="jscraik",
+                execute=True,
+                include_review=True,
+                review_threshold=evals.TESSL_LOCAL_REVIEW_MIN_SCORE,
+                timeout_seconds=17,
+            ),
         )
 
+    _assert_tessl_local_proof_execution_contract(receipt, run, tmp_path)
+
+
+def _assert_tessl_local_proof_execution_contract(
+    receipt: dict[str, object], run: mock.Mock, tmp_path: Path
+) -> None:
     assert receipt["status"] == "pass"
     assert receipt["execute"] is True
     assert set(receipt["commands"]) == {"plugin_lint", "plugin_pack", "install_file", "review_run"}
     assert "operator@example.com" not in receipt["commands"]["install_file"]["stdout"]
     assert "<redacted-email>" in receipt["commands"]["install_file"]["stdout"]
+    _assert_tessl_local_install_command(run, tmp_path)
+    _assert_tessl_local_command_safety(run)
+
+
+def _assert_tessl_local_install_command(run: mock.Mock, tmp_path: Path) -> None:
     assert run.call_count == 4
     install_call = run.call_args_list[2]
     install_command = install_call.args[0]
@@ -395,6 +428,9 @@ def test_tessl_local_proof_execute_uses_temp_install_workspace_and_no_publish(tm
     assert install_command[3:] == ["--agent", "codex", "--yes", "--strict"]
     assert "/ask-tessl-local-install/" in install_call.kwargs["cwd"]
     assert str(tmp_path) not in install_call.kwargs["cwd"]
+
+
+def _assert_tessl_local_command_safety(run: mock.Mock) -> None:
     for call in run.call_args_list:
         command = call.args[0]
         assert "publish" not in command
@@ -416,9 +452,14 @@ def test_tessl_local_proof_uses_canonical_blocked_validation_fallback(tmp_path: 
     ):
         receipt = evals.run_tessl_local_proof(
             tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
-            execute=True,
+            evals.TesslLocalProofRequest(
+                path="Skills/example-skill",
+                workspace="jscraik",
+                execute=True,
+                include_review=False,
+                review_threshold=evals.TESSL_LOCAL_REVIEW_MIN_SCORE,
+                timeout_seconds=180,
+            ),
         )
 
     assert receipt["status"] == "blocked"

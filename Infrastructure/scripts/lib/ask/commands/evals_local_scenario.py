@@ -1,124 +1,181 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .evals_live_preflight import *  # noqa: F403
 
-def run_tessl_local_proof(
-    repo_root: Path,
-    path: str,
-    *,
-    workspace: str,
-    execute: bool = False,
-    include_review: bool = False,
-    review_threshold: int = TESSL_LOCAL_REVIEW_MIN_SCORE,
-    timeout_seconds: int = 180,
-) -> dict[str, object]:
+
+@dataclass(frozen=True)
+class TesslLocalProofRequest:
+    """Named options for one staged Tessl lint, pack, install, and review proof."""
+
+    path: str
+    workspace: str
+    execute: bool
+    include_review: bool
+    review_threshold: int
+    timeout_seconds: int
+
+
+@dataclass(frozen=True)
+class TesslScenarioGenerationRequest:
+    """Named options for one isolated Tessl scenario-generation workspace."""
+
+    path: str
+    workspace: str | None
+    dry_run: bool
+
+
+def run_tessl_local_proof(repo_root: Path, request: TesslLocalProofRequest) -> dict[str, object]:
     """Stage a Tessl package and optionally run local lint, pack, file install, and review checks."""
-    source_path = Path(path)
-    proof_path = str(source_path.parent) if source_path.name == "SKILL.md" else path
+    proof_path = _tessl_proof_path(request.path)
     try:
-        normalized_workspace = _validate_tessl_workspace(workspace)
+        normalized_workspace = _validate_tessl_workspace(request.workspace)
         staged_source, copied_files = _stage_tessl_live_private_source(repo_root, proof_path, normalized_workspace)
     except (OSError, ValueError) as e:
-        return {
-            "schema_version": "skills-sdk.tessl-local-proof.v1",
-            "status": "blocked",
-            "source_path": path,
-            "proof_path": proof_path,
-            "workspace": workspace,
-            "execute": execute,
-            "blocker": f"Failed to stage Tessl local proof source: {e}",
-            "blocker_class": "blocked_validation" if isinstance(e, ValueError) else "blocked_runtime",
-            "policy": _tessl_local_proof_policy(workspace),
-        }
+        return _tessl_local_proof_staging_blocker(request, proof_path, e)
 
+    plan = _tessl_local_proof_plan(repo_root, proof_path, staged_source, normalized_workspace, request)
+    receipt = _tessl_local_proof_receipt(request, proof_path, staged_source, copied_files, normalized_workspace, plan)
+    if not request.execute:
+        return receipt
+    return _execute_tessl_local_proof(receipt, request, plan)
+
+
+def _tessl_proof_path(path: str) -> str:
+    source_path = Path(path)
+    return str(source_path.parent) if source_path.name == "SKILL.md" else path
+
+
+def _tessl_local_proof_staging_blocker(
+    request: TesslLocalProofRequest,
+    proof_path: str,
+    error: OSError | ValueError,
+) -> dict[str, object]:
+    return {
+        "schema_version": "skills-sdk.tessl-local-proof.v1",
+        "status": "blocked",
+        "source_path": request.path,
+        "proof_path": proof_path,
+        "workspace": request.workspace,
+        "execute": request.execute,
+        "blocker": f"Failed to stage Tessl local proof source: {error}",
+        "blocker_class": "blocked_validation" if isinstance(error, ValueError) else "blocked_runtime",
+        "policy": _tessl_local_proof_policy(request.workspace),
+    }
+
+
+def _tessl_local_proof_plan(
+    repo_root: Path,
+    proof_path: str,
+    staged_source: Path,
+    workspace: str,
+    request: TesslLocalProofRequest,
+) -> dict[str, object]:
     tessl_path = shutil.which("tessl") or "tessl"
-    safe_name = proof_path.replace("/", "__").replace(" ", "_")
-    digest = hashlib.sha256(proof_path.encode("utf-8")).hexdigest()[:12]
-    install_workspace = Path(tempfile.gettempdir()) / "ask-tessl-local-install" / f"{safe_name}-{digest}"
     source_root_name = (repo_root.resolve() / proof_path).resolve().name
     dist_dir = staged_source / "dist"
     dist_path = dist_dir / f"{source_root_name}.tgz"
     review_path = staged_source / "skills" / source_root_name
-    lint_command = [tessl_path, "plugin", "lint", str(staged_source)]
-    pack_command = [tessl_path, "plugin", "pack", "--output", str(dist_path), str(staged_source)]
-    install_command = [tessl_path, "install", f"file:{staged_source}", "--agent", "codex", "--yes", "--strict"]
-    review_command = [
-        tessl_path,
-        "review",
-        "run",
-        str(review_path),
-        "--workspace",
-        normalized_workspace,
-        "--json",
-        "--threshold",
-        str(review_threshold),
-    ]
-    planned_commands = {
-        "plugin_lint": " ".join(shlex.quote(part) for part in lint_command),
-        "plugin_pack": " ".join(shlex.quote(part) for part in pack_command),
-        "install_file": " ".join(shlex.quote(part) for part in install_command),
-        "review_run": " ".join(shlex.quote(part) for part in review_command),
+    commands = {
+        "plugin_lint": [tessl_path, "plugin", "lint", str(staged_source)],
+        "plugin_pack": [tessl_path, "plugin", "pack", "--output", str(dist_path), str(staged_source)],
+        "install_file": [tessl_path, "install", f"file:{staged_source}", "--agent", "codex", "--yes", "--strict"],
+        "review_run": [tessl_path, "review", "run", str(review_path), "--workspace", workspace, "--json", "--threshold", str(request.review_threshold)],
     }
-    receipt: dict[str, object] = {
+    return {
+        "commands": commands,
+        "dist_dir": dist_dir,
+        "dist_path": dist_path,
+        "install_workspace": _stable_tessl_local_install_workspace(proof_path),
+    }
+
+
+def _tessl_local_proof_receipt(
+    request: TesslLocalProofRequest,
+    proof_path: str,
+    staged_source: Path,
+    copied_files: list[str],
+    workspace: str,
+    plan: dict[str, object],
+) -> dict[str, object]:
+    commands = plan["commands"]
+    assert isinstance(commands, dict)
+    return {
         "schema_version": "skills-sdk.tessl-local-proof.v1",
-        "status": "preview" if not execute else "pass",
-        "source_path": path,
+        "status": "preview" if not request.execute else "pass",
+        "source_path": request.path,
         "proof_path": proof_path,
-        "workspace": normalized_workspace,
-        "execute": execute,
-        "include_review": include_review,
-        "review_threshold": review_threshold,
+        "workspace": workspace,
+        "execute": request.execute,
+        "include_review": request.include_review,
+        "review_threshold": request.review_threshold,
         "staged_source": str(staged_source),
         "staged_files": copied_files,
         "staged_file_count": len(copied_files),
-        "install_workspace": str(install_workspace),
-        "dist_dir": str(dist_dir),
-        "dist_path": str(dist_path),
-        "planned_commands": planned_commands,
+        "install_workspace": str(plan["install_workspace"]),
+        "dist_dir": str(plan["dist_dir"]),
+        "dist_path": str(plan["dist_path"]),
+        "planned_commands": {key: " ".join(shlex.quote(part) for part in command) for key, command in commands.items()},
         "commands": {},
-        "policy": _tessl_local_proof_policy(normalized_workspace),
-        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals-live for inspection",
+        "policy": _tessl_local_proof_policy(workspace),
+        "evidence_retention": _tessl_local_proof_evidence_retention(),
     }
-    if not execute:
-        return receipt
 
+
+def _tessl_local_proof_evidence_retention() -> str:
+    return (
+        f"staged package is left under {tempfile.gettempdir()}/ask-tessl-evals-live and "
+        f"install evidence under {tempfile.gettempdir()}/ask-tessl-local-install for inspection"
+    )
+
+
+def _execute_tessl_local_proof(
+    receipt: dict[str, object], request: TesslLocalProofRequest, plan: dict[str, object]
+) -> dict[str, object]:
     if not shutil.which("tessl"):
-        receipt["status"] = "blocked"
-        receipt["blocker"] = "Installed native tessl CLI was not found on PATH."
-        receipt["blocker_class"] = "blocked_runtime"
+        receipt.update({"status": "blocked", "blocker": "Installed native tessl CLI was not found on PATH.", "blocker_class": "blocked_runtime"})
         return receipt
-
+    install_workspace = plan["install_workspace"]
+    dist_dir = plan["dist_dir"]
+    commands = plan["commands"]
+    assert isinstance(install_workspace, Path) and isinstance(dist_dir, Path) and isinstance(commands, dict)
     _clear_directory(install_workspace)
     dist_dir.mkdir(parents=True, exist_ok=True)
-    env = dict(os.environ)
-    env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    return _run_tessl_local_proof_commands(receipt, request, commands, install_workspace)
+
+
+def _run_tessl_local_proof_commands(
+    receipt: dict[str, object],
+    request: TesslLocalProofRequest,
+    planned_commands: dict[str, list[str]],
+    install_workspace: Path,
+) -> dict[str, object]:
+    env = {**os.environ, "TESSL_AUTO_UPDATE_INTERVAL_MINUTES": "0"}
     commands: dict[str, object] = {}
-    for key, command, cwd in (
-        ("plugin_lint", lint_command, staged_source),
-        ("plugin_pack", pack_command, staged_source),
-        ("install_file", install_command, install_workspace),
-    ):
-        payload = _run_tessl_local_command(command, cwd=cwd, env=env, timeout_seconds=timeout_seconds)
+    required = (("plugin_lint", None), ("plugin_pack", None), ("install_file", install_workspace))
+    for key, install_cwd in required:
+        payload = _run_tessl_local_command(planned_commands[key], cwd=install_cwd or Path(str(receipt["staged_source"])), env=env, timeout_seconds=request.timeout_seconds)
         commands[key] = payload
         if payload.get("status") != "success":
-            receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
-            receipt["blocker"] = payload.get("blocker") or f"Tessl local proof step failed: {key}"
-            receipt["blocker_class"] = payload.get("blocker_class") or "blocked_validation"
-            receipt["commands"] = commands
-            return receipt
-
-    if include_review:
-        payload = _run_tessl_local_command(review_command, cwd=staged_source, env=env, timeout_seconds=timeout_seconds)
+            return _tessl_local_proof_command_failure(receipt, commands, key, payload)
+    if request.include_review:
+        payload = _run_tessl_local_command(planned_commands["review_run"], cwd=Path(str(receipt["staged_source"])), env=env, timeout_seconds=request.timeout_seconds)
         commands["review_run"] = payload
         if payload.get("status") != "success":
-            receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
-            receipt["blocker"] = payload.get("blocker") or "Tessl review run did not meet the requested threshold."
-            receipt["blocker_class"] = payload.get("blocker_class") or "blocked_validation"
-            receipt["commands"] = commands
-            return receipt
-
+            return _tessl_local_proof_command_failure(receipt, commands, "review_run", payload)
     receipt["commands"] = commands
     receipt["installed_project_manifest"] = str(install_workspace / "tessl.json")
+    return receipt
+
+
+def _tessl_local_proof_command_failure(
+    receipt: dict[str, object], commands: dict[str, object], key: str, payload: dict[str, object]
+) -> dict[str, object]:
+    receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
+    receipt["blocker"] = payload.get("blocker") or f"Tessl local proof step failed: {key}"
+    receipt["blocker_class"] = payload.get("blocker_class") or "blocked_validation"
+    receipt["commands"] = commands
     return receipt
 
 
@@ -249,27 +306,23 @@ def _tessl_scenario_tool_paths(tool_project: Path) -> tuple[Path, Path]:
 
 
 def prepare_tessl_scenario_generation(
-    repo_root: Path,
-    path: str,
-    *,
-    workspace: str | None,
-    dry_run: bool = True,
+    repo_root: Path, request: TesslScenarioGenerationRequest
 ) -> CallResult:
     """Prepare a temp Tessl scenario-generation workspace for a skill.
 
     Staging-only is the safe default. Callers must explicitly opt into the
     Tessl tile install because that command can alter the staged project state.
     """
-    policy = _tessl_scenario_generation_policy(workspace)
+    policy = _tessl_scenario_generation_policy(request.workspace)
     tool_spec = f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}"
     command_display = f"tessl install {tool_spec} --agent codex --yes"
-    if not dry_run and os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny":
+    if not request.dry_run and os.environ.get("ASK_EXTERNAL_EFFECTS") == "deny":
         return CallResult(
             status="error",
             data={
                 "status": "blocked",
                 "command": command_display,
-                "source_path": path,
+                "source_path": request.path,
                 "raw_output": "",
                 "raw_error": "",
                 "blocker": "Tessl project setup is blocked by the hermetic test effect policy; use --dry-run in test lanes.",
@@ -279,28 +332,28 @@ def prepare_tessl_scenario_generation(
             errors=[ErrorObject(code="ERR_VALIDATION", message="Tessl project setup is blocked by the hermetic test effect policy.")],
         )
     try:
-        normalized_workspace = _validate_tessl_workspace(workspace)
-        staged_root = _stable_tessl_scenario_generation_parent(path)
+        normalized_workspace = _validate_tessl_workspace(request.workspace)
+        staged_root = _stable_tessl_scenario_generation_parent(request.path)
         staged_root.mkdir(parents=True, exist_ok=True)
         target_tile = staged_root / "target-tile"
         tool_project = staged_root / "tool-project"
         target_tile, target_files = _stage_tessl_scenario_target_tile(
             repo_root,
-            path,
+            request.path,
             normalized_workspace,
             target_tile,
         )
         tool_files = _write_tessl_scenario_tool_project(tool_project)
         live_staged_source: Path | None = None
         live_staged_files: list[str] = []
-        if not dry_run:
+        if not request.dry_run:
             # Tessl binds a project to the concrete directory path. The live
             # evaluator later stages the private plugin under
             # /tmp/ask-tessl-evals-live, so setup must link that exact stable path
             # rather than the scenario-generation target tile.
             live_staged_source, live_staged_files = _stage_tessl_live_private_source(
                 repo_root,
-                path,
+                request.path,
                 normalized_workspace,
             )
     except (OSError, ValueError) as e:
@@ -309,7 +362,7 @@ def prepare_tessl_scenario_generation(
             data={
                 "status": "blocked",
                 "command": command_display,
-                "source_path": path,
+                "source_path": request.path,
                 "raw_output": "",
                 "raw_error": str(e),
                 "blocker": f"Failed to prepare Tessl scenario-generation staging: {e}",
@@ -320,7 +373,7 @@ def prepare_tessl_scenario_generation(
         )
 
     common = {
-        "source_path": path,
+        "source_path": request.path,
         "staged_root": str(staged_root),
         "target_tile": str(target_tile),
         "tool_project": str(tool_project),
@@ -331,8 +384,8 @@ def prepare_tessl_scenario_generation(
         "live_staged_source": str(live_staged_source) if live_staged_source else None,
         "live_staged_files": live_staged_files,
         "workspace": normalized_workspace,
-        "project_identity": _tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
-        "dry_run": dry_run,
+        "project_identity": _tessl_project_identity((repo_root / request.path).resolve(), normalized_workspace),
+        "dry_run": request.dry_run,
         "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
         "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
         "staging_policy": "stable_tmp_scenario_generation_evidence",
@@ -340,10 +393,10 @@ def prepare_tessl_scenario_generation(
         "policy": _tessl_scenario_generation_policy(normalized_workspace),
     }
 
-    if dry_run:
+    if request.dry_run:
         brief_path = _write_tessl_scenario_generation_brief(
             staged_root,
-            source_path=path,
+            source_path=request.path,
             workspace=normalized_workspace,
             target_tile=target_tile,
             tool_project=tool_project,
@@ -405,7 +458,7 @@ def prepare_tessl_scenario_generation(
 
     project_link_receipt = _write_tessl_project_link_receipt(
         repo_root,
-        path,
+        request.path,
         workspace=normalized_workspace,
         identity=common["project_identity"],
         project_link=project_link,
@@ -482,7 +535,7 @@ def prepare_tessl_scenario_generation(
     scenario_skill, scenario_reference = _tessl_scenario_tool_paths(tool_project)
     brief_path = _write_tessl_scenario_generation_brief(
         staged_root,
-        source_path=path,
+        source_path=request.path,
         workspace=normalized_workspace,
         target_tile=target_tile,
         tool_project=tool_project,

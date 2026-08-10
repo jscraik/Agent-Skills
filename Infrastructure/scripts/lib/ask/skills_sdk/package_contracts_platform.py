@@ -290,7 +290,7 @@ def _plugin_hooks_contract(
         blockers.append(
             _platform_blocker(
                 "plugin_hooks_command_not_portable",
-                "Plugin-owned hook commands must reference ${PLUGIN_ROOT} or ${PLUGIN_DATA}.",
+                "Plugin-owned hook commands must not use absolute or home-relative paths; use ${PLUGIN_ROOT} or ${PLUGIN_DATA} instead.",
                 dimension="path_portability",
                 path=hooks_rel,
                 evidence={"hooks": nonportable_commands},
@@ -531,7 +531,7 @@ def local_evidence_provider_status() -> dict[str, Any]:
                 "optional": True,
                 "authority": "enrichment_only",
                 "status": "available" if available else "missing",
-                "root": root.as_posix(),
+                "root": f"~/{root.relative_to(agents_root.parent).as_posix()}",
                 "signals": spec["signals"],
                 "stats_freshness": stats_freshness,
             }

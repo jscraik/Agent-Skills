@@ -108,9 +108,9 @@ def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: 
 
     result = evals.prepare_tessl_scenario_generation(
         tmp_path,
-        "Skills/example-skill",
-        workspace="jscraik",
-        dry_run=True,
+        evals.TesslScenarioGenerationRequest(
+            path="Skills/example-skill", workspace="jscraik", dry_run=True
+        ),
     )
 
     assert result.status == "success"
@@ -144,8 +144,9 @@ def test_prepare_tessl_scenario_generation_defaults_to_staging_only(tmp_path: Pa
     with mock.patch.object(evals.subprocess, "run") as run:
         result = evals.prepare_tessl_scenario_generation(
             tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
+            evals.TesslScenarioGenerationRequest(
+                path="Skills/example-skill", workspace="jscraik", dry_run=True
+            ),
         )
 
     assert result.status == "success"
@@ -169,9 +170,9 @@ def test_prepare_tessl_scenario_generation_archives_prior_temp_evidence(tmp_path
 
     first = evals.prepare_tessl_scenario_generation(
         tmp_path,
-        "Skills/example-skill-retention",
-        workspace="jscraik",
-        dry_run=True,
+        evals.TesslScenarioGenerationRequest(
+            path="Skills/example-skill-retention", workspace="jscraik", dry_run=True
+        ),
     )
     assert first.status == "success"
     staged_root = Path(first.data["staged_root"])
@@ -181,9 +182,9 @@ def test_prepare_tessl_scenario_generation_archives_prior_temp_evidence(tmp_path
 
     second = evals.prepare_tessl_scenario_generation(
         tmp_path,
-        "Skills/example-skill-retention",
-        workspace="jscraik",
-        dry_run=True,
+        evals.TesslScenarioGenerationRequest(
+            path="Skills/example-skill-retention", workspace="jscraik", dry_run=True
+        ),
     )
 
     assert second.status == "success"
@@ -226,9 +227,9 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
     ):
         result = evals.prepare_tessl_scenario_generation(
             tmp_path,
-            "Skills/example-skill",
-            workspace="jscraik",
-            dry_run=False,
+            evals.TesslScenarioGenerationRequest(
+                path="Skills/example-skill", workspace="jscraik", dry_run=False
+            ),
         )
 
     assert result.status == "success"

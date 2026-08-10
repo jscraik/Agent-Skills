@@ -185,14 +185,15 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
             references_dir.mkdir(parents=True)
             skill_md = skill_dir / 'SKILL.md'
             skill_md.write_text('---\nname: weak-rubric-skill\ndescription: Weak rubric fixture.\nversion: "1.0.0"\n---\n\n# Weak Rubric Skill\n', encoding='utf-8')
-            (references_dir / 'contract.yaml').write_text('purpose: Test weak rubric contract.\ninputs:\n  - user request\noutputs:\n  - result\nquality_criteria:\n  result_quality:\n    observable: result contains useful evidence\nevidence_requirements:\n  - Result cites evidence.\n', encoding='utf-8')
+            (references_dir / 'contract.yaml').write_text('purpose: Test weak rubric contract.\ninputs:\n  - user request\noutputs:\n  - result\nquality_criteria:\n  result_quality:\n    observable: result contains useful evidence\n    scoring: malformed\nevidence_requirements:\n  - Result cites evidence.\n', encoding='utf-8')
             contract = package_contracts.reference_quality_contract(repo_root, skill_md)
         analytic_check = next((check for check in contract['checks'] if check['name'] == 'analytic_rubric_quality'))
         self.assertEqual(analytic_check['status'], 'blocked_validation')
         self.assertIn('quality_criteria.result_quality.purpose', analytic_check['missing'])
         self.assertIn('quality_criteria.result_quality.why_it_matters', analytic_check['missing'])
         self.assertIn('quality_criteria.result_quality.observable_evidence', analytic_check['missing'])
-        self.assertIn('quality_criteria.result_quality.scoring', analytic_check['missing'])
+        self.assertNotIn('quality_criteria.result_quality.scoring', analytic_check['missing'])
+        self.assertIn('quality_criteria.result_quality.scoring:nonempty_mapping_required', analytic_check['missing'])
         self.assertIn('automatic_failure_conditions', analytic_check['missing'])
         self.assertNotIn('analytic_rubric_quality_missing', {blocker['rule_id'] for blocker in contract['blockers']})
 

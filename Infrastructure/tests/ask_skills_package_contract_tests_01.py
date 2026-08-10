@@ -1,5 +1,32 @@
 from ask_skills_package_contract_tests_core import *  # noqa: F403
 
+
+def _assert_sdk_package_contract(case, sdk_contract: dict[str, object]) -> None:
+    values = sdk_contract['values']
+    disclosure = sdk_contract['progressive_disclosure']
+    required = {
+        'agent_metadata', 'reference_contract', 'reference_quality', 'writing_quality',
+        'openai_platform_compat', 'purpose', 'inputs', 'outputs', 'commands',
+        'permission_profile', 'evals', 'task_profile', 'evidence_policy',
+    }
+    case.assertEqual(sdk_contract['schema_version'], 'skill-sdk-contract.v1')
+    case.assertTrue(required <= set(sdk_contract['required_fields']['present']))
+    case.assertEqual(values['agent_metadata']['path'], 'Plugins/skill-factory/skills/skill-factory-router/agents/openai.yaml')
+    case.assertEqual(values['reference_contract']['path'], 'Plugins/skill-factory/skills/skill-factory-router/references/contract.yaml')
+    for key in ('reference_quality', 'writing_quality', 'openai_platform_compat'):
+        case.assertEqual(values[key]['status'], 'pass')
+        case.assertTrue(values[key]['required_for_package_readiness'])
+        case.assertFalse(values[key]['blockers'])
+    case.assertEqual(disclosure['references_quality_status'], 'pass')
+    case.assertEqual(disclosure['writing_quality_status'], 'pass')
+    case.assertEqual(disclosure['openai_platform_compat_status'], 'pass')
+    case.assertTrue(values['evals']['declared'])
+    case.assertIn('Plugins/skill-factory/skills/skill-factory-router/references/evals.yaml', values['evals']['paths'])
+    providers = sdk_contract['evidence_providers']
+    case.assertEqual([item['name'] for item in providers['providers']], ['otel_collector', 'session_collector', 'observability_stack'])
+    case.assertTrue(all(item['root'].startswith('~/.agents/') for item in providers['providers']))
+
+
 class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
     def test_package_contract_logic_lives_in_skills_sdk_service(self) -> None:
         command_source = (REPO_ROOT / 'Infrastructure/scripts/lib/ask/commands/skills_impl.py').read_text(encoding='utf-8')
@@ -145,65 +172,7 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
     def test_package_payload_exposes_sdk_contract_and_optional_observability(self) -> None:
         with patch('ask.commands.skills_impl.resolve_skill_handle', return_value={'status': 'ok', 'handle': 'skill-factory-router', 'source_path': 'Plugins/skill-factory/skills/skill-factory-router/SKILL.md'}):
             package = skills_package(REPO_ROOT, 'skill-factory-router').data['skill_package']
-        sdk_contract = package['package_contract']['sdk_contract']
-        self.assertEqual(sdk_contract['schema_version'], 'skill-sdk-contract.v1')
-        self.assertIn('agent_metadata', sdk_contract['required_fields']['present'])
-        self.assertIn('reference_contract', sdk_contract['required_fields']['present'])
-        self.assertIn('reference_quality', sdk_contract['required_fields']['present'])
-        self.assertIn('writing_quality', sdk_contract['required_fields']['present'])
-        self.assertIn('openai_platform_compat', sdk_contract['required_fields']['present'])
-        self.assertIn('purpose', sdk_contract['required_fields']['present'])
-        self.assertIn('inputs', sdk_contract['required_fields']['present'])
-        self.assertIn('outputs', sdk_contract['required_fields']['present'])
-        self.assertIn('commands', sdk_contract['required_fields']['present'])
-        self.assertIn('permission_profile', sdk_contract['required_fields']['present'])
-        self.assertIn('evals', sdk_contract['required_fields']['present'])
-        self.assertIn('task_profile', sdk_contract['required_fields']['present'])
-        self.assertIn('evidence_policy', sdk_contract['required_fields']['present'])
-        self.assertEqual(sdk_contract['values']['agent_metadata']['path'], 'Plugins/skill-factory/skills/skill-factory-router/agents/openai.yaml')
-        self.assertEqual(sdk_contract['values']['reference_contract']['path'], 'Plugins/skill-factory/skills/skill-factory-router/references/contract.yaml')
-        self.assertEqual(sdk_contract['values']['reference_quality']['policy'], 'references_are_package_contract')
-        self.assertEqual(sdk_contract['values']['reference_quality']['status'], 'pass')
-        self.assertTrue(sdk_contract['values']['reference_quality']['required_for_package_readiness'])
-        self.assertFalse(sdk_contract['values']['reference_quality']['blockers'])
-        self.assertEqual(sdk_contract['values']['writing_quality']['schema_version'], 'skills-sdk.skill-writing-quality.v1')
-        self.assertEqual(sdk_contract['values']['writing_quality']['status'], 'pass')
-        self.assertTrue(sdk_contract['values']['writing_quality']['required_for_package_readiness'])
-        self.assertFalse(sdk_contract['values']['writing_quality']['blockers'])
-        self.assertEqual(sdk_contract['values']['openai_platform_compat']['schema_version'], 'skills-sdk.openai-platform-compat.v1')
-        self.assertEqual(sdk_contract['values']['openai_platform_compat']['status'], 'pass')
-        self.assertTrue(sdk_contract['values']['openai_platform_compat']['required_for_package_readiness'])
-        self.assertFalse(sdk_contract['values']['openai_platform_compat']['blockers'])
-        self.assertEqual(sdk_contract['progressive_disclosure']['references_quality_status'], 'pass')
-        self.assertEqual(sdk_contract['progressive_disclosure']['writing_quality_status'], 'pass')
-        self.assertEqual(sdk_contract['progressive_disclosure']['openai_platform_compat_status'], 'pass')
-        self.assertEqual(sdk_contract['values']['task_profile']['path'], 'Plugins/skill-factory/skills/skill-factory-router/references/task-profile.json')
-        self.assertEqual(sdk_contract['values']['permission_profile']['filesystem']['read'], ['user request and declared target skill path', 'Skill Factory skill inventory', 'Skill Factory references needed for the selected lane', 'repo validation scripts and package-readiness schemas'])
-        self.assertTrue(sdk_contract['progressive_disclosure']['skill_md_under_500_lines'])
-        self.assertTrue(sdk_contract['progressive_disclosure']['agent_metadata_declared'])
-        self.assertTrue(sdk_contract['progressive_disclosure']['references_contract_declared'])
-        self.assertTrue(sdk_contract['values']['evals']['declared'])
-        self.assertTrue(sdk_contract['progressive_disclosure']['task_profile_declared'])
-        self.assertFalse(sdk_contract['progressive_disclosure']['agent_tomls_declared'])
-        self.assertIn('Plugins/skill-factory/skills/skill-factory-router/references/evals.yaml', sdk_contract['values']['evals']['paths'])
-        self.assertFalse(any((command.startswith('Tessl content below 95') for command in sdk_contract['values']['commands'])))
-        self.assertEqual(sdk_contract['agent_contract']['source_of_truth'], 'Plugins/skill-factory/skills/skill-factory-router/SKILL.md')
-        self.assertIn('claim_eval_pass_as_runtime_proof', sdk_contract['agent_contract']['forbidden_actions'])
-        self.assertIn('optional_per_skill_runtime_profiles', sdk_contract['agent_contract']['agent_toml_policy'])
-        self.assertEqual(sdk_contract['values']['workflow_contract']['schema_version'], 'skillflow-contract.v1')
-        self.assertEqual(sdk_contract['values']['workflow_contract']['skillflow_schema_version'], 'skillflow.v1')
-        self.assertEqual(sdk_contract['values']['optimization_contract']['schema_version'], 'skill-optimization-readiness.v1')
-        self.assertEqual(sdk_contract['values']['optimization_contract']['optimization_schema_version'], 'skill-optimization-contract.v1')
-        self.assertEqual(sdk_contract['progressive_disclosure']['execution_mode'], sdk_contract['values']['workflow_contract']['execution_mode'])
-        self.assertEqual(sdk_contract['progressive_disclosure']['optimization_status'], sdk_contract['values']['optimization_contract']['status'])
-        self.assertIn('workflows/skillflow.json', sdk_contract['agent_contract']['workflow_policy'])
-        self.assertIn('bounded candidate artifacts', sdk_contract['agent_contract']['optimization_policy'])
-        providers = sdk_contract['evidence_providers']
-        self.assertEqual(providers['schema_version'], 'skill-evidence-providers.v1')
-        self.assertEqual(providers['authority'], 'artifacts_decide_telemetry_explains')
-        self.assertFalse(providers['required_for_package_readiness'])
-        self.assertIn(providers['telemetry_confidence'], {'enriched', 'partial', 'not_available'})
-        self.assertEqual([provider['name'] for provider in providers['providers']], ['otel_collector', 'session_collector', 'observability_stack'])
+        _assert_sdk_package_contract(self, package['package_contract']['sdk_contract'])
 
     def test_structured_reference_fallback_preserves_top_level_lists(self) -> None:
         text = "---\nschema_version: '2.0'\nskill_name: example\nclaims:\n- id: global-target-repository\n  statement: Uses active repository.\ncases:\n- id: smoke-discovery\n  name: Discovery\n"

@@ -1,6 +1,43 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .skills_impl_sdk_eval import *  # noqa: F403
+
+
+@dataclass(frozen=True)
+class TesslLocalProofOptions:
+    """CLI-selected options for one local Tessl proof receipt."""
+
+    skill: str
+    workspace: str
+    execute: bool
+    include_review: bool
+    review_threshold: int
+    timeout_seconds: int
+
+
+@dataclass(frozen=True)
+class SkillsSdkPluginCreateRequest:
+    """Named SDK plugin creation inputs from the CLI dispatch boundary."""
+
+    kind: str
+    name: str
+    category: str
+    description: str | None
+    with_registry: bool
+    companion_folders: list[str]
+    apply: bool
+
+
+@dataclass(frozen=True)
+class SkillsSdkPluginReviewRequest:
+    """Named SDK plugin review inputs from the CLI dispatch boundary."""
+
+    kind: str
+    target: str
+    strict: bool
+    execute: bool
 
 def skills_sdk_eval_scorer_calibration(repo_root: Path, target: str) -> CallResult:
     """Preview held-out scorer calibration evidence without mutating eval sources."""
@@ -117,16 +154,7 @@ def skills_sdk_eval_tessl_score(
     return result
 
 
-def skills_sdk_eval_tessl_local_proof(
-    repo_root: Path,
-    *,
-    skill: str,
-    workspace: str,
-    execute: bool = False,
-    include_review: bool = False,
-    review_threshold: int = TESSL_REVIEW_MIN_SCORE,
-    timeout_seconds: int = 180,
-) -> CallResult:
+def skills_sdk_eval_tessl_local_proof(repo_root: Path, options: TesslLocalProofOptions) -> CallResult:
     """Preview or execute a temp-staged local Tessl package/install proof receipt."""
     result = CallResult()
     result.metadata["command"] = "sdk eval tessl-local-proof"
@@ -134,68 +162,69 @@ def skills_sdk_eval_tessl_local_proof(
 
     receipt = eval_commands.run_tessl_local_proof(
         repo_root,
-        skill,
-        workspace=workspace,
-        execute=execute,
-        include_review=include_review,
-        review_threshold=review_threshold,
-        timeout_seconds=timeout_seconds,
-    )
-    command_parts = [
-        "sdk",
-        "eval",
-        "tessl-local-proof",
-        "--skill",
-        skill,
-        "--workspace",
-        workspace,
-    ]
-    if execute:
-        command_parts.append("--execute")
-    else:
-        command_parts.append("--preview")
-    if include_review:
-        command_parts.append("--include-review")
-    if review_threshold != TESSL_REVIEW_MIN_SCORE:
-        command_parts.extend(["--review-threshold", str(review_threshold)])
-    if timeout_seconds != 180:
-        command_parts.extend(["--timeout-seconds", str(timeout_seconds)])
-
-    payload = {
-        "schema_version": "skills-sdk-eval-tessl-local-proof.v0",
-        "status": receipt.get("status"),
-        "ready": receipt.get("status") == "pass",
-        "skill": skill,
-        "workspace": workspace,
-        "receipt": receipt,
-        "mutation_performed": execute,
-        "validation_commands": [_ask_validation_command(*command_parts)],
-        "agent_summary": (
-            "Tessl local proof passed."
-            if receipt.get("status") == "pass"
-            else f"Tessl local proof is {receipt.get('status')} for {skill}."
+        eval_commands.TesslLocalProofRequest(
+            path=options.skill,
+            workspace=options.workspace,
+            execute=options.execute,
+            include_review=options.include_review,
+            review_threshold=options.review_threshold,
+            timeout_seconds=options.timeout_seconds,
         ),
-    }
+    )
+    payload = _tessl_local_proof_payload(options, receipt)
     result.data["skills_sdk_eval_tessl_local_proof"] = payload
     if receipt.get("status") in {"blocked", "fail"}:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION" if receipt.get("status") == "fail" else "ERR_RUNTIME",
-                message=payload["agent_summary"],
-                fix_suggestion=_ask_validation_command(
-                    "sdk",
-                    "eval",
-                    "tessl-local-proof",
-                    "--skill",
-                    skill,
-                    "--workspace",
-                    workspace,
-                    "--preview",
-                ),
-            )
-        )
+        _add_tessl_local_proof_error(result, payload, options)
     return result
+
+
+def _tessl_local_proof_payload(
+    options: TesslLocalProofOptions, receipt: dict[str, object]
+) -> dict[str, object]:
+    status = receipt.get("status")
+    return {
+        "schema_version": "skills-sdk-eval-tessl-local-proof.v0",
+        "status": status,
+        "ready": status == "pass",
+        "skill": options.skill,
+        "workspace": options.workspace,
+        "receipt": receipt,
+        "mutation_performed": options.execute,
+        "validation_commands": [_ask_validation_command(*_tessl_local_proof_command_parts(options))],
+        "agent_summary": (
+            "Tessl local proof passed."
+            if status == "pass"
+            else f"Tessl local proof is {status} for {options.skill}."
+        ),
+    }
+
+
+def _tessl_local_proof_command_parts(options: TesslLocalProofOptions) -> list[str]:
+    parts = ["sdk", "eval", "tessl-local-proof", "--skill", options.skill, "--workspace", options.workspace]
+    parts.append("--execute" if options.execute else "--preview")
+    if options.include_review:
+        parts.append("--include-review")
+    if options.review_threshold != TESSL_REVIEW_MIN_SCORE:
+        parts.extend(["--review-threshold", str(options.review_threshold)])
+    if options.timeout_seconds != 180:
+        parts.extend(["--timeout-seconds", str(options.timeout_seconds)])
+    return parts
+
+
+def _add_tessl_local_proof_error(
+    result: CallResult, payload: dict[str, object], options: TesslLocalProofOptions
+) -> None:
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION" if payload["status"] == "fail" else "ERR_RUNTIME",
+            message=str(payload["agent_summary"]),
+            fix_suggestion=_ask_validation_command(
+                "sdk", "eval", "tessl-local-proof", "--skill", options.skill,
+                "--workspace", options.workspace, "--preview",
+            ),
+        )
+    )
 
 
 def _sdk_plugin_first_principles_gate(kind: str, action: str) -> dict[str, Any]:
@@ -521,128 +550,88 @@ def _sdk_plugin_install_validation_command(
     return _ask_validation_command(*args)
 
 
-def skills_sdk_plugin_create(
-    repo_root: Path,
-    *,
-    kind: str,
-    name: str,
-    category: str,
-    description: str | None = None,
-    with_registry: bool = False,
-    companion_folders: list[str] | None = None,
-    apply: bool = False,
-) -> CallResult:
+def skills_sdk_plugin_create(repo_root: Path, request: SkillsSdkPluginCreateRequest) -> CallResult:
     """Create or preview creation of a single skill or plugin through the SDK facade."""
-    command = _ask_validation_command(
-        "sdk",
-        "plugin",
-        "create",
-        name,
-        "--kind",
-        kind,
-        "--category",
-        category,
-        "--apply" if apply else "--preview",
+    command = _sdk_plugin_create_command(request)
+    if request.kind == "skill" and not request.description:
+        return _sdk_plugin_create_missing_description(request, command)
+    if not request.apply:
+        return _sdk_plugin_create_preview(request, command)
+    return _sdk_plugin_create_apply(repo_root, request, command)
+
+
+def _sdk_plugin_create_command(request: SkillsSdkPluginCreateRequest) -> str:
+    return _ask_validation_command(
+        "sdk", "plugin", "create", request.name, "--kind", request.kind,
+        "--category", request.category, "--apply" if request.apply else "--preview",
     )
-    if kind == "skill" and not description:
-        payload = {
-            "schema_version": "skills-sdk-plugin-create.v0",
-            "status": "blocked",
-            "kind": kind,
-            "name": name,
-            "mutation_performed": False,
-            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
-            "validation_commands": [command],
-            "agent_summary": "Skill creation requires --description so the routing contract is not blank.",
-        }
-        return _sdk_plugin_result(
-            command="sdk plugin create",
-            payload_key="skills_sdk_plugin_create",
-            payload=payload,
-            error_message=payload["agent_summary"],
-            fix_suggestion="Add --description before applying or previewing a skill scaffold.",
-        )
 
-    if not apply:
-        lower_command = (
-            _skills_validation_command("init", name, "--category", category, "--description", description or "")
-            if kind == "skill"
-            else _ask_validation_command("plugins", "create", name, "--category", category)
-        )
-        if kind == "plugin" and with_registry:
-            lower_command = f"{lower_command} --with-marketplace"
-        payload = {
-            "schema_version": "skills-sdk-plugin-create.v0",
-            "status": "preview",
-            "kind": kind,
-            "name": name,
-            "category": category,
-            "with_registry": with_registry,
-            "planned_commands": [lower_command, command],
-            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
-            "mutation_performed": False,
-            "agent_summary": f"SDK plugin create preview planned {kind} creation without writes.",
-        }
-        return _sdk_plugin_result(command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload)
 
-    if kind == "skill":
-        delegated = init_skill(repo_root, name=name, category=category, description=description or "")
-        artifact_target = f"Skills/{category}/{name}" if not category.startswith("Skills/") else f"{category}/{name}"
-    else:
-        from ask.commands.plugins import init_plugin  # noqa: PLC0415
+def _sdk_plugin_create_missing_description(
+    request: SkillsSdkPluginCreateRequest, command: str
+) -> CallResult:
+    payload = {
+        "schema_version": "skills-sdk-plugin-create.v0",
+        "status": "blocked",
+        "kind": request.kind,
+        "name": request.name,
+        "mutation_performed": False,
+        "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "create"),
+        "validation_commands": [command],
+        "agent_summary": "Skill creation requires --description so the routing contract is not blank.",
+    }
+    return _sdk_plugin_result(
+        command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload,
+        error_message=str(payload["agent_summary"]),
+        fix_suggestion="Add --description before applying or previewing a skill scaffold.",
+    )
 
-        delegated = init_plugin(
-            repo_root,
-            name=name,
-            category=category,
-            with_marketplace=with_registry,
-            companion_folders=companion_folders or [],
-            action="create",
+
+def _sdk_plugin_create_preview(request: SkillsSdkPluginCreateRequest, command: str) -> CallResult:
+    lower_command = _sdk_plugin_create_lower_command(request)
+    payload = {
+        "schema_version": "skills-sdk-plugin-create.v0",
+        "status": "preview",
+        "kind": request.kind,
+        "name": request.name,
+        "category": request.category,
+        "with_registry": request.with_registry,
+        "planned_commands": [lower_command, command],
+        "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "create"),
+        "mutation_performed": False,
+        "agent_summary": f"SDK plugin create preview planned {request.kind} creation without writes.",
+    }
+    return _sdk_plugin_result(command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload)
+
+
+def _sdk_plugin_create_lower_command(request: SkillsSdkPluginCreateRequest) -> str:
+    if request.kind == "skill":
+        return _skills_validation_command(
+            "init", request.name, "--category", request.category, "--description", request.description or ""
         )
-        artifact_target = str(delegated.data.get("plugin_root") or f"Plugins/{category}/{name}")
-    registry_receipt = None
-    if with_registry and delegated.status == "success":
-        try:
-            registry_receipt = (
-                _sdk_plugin_save_skill_registry_receipt(
-                    repo_root,
-                    target=f"{artifact_target}/SKILL.md",
-                    registry=None,
-                    name=name,
-                    apply=True,
-                )
-                if kind == "skill"
-                else _sdk_plugin_save_plugin_registry_receipt(
-                    repo_root,
-                    target=artifact_target,
-                    registry=None,
-                    name=name,
-                    apply=True,
-                )
-            )
-        except ValueError as exc:
-            delegated.status = "error"
-            delegated.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message=str(exc),
-                    fix_suggestion="Fix the local registry JSON before retrying registry save.",
-                )
-            )
+    command = _ask_validation_command("plugins", "create", request.name, "--category", request.category)
+    return f"{command} --with-marketplace" if request.with_registry else command
+
+
+def _sdk_plugin_create_apply(
+    repo_root: Path, request: SkillsSdkPluginCreateRequest, command: str
+) -> CallResult:
+    delegated, artifact_target = _sdk_plugin_create_delegated(repo_root, request)
+    registry_receipt = _sdk_plugin_create_registry_receipt(repo_root, request, delegated, artifact_target)
     payload = {
         "schema_version": "skills-sdk-plugin-create.v0",
         "status": "applied" if delegated.status == "success" else "blocked",
-        "kind": kind,
-        "name": name,
-        "category": category,
-        "with_registry": with_registry,
+        "kind": request.kind,
+        "name": request.name,
+        "category": request.category,
+        "with_registry": request.with_registry,
         "delegated_command_status": delegated.status,
         "delegated_data": delegated.data,
         "registry_receipt": registry_receipt,
-        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
+        "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "create"),
         "mutation_performed": True,
         "validation_commands": [command],
-        "agent_summary": f"SDK plugin create delegated {kind} creation through the bounded factory command.",
+        "agent_summary": f"SDK plugin create delegated {request.kind} creation through the bounded factory command.",
     }
     result = _sdk_plugin_result(command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload)
     result.status = delegated.status
@@ -650,56 +639,69 @@ def skills_sdk_plugin_create(
     return result
 
 
-def skills_sdk_plugin_review(
+def _sdk_plugin_create_delegated(
+    repo_root: Path, request: SkillsSdkPluginCreateRequest
+) -> tuple[CallResult, str]:
+    if request.kind == "skill":
+        delegated = init_skill(repo_root, name=request.name, category=request.category, description=request.description or "")
+        target = f"Skills/{request.category}/{request.name}" if not request.category.startswith("Skills/") else f"{request.category}/{request.name}"
+        return delegated, target
+    from ask.commands.plugins import init_plugin  # noqa: PLC0415
+
+    delegated = init_plugin(
+        repo_root, name=request.name, category=request.category,
+        with_marketplace=request.with_registry, companion_folders=request.companion_folders, action="create",
+    )
+    return delegated, str(delegated.data.get("plugin_root") or f"Plugins/{request.category}/{request.name}")
+
+
+def _sdk_plugin_create_registry_receipt(
     repo_root: Path,
-    *,
-    kind: str,
-    target: str,
-    strict: bool = False,
-    execute: bool = False,
-) -> CallResult:
+    request: SkillsSdkPluginCreateRequest,
+    delegated: CallResult,
+    artifact_target: str,
+) -> object:
+    if not request.with_registry or delegated.status != "success":
+        return None
+    try:
+        return _sdk_plugin_create_registry_save(repo_root, request, artifact_target)
+    except ValueError as exc:
+        delegated.status = "error"
+        delegated.errors.append(
+            ErrorObject(code="ERR_VALIDATION", message=str(exc), fix_suggestion="Fix the local registry JSON before retrying registry save.")
+        )
+        return None
+
+
+def _sdk_plugin_create_registry_save(
+    repo_root: Path, request: SkillsSdkPluginCreateRequest, artifact_target: str
+) -> object:
+    if request.kind == "skill":
+        return _sdk_plugin_save_skill_registry_receipt(
+            repo_root, target=f"{artifact_target}/SKILL.md", registry=None, name=request.name, apply=True
+        )
+    return _sdk_plugin_save_plugin_registry_receipt(
+        repo_root, target=artifact_target, registry=None, name=request.name, apply=True
+    )
+
+
+def skills_sdk_plugin_review(repo_root: Path, request: SkillsSdkPluginReviewRequest) -> CallResult:
     """Review or preview review of a single skill or plugin through SDK guardrails."""
     command = _ask_validation_command(
-        "sdk",
-        "plugin",
-        "review",
-        target,
-        "--kind",
-        kind,
-        "--execute" if execute else "--preview",
+        "sdk", "plugin", "review", request.target, "--kind", request.kind,
+        "--execute" if request.execute else "--preview",
     )
-    planned = (
-        [_ask_validation_command("sdk", "check", target, "--strict" if strict else "")]
-        if kind == "skill"
-        else [_ask_validation_command("plugins", "harden", target)]
-    )
-    planned = [item.strip() for item in planned]
-    if not execute:
-        payload = {
-            "schema_version": "skills-sdk-plugin-review.v0",
-            "status": "preview",
-            "kind": kind,
-            "target": target,
-            "planned_commands": planned,
-            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "review"),
-            "mutation_performed": False,
-            "agent_summary": f"SDK plugin review preview planned {kind} guardrails without running checks.",
-        }
-        return _sdk_plugin_result(command="sdk plugin review", payload_key="skills_sdk_plugin_review", payload=payload)
-    if kind == "skill":
-        delegated = skills_sdk_check(repo_root, target=target, strict=strict, codex_parity=False)
-    else:
-        from ask.commands.plugins import harden_plugin  # noqa: PLC0415
-
-        delegated = harden_plugin(repo_root, plugin_path=target, require_marketplace=strict)
+    if not request.execute:
+        return _sdk_plugin_review_preview(request, command)
+    delegated = _sdk_plugin_review_delegated(repo_root, request)
     payload = {
         "schema_version": "skills-sdk-plugin-review.v0",
         "status": "passed" if delegated.status == "success" else "blocked",
-        "kind": kind,
-        "target": target,
+        "kind": request.kind,
+        "target": request.target,
         "delegated_command_status": delegated.status,
         "delegated_data": delegated.data,
-        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "review"),
+        "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "review"),
         "mutation_performed": False,
         "validation_commands": [command],
         "agent_summary": f"SDK plugin review executed bounded {kind} checks.",
@@ -708,5 +710,34 @@ def skills_sdk_plugin_review(
     result.status = delegated.status
     result.errors.extend(delegated.errors)
     return result
+
+
+def _sdk_plugin_review_preview(request: SkillsSdkPluginReviewRequest, command: str) -> CallResult:
+    planned = _sdk_plugin_review_planned_commands(request)
+    payload = {
+        "schema_version": "skills-sdk-plugin-review.v0",
+        "status": "preview",
+        "kind": request.kind,
+        "target": request.target,
+        "planned_commands": planned,
+        "first_principles_gate": _sdk_plugin_first_principles_gate(request.kind, "review"),
+        "mutation_performed": False,
+        "agent_summary": f"SDK plugin review preview planned {request.kind} guardrails without running checks.",
+    }
+    return _sdk_plugin_result(command="sdk plugin review", payload_key="skills_sdk_plugin_review", payload=payload)
+
+
+def _sdk_plugin_review_planned_commands(request: SkillsSdkPluginReviewRequest) -> list[str]:
+    if request.kind == "skill":
+        return [_ask_validation_command("sdk", "check", request.target, "--strict" if request.strict else "").strip()]
+    return [_ask_validation_command("plugins", "harden", request.target)]
+
+
+def _sdk_plugin_review_delegated(repo_root: Path, request: SkillsSdkPluginReviewRequest) -> CallResult:
+    if request.kind == "skill":
+        return skills_sdk_check(repo_root, target=request.target, strict=request.strict, codex_parity=False)
+    from ask.commands.plugins import harden_plugin  # noqa: PLC0415
+
+    return harden_plugin(repo_root, plugin_path=request.target, require_marketplace=request.strict)
 
 __all__ = [name for name in globals() if not name.startswith("__")]

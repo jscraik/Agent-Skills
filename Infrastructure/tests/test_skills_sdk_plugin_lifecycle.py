@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import (  # noqa: E402
+    SkillsSdkPluginCreateRequest,
     skills_sdk_plugin_install,
     skills_sdk_plugin_create,
     skills_sdk_plugin_save_registry,
@@ -75,12 +76,10 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
     def test_create_preview_routes_single_skill_without_writing(self) -> None:
         result = skills_sdk_plugin_create(
             REPO_ROOT,
-            kind="skill",
-            name="demo-skill",
-            category="agent-ops",
-            description="Demo skill",
-            with_registry=True,
-            apply=False,
+            SkillsSdkPluginCreateRequest(
+                kind="skill", name="demo-skill", category="agent-ops", description="Demo skill",
+                with_registry=True, companion_folders=[], apply=False,
+            ),
         )
 
         payload = result.data["skills_sdk_plugin_create"]
@@ -94,12 +93,10 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
     def test_create_preview_routes_plugin_with_registry_without_writing(self) -> None:
         result = skills_sdk_plugin_create(
             REPO_ROOT,
-            kind="plugin",
-            name="demo-plugin",
-            category="third-party",
-            with_registry=True,
-            companion_folders=["references"],
-            apply=False,
+            SkillsSdkPluginCreateRequest(
+                kind="plugin", name="demo-plugin", category="third-party", description=None,
+                with_registry=True, companion_folders=["references"], apply=False,
+            ),
         )
 
         payload = result.data["skills_sdk_plugin_create"]

@@ -26,6 +26,7 @@ def _load_impl() -> ModuleType:
 
 _impl = _load_impl()
 SCRIPT_TIMEOUT_SECONDS = _impl.SCRIPT_TIMEOUT_SECONDS
+DoctorCatalogOptions = _impl.DoctorCatalogOptions
 check_hub_stability = _impl.check_hub_stability
 collect_changed_files = _impl.collect_changed_files
 doctor_catalog = _impl.doctor_catalog
@@ -40,6 +41,7 @@ subprocess = _impl.subprocess
 
 __all__ = [
     "SCRIPT_TIMEOUT_SECONDS",
+    "DoctorCatalogOptions",
     "check_hub_stability",
     "collect_changed_files",
     "doctor_catalog",

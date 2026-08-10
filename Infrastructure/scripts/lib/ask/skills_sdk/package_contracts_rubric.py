@@ -16,7 +16,6 @@ def _analytic_rubric_quality_check_for_repo(
     )
     findings: list[str] = []
     checked: list[str] = []
-
     if not isinstance(quality_criteria, dict) or not quality_criteria:
         findings.append("quality_criteria")
     else:
@@ -25,54 +24,13 @@ def _analytic_rubric_quality_check_for_repo(
             if criterion_id.endswith("_selection"):
                 continue
             checked.append(criterion_id)
-            if not isinstance(value, dict) or not value:
-                findings.append(f"quality_criteria.{criterion_id}:analytic_mapping_required")
-                continue
-            missing_fields = sorted(field for field in ANALYTIC_RUBRIC_FIELDS if field not in value)
-            findings.extend(f"quality_criteria.{criterion_id}.{field}" for field in missing_fields)
-            for field in ("purpose", "why_it_matters"):
-                if field in value and (not isinstance(value.get(field), str) or not str(value.get(field)).strip()):
-                    findings.append(f"quality_criteria.{criterion_id}.{field}:nonempty_string_required")
-            observable_evidence = value.get("observable_evidence")
-            if "observable_evidence" in value and not (
-                (isinstance(observable_evidence, str) and observable_evidence.strip())
-                or (
-                    isinstance(observable_evidence, list)
-                    and any(isinstance(item, str) and item.strip() for item in observable_evidence)
-                )
-            ):
-                findings.append(
-                    f"quality_criteria.{criterion_id}.observable_evidence:nonempty_string_or_list_required"
-                )
-            scoring = value.get("scoring")
-            if not isinstance(scoring, dict) or not scoring:
-                continue
-            score_keys = {str(score_key) for score_key in scoring}
-            missing_scores = sorted(ANALYTIC_RUBRIC_SCORES - score_keys, reverse=True)
-            findings.extend(f"quality_criteria.{criterion_id}.scoring.{score}" for score in missing_scores)
-            for score_key, score_value in scoring.items():
-                if not isinstance(score_value, str) or not score_value.strip():
-                    findings.append(f"quality_criteria.{criterion_id}.scoring.{score_key}:nonempty_string_required")
-
+            findings.extend(_analytic_rubric_criterion_findings(criterion_id, value))
     if not checked:
         findings.append("quality_criteria.observable_analytic_criterion")
     findings.extend(profile_errors)
     if not [item for item in automatic_failures if isinstance(item, str) and item.strip()]:
         findings.append("automatic_failure_conditions")
-
-    check = {
-        "name": "analytic_rubric_quality",
-        "status": "pass" if not findings else "blocked_validation",
-        "path": "references/contract.yaml",
-        "criteria_checked": sorted(checked),
-        "missing": sorted(findings),
-        "rubric_profiles": profile_ids,
-        "policy": (
-            "Skills SDK rubric criteria must use an analytic rubric shape. "
-            "Shared criteria may come from centralized rubric_profile entries; "
-            "skill-local criteria should only add selectors or domain-specific overrides."
-        ),
-    }
+    check = _analytic_rubric_quality_check_payload(findings, checked, profile_ids)
     blockers: list[dict[str, str]] = []
     if findings:
         blockers.append(
@@ -87,6 +45,50 @@ def _analytic_rubric_quality_check_for_repo(
             }
         )
     return check, blockers
+
+
+def _analytic_rubric_criterion_findings(criterion_id: str, value: object) -> list[str]:
+    prefix = f"quality_criteria.{criterion_id}"
+    if not isinstance(value, dict) or not value:
+        return [f"{prefix}:analytic_mapping_required"]
+    findings = [f"{prefix}.{field}" for field in ANALYTIC_RUBRIC_FIELDS if field not in value]
+    for field in ("purpose", "why_it_matters"):
+        if field in value and (not isinstance(value.get(field), str) or not str(value.get(field)).strip()):
+            findings.append(f"{prefix}.{field}:nonempty_string_required")
+    observable_evidence = value.get("observable_evidence")
+    if "observable_evidence" in value and not _valid_observable_evidence(observable_evidence):
+        findings.append(f"{prefix}.observable_evidence:nonempty_string_or_list_required")
+    return [*findings, *_analytic_rubric_scoring_findings(prefix, value)]
+
+
+def _valid_observable_evidence(value: object) -> bool:
+    return (isinstance(value, str) and bool(value.strip())) or (
+        isinstance(value, list) and any(isinstance(item, str) and item.strip() for item in value)
+    )
+
+
+def _analytic_rubric_scoring_findings(prefix: str, value: dict[str, Any]) -> list[str]:
+    scoring = value.get("scoring")
+    if not isinstance(scoring, dict) or not scoring:
+        return [f"{prefix}.scoring:nonempty_mapping_required"] if "scoring" in value else []
+    findings = [f"{prefix}.scoring.{score}" for score in ANALYTIC_RUBRIC_SCORES - {str(key) for key in scoring}]
+    findings.extend(
+        f"{prefix}.scoring.{key}:nonempty_string_required"
+        for key, item in scoring.items()
+        if not isinstance(item, str) or not item.strip()
+    )
+    return findings
+
+
+def _analytic_rubric_quality_check_payload(
+    findings: list[str], checked: list[str], profile_ids: list[str],
+) -> dict[str, Any]:
+    return {
+        "name": "analytic_rubric_quality", "status": "pass" if not findings else "blocked_validation",
+        "path": "references/contract.yaml", "criteria_checked": sorted(checked),
+        "missing": sorted(findings), "rubric_profiles": profile_ids,
+        "policy": "Skills SDK rubric criteria must use an analytic rubric shape. Shared criteria may come from centralized rubric_profile entries; skill-local criteria should only add selectors or domain-specific overrides.",
+    }
 
 
 def _requires_tessl_handoff_quality(contract: dict[str, Any]) -> bool:

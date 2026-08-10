@@ -275,12 +275,12 @@ def test_tessl_live_private_sanitizer_preserves_staged_evidence_root() -> None:
 
 def test_tessl_live_private_sanitizer_redacts_cross_platform_home_paths() -> None:
     payload = {
-        "stdout": "linux /home/runner/private.txt and windows C:\\Users\\Jamie\\private.txt",
+        "stdout": "linux /home/runner/private.txt, root /root/private.txt, and windows C:\\Users\\Jamie\\private.txt",
     }
 
     sanitized = evals._sanitize_tessl_live_private_payload(payload)
 
-    assert sanitized["stdout"] == "linux <user-path> and windows <user-path>"
+    assert sanitized["stdout"] == "linux <user-path>, root <user-path>, and windows <user-path>"
 
 
 def test_macro_eval_report_blocks_on_malformed_existing_summary(tmp_path: Path) -> None:

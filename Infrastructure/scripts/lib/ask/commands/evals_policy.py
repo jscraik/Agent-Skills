@@ -253,7 +253,7 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
     }
 
 
-TESSL_STAGING_IGNORED_NAMES = {".DS_Store"}
-TESSL_STAGING_IGNORED_DIRS = {"__MACOSX", ".AppleDouble"}
+TESSL_STAGING_IGNORED_NAMES = frozenset({".DS_Store"})
+TESSL_STAGING_IGNORED_DIRS = frozenset({"__MACOSX", ".AppleDouble"})
 
 __all__ = [name for name in globals() if not name.startswith("__")]

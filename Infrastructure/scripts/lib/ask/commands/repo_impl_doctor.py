@@ -1,11 +1,21 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .repo_impl_core import *  # noqa: F403
 
-def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
+
+@dataclass(frozen=True)
+class DoctorCatalogOptions:
+    """Named policy choice for a catalog parity diagnostic."""
+
+    strict: bool
+
+
+def doctor_catalog(repo_root: Path, options: DoctorCatalogOptions) -> CallResult:
     """Run catalog parity diagnostics and expose the full report in a CallResult."""
     result = CallResult()
-    report = compute_catalog_parity(repo_root, strict=strict)
+    report = compute_catalog_parity(repo_root, strict=options.strict)
     result.data["catalog_parity"] = report
     result.data["decision_status"] = report.get("decision_status")
     result.data["policy_identity"] = report.get("policy_identity")
@@ -119,9 +129,7 @@ def _workspace_projection_signal(projection_state: str, skills_synced: bool) -> 
     }
     if unmaterialized:
         signal["details"]["runtime_verification"] = "not_run"
-        signal["next_command"] = SKILLS_SYNC_COMMAND
-    else:
-        signal["next_command"] = SKILLS_SYNC_COMMAND
+    signal["next_command"] = SKILLS_SYNC_COMMAND
     return signal
 
 
@@ -642,7 +650,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
     result = CallResult()
     try:
         status_result = repo_status(repo_root)
-    except Exception as exc:
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError) as exc:
         signals = {
             "repo_status": _unknown_signal_error_signal(exc),
             "ask_bootstrap": _skipped_signal(
@@ -689,7 +697,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
             signals.update(
                 {
                     "catalog_parity": _safe_signal(
-                        lambda: _catalog_parity_signal(doctor_catalog(repo_root))
+                        lambda: _catalog_parity_signal(doctor_catalog(repo_root, DoctorCatalogOptions(strict=False)))
                     ),
                     "runtime_budget": _safe_signal(
                         lambda: _runtime_budget_signal(skills_budget(repo_root))
