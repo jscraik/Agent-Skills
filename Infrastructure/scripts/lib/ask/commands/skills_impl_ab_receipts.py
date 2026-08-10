@@ -335,7 +335,12 @@ def _skills_sdk_internal_eval_receipt_counts(
     if status == "pass":
         synthetic_blockers.append("blocked_missing_artifact:no_scorecard_or_closeout")
     internal_case_count = 0 if status == "blocked" else 1
-    receipt_status = "blocked" if status == "pass" else status if status != "pass" or not quality_blockers else "fail"
+    if status == "pass":
+        receipt_status = "blocked"
+    elif quality_blockers:
+        receipt_status = "fail"
+    else:
+        receipt_status = status
     missing_artifact_check = {
         "id": "blocked_missing_artifact:no_scorecard_or_closeout",
         "status": "blocker",
