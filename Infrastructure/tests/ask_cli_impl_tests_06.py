@@ -288,7 +288,7 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(output['data']['policy']['tessl_review_min_score'], 95)
         self.assertEqual(output['data']['policy']['tessl_review_target_score'], 95)
         self.assertEqual(output['data']['policy']['tessl_project_marker'], 'tessl.json')
-        self.assertIn('/tmp/ask-tessl-reviews', output['data']['policy']['tessl_staging_root'])
+        self.assertIn(os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews'), output['data']['policy']['tessl_staging_root'])
         self.assertEqual(output['data']['review_mode_details']['tessl_review']['minimum_score'], 95)
         self.assertEqual(output['data']['review_mode_details']['tessl_review']['target_score'], 95)
         self.assertIn('--threshold 95', output['data']['review_mode_details']['tessl_review']['command'])
