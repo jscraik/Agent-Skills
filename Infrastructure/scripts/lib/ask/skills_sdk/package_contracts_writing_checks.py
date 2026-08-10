@@ -253,11 +253,12 @@ def writing_quality_contract(
     description = str(frontmatter.get("description") or "").strip()
     description_status = "not_applicable"
     if not user_invoked:
+        description_tokens = _token_set(description)
         description_status = (
             "pass"
             if description
             and text_contains_action_term(description)
-            and "when" in {token.strip(".,:;!?()[]{}\"'").lower() for token in description.split()}
+            and "when" in description_tokens
             else "blocked_validation"
         )
         if description_status != "pass":
