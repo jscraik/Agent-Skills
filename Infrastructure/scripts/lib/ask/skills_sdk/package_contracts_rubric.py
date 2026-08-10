@@ -362,14 +362,17 @@ def _source_operating_model_paths_from_text(path: Path) -> list[str]:
     current_kind: str | None = None
     for line in text.splitlines():
         stripped = line.strip()
-        if stripped.startswith("- path:"):
-            if current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
-                paths.append(current_path)
-            current_path = stripped.split(":", 1)[1].strip().strip("'\"")
+        item_start = stripped.startswith("- ")
+        entry = stripped[2:] if item_start else stripped
+        if item_start and current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
+            paths.append(current_path)
+            current_path = None
             current_kind = None
+        if entry.startswith("path:"):
+            current_path = entry.split(":", 1)[1].strip().strip("'\"")
             continue
-        if stripped.startswith("kind:"):
-            current_kind = stripped.split(":", 1)[1].strip().strip("'\"")
+        if entry.startswith("kind:"):
+            current_kind = entry.split(":", 1)[1].strip().strip("'\"")
     if current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
         paths.append(current_path)
     return [source_path for source_path in paths if source_path]
