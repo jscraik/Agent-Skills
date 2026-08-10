@@ -148,8 +148,9 @@ def _construction_line_items(text: str) -> list[str]:
             continue
         while line.startswith(("-", "*")):
             line = line[1:].strip()
-        if len(line) >= 3 and line[0].isdigit() and line[1] == ".":
-            line = line[2:].strip()
+        prefix, separator, remainder = line.partition(".")
+        if separator and prefix.isdigit() and remainder.strip():
+            line = remainder.strip()
         if line:
             items.append(line)
     return items
