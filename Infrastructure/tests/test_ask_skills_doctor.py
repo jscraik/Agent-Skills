@@ -14,9 +14,12 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.commands.skills_impl import (  # noqa: E402
     _doctor_sdk_layer_for,
+    _skill_doctor_operation_context,
     _skill_doctor_next_command_decision,
+    _skill_package_operation_context,
     skills_doctor,
     skills_proof,
+    skills_sdk_check,
 )
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 from helpers.schema_validator import (  # noqa: E402
@@ -82,6 +85,55 @@ def _assert_consumer_usable_schema_refs(test_case: unittest.TestCase, schemas: d
 
 
 class TestAskSkillsDoctor(unittest.TestCase):
+    def test_doctor_accepts_legacy_positional_flags(self) -> None:
+        captured: dict[str, object] = {}
+
+        def fake_doctor(_repo_root: Path, _target: str, **options: object) -> CallResult:
+            captured.update(options)
+            return CallResult()
+
+        with patch("ask.commands.skills_impl._skills_doctor", side_effect=fake_doctor):
+            skills_doctor(REPO_ROOT, "autofix", True, True, "source")
+
+        self.assertEqual(captured, {"strict": True, "codex_parity": True, "validation_scope": "source"})
+
+    def test_doctor_merges_legacy_positional_and_keyword_options(self) -> None:
+        captured: dict[str, object] = {}
+
+        def fake_doctor(_repo_root: Path, _target: str, **options: object) -> CallResult:
+            captured.update(options)
+            return CallResult()
+
+        with patch("ask.commands.skills_impl._skills_doctor", side_effect=fake_doctor):
+            skills_doctor(REPO_ROOT, "autofix", True, validation_scope="source")
+
+        self.assertEqual(
+            captured,
+            {"strict": True, "codex_parity": False, "validation_scope": "source"},
+        )
+
+    def test_sdk_check_accepts_legacy_positional_flags(self) -> None:
+        captured: dict[str, object] = {}
+
+        def fake_sdk_check(_repo_root: Path, _target: str, **options: object) -> CallResult:
+            captured.update(options)
+            return CallResult()
+
+        with patch("ask.commands.skills_impl._skills_sdk_check", side_effect=fake_sdk_check):
+            skills_sdk_check(REPO_ROOT, "autofix", True, True)
+
+        self.assertEqual(captured, {"strict": True, "codex_parity": True})
+
+    def test_sdk_check_rejects_unsupported_validation_scope_keyword(self) -> None:
+        with self.assertRaisesRegex(TypeError, "validation_scope"):
+            skills_sdk_check(REPO_ROOT, "autofix", validation_scope="source")
+
+    def test_operation_context_events_are_json_serializable(self) -> None:
+        for context in (_skill_package_operation_context(), _skill_doctor_operation_context()):
+            with self.subTest(primary_profile=context["primary_profile"]):
+                json.dumps(context)
+                self.assertTrue(all(isinstance(event, dict) for event in context["events"].values()))
+
     def test_runtime_target_codex_fails_closed_when_only_agents_runtime_is_ready(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             sandbox = Path(tmp)

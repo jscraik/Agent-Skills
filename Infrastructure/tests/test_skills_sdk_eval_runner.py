@@ -294,6 +294,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(payload["status"], "blocked")
         self.assertEqual(payload["receipt"]["status"], "blocked")
+        self.assertIsNone(payload["receipt"]["dataset_digest"])
         self.assertIn("blocked_missing_artifact:no_scorecard_or_closeout", payload["receipt"]["blockers"])
 
     def test_sdk_internal_runner_passes_codex_profile_override(self) -> None:

@@ -295,12 +295,14 @@ def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResu
 def _dispatch_tessl_local_proof(repo_root: Path, args: argparse.Namespace) -> CallResult:
     return skills_commands.skills_sdk_eval_tessl_local_proof(
         repo_root,
-        skill=args.skill,
-        workspace=args.workspace,
-        execute=args.execute,
-        include_review=args.include_review,
-        review_threshold=args.review_threshold,
-        timeout_seconds=args.timeout_seconds,
+        skills_commands.TesslLocalProofOptions(
+            skill=args.skill,
+            workspace=args.workspace,
+            execute=args.execute,
+            include_review=args.include_review,
+            review_threshold=args.review_threshold,
+            timeout_seconds=args.timeout_seconds,
+        ),
     )
 
 

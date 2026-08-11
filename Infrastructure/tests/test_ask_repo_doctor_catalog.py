@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.repo import doctor_catalog
+from ask.commands.repo import DoctorCatalogOptions, doctor_catalog
 
 
 class TestAskRepoDoctorCatalog(unittest.TestCase):
@@ -69,7 +69,7 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
                 "ask.catalog_parity.get_policy_identity",
                 return_value="0123456789abcdef",
             ):
-                result = doctor_catalog(repo, strict=False)
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=False))
             self.assertEqual(result.status, "error")
             report = result.data["catalog_parity"]
             self.assertEqual(report["schema_version"], "catalog-parity.v1")
@@ -97,7 +97,7 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
                 "ask.catalog_parity.get_policy_identity",
                 return_value="0123456789abcdef",
             ):
-                result = doctor_catalog(repo, strict=True)
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
             self.assertEqual(result.status, "error")
             report = result.data["catalog_parity"]
             self.assertEqual(report["drift_class"], "trend_insufficient_history")

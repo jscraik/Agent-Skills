@@ -7,8 +7,9 @@ This keeps public behavior stable while moving implementation into
 
 from __future__ import annotations
 
+import importlib
+import sys
 from types import ModuleType
-import importlib.util
 from pathlib import Path
 from typing import Any
 
@@ -18,15 +19,17 @@ def _load_impl() -> ModuleType:
         from . import skills_impl as _impl
 
         return _impl
-    except Exception:  # pragma: no cover - fallback when run as a file
-        spec = importlib.util.spec_from_file_location(
-            "skills_impl", Path(__file__).with_name("skills_impl.py")
-        )
-        if not spec or spec.loader is None:
-            raise
-        _impl = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_impl)
-        return _impl
+    except ImportError as relative_import_error:  # pragma: no cover - fallback when run as a file
+        package_root = Path(__file__).resolve().parents[2]
+        if str(package_root) not in sys.path:
+            sys.path.insert(0, str(package_root))
+        try:
+            return importlib.import_module("ask.commands.skills_impl")
+        except ImportError as package_import_error:
+            raise ImportError(
+                "ask.commands.skills could not load skills_impl through relative or package import; "
+                f"relative import failed: {relative_import_error}"
+            ) from package_import_error
 
 
 _impl = _load_impl()
@@ -88,7 +91,7 @@ def _call_impl(name: str, *args, **kwargs):
 
 def resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any], str | None]:
     """Resolve a public skill target for SDK dispatch surfaces."""
-    return _resolve_doctor_target(repo_root, target)
+    return _call_impl("_resolve_doctor_target", repo_root, target)
 
 
 def skills_proof(*args, **kwargs):

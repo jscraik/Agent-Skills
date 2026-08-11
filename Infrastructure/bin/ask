@@ -35,6 +35,7 @@ import ask.commands.skills as skills_commands
 from ask.commands.sdk import add_sdk_parser, dispatch_sdk
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import (
+    DoctorCatalogOptions,
     check_hub_stability,
     doctor_catalog,
     provider_audit,
@@ -318,7 +319,7 @@ def main():
     plugins_uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview uninstallation without making changes")
     plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
     plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
-    plugins_harden_parser.add_argument("--marketplace-path", default=".agents/Plugins/marketplace.json", help="Marketplace manifest path")
+    plugins_harden_parser.add_argument("--marketplace-path", default="Plugins/marketplace.json", help="Marketplace manifest path")
     plugins_harden_parser.add_argument("--skip-compat", action="store_true", help="Skip audit-compat step")
     plugins_harden_parser.add_argument("--skip-marketplace-audit", action="store_true", help="Skip audit-marketplace step")
     plugins_harden_parser.add_argument("--no-require-marketplace", action="store_true", help="Do not require a matching marketplace entry")
@@ -578,7 +579,7 @@ def main():
         elif args.action == "closeout":
             result = repo_closeout(repo_root, changed=args.changed, strict=args.strict)
         elif args.action == "doctor-catalog":
-            result = doctor_catalog(repo_root, strict=args.strict)
+            result = doctor_catalog(repo_root, DoctorCatalogOptions(strict=args.strict))
         elif args.action == "provider-audit":
             result = provider_audit(repo_root)
         elif args.action == "surface":

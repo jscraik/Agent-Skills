@@ -3,10 +3,10 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
 from pathlib import Path
 from types import ModuleType
-import importlib.util
-import sys
 
 
 def _load_impl() -> ModuleType:
@@ -15,21 +15,18 @@ def _load_impl() -> ModuleType:
 
         return _impl
     except Exception:  # pragma: no cover - fallback when executed as a file
-        module_name = "repo_impl_runtime"
-        spec = importlib.util.spec_from_file_location(
-            module_name,
-            Path(__file__).with_name("repo_impl.py"),
-        )
-        if not spec or spec.loader is None:
-            raise
-        _impl = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = _impl
-        spec.loader.exec_module(_impl)
-        return _impl
+        package_root = Path(__file__).resolve().parents[2]
+        command_root = Path(__file__).resolve().parent
+        lifecycle_root = Path(__file__).resolve().parents[3] / "lifecycle-and-sync"
+        for import_root in (package_root, command_root, lifecycle_root):
+            if str(import_root) not in sys.path:
+                sys.path.insert(0, str(import_root))
+        return importlib.import_module("ask.commands.repo_impl")
 
 
 _impl = _load_impl()
 SCRIPT_TIMEOUT_SECONDS = _impl.SCRIPT_TIMEOUT_SECONDS
+DoctorCatalogOptions = _impl.DoctorCatalogOptions
 check_hub_stability = _impl.check_hub_stability
 collect_changed_files = _impl.collect_changed_files
 doctor_catalog = _impl.doctor_catalog
@@ -44,6 +41,7 @@ subprocess = _impl.subprocess
 
 __all__ = [
     "SCRIPT_TIMEOUT_SECONDS",
+    "DoctorCatalogOptions",
     "check_hub_stability",
     "collect_changed_files",
     "doctor_catalog",

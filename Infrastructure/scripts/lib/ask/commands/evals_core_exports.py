@@ -1,0 +1,36 @@
+"""Explicit compatibility exports for the legacy ``evals`` command facade."""
+
+EVALS_CORE_EXPORTS = tuple(
+    """
+    dt json os re shlex signal subprocess sys shutil tempfile hashlib time Mapping Path
+    CallResult ErrorObject _python_command_supports_packages _subprocess_env_with_uv_cache render_skill_review_dashboard normalize_tessl_acceptance_item
+    tessl_eval_quality_findings parse_generated_eval_fixtures build_candidate_identity
+    default_handoff_readiness_path RELEASE_SCENARIO_MAXIMUM RELEASE_SCENARIO_MINIMUM
+    RELEASE_SCENARIO_TARGET release_scenario_set_case_ids _build_tessl_live_eval_view
+    _load_json_file _portable_command_part _sanitize_tessl_live_private_payload _tessl_archive_suffix
+    SKILL_BUILDER_SCRIPTS SMOKE_CASE_TIMEOUT_SECONDS SMOKE_EVAL_TIMEOUT_SECONDS
+    RELEASE_EVAL_TIMEOUT_SECONDS QWEN_OSS_LOCAL_MAX_BATCH_CASES SMOKE_EVAL_MODEL
+    SMOKE_EVAL_PROFILE DEFAULT_MACRO_EVAL_REPORTS_GLOB TESSL_SCENARIO_TOOL_TILE
+    TESSL_SCENARIO_TOOL_VERSION TESSL_DEFAULT_WORKSPACE TESSL_TILE_VERSION_RE
+    TESSL_LIVE_PRIVATE_MIN_SCENARIOS TESSL_LIVE_PRIVATE_TARGET_SCENARIOS
+    TESSL_LIVE_PRIVATE_MAX_SCENARIOS TESSL_LIVE_PRIVATE_VARIANT_COUNT
+    TESSL_LIVE_PRIVATE_MODEL_TASKS_PER_VARIANT TESSL_WORKSPACE_RUN_LIMIT
+    TESSL_WORKSPACE_RUN_LIMIT_SOURCE TESSL_WORKSPACE_RUN_RESERVE TESSL_LIVE_PRIVATE_MIN_SCORE
+    TESSL_LIVE_PRIVATE_TARGET_SCORE TESSL_LOCAL_REVIEW_MIN_SCORE
+    TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS
+    TESSL_PROJECT_LINK_TIMEOUT_SECONDS EVAL_CLOSEOUT_SCHEMA_VERSION EVAL_CLOSEOUT_REQUIRED_FIELDS
+    _pyyaml_eval_python_command _eval_blocker_taxonomy _eval_lifecycle_event_types
+    EVAL_BLOCKER_TAXONOMY EVAL_LIFECYCLE_EVENT_TYPES
+    _qwen_oss_local_batch_blocker _safe_slug _frontmatter_scalar _read_skill_frontmatter
+    _skill_tessl_tile_version _canonical_skill_identifier _utc_now_iso _as_text
+    _parse_json_value_from_text _parse_json_object_from_text _extract_tessl_eval_run_id
+    _score_solution _tessl_solution_failed_criteria _tessl_solution_missing_observable_output
+    _summarize_tessl_live_eval_view _tessl_eval_view_status _tessl_eval_view_failure_reason
+    _tessl_eval_view_has_complete_scores _write_tessl_live_view_evidence
+    _write_tessl_live_submission_evidence _tessl_project_link_receipt_path
+    _write_tessl_project_link_receipt _validate_tessl_project_link_receipt
+    _tessl_live_evidence_file _path_has_symlink_component_under _tessl_evidence_segment
+    _write_tessl_live_evidence_text _archive_existing_tessl_live_evidence
+    _record_tessl_live_evidence_index _collect_tessl_metric_fields _is_discovery_smoke_filter_blocker
+    """.split()
+)
