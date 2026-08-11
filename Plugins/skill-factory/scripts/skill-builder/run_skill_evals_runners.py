@@ -1,6 +1,7 @@
 from run_skill_evals_assertions import *  # noqa: F403
 
 from dataclasses import dataclass
+from typing import TypedDict, Unpack
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,54 @@ class OpenAiExecRequest:
     timeout_sec: Optional[float]
     timeout_profile: str
     extra_openai_args: Optional[List[str]] = None
+
+
+class _CodexExecLegacyOptions(TypedDict, total=False):
+    """Deprecated keyword adapter fields for :func:`run_codex_exec`."""
+
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    output_schema_path: Optional[Path]
+    sandbox: str
+    ask_for_approval: Optional[str]
+    model: Optional[str]
+    profile: Optional[str]
+    codex_home: Optional[Path]
+    jsonl_path: Optional[Path]
+    codex_bin: Optional[Path]
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_codex_args: Optional[List[str]]
+    fallback_profile: Optional[str]
+
+
+class _AltCodexExecLegacyOptions(TypedDict, total=False):
+    """Deprecated keyword adapter fields for :func:`run_alt_codex_exec`."""
+
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    codex_bin: Optional[Path]
+    output_format: str
+    settings_path: Optional[Path]
+    cli_command: Optional[str]
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_codex_args: Optional[List[str]]
+
+
+class _OpenAiExecLegacyOptions(TypedDict, total=False):
+    """Deprecated keyword adapter fields for :func:`run_openai_exec`."""
+
+    workspace_root: Path
+    prompt: str
+    output_last_message_path: Path
+    openai_bin: Optional[Path]
+    output_format: str
+    timeout_sec: Optional[float]
+    timeout_profile: str
+    extra_openai_args: Optional[List[str]]
 
 
 @dataclass
@@ -266,21 +315,8 @@ def _run_codex_exec(request: CodexExecRequest) -> Tuple[int, str, str, List[str]
     Run the Codex CLI `exec` command with the provided prompt and capture outputs and warnings.
 
     Parameters:
-        workspace_root (Path): Working directory for the Codex subprocess.
-        prompt (str): Prompt text supplied to Codex via stdin.
-        output_last_message_path (Path): File path where the CLI's "last message" output will be written.
-        output_schema_path (Optional[Path]): Path to an output schema file to pass via `--output-schema` (if any).
-        sandbox (str): Sandbox name to pass via `--sandbox`.
-        ask_for_approval (Optional[str]): Legacy value for `--ask-for-approval` when supported by the Codex CLI.
-        model (Optional[str]): Model name to pass via `--model`.
-        profile (Optional[str]): Active Codex profile name to pass via `--profile`.
-        codex_home (Optional[Path]): Directory to set as `CODEX_HOME` in the subprocess environment.
-        jsonl_path (Optional[Path]): When provided, the raw CLI stdout is written to this path as JSONL.
-        codex_bin (Optional[Path]): Path to a Codex binary; its parent directory is prepended to `PATH`.
-        timeout_sec (Optional[float]): Explicit timeout in seconds for the subprocess; if omitted, resolved from profile/env.
-        timeout_profile (str): Timeout profile name used when `timeout_sec` is not provided.
-        extra_codex_args (Optional[List[str]]): Additional CLI arguments appended to the command.
-        fallback_profile (Optional[str]): If the first run fails due to unsupported reasoning.summary, retry with this profile.
+        request (CodexExecRequest): Typed execution request. The request dataclass
+            owns workspace, output, transport, profile, and timeout fields.
 
     Returns:
         Tuple[int, str, str, List[str]]: A tuple of `(exit_code, stdout, stderr, warnings)`. `exit_code` may be
@@ -296,22 +332,7 @@ def _run_codex_exec(request: CodexExecRequest) -> Tuple[int, str, str, List[str]
 
 def run_codex_exec(
     request: CodexExecRequest | None = None,
-    *,
-    workspace_root: Path | None = None,
-    prompt: str | None = None,
-    output_last_message_path: Path | None = None,
-    output_schema_path: Path | None = None,
-    sandbox: str | None = None,
-    ask_for_approval: str | None = None,
-    model: str | None = None,
-    profile: str | None = None,
-    codex_home: Path | None = None,
-    jsonl_path: Path | None = None,
-    codex_bin: Path | None = None,
-    timeout_sec: float | None = None,
-    timeout_profile: str | None = None,
-    extra_codex_args: list[str] | None = None,
-    fallback_profile: str | None = None,
+    **legacy_options: Unpack[_CodexExecLegacyOptions],
 ) -> Tuple[int, str, str, List[str]]:
     """
     Run Codex from a typed request; accept legacy keyword arguments during migration.
@@ -319,31 +340,28 @@ def run_codex_exec(
     DEPRECATION: The legacy keyword argument interface is deprecated and will be removed
     in a future version. Use CodexExecRequest dataclass instead.
     """
-    if request is not None and any([
-        workspace_root, prompt, output_last_message_path, output_schema_path, sandbox,
-        ask_for_approval, model, profile, codex_home, jsonl_path, codex_bin,
-        timeout_sec is not None, timeout_profile, extra_codex_args, fallback_profile,
-    ]):
+    if request is not None and legacy_options:
         raise TypeError("pass either CodexExecRequest or legacy keyword arguments, not both")
     if request is None:
-        if workspace_root is None or prompt is None or output_last_message_path is None or sandbox is None or timeout_profile is None:
+        required = ("workspace_root", "prompt", "output_last_message_path", "sandbox", "timeout_profile")
+        if any(legacy_options.get(name) is None for name in required):
             raise TypeError("legacy keyword arguments require workspace_root, prompt, output_last_message_path, sandbox, and timeout_profile")
         resolved = CodexExecRequest(
-            workspace_root=workspace_root,
-            prompt=prompt,
-            output_last_message_path=output_last_message_path,
-            output_schema_path=output_schema_path,
-            sandbox=sandbox,
-            ask_for_approval=ask_for_approval,
-            model=model,
-            profile=profile,
-            codex_home=codex_home,
-            jsonl_path=jsonl_path,
-            codex_bin=codex_bin,
-            timeout_sec=timeout_sec,
-            timeout_profile=timeout_profile,
-            extra_codex_args=extra_codex_args,
-            fallback_profile=fallback_profile,
+            workspace_root=legacy_options["workspace_root"],
+            prompt=legacy_options["prompt"],
+            output_last_message_path=legacy_options["output_last_message_path"],
+            output_schema_path=legacy_options.get("output_schema_path"),
+            sandbox=legacy_options["sandbox"],
+            ask_for_approval=legacy_options.get("ask_for_approval"),
+            model=legacy_options.get("model"),
+            profile=legacy_options.get("profile"),
+            codex_home=legacy_options.get("codex_home"),
+            jsonl_path=legacy_options.get("jsonl_path"),
+            codex_bin=legacy_options.get("codex_bin"),
+            timeout_sec=legacy_options.get("timeout_sec"),
+            timeout_profile=legacy_options["timeout_profile"],
+            extra_codex_args=legacy_options.get("extra_codex_args"),
+            fallback_profile=legacy_options.get("fallback_profile"),
         )
     else:
         resolved = request
@@ -422,17 +440,7 @@ def _run_alt_codex_exec(request: AltCodexExecRequest) -> Tuple[int, str, str]:
 
 def run_alt_codex_exec(
     request: AltCodexExecRequest | None = None,
-    *,
-    workspace_root: Path | None = None,
-    prompt: str | None = None,
-    output_last_message_path: Path | None = None,
-    codex_bin: Path | None = None,
-    output_format: str | None = None,
-    settings_path: Path | None = None,
-    cli_command: str | None = None,
-    timeout_sec: float | None = None,
-    timeout_profile: str | None = None,
-    extra_codex_args: list[str] | None = None,
+    **legacy_options: Unpack[_AltCodexExecLegacyOptions],
 ) -> Tuple[int, str, str]:
     """
     Run the alternate Codex transport from a typed request or legacy keywords.
@@ -440,25 +448,23 @@ def run_alt_codex_exec(
     DEPRECATION: The legacy keyword argument interface is deprecated and will be removed
     in a future version. Use AltCodexExecRequest dataclass instead.
     """
-    if request is not None and any([
-        workspace_root, prompt, output_last_message_path, codex_bin, output_format,
-        settings_path, cli_command, timeout_sec is not None, timeout_profile, extra_codex_args,
-    ]):
+    if request is not None and legacy_options:
         raise TypeError("pass either AltCodexExecRequest or legacy keyword arguments, not both")
     if request is None:
-        if workspace_root is None or prompt is None or output_last_message_path is None or output_format is None or timeout_profile is None:
+        required = ("workspace_root", "prompt", "output_last_message_path", "output_format", "timeout_profile")
+        if any(legacy_options.get(name) is None for name in required):
             raise TypeError("legacy keyword arguments require workspace_root, prompt, output_last_message_path, output_format, and timeout_profile")
         resolved = AltCodexExecRequest(
-            workspace_root=workspace_root,
-            prompt=prompt,
-            output_last_message_path=output_last_message_path,
-            codex_bin=codex_bin,
-            output_format=output_format,
-            settings_path=settings_path,
-            cli_command=cli_command,
-            timeout_sec=timeout_sec,
-            timeout_profile=timeout_profile,
-            extra_codex_args=extra_codex_args,
+            workspace_root=legacy_options["workspace_root"],
+            prompt=legacy_options["prompt"],
+            output_last_message_path=legacy_options["output_last_message_path"],
+            codex_bin=legacy_options.get("codex_bin"),
+            output_format=legacy_options["output_format"],
+            settings_path=legacy_options.get("settings_path"),
+            cli_command=legacy_options.get("cli_command"),
+            timeout_sec=legacy_options.get("timeout_sec"),
+            timeout_profile=legacy_options["timeout_profile"],
+            extra_codex_args=legacy_options.get("extra_codex_args"),
         )
     else:
         resolved = request
@@ -510,15 +516,7 @@ def _run_openai_exec(request: OpenAiExecRequest) -> Tuple[int, str, str]:
 
 def run_openai_exec(
     request: OpenAiExecRequest | None = None,
-    *,
-    workspace_root: Path | None = None,
-    prompt: str | None = None,
-    output_last_message_path: Path | None = None,
-    openai_bin: Path | None = None,
-    output_format: str | None = None,
-    timeout_sec: float | None = None,
-    timeout_profile: str | None = None,
-    extra_openai_args: list[str] | None = None,
+    **legacy_options: Unpack[_OpenAiExecLegacyOptions],
 ) -> Tuple[int, str, str]:
     """
     Run the OpenAI transport from a typed request or legacy keywords.
@@ -526,23 +524,21 @@ def run_openai_exec(
     DEPRECATION: The legacy keyword argument interface is deprecated and will be removed
     in a future version. Use OpenAiExecRequest dataclass instead.
     """
-    if request is not None and any([
-        workspace_root, prompt, output_last_message_path, openai_bin, output_format,
-        timeout_sec is not None, timeout_profile, extra_openai_args,
-    ]):
+    if request is not None and legacy_options:
         raise TypeError("pass either OpenAiExecRequest or legacy keyword arguments, not both")
     if request is None:
-        if workspace_root is None or prompt is None or output_last_message_path is None or output_format is None or timeout_profile is None:
+        required = ("workspace_root", "prompt", "output_last_message_path", "output_format", "timeout_profile")
+        if any(legacy_options.get(name) is None for name in required):
             raise TypeError("legacy keyword arguments require workspace_root, prompt, output_last_message_path, output_format, and timeout_profile")
         resolved = OpenAiExecRequest(
-            workspace_root=workspace_root,
-            prompt=prompt,
-            output_last_message_path=output_last_message_path,
-            openai_bin=openai_bin,
-            output_format=output_format,
-            timeout_sec=timeout_sec,
-            timeout_profile=timeout_profile,
-            extra_openai_args=extra_openai_args,
+            workspace_root=legacy_options["workspace_root"],
+            prompt=legacy_options["prompt"],
+            output_last_message_path=legacy_options["output_last_message_path"],
+            openai_bin=legacy_options.get("openai_bin"),
+            output_format=legacy_options["output_format"],
+            timeout_sec=legacy_options.get("timeout_sec"),
+            timeout_profile=legacy_options["timeout_profile"],
+            extra_openai_args=legacy_options.get("extra_openai_args"),
         )
     else:
         resolved = request
