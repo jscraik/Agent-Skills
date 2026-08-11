@@ -414,7 +414,7 @@ class EvalRunReceipt(_SdkContractModel):
     status: Literal["pass", "fail", "blocked"]
     runner: Literal["deterministic_jsonl_v0", "internal_skill_builder_v0"]
     dataset_path: str = Field(min_length=1)
-    dataset_digest: str = Field(min_length=71)
+    dataset_digest: str | None = Field(min_length=71)
     skill_ir_schema_version: str | None
     package_id: str | None = Field(default=None, min_length=1)
     package_digest: str | None = Field(default=None, min_length=71)
@@ -446,6 +446,12 @@ class EvalRunReceipt(_SdkContractModel):
     acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
         min_length=1
     )
+
+    @model_validator(mode="after")
+    def _require_dataset_digest_for_final_status(self) -> EvalRunReceipt:
+        if self.status in {"pass", "fail"} and self.dataset_digest is None:
+            raise ValueError("dataset_digest is required for pass and fail eval receipts")
+        return self
 
 
 class SandboxCommandRule(_SdkContractModel):

@@ -5,7 +5,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+from ask.commands.skills_impl import init_skill
 from helpers.schema_validator import _validate_schema_subset
 
 
@@ -142,6 +144,23 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             payload (dict): The receipt JSON object to validate.
         """
         _validate_schema_subset(self.schema, payload, self.schemas)
+
+    def test_init_skill_normalizes_scaffold_startup_failures(self) -> None:
+        for error in (OSError("python missing"), subprocess.TimeoutExpired(["python3"], 60)):
+            with self.subTest(error=type(error).__name__), patch(
+                "ask.commands.skills_impl.subprocess.run",
+                side_effect=error,
+            ):
+                result = init_skill(
+                    REPO_ROOT,
+                    "test-scaffold-skill",
+                    "agent-ops",
+                    "Test skill used to prove scaffold startup failures are structured.",
+                )
+
+            self.assertEqual(result.status, "error")
+            self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
+            self.assertIn("could not complete", result.errors[0].message)
 
     def test_status_accepts_empty_marked_project_without_writing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -349,9 +368,9 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
 
     def test_status_blocks_on_missing_lockfile_with_installed_evidence(self) -> None:
         """
-        Verify that when skills.lock.json is missing but installed evidence exists, status reports missing_with_installed_evidence and fails.
+        Verify that when skills.lock.json is missing but installed evidence exists, status reports missing_with_installed_evidence and blocks.
 
-        Installs a skill, removes the lockfile while leaving receipts and installed files, then asserts the command exits with code 2, lockfile_status is "missing_with_installed_evidence", and conformance status is "fail".
+        Installs a skill, removes the lockfile while leaving receipts and installed files, then asserts the command exits with code 2, lockfile_status is "missing_with_installed_evidence", and conformance status is "blocked".
         """
         with tempfile.TemporaryDirectory() as tmp:
             project_root = _marked_project(Path(tmp))
@@ -375,7 +394,7 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             receipt = payload["data"]["skills_sdk_project_conformance"]["receipt"]
             self.assert_receipt_valid(receipt)
             self.assertEqual(receipt["lockfile_status"], "missing_with_installed_evidence")
-            self.assertEqual(receipt["status"], "fail")
+            self.assertEqual(receipt["status"], "blocked")
 
 
 if __name__ == "__main__":

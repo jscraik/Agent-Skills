@@ -143,23 +143,27 @@ def _dispatch_create(repo_root: Path, args: argparse.Namespace) -> CallResult:
     ]
     return skills_commands.skills_sdk_plugin_create(
         repo_root,
-        kind=args.kind,
-        name=args.name,
-        category=args.category,
-        description=args.description,
-        with_registry=args.with_registry,
-        companion_folders=companion,
-        apply=args.apply,
+        skills_commands.SkillsSdkPluginCreateRequest(
+            kind=args.kind,
+            name=args.name,
+            category=args.category,
+            description=args.description,
+            with_registry=args.with_registry,
+            companion_folders=companion,
+            apply=args.apply,
+        ),
     )
 
 
 def _dispatch_review(repo_root: Path, args: argparse.Namespace) -> CallResult:
     return skills_commands.skills_sdk_plugin_review(
         repo_root,
-        kind=args.kind,
-        target=args.target,
-        strict=args.strict,
-        execute=args.execute,
+        skills_commands.SkillsSdkPluginReviewRequest(
+            kind=args.kind,
+            target=args.target,
+            strict=args.strict,
+            execute=args.execute,
+        ),
     )
 
 

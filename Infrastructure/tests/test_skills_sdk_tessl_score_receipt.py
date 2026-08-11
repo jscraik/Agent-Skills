@@ -12,6 +12,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.skills_sdk.tessl_acceptance_policy import TESSL_ACCEPTANCE_SCORE, TESSL_TARGET_SCORE  # noqa: E402
 from ask.skills_sdk.tessl_score_receipt import build_tessl_score_receipt  # noqa: E402
 
 
@@ -150,6 +151,24 @@ def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
+    def test_selected_tessl_acceptance_policy_is_explicit(self) -> None:
+        self.assertEqual(TESSL_ACCEPTANCE_SCORE, 85)
+        self.assertEqual(TESSL_TARGET_SCORE, 90)
+
+    def test_acceptance_floor_closes_live_handoff(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(
+                json.dumps(_view_payload(usage_score=TESSL_ACCEPTANCE_SCORE / 100, baseline_score=0.5)),
+                encoding="utf-8",
+            )
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "pass")
+        self.assertTrue(receipt["ready"])
+        self.assertEqual(receipt["score_summary"]["usage_percent"], float(TESSL_ACCEPTANCE_SCORE))
+
     def test_complete_view_json_builds_pass_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "view.json"

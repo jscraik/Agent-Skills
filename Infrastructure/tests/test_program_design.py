@@ -27,6 +27,11 @@ def _load_validator() -> ModuleType:
 
 
 class TestProgramDesign(unittest.TestCase):
+    def test_exact_move_baseline_handles_invalid_current_source(self) -> None:
+        validator = _load_validator()
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+        self.assertIsNone(validator._exact_move_baseline(path, "def broken(:\n", "origin/main"))
+
     def test_new_public_interface_with_six_parameters_is_rejected(self) -> None:
         validator = _load_validator()
         issues = validator._check_source(
@@ -376,6 +381,68 @@ class Factory:
         with self.assertRaises(validator.BaselineUnavailable):
             validator._validate_baseline_ref("not-a-real-revision")
 
+    def test_exact_helper_extraction_reuses_baseline_design_metrics(self) -> None:
+        validator = _load_validator()
+        original = """CACHE = {}
+
+def publish(a, b, c, d, e, f, enabled=False):
+    try:
+        return enabled
+    except Exception:
+        return None
+"""
+        extracted = """from original import dependency
+
+__all__ = ["publish"]
+
+def publish(a, b, c, d, e, f, enabled=False):
+    try:
+        return enabled
+    except Exception:
+        return None
+"""
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertEqual(
+                validator._exact_move_baseline(path, extracted, "origin/main"),
+                extracted,
+            )
+
+    def test_changed_helper_body_is_not_treated_as_an_exact_move(self) -> None:
+        validator = _load_validator()
+        original = """def publish(value):
+    return value
+"""
+        changed = """def publish(value):
+    return str(value)
+"""
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertIsNone(validator._exact_move_baseline(path, changed, "origin/main"))
+
+    def test_exact_helper_extraction_ignores_docstring_layout_cleanup(self) -> None:
+        validator = _load_validator()
+        original = 'def publish(value):\n    """\n    \tReturn the supplied value.   \n    """\n    return value\n'
+        extracted = 'def publish(value):\n    """\n        Return the supplied value.\n    """\n    return value\n'
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertEqual(
+                validator._exact_move_baseline(path, extracted, "origin/main"),
+                extracted,
+            )
+
+    def test_exact_helper_extraction_keeps_docstring_content_significant(self) -> None:
+        validator = _load_validator()
+        original = 'def publish(value):\n    """Return the supplied value."""\n    return value\n'
+        changed = 'def publish(value):\n    """Return a converted value."""\n    return value\n'
+        path = validator.REPO_ROOT / "Infrastructure/scripts/example_helper.py"
+
+        with mock.patch.object(validator, "_baseline_sibling_sources", return_value=(original,)):
+            self.assertIsNone(validator._exact_move_baseline(path, changed, "origin/main"))
+
     def test_staged_source_uses_head_as_default_baseline(self) -> None:
         validator = _load_validator()
         self.assertEqual(validator._default_baseline_ref(staged_source=True), "HEAD")
@@ -547,7 +614,24 @@ class Factory:
             paths = validator._changed_paths((relpath,), staged_source=True)
 
         self.assertEqual(paths, [path])
-        source_text.assert_called_once_with(path, staged_source=True)
+        source_text.assert_called_once_with(path, staged_source=True, source_ref=None)
+
+    def test_excluded_path_skips_source_revision_lookup(self) -> None:
+        validator = _load_validator()
+        relpath = "Infrastructure/references/fixtures/retired/evals.yaml"
+        path = validator.REPO_ROOT / relpath
+
+        with mock.patch.object(validator, "_current_source_text") as source_text:
+            selected = validator._is_changed_production_python(
+                relpath,
+                path,
+                frozenset(),
+                staged_source=False,
+                source_ref="HEAD",
+            )
+
+        self.assertFalse(selected)
+        source_text.assert_not_called()
 
     def test_extensionless_python_entrypoint_is_selected(self) -> None:
         validator = _load_validator()

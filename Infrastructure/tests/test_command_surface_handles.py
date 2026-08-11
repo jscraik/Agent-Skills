@@ -65,6 +65,15 @@ def _link_flat_projection(repo_root: Path, handle: str, source_dir: Path) -> Pat
 
 
 class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
+    def test_skills_handles_accepts_legacy_positional_flags(self) -> None:
+        result = skills_handles(REPO_ROOT, True, False, False, False, True)
+
+        report = result.data["sdk_handles"]
+        self.assertEqual(result.status, "success")
+        self.assertIn("--check", report["validation_commands"][0])
+        self.assertIn("--dry-run", report["validation_commands"][0])
+        self.assertIn("--no-handles", report["validation_commands"][0])
+
     def test_resolution_rejects_retired_skill_handles(self) -> None:
         payload = command_surface.resolve_skill_handle("he-heartbeat", repo_root_path=REPO_ROOT)
 

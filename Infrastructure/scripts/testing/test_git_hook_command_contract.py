@@ -27,7 +27,6 @@ ROOT_PREK_EXPECTED = {
 INFRASTRUCTURE_PREK_EXPECTED = {
     "pre-commit": "bash ../scripts/hooks/pre-commit.sh",
     "commit-msg": "bash ../scripts/hooks/commit-msg.sh",
-    "pre-push": "bash ../scripts/hooks/pre-push.sh",
 }
 SIMPLE_GIT_HOOKS_EXPECTED = {
     "pre-commit": "bash scripts/hooks/pre-commit.sh",

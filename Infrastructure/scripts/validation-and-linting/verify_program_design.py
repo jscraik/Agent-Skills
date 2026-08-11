@@ -23,6 +23,7 @@ import argparse
 import ast
 import os
 import subprocess
+import sys
 from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -31,6 +32,10 @@ from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 
+_SCRIPT_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPT_DIR)
+import program_design_exact_moves as _exact_moves  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MAX_PUBLIC_PARAMETERS = 5
@@ -85,8 +90,7 @@ class DesignMetrics:
     mutable_module_state: tuple[Finding, ...]
 
 
-class BaselineUnavailable(RuntimeError):
-    """Raised when the requested Git baseline cannot be inspected."""
+BaselineUnavailable = _exact_moves.MoveBaselineUnavailable
 
 
 def parse_args() -> argparse.Namespace:
@@ -521,6 +525,16 @@ def _git_revision_text(path: Path, revision: str) -> str | None:
     return result.stdout
 
 
+def _baseline_sibling_sources(revision: str, parent: str) -> tuple[str, ...]:
+    return _exact_moves.baseline_sibling_sources(revision, parent, REPO_ROOT)
+
+
+def _exact_move_baseline(path: Path, current_text: str, revision: str) -> str | None:
+    return _exact_moves.exact_move_baseline(
+        path, current_text, revision, repo_root=REPO_ROOT, baseline_sources=_baseline_sibling_sources
+    )
+
+
 def _check_waiver_metadata(
     waivers: Mapping[str, Mapping[str, str]] | None,
     *,
@@ -634,16 +648,16 @@ def _is_changed_production_python(
     staged_source: bool,
     source_ref: str | None,
 ) -> bool:
+    parts = Path(normalized).parts
+    if not normalized.startswith(PRODUCTION_PREFIXES) or normalized.startswith("Plugins/cache/") or set(parts) & EXCLUDED_PARTS or any(part.startswith("test_") for part in parts):
+        return False
     is_staged = normalized in staged_paths
     if not path.is_file() and not is_staged and source_ref is None:
         return False
     source_text = None
     if not normalized.endswith((".py", ".pyw")):
         try:
-            if source_ref is None:
-                source_text = _current_source_text(path, staged_source=staged_source)
-            else:
-                source_text = _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
+            source_text = _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
         except UnicodeDecodeError:
             source_text = ""
     return _is_production_python(normalized, path=path, source_text=source_text)
@@ -722,15 +736,16 @@ def _scan_paths(
     paths = _changed_paths(changed_files, staged_source=staged_source, source_ref=source_ref)
     for path in paths:
         relpath = path.relative_to(REPO_ROOT).as_posix()
+        current_text = _current_source_text(
+            path, staged_source=staged_source, source_ref=source_ref
+        )
         baseline_text = _git_revision_text(path, baseline_ref)
+        if baseline_text is None:
+            baseline_text = _exact_move_baseline(path, current_text, baseline_ref)
         issues.extend(
             _check_source(
                 relpath,
-                (
-                    _current_source_text(path, staged_source=staged_source)
-                    if source_ref is None
-                    else _current_source_text(path, staged_source=staged_source, source_ref=source_ref)
-                ),
+                current_text,
                 baseline_text,
                 max_public_parameters=max_public_parameters,
             )

@@ -130,7 +130,7 @@ def test_codex_profile_runner_ignores_base_user_config_while_preserving_profile(
 
 def test_codex_help_probe_runs_in_isolated_session() -> None:
     runner = _load_runner_module()
-    runner._CODEX_HELP_CACHE.clear()
+    runner._codex_help_text.cache_clear()
     fake_proc = mock.Mock(returncode=0, stdout="--profile\n", stderr="")
 
     with mock.patch.object(runner.sp, "run", return_value=fake_proc) as mocked_run:

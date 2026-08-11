@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.handoff_readiness import build_candidate_identity, build_handoff_readiness_receipt  # noqa: E402
 from ask.skills_sdk.handoff_readiness_contracts import validate_handoff_readiness_receipt  # noqa: E402
+from ask.skills_sdk.tessl_acceptance_policy import TESSL_ACCEPTANCE_SCORE  # noqa: E402
 
 
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
@@ -85,21 +86,24 @@ def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
 def _readiness_lane_command(lane_id: str) -> str:
     commands = {
         "mechanical_validation": (
-            "./bin/ask skills audit Skills/example --level strict --json --robot && "
+            "./bin/ask skills audit Skills/example --level strict --source-only --json --robot && "
             "./bin/ask skills package verify Skills/example --json --robot"
         ),
         "security_risk_modes": "./bin/ask sdk security risk-modes Skills/example --preview --json --robot",
         "scenario_quality": "./bin/ask sdk eval scenario-quality Skills/example --preview --json --robot",
         "scorer_quality": "./bin/ask sdk eval scorer-quality Skills/example --preview --json --robot",
         "scorer_calibration": "./bin/ask sdk eval scorer-calibration Skills/example --preview --json --robot",
-        "deterministic_local_gates": "./bin/ask sdk eval run Skills/example --runner internal --mode smoke --json --robot",
+        "deterministic_local_gates": (
+            "./bin/ask sdk eval run Skills/example --runner internal --mode smoke "
+            "--codex-profile oss-local --json --robot"
+        ),
         "oss-local": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode smoke --codex-profile oss-local --json --robot"
+            "--mode release --codex-profile oss-local --json --robot"
         ),
         "oss-cloud": (
             "./bin/ask sdk eval run Skills/example --runner internal "
-            "--mode smoke --codex-profile oss-cloud --json --robot"
+            "--mode release --codex-profile oss-cloud --json --robot"
         ),
         "tessl-local-proof": (
             "./bin/ask sdk eval tessl-local-proof --skill Skills/example "
@@ -145,7 +149,7 @@ def _write_tessl_score_receipt(
     *,
     feedback_status: str = "closed",
     regressions: list[dict[str, object]] | None = None,
-    usage_percent: float = 95.0,
+    usage_percent: float = 90.0,
     scenario_count: int = 3,
 ) -> Path:
     regressions = regressions or []
@@ -154,7 +158,7 @@ def _write_tessl_score_receipt(
             "data": {
                 "skills_sdk_eval_tessl_score": {
                     "status": "preview",
-                    "ready": not regressions and feedback_status != "open" and usage_percent >= 90.0,
+                    "ready": not regressions and feedback_status != "open" and usage_percent >= TESSL_ACCEPTANCE_SCORE,
                     "receipt": {
                         "status": "preview",
                         "blocker_class": None,
@@ -186,7 +190,7 @@ def _write_raw_tessl_score_receipt(path: Path, *, scenario_count: int = 3) -> Pa
             "feedback_loop": {"status": "closed", "regression_count": 0},
             "score_summary": {
                 "scenario_count": scenario_count,
-                "usage_percent": 95.0,
+                "usage_percent": 90.0,
                 "baseline_percent": 70.0,
                 "regressions": [],
             },
@@ -215,7 +219,10 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
     def test_complete_readiness_artifact_allows_live_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             readiness_path = _write_readiness_bundle(Path(temp_dir))
-            tessl_score = _write_tessl_score_receipt(Path(temp_dir) / "tessl-score.json")
+            tessl_score = _write_tessl_score_receipt(
+                Path(temp_dir) / "tessl-score.json",
+                usage_percent=float(TESSL_ACCEPTANCE_SCORE),
+            )
             receipt = build_handoff_readiness_receipt(
                 REPO_ROOT,
                 source_path=REPO_ROOT / FIXTURE_SKILL,
@@ -227,7 +234,7 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertEqual(receipt["status"], "preview")
         self.assertTrue(receipt["ready_for_live_tessl"])
         self.assertEqual(receipt["blockers"], [])
-        self.assertEqual(receipt["tessl_score_summary"]["usage_percent"], 95.0)
+        self.assertEqual(receipt["tessl_score_summary"]["usage_percent"], float(TESSL_ACCEPTANCE_SCORE))
         validate_handoff_readiness_receipt(receipt)
 
     def test_handoff_readiness_blocks_open_tessl_feedback_loop(self) -> None:
@@ -271,11 +278,14 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertIn("tessl_baseline_wins_absent", {blocker["id"] for blocker in receipt["blockers"]})
         validate_handoff_readiness_receipt(receipt)
 
-    def test_handoff_readiness_blocks_sub_90_tessl_usage(self) -> None:
+    def test_handoff_readiness_blocks_sub_acceptance_tessl_usage(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             readiness_path = _write_readiness_bundle(temp_path)
-            tessl_score = _write_tessl_score_receipt(temp_path / "tessl-score.json", usage_percent=89.9)
+            tessl_score = _write_tessl_score_receipt(
+                temp_path / "tessl-score.json",
+                usage_percent=float(TESSL_ACCEPTANCE_SCORE) - 0.1,
+            )
             receipt = build_handoff_readiness_receipt(
                 REPO_ROOT,
                 source_path=REPO_ROOT / FIXTURE_SKILL,

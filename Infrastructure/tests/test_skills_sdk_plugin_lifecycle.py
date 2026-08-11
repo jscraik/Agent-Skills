@@ -13,10 +13,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import (  # noqa: E402
+    SkillsSdkPluginCreateRequest,
+    SkillsSdkPluginReviewRequest,
     skills_sdk_plugin_install,
     skills_sdk_plugin_create,
     skills_sdk_plugin_save_registry,
 )
+from ask.commands.skills_impl_sdk_calibration import _sdk_plugin_review_command  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -75,12 +78,10 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
     def test_create_preview_routes_single_skill_without_writing(self) -> None:
         result = skills_sdk_plugin_create(
             REPO_ROOT,
-            kind="skill",
-            name="demo-skill",
-            category="agent-ops",
-            description="Demo skill",
-            with_registry=True,
-            apply=False,
+            SkillsSdkPluginCreateRequest(
+                kind="skill", name="demo-skill", category="agent-ops", description="Demo skill",
+                with_registry=True, companion_folders=[], apply=False,
+            ),
         )
 
         payload = result.data["skills_sdk_plugin_create"]
@@ -90,16 +91,18 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
         self.assertFalse(payload["mutation_performed"])
         self.assertEqual(payload["first_principles_gate"]["artifact_decision"], "IMPROVE_EXISTING")
         self.assertTrue(any("ask skills init" in command for command in payload["planned_commands"]))
+        replay = payload["planned_commands"][-1]
+        self.assertIn("--description", replay)
+        self.assertIn("Demo skill", replay)
+        self.assertIn("--with-registry", replay)
 
     def test_create_preview_routes_plugin_with_registry_without_writing(self) -> None:
         result = skills_sdk_plugin_create(
             REPO_ROOT,
-            kind="plugin",
-            name="demo-plugin",
-            category="third-party",
-            with_registry=True,
-            companion_folders=["references"],
-            apply=False,
+            SkillsSdkPluginCreateRequest(
+                kind="plugin", name="demo-plugin", category="third-party", description=None,
+                with_registry=True, companion_folders=["references"], apply=False,
+            ),
         )
 
         payload = result.data["skills_sdk_plugin_create"]
@@ -108,6 +111,19 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
         self.assertEqual(payload["kind"], "plugin")
         self.assertFalse(payload["mutation_performed"])
         self.assertTrue(any("ask plugins create" in command for command in payload["planned_commands"]))
+        replay = payload["planned_commands"][-1]
+        self.assertIn("--with-registry", replay)
+        self.assertIn("--with-references", replay)
+
+    def test_review_replay_retains_strict_mode(self) -> None:
+        replay = _sdk_plugin_review_command(
+            SkillsSdkPluginReviewRequest(
+                kind="skill", target="Skills/agent-ops/demo-skill", strict=True, execute=True
+            )
+        )
+
+        self.assertIn("--strict", replay)
+        self.assertIn("--execute", replay)
 
     def test_save_registry_apply_writes_skill_registry(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

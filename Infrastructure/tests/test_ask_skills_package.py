@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 # noqa: E402: test-only Infrastructure imports after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.commands import skills_impl  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 from helpers.ask_skills_package_fixtures import (  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
@@ -22,6 +23,32 @@ from helpers.ask_skills_package_fixtures import (  # noqa: E402  # test-only Inf
 
 
 class TestAskSkillsPackage(unittest.TestCase):
+    def test_package_accepts_legacy_positional_strict_flag(self) -> None:
+        expected = object()
+        with patch.object(skills_impl, "_skills_package", return_value=expected) as package:
+            result = skills_package(REPO_ROOT, "example-skill", True)
+
+        self.assertIs(result, expected)
+        package.assert_called_once_with(
+            REPO_ROOT,
+            "example-skill",
+            strict=True,
+            checkout_test=False,
+        )
+
+    def test_package_merges_legacy_positional_and_keyword_options(self) -> None:
+        expected = object()
+        with patch.object(skills_impl, "_skills_package", return_value=expected) as package:
+            result = skills_package(REPO_ROOT, "example-skill", True, checkout_test=True)
+
+        self.assertIs(result, expected)
+        package.assert_called_once_with(
+            REPO_ROOT,
+            "example-skill",
+            strict=True,
+            checkout_test=True,
+        )
+
     def test_package_verify_blocks_weak_skill_writing_quality(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

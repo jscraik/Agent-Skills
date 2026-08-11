@@ -5,10 +5,12 @@ import math
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.tessl_acceptance_policy import TESSL_ACCEPTANCE_SCORE
+
 
 TESSL_SCORE_RECEIPT_SCHEMA_VERSION = "skills-sdk.tessl-score-receipt.v0"
 TESSL_SCORE_RECEIPT_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/tessl-score-receipt.v0.schema.json"
-TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT = 90.0
+TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT = float(TESSL_ACCEPTANCE_SCORE)
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:

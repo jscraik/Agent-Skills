@@ -1,3 +1,4 @@
+import importlib
 import json
 import subprocess
 import sys
@@ -10,20 +11,114 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import (  # noqa: E402
-    _safe_tessl_staging_path,
-    _subprocess_env_with_uv_cache,
-    _summarize_family_benchmark_failure,
-    _write_tessl_plugin_wrapper,
-    audit_skill,
-    external_review_skill,
-    install_skill,
-)
-from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
+skills_impl = importlib.import_module("ask.commands.skills_impl")
+skills_impl_catalog = importlib.import_module("ask.commands.skills_impl_catalog")
+skills_impl_core = importlib.import_module("ask.commands.skills_impl_core")
+_safe_tessl_staging_path = skills_impl._safe_tessl_staging_path
+_redacted_url = skills_impl._redacted_url
+_subprocess_env_with_uv_cache = skills_impl._subprocess_env_with_uv_cache
+_summarize_family_benchmark_failure = skills_impl._summarize_family_benchmark_failure
+_write_tessl_plugin_wrapper = skills_impl._write_tessl_plugin_wrapper
+audit_skill = skills_impl.audit_skill
+external_review_skill = skills_impl.external_review_skill
+install_skill = skills_impl.install_skill
+skills_budget = skills_impl.skills_budget
+render_skill_review_dashboard = importlib.import_module(
+    "ask.skill_review_dashboard"
+).render_skill_review_dashboard
 
 
 def _completed(args, stdout, *, returncode=0, stderr=""):
     return subprocess.CompletedProcess(args=args, returncode=returncode, stdout=stdout, stderr=stderr)
+
+
+def test_validation_timeout_retains_decoded_output() -> None:
+    timeout = subprocess.TimeoutExpired(
+        cmd=["fixture-check"], timeout=1, output=b"partial\xff", stderr=b"slow\xff"
+    )
+
+    with patch.object(skills_impl_core.subprocess, "run", side_effect=timeout):
+        result = skills_impl_core._run_validation_command(
+            repo_root, ["fixture-check"], "fixture", "Fixture validation failed.", timeout=1
+        )
+
+    payload = json.loads(result.to_json())
+    assert payload["data"]["fixture"]["stdout"] == "partial\ufffd"
+    assert payload["data"]["fixture"]["stderr"] == "slow\ufffd\nvalidation command timed out after 1 seconds"
+
+
+def test_install_skill_accepts_legacy_positional_remediate_flag() -> None:
+    expected = object()
+    with patch.object(skills_impl, "_install_skill", return_value=expected) as install:
+        result = install_skill(repo_root, "https://example.invalid/demo.git", True)
+
+    assert result is expected
+    install.assert_called_once_with(
+        repo_root,
+        "https://example.invalid/demo.git",
+        remediate=True,
+        dest="Skills/github",
+        dry_run=False,
+    )
+
+
+def test_install_skill_merges_legacy_positional_and_keyword_options() -> None:
+    expected = object()
+    with patch.object(skills_impl, "_install_skill", return_value=expected) as install:
+        result = install_skill(
+            repo_root, "https://example.invalid/demo.git", True, dest="Skills/agent-ops", dry_run=True
+        )
+
+    assert result is expected
+    install.assert_called_once_with(
+        repo_root,
+        "https://example.invalid/demo.git",
+        remediate=True,
+        dest="Skills/agent-ops",
+        dry_run=True,
+    )
+
+
+def test_redacted_url_covers_any_scheme_and_userinfo_shape() -> None:
+    cases = {
+        "https://user:password@example.invalid/repo.git": "https://<REDACTED>@example.invalid/repo.git",
+        "ssh://token@example.invalid/repo.git": "ssh://<REDACTED>@example.invalid/repo.git",
+        "git+https://token@example.invalid/repo.git": "git+https://<REDACTED>@example.invalid/repo.git",
+        "https://example.invalid/path@literal": "https://example.invalid/path@literal",
+    }
+
+    for raw, expected in cases.items():
+        assert _redacted_url(raw) == expected
+
+
+def test_builder_module_cache_is_qualified_by_resolved_path() -> None:
+    with tempfile.TemporaryDirectory() as first_dir, tempfile.TemporaryDirectory() as second_dir:
+        first_root, second_root = Path(first_dir), Path(second_dir)
+        (first_root / "builder.py").write_text("VALUE = 'first'\n", encoding="utf-8")
+        (second_root / "builder.py").write_text("VALUE = 'second'\n", encoding="utf-8")
+        with patch.object(
+            skills_impl_catalog, "_resolve_skill_builder_script", return_value="builder.py"
+        ):
+            first = skills_impl_catalog._load_builder_module(first_root, "fixture")
+            second = skills_impl_catalog._load_builder_module(second_root, "fixture")
+
+    assert first is not None and first.VALUE == "first"
+    assert second is not None and second.VALUE == "second"
+
+
+def test_skills_budget_returns_structured_timeout() -> None:
+    timeout = subprocess.TimeoutExpired(
+        cmd=["budget"], timeout=600, output=b"partial", stderr=b"hung"
+    )
+    with (
+        patch("ask.commands.skills_impl._get_python_command", return_value=["python3"]),
+        patch("ask.commands.skills_impl.subprocess.run", side_effect=timeout),
+    ):
+        result = skills_budget(repo_root)
+
+    assert result.status == "error"
+    assert result.errors[0].code == "ERR_TIMEOUT"
+    assert result.data["runtime_budget"]["stdout"] == "partial"
 
 
 def _write_skill_fixture(repo_root, skill_dir):
@@ -42,6 +137,44 @@ def _successful_audit(data):
 
 def _external_tool_path(name):
     return f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl", "snyk"} else None
+
+
+class SkillReviewDashboardImportTests(unittest.TestCase):
+    def test_facade_defers_renderer_import_until_rendering(self) -> None:
+        """The public dashboard module must keep renderer loading lazy."""
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys; "
+                    "sys.path.insert(0, sys.argv[1]); "
+                    "from ask.skill_review_dashboard import render_skill_review_dashboard; "
+                    "assert callable(render_skill_review_dashboard); "
+                    "assert 'ask.skill_review_dashboard_render' not in sys.modules, "
+                    "'dashboard facade imported the renderer eagerly'"
+                ),
+                str(repo_root / "Infrastructure" / "scripts" / "lib"),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class CommandFacadeScriptModeTests(unittest.TestCase):
+    def test_refactored_facades_remain_importable_as_scripts(self) -> None:
+        """File-mode facades must retain package context for relative imports."""
+        for command in ("skills.py", "repo.py"):
+            result = subprocess.run(
+                [sys.executable, str(repo_root / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / command)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, f"{command}: {result.stderr}")
 
 
 def _run_snyk_review(mock_run, mock_which, mock_audit, *, snyk_result, returncode=0, stderr="", skill_dir="Skills/backend-platform/example-skill"):
@@ -201,6 +334,20 @@ class TestAskSkillsErrors(unittest.TestCase):
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")
+    def test_audit_skill_stops_after_diagnostics_fail(self, mock_run, _mock_python):
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=2, stdout="invalid target", stderr="missing SKILL.md"
+        )
+
+        result = audit_skill(repo_root=repo_root, skill_path="backend/cli-spec", level="strict")
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("Structural diagnostics failed", result.errors[0].message)
+        self.assertEqual(mock_run.call_count, 1)
+
+    @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_audit_skill_strict_includes_family_failure_context(self, mock_run, _mock_python):
         family_stdout = "\n".join([
             "[family-benchmark] failures:",
@@ -286,6 +433,27 @@ class TestAskSkillsErrors(unittest.TestCase):
         for call in mock_run.call_args_list:
             self.assertIn("Skills/agent-ops/autofix", call.args[0])
             self.assertNotIn("autofix", call.args[0][2:])
+
+    @patch("ask.commands.skills_impl.subprocess.run")
+    def test_install_skill_returns_structured_timeout(self, mock_run):
+        timeout = subprocess.TimeoutExpired(
+            cmd=["installer"], timeout=600, output=b"partial", stderr=b"hung"
+        )
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(
+                args=[], returncode=0, stdout="usage: installer --validation-level", stderr=""
+            ),
+            timeout,
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "github").mkdir()
+            with patch("ask.commands.skills_impl._get_python_command", return_value=["python3"]):
+                result = install_skill(root, "https://example.com/example.git", dest="github")
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_TIMEOUT")
+        self.assertEqual(result.data["install_process"]["stdout"], "partial")
 
     @patch("ask.commands.skills_impl.subprocess.run")
     def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run):
@@ -477,7 +645,6 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
-        skill_dir = "Skills/backend-platform/example-skill"
         result = _run_snyk_review(mock_run, mock_which, mock_audit, snyk_result='{"ok": false, "error": "Could not detect supported target files"}', returncode=3)
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["snyk"]["status"], "not_applicable")
@@ -562,6 +729,14 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["tessl_review"]["status"], "skipped")
         self.assertIn("Disabled by default", result.data["tessl_review"]["reason"])
+        self.assertEqual(
+            result.data["dashboard"],
+            {
+                "status": "not_requested",
+                "reason": "disabled_by_option",
+                "tab": "quality",
+            },
+        )
         self.assertEqual(mock_run.call_count, 2)
 
     def test_external_review_rejects_conflicting_tessl_review_flags(self):
@@ -589,7 +764,6 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["external_review"]["blocker_class"], "blocked_validation")
         self.assertIn("--skip-tessl", result.data["external_review"]["blocker"])
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-
 
 if __name__ == "__main__":
     unittest.main()

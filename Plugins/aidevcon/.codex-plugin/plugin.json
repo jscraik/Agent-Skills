@@ -23,7 +23,7 @@
     "maturity": "experimental",
     "owner": "Agent Skills Team",
     "review_cadence": "monthly",
-    "last_reviewed": "2026-07-09",
+    "last_reviewed": "2026-08-10",
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",

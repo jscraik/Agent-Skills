@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import skills_sdk_eval_run  # noqa: E402
+from ask.commands.skills_impl_release_sets import SdkEvalRunRequest, _coerce_sdk_eval_run_request  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt  # noqa: E402
 from eval_runner_helpers import internal_result_with_scorecard, successful_internal_result  # noqa: E402
 
@@ -38,6 +39,13 @@ class TestSkillsSdkEvalRunnerReceipts(unittest.TestCase):
                 runner="internal",
                 codex_profile="oss-local",
             )
+
+    def test_sdk_eval_request_rejects_an_untyped_value_object(self) -> None:
+        request = SdkEvalRunRequest(target="Skills/agent-ops/testing")
+
+        self.assertEqual(_coerce_sdk_eval_run_request(request, {}), request)
+        with self.assertRaisesRegex(TypeError, "SdkEvalRunRequest"):
+            _coerce_sdk_eval_run_request(object(), {})  # type: ignore[arg-type]
 
     def test_internal_oss_eval_uses_profile_identity_when_skill_has_no_lane_policy(self) -> None:
         result = self._run_internal(successful_internal_result("oss-local"))
