@@ -119,8 +119,8 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
         )
         acceptance = case["acceptance"]
         passing = (
-            "**Outcome:** `no_justified_edit`\n"
-            "The forms are behaviorally equivalent because they call format_item in the same order and return type.\n"
+            "**Outcome:** `changed`\n"
+            "Revert the expanded loop and retain the list comprehension: the forms are behaviorally equivalent because they call format_item in the same order and return type.\n"
             "Run render_summary validation tests before closeout."
         )
 
@@ -133,11 +133,11 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
         failures = evaluate_assertions_text(
             "The patch looks fine.", acceptance, skill_name="simplify", selected_skill=True
         )
-        self.assertIn("semantic_requirements failed: no_justified_edit", failures)
+        self.assertIn("semantic_requirements failed: recommend_reverting_expanded_loop", failures)
 
         functionally_equivalent = (
-            "Outcome: no_justified_edit\n"
-            "The forms are functionally equivalent: format_item preserves order and return type.\n"
+            "Outcome: changed\n"
+            "Revert the expanded loop and retain the list-comprehension: the forms are functionally equivalent because format_item preserves order and return type.\n"
             "Run focused render_summary validation tests before closeout."
         )
         self.assertEqual(
@@ -146,6 +146,50 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
             ),
             [],
         )
+
+    def test_happy_diff_acceptance_accepts_ordered_list_evidence(self) -> None:
+        case = next(
+            item
+            for item in _load_evals_document(
+                REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml"
+            )["cases"]
+            if item["id"] == "happy-diff"
+        )
+        ordered_list_equivalent = (
+            "Revert the expanded loop and retain the list comprehension. "
+            "format_item calls stay in order and render_summary returns the same ordered list. "
+            "Run focused render_summary validation tests before closeout."
+        )
+
+        self.assertEqual(
+            evaluate_assertions_text(
+                ordered_list_equivalent,
+                case["acceptance"],
+                skill_name="simplify",
+                selected_skill=True,
+            ),
+            [],
+        )
+
+    def test_happy_diff_acceptance_requires_reverting_expanded_loop(self) -> None:
+        case = next(
+            item
+            for item in _load_evals_document(
+                REPO_ROOT / "Skills/agent-ops/simplify/references/evals.yaml"
+            )["cases"]
+            if item["id"] == "happy-diff"
+        )
+        missing_rollback = (
+            "Outcome: changed\n"
+            "The forms are functionally equivalent: format_item preserves order and return type.\n"
+            "Run focused render_summary validation tests before closeout."
+        )
+
+        failures = evaluate_assertions_text(
+            missing_rollback, case["acceptance"], skill_name="simplify", selected_skill=True
+        )
+
+        self.assertIn("semantic_requirements failed: recommend_reverting_expanded_loop", failures)
 
     def test_happy_polish_acceptance_requires_both_guard_paths_and_validation(self) -> None:
         case = next(
@@ -167,6 +211,15 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
             ),
             [],
         )
+
+        missing_validation = (
+            "Combine the adjacent enabled guards while preserving behavior and return value.\n"
+            "Cover the enabled and disabled retry_delay paths."
+        )
+        failures = evaluate_assertions_text(
+            missing_validation, case["acceptance"], skill_name="simplify", selected_skill=True
+        )
+        self.assertIn("semantic_requirements failed: focused_retry_validation", failures)
 
 
     def test_expected_signal_acceptance_fails_vague_regex_only_response(self) -> None:
@@ -225,6 +278,19 @@ class RunSkillEvalsBlockerTests(unittest.TestCase):
         )
 
         self.assertEqual(failures, [])
+
+    def test_discovery_question_assertion_rejects_post_work_framing(self) -> None:
+        failures = evaluate_assertions_text(
+            "After I implement the workflow, what entity state should be modeled?",
+            [{"type": "discovery_question", "value": "ask for scope before edits"}],
+            skill_name="simplify",
+            selected_skill=False,
+        )
+
+        self.assertEqual(
+            failures,
+            ["discovery_question failed: response framed discovery after work began"],
+        )
 
 
     def test_discovery_question_assertion_rejects_edit_claims(self) -> None:

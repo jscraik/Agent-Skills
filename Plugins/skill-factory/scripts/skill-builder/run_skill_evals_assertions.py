@@ -79,11 +79,16 @@ _DISCOVERY_SCOPE_RE = re.compile(
 _DISCOVERY_EDIT_CLAIM_RE = re.compile(
     r"(?i)\b(?:I changed|I've changed|I updated|I've updated|patched|rewrote|saved|committed)\b"
 )
+_DISCOVERY_POST_WORK_FRAME_RE = re.compile(
+    r"(?i)\b(?:after|once|following)\s+(?:(?:I|we)\s+)?(?:inspect(?:ing|ed)?|edit(?:ing|ed)?|implement(?:ation|ing|ed)?|patch(?:ing|ed)?|rewrit(?:e|ing|ten)|chang(?:e|ing|ed))\b"
+)
 
 
 def _evaluate_discovery_question_assertion(text: str) -> Optional[str]:
     if _DISCOVERY_EDIT_CLAIM_RE.search(text):
         return "discovery_question failed: response claimed an edit before discovery"
+    if _DISCOVERY_POST_WORK_FRAME_RE.search(text):
+        return "discovery_question failed: response framed discovery after work began"
     if "?" not in text:
         return "discovery_question failed: response did not ask a question"
     if not _DISCOVERY_SCOPE_RE.search(text):

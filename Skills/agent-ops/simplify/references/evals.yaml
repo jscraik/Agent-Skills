@@ -138,9 +138,10 @@ cases:
     +    return rendered
     ```
 
-    Return a concise final markdown review note about whether any change is prudent.
+    Return a concise final markdown review note recommending that this
+    expansion be reverted and the original list comprehension retained.
     Identify the observable behavior that must remain unchanged and name the
-    focused validation required before accepting equivalent behavior.
+    focused validation required before accepting the rollback.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -152,10 +153,12 @@ cases:
     value: Names focused render_summary validation.
   - type: semantic_requirements
     requirements:
-    - id: no_justified_edit
+    - id: recommend_reverting_expanded_loop
+      all_of:
+      - revert
       any_of:
-      - no_justified_edit
-      - no additional edits
+      - list comprehension
+      - list-comprehension
   - type: semantic_requirements
     requirements:
     - id: preserve_list_comprehension
@@ -166,8 +169,12 @@ cases:
       any_of:
       - return type
       - output list
+      - ordered list
       - return a list
       - returns a list
+      - result shape
+      - result type
+      - output-shape
       - same outputs
     - id: validation_evidence
       all_of:
@@ -252,7 +259,6 @@ cases:
       - test
       - validation
       - assert
-      - retry_delay
   - type: expected_signal
     value: Enabled.
 - id: edge-risky

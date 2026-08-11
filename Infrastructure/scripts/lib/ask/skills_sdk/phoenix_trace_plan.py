@@ -89,11 +89,16 @@ def _eval_run_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             "blockers": [],
         }]
     argv = receipt.get("codex_exec_command_argv") or receipt.get("codex_exec_command_shape")
+    allowed_profiles = (
+        EVAL_CODEX_PROFILES
+        if receipt.get("mode") == "smoke" or receipt.get("lane") == "codex-fast-smoke"
+        else OSS_CODEX_PROFILES
+    )
     return [_profile_from_argv(
         argv,
         lane="eval-run",
         claimed_profile=claimed,
-        allowed_profiles=EVAL_CODEX_PROFILES,
+        allowed_profiles=allowed_profiles,
     )]
 
 
