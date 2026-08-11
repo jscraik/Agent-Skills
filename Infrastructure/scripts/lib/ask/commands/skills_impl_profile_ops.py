@@ -590,6 +590,14 @@ def _skill_doctor_next_command_decision(
             "source_check": "outcome_proof",
             "reason": "No blockers or warnings remain; run the proof scorecard as the next evidence command.",
         }
+    if not audit_target:
+        return {
+            "command": _skills_validation_command("resolve", query),
+            "precedence": "default",
+            "source_class": None,
+            "source_check": "canonical_source",
+            "reason": "No handle and no audit target are available; resolve the target first.",
+        }
     return {
         "command": _skills_validation_command("audit", str(audit_target), "--level", "strict"),
         "precedence": "default",
