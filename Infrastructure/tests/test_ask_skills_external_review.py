@@ -11,7 +11,7 @@ repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
 # noqa: E402: test-only Infrastructure import after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.commands.skills_impl import external_review_skill  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+from ask.commands.skills_impl import ExternalReviewRequest, external_review_skill  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
 
 
 def _completed(args, stdout, *, returncode=0, stderr=""):
@@ -105,6 +105,37 @@ def _assert_dashboard_review(result, html_text, report_payload):
     assert report_payload["data"]["dashboard_path"] == result.data["dashboard_path"]
     for marker in ("ASK Local Review", 'data-auto-refresh-seconds="0"', "Static evidence snapshot", 'role="tablist"', 'role="tabpanel"', "Quality", "Evals Not Run Yet", "Snyk Advisory", "local_internal_only", "disabled_until_requested"):
         assert marker in html_text
+
+
+def test_external_review_accepts_explicit_request_object():
+    result = external_review_skill(
+        repo_root,
+        ExternalReviewRequest(
+            skill_path="Skills/backend-platform/example-skill",
+            with_tessl_review=True,
+            skip_tessl=True,
+        ),
+    )
+
+    assert result.status == "error"
+    assert result.data["external_review"]["blocker_class"] == "blocked_validation"
+    assert result.errors[0].code == "ERR_VALIDATION"
+
+
+@patch("ask.commands.skills_impl.audit_skill")
+def test_external_review_keeps_review_result_when_dashboard_report_staging_is_unavailable(mock_audit):
+    skill_dir = "Skills/backend-platform/example-skill"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        local_root = Path(tmpdir)
+        _skill_fixture(local_root, skill_dir)
+        mock_audit.return_value = _successful_audit({"diagnostics": {"exit_code": 0}})
+        with patch.object(Path, "mkdir", side_effect=OSError("read-only dashboard root")):
+            result = external_review_skill(repo_root=local_root, skill_path=skill_dir, skip_plugin_eval=True, skip_tessl=True, dashboard=True)
+
+    assert result.status == "success"
+    assert result.errors == []
+    assert result.data["dashboard"] == {"status": "unavailable", "reason": "render_failed", "error_type": "OSError", "tab": "quality"}
+    assert "report_path" not in result.data
 
 
 class TestAskSkillsExternalReview(unittest.TestCase):
