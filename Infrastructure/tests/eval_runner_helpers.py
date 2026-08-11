@@ -108,6 +108,7 @@ def successful_internal_result(codex_profile: str | None = None) -> CallResult:
             "skill_path": "Skills/agent-ops/testing",
             "mode": "smoke",
             "runner": "codex",
+            "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
             "cases": [{"id": "case-pass", "status": "pass"}],
             "mutation_allowed": True,
             "registry_update_allowed": True,

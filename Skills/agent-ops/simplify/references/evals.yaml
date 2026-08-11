@@ -138,7 +138,10 @@ cases:
     +    return rendered
     ```
 
-    Return a concise final markdown review note about whether any change is prudent.
+    Return a concise final markdown review note recommending that this
+    expansion be reverted and the original list comprehension retained.
+    Identify the observable behavior that must remain unchanged and name the
+    focused validation required before accepting the rollback.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -147,9 +150,36 @@ cases:
     - nc
   acceptance:
   - type: expected_signal
-    value: Revert the patch and retain the list comprehension.
-  - type: expected_signal
-    value: Run focused render_summary tests and record validation evidence.
+    value: Names focused render_summary validation.
+  - type: semantic_requirements
+    requirements:
+    - id: recommend_reverting_expanded_loop
+      all_of:
+      - revert
+      any_of:
+      - list comprehension
+      - list-comprehension
+  - type: semantic_requirements
+    requirements:
+    - id: preserve_list_comprehension
+      all_of:
+      - format_item
+      - order
+    - id: preserve_output_shape
+      any_of:
+      - return type
+      - output list
+      - ordered list
+      - return a list
+      - returns a list
+      - result shape
+      - result type
+      - output-shape
+      - same outputs
+    - id: validation_evidence
+      all_of:
+      - render_summary
+      - test
 - id: happy-polish
   name: final polish
   category: happy
@@ -182,7 +212,9 @@ cases:
          return min(attempt * 2, 30)
     ```
 
-    Return a concise final cleanup review note.
+    Return a concise final cleanup review note. State the behavior that must
+    remain unchanged, including side-effect order, and name focused validation
+    for both the enabled and disabled paths.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -221,13 +253,12 @@ cases:
     requirements:
     - id: focused_retry_validation
       all_of:
-      - test
-      any_of:
-      - focused
-      - retry_delay
-      - validation
       - enabled
-      - order
+      - disabled
+      any_of:
+      - test
+      - validation
+      - assert
   - type: expected_signal
     value: Enabled.
 - id: edge-risky
