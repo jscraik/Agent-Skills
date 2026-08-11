@@ -4,6 +4,17 @@ from dataclasses import dataclass
 
 from .skills_impl_profile_ops import *  # noqa: F403
 
+
+def _operation_context_events(*event_types: str) -> dict[str, dict[str, Any]]:
+    """Copy immutable event routes into JSON-safe operation-context data."""
+    return {
+        event_type: {
+            field: list(value) if isinstance(value, list) else value
+            for field, value in CAPABILITY_LIFECYCLE_EVENT_CONSUMERS[event_type].items()
+        }
+        for event_type in event_types
+    }
+
 def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallResult:
     """Report runtime proof-plane capability discovery for agents."""
     target = normalize_runtime_target(runtime_target)
@@ -92,7 +103,6 @@ def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallR
     }
     return result
 
-
 def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
     """
     Format a human-readable summary of a capability discovery payload.
@@ -126,7 +136,6 @@ def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
         lines.append(f"Next: {next_actions[0]}")
     return lines
 
-
 def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
     """
     Format a Codex preview payload into a list of human-readable summary lines.
@@ -157,7 +166,6 @@ def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
     lines.extend(f"- {command.get('name')}: {command.get('validation_command')}" for command in commands if isinstance(command, dict))
     return lines
 
-
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
     """
     Produce a Codex-based render preview payload for the repository.
@@ -174,13 +182,11 @@ def skills_render_preview(repo_root: Path, context_window: int | None = None) ->
     result.data["codex_render_preview"] = build_codex_render_preview(repo_root, context_window)
     return result
 
-
 def skills_config_explain(repo_root: Path) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills config explain"
     result.data["codex_config_explain"] = build_codex_config_explain(repo_root)
     return result
-
 
 def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
     result = CallResult()
@@ -209,9 +215,7 @@ def _skill_package_operation_context() -> dict[str, Any]:
             }
             for profile_name in ("package-review", "plugin-share")
         },
-        "events": {
-            "package_readiness_checked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["package_readiness_checked"],
-        },
+        "events": _operation_context_events("package_readiness_checked"),
         "validation_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
             _skills_validation_command("events", "package_readiness_checked"),
@@ -233,11 +237,7 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
             }
             for profile_name in ("authoring", "package-review", "eval")
         },
-        "events": {
-            "skill_doctor_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["skill_doctor_completed"],
-            "eval_blocked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_blocked"],
-            "eval_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_completed"],
-        },
+        "events": _operation_context_events("skill_doctor_completed", "eval_blocked", "eval_completed"),
         "follow_up_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
             "./bin/ask skills prove <handle> --json --robot",

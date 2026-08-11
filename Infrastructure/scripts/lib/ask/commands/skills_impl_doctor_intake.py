@@ -334,16 +334,58 @@ def _skills_doctor(
     return result
 
 
+def _legacy_doctor_option_values(
+    options: bool,
+    legacy_flags: tuple[object, ...],
+    *,
+    allow_validation_scope: bool,
+) -> dict[str, object]:
+    """Validate and name the positional doctor arguments used before options objects."""
+    values = (options, *legacy_flags)
+    fields = ("strict", "codex_parity", "validation_scope") if allow_validation_scope else ("strict", "codex_parity")
+    if len(values) > len(fields):
+        raise TypeError("too many legacy doctor flags")
+    if not all(isinstance(value, bool) for value in values[:2]):
+        raise TypeError("legacy doctor flags must begin with booleans")
+    if len(values) == 3 and values[2] not in {"runtime", "source"}:
+        raise TypeError("legacy doctor validation_scope must be runtime or source")
+    return dict(zip(fields, values))
+
+
+def _resolve_doctor_options(
+    options: SkillsDoctorOptions | bool | None,
+    legacy_flags: tuple[object, ...],
+    legacy_options: dict[str, object],
+    *,
+    allow_validation_scope: bool,
+) -> SkillsDoctorOptions:
+    """Adapt the pre-options doctor flags while rejecting mixed call styles."""
+    if isinstance(options, SkillsDoctorOptions):
+        if legacy_flags or legacy_options:
+            raise TypeError("pass either SkillsDoctorOptions or legacy arguments, not both")
+        return options
+    if options is None:
+        if legacy_flags:
+            raise TypeError("legacy positional flags require the strict argument")
+        return SkillsDoctorOptions(**legacy_options)
+    if legacy_options:
+        raise TypeError("pass either legacy positional or keyword arguments, not both")
+    return SkillsDoctorOptions(**_legacy_doctor_option_values(
+        options, legacy_flags, allow_validation_scope=allow_validation_scope,
+    ))
+
+
 def skills_doctor(
     repo_root: Path,
     target: str,
-    options: SkillsDoctorOptions | None = None,
+    options: SkillsDoctorOptions | bool | None = None,
+    *legacy_flags: object,
     **legacy_options: object,
 ) -> CallResult:
     """Run skill doctor from typed options, retaining legacy keywords during migration."""
-    if options is not None and legacy_options:
-        raise TypeError("pass either SkillsDoctorOptions or legacy keyword arguments, not both")
-    resolved = options or SkillsDoctorOptions(**legacy_options)
+    resolved = _resolve_doctor_options(
+        options, legacy_flags, legacy_options, allow_validation_scope=True,
+    )
     return _skills_doctor(
         repo_root,
         target,
@@ -453,13 +495,14 @@ def _skills_sdk_check(
 def skills_sdk_check(
     repo_root: Path,
     target: str,
-    options: SkillsDoctorOptions | None = None,
+    options: SkillsDoctorOptions | bool | None = None,
+    *legacy_flags: object,
     **legacy_options: object,
 ) -> CallResult:
     """Run the SDK check using the same typed options as doctor."""
-    if options is not None and legacy_options:
-        raise TypeError("pass either SkillsDoctorOptions or legacy keyword arguments, not both")
-    resolved = options or SkillsDoctorOptions(**legacy_options)
+    resolved = _resolve_doctor_options(
+        options, legacy_flags, legacy_options, allow_validation_scope=False,
+    )
     return _skills_sdk_check(
         repo_root,
         target,

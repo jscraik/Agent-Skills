@@ -282,15 +282,37 @@ def _skills_handles(repo_root: Path, options: SkillsHandlesOptions) -> CallResul
         )
     return result
 
+def _resolve_handles_options(
+    options: SkillsHandlesOptions | bool | None,
+    legacy_flags: tuple[object, ...],
+    legacy_options: dict[str, object],
+) -> SkillsHandlesOptions:
+    """Accept the pre-options positional flags without mixing call styles."""
+    if isinstance(options, SkillsHandlesOptions):
+        if legacy_flags or legacy_options:
+            raise TypeError("pass either SkillsHandlesOptions or legacy arguments, not both")
+        return options
+    if options is None:
+        if legacy_flags:
+            raise TypeError("legacy positional flags require the check argument")
+        return SkillsHandlesOptions(**legacy_options)
+    if legacy_options:
+        raise TypeError("pass either legacy positional or keyword arguments, not both")
+    values = (options, *legacy_flags)
+    fields = ("check", "include_handles", "write_projection", "check_projection", "dry_run")
+    if len(values) > len(fields) or not all(isinstance(value, bool) for value in values):
+        raise TypeError("legacy skills_handles flags must be booleans")
+    return SkillsHandlesOptions(**dict(zip(fields, values)))
+
+
 def skills_handles(
     repo_root: Path,
-    options: SkillsHandlesOptions | None = None,
+    options: SkillsHandlesOptions | bool | None = None,
+    *legacy_flags: object,
     **legacy_options: object,
 ) -> CallResult:
     """Return skill handles from typed options, retaining legacy keyword arguments during migration."""
-    if options is not None and legacy_options:
-        raise TypeError("pass either SkillsHandlesOptions or legacy keyword arguments, not both")
-    resolved = options or SkillsHandlesOptions(**legacy_options)
+    resolved = _resolve_handles_options(options, legacy_flags, legacy_options)
     return _skills_handles(repo_root, resolved)
 
 
