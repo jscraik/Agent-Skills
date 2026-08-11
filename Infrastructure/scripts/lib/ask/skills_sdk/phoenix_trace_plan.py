@@ -10,6 +10,7 @@ from ask.skills_sdk.ab_contracts import _judge_command_shape_from_argv
 
 
 OSS_CODEX_PROFILES = ("oss-local", "oss-cloud")
+EVAL_CODEX_PROFILES = ("fast", *OSS_CODEX_PROFILES)
 PHOENIX_PROJECT_NAME = "agent-skills-skills-sdk-evals"
 MAX_CASE_SPANS = 20
 SAFE_ATTRIBUTE_TYPES = (str, int, float, bool)
@@ -32,7 +33,9 @@ def _source_kind(receipt: dict[str, Any]) -> str:
     return "unsupported_receipt"
 
 
-def _command_profile(command: list[str]) -> tuple[str | None, int | None, list[str]]:
+def _command_profile(
+    command: list[str], *, allowed_profiles: tuple[str, ...] = OSS_CODEX_PROFILES,
+) -> tuple[str | None, int | None, list[str]]:
     blockers: list[str] = []
     profile_positions = [index for index, item in enumerate(command) if item == "--profile"]
     if len(command) < 2 or command[:2] != ["codex", "exec"]:
@@ -45,15 +48,21 @@ def _command_profile(command: list[str]) -> tuple[str | None, int | None, list[s
         blockers.append(f"profile_flag_misplaced:{position}")
         return None, position, blockers
     candidate = command[position + 1]
-    if candidate not in OSS_CODEX_PROFILES:
+    if candidate not in allowed_profiles:
         blockers.append(f"profile_unsupported:{candidate}")
         return None, position, blockers
     return candidate, position, blockers
 
 
-def _profile_from_argv(argv: Any, *, lane: str, claimed_profile: Any = None) -> dict[str, Any]:
+def _profile_from_argv(
+    argv: Any,
+    *,
+    lane: str,
+    claimed_profile: Any = None,
+    allowed_profiles: tuple[str, ...] = OSS_CODEX_PROFILES,
+) -> dict[str, Any]:
     command = argv if isinstance(argv, list) and all(isinstance(item, str) for item in argv) else []
-    derived_profile, profile_position, blockers = _command_profile(command)
+    derived_profile, profile_position, blockers = _command_profile(command, allowed_profiles=allowed_profiles)
     if isinstance(claimed_profile, str) and derived_profile != claimed_profile:
         blockers.append(f"claimed_profile_mismatch:{claimed_profile}:{derived_profile or 'missing'}")
     return {
@@ -80,7 +89,12 @@ def _eval_run_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             "blockers": [],
         }]
     argv = receipt.get("codex_exec_command_argv") or receipt.get("codex_exec_command_shape")
-    return [_profile_from_argv(argv, lane="eval-run", claimed_profile=claimed)]
+    return [_profile_from_argv(
+        argv,
+        lane="eval-run",
+        claimed_profile=claimed,
+        allowed_profiles=EVAL_CODEX_PROFILES,
+    )]
 
 
 def _ab_profile_evidence(receipt: dict[str, Any]) -> list[dict[str, Any]]:
