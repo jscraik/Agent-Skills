@@ -524,9 +524,15 @@ def _copy_tessl_live_skill_package(source_root: Path, staged_root: Path) -> list
     return copied
 
 
-def _tessl_stage_directory_name(path: str) -> str:
+def _tessl_stage_directory_name(
+    path: str,
+    *,
+    identity: str | None = None,
+    lane: str | None = None,
+) -> str:
     safe_name = path.replace("/", "__").replace(" ", "_")
-    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
+    digest_input = "\0".join(part for part in (identity or path, lane) if part)
+    digest = hashlib.sha256(digest_input.encode("utf-8")).hexdigest()[:12]
     return f"{safe_name}-{digest}"
 
 

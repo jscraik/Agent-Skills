@@ -215,7 +215,7 @@ def _write_codex_jsonl(path: Optional[Path], stdout: str, warnings: List[str]) -
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(stdout, encoding="utf-8")
         except OSError as exc:
-            warnings.append(f"Could not write Codex JSONL output to {path}: {exc}")
+            warnings.append(f"run_skill_evals: could not write Codex JSONL output to {path}: {exc}")
 
 
 def _codex_timeout_result(context: _CodexExecContext, exc: sp.TimeoutExpired) -> Tuple[int, str, str]:

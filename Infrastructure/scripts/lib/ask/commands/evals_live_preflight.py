@@ -2,6 +2,24 @@ from __future__ import annotations
 
 from .evals_project import *  # noqa: F403
 
+
+def _custom_or_stable_tessl_stage_root(
+    temp_root: Path | None,
+    path: str,
+    source_root: Path,
+    *,
+    lane: str,
+    stable_root: Path,
+) -> Path:
+    if temp_root is None:
+        return stable_root
+    return temp_root / _tessl_stage_directory_name(
+        path,
+        identity=source_root.as_posix(),
+        lane=lane,
+    )
+
+
 def _stage_tessl_eval_source(
     repo_root: Path,
     path: str,
@@ -15,7 +33,13 @@ def _stage_tessl_eval_source(
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl eval source is not a directory: {path}")
 
-    staged_root = (temp_root / _tessl_stage_directory_name(path)) if temp_root else _stable_tessl_stage_parent(path)
+    staged_root = _custom_or_stable_tessl_stage_root(
+        temp_root,
+        path,
+        source_root,
+        lane="local",
+        stable_root=_stable_tessl_stage_parent(path),
+    )
     staged_root.mkdir(parents=True, exist_ok=True)
     _archive_stage_children(staged_root, "local-eval")
 
@@ -50,7 +74,13 @@ def _stage_tessl_live_private_source(
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl live eval source is not a directory: {path}")
 
-    staged_root = (temp_root / _tessl_stage_directory_name(path)) if temp_root else _stable_tessl_live_stage_parent(path)
+    staged_root = _custom_or_stable_tessl_stage_root(
+        temp_root,
+        path,
+        source_root,
+        lane="live-private",
+        stable_root=_stable_tessl_live_stage_parent(path),
+    )
     staged_root.mkdir(parents=True, exist_ok=True)
     _archive_stage_children(staged_root, "live-private")
 

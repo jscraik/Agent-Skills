@@ -668,7 +668,7 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
                 run_skill_evals._write_codex_jsonl(Path(tmpdir) / "trace.jsonl", "partial", warnings)
 
         self.assertEqual(len(warnings), 1)
-        self.assertIn("Could not write Codex JSONL output", warnings[0])
+        self.assertIn("run_skill_evals: could not write Codex JSONL output", warnings[0])
 
 
     def test_run_codex_exec_keeps_last_message_artifact_on_timeout(self) -> None:

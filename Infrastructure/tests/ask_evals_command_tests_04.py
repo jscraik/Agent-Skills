@@ -1,5 +1,48 @@
 from ask_evals_command_tests_03 import *  # noqa: F403
 
+
+def test_tessl_local_and_live_staging_use_separate_custom_root_children(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    staging_root = tmp_path / "ask-tessl-shared-proof"
+
+    local_stage, _ = evals._stage_tessl_eval_source(
+        tmp_path,
+        "Skills/example-skill",
+        temp_root=staging_root,
+    )
+    live_stage, _ = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=staging_root,
+    )
+
+    assert local_stage != live_stage
+    assert local_stage.parent == live_stage.parent == staging_root
+
+
+def test_tessl_custom_root_staging_uses_resolved_source_identity(tmp_path: Path) -> None:
+    first_repo = tmp_path / "first-repo"
+    second_repo = tmp_path / "second-repo"
+    _write_example_skill(first_repo)
+    _write_example_skill(second_repo)
+    staging_root = tmp_path / "ask-tessl-shared-proof"
+
+    first_stage, _ = evals._stage_tessl_eval_source(
+        first_repo,
+        "Skills/example-skill",
+        temp_root=staging_root,
+    )
+    second_stage, _ = evals._stage_tessl_eval_source(
+        second_repo,
+        "Skills/example-skill",
+        temp_root=staging_root,
+    )
+
+    assert first_stage != second_stage
+    assert first_stage.parent == second_stage.parent == staging_root
+
+
 def test_evals_live_private_requires_oss_lanes_to_match_tessl_case_set(tmp_path: Path) -> None:
     _write_handoff_readiness(tmp_path, "example-skill")
     skill_root = _write_example_skill(tmp_path)
