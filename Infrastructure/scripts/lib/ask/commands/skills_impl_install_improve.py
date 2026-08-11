@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .skills_impl_external_review import *  # noqa: F403
@@ -9,6 +10,11 @@ class InstallSkillOptions:
     remediate: bool = False
     dest: str = "Skills/github"
     dry_run: bool = False
+
+
+def _redacted_url(url: str) -> str:
+    """Redact embedded credentials from a URL to prevent leakage in logs and install metadata."""
+    return re.sub(r"(https?://)[^:/@]+:[^@/]+@", r"\1<REDACTED>@", url)
 
 
 def _install_dry_run_result(
@@ -26,13 +32,14 @@ def _install_dry_run_result(
         display_path = str(target_path.relative_to(repo_root))
     except ValueError:
         display_path = str(target_path)
-    validation_args = [url, "--dest", dest_rel]
+    redacted = _redacted_url(url)
+    validation_args = [redacted, "--dest", dest_rel]
     if remediate:
         validation_args.append("--remediate")
     validation_args.append("--dry-run")
     result.data.update({
         "dry_run": True, "skill_name": skill_name, "target_path": display_path,
-        "url": url, "remediate": remediate, "canonical_dest": dest_rel,
+        "url": redacted, "remediate": remediate, "canonical_dest": dest_rel,
         "intake_decision": intake_decision,
         "readiness_policy": {
             "full_evals_required_before_promotion": True,
@@ -44,7 +51,7 @@ def _install_dry_run_result(
     })
     result.metadata["next_steps"] = [
         "Review data.intake_decision.outcome before writing canonical source.",
-        f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else ""),
+        f"ask skills install {redacted} --dest {dest_rel}" + (" --remediate" if remediate else ""),
     ]
     return result
 
@@ -122,9 +129,11 @@ def _record_install_process(
     result: CallResult, process: subprocess.CompletedProcess[str], dest_rel: str, intake_decision: dict,
 ) -> None:
     """Attach the installer process evidence before classifying its outcome."""
+    redacted_stdout = _redacted_url(process.stdout) if process.stdout else ""
+    redacted_stderr = _redacted_url(process.stderr) if process.stderr else ""
     result.data.update({
-        "raw_output": process.stdout,
-        "raw_error": process.stderr,
+        "raw_output": redacted_stdout,
+        "raw_error": redacted_stderr,
         "canonical_dest": dest_rel,
         "intake_decision": intake_decision,
     })

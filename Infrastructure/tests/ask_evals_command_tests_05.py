@@ -164,9 +164,21 @@ def _repair_project_response(cmd: list[str]) -> mock.Mock:
     )
 
 
-def _tessl_live_fake_run(completed_view: mock.Mock, *, pending_payload: dict | None = None):
+def _tessl_live_fake_run(completed_view: mock.Mock, *eval_views: mock.Mock, pending_payload: dict | None = None) -> object:
+    """
+    Build a fake tessl subprocess runner for live eval tests.
+
+    Args:
+        completed_view: The final completed view response.
+        *eval_views: Optional sequence of intermediate view responses (for polling tests).
+        pending_payload: Optional pending run list payload to simulate blocked submission.
+
+    Returns:
+        A fake_run callable that dispatches tessl commands and cycles through eval views.
+    """
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
+    views = iter((*eval_views, completed_view)) if eval_views else None
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
@@ -177,7 +189,9 @@ def _tessl_live_fake_run(completed_view: mock.Mock, *, pending_payload: dict | N
             if pending_payload:
                 raise AssertionError("duplicate pending run guard must block before tessl eval run")
             return completed_eval
-        return completed_view if cmd[1:3] == ["eval", "view"] else completed
+        if cmd[1:3] == ["eval", "view"]:
+            return next(views) if views else completed_view
+        return completed
 
     return fake_run
 
@@ -211,24 +225,6 @@ def _tessl_score_view(description: str, baseline_score: int, skill_score: int | 
     if status is not None:
         attributes["status"] = status
     return mock.Mock(returncode=0, stdout=json.dumps({"data": {"attributes": attributes}}), stderr="")
-
-
-def _polling_tessl_live_fake_run(pending_view: mock.Mock, completed_view: mock.Mock):
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
-    views = iter((pending_view, completed_view))
-
-    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return _repair_project_response(cmd)
-        if cmd[1:3] == ["eval", "list"]:
-            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
-        if cmd[1:3] == ["eval", "run"]:
-            return completed_eval
-        return next(views) if cmd[1:3] == ["eval", "view"] else completed
-
-    return fake_run
-
 
 def _assert_tessl_commands(run: mock.Mock) -> Path:
     calls = [call.args[0] for call in run.call_args_list]
@@ -443,7 +439,7 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path,
     pending_view = _tessl_score_view("pending scores", 1, None, status="pending")
     completed_view = _tessl_score_view("completed scores", 0, 1, status="completed")
     _write_example_skill(tmp_path)
-    result = _run_tessl_live_private(tmp_path, _polling_tessl_live_fake_run(pending_view, completed_view))
+    result = _run_tessl_live_private(tmp_path, _tessl_live_fake_run(completed_view, pending_view))
 
     assert result.status == "success"
     tessl_eval = result.data["tessl_eval"]

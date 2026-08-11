@@ -200,7 +200,7 @@ def _doctor_source_material(state: _DoctorState) -> tuple[dict[str, Any], str]:
         return {}, ""
     try:
         return _read_skill_frontmatter_fields(state.source_path), state.source_path.read_text(encoding="utf-8")
-    except OSError:
+    except (OSError, UnicodeDecodeError):
         return {}, ""
 
 
