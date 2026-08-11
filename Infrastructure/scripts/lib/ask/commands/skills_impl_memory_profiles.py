@@ -211,7 +211,7 @@ def skills_memory(
         for source in MEMORY_SOURCES
     ]
     mode_key = mode.strip().lower()
-    capped_limit = min(limit, 50)
+    capped_limit = min(max(1, int(limit)), 50)
     payload: dict[str, Any] = {
         "schema_version": "skill-memory-provider.v1",
         "status": "pass",
