@@ -230,6 +230,7 @@ def main():
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    skills_audit_parser.add_argument("--source-only", action="store_true", help="Validate canonical source without requiring a generated runtime projection")
     skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser])
     skills_external_review_parser.add_argument("path", help="Path to the skill directory")
     skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth")
@@ -339,6 +340,7 @@ def main():
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
     evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")
     evals_run_parser.add_argument("--tessl-live-dry-run", action="store_true", help="Stage private Tessl tile eval inputs without invoking Tessl")
+    evals_run_parser.add_argument("--handoff-readiness", help="Current repo-relative handoff readiness manifest under .harness/evidence/handoff")
     evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
@@ -725,7 +727,7 @@ def main():
                 plugin_cache_refresh=sync_options,
             )
         elif args.action == "audit":
-            result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
+            result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level, validation_scope="source" if args.source_only else "runtime")
         elif args.action == "external-review":
             result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, with_tessl_review=args.with_tessl_review, skip_tessl_review=args.skip_tessl_review, include_snyk=args.include_snyk, timeout_seconds=args.timeout_seconds, report_path=args.report_path, dashboard=args.dashboard, dashboard_path=args.dashboard_path)
         elif args.action == "validate-skill-gate":
@@ -799,7 +801,7 @@ def main():
         if args.action == "run":
             result = run_evals(
                 repo_root,
-                path=args.path,
+                args.path,
                 mode=args.mode,
                 dashboard=not args.no_dashboard,
                 runner=args.runner,
@@ -808,6 +810,7 @@ def main():
                 tessl_live_private=args.tessl_live_private,
                 tessl_workspace=args.tessl_workspace,
                 tessl_live_dry_run=args.tessl_live_dry_run,
+                handoff_readiness_path=args.handoff_readiness,
                 model=args.model,
                 codex_profile=args.profile,
                 cases=args.case,
@@ -1892,9 +1895,6 @@ def main():
             elif args.topic == "workouts":
                 print_first_validation_command(result.data)
                 print("\n📚 Workout examples:\n   ask workouts list\n   ask workouts run agent-ops/verification-before-completion --attempts 2\n   ask workouts score agent-ops/verification-before-completion\n   ask workouts promote agent-ops/verification-before-completion --dry-run")
-    if result.status == "success":
-        sys.exit(0)
-    else:
-        sys.exit(exit_code_for_errors(result.errors))
+    sys.exit(0 if result.status == "success" else exit_code_for_errors(result.errors))
 if __name__ == "__main__":
     main()

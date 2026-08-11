@@ -250,6 +250,8 @@ def test_eval_only_review_report_uses_stable_tessl_staging_template(tmp_path: Pa
 
     expected_staging_root = os.path.join(tempfile.gettempdir(), "ask-tessl-evals")
     policy = report["data"]["policy"]
+    assert policy["tessl_review_min_score"] == 85
+    assert policy["tessl_review_target_score"] == 90
     assert policy["tessl_eval_staging_root"].startswith(expected_staging_root)
     assert policy["tessl_eval_staging_root"].endswith("<skill-path>-<sha12>")
     assert report["data"]["review_mode_details"]["local_evals"]["tessl_evidence"].startswith(

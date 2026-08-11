@@ -40,6 +40,7 @@ def _evals_run_validation_command(
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
+    handoff_readiness_path: str | None = None,
     timeout_seconds: int | None = None,
 ) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
@@ -51,6 +52,8 @@ def _evals_run_validation_command(
         parts.extend(["--tessl-workspace", tessl_workspace])
     if tessl_live_dry_run:
         parts.append("--tessl-live-dry-run")
+    if handoff_readiness_path:
+        parts.extend(["--handoff-readiness", handoff_readiness_path])
     if timeout_seconds is not None:
         parts.extend(["--timeout-seconds", str(timeout_seconds)])
     if not dashboard:

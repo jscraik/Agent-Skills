@@ -1,4 +1,72 @@
 from ask_evals_command_tests_05 import *  # noqa: F403
+from ask.skills_sdk import tessl_live_view
+
+
+def test_tessl_view_inspects_only_the_bound_submitted_run(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    skill_path = "Skills/example-skill"
+    candidate = build_candidate_identity(tmp_path, tmp_path / skill_path)
+    project_receipt = evals._tessl_project_link_receipt_path(tmp_path, skill_path, candidate)
+    assert project_receipt is not None
+    project_receipt.parent.mkdir(parents=True, exist_ok=True)
+    project_receipt.write_text(json.dumps({
+        "schema_version": "skills-sdk.tessl-project-link.v1",
+        "status": "pass",
+        "workspace": "jscraik",
+        "project": "example-skill",
+        "candidate": candidate,
+    }), encoding="utf-8")
+    run_id = "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    submission_path = evals._tessl_live_evidence_file(
+        tmp_path,
+        skill_path,
+        run_id,
+        "tessl-eval-submission.json",
+    )
+    assert submission_path is not None
+    submission_path.parent.mkdir(parents=True, exist_ok=True)
+    submission_path.write_text(json.dumps({
+        "run_id": run_id,
+        "workspace": "jscraik",
+        "skill_path": skill_path,
+    }), encoding="utf-8")
+    completed_view = mock.Mock(
+        returncode=0,
+        stdout=json.dumps({"data": {"attributes": {"status": "completed", "scenarios": [{"solutions": [
+            {"variant": "baseline", "assessmentResults": [{"score": 0, "max_score": 1}]},
+            {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
+        ]}]}}}),
+        stderr="",
+    )
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(tessl_live_view.subprocess, "run", return_value=completed_view) as run,
+    ):
+        result = evals.inspect_tessl_live_private_eval(
+            tmp_path,
+            skill_path=skill_path,
+            run_id=run_id,
+            workspace="jscraik",
+        )
+
+    assert result.status == "success"
+    assert result.data["status"] == "pass"
+    assert result.data["view_evidence_path"].endswith("tessl-eval-view.json")
+    assert run.call_args.args[0] == ["/usr/local/bin/tessl", "eval", "view", "--json", run_id]
+
+
+def test_tessl_view_rejects_an_unbound_run(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    result = evals.inspect_tessl_live_private_eval(
+        tmp_path,
+        skill_path="Skills/example-skill",
+        run_id="019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        workspace="jscraik",
+    )
+
+    assert result.status == "error"
+    assert result.data["blocker_class"] == "blocked_validation"
 
 
 def test_eval_closeout_persistence_failure_returns_classified_blocker(tmp_path: Path) -> None:

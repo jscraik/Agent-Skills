@@ -16,6 +16,9 @@ from . import evals_live_run as _evals_live_run
 from . import evals_macro as _evals_macro
 from . import evals_closeout as _evals_closeout
 from . import evals_runner as _evals_runner
+from ask.skills_sdk.tessl_live_view import (
+    inspect_tessl_live_private_eval,
+)
 
 
 def _facade_value(value, module_name: str):

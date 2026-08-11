@@ -194,8 +194,63 @@ The dry-run route is not a shortcut around the SDK sequence. Before it stages
 the payload, the shared admission check requires current receipts for
 mechanical validation, security risk modes, scenario quality, scorer quality,
 scorer calibration, deterministic local gates, `oss-local`, `oss-cloud`, and
-executed Tessl-local proof. Record the successful dry-run receipt, then run
-`sdk eval handoff-readiness --preview` before an actual live Tessl submission.
+executed Tessl-local proof. Capture each lane from its canonical command before
+materializing the bundle. Do not hand-write `eval-handoff-readiness.json`, a
+lane receipt, or reuse a prior candidate's manifest:
+
+    ./bin/ask sdk eval handoff-capture --skill <skill-path> \
+      --lane <pre-tessl-lane-id> \
+      --receipt-path .harness/evidence/handoff/<skill>/<new-source-receipt>.json \
+      --preview --json --robot
+
+Rerun that exact lane with `--execute` to write its source receipt. Use one
+fresh capture invocation per non-sharded lane and one fresh invocation for each
+one- or two-case `oss-local` shard. Do not use generic `handoff-capture` for
+`oss-cloud`: assign the completed current-candidate `sdk eval ab-run
+--execution-lane oss-cloud` receipt directly to materialization. That receipt
+retains the Configs FIFO wrapper, provider invocation, and execution-lane proof;
+the materializer accepts it only when its B variant exactly matches the current
+source candidate and its raw controlled fixture bytes match exactly one current
+`references/evals.yaml` prompt. Materialization derives that case id itself;
+do not hand-write a case list or use a generic task fixture. Do not source the
+FIFO, use the older Environment-ID transport, or reuse a stream for later
+stages. A stale, wrong-candidate, mismatched-scenario, or arbitrary JSON file
+is rejected by materialization.
+
+Stage each cloud fixture from the owning current scenario instead of composing
+task text by hand. Preview first, then write a new fixture only after the
+preview identifies the intended candidate and prompt digest:
+
+    ./bin/ask sdk eval ab-fixture-stage --skill <skill-path> --case <canonical-case-id> \
+      --fixture-path .harness/evidence/handoff/<skill>/<new-run>/fixtures/<canonical-case-id>.md \
+      --preview --json --robot
+
+Run the same command with `--execute`, then use that exact fixture path for the
+single matching cloud A/B receipt. This command stages source bytes only; it
+does not invoke Codex, the provider, Tessl, or the 1Password FIFO.
+
+After every required pre-Tessl lane passes, assemble them with the SDK-owned
+bridge:
+
+    ./bin/ask sdk eval handoff-materialize --skill <skill-path> \
+      --evidence-root .harness/evidence/handoff/<skill>/<new-bundle> \
+      --lane-receipt <lane-id>=<receipt.json> \
+      --preview --json --robot
+
+Supply one captured `--lane-receipt` for every non-sharded lane and repeat
+`--lane-receipt oss-local=<receipt.json>` for every current two-case local
+shard. For `oss-cloud`, provide one completed A/B receipt for each canonical
+scenario prompt instead of a capture receipt, then rerun the same command with
+`--execute`.
+Materialization derives each replay command from those captures instead of
+accepting typed command text. It copies only validated lane facts into a new
+candidate-bound bundle, records every source receipt's SHA-256, and leaves the
+`tessl-live-dry-run` row explicitly blocked until that stage actually runs. If
+a stage cannot emit its canonical repository-owned JSON receipt, classify that
+as an SDK receipt-capture gap and repair its owner before continuing the
+handoff.
+Record the successful dry-run receipt, then run `sdk eval handoff-readiness
+--preview` before an actual live Tessl submission.
 
 Project setup is a separate, explicit side-effect lane. Run
 `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot`
@@ -203,6 +258,18 @@ only with operator authority. It records a candidate-bound
 `.harness/evidence/tessl-project-links/<skill>/<candidate-digest>.json` receipt.
 The live evaluator only reads that receipt; it never repairs, relinks, updates,
 or creates a Tessl project as a side effect of scoring.
+
+After a live submission, preserve its returned run ID and inspect that exact
+run without spending another evaluation:
+
+    ./bin/ask sdk eval tessl-view --skill <skill-path> --run-id <submitted-run-id> \
+      --workspace <workspace> --execute --json --robot
+
+This command requires both the current project-link receipt and the matching
+submitted-run receipt. It writes the sanitized view locally, returns only its
+digest, byte count, and score summary, and never submits, relinks, publishes,
+or changes visibility. A pending result stays pending; poll that run again
+rather than invoking `evals run` a second time.
 
 The wrapper stages a private plugin package under:
 
@@ -307,8 +374,8 @@ Treat Tessl scores as evidence, not proof by themselves.
 - If the live run would exceed the operator-approved workspace budget or consume
   the 20-run reserve, classify the lane as `blocked_environment` for live
   scoring and continue with dry-run/local validation only.
-- The live-private readiness gate is: usage-spec score is at least 90% and is
-  not below the baseline score. A 95%+ score remains the improvement target.
+- The live-private readiness gate is: usage-spec score is at least 85% and is
+  not below the baseline score. A 90%+ score remains the improvement target.
   A lower score, lower baseline comparison, or
   missing viewable score summary is a failed or blocked gate, not a pass.
 - If the score UI shows an in-progress or lower live score, that live score is

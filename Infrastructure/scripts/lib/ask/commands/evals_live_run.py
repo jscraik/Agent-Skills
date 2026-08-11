@@ -82,9 +82,15 @@ def _tessl_live_scenario_preflight(
     path: str,
     staged_source: Path,
     common: dict,
+    handoff_readiness_path: Path | None = None,
 ) -> dict | None:
     try:
-        parity = _tessl_live_oss_scenario_parity(repo_root, path, staged_source)
+        parity = _tessl_live_oss_scenario_parity(
+            repo_root,
+            path,
+            staged_source,
+            handoff_readiness_path,
+        )
         budget_preflight = _tessl_live_budget_preflight(staged_source)
     except EvalArtifactReadError as exc:
         return {
@@ -304,7 +310,14 @@ def _tessl_live_result(common: dict, exit_code: int, raw_output: str, raw_error:
     }
 
 
-def _run_tessl_live_private_eval(repo_root: Path, path: str, *, workspace: str | None, dry_run: bool = False) -> dict:
+def _run_tessl_live_private_eval(
+    repo_root: Path,
+    path: str,
+    *,
+    workspace: str | None,
+    dry_run: bool = False,
+    handoff_readiness_path: Path | None = None,
+) -> dict:
     """Run or preview the opt-in private Tessl plugin eval lane."""
     command = "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     prepared = _tessl_live_prepare(repo_root, path, workspace, dry_run, command)
@@ -312,7 +325,13 @@ def _run_tessl_live_private_eval(repo_root: Path, path: str, *, workspace: str |
         return prepared
     normalized_workspace, staged_source, copied_files, command = prepared
     common = _tessl_eval_result_common(command=command, source_path=path, staged_source=staged_source, copied_files=copied_files, workspace=normalized_workspace, project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace), dry_run=dry_run)
-    if blocked := _tessl_live_scenario_preflight(repo_root, path, staged_source, common):
+    if blocked := _tessl_live_scenario_preflight(
+        repo_root,
+        path,
+        staged_source,
+        common,
+        handoff_readiness_path,
+    ):
         return blocked
     if blocked := _tessl_live_effects_block(command, path, normalized_workspace, dry_run):
         return blocked

@@ -35,6 +35,7 @@ def _audit_external_children(
         "classification": "external_project_skill_root",
         "repo_coupled_gates": False,
         "child_count": len(children),
+        "validation_scope": validation_scope,
     }
     child_results = [
         audit_skill(repo_root, child.as_posix(), level=level, validation_scope=validation_scope)
@@ -177,7 +178,11 @@ def audit_skill(
 ) -> CallResult:
     """Run runtime gates for runtime scope, or source-only diagnostics for source scope."""
     result = CallResult()
-    args = [skill_path, *(["--level", level] if level != "compat" else [])]
+    args = [
+        skill_path,
+        *(["--level", level] if level != "compat" else []),
+        *(["--source-only"] if validation_scope == "source" else []),
+    ]
     result.data["validation_commands"] = [_skills_validation_command("audit", *args)]
     children = _external_skill_root_children(repo_root, skill_path)
     if children:
@@ -189,6 +194,7 @@ def audit_skill(
     result.data["audit_scope"] = {
         "classification": "external_project_skill" if external else "foundry_repo_skill",
         "repo_coupled_gates": not external,
+        "validation_scope": validation_scope,
     }
     python = _get_python_command(["pyyaml", "jsonschema"])
     if not _run_audit_diagnostics(result, repo_root, skill_path, target_path, python, validation_scope):

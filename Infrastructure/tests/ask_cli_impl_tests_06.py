@@ -285,13 +285,13 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(output['data']['plugin_eval']['status'], 'skipped')
         self.assertEqual(output['data']['tessl_lint']['status'], 'skipped')
         self.assertEqual(output['data']['policy']['plugin_eval_min_acceptable_grade'], 'B+')
-        self.assertEqual(output['data']['policy']['tessl_review_min_score'], 95)
-        self.assertEqual(output['data']['policy']['tessl_review_target_score'], 95)
+        self.assertEqual(output['data']['policy']['tessl_review_min_score'], 85)
+        self.assertEqual(output['data']['policy']['tessl_review_target_score'], 90)
         self.assertEqual(output['data']['policy']['tessl_project_marker'], 'tessl.json')
         self.assertIn(os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews'), output['data']['policy']['tessl_staging_root'])
-        self.assertEqual(output['data']['review_mode_details']['tessl_review']['minimum_score'], 95)
-        self.assertEqual(output['data']['review_mode_details']['tessl_review']['target_score'], 95)
-        self.assertIn('--threshold 95', output['data']['review_mode_details']['tessl_review']['command'])
+        self.assertEqual(output['data']['review_mode_details']['tessl_review']['minimum_score'], 85)
+        self.assertEqual(output['data']['review_mode_details']['tessl_review']['target_score'], 90)
+        self.assertIn('--threshold 85', output['data']['review_mode_details']['tessl_review']['command'])
         self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --skip-plugin-eval --skip-tessl --json --robot'])
 
     def test_skills_external_review_skip_tools_human_output_exposes_validation(self):
@@ -395,6 +395,27 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(output['status'], 'success')
         self.assertEqual(output['data']['diagnostics']['exit_code'], 0)
         self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot'])
+
+    def test_skills_audit_source_only_contract(self):
+        """Source-only audit must not require a generated workspace projection."""
+        cmd = [
+            'python3', './bin/ask', 'skills', 'audit',
+            'Plugins/skill-factory/skills/code_quality_review/skill-builder',
+            '--source-only', '--json',
+        ]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output['status'], 'success')
+        self.assertEqual(output['data']['audit_scope']['validation_scope'], 'source')
+        self.assertEqual(
+            output['data']['validation_commands'],
+            [
+                './bin/ask skills audit '
+                'Plugins/skill-factory/skills/code_quality_review/skill-builder '
+                '--source-only --json --robot'
+            ],
+        )
 
     def test_skills_audit_accepts_explicit_external_project_skill(self):
         """Verify Skill Factory audit can inspect project-local skills outside the foundry."""

@@ -46,7 +46,7 @@ def _run_explicit_review(mock_run, mock_which, mock_audit):
         mock_run.side_effect = [
             _completed(["/usr/local/bin/plugin-eval", "analyze", skill_dir, "--format", "markdown"], "Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn"),
             _completed(["/usr/local/bin/tessl", "plugin", "lint", skill_dir], "tessl lint ok"),
-            _completed(["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "90", skill_dir], '{"reviewScore": 96, "summary": "ok"}'),
+            _completed(["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "85", skill_dir], '{"reviewScore": 96, "summary": "ok"}'),
         ]
         return external_review_skill(repo_root=repo_root, skill_path=skill_dir, with_tessl_review=True)
 
@@ -61,8 +61,8 @@ def _assert_explicit_review(case, result, mock_run):
     case.assertIn("/ask-plugin-eval-reviews/", mock_run.call_args_list[0].args[0][2])
     case.assertEqual(result.data["tessl_lint"]["status"], "success")
     case.assertEqual(result.data["tessl_review"]["status"], "success")
-    case.assertEqual(result.data["tessl_review"]["target_score"], 95)
-    case.assertEqual(result.data["tessl_review"]["summary"]["target_score"], 95)
+    case.assertEqual(result.data["tessl_review"]["target_score"], 90)
+    case.assertEqual(result.data["tessl_review"]["summary"]["target_score"], 90)
     case.assertEqual(mock_run.call_count, 3)
     for call in mock_run.call_args_list:
         case.assertNotIn("npx", call.args[0])
@@ -71,7 +71,7 @@ def _assert_explicit_review(case, result, mock_run):
     case.assertEqual(tessl_call.args[0][1:3], ["plugin", "lint"])
     case.assertEqual(review_call.args[0][1:3], ["skill", "review"])
     case.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
-    case.assertEqual(review_call.args[0][5], "95")
+    case.assertEqual(review_call.args[0][5], "85")
     for call in (tessl_call, review_call):
         case.assertNotIn("agent-skills-tessl-", call.kwargs["env"].get("HOME", ""))
     case.assertTrue(result.data["tessl_plugin"]["support_refs_included"])

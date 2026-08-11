@@ -136,8 +136,12 @@ def _case_ids_with_pass_status(payload: object) -> set[str]:
     return passed
 
 
-def _tessl_live_readiness_lanes(repo_root: Path, source_path: str) -> dict[str, dict[str, object]]:
-    readiness_path = default_handoff_readiness_path(repo_root, repo_root / source_path)
+def _tessl_live_readiness_lanes(
+    repo_root: Path,
+    source_path: str,
+    readiness_path: Path | None = None,
+) -> dict[str, dict[str, object]]:
+    readiness_path = readiness_path or default_handoff_readiness_path(repo_root, repo_root / source_path)
     readiness = _load_json_file(readiness_path)
     lanes = readiness.get("lanes")
     if not isinstance(lanes, list):
@@ -179,24 +183,19 @@ def _tessl_live_oss_scenario_parity(
     repo_root: Path,
     source_path: str,
     staged_source: Path,
+    readiness_path: Path | None = None,
 ) -> dict[str, object]:
     """Block Tessl live when staged cases outrun OSS local/cloud pass evidence."""
     staged_case_ids = _tessl_live_staged_case_ids(staged_source)
-    lanes = _tessl_live_readiness_lanes(repo_root, source_path)
+    lanes = _tessl_live_readiness_lanes(repo_root, source_path, readiness_path)
     lane_case_ids: dict[str, list[str]] = {}
     missing_by_lane: dict[str, list[str]] = {}
     extra_by_lane: dict[str, list[str]] = {}
     lane_receipts: dict[str, dict[str, object]] = {}
     staged_case_set = set(staged_case_ids)
     for lane_id in ("oss-local", "oss-cloud"):
-        lane = lanes.get(lane_id) or {}
-        receipt_path = _resolve_tessl_live_evidence_path(repo_root, lane.get("receipt_path"))
-        receipt_found = receipt_path is not None and receipt_path.is_file()
-        passed = _oss_pass_case_ids_for_live(repo_root, receipt_path)
-        lane_receipts[lane_id] = {
-            "receipt_path": str(receipt_path.relative_to(repo_root)) if receipt_path and receipt_path.is_relative_to(repo_root) else str(receipt_path) if receipt_path else None,
-            "receipt_found": receipt_found,
-        }
+        passed, receipt = _tessl_live_lane_case_evidence(repo_root, lanes.get(lane_id) or {})
+        lane_receipts[lane_id] = receipt
         lane_case_ids[lane_id] = sorted(passed)
         missing_by_lane[lane_id] = sorted(staged_case_set - passed)
         extra_by_lane[lane_id] = sorted(passed - staged_case_set)
@@ -222,6 +221,22 @@ def _tessl_live_oss_scenario_parity(
             "The Tessl live scenario set must exactly match both oss-local and "
             "oss-cloud pass evidence for the current live candidate."
         ),
+    }
+
+
+def _tessl_live_lane_case_evidence(
+    repo_root: Path,
+    lane: dict[str, object],
+) -> tuple[set[str], dict[str, object]]:
+    """Return one lane's passing OSS cases and the bounded receipt locator."""
+    receipt_path = _resolve_tessl_live_evidence_path(repo_root, lane.get("receipt_path"))
+    receipt_found = receipt_path is not None and receipt_path.is_file()
+    path_value = None
+    if receipt_path is not None:
+        path_value = str(receipt_path.relative_to(repo_root)) if receipt_path.is_relative_to(repo_root) else str(receipt_path)
+    return _oss_pass_case_ids_for_live(repo_root, receipt_path), {
+        "receipt_path": path_value,
+        "receipt_found": receipt_found,
     }
 
 

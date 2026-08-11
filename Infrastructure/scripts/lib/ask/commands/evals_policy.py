@@ -15,6 +15,10 @@ from .evals_core import (
     TESSL_WORKSPACE_RUN_LIMIT_SOURCE,
     TESSL_WORKSPACE_RUN_RESERVE,
 )
+from ask.skills_sdk.tessl_acceptance_policy import (
+    TESSL_ACCEPTANCE_SCORE,
+    TESSL_TARGET_SCORE,
+)
 
 
 def _tessl_staging_root_template() -> str:
@@ -57,6 +61,13 @@ def _tessl_policy() -> dict:
 
 def _tessl_live_private_policy(workspace: str | None = None) -> dict:
     """Return the repo's opt-in private Tessl plugin eval contract."""
+    policy = _tessl_live_private_base_policy(workspace)
+    policy.update(_tessl_live_private_scenario_policy())
+    policy.update(_tessl_live_private_operating_policy())
+    return policy
+
+
+def _tessl_live_private_base_policy(workspace: str | None) -> dict:
     return {
         "enabled_by": "--tessl-live-private",
         "visibility": "private",
@@ -92,6 +103,11 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "evals/<case-id>/criteria.json",
         ],
         "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
+    }
+
+
+def _tessl_live_private_scenario_policy() -> dict:
+    return {
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need 5 to 10 gold-standard scenarios with 8 as the target; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
         "target_scenarios": TESSL_LIVE_PRIVATE_TARGET_SCENARIOS,
@@ -113,63 +129,53 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         ),
         "expected_variants": ["baseline", "usage-spec"],
         "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
-        "pre_tessl_feedback_loop": {
-            "required_order": [
-                "mechanical_validation",
-                "security_risk_modes",
-                "scenario_quality",
-                "scorer_quality",
-                "scorer_calibration",
-                "deterministic_local_gates",
-                "oss_local_internal_judge",
-                "patch_oss_local_failures",
-                "oss_cloud_internal_judge",
-                "patch_oss_cloud_failures",
-                "tessl_local_proof",
-                "tessl_live_dry_run",
-                "tessl_live_run",
-                "patch_tessl_failures",
-            ],
-            "deterministic_local_gates": [
-                "skills audit",
-                "sdk eval regression-plan when prior Tessl or internal judge regressions exist",
-            ],
-            "mechanical_validation": ["skills audit", "skills package verify"],
-            "security_risk_modes": ["sdk security risk-modes --preview"],
-            "scenario_quality": ["sdk eval scenario-quality --preview"],
-            "scorer_quality": ["sdk eval scorer-quality --preview"],
-            "scorer_calibration": ["sdk eval scorer-calibration --preview"],
-            "internal_judge_sequence": [
-                {
-                    "profile": "oss-local",
-                    "role": "cheap internal remediation judge",
-                    "required_before": "oss-cloud",
-                    "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression",
-                },
-                {
-                    "profile": "oss-cloud",
-                    "role": "higher-confidence internal remediation judge",
-                    "required_before": "tessl_live_dry_run",
-                    "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression",
-                },
-            ],
-            "tessl_sequence": [
-                {
-                    "stage": "tessl_local_proof",
-                    "role": "local Tessl lint, pack, temp install, and optional review proof before staged external scoring",
-                },
-                {
-                    "stage": "tessl_live_dry_run",
-                    "role": "package and scenario staging proof before external scoring",
-                },
-                {
-                    "stage": "tessl_live_run",
-                    "role": "external confirmation lane after internal judges pass",
-                },
-            ],
-            "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
-            "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
-        },
+        "pre_tessl_feedback_loop": _tessl_live_private_feedback_loop(),
+    }
+
+
+def _tessl_live_private_feedback_loop() -> dict:
+    return {
+        "required_order": _tessl_live_required_order(),
+        "deterministic_local_gates": ["skills audit", "sdk eval regression-plan when prior Tessl or internal judge regressions exist"],
+        "mechanical_validation": ["skills audit", "skills package verify"],
+        "security_risk_modes": ["sdk security risk-modes --preview"],
+        "scenario_quality": ["sdk eval scenario-quality --preview"],
+        "scorer_quality": ["sdk eval scorer-quality --preview"],
+        "scorer_calibration": ["sdk eval scorer-calibration --preview"],
+        "internal_judge_sequence": _tessl_live_internal_judge_sequence(),
+        "tessl_sequence": _tessl_live_tessl_sequence(),
+        "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
+        "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
+    }
+
+
+def _tessl_live_required_order() -> list[str]:
+    return [
+        "mechanical_validation", "security_risk_modes", "scenario_quality", "scorer_quality",
+        "scorer_calibration", "deterministic_local_gates", "oss_local_internal_judge",
+        "patch_oss_local_failures", "oss_cloud_internal_judge", "patch_oss_cloud_failures",
+        "tessl_local_proof", "tessl_live_dry_run", "tessl_live_run", "patch_tessl_failures",
+    ]
+
+
+def _tessl_live_internal_judge_sequence() -> list[dict[str, str]]:
+    failure_rule = "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression"
+    return [
+        {"profile": "oss-local", "role": "cheap internal remediation judge", "required_before": "oss-cloud", "failure_rule": failure_rule},
+        {"profile": "oss-cloud", "role": "higher-confidence internal remediation judge", "required_before": "tessl_live_dry_run", "failure_rule": failure_rule},
+    ]
+
+
+def _tessl_live_tessl_sequence() -> list[dict[str, str]]:
+    return [
+        {"stage": "tessl_local_proof", "role": "local Tessl lint, pack, temp install, and optional review proof before staged external scoring"},
+        {"stage": "tessl_live_dry_run", "role": "package and scenario staging proof before external scoring"},
+        {"stage": "tessl_live_run", "role": "external confirmation lane after internal judges pass"},
+    ]
+
+
+def _tessl_live_private_operating_policy() -> dict:
+    return {
         "model_selection_gate": {
             "quality_floor_before_cost": True,
             "cost_is_secondary_to_score": True,
@@ -199,30 +205,44 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "preflight": "before live scoring, check remaining Tessl workspace run capacity when the API/list surface is available; otherwise use the operator-provided 300-run cap and preserve reserve for rerun/remediation",
             "block_when": "remaining run capacity cannot be checked and the run is nonessential, or known remaining capacity is at/below reserve; use dry-run staging and local scenario gates instead",
         },
-        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score > baseline; 95% remains the target",
+        "readiness_gate": (
+            "after run completion, fetch tessl eval view --json and require usage score "
+            f">= {TESSL_ACCEPTANCE_SCORE}% and usage score > baseline; "
+            f"{TESSL_TARGET_SCORE}% remains the target"
+        ),
         "min_score_required": TESSL_LIVE_PRIVATE_MIN_SCORE,
         "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "usage_data_opt_out": "tessl config set shareUsageData false",
     }
 
 
-def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
+def _tessl_live_handoff_readiness(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
 
     return build_handoff_readiness_receipt(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
 
 
-def _tessl_dry_run_admission(repo_root: Path, skill_path: str) -> dict:
+def _tessl_dry_run_admission(
+    repo_root: Path,
+    skill_path: str,
+    readiness_path: Path | None = None,
+) -> dict:
     from ask.skills_sdk.handoff_readiness import build_tessl_dry_run_admission  # noqa: PLC0415
 
     return build_tessl_dry_run_admission(
         repo_root,
         source_path=repo_root / skill_path,
         query=skill_path,
+        readiness_path=readiness_path,
     )
 
 
