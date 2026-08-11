@@ -166,11 +166,14 @@ def _run_gate(request: SkillGateRequest) -> List[Finding]:
     return findings
 
 
-def run_gate(request: SkillGateRequest | None = None, **legacy_options: object) -> List[Finding]:
+def run_gate(request: SkillGateRequest | SkillDoc | None = None, **legacy_options: object) -> List[Finding]:
     """Evaluate a skill gate request while retaining the keyword adapter temporarily."""
-    if request is not None and legacy_options:
+    if isinstance(request, SkillDoc):
+        resolved = SkillGateRequest(doc=request, **legacy_options)
+    elif request is not None and legacy_options:
         raise TypeError("pass either SkillGateRequest or legacy keyword arguments, not both")
-    resolved = request or SkillGateRequest(**legacy_options)
+    else:
+        resolved = request or SkillGateRequest(**legacy_options)
     return _run_gate(resolved)
 
 

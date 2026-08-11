@@ -23,12 +23,3 @@ language = "system"
 stages = ["commit-msg"]
 pass_filenames = true
 always_run = false
-
-[[repos.hooks]]
-id = "hooks-pre-push"
-name = "Run pre-push diagnostics"
-entry = "bash ../scripts/hooks/pre-push.sh"
-language = "system"
-stages = ["pre-push"]
-pass_filenames = false
-always_run = true

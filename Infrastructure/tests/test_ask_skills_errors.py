@@ -10,7 +10,7 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands import skills_impl_catalog, skills_impl_core  # noqa: E402
+from ask.commands import skills_impl, skills_impl_catalog, skills_impl_core  # noqa: E402
 from ask.commands.skills_impl import (  # noqa: E402
     _safe_tessl_staging_path,
     _subprocess_env_with_uv_cache,
@@ -41,6 +41,21 @@ def test_validation_timeout_retains_decoded_output() -> None:
     payload = json.loads(result.to_json())
     assert payload["data"]["fixture"]["stdout"] == "partial\ufffd"
     assert payload["data"]["fixture"]["stderr"] == "slow\ufffd\nvalidation command timed out after 1 seconds"
+
+
+def test_install_skill_accepts_legacy_positional_remediate_flag() -> None:
+    expected = object()
+    with patch.object(skills_impl, "_install_skill", return_value=expected) as install:
+        result = install_skill(repo_root, "https://example.invalid/demo.git", True)
+
+    assert result is expected
+    install.assert_called_once_with(
+        repo_root,
+        "https://example.invalid/demo.git",
+        remediate=True,
+        dest="Skills/github",
+        dry_run=False,
+    )
 
 
 def test_builder_module_cache_is_qualified_by_resolved_path() -> None:

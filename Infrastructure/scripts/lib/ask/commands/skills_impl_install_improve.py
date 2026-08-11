@@ -233,10 +233,14 @@ def _install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str
 def install_skill(
     repo_root: Path,
     url: str,
-    options: InstallSkillOptions | None = None,
+    options: InstallSkillOptions | bool | None = None,
     **legacy_options: object,
 ) -> CallResult:
     """Install from typed options, retaining legacy keywords during migration."""
+    if isinstance(options, bool):
+        if legacy_options:
+            raise TypeError("pass positional remediate or legacy keyword arguments, not both")
+        options = InstallSkillOptions(remediate=options)
     if options is not None and legacy_options:
         raise TypeError("pass either InstallSkillOptions or legacy keyword arguments, not both")
     resolved = options or InstallSkillOptions(**legacy_options)

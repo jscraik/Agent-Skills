@@ -598,12 +598,12 @@ def _skills_package(
 
 
 def skills_package(
-    repo_root: Path,
-    target: str,
-    options: SkillsPackageOptions | None = None,
-    **legacy_options: object,
+    repo_root: Path, target: str, options: SkillsPackageOptions | bool | None = None, **legacy_options: object,
 ) -> CallResult:
-    """Report package readiness from typed options, retaining legacy keywords during migration."""
+    if isinstance(options, bool):
+        if legacy_options:
+            raise TypeError("pass positional strict or legacy keyword arguments, not both")
+        options = SkillsPackageOptions(strict=options)
     if options is not None and legacy_options:
         raise TypeError("pass either SkillsPackageOptions or legacy keyword arguments, not both")
     resolved = options or SkillsPackageOptions(**legacy_options)

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 from importlib.machinery import SourceFileLoader
 import os
@@ -96,6 +97,29 @@ class SkillGatePublicPathTests(unittest.TestCase):
         self.assertNotIn("PATH_REPO_LINK_MISSING", codes)
         self.assertNotIn("PATH_REPO_LINK_TRAVERSAL", codes)
         self.assertNotIn("PATH_ABSOLUTE", codes)
+
+    def test_run_gate_accepts_legacy_document_with_keywords(self) -> None:
+        doc = self._doc(SKILL_GATE, "# Sample\n")
+        expected = []
+        gate_output = importlib.import_module("skill_gate_output")
+
+        with mock.patch.object(gate_output, "_run_gate", return_value=expected) as run:
+            actual = self.module.run_gate(
+                doc,
+                max_lines=360,
+                max_codeblock_lines=120,
+                min_desc_len=120,
+                require_contract=True,
+                require_evals=True,
+                require_philosophy=True,
+                require_redaction=True,
+                require_fail_fast=False,
+                require_security_evals=False,
+                pi_high_fail=False,
+            )
+
+        self.assertIs(actual, expected)
+        self.assertEqual(run.call_args.args[0].doc, doc)
 
     def test_repo_scheme_rejects_missing_or_escaping_targets(self) -> None:
         doc = self._doc(

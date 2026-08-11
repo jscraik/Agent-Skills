@@ -1,8 +1,20 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
+from typing import Any
+
 from .skills_impl_listing import *  # noqa: F403
 
-CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
+
+def _freeze_contract_mapping(
+    value: Mapping[str, Mapping[str, Any]],
+) -> Mapping[str, Mapping[str, Any]]:
+    """Freeze module-level contract mappings while preserving list schema fields."""
+    return MappingProxyType({key: MappingProxyType(dict(item)) for key, item in value.items()})
+
+
+CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: Mapping[str, Mapping[str, Any]] = _freeze_contract_mapping({
     "skill_loaded": {
         "profiles": ["authoring", "package-review", "eval"],
         "producer_commands": ["./bin/ask skills resolve <handle> --json --robot"],
@@ -43,10 +55,10 @@ CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
         "producer_commands": [_skills_validation_command("sync", "--scope", "workspace", "--projection", "flat")],
         "observer_commands": [_skills_validation_command("list")],
     },
-}
+})
 
 
-SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
+SKILL_OPERATION_PROFILES: Mapping[str, Mapping[str, Any]] = _freeze_contract_mapping({
     "authoring": {
         "intent": "Create or revise canonical skill sources.",
         "allowed_roots": ["Skills/**", "Plugins/*/skills/**", "Docs/**", "Infrastructure/tests/**"],
@@ -101,7 +113,7 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "required_evidence": ["operator request", "target identity", "rollback path", "post-mutation validation"],
         "stop_conditions": ["unclear target", "auth mismatch", "unrelated dirty worktree", "rollback unavailable"],
     },
-}
+})
 
 
 def _skill_memory_operation_context() -> dict[str, Any]:
@@ -567,36 +579,64 @@ def _skill_events_readiness_overview(event_summary: dict[str, Any]) -> dict[str,
     })
 
 
-def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
-    """Return the declared capability lifecycle event contract."""
+def _unknown_skill_event_result(selected: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills events"
-    selected = event_type.strip() if event_type else None
-    if selected and selected not in CAPABILITY_LIFECYCLE_EVENT_TYPES:
-        result.status = "error"
-        result.data["skill_events"] = {
-            "schema_version": "skill-events.v1",
-            "status": "blocked",
-            "requested_event_type": selected,
-            "available_event_types": sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES),
-        }
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Unknown skill lifecycle event type '{selected}'.",
-                fix_suggestion=f"Use one of: {', '.join(sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES))}",
-            )
+    result.status = "error"
+    result.data["skill_events"] = {
+        "schema_version": "skill-events.v1",
+        "status": "blocked",
+        "requested_event_type": selected,
+        "available_event_types": sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES),
+    }
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Unknown skill lifecycle event type '{selected}'.",
+            fix_suggestion=f"Use one of: {', '.join(sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES))}",
         )
-        return result
+    )
+    return result
 
-    event_types = {selected: CAPABILITY_LIFECYCLE_EVENT_TYPES[selected]} if selected else CAPABILITY_LIFECYCLE_EVENT_TYPES
-    event_consumers = (
+
+def _selected_skill_event_contract(selected: str | None) -> tuple[dict[str, Any], dict[str, Any]]:
+    selected_event_types = (
+        {selected: CAPABILITY_LIFECYCLE_EVENT_TYPES[selected]}
+        if selected
+        else CAPABILITY_LIFECYCLE_EVENT_TYPES
+    )
+    selected_event_consumers = (
         {selected: CAPABILITY_LIFECYCLE_EVENT_CONSUMERS[selected]}
         if selected
         else CAPABILITY_LIFECYCLE_EVENT_CONSUMERS
     )
+    event_types = dict(selected_event_types)
+    event_consumers = {
+        event_type: dict(consumer)
+        for event_type, consumer in selected_event_consumers.items()
+    }
+    return event_types, event_consumers
+
+
+def _skill_events_contract_schemas() -> dict[str, str]:
+    return {
+        "events": "skill-events.v1",
+        "lifecycle_event": "capability-lifecycle-event.v1",
+        "profiles": "skill-operation-profiles.v1",
+        "doctor": "skill-doctor.v1",
+        "package": "skill-package-readiness.v1",
+        "memory": "skill-memory-provider.v1",
+    }
+
+
+def _skill_events_payload(
+    repo_root: Path,
+    selected: str | None,
+    event_types: dict[str, Any],
+    event_consumers: dict[str, Any],
+) -> dict[str, Any]:
     event_summary = _skill_event_summary(event_consumers, SKILL_OPERATION_PROFILES)
-    result.data["skill_events"] = {
+    return {
         "schema_version": "skill-events.v1",
         "status": "pass",
         "repo_root": str(repo_root),
@@ -604,14 +644,7 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
         "event_schema": "capability-lifecycle-event.v1",
         "event_names": list(event_types),
         "available_event_types": sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES),
-        "contract_schemas": {
-            "events": "skill-events.v1",
-            "lifecycle_event": "capability-lifecycle-event.v1",
-            "profiles": "skill-operation-profiles.v1",
-            "doctor": "skill-doctor.v1",
-            "package": "skill-package-readiness.v1",
-            "memory": "skill-memory-provider.v1",
-        },
+        "contract_schemas": _skill_events_contract_schemas(),
         "event_types": event_types,
         "event_consumers": event_consumers,
         "readiness_overview": _skill_events_readiness_overview(event_summary),
@@ -635,6 +668,19 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
             else f"{len(CAPABILITY_LIFECYCLE_EVENT_TYPES)} capability lifecycle event types are declared."
         ),
     }
+
+
+def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
+    """Return the declared capability lifecycle event contract."""
+    selected = event_type.strip() if event_type else None
+    if selected and selected not in CAPABILITY_LIFECYCLE_EVENT_TYPES:
+        return _unknown_skill_event_result(selected)
+    event_types, event_consumers = _selected_skill_event_contract(selected)
+    result = CallResult()
+    result.metadata["command"] = "skills events"
+    result.data["skill_events"] = _skill_events_payload(
+        repo_root, selected, event_types, event_consumers
+    )
     return result
 
 
