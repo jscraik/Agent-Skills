@@ -71,12 +71,6 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
         )
     else:
         scorecard_evidence_html = "<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>"
-    live_status_html = (
-        f'<span class="live-status is-active">Validation running - refreshes in '
-        f"<span data-refresh-countdown>{refresh_seconds}s</span></span>"
-        if validation_active
-        else '<span class="live-status">Static evidence snapshot</span>'
-    )
     review_lanes_html = _render_review_mode_details(review_mode_details)
     if validation_active:
         live_status_html = (
