@@ -333,12 +333,12 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
 PROJECT_SKILLS_SDK_MANIFEST = "skills-sdk.json"
 PROJECT_SKILLS_SDK_SCHEMA = "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json"
 PROJECT_SKILLS_SDK_SCHEMA_VERSION = "skills-sdk.project.v1"
-PROJECT_SKILL_ROOT_CLASSIFICATIONS = {
+PROJECT_SKILL_ROOT_CLASSIFICATIONS = frozenset({
     "canonical_project_source",
     "generated_runtime_projection",
     "client_runtime_config",
     "unknown",
-}
+})
 
 
 def _repo_relative_path_parts(path: str) -> tuple[str, ...]:
