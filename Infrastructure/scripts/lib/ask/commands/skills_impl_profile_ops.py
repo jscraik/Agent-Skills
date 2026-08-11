@@ -120,7 +120,7 @@ def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any
             stop_conditions_by_profile[profile_name] = sorted(str(condition) for condition in stop_conditions)
         taxonomy_stop_conditions = sorted(
             str(condition)
-            for condition in stop_conditions
+            for condition in (stop_conditions if isinstance(stop_conditions, list) else [])
             if isinstance(condition, str) and condition in DOCTOR_BLOCKER_TAXONOMY
         )
         if taxonomy_stop_conditions:
