@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 import tempfile
 import unittest
@@ -19,7 +20,7 @@ if existing_runner is not None:
     if existing_path.parent != SCRIPT_DIR:
         del sys.modules["run_skill_evals"]
 
-import run_skill_evals  # noqa: E402
+run_skill_evals = importlib.import_module("run_skill_evals")
 
 
 class LegacyRunnerAdapterTests(unittest.TestCase):

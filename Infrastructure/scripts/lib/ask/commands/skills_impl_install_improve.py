@@ -14,7 +14,7 @@ class InstallSkillOptions:
 
 def _redacted_url(url: str) -> str:
     """Redact embedded credentials from a URL to prevent leakage in logs and install metadata."""
-    return re.sub(r"(https?://)[^:/@]+:[^@/]+@", r"\1<REDACTED>@", url)
+    return re.sub(r"(?i)([a-z][a-z0-9+.-]*://)[^@/\s]*@", r"\1<REDACTED>@", url)
 
 
 def _install_dry_run_result(
@@ -238,9 +238,10 @@ def install_skill(
 ) -> CallResult:
     """Install from typed options, retaining legacy keywords during migration."""
     if isinstance(options, bool):
-        if legacy_options:
-            raise TypeError("pass positional remediate or legacy keyword arguments, not both")
-        options = InstallSkillOptions(remediate=options)
+        if "remediate" in legacy_options:
+            raise TypeError("remediate was provided both positionally and by keyword")
+        options = InstallSkillOptions(remediate=options, **legacy_options)
+        legacy_options = {}
     if options is not None and legacy_options:
         raise TypeError("pass either InstallSkillOptions or legacy keyword arguments, not both")
     resolved = options or InstallSkillOptions(**legacy_options)

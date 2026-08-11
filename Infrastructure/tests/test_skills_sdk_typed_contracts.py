@@ -191,6 +191,17 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
 
         self.assertIsNone(receipt.dataset_digest)
 
+    def test_final_eval_run_contract_requires_dataset_digest(self) -> None:
+        for status in ("pass", "fail"):
+            with self.subTest(status=status):
+                payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+                self.assertIsInstance(payload, dict)
+                payload["status"] = status
+                payload["dataset_digest"] = None
+
+                with self.assertRaises(ValidationError):
+                    contracts.validate_eval_run_receipt(payload)
+
     def test_emitter_preview_contract_rejects_emission_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
         self.assertIsInstance(payload, dict)

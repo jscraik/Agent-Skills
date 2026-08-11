@@ -706,7 +706,7 @@ def _skills_sdk_release_set_blocked_result(
             fix_suggestion=(
                 f"Run the declared release set with --scenario-set {release_set['id']} "
                 if release_set
-                else "Define release_scenario_sets in references/evals.yaml before OSS release proof."
+                else "Define release_scenario_sets in references/evals.yaml before OSS release proof. "
             )
             + "or use --mode smoke for focused debug subsets.",
         )

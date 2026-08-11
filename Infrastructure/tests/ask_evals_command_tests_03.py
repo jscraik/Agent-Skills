@@ -1,4 +1,24 @@
+import shutil
+
 from ask_evals_command_tests_02 import *  # noqa: F403
+
+
+def test_tessl_live_staging_uses_path_identity_for_custom_roots(tmp_path: Path) -> None:
+    first_source = _write_example_skill(tmp_path)
+    second_source = tmp_path / "Plugins" / "demo" / "skills" / first_source.name
+    second_source.parent.mkdir(parents=True)
+    shutil.copytree(first_source, second_source)
+    staging_root = tmp_path / "ask-tessl-local-proof"
+
+    first_stage, _ = evals._stage_tessl_live_private_source(
+        tmp_path, "Skills/example-skill", "jscraik", temp_root=staging_root
+    )
+    second_stage, _ = evals._stage_tessl_live_private_source(
+        tmp_path, "Plugins/demo/skills/example-skill", "jscraik", temp_root=staging_root
+    )
+
+    assert first_stage != second_stage
+    assert first_stage.parent == second_stage.parent == staging_root
 
 def test_tessl_projection_shape_rejects_invalid_bundled_mcp(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)

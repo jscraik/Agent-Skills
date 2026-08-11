@@ -561,10 +561,17 @@ def skills_sdk_plugin_create(repo_root: Path, request: SkillsSdkPluginCreateRequ
 
 
 def _sdk_plugin_create_command(request: SkillsSdkPluginCreateRequest) -> str:
-    return _ask_validation_command(
+    args = [
         "sdk", "plugin", "create", request.name, "--kind", request.kind,
-        "--category", request.category, "--apply" if request.apply else "--preview",
-    )
+        "--category", request.category,
+    ]
+    if request.description:
+        args.extend(["--description", request.description])
+    if request.with_registry:
+        args.append("--with-registry")
+    args.extend(f"--with-{folder}" for folder in request.companion_folders)
+    args.append("--apply" if request.apply else "--preview")
+    return _ask_validation_command(*args)
 
 
 def _sdk_plugin_create_missing_description(
@@ -687,10 +694,7 @@ def _sdk_plugin_create_registry_save(
 
 def skills_sdk_plugin_review(repo_root: Path, request: SkillsSdkPluginReviewRequest) -> CallResult:
     """Review or preview review of a single skill or plugin through SDK guardrails."""
-    command = _ask_validation_command(
-        "sdk", "plugin", "review", request.target, "--kind", request.kind,
-        "--execute" if request.execute else "--preview",
-    )
+    command = _sdk_plugin_review_command(request)
     if not request.execute:
         return _sdk_plugin_review_preview(request, command)
     delegated = _sdk_plugin_review_delegated(repo_root, request)
@@ -710,6 +714,14 @@ def skills_sdk_plugin_review(repo_root: Path, request: SkillsSdkPluginReviewRequ
     result.status = delegated.status
     result.errors.extend(delegated.errors)
     return result
+
+
+def _sdk_plugin_review_command(request: SkillsSdkPluginReviewRequest) -> str:
+    args = ["sdk", "plugin", "review", request.target, "--kind", request.kind]
+    if request.strict:
+        args.append("--strict")
+    args.append("--execute" if request.execute else "--preview")
+    return _ask_validation_command(*args)
 
 
 def _sdk_plugin_review_preview(request: SkillsSdkPluginReviewRequest, command: str) -> CallResult:

@@ -524,22 +524,22 @@ def _copy_tessl_live_skill_package(source_root: Path, staged_root: Path) -> list
     return copied
 
 
-def _stable_tessl_stage_parent(path: str) -> Path:
+def _tessl_stage_directory_name(path: str) -> str:
     safe_name = path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
-    return Path(tempfile.gettempdir()) / "ask-tessl-evals" / f"{safe_name}-{digest}"
+    return f"{safe_name}-{digest}"
+
+
+def _stable_tessl_stage_parent(path: str) -> Path:
+    return Path(tempfile.gettempdir()) / "ask-tessl-evals" / _tessl_stage_directory_name(path)
 
 
 def _stable_tessl_live_stage_parent(path: str) -> Path:
-    safe_name = path.replace("/", "__").replace(" ", "_")
-    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
-    return Path(tempfile.gettempdir()) / "ask-tessl-evals-live" / f"{safe_name}-{digest}"
+    return Path(tempfile.gettempdir()) / "ask-tessl-evals-live" / _tessl_stage_directory_name(path)
 
 
 def _stable_tessl_local_install_workspace(path: str) -> Path:
-    safe_name = path.replace("/", "__").replace(" ", "_")
-    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
-    return Path(tempfile.gettempdir()) / "ask-tessl-local-install" / f"{safe_name}-{digest}"
+    return Path(tempfile.gettempdir()) / "ask-tessl-local-install" / _tessl_stage_directory_name(path)
 
 
 def _unique_archive_dir(archive_root: Path, label: str) -> Path:

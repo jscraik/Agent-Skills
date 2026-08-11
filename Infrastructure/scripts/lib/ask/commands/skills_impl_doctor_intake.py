@@ -360,6 +360,8 @@ def _resolve_doctor_options(
     allow_validation_scope: bool,
 ) -> SkillsDoctorOptions:
     """Adapt the pre-options doctor flags while rejecting mixed call styles."""
+    if not allow_validation_scope and "validation_scope" in legacy_options:
+        raise TypeError("validation_scope is not supported by this command")
     if isinstance(options, SkillsDoctorOptions):
         if legacy_flags or legacy_options:
             raise TypeError("pass either SkillsDoctorOptions or legacy arguments, not both")
@@ -368,11 +370,13 @@ def _resolve_doctor_options(
         if legacy_flags:
             raise TypeError("legacy positional flags require the strict argument")
         return SkillsDoctorOptions(**legacy_options)
-    if legacy_options:
-        raise TypeError("pass either legacy positional or keyword arguments, not both")
-    return SkillsDoctorOptions(**_legacy_doctor_option_values(
+    positional_options = _legacy_doctor_option_values(
         options, legacy_flags, allow_validation_scope=allow_validation_scope,
-    ))
+    )
+    duplicate_fields = positional_options.keys() & legacy_options.keys()
+    if duplicate_fields:
+        raise TypeError(f"legacy options were provided twice: {', '.join(sorted(duplicate_fields))}")
+    return SkillsDoctorOptions(**(legacy_options | positional_options))
 
 
 def skills_doctor(

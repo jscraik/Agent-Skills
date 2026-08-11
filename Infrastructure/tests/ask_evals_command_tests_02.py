@@ -273,6 +273,23 @@ def test_tessl_live_private_sanitizer_preserves_staged_evidence_root() -> None:
     assert sanitized["stdout"] == "contact <redacted-email> and inspect <user-path>"
 
 
+def test_tessl_live_receipt_retention_names_the_actual_stage_parent(tmp_path: Path) -> None:
+    staged_source = tmp_path / "ask-tessl-evals-live" / "Skills__example-skill-abc123"
+    staged_source.mkdir(parents=True)
+
+    receipt = evals._tessl_eval_result_common(
+        command="tessl eval run",
+        source_path="Skills/example-skill",
+        staged_source=staged_source,
+        copied_files=[],
+        workspace="jscraik",
+        project_identity={"name": "jscraik/example-skill"},
+        dry_run=True,
+    )
+
+    assert str(staged_source.parent) in receipt["evidence_retention"]
+
+
 def test_tessl_live_private_sanitizer_redacts_cross_platform_home_paths() -> None:
     payload = {
         "stdout": (

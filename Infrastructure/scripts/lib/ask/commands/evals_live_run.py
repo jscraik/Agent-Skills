@@ -72,7 +72,7 @@ def _tessl_eval_result_common(
         "visibility": "private",
         "dry_run": dry_run,
         "live_private": True,
-        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
+        "evidence_retention": f"staged directory is left under {staged_source.parent} for inspection",
         "policy": _tessl_live_private_policy(workspace),
     }
 

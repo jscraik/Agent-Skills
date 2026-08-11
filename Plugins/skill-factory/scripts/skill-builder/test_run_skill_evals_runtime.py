@@ -661,6 +661,15 @@ class RunSkillEvalsRuntimeTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         self.assertEqual(persisted_jsonl, "partial stdout")
 
+    def test_codex_jsonl_write_failure_is_recorded_as_a_warning(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            warnings: list[str] = []
+            with unittest.mock.patch.object(Path, "write_text", side_effect=OSError("disk full")):
+                run_skill_evals._write_codex_jsonl(Path(tmpdir) / "trace.jsonl", "partial", warnings)
+
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("Could not write Codex JSONL output", warnings[0])
+
 
     def test_run_codex_exec_keeps_last_message_artifact_on_timeout(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

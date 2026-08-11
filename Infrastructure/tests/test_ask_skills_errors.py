@@ -1,3 +1,4 @@
+import importlib
 import json
 import subprocess
 import sys
@@ -10,18 +11,21 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands import skills_impl, skills_impl_catalog, skills_impl_core  # noqa: E402
-from ask.commands.skills_impl import (  # noqa: E402
-    _safe_tessl_staging_path,
-    _subprocess_env_with_uv_cache,
-    _summarize_family_benchmark_failure,
-    _write_tessl_plugin_wrapper,
-    audit_skill,
-    external_review_skill,
-    install_skill,
-    skills_budget,
-)
-from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
+skills_impl = importlib.import_module("ask.commands.skills_impl")
+skills_impl_catalog = importlib.import_module("ask.commands.skills_impl_catalog")
+skills_impl_core = importlib.import_module("ask.commands.skills_impl_core")
+_safe_tessl_staging_path = skills_impl._safe_tessl_staging_path
+_redacted_url = skills_impl._redacted_url
+_subprocess_env_with_uv_cache = skills_impl._subprocess_env_with_uv_cache
+_summarize_family_benchmark_failure = skills_impl._summarize_family_benchmark_failure
+_write_tessl_plugin_wrapper = skills_impl._write_tessl_plugin_wrapper
+audit_skill = skills_impl.audit_skill
+external_review_skill = skills_impl.external_review_skill
+install_skill = skills_impl.install_skill
+skills_budget = skills_impl.skills_budget
+render_skill_review_dashboard = importlib.import_module(
+    "ask.skill_review_dashboard"
+).render_skill_review_dashboard
 
 
 def _completed(args, stdout, *, returncode=0, stderr=""):
@@ -56,6 +60,35 @@ def test_install_skill_accepts_legacy_positional_remediate_flag() -> None:
         dest="Skills/github",
         dry_run=False,
     )
+
+
+def test_install_skill_merges_legacy_positional_and_keyword_options() -> None:
+    expected = object()
+    with patch.object(skills_impl, "_install_skill", return_value=expected) as install:
+        result = install_skill(
+            repo_root, "https://example.invalid/demo.git", True, dest="Skills/agent-ops", dry_run=True
+        )
+
+    assert result is expected
+    install.assert_called_once_with(
+        repo_root,
+        "https://example.invalid/demo.git",
+        remediate=True,
+        dest="Skills/agent-ops",
+        dry_run=True,
+    )
+
+
+def test_redacted_url_covers_any_scheme_and_userinfo_shape() -> None:
+    cases = {
+        "https://user:password@example.invalid/repo.git": "https://<REDACTED>@example.invalid/repo.git",
+        "ssh://token@example.invalid/repo.git": "ssh://<REDACTED>@example.invalid/repo.git",
+        "git+https://token@example.invalid/repo.git": "git+https://<REDACTED>@example.invalid/repo.git",
+        "https://example.invalid/path@literal": "https://example.invalid/path@literal",
+    }
+
+    for raw, expected in cases.items():
+        assert _redacted_url(raw) == expected
 
 
 def test_builder_module_cache_is_qualified_by_resolved_path() -> None:

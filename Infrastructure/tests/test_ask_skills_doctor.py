@@ -97,6 +97,21 @@ class TestAskSkillsDoctor(unittest.TestCase):
 
         self.assertEqual(captured, {"strict": True, "codex_parity": True, "validation_scope": "source"})
 
+    def test_doctor_merges_legacy_positional_and_keyword_options(self) -> None:
+        captured: dict[str, object] = {}
+
+        def fake_doctor(_repo_root: Path, _target: str, **options: object) -> CallResult:
+            captured.update(options)
+            return CallResult()
+
+        with patch("ask.commands.skills_impl._skills_doctor", side_effect=fake_doctor):
+            skills_doctor(REPO_ROOT, "autofix", True, validation_scope="source")
+
+        self.assertEqual(
+            captured,
+            {"strict": True, "codex_parity": False, "validation_scope": "source"},
+        )
+
     def test_sdk_check_accepts_legacy_positional_flags(self) -> None:
         captured: dict[str, object] = {}
 
@@ -108,6 +123,10 @@ class TestAskSkillsDoctor(unittest.TestCase):
             skills_sdk_check(REPO_ROOT, "autofix", True, True)
 
         self.assertEqual(captured, {"strict": True, "codex_parity": True})
+
+    def test_sdk_check_rejects_unsupported_validation_scope_keyword(self) -> None:
+        with self.assertRaisesRegex(TypeError, "validation_scope"):
+            skills_sdk_check(REPO_ROOT, "autofix", validation_scope="source")
 
     def test_operation_context_events_are_json_serializable(self) -> None:
         for context in (_skill_package_operation_context(), _skill_doctor_operation_context()):

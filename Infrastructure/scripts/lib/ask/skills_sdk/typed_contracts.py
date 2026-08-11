@@ -447,6 +447,12 @@ class EvalRunReceipt(_SdkContractModel):
         min_length=1
     )
 
+    @model_validator(mode="after")
+    def _require_dataset_digest_for_final_status(self) -> EvalRunReceipt:
+        if self.status in {"pass", "fail"} and self.dataset_digest is None:
+            raise ValueError("dataset_digest is required for pass and fail eval receipts")
+        return self
+
 
 class SandboxCommandRule(_SdkContractModel):
     program: str = Field(min_length=1)

@@ -597,13 +597,12 @@ def _skills_package(
     return result
 
 
-def skills_package(
-    repo_root: Path, target: str, options: SkillsPackageOptions | bool | None = None, **legacy_options: object,
-) -> CallResult:
+def skills_package(repo_root: Path, target: str, options: SkillsPackageOptions | bool | None = None, **legacy_options: object) -> CallResult:
     if isinstance(options, bool):
-        if legacy_options:
-            raise TypeError("pass positional strict or legacy keyword arguments, not both")
-        options = SkillsPackageOptions(strict=options)
+        if "strict" in legacy_options:
+            raise TypeError("strict was provided both positionally and by keyword")
+        options = SkillsPackageOptions(strict=options, **legacy_options)
+        legacy_options = {}
     if options is not None and legacy_options:
         raise TypeError("pass either SkillsPackageOptions or legacy keyword arguments, not both")
     resolved = options or SkillsPackageOptions(**legacy_options)

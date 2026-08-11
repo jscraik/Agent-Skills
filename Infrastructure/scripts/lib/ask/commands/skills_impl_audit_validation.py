@@ -175,7 +175,7 @@ def audit_skill(
     repo_root: Path, skill_path: str, level: str = "compat",
     validation_scope: Literal["runtime", "source"] = "runtime",
 ) -> CallResult:
-    """Run structural diagnostics and the selected strict audit gates."""
+    """Run runtime gates for runtime scope, or source-only diagnostics for source scope."""
     result = CallResult()
     args = [skill_path, *(["--level", level] if level != "compat" else [])]
     result.data["validation_commands"] = [_skills_validation_command("audit", *args)]

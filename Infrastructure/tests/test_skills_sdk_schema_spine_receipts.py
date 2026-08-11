@@ -351,6 +351,20 @@ class TestSkillsSdkSchemaSpineReceipts(SchemaSpineTestCase):
             {**self.schemas, **self.schemas_by_file},
         )
 
+    def test_eval_run_v0_schema_requires_dataset_digest_for_final_status(self) -> None:
+        for status in ("pass", "fail"):
+            with self.subTest(status=status):
+                payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+                payload["status"] = status
+                payload["dataset_digest"] = None
+
+                with self.assertRaises(AssertionError):
+                    _validate_schema_subset(
+                        self.schemas["eval-run-receipt"],
+                        payload,
+                        {**self.schemas, **self.schemas_by_file},
+                    )
+
     def test_eval_run_v0_schema_accepts_internal_quality_gates(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
         payload["runner"] = "internal_skill_builder_v0"

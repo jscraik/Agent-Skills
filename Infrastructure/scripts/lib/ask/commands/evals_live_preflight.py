@@ -15,7 +15,7 @@ def _stage_tessl_eval_source(
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl eval source is not a directory: {path}")
 
-    staged_root = (temp_root / source_root.name) if temp_root else _stable_tessl_stage_parent(path)
+    staged_root = (temp_root / _tessl_stage_directory_name(path)) if temp_root else _stable_tessl_stage_parent(path)
     staged_root.mkdir(parents=True, exist_ok=True)
     _archive_stage_children(staged_root, "local-eval")
 
@@ -50,7 +50,7 @@ def _stage_tessl_live_private_source(
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl live eval source is not a directory: {path}")
 
-    staged_root = (temp_root / source_root.name) if temp_root else _stable_tessl_live_stage_parent(path)
+    staged_root = (temp_root / _tessl_stage_directory_name(path)) if temp_root else _stable_tessl_live_stage_parent(path)
     staged_root.mkdir(parents=True, exist_ok=True)
     _archive_stage_children(staged_root, "live-private")
 

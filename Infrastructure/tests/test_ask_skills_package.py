@@ -36,6 +36,19 @@ class TestAskSkillsPackage(unittest.TestCase):
             checkout_test=False,
         )
 
+    def test_package_merges_legacy_positional_and_keyword_options(self) -> None:
+        expected = object()
+        with patch.object(skills_impl, "_skills_package", return_value=expected) as package:
+            result = skills_package(REPO_ROOT, "example-skill", True, checkout_test=True)
+
+        self.assertIs(result, expected)
+        package.assert_called_once_with(
+            REPO_ROOT,
+            "example-skill",
+            strict=True,
+            checkout_test=True,
+        )
+
     def test_package_verify_blocks_weak_skill_writing_quality(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

@@ -209,19 +209,19 @@ def _standard_codex_exec_command(
     return cmd
 
 
-def _write_codex_jsonl(path: Optional[Path], stdout: str) -> None:
+def _write_codex_jsonl(path: Optional[Path], stdout: str, warnings: List[str]) -> None:
     if path and stdout:
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(stdout, encoding="utf-8")
-        except OSError:
-            pass
+        except OSError as exc:
+            warnings.append(f"Could not write Codex JSONL output to {path}: {exc}")
 
 
 def _codex_timeout_result(context: _CodexExecContext, exc: sp.TimeoutExpired) -> Tuple[int, str, str]:
     stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout or ""
     stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr or ""
-    _write_codex_jsonl(context.request.jsonl_path, stdout)
+    _write_codex_jsonl(context.request.jsonl_path, stdout, context.warnings)
     timeout_message = f"codex exec timed out after {context.timeout} seconds."
     return 124, stdout, f"{stderr.rstrip()}\n{timeout_message}".strip()
 
@@ -243,7 +243,7 @@ def _invoke_codex_exec(
         return 2, "", str(exc)
     except sp.TimeoutExpired as exc:
         return _codex_timeout_result(context, exc)
-    _write_codex_jsonl(request.jsonl_path, proc.stdout)
+    _write_codex_jsonl(request.jsonl_path, proc.stdout, context.warnings)
     return proc.returncode, proc.stdout, proc.stderr
 
 
