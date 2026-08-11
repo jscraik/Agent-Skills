@@ -729,6 +729,14 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["tessl_review"]["status"], "skipped")
         self.assertIn("Disabled by default", result.data["tessl_review"]["reason"])
+        self.assertEqual(
+            result.data["dashboard"],
+            {
+                "status": "not_requested",
+                "reason": "disabled_by_option",
+                "tab": "quality",
+            },
+        )
         self.assertEqual(mock_run.call_count, 2)
 
     def test_external_review_rejects_conflicting_tessl_review_flags(self):
@@ -756,7 +764,6 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["external_review"]["blocker_class"], "blocked_validation")
         self.assertIn("--skip-tessl", result.data["external_review"]["blocker"])
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-
 
 if __name__ == "__main__":
     unittest.main()

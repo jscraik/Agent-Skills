@@ -496,6 +496,38 @@ def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
         )
 
     assert result.status == "success"
+    assert result.data["dashboard"] == {
+        "status": "not_requested",
+        "reason": "disabled_by_option",
+        "tab": "evals",
+    }
+    assert "dashboard_path" not in result.data
+
+
+def test_run_evals_keeps_passing_receipt_when_dashboard_is_unavailable(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with (
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+        mock.patch.object(evals, "_render_eval_dashboard", side_effect=OSError("read-only dashboard root")),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=True,
+            skip_tessl=True,
+        )
+
+    assert result.status == "success"
+    assert result.errors == []
+    assert result.data["eval_status"] == "pass"
+    assert result.data["dashboard"] == {
+        "status": "unavailable",
+        "reason": "render_failed",
+        "error_type": "OSError",
+        "tab": "evals",
+    }
     assert "dashboard_path" not in result.data
 
 
