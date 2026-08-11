@@ -391,10 +391,8 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
     suffix = path.suffix.lower()
     if suffix == ".json":
         try:
-            import json
-
             loaded = json.loads(text)
-        except (OSError, ValueError) as exc:
+        except ValueError as exc:
             return None, str(exc)
         if isinstance(loaded, (dict, list)):
             return loaded, None
