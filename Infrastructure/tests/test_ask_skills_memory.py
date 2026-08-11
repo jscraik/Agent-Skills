@@ -29,6 +29,17 @@ def test_skills_memory_list_wraps_provider_payload() -> None:
     assert payload["roots"]
 
 
+def test_skills_memory_list_blocks_negative_limit() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    result = skills_memory(repo_root, "list", limit=-1)
+
+    assert result.status == "error"
+    payload = result.data["skill_memory"]
+    assert payload["status"] == "blocked"
+    assert "limit must be non-negative" in payload["agent_summary"]
+
+
 def test_skills_memory_search_preserves_entry_provenance() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 

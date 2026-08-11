@@ -146,7 +146,6 @@ def _skill_memory_operation_context() -> dict[str, Any]:
         ],
     }
 
-
 def _skill_memory_source_summary(roots: list[dict[str, Any]]) -> dict[str, Any]:
     """Return compact source availability for the skill memory provider."""
     available = [root["provider"] for root in roots if root["exists"]]
@@ -190,16 +189,8 @@ def _skill_memory_entry_summary(entries: list[dict[str, Any]], total_count: int 
     }
 
 
-def skills_memory(
-    repo_root: Path,
-    mode: str,
-    query: str | None = None,
-    limit: int = 8,
-    source_id: str | None = None,
-) -> CallResult:
-    """List, read, or search durable skill memory surfaces as a read-only provider."""
-    result = CallResult()
-    result.metadata["command"] = f"skills memory {mode}"
+def _skill_memory_payload(repo_root: Path, mode_key: str, query: str | None) -> dict[str, Any]:
+    """Build the shared read-only memory-provider payload."""
     provider_roots = [
         {
             "provider": source.source_id,
@@ -210,9 +201,7 @@ def skills_memory(
         }
         for source in MEMORY_SOURCES
     ]
-    mode_key = mode.strip().lower()
-    capped_limit = min(max(1, int(limit)), 50)
-    payload: dict[str, Any] = {
+    return {
         "schema_version": "skill-memory-provider.v1",
         "status": "pass",
         "mode": mode_key,
@@ -230,93 +219,157 @@ def skills_memory(
         "memory_provider_schema": "memory-provider.v1",
     }
 
-    if mode_key == "list":
-        provider_result = _memory_provider_list(repo_root, source_id=source_id, limit=capped_limit)
-        memory_payload = provider_result.data.get("memory", {})
-        if provider_result.status != "success":
-            result.status = "error"
-            payload["status"] = "blocked"
-            payload["agent_summary"] = memory_payload.get("agent_summary") or (
-                provider_result.errors[0].message if provider_result.errors else "Memory list failed."
-            )
-            result.errors.extend(provider_result.errors)
-            result.data["skill_memory"] = payload
-            return result
-        payload["entries"] = memory_payload.get("entries", [])
-        payload["entry_count"] = memory_payload.get("count", len(payload["entries"]))
-        payload["total_count"] = memory_payload.get("total_count", len(payload["entries"]))
-        payload["entry_summary"] = _skill_memory_entry_summary(payload["entries"], payload["total_count"])
-        payload["agent_summary"] = memory_payload.get("agent_summary", "Listed skill memory entries.")
-    elif mode_key == "read":
-        needle = (query or "").strip()
-        if not needle:
-            result.status = "error"
-            payload["status"] = "blocked"
-            payload["agent_summary"] = "Memory read requires an entry id or repo-relative path."
-            result.data["skill_memory"] = payload
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message=payload["agent_summary"],
-                    fix_suggestion="Run ./bin/ask skills memory list --json --robot and pass an entry id.",
-                )
-            )
-            return result
-        provider_result = _memory_provider_read(repo_root, needle)
-        memory_payload = provider_result.data.get("memory", {})
-        if provider_result.status != "success":
-            result.status = "error"
-            payload["status"] = "blocked"
-            payload["requested"] = needle
-            payload["agent_summary"] = memory_payload.get("agent_summary") or f"No skill memory entry matched '{needle}'."
-            result.errors.extend(provider_result.errors)
-            result.data["skill_memory"] = payload
-            return result
-        payload["entry"] = memory_payload.get("entry")
-        payload["entry_summary"] = _skill_memory_entry_summary([payload["entry"]] if payload["entry"] else [], 1 if payload["entry"] else 0)
-        payload["agent_summary"] = memory_payload.get("agent_summary", f"Read skill memory entry {needle}.")
-    elif mode_key == "search":
-        if not (query or "").strip():
-            result.status = "error"
-            payload["status"] = "blocked"
-            payload["agent_summary"] = "Memory search requires a non-empty query."
-            result.data["skill_memory"] = payload
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message=payload["agent_summary"],
-                    fix_suggestion="Run ./bin/ask skills memory search '<keyword>' --json --robot.",
-                )
-            )
-            return result
-        provider_result = _memory_provider_search(repo_root, query or "", source_id=source_id, limit=capped_limit)
-        memory_payload = provider_result.data.get("memory", {})
-        if provider_result.status != "success":
-            result.status = "error"
-            payload["status"] = "blocked"
-            payload["agent_summary"] = memory_payload.get("agent_summary") or (
-                provider_result.errors[0].message if provider_result.errors else "Memory search failed."
-            )
-            result.errors.extend(provider_result.errors)
-            result.data["skill_memory"] = payload
-            return result
-        payload["entries"] = memory_payload.get("results", [])
-        payload["entry_count"] = memory_payload.get("count", len(payload["entries"]))
-        payload["total_count"] = memory_payload.get("total_count", len(payload["entries"]))
-        payload["entry_summary"] = _skill_memory_entry_summary(payload["entries"], payload["total_count"])
-        payload["agent_summary"] = memory_payload.get("agent_summary", f"Found skill memory entries matching '{query}'.")
-    else:
-        result.status = "error"
-        payload["status"] = "blocked"
-        payload["agent_summary"] = f"Unknown skill memory mode '{mode}'."
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=payload["agent_summary"],
-                fix_suggestion="Use one of: list, read, search.",
-            )
-        )
 
+def _block_skill_memory(
+    result: CallResult,
+    payload: dict[str, Any],
+    message: str,
+    fix_suggestion: str,
+) -> None:
+    """Record a stable validation failure in the memory-provider envelope."""
+    result.status = "error"
+    payload["status"] = "blocked"
+    payload["agent_summary"] = message
+    result.data["skill_memory"] = payload
+    result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion))
+
+
+def _block_skill_memory_provider(
+    result: CallResult,
+    payload: dict[str, Any],
+    provider_result: CallResult,
+    fallback_message: str,
+    requested: str | None = None,
+) -> None:
+    """Carry a provider failure through the facade without changing its schema."""
+    result.status = "error"
+    payload["status"] = "blocked"
+    if requested is not None:
+        payload["requested"] = requested
+    payload["agent_summary"] = provider_result.data.get("memory", {}).get("agent_summary") or (
+        provider_result.errors[0].message if provider_result.errors else fallback_message
+    )
+    result.errors.extend(provider_result.errors)
+    result.data["skill_memory"] = payload
+
+
+def _copy_skill_memory_entries(
+    payload: dict[str, Any],
+    memory_payload: dict[str, Any],
+    entries_key: str,
+    summary: str,
+) -> None:
+    """Populate list or search entries and their stable summary fields."""
+    entries = memory_payload.get(entries_key, [])
+    payload["entries"] = entries
+    payload["entry_count"] = memory_payload.get("count", len(entries))
+    payload["total_count"] = memory_payload.get("total_count", len(entries))
+    payload["entry_summary"] = _skill_memory_entry_summary(entries, payload["total_count"])
+    payload["agent_summary"] = memory_payload.get("agent_summary", summary)
+
+
+def _populate_skill_memory_list(
+    repo_root: Path,
+    payload: dict[str, Any],
+    result: CallResult,
+    source_id: str | None,
+    limit: int,
+) -> bool:
+    """Populate the facade payload from the canonical memory-list provider."""
+    provider_result = _memory_provider_list(repo_root, source_id=source_id, limit=limit)
+    if provider_result.status != "success":
+        _block_skill_memory_provider(result, payload, provider_result, "Memory list failed.")
+        return False
+    _copy_skill_memory_entries(payload, provider_result.data.get("memory", {}), "entries", "Listed skill memory entries.")
+    return True
+
+
+def _populate_skill_memory_read(
+    repo_root: Path,
+    payload: dict[str, Any],
+    result: CallResult,
+    query: str | None,
+) -> bool:
+    """Populate the facade payload from the canonical memory-read provider."""
+    needle = (query or "").strip()
+    if not needle:
+        _block_skill_memory(
+            result,
+            payload,
+            "Memory read requires an entry id or repo-relative path.",
+            "Run ./bin/ask skills memory list --json --robot and pass an entry id.",
+        )
+        return False
+    provider_result = _memory_provider_read(repo_root, needle)
+    if provider_result.status != "success":
+        _block_skill_memory_provider(result, payload, provider_result, f"No skill memory entry matched '{needle}'.", needle)
+        return False
+    memory_payload = provider_result.data.get("memory", {})
+    payload["entry"] = memory_payload.get("entry")
+    entries = [payload["entry"]] if payload["entry"] else []
+    payload["entry_summary"] = _skill_memory_entry_summary(entries, 1 if entries else 0)
+    payload["agent_summary"] = memory_payload.get("agent_summary", f"Read skill memory entry {needle}.")
+    return True
+
+
+def _populate_skill_memory_search(
+    repo_root: Path,
+    payload: dict[str, Any],
+    result: CallResult,
+    query: str | None,
+    source_id: str | None,
+    limit: int,
+) -> bool:
+    """Populate the facade payload from the canonical memory-search provider."""
+    needle = (query or "").strip()
+    if not needle:
+        _block_skill_memory(
+            result,
+            payload,
+            "Memory search requires a non-empty query.",
+            "Run ./bin/ask skills memory search '<keyword>' --json --robot.",
+        )
+        return False
+    provider_result = _memory_provider_search(repo_root, needle, source_id=source_id, limit=limit)
+    if provider_result.status != "success":
+        _block_skill_memory_provider(result, payload, provider_result, "Memory search failed.")
+        return False
+    _copy_skill_memory_entries(
+        payload,
+        provider_result.data.get("memory", {}),
+        "results",
+        f"Found skill memory entries matching '{needle}'.",
+    )
+    return True
+
+
+def skills_memory(
+    repo_root: Path,
+    mode: str,
+    query: str | None = None,
+    limit: int = 8,
+    source_id: str | None = None,
+) -> CallResult:
+    """List, read, or search durable skill memory surfaces as a read-only provider."""
+    result = CallResult()
+    result.metadata["command"] = f"skills memory {mode}"
+    mode_key = mode.strip().lower()
+    payload = _skill_memory_payload(repo_root, mode_key, query)
+    if limit < 0:
+        _block_skill_memory(result, payload, "Memory limit must be non-negative.", "Pass --limit 0 or a positive integer.")
+        return result
+    capped_limit = min(limit, 50)
+    if mode_key == "list":
+        populated = _populate_skill_memory_list(repo_root, payload, result, source_id, capped_limit)
+    elif mode_key == "read":
+        populated = _populate_skill_memory_read(repo_root, payload, result, query)
+    elif mode_key == "search":
+        populated = _populate_skill_memory_search(repo_root, payload, result, query, source_id, capped_limit)
+    else:
+        _block_skill_memory(result, payload, f"Unknown skill memory mode '{mode}'.", "Use one of: list, read, search.")
+        return result
+    if not populated:
+        return result
     result.data["skill_memory"] = payload
     return result
 
