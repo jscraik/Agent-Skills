@@ -137,28 +137,13 @@ if [[ -f "$REPO_ROOT/scripts/harness-cli.sh" && -r "$REPO_ROOT/scripts/harness-c
 		exit 0
 	fi
 	if [[ "$wrapper_exit" -eq 126 || "$wrapper_exit" -eq 127 ]]; then
-		echo "Warning: scripts/harness-cli.sh unavailable (exit $wrapper_exit); attempting fallback runners." >&2
+		echo "Error: the canonical scripts/harness-cli.sh runner is unavailable (exit $wrapper_exit)." >&2
+		echo "Refusing ambient mise or harness fallbacks because their version is not verified." >&2
 	else
 		exit "$wrapper_exit"
 	fi
 fi
 
-if command -v mise >/dev/null 2>&1; then
-	MISE_RESOLVED="$(mise which harness 2>/dev/null || true)"
-	if [[ -n "$MISE_RESOLVED" && -x "$MISE_RESOLVED" ]]; then
-		run_with_process_storm_guard "$MISE_RESOLVED" "$@"
-		exit "$?"
-	fi
-fi
-
-if command -v harness >/dev/null 2>&1; then
-	run_with_process_storm_guard harness "$@"
-	exit "$?"
-fi
-
-echo "Error: unable to resolve a harness runner for this repository." >&2
-echo "Install dependencies with:" >&2
-echo "  npm install" >&2
-echo "or run with a local harness install via:" >&2
-echo "  npm exec harness -- <command>" >&2
+echo "Error: unable to resolve a verified Harness runner for this repository." >&2
+echo "Use a Harness source checkout, a built local CLI, or the canonical scripts/harness-cli.sh wrapper." >&2
 exit 1

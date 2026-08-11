@@ -105,10 +105,6 @@ resolution_status=$?
 set -e
 
 if [[ $resolution_status -eq 42 ]]; then
-	if command -v harness >/dev/null 2>&1; then
-		exec harness "$@"
-	fi
-
 	if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then
 		if ! command -v npm >/dev/null 2>&1; then
 			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
@@ -117,20 +113,20 @@ if [[ $resolution_status -eq 42 ]]; then
 		exec npm exec --yes --package "$FALLBACK_PACKAGE" -- harness "$@"
 	fi
 
-	echo "Error: local @brainwav/coding-harness could not be resolved from this repo." >&2
+	echo "Error: local @brainwav/coding-harness@$SUPPORTED_VERSION could not be resolved from this repo." >&2
 	echo "This is a local install/bootstrap problem, not a harness command failure." >&2
-	echo "Repair from the repo root with one of:" >&2
-	echo "  npm install" >&2
-	echo "  npm install --save-dev @brainwav/coding-harness" >&2
-	echo "After the package is installed, rerun:" >&2
+	echo "Refusing to run an ambient harness executable because its version is not verified." >&2
+	echo "For a deliberate one-off pinned runner, rerun with:" >&2
+	echo "  HARNESS_CLI_ALLOW_NPM_EXEC=1 bash scripts/harness-cli.sh <command>" >&2
+	echo "A consuming package repository may instead install @brainwav/coding-harness@$SUPPORTED_VERSION locally." >&2
+	echo "After a verified repo-local install, rerun:" >&2
 	echo "  bash scripts/harness-cli.sh <command>" >&2
-	echo "  npm exec harness -- <command>" >&2
 	exit 1
 fi
 
 if [[ $resolution_status -eq 44 ]]; then
 	echo "Error: the resolved local @brainwav/coding-harness does not match $SUPPORTED_VERSION." >&2
-	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION or remove the stale ambient resolution path." >&2
+	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION locally or use the explicit pinned fallback." >&2
 	exit 1
 fi
 

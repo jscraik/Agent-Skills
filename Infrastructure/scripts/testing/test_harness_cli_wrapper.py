@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+import subprocess
 
 
 WRAPPER = Path(__file__).resolve().parents[1] / "harness-cli.sh"
+GATE = Path(__file__).resolve().parents[1] / "run-harness-gate.sh"
 
 
 def test_harness_fallback_pin_is_the_approved_release() -> None:
@@ -17,6 +20,38 @@ def test_harness_fallback_invokes_the_pinned_package() -> None:
     source = WRAPPER.read_text(encoding="utf-8")
 
     assert 'exec npm exec --yes --package "$FALLBACK_PACKAGE" -- harness "$@"' in source
+
+
+def test_harness_never_executes_an_unverified_ambient_binary(tmp_path: Path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    marker = tmp_path / "ambient-harness-ran"
+    ambient_harness = fake_bin / "harness"
+    ambient_harness.write_text(
+        f'#!/usr/bin/env bash\ntouch "{marker}"\n',
+        encoding="utf-8",
+    )
+    ambient_harness.chmod(0o755)
+
+    result = subprocess.run(
+        ["bash", str(WRAPPER), "--version"],
+        capture_output=True,
+        check=False,
+        env={**os.environ, "PATH": f"{fake_bin}:{os.environ['PATH']}"},
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Refusing to run an ambient harness executable" in result.stderr
+    assert not marker.exists()
+
+
+def test_harness_gate_has_no_ambient_runner_fallbacks() -> None:
+    source = GATE.read_text(encoding="utf-8")
+
+    assert 'run_with_process_storm_guard harness "$@"' not in source
+    assert "MISE_RESOLVED=" not in source
+    assert "Refusing ambient mise or harness fallbacks" in source
 
 
 def test_harness_local_resolution_is_versioned_and_repo_bound() -> None:
