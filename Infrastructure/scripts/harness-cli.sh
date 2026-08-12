@@ -104,7 +104,7 @@ try {
 resolution_status=$?
 set -e
 
-if [[ $resolution_status -eq 42 ]]; then
+if [[ $resolution_status -eq 42 || $resolution_status -eq 44 ]]; then
 	if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then
 		if ! command -v npm >/dev/null 2>&1; then
 			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
@@ -126,7 +126,7 @@ fi
 
 if [[ $resolution_status -eq 44 ]]; then
 	echo "Error: the resolved local @brainwav/coding-harness does not match $SUPPORTED_VERSION." >&2
-	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION locally or use the explicit pinned fallback." >&2
+	echo "Install @brainwav/coding-harness@$SUPPORTED_VERSION locally, or rerun with HARNESS_CLI_ALLOW_NPM_EXEC=1 for the explicit pinned fallback." >&2
 	exit 1
 fi
 
