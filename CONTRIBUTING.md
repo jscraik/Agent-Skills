@@ -126,7 +126,7 @@ Recommended policy:
 - In a consumer repository with a root `package.json` and lockfile, repair from
   that repo root with:
   - `npm install`
-  - `npm install --save-dev @brainwav/coding-harness@0.15.3`
+  - `npm install --save-dev --save-exact @brainwav/coding-harness@0.15.3`
 - After repair in that verified package root, rerun:
   - `bash scripts/harness-cli.sh <command>`
 - For one deliberate, pinned fallback without changing the consumer's package
