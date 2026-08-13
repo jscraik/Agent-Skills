@@ -61,9 +61,14 @@ collect_changed_run_dirs() {
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
     [[ "$file" == "$runs_root"/* ]] || continue
-  local rel="${file#"${runs_root}"/}"
+    local rel="${file#"${runs_root}"/}"
     local run_dir_name="${rel%%/*}"
     [[ "$run_dir_name" == run_* ]] || continue
+    # A cleanup commit may delete an entire historical run directory. Git
+    # reports the deleted files in the diff, but the directory is legitimately
+    # absent from the candidate checkout; do not reclassify that deletion as
+    # an empty run that must still satisfy the live-run contract.
+    [[ -d "$runs_root/$run_dir_name" ]] || continue
     changed_run_dirs+=("$runs_root/$run_dir_name")
     changed_run_count=$((changed_run_count + 1))
   done < <(git diff --name-only "$base_sha" "$head_sha")
