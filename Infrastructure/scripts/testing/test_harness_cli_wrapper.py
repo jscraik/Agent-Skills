@@ -93,6 +93,30 @@ def test_harness_allows_explicit_pinned_fallback_after_version_drift(tmp_path: P
     ]
 
 
+def test_harness_reports_version_drift_without_explicit_fallback(tmp_path: Path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_node = fake_bin / "node"
+    fake_node.write_text("#!/usr/bin/env bash\nexit 44\n", encoding="utf-8")
+    fake_node.chmod(0o755)
+
+    result = subprocess.run(
+        ["bash", str(WRAPPER), "--version"],
+        capture_output=True,
+        check=False,
+        env={
+            **os.environ,
+            "PATH": f"{fake_bin}:{os.environ['PATH']}",
+            "HARNESS_CLI_ALLOW_NPM_EXEC": "0",
+        },
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "does not match 0.15.3" in result.stderr
+    assert "HARNESS_CLI_ALLOW_NPM_EXEC=1" in result.stderr
+
+
 def test_harness_gate_has_no_ambient_runner_fallbacks() -> None:
     source = GATE.read_text(encoding="utf-8")
 
@@ -126,32 +150,7 @@ def test_harness_executes_only_the_validated_cli_path() -> None:
     source = WRAPPER.read_text(encoding="utf-8")
 
     assert 'exec node "$CLI_PATH" "$@"' in source
-    assert 'if [[ $resolution_status -eq 44 ]]; then' in source
     assert 'if [[ $resolution_status -eq 45 ]]; then' in source
-    assert source.index('if [[ $resolution_status -eq 44 ]]') < source.index('exec node "$CLI_PATH"')
-
-
-def test_harness_version_mismatch_diagnostic_when_npm_unavailable(tmp_path: Path) -> None:
-    """Regression test for status 44 reaching version-mismatch diagnostic without npm fallback."""
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_node = fake_bin / "node"
-    fake_node.write_text("#!/usr/bin/env bash\nexit 44\n", encoding="utf-8")
-    fake_node.chmod(0o755)
-
-    result = subprocess.run(
-        ["bash", str(WRAPPER), "--version"],
-        capture_output=True,
-        check=False,
-        env={
-            **os.environ,
-            "PATH": f"{fake_bin}:{os.environ['PATH']}",
-            "HARNESS_CLI_ALLOW_NPM_EXEC": "0",
-        },
-        text=True,
+    assert source.index('if [[ $resolution_status -eq 42 || $resolution_status -eq 44 ]]') < source.index(
+        'exec node "$CLI_PATH"'
     )
-
-    assert result.returncode == 1
-    assert "does not match" in result.stderr
-    assert "0.15.3" in result.stderr
-    assert "HARNESS_CLI_ALLOW_NPM_EXEC=1" in result.stderr
