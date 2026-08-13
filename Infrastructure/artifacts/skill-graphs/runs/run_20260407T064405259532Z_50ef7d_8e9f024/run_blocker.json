@@ -1,8 +1,0 @@
-{
-  "code": "evaluator_conflict",
-  "created_at": "2026-04-07T06:44:05Z",
-  "message": "run halted by blocker: evaluator_conflict",
-  "remediation_owner": "shadow-cycle",
-  "run_id": "run_20260407T064405259532Z_50ef7d_8e9f024",
-  "schema_version": "1.0"
-}
