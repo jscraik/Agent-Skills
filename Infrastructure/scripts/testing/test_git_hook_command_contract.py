@@ -388,8 +388,9 @@ def test_harness_fallback_wrappers_share_supported_version() -> None:
     wrapper_texts = [path.read_text(encoding="utf-8") for path in wrapper_paths]
     assert all(expected.search(text) for text in wrapper_texts)
     assert all('SUPPORTED_VERSION="0.15.3"' in text for text in wrapper_texts)
-    assert all(global_fallback in text for text in wrapper_texts)
-    assert all(text.index(global_fallback) < text.index(npm_fallback) for text in wrapper_texts)
+    assert all(global_fallback not in text for text in wrapper_texts)
+    assert all(npm_fallback in text for text in wrapper_texts)
+    assert all("Refusing to run an ambient harness executable" in text for text in wrapper_texts)
 
 
 def test_secure_hook_cache_rejects_symlinks_and_enforces_private_mode(tmp_path: Path) -> None:
