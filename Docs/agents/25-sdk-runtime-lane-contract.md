@@ -291,7 +291,7 @@ OpenAI/Codex package surfaces:
 - `.codex-plugin/plugin.json`: translate selected identity, summary, display,
   and capability metadata into a Tessl `.tessl-plugin/plugin.json`; do not
   publish `.codex-plugin/plugin.json` directly as the Tessl manifest.
-- `plugins/marketplace.json`: preserve as OpenAI marketplace/index metadata.
+- `Plugins/marketplace.json`: preserve as OpenAI marketplace/index metadata.
   There is no separate required OpenAI plugin marketplace JSON inside each
   plugin package in the current `agent-skills` repository format; marketplace-
   facing metadata lives in `.codex-plugin/plugin.json` and the repo-level
