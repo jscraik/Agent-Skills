@@ -13,7 +13,6 @@ SCRIPT = (
     / "validate_skills_sdk_release_ratchets.py"
 )
 
-
 def _load_module():
     spec = importlib.util.spec_from_file_location("validate_skills_sdk_release_ratchets", SCRIPT)
     assert spec is not None
@@ -22,7 +21,6 @@ def _load_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
-
 
 def _write_fixture(
     root: Path,
@@ -43,7 +41,6 @@ def _write_fixture(
     _write_reference_files(refs)
     if include_evidence:
         _write_release_evidence(root, skill)
-
 
 def _write_central_rubric(root: Path) -> None:
     central = root / "Infrastructure" / "config" / "skills-sdk"
@@ -68,7 +65,6 @@ def _write_central_rubric(root: Path) -> None:
         encoding="utf-8",
     )
 
-
 def _write_pattern_report(root: Path) -> None:
     reports = root / ".harness" / "reports"
     reports.mkdir(parents=True)
@@ -89,7 +85,6 @@ def _write_pattern_report(root: Path) -> None:
         encoding="utf-8",
     )
 
-
 def _write_steering_ledger(root: Path) -> None:
     quality = root / ".harness" / "quality"
     quality.mkdir(parents=True)
@@ -99,7 +94,6 @@ def _write_steering_ledger(root: Path) -> None:
         "| 2026-06-29 | stale wait handle | stale wait recurrence | direct commands only | validator | pass | validated |\n",
         encoding="utf-8",
     )
-
 
 def _write_skill_entrypoint(skill: Path, leak_package_ref: bool, mention_capsule_routing: bool) -> None:
     package_ref_line = "- Read references/source-context.yaml for package context.\n" if leak_package_ref else ""
@@ -124,7 +118,6 @@ Run the fixture.
         encoding="utf-8",
     )
 
-
 def _contract_commands(include_security: bool) -> list[str]:
     commands = [
         '  - "./bin/ask skills package verify Skills/agent-ops/fixture-skill --json --robot"',
@@ -133,7 +126,6 @@ def _contract_commands(include_security: bool) -> list[str]:
     if include_security:
         commands.append('  - "./bin/ask sdk security risk-modes Skills/agent-ops/fixture-skill --preview --json --robot"')
     return commands
-
 
 def _write_contract(refs: Path, include_security: bool) -> None:
     (refs / "contract.yaml").write_text(
@@ -163,7 +155,6 @@ def _write_contract(refs: Path, include_security: bool) -> None:
         encoding="utf-8",
     )
 
-
 def _write_reference_files(refs: Path) -> None:
     (refs / "details.md").write_text("# Fixture Skill Details\n", encoding="utf-8")
     (refs / "source-context.yaml").write_text("source: fixture\n", encoding="utf-8")
@@ -192,7 +183,6 @@ cases:
         encoding="utf-8",
     )
 
-
 def _write_release_evidence(root: Path, skill: Path) -> None:
     evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
     evidence.mkdir(parents=True)
@@ -204,7 +194,6 @@ def _write_release_evidence(root: Path, skill: Path) -> None:
     _write_plugin_shape(evidence)
     _write_repair_loop(evidence)
     _write_gate_chain(root, evidence)
-
 
 def _write_factory_gate(gate: Path) -> None:
     (gate / "factory-gate.json").write_text(
@@ -222,7 +211,6 @@ def _write_factory_gate(gate: Path) -> None:
         ),
         encoding="utf-8",
     )
-
 
 def _write_scenario_sources(evidence: Path) -> None:
     scenario_ids = ["happy-main"]
@@ -243,7 +231,6 @@ def _write_scenario_sources(evidence: Path) -> None:
         encoding="utf-8",
     )
 
-
 def _write_security_receipt(evidence: Path) -> None:
     security_payload = {
         "schema_version": "skills-sdk.security-risk-modes.v1",
@@ -262,7 +249,6 @@ def _write_security_receipt(evidence: Path) -> None:
     }
     (evidence / "security-risk-modes.json").write_text(json.dumps(security_payload), encoding="utf-8")
 
-
 def _write_plugin_shape(evidence: Path) -> None:
     (evidence / "plugin-shape.json").write_text(
         json.dumps(
@@ -279,13 +265,11 @@ def _write_plugin_shape(evidence: Path) -> None:
         encoding="utf-8",
     )
 
-
 def _write_repair_loop(evidence: Path) -> None:
     (evidence / "repair-loop.json").write_text(
         json.dumps({"schema_version": "skills-sdk.repair-loop.v1", "attempts": []}),
         encoding="utf-8",
     )
-
 
 def _write_gate_chain(root: Path, evidence: Path) -> None:
     gate_ids = [
@@ -318,7 +302,6 @@ def _write_gate_chain(root: Path, evidence: Path) -> None:
         encoding="utf-8",
     )
 
-
 def _write_gate_receipt(evidence: Path, gate_id: str) -> Path:
     receipt = evidence / f"{gate_id}.json"
     receipt.write_text(
@@ -329,12 +312,15 @@ def _write_gate_receipt(evidence: Path, gate_id: str) -> Path:
                 "gate_id": gate_id,
                 "tessl_lane": _tessl_lane(gate_id),
                 "scenario_ids": ["happy-main"] if gate_id in {"oss_local", "oss_cloud", "tessl_dry_run"} else [],
+                "evidence_refs": [
+                    "Skills/agent-ops/fixture-skill/SKILL.md",
+                    "Skills/agent-ops/fixture-skill/references/evals.yaml",
+                ],
             }
         ),
         encoding="utf-8",
     )
     return receipt
-
 
 def _tessl_lane(gate_id: str) -> str | None:
     if gate_id == "tessl_local_proof":
@@ -342,7 +328,6 @@ def _tessl_lane(gate_id: str) -> str | None:
     if gate_id == "tessl_dry_run":
         return "dry_run"
     return None
-
 
 def _gate_chain_entry(root: Path, gate_ids: list[str], index: int, gate_id: str, receipt: Path) -> dict[str, object]:
     return {
@@ -356,6 +341,14 @@ def _gate_chain_entry(root: Path, gate_ids: list[str], index: int, gate_id: str,
         "what_this_does_not_prove": ["external registry release"],
     }
 
+def _legacy_exception(check: str, path: str, reason: str) -> dict[str, str]:
+    return {
+        "check": check,
+        "path": path,
+        "reason": reason,
+        "ticket": "TEST-RELEASE-RATCHET",
+        "adr_reference": "test-fixture-exception",
+    }
 
 def test_release_ratchets_pass_for_valid_fixture() -> None:
     module = _load_module()
@@ -364,10 +357,8 @@ def test_release_ratchets_pass_for_valid_fixture() -> None:
         _write_fixture(root)
 
         payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert payload["status"] == "pass"
     assert payload["finding_count"] == 0
-
 
 def test_release_ratchets_accept_prompt_as_task_body() -> None:
     module = _load_module()
@@ -378,10 +369,8 @@ def test_release_ratchets_accept_prompt_as_task_body() -> None:
         evals.write_text(evals.read_text(encoding="utf-8").replace("  task: Run the fixture.\n", ""), encoding="utf-8")
 
         payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert payload["status"] == "pass"
     assert payload["finding_count"] == 0
-
 
 def test_release_ratchets_fail_without_task_or_prompt_body() -> None:
     module = _load_module()
@@ -402,7 +391,6 @@ def test_release_ratchets_fail_without_task_or_prompt_body() -> None:
     assert parser["status"] == "fail"
     assert parser["evidence"]["missing_fields"] == [{"id": "happy-main", "missing": ["task_or_prompt"]}]
 
-
 def test_release_ratchets_fail_tessl_list_receipt_without_crashing() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -418,7 +406,6 @@ def test_release_ratchets_fail_tessl_list_receipt_without_crashing() -> None:
     assert lane["evidence"]["missing_lane"] == [
         ".harness/evidence/handoff/fixture-skill/tessl-list.json"
     ]
-
 
 def test_release_ratchets_fail_nested_malformed_tessl_receipt_without_crashing() -> None:
     module = _load_module()
@@ -439,7 +426,6 @@ def test_release_ratchets_fail_nested_malformed_tessl_receipt_without_crashing()
         ".harness/evidence/handoff/fixture-skill/tessl-malformed.json"
     ]
 
-
 def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -447,34 +433,30 @@ def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
         _write_fixture(root)
         evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
         (evidence / "tessl-legacy.json").write_text("not json", encoding="utf-8")
-        (evidence / "package-verify-legacy.json").write_text(
-            json.dumps({"status": "pass", "advisories": [{"code": "legacy"}]}),
-            encoding="utf-8",
-        )
+        (evidence / "package-verify-legacy.json").write_text(json.dumps({"status": "pass", "advisories": [{"code": "legacy"}]}), encoding="utf-8")
         exception_payload = {
             "schema_version": "skills-sdk.release-ratchet-exceptions.v1",
             "accepted_exceptions": [
-                {
-                    "check": "tessl_lane_naming",
-                    "path": ".harness/evidence/handoff/fixture-skill/tessl-legacy.json",
-                    "reason": "Historical artifact predates lane field; current lane is covered by gate-chain receipts.",
-                },
-                {
-                    "check": "no_carried_advisories",
-                    "path": ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
-                    "reason": "Historical artifact predates JSON receipt contract; current lane is covered by gate-chain receipts.",
-                },
-                {
-                    "check": "no_carried_advisories",
-                    "path": ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
-                    "reason": "Historical package-verify advisory retained as legacy evidence; current package verify is covered by gate-chain receipts.",
-                },
+                _legacy_exception(
+                    "tessl_lane_naming",
+                    ".harness/evidence/handoff/fixture-skill/tessl-legacy.json",
+                    "Historical artifact predates lane field; current lane is covered by gate-chain receipts.",
+                ),
+                _legacy_exception(
+                    "no_carried_advisories",
+                    ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
+                    "Historical artifact predates JSON receipt contract; current lane is covered by gate-chain receipts.",
+                ),
+                _legacy_exception(
+                    "no_carried_advisories",
+                    ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
+                    "Historical package-verify advisory retained as legacy evidence; current package verify is covered by gate-chain receipts.",
+                ),
             ],
         }
         (evidence / "release-ratchet-exceptions.json").write_text(json.dumps(exception_payload), encoding="utf-8")
 
         payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert payload["status"] == "pass"
     lane = next(check for check in payload["checks"] if check["code"] == "tessl_lane_naming")
     assert lane["evidence"]["ignored_legacy"] == [".harness/evidence/handoff/fixture-skill/tessl-legacy.json"]
@@ -484,7 +466,6 @@ def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
         ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
         ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
     }
-
 
 def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> None:
     module = _load_module()
@@ -514,14 +495,12 @@ def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> 
 
         prefix_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="security_risk_modes")
         full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert prefix_payload["status"] == "pass"
     assert prefix_payload["target_gate"] == "security_risk_modes"
     assert prefix_payload["finding_count"] == 0
     assert full_payload["status"] == "fail"
     full_gate = next(check for check in full_payload["checks"] if check["code"] == "ordered_gate_chain")
     assert "scenario_quality" in full_gate["evidence"]["missing_gates"]
-
 
 def test_release_ratchets_target_gate_ignores_future_gate_failures() -> None:
     module = _load_module()
@@ -538,11 +517,9 @@ def test_release_ratchets_target_gate_ignores_future_gate_failures() -> None:
 
         prefix_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="security_risk_modes")
         full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert prefix_payload["status"] == "pass"
     full_gate = next(check for check in full_payload["checks"] if check["code"] == "ordered_gate_chain")
     assert "oss_cloud" in full_gate["evidence"]["bad_status"]
-
 
 def test_release_ratchets_target_gate_maps_receipt_filenames_before_advisory_filtering() -> None:
     module = _load_module()
@@ -557,11 +534,9 @@ def test_release_ratchets_target_gate_maps_receipt_filenames_before_advisory_fil
 
         package_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="package_verify")
         full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert package_payload["status"] == "pass"
     carried = next(check for check in full_payload["checks"] if check["code"] == "no_carried_advisories")
     assert ".harness/evidence/handoff/fixture-skill/scenario-sources.json:advisories" in carried["evidence"]["carried"]
-
 
 def test_release_ratchets_allow_skill_to_point_at_capsule_routing() -> None:
     module = _load_module()
@@ -574,7 +549,6 @@ def test_release_ratchets_allow_skill_to_point_at_capsule_routing() -> None:
     boundary = next(check for check in payload["checks"] if check["code"] == "reference_boundary")
     assert boundary["status"] == "pass"
 
-
 def test_release_ratchets_fail_for_boundary_and_security_drift() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -582,13 +556,11 @@ def test_release_ratchets_fail_for_boundary_and_security_drift() -> None:
         _write_fixture(root, leak_package_ref=True, include_security=False)
 
         payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-
     assert payload["status"] == "fail"
     failed = {check["code"] for check in payload["checks"] if check["status"] != "pass"}
     assert "reference_boundary" in failed
     assert "skill_factory_pipeline_commands" in failed
     assert "security_risk_mode_lane" in failed
-
 
 def test_release_ratchets_fail_without_factory_gate_receipt() -> None:
     module = _load_module()
@@ -602,7 +574,6 @@ def test_release_ratchets_fail_without_factory_gate_receipt() -> None:
 
     failed = {check["code"] for check in payload["checks"] if check["status"] != "pass"}
     assert "factory_gate_receipt" in failed
-
 
 def test_release_ratchets_fail_when_gate_chain_is_out_of_order() -> None:
     module = _load_module()
@@ -620,7 +591,6 @@ def test_release_ratchets_fail_when_gate_chain_is_out_of_order() -> None:
     assert gate_chain["status"] == "fail"
     assert gate_chain["evidence"]["order_ok"] is False
 
-
 def test_release_ratchets_fail_on_carried_advisories() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -634,7 +604,6 @@ def test_release_ratchets_fail_on_carried_advisories() -> None:
     failed = {check["code"] for check in payload["checks"] if check["status"] != "pass"}
     assert "no_carried_advisories" in failed
     assert "ordered_gate_chain" in failed
-
 
 def test_release_ratchets_fail_on_scenario_set_drift() -> None:
     module = _load_module()
@@ -652,7 +621,6 @@ def test_release_ratchets_fail_on_scenario_set_drift() -> None:
     assert parity["status"] == "fail"
     assert parity["evidence"]["receipt_mismatches"][0]["lane"] == "oss-local"
 
-
 def test_release_ratchets_fail_on_unrouted_reference() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -665,7 +633,6 @@ def test_release_ratchets_fail_on_unrouted_reference() -> None:
 
     failed = {check["code"] for check in payload["checks"] if check["status"] != "pass"}
     assert "reference_routing_completeness" in failed
-
 
 def test_release_ratchets_fail_on_incomplete_security_receipt() -> None:
     module = _load_module()
@@ -682,7 +649,6 @@ def test_release_ratchets_fail_on_incomplete_security_receipt() -> None:
     security = next(check for check in result["checks"] if check["code"] == "security_package_gate")
     assert security["status"] == "fail"
     assert "prompt_injection" in security["evidence"]["missing_modes"]
-
 
 def test_release_ratchets_fail_on_plugin_shape_policy_drift() -> None:
     module = _load_module()
@@ -701,7 +667,6 @@ def test_release_ratchets_fail_on_plugin_shape_policy_drift() -> None:
     shape = next(check for check in result["checks"] if check["code"] == "plugin_shape_parity")
     assert shape["status"] == "fail"
     assert shape["evidence"]["private_ok"] is False
-
 
 def test_release_ratchets_fail_on_unclassified_repair_regression() -> None:
     module = _load_module()
@@ -731,7 +696,6 @@ def test_release_ratchets_fail_on_unclassified_repair_regression() -> None:
     assert repair_loop["status"] == "fail"
     assert repair_loop["evidence"]["unclassified_regressions"]
 
-
 def test_release_ratchets_ignore_missing_regressed_cases_on_no_regression_attempt() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -757,7 +721,6 @@ def test_release_ratchets_ignore_missing_regressed_cases_on_no_regression_attemp
 
     repair_loop = next(check for check in result["checks"] if check["code"] == "repair_loop_monotonicity")
     assert repair_loop["status"] == "pass"
-
 
 def test_release_ratchets_fail_unjustified_legacy_knowledgeos_capsule_subdir() -> None:
     module = _load_module()
@@ -785,7 +748,6 @@ capsules:
     failed = {check["code"] for check in payload["checks"] if check["status"] != "pass"}
     assert "knowledgeos_reference_shape" in failed
 
-
 def test_release_ratchets_fail_non_invocable_reference_headings() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -805,7 +767,6 @@ def test_release_ratchets_fail_non_invocable_reference_headings() -> None:
             "reason": "missing_generic_or_filename_misaligned_h1",
         }
     ]
-
 
 def test_release_ratchets_accept_justified_legacy_knowledgeos_capsule_subdir() -> None:
     module = _load_module()
