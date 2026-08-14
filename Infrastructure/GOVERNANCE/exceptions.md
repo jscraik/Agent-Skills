@@ -4,13 +4,13 @@
 
 | ID | Date | Entered by | Approved by | Scope / file | Risk | Mitigation | Reviewed until | Status | Close condition |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| EX-000 | 2026-02-18 | Jamie | Jamie | Not yet used | Not yet used | Not yet used | 2026-03-19 | open | Create a concrete ticket before the review date. |
+| (none) | - | - | - | - | - | - | - | - | No active exceptions. |
 
 ## Closed exceptions
 
 | ID | Date | Closed by | Scope / file | Root cause | Corrective action | Resolved date |
 | --- | --- | --- | --- | --- | --- | --- |
-| (none yet) | - | - | - | - | - | - |
+| EX-000 | 2026-02-18 | Jamie | Unused seed row in this register | The seed row was never used and its review date expired without a governed bypass. | Removed the unused exception entry; no waiver was renewed or carried forward. | 2026-08-13 |
 
 ## Process
 
