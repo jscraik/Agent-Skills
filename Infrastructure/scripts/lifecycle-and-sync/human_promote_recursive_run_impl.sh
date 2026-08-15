@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+repo_root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "$repo_root" ]]; then
+  repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+fi
 cd "$repo_root"
 
 run_id=""
@@ -46,10 +49,10 @@ validate_run_id() {
 confine_run_dir() {
   local resolved_dir="$1"
   local canonical_runs_dir
-  canonical_runs_dir="$(cd "${repo_root}/Infrastructure/artifacts/skill-graphs/runs" 2>/dev/null && pwd || true)"
+  canonical_runs_dir="$(cd "${repo_root}/.harness/evidence/skill-graphs/runs" 2>/dev/null && pwd || true)"
   if [[ -z "$canonical_runs_dir" ]]; then
     # Runs directory doesn't exist yet — verify at least repo_root is the prefix.
-    canonical_runs_dir="${repo_root}/Infrastructure/artifacts/skill-graphs/runs"
+    canonical_runs_dir="${repo_root}/.harness/evidence/skill-graphs/runs"
   fi
   if [[ "$resolved_dir" != "${canonical_runs_dir}"/* && "$resolved_dir" != "$canonical_runs_dir" ]]; then
     echo "[promotion-gate] run directory '${resolved_dir}' is outside the canonical runs subtree '${canonical_runs_dir}'" >&2
@@ -63,7 +66,7 @@ usage() {
 Usage: Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh [options]
 
 Required:
-  --run-id ID                 Run id under Infrastructure/artifacts/skill-graphs/runs (or use --run-dir)
+  --run-id ID                 Run id under .harness/evidence/skill-graphs/runs (or use --run-dir)
   --lesson-id ID              Canonical lesson id
   --reviewer ID[,ID2...]      Reviewer id(s)
   --expected-version VERSION  Optimistic version token for promotion write (required for approved)
@@ -161,7 +164,7 @@ if [[ -z "$run_dir" ]]; then
   fi
   # M-01: validate run_id format before constructing any path from it.
   validate_run_id "$run_id"
-  run_dir="Infrastructure/artifacts/skill-graphs/runs/${run_id}"
+  run_dir=".harness/evidence/skill-graphs/runs/${run_id}"
 fi
 
 write_blocker_and_exit() {
@@ -512,7 +515,7 @@ expected_version = sys.argv[4].strip()
 reviewers = [r.strip() for r in sys.argv[5].split(",") if r.strip()]
 
 repo_root = Path.cwd()
-lessons_dir = repo_root / "Infrastructure/artifacts/skill-graphs/lessons"
+lessons_dir = repo_root / ".harness/evidence/skill-graphs/lessons"
 jsonl_path = lessons_dir / "canonical-lessons.jsonl"
 index_path = lessons_dir / "canonical-lesson-index.json"
 lessons_dir.mkdir(parents=True, exist_ok=True)

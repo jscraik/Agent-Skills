@@ -92,5 +92,5 @@ watch-readiness project-root='.':
         --format json
 
 # Analyze router telemetry metrics (first-hit rates, guardrail performance)
-router-metrics events='Infrastructure/artifacts/skill-graphs/telemetry/route-events.jsonl':
+router-metrics events='.harness/evidence/skill-graphs/telemetry/route-events.jsonl':
     mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events {{events}} --json

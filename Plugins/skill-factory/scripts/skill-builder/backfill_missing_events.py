@@ -203,7 +203,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument(
         "--runs-root",
         type=Path,
-        default=Path("Infrastructure/artifacts/skill-graphs/runs"),
+        default=Path(".tmp/agent-skills-artifacts/skill-graphs/runs"),
         help="Root directory containing run directories",
     )
     p.add_argument(
@@ -220,7 +220,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument(
         "--runs-smoke-root",
         type=Path,
-        default=Path("Infrastructure/artifacts/skill-graphs/runs-smoke"),
+        default=Path(".tmp/agent-skills-artifacts/skill-graphs/runs-smoke"),
         help="Root directory containing smoke test runs",
     )
 

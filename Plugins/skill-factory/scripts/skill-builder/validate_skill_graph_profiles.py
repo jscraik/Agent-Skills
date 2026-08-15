@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from skill_graph_inventory import (
     DEFAULT_INVENTORY_POLICY,
@@ -57,7 +57,6 @@ class TelemetryHealth:
     window_start: Optional[str]
     window_end: Optional[str]
     event_envelope_errors_total: Optional[int]
-    event_envelope_errors_waived: int
     event_envelope_errors_unresolved: Optional[int]
 
 
@@ -256,28 +255,24 @@ def parse_telemetry_health(health_path: Path) -> Optional[TelemetryHealth]:
         window_end = window_match.group(2)
 
     total_match = re.search(r"Event envelope errors total:\s*`?(\d+)`?", text)
-    waived_match = re.search(r"Event envelope errors waived:\s*`?(\d+)`?", text)
     unresolved_match = re.search(r"Event envelope errors unresolved:\s*`?(\d+)`?", text)
     legacy_match = re.search(r"Event envelope errors:\s*`?(\d+)`?", text)
 
     total = int(total_match.group(1)) if total_match else None
-    waived = int(waived_match.group(1)) if waived_match else 0
     unresolved = int(unresolved_match.group(1)) if unresolved_match else None
 
     if unresolved is None and total is not None:
-        unresolved = max(total - waived, 0)
+        unresolved = total
     if unresolved is None and legacy_match:
         unresolved = int(legacy_match.group(1))
         if total is None:
             total = unresolved
-        waived = 0
 
     return TelemetryHealth(
         generated_at=generated_at,
         window_start=window_start,
         window_end=window_end,
         event_envelope_errors_total=total,
-        event_envelope_errors_waived=waived,
         event_envelope_errors_unresolved=unresolved,
     )
 
@@ -415,12 +410,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-count", type=int, default=72, help="Expected active skill count")
     parser.add_argument(
         "--profile-index-out",
-        default="Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json",
+        default=".harness/evidence/skill-graphs/onboarding/profile-index.json",
         help="Output path for per-skill profile validation index",
     )
     parser.add_argument(
         "--wave-readiness-out",
-        default="Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json",
+        default=".harness/evidence/skill-graphs/onboarding/wave-readiness.json",
         help="Output path for wave readiness artifact",
     )
     parser.add_argument(
@@ -591,7 +586,7 @@ def main() -> int:
     profile_index_path.parent.mkdir(parents=True, exist_ok=True)
     profile_index_path.write_text(json.dumps(profile_index, indent=2) + "\n", encoding="utf-8")
 
-    controls_dir = repo_root / "Infrastructure/artifacts/skill-graphs/controls"
+    controls_dir = repo_root / ".harness/evidence/skill-graphs/controls"
     required_controls = (
         controls_dir / "kill-switch.txt",
         controls_dir / "rollback-required.txt",
@@ -608,11 +603,10 @@ def main() -> int:
             )
 
     telemetry_health = parse_telemetry_health(
-        repo_root / "Docs/skill-graphs/telemetry/daily-skill-health.md"
+        repo_root / ".harness/evidence/skill-graphs/telemetry/daily-skill-health.md"
     )
     telemetry_errors_unresolved: Optional[int] = None
     telemetry_errors_total: Optional[int] = None
-    telemetry_errors_waived = 0
     telemetry_generated_at: Optional[str] = None
     telemetry_window_start: Optional[str] = None
     telemetry_window_end: Optional[str] = None
@@ -628,7 +622,6 @@ def main() -> int:
     else:
         telemetry_errors_unresolved = telemetry_health.event_envelope_errors_unresolved
         telemetry_errors_total = telemetry_health.event_envelope_errors_total
-        telemetry_errors_waived = telemetry_health.event_envelope_errors_waived
         telemetry_generated_at = (
             telemetry_health.generated_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
             if telemetry_health.generated_at
@@ -812,7 +805,6 @@ def main() -> int:
             "profile_invalid_count": invalid_count,
             "event_envelope_errors": telemetry_errors_unresolved,
             "event_envelope_errors_total": telemetry_errors_total,
-            "event_envelope_errors_waived": telemetry_errors_waived,
             "event_envelope_errors_unresolved": telemetry_errors_unresolved,
             "approver_count": approver_count,
             "telemetry_generated_at": telemetry_generated_at,

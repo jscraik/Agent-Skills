@@ -16,7 +16,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/skill_router.py \
   --query "help me design a ChatGPT app" \
   --actor-type human \
   --policy-mode observe_only \
-  --events-out Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl
+  --events-out .harness/evidence/skill-graphs/telemetry/skill-router-events.jsonl
 ```
 
 JSON mode:
@@ -26,7 +26,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/skill_router.py \
   --actor-type agent \
   --policy-mode co_pilot \
   --json \
-  --events-out Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl
+  --events-out .harness/evidence/skill-graphs/telemetry/skill-router-events.jsonl
 ```
 
 ## Control hierarchy
@@ -41,7 +41,7 @@ Unknown/invalid controls fail closed to safe state (`observe_only`).
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/verify_router_schema.py --input /tmp/router-result.json --fail-on-sensitive-fields
 python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict
-python3 Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json
+python3 Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events .harness/evidence/skill-graphs/telemetry/skill-router-events.jsonl --json
 ```
 
 Calibration profile (v1):

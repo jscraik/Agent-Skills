@@ -106,7 +106,7 @@ GITLEAKS_ENABLE_COMMENTS: "true"
 
 ### Exclusions
 
-- `Infrastructure/artifacts/skill-graphs/**`
+- `.tmp/agent-skills-artifacts/skill-graphs/**`
 
 ### PR Mode
 

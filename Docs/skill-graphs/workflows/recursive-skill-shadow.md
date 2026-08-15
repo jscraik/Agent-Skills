@@ -72,7 +72,7 @@ permissions:
 bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile "$RUNS_PER_PROFILE" \
   --window-days "$WINDOW_DAYS" \
-  --out-root "Infrastructure/artifacts/skill-graphs/runs" \
+  --out-root ".tmp/agent-skills-artifacts/skill-graphs/runs" \
   --profiles-file "docs/skill-graphs/schemas/examples/pilot-profiles.json"
 ```
 
@@ -82,7 +82,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
 |------|---------|
 | `--runs-per-profile` | `2` |
 | `--window-days` | `7` |
-| `--out-root` | `Infrastructure/artifacts/skill-graphs/runs` |
+| `--out-root` | `.tmp/agent-skills-artifacts/skill-graphs/runs` |
 | `--profiles-file` | `docs/skill-graphs/schemas/examples/pilot-profiles.json` |
 
 The pilot profiles file may be either:
@@ -100,7 +100,7 @@ When using object entries, keep pilot objectives specific enough for adversarial
 Treat the pilot as an eval program, not only a rerun harness:
 - keep the current strict gate on `critical non-regression`, which means every reevaluation in the run stayed clean;
 - also report `terminal non-regression` and `non-regression recovered` so operators can distinguish a clean run from a recovered run without weakening the gate;
-- freeze a baseline snapshot in `Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json` and refresh it only on whole-window boundaries so delta KPIs stay auditable;
+- freeze a baseline snapshot in `.harness/evidence/skill-graphs/pilot/shadow-baseline.json` and refresh it only on whole-window boundaries so delta KPIs stay auditable;
 - prefer stronger output contracts and verification scaffolding before raising reasoning effort or rewriting objectives wholesale.
 
 This workflow now aligns to current OpenAI guidance:
@@ -138,12 +138,12 @@ python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
 
 | NAME | PATHS |
 |------|-------|
-| `recursive-skill-shadow-artifacts` | `Infrastructure/artifacts/skill-graphs/**` |
+| `recursive-skill-shadow-artifacts` | `.tmp/agent-skills-artifacts/skill-graphs/**` |
 | | `docs/skill-graphs/pilots/ui-skills-shadow-results.md` |
 | | `docs/skill-graphs/pilots/ui-skills-pilot-readout.md` |
-| | `docs/skill-graphs/telemetry/daily-skill-health.md` |
-| | `Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl` |
-| | `Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md` |
+| | `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md` |
+| | `.harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl` |
+| | `.harness/evidence/skill-graphs/telemetry/promotion-queue.md` |
 | | `/tmp/docs-lint-shadow.json` |
 
 ---
@@ -163,12 +163,12 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
   --profiles-file custom-profiles.json
 
 # Review promotion candidates from the current shadow-cycle output
-sed -n '1,220p' Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md
+sed -n '1,220p' .harness/evidence/skill-graphs/telemetry/promotion-queue.md
 
 # Docs lint
 python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
-  --mode warn \
+  --mode block \
   --report-json docs-lint-report.json
 ```
 
@@ -185,4 +185,4 @@ Workflow: `.github/workflows/recursive-skill-shadow.yml`
 - [Shadow cycle script](/Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh)
 - [Pilot profiles example](/docs/skill-graphs/schemas/examples/pilot-profiles.json)
 - [UI skills shadow results](/docs/skill-graphs/pilots/ui-skills-shadow-results.md)
-- [Daily skill health](/docs/skill-graphs/telemetry/daily-skill-health.md)
+- Generated daily health: `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md`

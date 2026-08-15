@@ -37,12 +37,12 @@ flowchart LR
 
 Core files:
 
-- `Infrastructure/artifacts/skill-graphs/runs/<run_id>/run.json`
-- `Infrastructure/artifacts/skill-graphs/runs/<run_id>/capture_record.json`
-- `Infrastructure/artifacts/skill-graphs/runs/<run_id>/lesson_observations.json`
-- `Infrastructure/artifacts/skill-graphs/runs/<run_id>/lesson_candidates.json`
-- `Infrastructure/artifacts/skill-graphs/runs/<run_id>/promotion_decision.json`
-- `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl`
+- `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/run.json`
+- `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/capture_record.json`
+- `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/lesson_observations.json`
+- `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/lesson_candidates.json`
+- `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/promotion_decision.json`
+- `.harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl`
 
 ## Frontend UI Design pilot
 
@@ -149,7 +149,7 @@ Recursive promotion validation:
 
 ```bash
 python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py \
-  --run-dir Infrastructure/artifacts/skill-graphs/runs/<run_id>
+  --run-dir .tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>
 ```
 
 Docs quality:

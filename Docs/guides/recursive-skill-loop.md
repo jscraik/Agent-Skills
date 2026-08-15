@@ -22,18 +22,18 @@ This guide runs the MVP loop engine in bounded mode and emits auditable artifact
 python3 Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py \
   --profile-file docs/skill-graphs/schemas/examples/ui-skills-profile.example.json \
   --objective "Improve UI skill response quality for traceable, safe outputs" \
-  --out-root Infrastructure/artifacts/skill-graphs/runs \
+  --out-root .tmp/agent-skills-artifacts/skill-graphs/runs \
   --run-owner recursive-loop-operator \
   --rollout-mode observe_only \
   --uplift-gate-mode observe \
-  --controls-dir Infrastructure/artifacts/skill-graphs/controls \
-  --lessons-jsonl Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl \
+  --controls-dir .harness/evidence/skill-graphs/controls \
+  --lessons-jsonl .harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl \
   --max-injected-lessons 3 \
   --low-confidence-threshold 0.6 \
   --feedback-outcome worked \
   --feedback-note "Output was concise and directly actionable" \
-  --kill-switch-file Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt \
-  --rollback-required-file Infrastructure/artifacts/skill-graphs/controls/rollback-required.txt
+  --kill-switch-file .harness/evidence/skill-graphs/controls/kill-switch.txt \
+  --rollback-required-file .harness/evidence/skill-graphs/controls/rollback-required.txt
 ```
 
 ## Shadow cycle automation
@@ -58,7 +58,7 @@ This generates/updates:
 
 - `/docs/skill-graphs/pilots/ui-skills-shadow-results.md`
 - `/docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
-- `/Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json`
+- `/.harness/evidence/skill-graphs/pilot/shadow-dashboard.json`
 
 ## Expected output
 

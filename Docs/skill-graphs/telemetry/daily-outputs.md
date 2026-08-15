@@ -4,10 +4,10 @@ Daily operator artifacts for recursive loop health monitoring.
 
 ## Required outputs
 
-- `shadow-baseline.json`
-- `daily-skill-health.md`
-- `failure-pattern-candidates.jsonl`
-- `promotion-queue.md`
+- `.harness/evidence/skill-graphs/pilot/shadow-baseline.json`
+- `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md`
+- `.harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl`
+- `.harness/evidence/skill-graphs/telemetry/promotion-queue.md`
 
 `promotion-queue.md` entries should include:
 - run id + profile id
@@ -16,7 +16,7 @@ Daily operator artifacts for recursive loop health monitoring.
 - candidate lesson count
 - rollout mode + injected lesson count
 
-`daily-skill-health.md` should include:
+The generated daily-health evidence should include:
 - baseline source + baseline window
 - critical non-regression compliance (all reevaluations clean)
 - terminal non-regression compliance (final accepted state clean)

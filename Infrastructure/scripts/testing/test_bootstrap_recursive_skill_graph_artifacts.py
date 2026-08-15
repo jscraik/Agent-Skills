@@ -12,7 +12,11 @@ from pathlib import Path
 import unittest
 
 
-SCRIPT = Path(__file__).resolve().parents[0] / "bootstrap_recursive_skill_graph_artifacts.py"
+SCRIPT = (
+    Path(__file__).resolve().parents[1]
+    / "skill-graph"
+    / "bootstrap_recursive_skill_graph_artifacts.py"
+)
 DEFAULT_SCOPES = [
     "frontend/ui/ui-ux-creative-coding",
     "frontend/ui/react-ui-patterns",

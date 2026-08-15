@@ -15,7 +15,7 @@
 
 **Finding C-01** from the security best-practices report identified that the canonical
 lesson write path lacked a cryptographic trust boundary: any process with write access
-to `Infrastructure/artifacts/skill-graphs/runs/<run_id>/promotion_decision.json` could mutate the
+to `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/promotion_decision.json` could mutate the
 decision without detection.
 
 Signing closes this gap:

@@ -7,12 +7,11 @@ Picks a skill that needs attention based on:
 - Not modified recently
 """
 import json
-import random
 from pathlib import Path
 from datetime import datetime, timezone
 
-RUNS_ROOT = Path("Infrastructure/artifacts/skill-graphs/runs")
-TELEMETRY_ROOT = Path("Infrastructure/artifacts/skill-graphs/telemetry")
+RUNS_ROOT = Path(".harness/evidence/skill-graphs/runs")
+TELEMETRY_ROOT = Path(".harness/evidence/skill-graphs/telemetry")
 SKILLS_ROOT = Path("skills")
 
 def get_skill_mod_time(skill_name: str) -> str:
@@ -50,7 +49,7 @@ def analyze_failures() -> dict:
                     skill_failures[skill] = {"count": 0, "reasons": []}
                 skill_failures[skill]["count"] += 1
                 skill_failures[skill]["reasons"].append(stop_reason)
-        except:
+        except (AttributeError, OSError, UnicodeDecodeError, json.JSONDecodeError):
             continue
 
     return skill_failures
@@ -69,13 +68,13 @@ def pick_spotlight() -> dict:
             "action": "Review trigger phrases and confidence thresholds"
         }
 
-    # Fallback: pick a random skill that hasn't been modified recently
+    # Fallback: select the least-recently modified skill deterministically.
     skills = [d.name for d in SKILLS_ROOT.iterdir() if d.is_dir() and (d / "SKILL.md").exists()]
     if skills:
-        skill = random.choice(skills)
+        skill = min(skills, key=lambda name: (get_skill_mod_time(name), name))
         return {
             "skill": skill,
-            "signal": "Random spotlight - no failures detected",
+            "signal": "Least-recently-modified spotlight - no failures detected",
             "reasons": [],
             "action": "Review and validate skill documentation"
         }
@@ -86,7 +85,7 @@ def main():
     spotlight = pick_spotlight()
     mod_time = get_skill_mod_time(spotlight["skill"])
 
-    print(f"## Skill Spotlight (Auto-Generated)")
+    print("## Skill Spotlight (Auto-Generated)")
     print(f"- **Skill**: {spotlight['skill']}")
     print(f"- **Last modified**: {mod_time}")
     print(f"- **Signal**: {spotlight['signal']}")

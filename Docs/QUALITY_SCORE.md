@@ -662,7 +662,7 @@ calculated_by: harness-gardener
 1. `skill-graphs/schemas/skill-router.schema.md` (never validated)
 1. `skill-graphs/schemas/task-profile.schema.md` (never validated)
 1. `skill-graphs/telemetry/daily-outputs.md` (never validated)
-1. `skill-graphs/telemetry/daily-skill-health.md` (never validated)
+1. `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md` (generated evidence)
 1. `skill-graphs/telemetry/index.md` (never validated)
 1. `skill-graphs/telemetry/skill-router-go-no-go-thresholds.md` (never validated)
 1. `skill-graphs/topic-maps/agent-ops.md` (never validated)

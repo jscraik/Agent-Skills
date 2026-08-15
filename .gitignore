@@ -94,7 +94,7 @@ Infrastructure/artifacts/*-status-*.md
 Infrastructure/artifacts/skill-validation*
 Infrastructure/artifacts/skill_validation_*
 Infrastructure/artifacts/run_skill_validation.sh
-Infrastructure/artifacts/skill-graphs/drills/
+.tmp/agent-skills-artifacts/skill-graphs/drills/
 Infrastructure/artifacts/skills/**/structure-gate.json
 Infrastructure/artifacts/skills/**/structure-gate.sarif
 Infrastructure/artifacts/skills/autoresearch/
@@ -107,11 +107,11 @@ Infrastructure/reports/data/candidates.json
 /Infrastructure/artifacts/ai/tmp/
 /Infrastructure/artifacts/ai/cache/
 /Infrastructure/artifacts/ai/raw/
-/Infrastructure/artifacts/skill-graphs/runs/**/debug/
-/Infrastructure/artifacts/skill-graphs/runs/**/iter-*-generated.txt
-/Infrastructure/artifacts/skill-graphs/runs/**/iter-*-improved.txt
-/Infrastructure/artifacts/skill-graphs/runs/**/summary.md
-/Infrastructure/artifacts/skill-graphs/runs/**/events.jsonl
+/.tmp/agent-skills-artifacts/skill-graphs/runs/**/debug/
+/.tmp/agent-skills-artifacts/skill-graphs/runs/**/iter-*-generated.txt
+/.tmp/agent-skills-artifacts/skill-graphs/runs/**/iter-*-improved.txt
+/.tmp/agent-skills-artifacts/skill-graphs/runs/**/summary.md
+/.tmp/agent-skills-artifacts/skill-graphs/runs/**/events.jsonl
 
 # Harness runtime/scratch outputs
 .harness/
@@ -183,9 +183,9 @@ environment.toml
 .install-journal/
 
 # Skill Genome Loop runtime artifacts
-Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl
-Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
-Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark
+.harness/evidence/skill-graphs/telemetry/candidates.jsonl
+.harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json
+.harness/evidence/skill-graphs/telemetry/.genome-watermark
 
 # Selection quality history (mutable runtime artifact)
 Infrastructure/artifacts/selection-quality/history.jsonl

@@ -52,10 +52,10 @@ When present, loop outputs copy this to `run.json`, `promotion_decision.json`, a
 | Entity | Source artifact | Key edges |
 | --- | --- | --- |
 | Task profile | `docs/skill-graphs/schemas/task-profile.schema.md` | profile -> run |
-| Run | `Infrastructure/artifacts/skill-graphs/runs/<run_id>/run.json` | run -> iteration, run -> decision |
+| Run | `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/run.json` | run -> iteration, run -> decision |
 | Iteration | `iteration_journal.jsonl` | iteration -> candidate lesson |
 | Candidate lesson | `lesson_candidates.json` | candidate -> promotion decision |
-| Canonical lesson | `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl` | lesson -> supersedes lesson |
+| Canonical lesson | `.harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl` | lesson -> supersedes lesson |
 | Promotion decision | `promotion_decision.json` | decision -> canonical lesson |
 
 ## Progressive disclosure in practice
@@ -87,4 +87,4 @@ Map phase pipeline to deck archetypes:
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_recursive_skill_loop_capture.py`
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_validate_recursive_promotion.py`
 - `python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py --run-dir <run_dir>`
-- `python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py --runs-root Infrastructure/artifacts/skill-graphs/runs --window-days 3`
+- `python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py --runs-root .tmp/agent-skills-artifacts/skill-graphs/runs --window-days 3`

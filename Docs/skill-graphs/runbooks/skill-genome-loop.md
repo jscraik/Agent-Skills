@@ -22,10 +22,10 @@ python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --dry
 python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --force-mode observe_only
 
 # View candidates
-cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq .
+cat .harness/evidence/skill-graphs/telemetry/candidates.jsonl | jq .
 
 # View processing stats
-cat Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json | jq .
+cat .harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json | jq .
 ```
 
 ---
@@ -34,7 +34,7 @@ cat Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stat
 
 ### Kill-Switch (highest priority)
 
-**Location**: `Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt`
+**Location**: `.harness/evidence/skill-graphs/controls/kill-switch.txt`
 
 - **Trigger**: File exists (content ignored)
 - **Effect**: Immediately aborts candidate generation
@@ -42,22 +42,22 @@ cat Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stat
 
 ```bash
 # Activate kill-switch
-touch Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+touch .harness/evidence/skill-graphs/controls/kill-switch.txt
 
 # Deactivate kill-switch
-rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+rm .harness/evidence/skill-graphs/controls/kill-switch.txt
 ```
 
 ### Rollback
 
-**Location**: `Infrastructure/artifacts/skill-graphs/controls/rollback-required.txt`
+**Location**: `.harness/evidence/skill-graphs/controls/rollback-required.txt`
 
 - Handled by existing recursive skill loop infrastructure
 - Takes precedence over rollout mode
 
 ### Rollout Mode
 
-**Location**: `Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt`
+**Location**: `.harness/evidence/skill-graphs/controls/rollout-mode.txt`
 
 Valid values:
 - `off` - Skip candidate generation entirely
@@ -66,18 +66,18 @@ Valid values:
 
 ```bash
 # Set to active mode
-echo "active" > Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt
+echo "active" > .harness/evidence/skill-graphs/controls/rollout-mode.txt
 
 # Set to observe_only (default)
-echo "observe_only" > Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt
+echo "observe_only" > .harness/evidence/skill-graphs/controls/rollout-mode.txt
 
 # Disable completely
-echo "off" > Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt
+echo "off" > .harness/evidence/skill-graphs/controls/rollout-mode.txt
 ```
 
 ### Hard Gate Mode
 
-**Location**: `Infrastructure/artifacts/skill-graphs/controls/hard-gate-mode.txt`
+**Location**: `.harness/evidence/skill-graphs/controls/hard-gate-mode.txt`
 
 Valid values:
 - `auto` - enforce `TR-04`/`TR-05` hard from Phase 3+ and `TR-06` hard from Phase 4+ (default)
@@ -86,7 +86,7 @@ Valid values:
 
 ```bash
 # Set hard-gate mode to auto (default)
-echo "auto" > Infrastructure/artifacts/skill-graphs/controls/hard-gate-mode.txt
+echo "auto" > .harness/evidence/skill-graphs/controls/hard-gate-mode.txt
 ```
 
 ### Control Hierarchy
@@ -168,13 +168,13 @@ All candidates are processed through:
 
 ```bash
 # View all candidates
-cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq -c .
+cat .harness/evidence/skill-graphs/telemetry/candidates.jsonl | jq -c .
 
 # Filter by skill
-cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq -c 'select(.skill_path | contains("ui-ux"))'
+cat .harness/evidence/skill-graphs/telemetry/candidates.jsonl | jq -c 'select(.skill_path | contains("ui-ux"))'
 
 # Filter high confidence
-cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq -c 'select(.composite_score >= 0.82)'
+cat .harness/evidence/skill-graphs/telemetry/candidates.jsonl | jq -c 'select(.composite_score >= 0.82)'
 ```
 
 ### 2. Evaluate Candidate
@@ -199,27 +199,27 @@ For each candidate:
 
 ```bash
 # 1. Check kill-switch exists
-ls -la Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+ls -la .harness/evidence/skill-graphs/controls/kill-switch.txt
 
 # 2. Review recent processing stats
-cat Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json | jq .
+cat .harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json | jq .
 
 # 3. After incident resolution, remove kill-switch
-rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+rm .harness/evidence/skill-graphs/controls/kill-switch.txt
 ```
 
 ### If Bad Candidates Emitted
 
 ```bash
 # 1. Activate kill-switch immediately
-touch Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+touch .harness/evidence/skill-graphs/controls/kill-switch.txt
 
 # 2. Review candidates.jsonl for affected entries
-cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq .
+cat .harness/evidence/skill-graphs/telemetry/candidates.jsonl | jq .
 
 # 3. Remove bad entries (manual edit)
 # 4. Deactivate kill-switch
-rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
+rm .harness/evidence/skill-graphs/controls/kill-switch.txt
 ```
 
 ---
@@ -228,7 +228,7 @@ rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
 
 ### Processing Stats
 
-**Location**: `Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json`
+**Location**: `.harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json`
 
 ```json
 {

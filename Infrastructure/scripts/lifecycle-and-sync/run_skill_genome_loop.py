@@ -28,11 +28,11 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Set
 
 # Configuration
-CANDIDATES_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl")
-RUNS_ROOT = Path("Infrastructure/artifacts/skill-graphs/runs")
-CONTROLS_ROOT = Path("Infrastructure/artifacts/skill-graphs/controls")
-STATS_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json")
-WATERMARK_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark")
+CANDIDATES_PATH = Path(".harness/evidence/skill-graphs/telemetry/candidates.jsonl")
+RUNS_ROOT = Path(".harness/evidence/skill-graphs/runs")
+CONTROLS_ROOT = Path(".harness/evidence/skill-graphs/controls")
+STATS_PATH = Path(".harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json")
+WATERMARK_PATH = Path(".harness/evidence/skill-graphs/telemetry/.genome-watermark")
 
 MIN_CONFIDENCE = 0.82
 MIN_WINDOWS = 2
