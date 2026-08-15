@@ -166,7 +166,7 @@ def _run_codex_with_captured_subprocess(
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_judge_rejects_fifo_outside_actual_codex_home(self) -> None:
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as directory:
             actual_home = Path(directory) / "actual-home"
             other_home = Path(directory) / "other-home"
@@ -182,7 +182,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                     codex_judge._codex_judge_command(profile, Path(directory) / "work", Path(directory) / "last-message.json")
 
     def test_cloud_judge_rejects_receipt_only_stream_marker(self) -> None:
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with (
             patch.dict(os.environ, {"SKILLS_SDK_OSS_CLOUD_ENV_FILE": "<operator-approved-opaque-env-stream>"}, clear=False),
         ):
@@ -195,7 +195,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         command_tail = [
             "--require-env", "OLLAMA_API_KEY", "--",
             "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
-            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+            "--profile", "oss-cloud", "--model", "deepseek-v4-flash:0731-cloud",
             "--strict-config", "-c", 'approval_policy="on-request"',
             "--sandbox", "read-only", "--ephemeral", "-",
         ]
@@ -1103,8 +1103,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_cloud_codex_runner_uses_configs_auth_and_execution_wrappers(self) -> None:
         result, captured_command, captured_env, captured_profile_text, auth_env_file = _run_codex_with_captured_subprocess(
             "oss-cloud",
-            'model = "deepseek-v4-flash:cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
-            {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+            'model = "deepseek-v4-flash:0731-cloud"\nmodel_provider = "ollama-cloud"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
             {"OPENAI_API_KEY": "other-token", "GITHUB_TOKEN": "repo-token"},
         )
 
@@ -1119,10 +1119,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         ])
         self.assertIn("--strict-config", captured_command)
         self.assertIn("--model", captured_command)
-        self.assertIn("deepseek-v4-flash:cloud", captured_command)
+        self.assertIn("deepseek-v4-flash:0731-cloud", captured_command)
         self.assertNotIn("op", captured_command)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
-        self.assertIn('model = "deepseek-v4-flash:cloud"', captured_profile_text)
+        self.assertIn('model = "deepseek-v4-flash:0731-cloud"', captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)
 
@@ -1139,7 +1139,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 patch("ask.skills_sdk.ab_transport_contracts.operator_account_home", return_value=Path(profile_dir)),
             ):
                 command = _codex_judge_command(
-                    {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+                    {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
                     codex_judge._codex_judge_work_dir(output_file),
                     output_file,
                 )
@@ -1154,14 +1154,14 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             ],
         )
         self.assertIn("--model", command)
-        self.assertIn("deepseek-v4-flash:cloud", command)
+        self.assertIn("deepseek-v4-flash:0731-cloud", command)
         self.assertIn("--strict-config", command)
         self.assertIn("--skip-git-repo-check", command)
         self.assertIn("--cd", command)
         self.assertNotIn(str(REPO_ROOT), command)
 
     def test_cloud_auth_env_file_requires_a_desktop_fifo(self) -> None:
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_file = Path(profile_dir) / "codex.env"
             env_file.write_text("", encoding="utf-8")
@@ -1170,7 +1170,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
     def test_cloud_judge_rejects_direct_codex_when_configs_boundary_is_missing(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_file = Path(profile_dir) / "codex.env"
             env_file.write_text("not a FIFO\n", encoding="utf-8")
@@ -1188,7 +1188,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_desktop_fifo(self) -> None:
         output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir:
             env_dir = Path(profile_dir) / ".codex"
             env_dir.mkdir()
@@ -1205,7 +1205,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_judge_contains_runtime_output_and_copies_receipt(self) -> None:
-        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
+        profile = {"id": "oss-cloud", "model": "deepseek-v4-flash:0731-cloud", "secret_env_names": ["OLLAMA_API_KEY"]}
         with tempfile.TemporaryDirectory() as profile_dir, tempfile.TemporaryDirectory() as evidence_dir:
             profile_root = Path(profile_dir)
             env_file = profile_root / ".codex" / ".env"

@@ -10,7 +10,7 @@ fi
 cd "$repo_root"
 
 scope="${PROJECTION_INTEGRITY_SCOPE:-all}"
-manifest_out="${PROJECTION_INTEGRITY_MANIFEST:-Infrastructure/artifacts/validation/projection-integrity/latest.json}"
+manifest_out="${PROJECTION_INTEGRITY_MANIFEST:-.harness/evidence/validation/projection-integrity/latest.json}"
 output_format="${PROJECTION_INTEGRITY_FORMAT:-text}"
 
 set +e

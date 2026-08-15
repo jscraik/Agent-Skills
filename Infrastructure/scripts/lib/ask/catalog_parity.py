@@ -18,7 +18,7 @@ REQUIRED_SURFACES = (
     "ask skills list",
     "route considered metadata",
 )
-HISTORY_PATH = Path("Infrastructure/artifacts/selection-quality/history.jsonl")
+HISTORY_PATH = Path(".harness/evidence/selection-quality/history.jsonl")
 
 
 def _extract_readme_count(readme_path: Path) -> int | None:
@@ -268,12 +268,12 @@ def compute_catalog_parity(
             drift_detected = True
             drift_class = "trend_schema_invalid_history"
             blocking_reason = "schema_invalid_history"
-            operator_action = "Repair Infrastructure/artifacts/selection-quality/history.jsonl to valid schema entries."
+            operator_action = "Repair .harness/evidence/selection-quality/history.jsonl to valid schema entries."
         elif history_issue == "missing_history":
             drift_detected = True
             drift_class = "trend_insufficient_history"
             blocking_reason = "insufficient_history"
-            operator_action = "Create Infrastructure/artifacts/selection-quality/history.jsonl from completed validation runs."
+            operator_action = "Create .harness/evidence/selection-quality/history.jsonl from completed validation runs."
         elif history_issue == "trend_deterioration":
             drift_detected = True
             drift_class = "trend_deterioration"

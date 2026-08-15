@@ -56,7 +56,7 @@ def _test_execution_argv(command_argv: list[str]) -> list[str]:
             "bash", _CONFIGS_AUTH_WRAPPER, "--env-file", str(_TEST_CLOUD_ENV_FILE),
             "--require-env", "OLLAMA_API_KEY", "--",
             "bash", _CONFIGS_CODEX_EXEC_WRAPPER, "--profile", "oss-cloud",
-            "--model", "deepseek-v4-flash:cloud", "--strict-config", "-c",
+            "--model", "deepseek-v4-flash:0731-cloud", "--strict-config", "-c",
             'approval_policy="on-request"', "--cd", command_argv[command_argv.index("--cd") + 1],
             "--sandbox", "read-only", "--ephemeral", "--json", "--output-last-message",
             command_argv[command_argv.index("--output-last-message") + 1], "-",

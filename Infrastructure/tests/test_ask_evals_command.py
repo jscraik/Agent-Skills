@@ -5153,7 +5153,7 @@ def test_plugin_eval_b_plus_warning_is_budget_guardrail() -> None:
     assert parsed["warn_count"] == 1
 
 
-def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good() -> None:
+def test_plugin_eval_deferred_budget_fail_is_blocking_when_active_budget_good() -> None:
     parsed = _parse_plugin_eval(
         """# Plugin Eval Report
 
@@ -5170,11 +5170,11 @@ def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good
     )
 
     assert parsed["fail_count"] == 1
-    assert parsed["blocking_fail_count"] == 0
-    assert parsed["posture"] == "deferred_budget_guardrail"
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
 
 
-def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_moderate_and_grade_b() -> None:
+def test_plugin_eval_deferred_budget_fail_is_blocking_when_active_budget_moderate_and_grade_b() -> None:
     parsed = _parse_plugin_eval(
         """# Plugin Eval Report
 
@@ -5192,8 +5192,8 @@ def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_mode
 
     assert parsed["grade_acceptable"] is True
     assert parsed["fail_count"] == 1
-    assert parsed["blocking_fail_count"] == 0
-    assert parsed["posture"] == "deferred_budget_guardrail"
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
 
 
 def test_plugin_eval_deferred_budget_fail_still_blocks_low_grade() -> None:

@@ -11,8 +11,8 @@ import random
 from pathlib import Path
 from datetime import datetime, timezone
 
-RUNS_ROOT = Path("Infrastructure/artifacts/skill-graphs/runs")
-TELEMETRY_ROOT = Path("Infrastructure/artifacts/skill-graphs/telemetry")
+RUNS_ROOT = Path(".harness/evidence/skill-graphs/runs")
+TELEMETRY_ROOT = Path(".harness/evidence/skill-graphs/telemetry")
 SKILLS_ROOT = Path("skills")
 
 def get_skill_mod_time(skill_name: str) -> str:

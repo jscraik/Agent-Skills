@@ -550,41 +550,22 @@ def ensure_blocker_artifacts(run_dir: Path, run_obj: Dict[str, Any], dry_run: bo
     return changed
 
 
-def target_run_dirs(runs_root: Path, waiver_file: Path, explicit: List[str]) -> List[Path]:
+def target_run_dirs(runs_root: Path, explicit: List[str]) -> List[Path]:
     if explicit:
         return [Path(item).expanduser().resolve() for item in explicit]
-
-    payload = load_json(waiver_file) or {}
-    rows = payload.get("waived_runs")
-    targets: List[Path] = []
-    if isinstance(rows, list):
-        for row in rows:
-            if not isinstance(row, dict):
-                continue
-            raw = str(row.get("run_dir", "")).strip()
-            if not raw:
-                continue
-            path = Path(raw)
-            if not path.is_absolute():
-                path = (Path.cwd() / raw).resolve()
-            targets.append(path)
-    if targets:
-        return targets
     return sorted(p for p in runs_root.glob("run_*") if p.is_dir())
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs-root", default="Infrastructure/artifacts/skill-graphs/runs")
-    parser.add_argument("--waiver-file", default="Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-waivers.json")
     parser.add_argument("--run-dir", action="append", default=[])
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
     runs_root = Path(args.runs_root).expanduser().resolve()
-    waiver_file = Path(args.waiver_file).expanduser().resolve()
-    targets = target_run_dirs(runs_root, waiver_file, list(args.run_dir))
+    targets = target_run_dirs(runs_root, list(args.run_dir))
 
     repaired = 0
     for run_dir in targets:

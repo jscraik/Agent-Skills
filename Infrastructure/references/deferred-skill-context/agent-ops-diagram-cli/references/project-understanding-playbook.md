@@ -13,7 +13,7 @@ Turn diagram artifacts into a concise architecture brief that helps users unders
 ## Command sequence
 
 ```bash
-npx --yes @brainwav/diagram analyze . --json > Infrastructure/artifacts/diagrams/analyze.json
+npx --yes @brainwav/diagram analyze . --json > .tmp/diagrams/analyze.json
 npx --yes @brainwav/diagram all . --output-dir .diagram
 npx --yes @brainwav/diagram manifest . --manifest-dir .diagram --require-types architecture,dependency,security,auth --fail-on-placeholder
 ```

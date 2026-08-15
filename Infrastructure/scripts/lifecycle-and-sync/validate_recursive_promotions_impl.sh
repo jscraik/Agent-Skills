@@ -13,9 +13,9 @@ changed_only=0
 base_sha=""
 head_sha="HEAD"
 strict_runs=0
-report_json="Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json"
-runs_root="Infrastructure/artifacts/skill-graphs/runs"
-parity_manifest="Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
+report_json=".harness/evidence/skill-graphs/pilot/promotion-validation-report.json"
+runs_root=".tmp/agent-skills-artifacts/skill-graphs/runs"
+parity_manifest=".harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json"
 status=0
 changed_run_count=0
 
@@ -49,7 +49,7 @@ Options:
   --changed-only         Validate only changed promotion_decision.json files in git diff
   --base-sha SHA         Base SHA for changed-only mode
   --head-sha SHA         Head SHA for changed-only mode (default: HEAD)
-  --runs-root PATH       Runs root for strict run-dir parity checks (default: Infrastructure/artifacts/skill-graphs/runs)
+  --runs-root PATH       Runs root for strict run-dir parity checks (default: .tmp/agent-skills-artifacts/skill-graphs/runs)
   --report-json PATH     Output JSON report path
   --strict-runs          Enable strict run-parity checks for changed run directories
   --parity-manifest PATH Path for artifact-parity manifest output
@@ -305,8 +305,8 @@ python3 - <<'PY'
 import json
 from pathlib import Path
 
-jsonl_path = Path("Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl")
-index_path = Path("Infrastructure/artifacts/skill-graphs/lessons/canonical-lesson-index.json")
+jsonl_path = Path(".harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl")
+index_path = Path(".harness/evidence/skill-graphs/lessons/canonical-lesson-index.json")
 if jsonl_path.exists():
     for i, line in enumerate(jsonl_path.read_text(encoding="utf-8").splitlines(), start=1):
         line = line.strip()

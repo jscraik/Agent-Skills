@@ -21,9 +21,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Configuration
-PENDING_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/pending-candidates.jsonl")
-CANDIDATES_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl")
-REJECTED_PATH = Path("Infrastructure/artifacts/skill-graphs/telemetry/rejected-candidates.jsonl")
+PENDING_PATH = Path(".harness/evidence/skill-graphs/telemetry/pending-candidates.jsonl")
+CANDIDATES_PATH = Path(".harness/evidence/skill-graphs/telemetry/candidates.jsonl")
+REJECTED_PATH = Path(".harness/evidence/skill-graphs/telemetry/rejected-candidates.jsonl")
 
 
 def load_pending() -> List[Dict[str, Any]]:

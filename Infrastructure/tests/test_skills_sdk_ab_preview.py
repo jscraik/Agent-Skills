@@ -43,7 +43,7 @@ class TestSkillsSdkAbPreview(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "preview")
         self.assertEqual(receipt["judge_profile"]["id"], "oss-cloud")
-        self.assertEqual(receipt["judge_profile"]["model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(receipt["judge_profile"]["model"], "deepseek-v4-flash:0731-cloud")
         self.assertEqual(receipt["secret_boundary"]["judge_env_secret_names"], ["OLLAMA_API_KEY"])
         self.assertEqual(receipt["secret_boundary"]["skill_execution_env_secret_names"], [])
         self.assertFalse(receipt["secret_boundary"]["skill_execution_receives_judge_secrets"])

@@ -77,12 +77,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Add each path separately so missing paths don't block others
           git add docs/skill-graphs/telemetry/daily-skill-health.md 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/runs/ 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/telemetry/ 2>/dev/null || true
+          git add .tmp/agent-skills-artifacts/skill-graphs/runs/ 2>/dev/null || true
+          git add .harness/evidence/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
+          git add .harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
+          git add .harness/evidence/skill-graphs/pilot/shadow-dashboard.json 2>/dev/null || true
+          git add .harness/evidence/skill-graphs/pilot/shadow-baseline.json 2>/dev/null || true
+          git add .harness/evidence/skill-graphs/telemetry/ 2>/dev/null || true
           git add docs/skill-graphs/pilots/ui-skills-shadow-results.md 2>/dev/null || true
           git add docs/skill-graphs/pilots/ui-skills-pilot-readout.md 2>/dev/null || true
           git diff --cached --quiet || git commit \
@@ -94,10 +94,10 @@ jobs:
         with:
           name: recursive-skill-shadow-artifacts
           path: |
-            Infrastructure/artifacts/skill-graphs
+            .tmp/agent-skills-artifacts/skill-graphs
             docs/skill-graphs/pilots/ui-skills-shadow-results.md
             docs/skill-graphs/pilots/ui-skills-pilot-readout.md
             docs/skill-graphs/telemetry/daily-skill-health.md
-            Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl
-            Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md
+            .harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl
+            .harness/evidence/skill-graphs/telemetry/promotion-queue.md
             /tmp/docs-lint-shadow.json

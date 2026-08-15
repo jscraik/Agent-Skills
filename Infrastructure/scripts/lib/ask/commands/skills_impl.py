@@ -25,6 +25,7 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
+from ask.commands.skills_capability_context import _operation_context_events  # noqa: E402
 from ask.commands.memory import (  # noqa: E402
     MEMORY_SOURCES,
     memory_list as _memory_provider_list,
@@ -3667,9 +3668,9 @@ def _skill_package_operation_context() -> dict[str, Any]:
             }
             for profile_name in ("package-review", "plugin-share")
         },
-        "events": {
-            "package_readiness_checked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["package_readiness_checked"],
-        },
+        "events": _operation_context_events(
+            CAPABILITY_LIFECYCLE_EVENT_CONSUMERS, "package_readiness_checked"
+        ),
         "validation_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
             _skills_validation_command("events", "package_readiness_checked"),
@@ -3691,11 +3692,12 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
             }
             for profile_name in ("authoring", "package-review", "eval")
         },
-        "events": {
-            "skill_doctor_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["skill_doctor_completed"],
-            "eval_blocked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_blocked"],
-            "eval_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_completed"],
-        },
+        "events": _operation_context_events(
+            CAPABILITY_LIFECYCLE_EVENT_CONSUMERS,
+            "skill_doctor_completed",
+            "eval_blocked",
+            "eval_completed",
+        ),
         "follow_up_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
             "./bin/ask skills prove <handle> --json --robot",

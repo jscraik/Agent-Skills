@@ -19,9 +19,9 @@ from eval_signal_contract import (
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Aggregate skill eval scorecards into dashboard JSON/Markdown.")
-    p.add_argument("--reports-root", default="Infrastructure/artifacts/skills", help="Base directory containing <skill>/<run_id>/scorecard.json")
-    p.add_argument("--out-json", default="Infrastructure/artifacts/skills/dashboard.json")
-    p.add_argument("--out-md", default="Infrastructure/artifacts/skills/dashboard.md")
+    p.add_argument("--reports-root", default=".tmp/agent-skills-artifacts/skills", help="Base directory containing <skill>/<run_id>/scorecard.json")
+    p.add_argument("--out-json", default=".harness/evidence/skills/dashboard.json")
+    p.add_argument("--out-md", default=".harness/evidence/skills/dashboard.md")
     return p.parse_args()
 
 

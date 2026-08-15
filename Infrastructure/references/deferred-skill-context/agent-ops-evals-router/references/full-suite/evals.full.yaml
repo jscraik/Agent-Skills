@@ -475,7 +475,7 @@ cases:
     unit: evals-router external pattern extraction
     given: An existing Codex skill eval suite needs to borrow assertion structure from an external skill-creator pattern without copying or installing that source.
     should: Audit the current eval shape, translate only the useful pattern into local comparator and deterministic-check guidance, and report pass/fail/blocked readiness evidence.
-    actual_artifact: Infrastructure/artifacts/skill-reviews/evals-router-eval-latest.json
+    actual_artifact: .harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-reviews/evals-router-eval-latest.json
     expected_artifact: Skills/agent-ops/evals-router/references/evals.yaml
     reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-skill-eval-creation-loop --skip-tessl --no-dashboard --json --robot"
     prepend_skill: true
@@ -496,7 +496,7 @@ cases:
     unit: evals-router bounded literature-lens eval design
     given: A skill eval suite has a software literature lens pack available as inspiration but needs concrete actor-goal eval cases and repo evidence.
     should: Route to evals-router, select only the named lenses, add positive and negative eval paths, and preserve pass/fail/blocked evidence without treating book references as proof.
-    actual_artifact: Infrastructure/artifacts/skill-reviews/evals-router-eval-latest.json
+    actual_artifact: .harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-reviews/evals-router-eval-latest.json
     expected_artifact: Skills/agent-ops/evals-router/references/evals.yaml
     reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-literature-lens-eval-design --skip-tessl --no-dashboard --json --robot"
     prepend_skill: true

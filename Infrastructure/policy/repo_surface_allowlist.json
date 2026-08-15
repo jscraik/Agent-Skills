@@ -4,7 +4,7 @@
     {
       "id": "selection-quality-history-canonical-index",
       "match_type": "exact",
-      "pattern": "Infrastructure/artifacts/selection-quality/history.jsonl",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/selection-quality/history.jsonl",
       "classification": "historical_artifact",
       "reason": "Canonical append-only routing-quality history consumed by validation and catalog parity checks; retained until moved to a non-artifact state path.",
       "owner": "agent-skills validation",
@@ -22,7 +22,7 @@
     {
       "id": "projection-integrity-latest-evidence",
       "match_type": "exact",
-      "pattern": "Infrastructure/artifacts/validation/projection-integrity/latest.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/validation/projection-integrity/latest.json",
       "classification": "historical_artifact",
       "reason": "Latest projection-integrity evidence artifact consumed by projection validation closeout; retained as a reviewed historical artifact until the generator writes to a governed state path.",
       "owner": "agent-skills validation",
@@ -49,7 +49,7 @@
     {
       "id": "subtree-agents-artifacts-guide",
       "match_type": "exact",
-      "pattern": "artifacts/AGENTS.md",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/AGENTS.md",
       "classification": "source",
       "reason": "Intentional nested Codex instruction boundary that explains artifact retention and evidence authority inside an otherwise historical-artifact subtree.",
       "owner": "agent-skills instructions",
@@ -85,7 +85,7 @@
     {
       "id": "improve-agent-native-latest-eval-summary",
       "match_type": "exact",
-      "pattern": "Infrastructure/artifacts/skill-reviews/improve-agent-native-eval-latest.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-reviews/improve-agent-native-eval-latest.json",
       "classification": "historical_artifact",
       "reason": "Latest improve-agent-native eval summary retained as reviewed handoff evidence for Skills SDK and Tessl score reconciliation until a governed receipt store replaces this artifact path.",
       "owner": "skills-sdk",
@@ -94,7 +94,7 @@
     {
       "id": "improve-agent-native-smoke-closeout-20260702-212055",
       "match_type": "exact",
-      "pattern": "Infrastructure/artifacts/evals/closeouts/20260702T212055Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/closeouts/20260702T212055Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
       "classification": "historical_artifact",
       "reason": "Blocked smoke closeout receipt retained as reviewed Skills SDK evidence for improve-agent-native release-ratchet reconciliation until a governed receipt store replaces this artifact path.",
       "owner": "skills-sdk",
@@ -103,7 +103,7 @@
     {
       "id": "improve-agent-native-smoke-closeout-20260702-212122",
       "match_type": "exact",
-      "pattern": "Infrastructure/artifacts/evals/closeouts/20260702T212122Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/closeouts/20260702T212122Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
       "classification": "historical_artifact",
       "reason": "Blocked smoke closeout receipt retained as reviewed Skills SDK evidence for improve-agent-native release-ratchet reconciliation until a governed receipt store replaces this artifact path.",
       "owner": "skills-sdk",
@@ -112,7 +112,7 @@
     {
       "id": "improve-agent-native-menubar-launchservices-run-manifest",
       "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json",
       "classification": "historical_artifact",
       "reason": "Agent-run manifest retained as reviewed handoff evidence linking the menubar LaunchServices debug lane to its PM report and review artifact.",
       "owner": "skills-sdk",
@@ -121,7 +121,7 @@
     {
       "id": "improve-agent-native-ratchet-review-run-manifest",
       "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f24aa-b948-7fe2-8155-f4457bb4e47d/manifest.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/agent-runs/default-019f24aa-b948-7fe2-8155-f4457bb4e47d/manifest.json",
       "classification": "historical_artifact",
       "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native release-ratchet review lane to its PM report and review artifact.",
       "owner": "skills-sdk",
@@ -130,7 +130,7 @@
     {
       "id": "improve-agent-native-ratchet-validator-run-manifest",
       "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f24ba-a5c8-7e01-9767-e1544212b3df/manifest.json",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/agent-runs/default-019f24ba-a5c8-7e01-9767-e1544212b3df/manifest.json",
       "classification": "historical_artifact",
       "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native validator lane to its PM report and review artifact.",
       "owner": "skills-sdk",
@@ -139,7 +139,7 @@
     {
       "id": "improve-agent-native-default-review-artifact",
       "match_type": "exact",
-      "pattern": "artifacts/reviews/default.md",
+      "pattern": ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/reviews/default.md",
       "classification": "historical_artifact",
       "reason": "Current review artifact retained as reviewed handoff evidence for improve-agent-native release-ratchet reconciliation until review output moves to a governed receipt store.",
       "owner": "skills-sdk",

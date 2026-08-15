@@ -18,15 +18,15 @@ skill_count=$("${python_cmd[@]}" Infrastructure/scripts/lifecycle-and-sync/skill
 echo "🔧 Skills: $skill_count"
 
 # Genome loop status
-rollout_mode=$(cat Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt 2>/dev/null || echo "unknown")
+rollout_mode=$(cat .harness/evidence/skill-graphs/controls/rollout-mode.txt 2>/dev/null || echo "unknown")
 echo "🧬 Genome loop mode: $rollout_mode"
 
 # Pending candidates
-pending_count=$(wc -l < Infrastructure/artifacts/skill-graphs/telemetry/pending-candidates.jsonl 2>/dev/null || echo "0")
+pending_count=$(wc -l < .harness/evidence/skill-graphs/telemetry/pending-candidates.jsonl 2>/dev/null || echo "0")
 echo "📝 Pending candidates: $pending_count"
 
 # Kill switch
-kill_switch=$(cat Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt 2>/dev/null || echo "")
+kill_switch=$(cat .harness/evidence/skill-graphs/controls/kill-switch.txt 2>/dev/null || echo "")
 if [ "$kill_switch" = "on" ]; then
     echo "🚨 Kill switch: ACTIVE"
 else

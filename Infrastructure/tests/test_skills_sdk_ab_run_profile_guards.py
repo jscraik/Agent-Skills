@@ -329,9 +329,9 @@ class TestSkillsSdkAbRunProfileGuards(unittest.TestCase):
         ):
             from ask.skills_sdk.eval_ab_preflight import _approved_cloud_auth_fact
 
-            approved = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             fact = _cloud_catalog_fact(
-                "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), approved,
+                "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), approved,
                 lambda _command: (_ for _ in ()).throw(
                     subprocess.TimeoutExpired(["bash", "/mock/configs/run-auth-backed.sh"], 1)
                 ),

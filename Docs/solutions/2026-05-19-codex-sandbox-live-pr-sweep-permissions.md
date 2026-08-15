@@ -3,7 +3,7 @@ title: Codex sandbox live PR sweep permissions
 asset_family: agent operations automation
 owner: Agent Skills Team
 source_artifact: Skills/agent-ops/pr-green-sweep/SKILL.md
-freshness_reviewed_on: 2026-05-19
+freshness_reviewed_on: 2026-08-23
 review_after_days: 90
 ---
 

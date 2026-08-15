@@ -30,7 +30,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             "network_accessed": True,
             "http_status": 200,
             "catalog_digest": f"sha256:{'a' * 64}",
-            "matched_model": "deepseek-v4-flash:cloud",
+            "matched_model": "deepseek-v4-flash:0731-cloud",
             "match_count": 1,
             "secret_value_observed": False,
             "secret_not_observed": True,
@@ -53,11 +53,11 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                     return_value="/mock/configs/run-auth-backed.sh",
                 ),
             ):
-                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
                 env_file.unlink()
                 os.mkfifo(env_file)
                 fact = _cloud_catalog_fact(
-                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth,
+                    "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), auth,
                     lambda _command: subprocess.CompletedProcess(
                         ["bash", "/mock/configs/run-auth-backed.sh"], 0,
                         stdout=json.dumps(self._catalog_payload()), stderr="",
@@ -83,7 +83,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                 ),
             ):
                 fact = _cloud_catalog_fact(
-                    "deepseek-v4-flash:cloud",
+                    "deepseek-v4-flash:0731-cloud",
                     Path("/mock/oss-cloud.config.toml"),
                     auth,
                     lambda _command: self.fail("unapproved FIFO must not reach the catalog runner"),
@@ -108,9 +108,9 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                     return_value="/mock/configs/run-auth-backed.sh",
                 ),
             ):
-                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
                 fact = _cloud_catalog_fact(
-                    "deepseek-v4-flash:cloud",
+                    "deepseek-v4-flash:0731-cloud",
                     Path("/mock/oss-cloud.config.toml"),
                     auth,
                     lambda _command: self.fail("unapproved home FIFO must not reach the catalog runner"),
@@ -125,7 +125,7 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
             patch("ask.skills_sdk.eval_ab_preflight.configs_auth_wrapper", return_value="/mock/configs/run-auth-backed.sh"),
             patch("ask.skills_sdk.eval_ab_run.configs_auth_wrapper", return_value="/mock/configs/run-auth-backed.sh"),
         ):
-            auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+            auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
             with self.assertRaisesRegex(ValueError, "operator-approved opaque environment stream"):
                 _execution_argv_for_run(command)
         self.assertEqual(auth["status"], "blocked")
@@ -216,9 +216,9 @@ class TestSkillsSdkAuthStreamIdentity(unittest.TestCase):
                 ),
                 patch("ask.skills_sdk.eval_ab_preflight.subprocess.run", side_effect=fake_run),
             ):
-                auth = _approved_cloud_auth_fact("deepseek-v4-flash:cloud")
+                auth = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
                 fact = _cloud_catalog_fact(
-                    "deepseek-v4-flash:cloud", Path("/mock/oss-cloud.config.toml"), auth,
+                    "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), auth,
                 )
         self.assertEqual(fact["status"], "pass")
         self.assertEqual(captured[0][0][:7], [

@@ -354,7 +354,7 @@ def _valid_cloud_smoke_identity(payload: dict[str, Any]) -> bool:
     return all((
         payload.get("lane") == "oss-cloud",
         payload.get("codex_profile") == "oss-cloud",
-        payload.get("model") == "deepseek-v4-flash:cloud",
+        payload.get("model") == "deepseek-v4-flash:0731-cloud",
         payload.get("model_provider") == "ollama-cloud",
         payload.get("auth_source") == "1password_desktop_fifo",
         type(payload.get("provider_invoked")) is bool and payload.get("provider_invoked") is True,

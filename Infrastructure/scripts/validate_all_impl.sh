@@ -8,8 +8,8 @@ Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [-
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
-  --persistent  Write logs to Infrastructure/artifacts/validation/<timestamp> and refresh
-                Infrastructure/artifacts/validation/latest. This is the default behavior.
+  --persistent  Write logs to .tmp/agent-skills-artifacts/validation/<timestamp> and refresh
+                .tmp/agent-skills-artifacts/validation/latest. This is the default behavior.
   --fail-fast   Stop scheduling new checks after the first required failure.
   --staged-source
                 Validate staged Git index blobs for the program-design check.
@@ -170,7 +170,7 @@ if [[ "$output_mode" == "ephemeral" ]]; then
   run_dir="$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-validate-all.XXXXXX")"
   cleanup_ephemeral_logs=1
 else
-  log_root="Infrastructure/artifacts/validation"
+  log_root=".tmp/agent-skills-artifacts/validation"
   run_dir="$log_root/$run_id"
   latest_dir="$log_root/latest"
 
@@ -714,7 +714,7 @@ schedule_check required skill-graph-profiles "🕸️  Validating skill graph pr
 schedule_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then
-  selection_contract_cmd+=(--history-path "Infrastructure/artifacts/selection-quality/history.jsonl")
+  selection_contract_cmd+=(--history-path ".harness/evidence/selection-quality/history.jsonl")
 fi
 schedule_check required selection-contract "🎯 Verifying selection contract fixtures..." "${selection_contract_cmd[@]}"
 schedule_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" Infrastructure/scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields

@@ -365,7 +365,7 @@ class TestSkillsSdkAbPlan(unittest.TestCase):
                     "--env-file", "<operator-approved-opaque-env-stream>",
                     "--require-env", "OLLAMA_API_KEY", "--",
                     "bash", "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh",
-                    "--profile", "oss-cloud", "--model", "deepseek-v4-flash:cloud",
+                    "--profile", "oss-cloud", "--model", "deepseek-v4-flash:0731-cloud",
                     "--strict-config", "-c", 'approval_policy="on-request"',
                     "--cd", argv[argv.index("--cd") + 1],
                     "--sandbox", "read-only", "--ephemeral", "--json",

@@ -150,7 +150,7 @@
           "then": {
             "properties": {
               "command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]},
-              "execution_argv": {"prefixItems": [{"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--require-env"}, {"const": "OLLAMA_API_KEY"}, {"const": "--"}, {"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--model"}, {"const": "deepseek-v4-flash:cloud"}, {"const": "--strict-config"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}
+              "execution_argv": {"prefixItems": [{"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--require-env"}, {"const": "OLLAMA_API_KEY"}, {"const": "--"}, {"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--model"}, {"const": "deepseek-v4-flash:0731-cloud"}, {"const": "--strict-config"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}
             }
           }
         }
@@ -1143,7 +1143,7 @@
         },
         {
           "if": {"properties": {"codex_profile": {"const": "oss-cloud"}}, "required": ["codex_profile"]},
-          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--require-env"}, {"const": "OLLAMA_API_KEY"}, {"const": "--"}, {"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--model"}, {"const": "deepseek-v4-flash:cloud"}, {"const": "--strict-config"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}}}
+          "then": {"properties": {"command_argv": {"prefixItems": [{"const": "codex"}, {"const": "exec"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--ask-for-approval"}, {"const": "on-request"}]}, "execution_argv": {"prefixItems": [{"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-auth-backed.sh"}, {"const": "--env-file"}, {"const": "<operator-approved-opaque-env-stream>"}, {"const": "--require-env"}, {"const": "OLLAMA_API_KEY"}, {"const": "--"}, {"const": "bash"}, {"const": "/Users/jamiecraik/dev/configs/codex/scripts/run-codex-exec.sh"}, {"const": "--profile"}, {"const": "oss-cloud"}, {"const": "--model"}, {"const": "deepseek-v4-flash:0731-cloud"}, {"const": "--strict-config"}, {"const": "-c"}, {"const": "approval_policy=\"on-request\""}]}}}
         },
         {
           "if": {"properties": {"status": {"const": "pass"}}, "required": ["status"]},

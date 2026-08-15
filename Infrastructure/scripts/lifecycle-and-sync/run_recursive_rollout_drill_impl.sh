@@ -4,9 +4,9 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root"
 
-out_root="${OUT_ROOT:-Infrastructure/artifacts/skill-graphs/drills/runs}"
-controls_dir="${CONTROLS_DIR:-Infrastructure/artifacts/skill-graphs/drills/controls}"
-report_json="${REPORT_JSON:-Infrastructure/artifacts/skill-graphs/pilot/rollback-drill-report.json}"
+out_root="${OUT_ROOT:-.tmp/agent-skills-artifacts/skill-graphs/drills/runs}"
+controls_dir="${CONTROLS_DIR:-.tmp/agent-skills-artifacts/skill-graphs/drills/controls}"
+report_json="${REPORT_JSON:-.harness/evidence/skill-graphs/pilot/rollback-drill-report.json}"
 report_md="${REPORT_MD:-docs/skill-graphs/pilots/rollback-drill.md}"
 profile_file="${PROFILE_FILE:-docs/skill-graphs/schemas/examples/ui-skills-profile.example.json}"
 loop_script="Plugins/skill-factory/scripts/skill-builder/recursive_skill_loop.py"

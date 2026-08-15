@@ -423,17 +423,17 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--baseline-out",
-        default=f"Infrastructure/artifacts/skill-graphs/onboarding/baseline-{today}.json",
+        default=f".harness/evidence/skill-graphs/onboarding/baseline-{today}.json",
         help="Path for baseline inventory JSON (repo-relative)",
     )
     parser.add_argument(
         "--checklist-out",
-        default=f"Infrastructure/artifacts/skill-graphs/onboarding/skill-onboarding-checklist-{today}.md",
+        default=f".harness/evidence/skill-graphs/onboarding/skill-onboarding-checklist-{today}.md",
         help="Path for onboarding checklist markdown (repo-relative)",
     )
     parser.add_argument(
         "--owner-map",
-        default="Infrastructure/artifacts/skill-graphs/onboarding/skill-owner-map.json",
+        default=".harness/evidence/skill-graphs/onboarding/skill-owner-map.json",
         help="Optional JSON map for checklist readiness_status/owner/due_date fields",
     )
     parser.add_argument(
