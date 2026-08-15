@@ -7,13 +7,12 @@ import sys
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 import urllib.error
 from unittest.mock import patch
 from pathlib import Path
-
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
@@ -35,7 +34,6 @@ _catalog_probe_result = _preflight._catalog_probe_result
 build_lane_preflight = _preflight.build_lane_preflight
 select_judge_profile = _profiles.select_judge_profile
 declared_profile_preflight = _fixtures.declared_profile_preflight
-
 
 class _CustomBoundarySignal(BaseException):
     pass
@@ -75,12 +73,14 @@ class SkillsSdkAbPreflightFixture:
                 ),
             ):
                 yield env_file
+
     @staticmethod
     def _codex_fixture(root: Path, version: str = "codex-cli 1.2.3") -> Path:
         binary = root / "codex"
         binary.write_text(f"#!/bin/sh\nprintf '%s\\n' '{version}'\n", encoding="utf-8")
         binary.chmod(0o755)
         return binary
+
     @staticmethod
     def _catalog_process(
         payload: dict[str, object], returncode: int = 0, stderr: str = "",
@@ -88,6 +88,7 @@ class SkillsSdkAbPreflightFixture:
         return subprocess.CompletedProcess(
             ["op", "run"], returncode, stdout=json.dumps(payload), stderr=stderr,
         )
+
     @staticmethod
     def _catalog_payload(result_class: str = "pass", **fields: object) -> dict[str, object]:
         return {
@@ -176,6 +177,7 @@ class TestSkillsSdkAbPreflight(SkillsSdkAbPreflightFixture, unittest.TestCase):
             "profile_config_missing_or_invalid",
             {item["blocker_class"] for item in cloud["admission"]["blockers"]},
         )
+
     def test_installed_local_profile_catalog_and_runtime_inventory_are_required(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

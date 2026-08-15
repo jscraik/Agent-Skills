@@ -418,7 +418,7 @@ rows:
     match_count: 15
     root: plugins
   -
-    consumer_path: "Infrastructure/artifacts/icon-prompts/icon-asset-manifest.json"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/icon-prompts/icon-asset-manifest.json"
     is_executable: false
     line_numbers:
       - 1108
@@ -436,56 +436,56 @@ rows:
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-skill-installer.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-skill-installer.md"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-slides.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-slides.md"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-spreadsheets.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-spreadsheets.md"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-skill-creator.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-skill-creator.md"
     is_executable: false
     line_numbers:
       - 3
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-skill-installer.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-skill-installer.md"
     is_executable: false
     line_numbers:
       - 3
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-slides.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-slides.md"
     is_executable: false
     line_numbers:
       - 3
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-spreadsheets.md"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/skill--agents-skills-system-spreadsheets.md"
     is_executable: false
     line_numbers:
       - 3
     match_count: 1
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/typed-graph.json"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/typed-graph.json"
     is_executable: false
     line_numbers:
       - 817
@@ -515,7 +515,7 @@ rows:
     match_count: 24
     root: .agents
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"
     is_executable: false
     line_numbers:
       - 12
@@ -525,7 +525,7 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/telemetry/skill-state-map.system-slice.html"
+    consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/telemetry/skill-state-map.system-slice.html"
     is_executable: false
     line_numbers:
       - 1256

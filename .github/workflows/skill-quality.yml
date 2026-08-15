@@ -57,22 +57,22 @@ jobs:
             --baseline-file Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json \
             --benchmark-mode off \
             --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
-            --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
-            --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
+            --benchmark-output-json .harness/evidence/industry-benchmark-latest.json \
+            --sarif-out .tmp/agent-skills-artifacts/skills/skill-structure-gates.sarif \
             --format text
       - name: Upload benchmark artifact
         uses: actions/upload-artifact@v7
         with:
           name: skill-portfolio-benchmark
-          path: Infrastructure/artifacts/industry-benchmark-latest.json
+          path: .harness/evidence/industry-benchmark-latest.json
       - name: Upload structure reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: skill-quality-structure-reports
-          path: Infrastructure/artifacts/skills
+          path: .tmp/agent-skills-artifacts/skills
       - name: Skip aggregate SARIF upload
-        if: always() && hashFiles('Infrastructure/artifacts/skills/skill-structure-gates.sarif') != ''
+        if: always() && hashFiles('.tmp/agent-skills-artifacts/skills/skill-structure-gates.sarif') != ''
         run: |
           echo "Aggregate skill structure SARIF contains one run per skill."
           echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
@@ -138,24 +138,24 @@ jobs:
             --tier2-mode "${{ inputs.tier2_mode }}" \
             --benchmark-mode warn \
             --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
-            --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
-            --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
+            --benchmark-output-json .harness/evidence/industry-benchmark-latest.json \
+            --sarif-out .tmp/agent-skills-artifacts/skills/skill-structure-gates.sarif \
             --format text
       - name: Build dashboard
         run: |
           python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py \
-            --reports-root Infrastructure/artifacts/skills \
-            --out-json Infrastructure/artifacts/skills/dashboard.json \
-            --out-md Infrastructure/artifacts/skills/dashboard.md
+            --reports-root .tmp/agent-skills-artifacts/skills \
+            --out-json .harness/evidence/skills/dashboard.json \
+            --out-md .harness/evidence/skills/dashboard.md
       - name: Upload reports
         uses: actions/upload-artifact@v7
         with:
           name: skill-quality-reports
           path: |
-            Infrastructure/artifacts/skills
-            Infrastructure/artifacts/industry-benchmark-latest.json
+            .tmp/agent-skills-artifacts/skills
+            .harness/evidence/industry-benchmark-latest.json
       - name: Skip aggregate SARIF upload
-        if: always() && hashFiles('Infrastructure/artifacts/skills/skill-structure-gates.sarif') != ''
+        if: always() && hashFiles('.tmp/agent-skills-artifacts/skills/skill-structure-gates.sarif') != ''
         run: |
           echo "Aggregate skill structure SARIF contains one run per skill."
           echo "GitHub code scanning rejects multi-run uploads that reuse the same category."

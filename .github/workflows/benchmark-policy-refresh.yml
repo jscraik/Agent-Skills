@@ -28,7 +28,7 @@ jobs:
             --config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
             --mode off \
             --format json \
-            --output-json Infrastructure/artifacts/industry-benchmark-latest.json
+            --output-json .harness/evidence/industry-benchmark-latest.json
 
       - name: Refresh benchmark policy
         env:
@@ -37,11 +37,11 @@ jobs:
           python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py \
             --root . \
             --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
-            --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json \
+            --benchmark-json .harness/evidence/industry-benchmark-latest.json \
             --schedule-days 7 \
             --require-context7 \
             --apply \
-            --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json \
+            --report-json .harness/evidence/benchmark-policy-refresh-report.json \
             --format text
 
       - name: Upload refresh artifacts
@@ -50,8 +50,8 @@ jobs:
         with:
           name: benchmark-policy-refresh
           path: |
-            Infrastructure/artifacts/industry-benchmark-latest.json
-            Infrastructure/artifacts/benchmark-policy-refresh-report.json
+            .harness/evidence/industry-benchmark-latest.json
+            .harness/evidence/benchmark-policy-refresh-report.json
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
@@ -75,8 +75,8 @@ jobs:
             - updated policy metadata (`validated_on`, refresh notes)
 
             ## How to test
-            - `python3 Plugins/skill-factory/scripts/skill-builder/benchmark_skill_portfolio.py --root . --config Plugins/skill-factory/references/skill-builder/benchmark-policy.json --mode off --format json --output-json Infrastructure/artifacts/industry-benchmark-latest.json`
-            - `python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py --root . --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json --schedule-days 7 --require-context7 --apply --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json --format text`
+            - `python3 Plugins/skill-factory/scripts/skill-builder/benchmark_skill_portfolio.py --root . --config Plugins/skill-factory/references/skill-builder/benchmark-policy.json --mode off --format json --output-json .tmp/agent-skills-artifacts/industry-benchmark-latest.json`
+            - `python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py --root . --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json --benchmark-json .harness/evidence/industry-benchmark-latest.json --schedule-days 7 --require-context7 --apply --report-json .harness/evidence/benchmark-policy-refresh-report.json --format text`
             - `gh pr checks <PR_NUMBER>`
 
             - [x] Benchmark artifact generated

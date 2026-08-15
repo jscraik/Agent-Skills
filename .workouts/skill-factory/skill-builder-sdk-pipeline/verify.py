@@ -14,11 +14,51 @@ HANDLE = "skill-builder"
 WORKOUT = "skill-factory/skill-builder-sdk-pipeline"
 
 
-def run_json(command: list[str]) -> dict:
+def _runtime_env() -> dict[str, str]:
+    """Run proof commands against this candidate without mutating user runtimes."""
+    state_dir = Path(os.environ["WORKOUT_STATE_DIR"])
+    home = state_dir / "runtime-home"
+    home.mkdir(parents=True, exist_ok=True)
+    env = os.environ.copy()
+    env["HOME"] = str(home)
+    env["CODEX_HOME"] = str(home / ".codex")
+    env["MISE_STATE_DIR"] = str(state_dir / "mise-state")
+    env["MISE_CACHE_DIR"] = str(state_dir / "mise-cache")
+    subprocess.run(
+        ["mise", "trust", "--yes", str(REPO_ROOT / ".mise.toml")],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    workspace_runtime = REPO_ROOT / ".agents" / "skills"
+    if not workspace_runtime.exists():
+        sync = subprocess.run(
+            ["./bin/ask", "skills", "sync", "--scope", "workspace", "--projection", "flat", "--json", "--robot"],
+            cwd=REPO_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if sync.returncode != 0 or not workspace_runtime.exists():
+            raise RuntimeError("canonical workspace skill projection is unavailable")
+    for name in (".codex", ".agents"):
+        root = home / name
+        root.mkdir(parents=True, exist_ok=True)
+        skills_link = root / "skills"
+        if not skills_link.exists() and not skills_link.is_symlink():
+            skills_link.symlink_to(workspace_runtime, target_is_directory=True)
+    return env
+
+
+def run_json(command: list[str], *, allow_error: bool = False) -> dict:
     try:
         result = subprocess.run(
             command,
             cwd=REPO_ROOT,
+            env=_runtime_env(),
             capture_output=True,
             text=True,
             timeout=60,
@@ -27,7 +67,7 @@ def run_json(command: list[str]) -> dict:
     except subprocess.TimeoutExpired as exc:
         print(f"command_timed_out: {' '.join(command)}", file=sys.stderr)
         raise SystemExit(1) from exc
-    if result.returncode != 0:
+    if result.returncode != 0 and not allow_error:
         print(f"command_failed: {' '.join(command)}", file=sys.stderr)
         print(result.stdout, file=sys.stderr)
         print(result.stderr, file=sys.stderr)
@@ -96,7 +136,10 @@ def assert_runtime_proof_pass() -> None:
 
 
 def assert_workout_candidate_available() -> None:
-    scorecard = run_json(["./bin/ask", "skills", "prove", SOURCE, "--json", "--robot"])
+    scorecard = run_json(
+        ["./bin/ask", "skills", "prove", SOURCE, "--json", "--robot"],
+        allow_error=True,
+    )
     skill_proof = data(scorecard, "data", "skill_proof")
     if not isinstance(skill_proof, dict):
         print("skill_proof_not_mapping", file=sys.stderr)
@@ -111,7 +154,12 @@ def assert_workout_candidate_available() -> None:
     if outcome.get("status") != "available_not_run":
         print("outcome_candidate_not_available", file=sys.stderr)
         raise SystemExit(1)
-    if WORKOUT not in outcome.get("workout_candidates", []):
+    workouts = run_json(["./bin/ask", "workouts", "list", "--json", "--robot"])
+    workout_items = data(workouts, "data", "workouts")
+    if not isinstance(workout_items, list) or not any(
+        isinstance(item, dict) and item.get("id") == WORKOUT and item.get("status") == "ready"
+        for item in workout_items
+    ):
         print("workout_candidate_missing", file=sys.stderr)
         raise SystemExit(1)
 

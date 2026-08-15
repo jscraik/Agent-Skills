@@ -22,7 +22,7 @@ _YAML_NAME_LINE = re.compile(r"^\s*name\s*:\s*(.+?)\s*$")
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run repo-wide skill quality checks.")
     p.add_argument("--root", default=".", help="Repo root")
-    p.add_argument("--reports-dir", default="Infrastructure/artifacts/skills", help="Scorecard output directory")
+    p.add_argument("--reports-dir", default=".tmp/agent-skills-artifacts/skills", help="Scorecard output directory")
     p.add_argument("--tier2-mode", choices=["warn", "fail", "off"], default="warn")
     p.add_argument("--run-evals", action="store_true", help="Run run_skill_evals.py for each skill")
     p.add_argument("--runner", default="codex", help="Single-run eval runner.")
@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--benchmark-output-json",
-        default="Infrastructure/artifacts/industry-benchmark-latest.json",
+        default=".tmp/agent-skills-artifacts/industry-benchmark-latest.json",
         help="Where to write benchmark JSON output.",
     )
     p.add_argument(
