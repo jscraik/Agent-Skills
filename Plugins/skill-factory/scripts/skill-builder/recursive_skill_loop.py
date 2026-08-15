@@ -1693,7 +1693,7 @@ def run_loop(args: argparse.Namespace) -> int:
     controls_dir_raw = str(
         args.controls_dir
         or os.environ.get("SKILL_GRAPH_CONTROLS_DIR")
-        or "Infrastructure/artifacts/skill-graphs/controls"
+        or ".harness/evidence/skill-graphs/controls"
     ).strip()
     controls_dir = Path(controls_dir_raw).expanduser().resolve()
     skill_controls_dir_raw = (
@@ -2707,8 +2707,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Run bounded recursive skill loop (MVP scaffold)")
     p.add_argument("--profile-file", required=True, help="Path to profile JSON")
     p.add_argument("--objective", required=True, help="Run objective text")
-    p.add_argument("--out-root", default="Infrastructure/artifacts/skill-graphs/runs", help="Output root directory")
-    p.add_argument("--actor-id", default="recursive-skill-loop", help="Actor id for Infrastructure/artifacts/events")
+    p.add_argument("--out-root", default=".tmp/agent-skills-artifacts/skill-graphs/runs", help="Output root directory")
+    p.add_argument("--actor-id", default="recursive-skill-loop", help="Actor id for .tmp/agent-skills-artifacts/events")
     p.add_argument("--run-owner", default="recursive-loop-system", help="Owning operator/service id")
     p.add_argument("--run-lock", help="Optional explicit lock file path")
     p.add_argument("--idempotency-key", help="Optional idempotency key for run ownership")
@@ -2719,7 +2719,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--controls-dir",
-        help="Control root directory (default: Infrastructure/artifacts/skill-graphs/controls)",
+        help="Control root directory (default: .harness/evidence/skill-graphs/controls)",
     )
     p.add_argument(
         "--skill-controls-dir",
@@ -2814,7 +2814,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-tokens", type=int, help="Override token budget")
     p.add_argument(
         "--lessons-jsonl",
-        default="Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
+        default=".harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl",
         help="Path to canonical lessons JSONL for start-of-run retrieval/injection",
     )
     p.add_argument(

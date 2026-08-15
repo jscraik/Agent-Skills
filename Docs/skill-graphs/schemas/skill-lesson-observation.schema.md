@@ -27,9 +27,9 @@ This artifact is for:
 
 ## Artifact location
 
-- Per-run artifact: `Infrastructure/artifacts/skill-graphs/runs/<run_id>/lesson_observations.json`
-- Candidate lesson output: `Infrastructure/artifacts/skill-graphs/runs/<run_id>/lesson_candidates.json`
-- Promoted lesson store: `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl`
+- Per-run artifact: `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/lesson_observations.json`
+- Candidate lesson output: `.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/lesson_candidates.json`
+- Promoted lesson store: `.harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl`
 
 ## Required fields
 

@@ -11,7 +11,7 @@ Canonical promotions are human-gated and must include provenance + security evid
 | PD | `promotion_decision.json` |
 | IJ | `iteration_journal.jsonl` |
 | RUN | `run.json` |
-| AR | `Infrastructure/artifacts/skill-graphs/runs/` |
+| AR | `.tmp/agent-skills-artifacts/skill-graphs/runs/` |
 | CTRL | Runtime controls (kill-switch, rollback, mode) |
 | EP | Evidence packet |
 | LS | Lesson source |
@@ -130,8 +130,8 @@ bash Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh \
 
 # Validate decision
 python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py \
-  --run-dir Infrastructure/artifacts/skill-graphs/runs/<run_id> \
-  --decision-file Infrastructure/artifacts/skill-graphs/runs/<run_id>/promotion_decision.json \
+  --run-dir .tmp/agent-skills-artifacts/skill-graphs/runs/<run_id> \
+  --decision-file .tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>/promotion_decision.json \
   --lesson-file <path_to_lesson_file>
 
 # CI validation

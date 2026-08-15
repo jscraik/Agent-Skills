@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-RUNNER = "Infrastructure/artifacts/skill-graphs/runs"
+RUNNER = ".harness/evidence/skill-graphs/runs"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 REQUIRED_BASE_FILES: Set[str] = {
@@ -31,12 +31,7 @@ REQUIRED_OPTIONAL_BLOCKER_FILES: Dict[str, Set[str]] = {
     "kill_switch_activated": {"run_blocker.json", "rollback_recommendation.json"},
     "evaluator_conflict": {"run_blocker.json"},
 }
-DEFAULT_MANIFEST = "Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json"
-DEFAULT_WAIVER_FILE = "Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
-
-WAIVER_APPLIES_TO_ALIASES: Dict[str, Set[str]] = {
-    "events.jsonl": {"events.jsonl", "event_envelope"},
-}
+DEFAULT_MANIFEST = ".harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json"
 
 def _display_path(path: Path) -> str:
     """Render repo-relative paths when possible and avoid leaking home paths."""
@@ -86,7 +81,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Verify recursive skill-graph artifact parity")
     p.add_argument(
         "--runs-root",
-        default="Infrastructure/artifacts/skill-graphs/runs",
+        default=RUNNER,
         help="Root directory containing run_* artifacts",
     )
     p.add_argument(
@@ -99,11 +94,6 @@ def parse_args() -> argparse.Namespace:
         "--manifest",
         default=DEFAULT_MANIFEST,
         help="Output manifest JSON path",
-    )
-    p.add_argument(
-        "--waiver-file",
-        default=DEFAULT_WAIVER_FILE,
-        help="Optional JSON file listing explicit waivers for historical non-compliant runs",
     )
     p.add_argument(
         "--dry-run",
@@ -366,68 +356,17 @@ def summarize_audits(audits: Sequence[ArtifactStatus], runs_root: Path) -> Dict[
     }
 
 
-def load_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
-    payload = load_json(path)
-    if not payload:
-        return {}
-    rows = payload.get("waived_runs")
-    if not isinstance(rows, list):
-        return {}
-
-    waivers: Dict[str, Dict[str, Any]] = {}
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        run_dir = str(row.get("run_dir", "")).strip()
-        if not run_dir:
-            continue
-        waivers[run_dir] = row
-    return waivers
-
-
-def resolve_waiver(audit: ArtifactStatus, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    missing_tokens = {str(item).strip().lower() for item in audit.missing if str(item).strip()}
-    expanded_missing_tokens = set(missing_tokens)
-    for token in missing_tokens:
-        expanded_missing_tokens.update(WAIVER_APPLIES_TO_ALIASES.get(token, set()))
-    candidates = [audit.run_dir_relative, str(audit.run_dir), audit.run_dir.name]
-    for key in candidates:
-        waiver = waivers.get(key)
-        if not waiver:
-            continue
-        allowed = waiver.get("allowed_statuses")
-        if isinstance(allowed, list) and allowed:
-            allowed_values = {str(item).strip() for item in allowed}
-            if audit.status not in allowed_values:
-                continue
-        applies_to = waiver.get("applies_to")
-        if isinstance(applies_to, list) and applies_to:
-            scoped_tokens = {str(item).strip().lower() for item in applies_to if str(item).strip()}
-            if scoped_tokens and "*" not in scoped_tokens and "any" not in scoped_tokens:
-                if not (expanded_missing_tokens & scoped_tokens):
-                    continue
-        return waiver
-    return None
-
-
 def make_manifest(
     audits: Sequence[ArtifactStatus],
     runs_root: Path,
     run_state_check: bool,
-    waivers: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
     summary = summarize_audits(audits, runs_root)
-    summary["waived_non_compliant"] = 0
     runs_payload: List[Dict[str, Any]] = []
     for audit in audits:
-        waiver = resolve_waiver(audit, waivers)
-        waived = audit.status != "compliant" and waiver is not None
-        if waived:
-            summary["waived_non_compliant"] += 1
         entry: Dict[str, Any] = {
             "run_dir": audit.run_dir_relative,
             "status": audit.status,
-            "waived": waived,
             "required_files": audit.required,
             "missing_files": audit.missing,
             "present_files": audit.present,
@@ -438,11 +377,6 @@ def make_manifest(
             "blocker_code": audit.blocker_code,
             "notes": audit.notes,
         }
-        if waived:
-            entry["waiver_reason"] = waiver.get("reason")
-            entry["waiver_id"] = waiver.get("waiver_id")
-            entry["waiver_approved_by"] = waiver.get("approved_by")
-            entry["waiver_created_at"] = waiver.get("created_at")
         if run_state_check:
             entry["event_blocker_codes"] = sorted(audit.event_blocker_codes)
         runs_payload.append(entry)
@@ -491,7 +425,6 @@ def main() -> int:
     args = parse_args()
     runs_root = Path(args.runs_root).resolve()
     run_dirs = scan_run_dirs(args.run_dir, args.runs_root)
-    waivers = load_waivers(Path(args.waiver_file))
 
     audits = [classify_run_dir(run_dir) for run_dir in run_dirs]
     removals = run_prune_empty(audits, dry_run=args.dry_run) if args.prune_empty else {}
@@ -507,25 +440,16 @@ def main() -> int:
         audits,
         runs_root=runs_root,
         run_state_check=args.run_state_check,
-        waivers=waivers,
     )
     manifest["prune_empty"] = {
         "enabled": bool(args.prune_empty),
         "dry_run": bool(args.dry_run),
         "actions": removals,
     }
-    manifest["waiver_file"] = args.waiver_file if waivers else None
-
     if args.strict:
-        # In strict mode, waived non-compliant runs are acceptable
-        def _is_strict_compliant(audit: ArtifactStatus) -> bool:
-            if audit.status == "compliant":
-                return True
-            return resolve_waiver(audit, waivers) is not None
-
         manifest["status"] = (
             "ok"
-            if all(_is_strict_compliant(audit) for audit in audits)
+            if all(audit.status == "compliant" for audit in audits)
             else "fail"
         )
     else:
@@ -546,10 +470,7 @@ def main() -> int:
                     print(json.dumps(output, indent=2))
                 else:
                     print(json.dumps(manifest, indent=2))
-                if args.strict and any(
-                    audit.status != "compliant" and resolve_waiver(audit, waivers) is None
-                    for audit in audits
-                ):
+                if args.strict and any(audit.status != "compliant" for audit in audits):
                     return 3
                 return 0
         manifest_path.write_text(rendered_manifest, encoding="utf-8")
@@ -562,7 +483,7 @@ def main() -> int:
     if args.strict:
         non_compliant = [
             audit for audit in audits
-            if audit.status != "compliant" and resolve_waiver(audit, waivers) is None
+            if audit.status != "compliant"
         ]
         if non_compliant:
             if args.quiet:
@@ -574,7 +495,6 @@ def main() -> int:
                             audits,
                             runs_root=runs_root,
                             run_state_check=args.run_state_check,
-                            waivers=waivers,
                         ),
                         indent=2,
                     )

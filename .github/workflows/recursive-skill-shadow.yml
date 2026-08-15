@@ -15,7 +15,7 @@ on:
     - cron: "7 6 * * *"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   shadow-cycle:
@@ -38,15 +38,15 @@ jobs:
             WINDOW_DAYS="7"
           fi
 
-          bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+          bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
             --runs-per-profile "$RUNS_PER_PROFILE" \
             --window-days "$WINDOW_DAYS"
 
-      - name: Docs lint (warn mode)
+      - name: Docs lint (block mode)
         run: |
           python3 Infrastructure/scripts/docs_lint.py \
             --config Infrastructure/docs-policy.json \
-            --mode warn \
+            --mode block \
             --report-json /tmp/docs-lint-shadow.json
 
       - name: Verify telemetry freshness
@@ -56,14 +56,15 @@ jobs:
           from pathlib import Path
           from datetime import datetime, timezone, timedelta
 
-          content = Path("docs/skill-graphs/telemetry/daily-skill-health.md").read_text()
+          health_path = Path(".harness/evidence/skill-graphs/telemetry/daily-skill-health.md")
+          content = health_path.read_text()
           for line in content.splitlines():
               if line.startswith("- Generated at:"):
                   ts = line.split("`")[1].strip()
                   generated = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                   age = datetime.now(timezone.utc) - generated
                   if age > timedelta(hours=24):
-                      print(f"FAIL: daily-skill-health.md is {age} old (limit: 24h)", file=sys.stderr)
+                      print(f"FAIL: daily-health evidence is {age} old (limit: 24h)", file=sys.stderr)
                       sys.exit(1)
                   print(f"OK: telemetry age {age}")
                   sys.exit(0)
@@ -71,33 +72,15 @@ jobs:
           sys.exit(1)
           PY
 
-      - name: Commit telemetry artifacts
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Add each path separately so missing paths don't block others
-          git add docs/skill-graphs/telemetry/daily-skill-health.md 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/runs/ 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json 2>/dev/null || true
-          git add Infrastructure/artifacts/skill-graphs/telemetry/ 2>/dev/null || true
-          git add docs/skill-graphs/pilots/ui-skills-shadow-results.md 2>/dev/null || true
-          git add docs/skill-graphs/pilots/ui-skills-pilot-readout.md 2>/dev/null || true
-          git diff --cached --quiet || git commit \
-            -m "chore(telemetry): daily skill-health refresh [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
-
       - name: Upload shadow artifacts
         uses: actions/upload-artifact@v7
         with:
           name: recursive-skill-shadow-artifacts
           path: |
-            Infrastructure/artifacts/skill-graphs
-            docs/skill-graphs/pilots/ui-skills-shadow-results.md
-            docs/skill-graphs/pilots/ui-skills-pilot-readout.md
-            docs/skill-graphs/telemetry/daily-skill-health.md
-            Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl
-            Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md
+            .tmp/agent-skills-artifacts/skill-graphs
+            Docs/skill-graphs/pilots/ui-skills-shadow-results.md
+            Docs/skill-graphs/pilots/ui-skills-pilot-readout.md
+            .harness/evidence/skill-graphs/telemetry/daily-skill-health.md
+            .harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl
+            .harness/evidence/skill-graphs/telemetry/promotion-queue.md
             /tmp/docs-lint-shadow.json

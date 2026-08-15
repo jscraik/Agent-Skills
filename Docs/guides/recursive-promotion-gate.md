@@ -13,7 +13,7 @@ Use this guide to create and validate `promotion_decision.json` for a completed 
 
 ## Prerequisites
 
-- A completed run directory under `/Infrastructure/artifacts/skill-graphs/runs/<run_id>`.
+- A completed run directory under `/.tmp/agent-skills-artifacts/skill-graphs/runs/<run_id>`.
 - A lesson content file for security/PII scanning when approving (required for approved decisions).
 - Reviewer policy + signature files:
   - `/docs/skill-graphs/governance/recursive-loop-approvers.yaml`
@@ -48,8 +48,8 @@ bash Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh \
 
 ```bash
 python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py \
-  --run-dir Infrastructure/artifacts/skill-graphs/runs/run_20260220T150021Z_518880 \
-  --decision-file Infrastructure/artifacts/skill-graphs/runs/run_20260220T150021Z_518880/promotion_decision.json \
+  --run-dir .tmp/agent-skills-artifacts/skill-graphs/runs/run_20260220T150021Z_518880 \
+  --decision-file .tmp/agent-skills-artifacts/skill-graphs/runs/run_20260220T150021Z_518880/promotion_decision.json \
   --lesson-file docs/skill-graphs/workflows/reviewer-rubric.md
 ```
 
@@ -68,8 +68,8 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - `promotion_decision.json` created/updated in the run directory.
 - Validation report emitted to stdout as JSON.
 - For approved decisions, canonical lesson lifecycle updated in:
-  - `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl`
-  - `Infrastructure/artifacts/skill-graphs/lessons/canonical-lesson-index.json`
+  - `.harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl`
+  - `.harness/evidence/skill-graphs/lessons/canonical-lesson-index.json`
 - For approved decisions, a `promotion_approved` event recorded in `events.jsonl` (idempotent per run+lesson).
 - Rejected policy/role/signature paths emit immutable `run_blocked` evidence in `run_blocker.json` + `events.jsonl`.
 

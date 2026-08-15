@@ -6,7 +6,7 @@ cd "$repo_root"
 
 runs_per_profile=2
 window_days=7
-out_root="Infrastructure/artifacts/skill-graphs/runs"
+out_root=".tmp/agent-skills-artifacts/skill-graphs/runs"
 profiles_file="Docs/skill-graphs/schemas/examples/pilot-profiles.json"
 
 require_option_value() {
@@ -46,7 +46,7 @@ Usage: Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycl
 Options:
   --runs-per-profile N   Number of loop runs per pilot profile (default: 2)
   --window-days N        Window size for report aggregation (default: 7)
-  --out-root PATH        Output root for run artifacts (default: Infrastructure/artifacts/skill-graphs/runs)
+  --out-root PATH        Output root for run artifacts (default: .tmp/agent-skills-artifacts/skill-graphs/runs)
   --profiles-file PATH   JSON array of pilot profile ids or profile objects (default: Docs/skill-graphs/schemas/examples/pilot-profiles.json)
 USAGE
       exit 0
@@ -136,11 +136,11 @@ loop_script="Plugins/skill-factory/scripts/skill-builder/recursive_skill_loop.py
 report_script="Plugins/skill-factory/scripts/skill-builder/build_recursive_skill_shadow_report.py"
 shadow_md="Docs/skill-graphs/pilots/ui-skills-shadow-results.md"
 readout_md="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
-dashboard_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json"
-baseline_snapshot_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json"
-daily_health_md="Docs/skill-graphs/telemetry/daily-skill-health.md"
-failure_patterns_jsonl="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
-promotion_queue_md="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md"
+dashboard_json=".harness/evidence/skill-graphs/pilot/shadow-dashboard.json"
+baseline_snapshot_json=".harness/evidence/skill-graphs/pilot/shadow-baseline.json"
+daily_health_md=".harness/evidence/skill-graphs/telemetry/daily-skill-health.md"
+failure_patterns_jsonl=".harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
+promotion_queue_md=".harness/evidence/skill-graphs/telemetry/promotion-queue.md"
 
 echo "[shadow-cycle] runs_per_profile=${runs_per_profile}"
 echo "[shadow-cycle] window_days=${window_days}"

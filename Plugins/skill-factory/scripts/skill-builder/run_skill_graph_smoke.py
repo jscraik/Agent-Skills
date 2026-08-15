@@ -79,27 +79,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=str(ROOT), help="Repository root")
     parser.add_argument(
         "--runs-out-root",
-        default="Infrastructure/artifacts/skill-graphs/runs-smoke",
+        default=".tmp/agent-skills-artifacts/skill-graphs/runs-smoke",
         help="Out root passed into recursive_skill_loop.py",
     )
     parser.add_argument(
         "--report-out",
-        default="Infrastructure/artifacts/skill-graphs/onboarding/smoke-report.json",
+        default=".harness/evidence/skill-graphs/onboarding/smoke-report.json",
         help="Smoke execution report output path",
     )
     parser.add_argument(
         "--controls-dir",
-        default="Infrastructure/artifacts/skill-graphs/controls",
+        default=".harness/evidence/skill-graphs/controls",
         help="Controls directory for recursive loop invocation",
     )
     parser.add_argument(
         "--lessons-jsonl",
-        default="Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl",
+        default=".harness/evidence/skill-graphs/lessons/canonical-lessons.jsonl",
         help="Canonical lessons JSONL path",
     )
     parser.add_argument(
         "--profile-index",
-        default="Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json",
+        default=".harness/evidence/skill-graphs/onboarding/profile-index.json",
         help="Canonical profile index inventory source (repo-relative)",
     )
     parser.add_argument(

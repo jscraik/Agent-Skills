@@ -42,7 +42,7 @@ The learning-preserving pilot adds one bounded, additive dimension:
 Canonical source of truth:
 
 - Repository-level declaration: this document plus pilot profile metadata in `Infrastructure/references/task-profile.json`.
-- Pilot conformance summary: `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`.
+- Pilot conformance summary: `.harness/evidence/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`.
 
 Authoring contract for pilot skills:
 
@@ -55,9 +55,9 @@ Authoring contract for pilot skills:
 ## Skill Genome Loop
 
 - [Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
-- [Telemetry Health](/docs/skill-graphs/telemetry/daily-skill-health.md)
-- Controls: `Infrastructure/artifacts/skill-graphs/controls/`
-- Candidates: `Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl`
+- Generated telemetry health: `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md`
+- Controls: `.harness/evidence/skill-graphs/controls/`
+- Candidates: `.harness/evidence/skill-graphs/telemetry/candidates.jsonl`
 
 The Skill Genome Loop is a nightly batch process that:
 1. Ingests run/session artifacts from the recursive skill loop
@@ -93,8 +93,8 @@ The Skill Genome Loop is a nightly batch process that:
 - Required per-skill profile: `<skill>/Infrastructure/references/task-profile.json`.
 - Required SKILL binding: `knowledge_graph_profile: Infrastructure/references/task-profile.json`.
 - Readiness artifacts:
-  - `Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json`
-  - `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
+  - `.tmp/agent-skills-artifacts/skill-graphs/onboarding/profile-index.json`
+  - `.tmp/agent-skills-artifacts/skill-graphs/onboarding/wave-readiness.json`
 
 ## Normative IDs
 

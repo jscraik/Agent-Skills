@@ -78,11 +78,11 @@ All runs have events.jsonl ✓
 Regenerate telemetry reports after any batch of runs:
 ```bash
 python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py \
-  --runs-root Infrastructure/artifacts/skill-graphs/runs \
+  --runs-root .tmp/agent-skills-artifacts/skill-graphs/runs \
   --window-days 7
 ```
 
-Check `docs/skill-graphs/telemetry/daily-skill-health.md` for:
+Check `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md` for:
 - Event envelope errors should be 0
 - Capture coverage should be 100%
 
@@ -113,10 +113,10 @@ Events are JSON Lines with the following structure:
 
 1. `Skills/skill-builder/Infrastructure/scripts/backfill_missing_events.py` - New
 2. `Skills/skill-builder/Infrastructure/scripts/test_events_jsonl_required.py` - New
-3. `Infrastructure/artifacts/skill-graphs/runs/run_20260220*/events.jsonl` - Backfilled (8 files)
+3. `.tmp/agent-skills-artifacts/skill-graphs/runs/run_20260220*/events.jsonl` - Backfilled (8 files)
 
 ## References
 
 - [Skill Knowledge Graph Operating Model](/docs/skill-graphs/knowledge-graph-operating-model.md)
-- [Daily Skill Health Telemetry](/docs/skill-graphs/telemetry/daily-skill-health.md)
+- Generated daily-health telemetry: `.harness/evidence/skill-graphs/telemetry/daily-skill-health.md`
 - [Recursive Skill Loop Script](/Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py)

@@ -25,19 +25,19 @@ Trigger kill switch if any occur:
 Runtime controls are file-based and fail-closed:
 
 1. Global emergency controls:
-   - `Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt`
-   - `Infrastructure/artifacts/skill-graphs/controls/rollback-required.txt`
+   - `.harness/evidence/skill-graphs/controls/kill-switch.txt`
+   - `.harness/evidence/skill-graphs/controls/rollback-required.txt`
 2. Rollout mode:
-   - `Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt` with `off | observe_only | active`
+   - `.harness/evidence/skill-graphs/controls/rollout-mode.txt` with `off | observe_only | active`
 3. Gate enforcement mode:
-   - `Infrastructure/artifacts/skill-graphs/controls/hard-gate-mode.txt` with `auto | force_on | force_off`
+   - `.harness/evidence/skill-graphs/controls/hard-gate-mode.txt` with `auto | force_on | force_off`
    - default is `auto` when missing or invalid
 4. Feature kill switches:
-   - `Infrastructure/artifacts/skill-graphs/controls/auto_capture.disabled`
-   - `Infrastructure/artifacts/skill-graphs/controls/auto_apply.disabled`
+   - `.harness/evidence/skill-graphs/controls/auto_capture.disabled`
+   - `.harness/evidence/skill-graphs/controls/auto_apply.disabled`
 5. Per-skill kill switches:
-   - `Infrastructure/artifacts/skill-graphs/controls/skills/<scope_skill>/auto_capture.disabled`
-   - `Infrastructure/artifacts/skill-graphs/controls/skills/<scope_skill>/auto_apply.disabled`
+   - `.harness/evidence/skill-graphs/controls/skills/<scope_skill>/auto_capture.disabled`
+   - `.harness/evidence/skill-graphs/controls/skills/<scope_skill>/auto_apply.disabled`
 
 ## Mandatory pre-run invocation check
 
@@ -96,7 +96,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_rollout_drill.sh
 ```
 
 Evidence artifacts:
-- `/Infrastructure/artifacts/skill-graphs/pilot/rollback-drill-report.json`
+- `/.harness/evidence/skill-graphs/pilot/rollback-drill-report.json`
 - `/docs/skill-graphs/pilots/rollback-drill.md`
 
 ## Recovery checklist

@@ -28,7 +28,7 @@ VALID_TAGS = {
     "full_delegation",
     "ai_led_debugging",
 }
-TELEMETRY_DIR = Path("Infrastructure/artifacts/skill-graphs/pilot/telemetry")
+TELEMETRY_DIR = Path(".harness/evidence/skill-graphs/pilot/telemetry")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -70,7 +70,7 @@ def resolve_artifact_path(path_like: str, workspace_root: Path) -> Path:
 
 def latest_scorecard(skill_path: str) -> Tuple[dict, Path | None]:
     """Return latest scorecard and its path for a pilot skill."""
-    base = Path("Infrastructure/artifacts/skills") / Path(skill_path).name
+    base = Path(".harness/evidence/skills") / Path(skill_path).name
     if not base.exists():
         return {}, None
 

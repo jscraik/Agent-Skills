@@ -21,10 +21,9 @@ from pathlib import Path
 from typing import Any, Iterable, Optional, Sequence
 
 
-CANONICAL_DAILY_HEALTH = "Docs/skill-graphs/telemetry/daily-skill-health.md"
-LEGACY_DAILY_HEALTH = "Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md"
+CANONICAL_DAILY_HEALTH = ".harness/evidence/skill-graphs/telemetry/daily-skill-health.md"
 DEFAULT_INVENTORY_POLICY = "Docs/skill-graphs/governance/inventory-policy.json"
-DEFAULT_GRAPH_ADAPTER_DIR = "Infrastructure/artifacts/skill-graphs/graph-adapter"
+DEFAULT_GRAPH_ADAPTER_DIR = ".tmp/agent-skills-artifacts/skill-graphs/graph-adapter"
 DEFAULT_SYSTEM_PREFIXES = ("Skills/.system/", ".agents/skills/.system/")
 CORE_PROFILES = {"auth", "backend", "frontend", "github", "utilities"}
 CLASS_TOKEN_PATTERN = re.compile(r"[^a-z0-9_-]+")
@@ -149,10 +148,10 @@ class SkillNode:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--repo-root", default=".")
-    p.add_argument("--out-html", default="Infrastructure/artifacts/skill-graphs/telemetry/skill-state-map.html", help="Output HTML path")
-    p.add_argument("--controls-dir", default="Infrastructure/artifacts/skill-graphs/controls", help="Control files directory")
-    p.add_argument("--wave-readiness", default="Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json")
-    p.add_argument("--profile-index", default="Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json")
+    p.add_argument("--out-html", default=".harness/evidence/skill-graphs/telemetry/skill-state-map.html", help="Output HTML path")
+    p.add_argument("--controls-dir", default=".harness/evidence/skill-graphs/controls", help="Control files directory")
+    p.add_argument("--wave-readiness", default=".harness/evidence/skill-graphs/onboarding/wave-readiness.json")
+    p.add_argument("--profile-index", default=".harness/evidence/skill-graphs/onboarding/profile-index.json")
     p.add_argument(
         "--inventory-policy",
         default=DEFAULT_INVENTORY_POLICY,
@@ -164,14 +163,14 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Override inventory policy system handling: separate or exclude",
     )
-    p.add_argument("--shadow-dashboard", default="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json")
+    p.add_argument("--shadow-dashboard", default=".harness/evidence/skill-graphs/pilot/shadow-dashboard.json")
     p.add_argument("--daily-health-md", default=CANONICAL_DAILY_HEALTH)
-    p.add_argument("--promotion-queue-md", default="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md")
-    p.add_argument("--promotion-validation", default="Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json")
-    p.add_argument("--parity-manifest", default="Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json")
-    p.add_argument("--candidates-jsonl", default="Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl")
-    p.add_argument("--runs-root", default="Infrastructure/artifacts/skill-graphs/runs")
-    p.add_argument("--feedback-log", default="Infrastructure/artifacts/skill-graphs/telemetry/feedback.log")
+    p.add_argument("--promotion-queue-md", default=".harness/evidence/skill-graphs/telemetry/promotion-queue.md")
+    p.add_argument("--promotion-validation", default=".harness/evidence/skill-graphs/pilot/promotion-validation-report.json")
+    p.add_argument("--parity-manifest", default=".harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json")
+    p.add_argument("--candidates-jsonl", default=".harness/evidence/skill-graphs/telemetry/candidates.jsonl")
+    p.add_argument("--runs-root", default=".tmp/agent-skills-artifacts/skill-graphs/runs")
+    p.add_argument("--feedback-log", default=".harness/evidence/skill-graphs/telemetry/feedback.log")
     p.add_argument("--graph-adapter-dir", default=DEFAULT_GRAPH_ADAPTER_DIR)
     p.add_argument("--with-graph-adapter", action="store_true")
     return p.parse_args()
@@ -186,14 +185,6 @@ def enforce_daily_health_contract(repo_root: Path, daily_health_path: Path) -> N
         )
     if not canonical.exists():
         raise RuntimeError(f"Path divergence: canonical daily health is missing ({canonical})")
-    legacy = (repo_root / LEGACY_DAILY_HEALTH).resolve()
-    if legacy.exists():
-        docs_text = canonical.read_text(encoding="utf-8")
-        legacy_text = legacy.read_text(encoding="utf-8")
-        if docs_text != legacy_text:
-            raise RuntimeError(
-                f"Path divergence: docs and artifacts daily health files differ ({canonical} vs {legacy})."
-            )
 
 
 def load_inventory_policy(repo_root: Path, path: Path, override_mode: Optional[str]) -> dict[str, Any]:

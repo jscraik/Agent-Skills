@@ -65,7 +65,7 @@ criterion_deltas:                     # key=criterion_id, value=float
   "prompt_hash": "sha256:...",
   "applied_lessons": [],
   "generated": {
-    "content_ref": "Infrastructure/artifacts/skill-graphs/runs/run_20260220_8f4c8d/iter-1-generated.txt",
+    "content_ref": ".tmp/agent-skills-artifacts/skill-graphs/runs/run_20260220_8f4c8d/iter-1-generated.txt",
     "token_estimate": 1210
   },
   "evaluation_report": {

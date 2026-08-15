@@ -19,10 +19,8 @@ DEFAULT_PILOT_PROFILES = [
     "react-ui-patterns",
 ]
 PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
-CANONICAL_DAILY_HEALTH_DOC = "Docs/skill-graphs/telemetry/daily-skill-health.md"
-LEGACY_DAILY_HEALTH_ARTIFACT = "Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md"
-DEFAULT_WAIVER_FILE = "Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
-DEFAULT_BASELINE_SNAPSHOT = "Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json"
+CANONICAL_DAILY_HEALTH_DOC = ".harness/evidence/skill-graphs/telemetry/daily-skill-health.md"
+DEFAULT_BASELINE_SNAPSHOT = ".harness/evidence/skill-graphs/pilot/shadow-baseline.json"
 
 EVENT_TYPES = {
     "run_initialized",
@@ -110,16 +108,16 @@ class WindowSummary:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Build recursive loop shadow dashboard + docs")
-    p.add_argument("--runs-root", default="Infrastructure/artifacts/skill-graphs/runs")
+    p.add_argument("--runs-root", default=".tmp/agent-skills-artifacts/skill-graphs/runs")
     p.add_argument("--window-days", type=int, default=7)
     p.add_argument("--min-runs-total", type=int, default=40)
     p.add_argument("--min-runs-per-profile", type=int, default=10)
     p.add_argument("--shadow-md", default="Docs/skill-graphs/pilots/ui-skills-shadow-results.md")
     p.add_argument("--readout-md", default="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md")
-    p.add_argument("--out-json", default="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json")
-    p.add_argument("--daily-health-md", default="Docs/skill-graphs/telemetry/daily-skill-health.md")
-    p.add_argument("--failure-patterns-jsonl", default="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
-    p.add_argument("--promotion-queue-md", default="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md")
+    p.add_argument("--out-json", default=".harness/evidence/skill-graphs/pilot/shadow-dashboard.json")
+    p.add_argument("--daily-health-md", default=CANONICAL_DAILY_HEALTH_DOC)
+    p.add_argument("--failure-patterns-jsonl", default=".harness/evidence/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
+    p.add_argument("--promotion-queue-md", default=".harness/evidence/skill-graphs/telemetry/promotion-queue.md")
     p.add_argument("--pilot-profiles-file", default="Docs/skill-graphs/schemas/examples/pilot-profiles.json")
     p.add_argument("--baseline-snapshot-json", default=DEFAULT_BASELINE_SNAPSHOT)
     p.add_argument(
@@ -128,11 +126,6 @@ def parse_args() -> argparse.Namespace:
         help="Refresh the frozen baseline snapshot to the current window after report generation.",
     )
     p.add_argument("--max-run-lines", type=int, default=40)
-    p.add_argument(
-        "--waiver-file",
-        default=DEFAULT_WAIVER_FILE,
-        help="Optional JSON waiver file (waived_runs[]) used for event-envelope waiver application",
-    )
     return p.parse_args()
 
 
@@ -148,15 +141,6 @@ def enforce_daily_health_path_contract(repo_root: Path, daily_health_path: Path)
             f"{CANONICAL_DAILY_HEALTH_DOC} (got {daily_health_path})"
         )
 
-    legacy = (repo_root / LEGACY_DAILY_HEALTH_ARTIFACT).resolve()
-    if canonical.exists() and legacy.exists():
-        canonical_text = canonical.read_text(encoding="utf-8")
-        legacy_text = legacy.read_text(encoding="utf-8")
-        if canonical_text != legacy_text:
-            raise RuntimeError(
-                "Path divergence: docs and artifacts daily health files differ "
-                f"({canonical} vs {legacy})."
-            )
 
 
 def safe_float(value: Any, default: float = 0.0) -> float:
@@ -233,51 +217,6 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
             continue
         rows.append(json.loads(line))
     return rows
-
-
-def load_event_envelope_waivers(path: Path) -> Dict[str, Dict[str, Any]]:
-    if not path.exists():
-        return {}
-    try:
-        payload = load_json(path)
-    except Exception:
-        return {}
-    rows = payload.get("waived_runs")
-    if not isinstance(rows, list):
-        return {}
-
-    waivers: Dict[str, Dict[str, Any]] = {}
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        run_dir = str(row.get("run_dir", "")).strip()
-        if not run_dir:
-            continue
-        applies_to = row.get("applies_to")
-        scope = str(row.get("scope", "")).strip().lower()
-        applies = False
-        if isinstance(applies_to, list):
-            applies = any(str(item).strip().lower() == "event_envelope" for item in applies_to)
-        elif isinstance(applies_to, str):
-            applies = applies_to.strip().lower() == "event_envelope"
-        elif scope:
-            applies = scope == "event_envelope"
-        if not applies:
-            continue
-        waivers[run_dir] = row
-    return waivers
-
-
-def resolve_event_envelope_waiver(run_dir_name: str, waivers: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    candidates = [
-        run_dir_name,
-        f"Infrastructure/artifacts/skill-graphs/runs/{run_dir_name}",
-    ]
-    for key in candidates:
-        waiver = waivers.get(key)
-        if waiver:
-            return waiver
-    return None
 
 
 def infer_queue_reason(
@@ -1188,29 +1127,12 @@ def main() -> int:
     current_run_ids = {record.run_id for record in current_records}
     current_event_entries = [entry for entry in event_error_entries if entry["run_id"] in current_run_ids]
 
-    waiver_file_path = Path(args.waiver_file).expanduser().resolve()
-    waivers = load_event_envelope_waivers(waiver_file_path)
-    unresolved_event_errors: List[str] = []
-    waived_event_errors: List[Dict[str, str]] = []
-    for entry in current_event_entries:
-        run_dir_name = entry["run_dir"]
-        waiver = resolve_event_envelope_waiver(run_dir_name, waivers)
-        rendered = f"{entry['run_id']}: {entry['error']}"
-        if waiver is None:
-            unresolved_event_errors.append(rendered)
-            continue
-        waived_event_errors.append(
-            {
-                "run_id": entry["run_id"],
-                "run_dir": run_dir_name,
-                "error": entry["error"],
-                "waiver_id": str(waiver.get("waiver_id", "")).strip(),
-                "reason": str(waiver.get("reason", "")).strip(),
-            }
-        )
+    unresolved_event_errors = [
+        f"{entry['run_id']}: {entry['error']}"
+        for entry in current_event_entries
+    ]
 
     event_total_count = len(current_event_entries)
-    event_waived_count = len(waived_event_errors)
     event_unresolved_count = len(unresolved_event_errors)
 
     current_summary = summarize(current_records)
@@ -1336,12 +1258,9 @@ def main() -> int:
             "reasons": reasons,
         },
         "event_envelope_errors": unresolved_event_errors,
-        "event_envelope_waived": waived_event_errors,
         "event_envelope_error_summary": {
             "total": event_total_count,
-            "waived": event_waived_count,
             "unresolved": event_unresolved_count,
-            "waiver_file": args.waiver_file if waivers else None,
         },
         "recent_runs": [
             {
@@ -1412,28 +1331,14 @@ def main() -> int:
             f"- Uplift auto-apply decisions: `pass={current_summary.uplift_auto_apply_decision_counts['pass']}` `hold={current_summary.uplift_auto_apply_decision_counts['hold']}` `insufficient_data={current_summary.uplift_auto_apply_decision_counts['insufficient_data']}`",
             f"- Event envelope errors: `{event_unresolved_count}`",
             f"- Event envelope errors total: `{event_total_count}`",
-            f"- Event envelope errors waived: `{event_waived_count}`",
             f"- Event envelope errors unresolved: `{event_unresolved_count}`",
             "",
         ]
-        if waivers:
-            daily_lines.append(f"- Event envelope waiver file: `{args.waiver_file}`")
-            daily_lines.append("")
         if unresolved_event_errors:
             daily_lines.append("## Event envelope errors (unresolved)")
             daily_lines.append("")
             for err in unresolved_event_errors[:50]:
                 daily_lines.append(f"- {err}")
-            daily_lines.append("")
-        if waived_event_errors:
-            daily_lines.append("## Event envelope waivers applied")
-            daily_lines.append("")
-            for row in waived_event_errors[:50]:
-                waiver_id = row["waiver_id"] or "unspecified"
-                reason = row["reason"] or "no reason provided"
-                daily_lines.append(
-                    f"- {row['run_id']} ({row['run_dir']}): waiver_id=`{waiver_id}` reason=`{reason}`"
-                )
             daily_lines.append("")
         write_markdown_artifact(
             daily_health_path,

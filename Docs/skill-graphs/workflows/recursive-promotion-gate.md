@@ -69,7 +69,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh 
   --changed-only \
   --base-sha "${{ github.event.pull_request.base.sha }}" \
   --head-sha "${{ github.event.pull_request.head.sha }}" \
-  --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
+  --report-json .harness/evidence/skill-graphs/pilot/promotion-validation-report.json \
   --strict-runs
 ```
 
@@ -77,7 +77,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh 
 
 ```bash
 bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
-  --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
+  --report-json .harness/evidence/skill-graphs/pilot/promotion-validation-report.json \
   --strict-runs
 ```
 
@@ -97,7 +97,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh 
 
 | NAME | PATH | CONDITION |
 |------|------|-----------|
-| `recursive-promotion-validation` | `Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json` | `always()` |
+| `recursive-promotion-validation` | `.harness/evidence/skill-graphs/pilot/promotion-validation-report.json` | `always()` |
 
 ---
 
@@ -119,7 +119,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh 
 
 # With custom runs root
 bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
-  --runs-root Infrastructure/artifacts/skill-graphs/runs \
+  --runs-root .tmp/agent-skills-artifacts/skill-graphs/runs \
   --report-json promotion-validation-report.json \
   --strict-runs
 ```
