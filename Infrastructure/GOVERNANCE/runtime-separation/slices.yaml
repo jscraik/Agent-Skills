@@ -23,7 +23,7 @@ slices:
         - plugins
         - Infrastructure/catalog/plugins
     path_consumer_inventory_ref: GOVERNANCE/runtime-separation/path-consumers.yaml
-    path_consumer_inventory_digest: "4b84ae677560ddf3fa59801761b818e2aec9e2d7f638c2cbc6c67def64d29372"
+    path_consumer_inventory_digest: "e260a0bd9881b9be1265f7e37c24874c84c70883a50adcb59c7df796f27b0c0c"
     reader_inventory_ref: GOVERNANCE/runtime-separation/readers.yaml
     reader_inventory_digest: "2d68d712f8a2d6cf957e690217d06ae63ee9fd801c88a881dc8f791e26df0704"
     policy_export_version: "2026-04-12.v9"
