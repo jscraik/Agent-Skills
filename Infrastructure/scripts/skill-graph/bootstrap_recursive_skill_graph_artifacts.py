@@ -11,8 +11,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 
-DEFAULT_CONTROL_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/controls")
-DEFAULT_LESSONS_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/lessons")
+DEFAULT_CONTROL_ROOT = Path(".harness/evidence/skill-graphs/controls")
+DEFAULT_LESSONS_ROOT = Path(".harness/evidence/skill-graphs/lessons")
 DEFAULT_CONTROL_SKILLS = [
     "frontend/ui/ui-ux-creative-coding",
     "frontend/ui/react-ui-patterns",
@@ -44,12 +44,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--controls-root",
         default=str(DEFAULT_CONTROL_ROOT),
-        help="Path to controls root directory (default: .tmp/agent-skills-artifacts/skill-graphs/controls)",
+        help="Path to controls root directory (default: .harness/evidence/skill-graphs/controls)",
     )
     parser.add_argument(
         "--lessons-root",
         default=str(DEFAULT_LESSONS_ROOT),
-        help="Path to canonical lessons root directory (default: .tmp/agent-skills-artifacts/skill-graphs/lessons)",
+        help="Path to canonical lessons root directory (default: .harness/evidence/skill-graphs/lessons)",
     )
     parser.add_argument(
         "--scope-skills",
