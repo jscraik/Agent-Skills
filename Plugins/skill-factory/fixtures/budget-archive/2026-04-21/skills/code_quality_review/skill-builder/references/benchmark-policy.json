@@ -1,6 +1,0 @@
-{
-  "schema_version": "1",
-  "status": "condensed-for-budget",
-  "read_when": "Use archived source for full structure and historical detail.",
-  "archive": "fixtures/budget-archive/2026-04-19/skills/code_quality_review/skill-builder/references/benchmark-policy.json"
-}
