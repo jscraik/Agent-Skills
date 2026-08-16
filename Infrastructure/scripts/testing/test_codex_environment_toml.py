@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import tempfile
@@ -12,7 +13,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ENV_PATH = REPO_ROOT / ".codex/environments/environment.toml"
-HELPER_PATH = REPO_ROOT / ".codex/environments/detach-head-helper.sh"
+HARNESS_CONTRACT_PATH = REPO_ROOT / "harness.contract.json"
 
 
 def _load_environment() -> dict:
@@ -54,10 +55,14 @@ _EXPECTED_CANDIDATES = [
     "/usr/local/bin",
     "/usr/sbin",
     "/sbin",
+    "/usr/bin",
+    "/bin",
 ]
 
 # Prepend loop order must be reverse-priority so final PATH keeps expected priority.
 _PREPEND_LOOP_CANDIDATES = [
+    "/bin",
+    "/usr/bin",
     "/sbin",
     "/usr/sbin",
     "/usr/local/bin",
@@ -72,9 +77,6 @@ class TestEnvironmentTomlContract(unittest.TestCase):
     def test_environment_toml_parses(self) -> None:
         env = _load_environment()
         self.assertIn("setup", env)
-
-    def test_helper_file_exists(self) -> None:
-        self.assertTrue(HELPER_PATH.exists(), f"Missing helper script: {HELPER_PATH}")
 
     # ------------------------------------------------------------------
     # PATH candidate loop replaces old git-guard + detach-head-helper
@@ -142,6 +144,18 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         env = _load_environment()
         setup_command = env["setup"]["script"]
         self.assertIn("-d", setup_command)
+
+    def test_setup_path_loop_restores_system_bins_from_empty_path(self) -> None:
+        """An empty inherited PATH must still make bash and core tools reachable."""
+        setup_command = _load_environment()["setup"]["script"]
+        path_loop = setup_command.split("if command -v mise", 1)[0]
+        with tempfile.TemporaryDirectory() as tmp:
+            result = _run_snippet(
+                path_loop + '\ncommand -v bash\ncommand -v git\n',
+                Path(tmp),
+                extra_env={"PATH": ""},
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     # ------------------------------------------------------------------
     # Old git-guard + helper references must be absent from setup and Tools
@@ -328,22 +342,17 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         """Release Finalize must exit 2 for branch names not matching the allowed patterns."""
         env = _load_environment()
         command = _action_command(env, "Release Finalize")
-        # Override the release_branch argument so it is an invalid name
-        # We stub git calls so actual git operations are not run
-        stub = """
-release_branch="feature/something-wrong"
-"""
-        # Inject a fake release_branch before the case statement
-        snippet = stub + command.split('release_branch="${1:-}"', 1)[-1]
         with tempfile.TemporaryDirectory() as tmp:
-            result = _run_snippet("release_branch='feature/something-wrong'\n" + command.split('release_branch="${1:-}"', 1)[-1], Path(tmp))
+            result = _run_snippet(
+                "release_branch='feature/something-wrong'\n"
+                + command.split('release_branch="${1:-}"', 1)[-1],
+                Path(tmp),
+            )
         self.assertEqual(result.returncode, 2)
         self.assertIn("Expected a release branch matching", result.stdout)
 
     def test_release_finalize_accepts_codex_release_branch(self) -> None:
         """Release Finalize must accept branches matching 'codex/release-*'."""
-        env = _load_environment()
-        command = _action_command(env, "Release Finalize")
         # Extract just the branch validation case block for testing without git ops
         case_check_snippet = r"""
 release_branch="codex/release-1.0.0"
@@ -419,55 +428,37 @@ esac
         self.assertIn("set -euo pipefail", command)
 
     # ------------------------------------------------------------------
-    # Mise action: inline detached HEAD logic
+    # Mise action: PATH priority and Ask-routed detached HEAD handling
     # ------------------------------------------------------------------
 
     def test_mise_action_exists(self) -> None:
         """Mise action must be present in environment.toml."""
         env = _load_environment()
-        self.assertTrue(_action_exists(env, "Mise"), "Missing 'Mise' action in environment.toml")
+        self.assertTrue(
+            _action_exists(env, "Mise"), "Missing 'Mise' action in environment.toml"
+        )
 
-    def test_mise_action_has_inline_detached_head_detection(self) -> None:
-        """Mise action must have inline detached HEAD detection logic."""
+    def test_mise_action_routes_detached_head_handling_through_ask(self) -> None:
+        """Mise must use the public Ask command for repository mutation."""
         env = _load_environment()
         command = _action_command(env, "Mise")
-        self.assertIn("git symbolic-ref --short -q HEAD", command)
-        self.assertIn("[codex] detached HEAD detected", command)
+        self.assertIn("./bin/ask repo attach-detached-head", command)
+        self.assertIn('--branch-prefix "${BRANCH_PREFIX:-codex/feature}"', command)
+        self.assertNotIn("git ", command)
 
-    def test_mise_action_creates_branch_for_detached_head(self) -> None:
-        """Mise action must call 'git switch -c' when HEAD is detached."""
+    def test_mise_action_normalizes_path_before_prepending(self) -> None:
+        """Mise must remove duplicate PATH entries before prepending candidates."""
         env = _load_environment()
         command = _action_command(env, "Mise")
-        self.assertIn("git switch -c", command)
-
-    def test_mise_action_uses_git_is_inside_work_tree_guard(self) -> None:
-        """Mise action must guard the detached HEAD block with git rev-parse check."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn("git rev-parse --is-inside-work-tree", command)
-
-    def test_mise_action_branch_name_uses_repo_slug(self) -> None:
-        """Mise action branch naming must use the Codex feature prefix and repo slug."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn('branch_base="${BRANCH_PREFIX:-codex/feature}/', command)
-        self.assertIn("repo_slug", command)
-
-    def test_mise_action_branch_name_uses_short_sha(self) -> None:
-        """Mise action branch naming must include the short git SHA."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn("git rev-parse --short HEAD", command)
-        self.assertIn("short_sha", command)
-
-    def test_mise_action_avoids_duplicate_branch_names(self) -> None:
-        """Mise action must avoid both local and remote branch-name collisions."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn("show-ref --verify --quiet", command)
-        self.assertIn("origin_branch_exists", command)
-        self.assertIn("git ls-remote --exit-code --heads origin", command)
-        self.assertIn("suffix=$((suffix + 1))", command)
+        self.assertIn('PATH="${PATH//:$candidate:/:}"', command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', command)
+        candidate_line = next(
+            line for line in command.splitlines() if line.startswith("for candidate in")
+        )
+        positions = [
+            candidate_line.index(candidate) for candidate in _PREPEND_LOOP_CANDIDATES
+        ]
+        self.assertEqual(positions, sorted(positions))
 
     def test_mise_action_mise_trust_allows_failure(self) -> None:
         """Mise action must allow 'mise trust' to fail gracefully with '|| true'."""
@@ -475,45 +466,38 @@ esac
         command = _action_command(env, "Mise")
         self.assertIn("mise trust --yes .mise.toml || true", command)
 
-    def test_mise_action_does_not_have_old_git_guard_sourcing_helper(self) -> None:
-        """Mise action must not use the old sourcing pattern for detach-head-helper.sh."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertNotIn("source", command.split("git symbolic-ref")[0])
-
-    def test_mise_action_optionally_sets_upstream_to_origin_main(self) -> None:
-        """Mise action must try to track origin/main for new branch when available."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn("git branch --set-upstream-to=origin/main", command)
-
-    def test_mise_action_fast_forwards_new_branch(self) -> None:
-        """Mise action must fetch and fast-forward from origin/main when safe."""
-        env = _load_environment()
-        command = _action_command(env, "Mise")
-        self.assertIn("git fetch --quiet origin main", command)
-        self.assertIn('git merge --ff-only "$target_ref"', command)
-        self.assertIn('git merge-base --is-ancestor HEAD "$target_ref"', command)
-
-    # ------------------------------------------------------------------
-    # Ralph action contract
-    # ------------------------------------------------------------------
-
-    def test_ralph_action_exists(self) -> None:
-        """Ralph action must be present with the required debug icon."""
-        env = _load_environment()
-        actions = [action for action in env.get("actions", []) if action.get("name") == "Ralph"]
-
-        self.assertEqual(len(actions), 1)
-        self.assertEqual(actions[0].get("icon"), "debug")
-
-    def test_ralph_action_runs_help(self) -> None:
-        """Ralph action must validate availability through its public CLI."""
-        env = _load_environment()
-        command = _action_command(env, "Ralph")
-
-        self.assertIn("command -v ralph >/dev/null 2>&1", command)
-        self.assertIn("ralph --help", command)
+    def test_mise_action_prefers_mise_shims_at_runtime(self) -> None:
+        """The full Mise action must resolve mise from the highest-priority shim path."""
+        command = _action_command(_load_environment(), "Mise")
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            shims = home / ".local/share/mise/shims"
+            local_bin = home / ".local/bin"
+            shims.mkdir(parents=True)
+            local_bin.mkdir(parents=True)
+            capture = Path(tmp) / "mise-path.txt"
+            fake_mise = shims / "mise"
+            fake_mise.write_text(
+                '#!/bin/bash\nprintf "%s" "$PATH" > "$MISE_PATH_CAPTURE"\n',
+                encoding="utf-8",
+            )
+            fake_mise.chmod(0o755)
+            fake_ask = Path(tmp) / "bin/ask"
+            fake_ask.parent.mkdir()
+            fake_ask.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+            fake_ask.chmod(0o755)
+            result = _run_snippet(
+                command,
+                Path(tmp),
+                extra_env={
+                    "HOME": str(home),
+                    "MISE_PATH_CAPTURE": str(capture),
+                    "PATH": "/usr/bin:/bin",
+                },
+            )
+            observed_path = capture.read_text(encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(observed_path.split(":", 1)[0], str(shims))
 
     # ------------------------------------------------------------------
     # Pylint action contract
@@ -533,6 +517,11 @@ esac
         command = _action_command(env, "Pylint")
         self.assertIn("command -v pylint >/dev/null 2>&1", command)
         self.assertIn("pylint --version", command)
+
+    def test_pylint_action_is_declared_as_required_binary(self) -> None:
+        """The Harness contract must provision every executable used by a required action."""
+        contract = json.loads(HARNESS_CONTRACT_PATH.read_text(encoding="utf-8"))
+        self.assertIn("pylint", contract["toolingPolicy"]["requiredBinaries"])
 
     # ------------------------------------------------------------------
     # Behavioral shell tests: PATH candidate loop

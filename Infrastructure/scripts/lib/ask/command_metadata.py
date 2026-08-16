@@ -9,7 +9,7 @@ SKILLS_AUTHOR_FACING_ACTIONS = ("package", "prove")
 SDK_AUTHOR_FACING_ACTIONS = ("start", "check")
 
 VALID_ACTIONS = {
-    "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
+    "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "attach-detached-head", "surface"],
     "skills": [
         "list",
         "budget",
@@ -127,6 +127,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("repo", "provider-audit"): [
         "ask repo provider-audit",
+    ],
+    ("repo", "attach-detached-head"): [
+        "ask repo attach-detached-head",
+        "ask repo attach-detached-head --branch-prefix codex/feature --json --robot",
     ],
     ("repo", "surface"): [
         "ask repo surface --json",

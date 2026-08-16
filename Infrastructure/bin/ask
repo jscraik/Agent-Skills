@@ -34,11 +34,13 @@ from ask.cli_prompts import prompt_choice, prompt_nonempty, prompt_optional
 import ask.commands.skills as skills_commands
 from ask.commands.sdk import add_sdk_parser, dispatch_sdk
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
+from ask.commands.repo_cli import add_repo_auxiliary_parsers
 from ask.commands.repo import (
     DoctorCatalogOptions,
     check_hub_stability,
     doctor_catalog,
     provider_audit,
+    repo_attach_detached_head,
     repo_closeout,
     repo_doctor,
     repo_yaml_inspect,
@@ -124,15 +126,7 @@ def main():
     repo_closeout_parser = repo_subparsers.add_parser("closeout", help="Report completion readiness", parents=[global_parser])
     repo_closeout_parser.add_argument("--changed", action="store_true", help="Infer staged, unstaged, and untracked changed files for commit readiness")
     repo_closeout_parser.add_argument("--strict", action="store_true", help="Treat diagnostic debt as closeout blocking")
-    repo_doctor_catalog_parser = repo_subparsers.add_parser(
-        "doctor-catalog",
-        help="Diagnose canonical catalog parity drift",
-        parents=[global_parser],
-    )
-    repo_doctor_catalog_parser.add_argument("--strict", action="store_true", help="Enable strict trend and stamp enforcement")
-    repo_subparsers.add_parser("provider-audit", help="Audit active paths for legacy provider drift", parents=[global_parser])
-    repo_surface_parser = repo_subparsers.add_parser("surface", help="Inventory tracked repo surface ownership", parents=[global_parser])
-    repo_surface_parser.add_argument("--strict", action="store_true", help="Exit non-zero when blocking surface findings exist")
+    add_repo_auxiliary_parsers(repo_subparsers, global_parser)
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
     skills_subparsers = skills_parser.add_subparsers(dest="action", action=facade_help_action(SKILLS_AUTHOR_FACING_ACTIONS))
     skills_subparsers.metavar = "{" + ",".join(SKILLS_AUTHOR_FACING_ACTIONS) + "}"
@@ -584,6 +578,8 @@ def main():
             result = doctor_catalog(repo_root, DoctorCatalogOptions(strict=args.strict))
         elif args.action == "provider-audit":
             result = provider_audit(repo_root)
+        elif args.action == "attach-detached-head":
+            result = repo_attach_detached_head(repo_root, branch_prefix=args.branch_prefix)
         elif args.action == "surface":
             result = repo_surface(repo_root, strict=args.strict)
         else:

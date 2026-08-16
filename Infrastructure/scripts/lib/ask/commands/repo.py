@@ -31,6 +31,7 @@ check_hub_stability = _impl.check_hub_stability
 collect_changed_files = _impl.collect_changed_files
 doctor_catalog = _impl.doctor_catalog
 provider_audit = _impl.provider_audit
+repo_attach_detached_head = _impl.repo_attach_detached_head
 repo_closeout = _impl.repo_closeout
 repo_doctor = _impl.repo_doctor
 repo_status = _impl.repo_status
@@ -46,6 +47,7 @@ __all__ = [
     "collect_changed_files",
     "doctor_catalog",
     "provider_audit",
+    "repo_attach_detached_head",
     "repo_closeout",
     "repo_doctor",
     "repo_status",

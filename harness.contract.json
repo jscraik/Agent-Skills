@@ -81,6 +81,7 @@
       "cloudflared",
       "vitest",
       "ruff",
+      "pylint",
       "eslint",
       "agent-browser",
       "agentation-mcp",
@@ -110,6 +111,7 @@
       "cloudflared",
       "vitest",
       "ruff",
+      "pylint",
       "eslint",
       "agent-browser",
       "agentation-mcp",
@@ -257,10 +259,6 @@
         {
           "name": "Diagram",
           "icon": "tool"
-        },
-        {
-          "name": "Ralph",
-          "icon": "debug"
         },
         {
           "name": "Mise",
