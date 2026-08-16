@@ -315,6 +315,7 @@ def test_harness_curated_context_paths_are_classified() -> None:
 
 def test_current_tracked_inventory_has_no_classification_required_paths() -> None:
     allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)
+    MODULE.validate_exact_allowlist_targets(MODULE.REPO_ROOT, allowlist)
     findings = MODULE.classify_paths(MODULE.git_ls_files(MODULE.REPO_ROOT), allowlist)
     offenders = [
         finding.path
@@ -323,6 +324,30 @@ def test_current_tracked_inventory_has_no_classification_required_paths() -> Non
     ]
 
     assert offenders == []
+
+
+def test_exact_allowlist_target_must_exist(tmp_path) -> None:
+    entry = MODULE.AllowlistEntry(
+        id="retained-receipt",
+        match_type="exact",
+        pattern="artifacts/receipt.json",
+        classification="historical_artifact",
+        reason="Retained by a current consumer.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+
+    try:
+        MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
+    except ValueError as exc:
+        assert "retained-receipt: artifacts/receipt.json" in str(exc)
+    else:
+        raise AssertionError("missing exact allowlist target should fail")
+
+    target = tmp_path / entry.pattern
+    target.parent.mkdir(parents=True)
+    target.write_text("{}\n", encoding="utf-8")
+    MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
 
 
 def test_harness_runtime_outputs_are_violations() -> None:

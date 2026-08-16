@@ -47,8 +47,7 @@ Verdict: findings present. The spec is close, but a few acceptance holes still l
 
 - status: findings
 - artifact_paths:
-  - /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/reviews/pu-012-breaker-loop-1-pass-1.md
-  - /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/agent-runs/adversarial-reviewer-019e9ddf-3987-7f00-a32c-6ecf5b0b79a2/manifest.json
+  - .harness/reviews/pu-012-breaker-loop-1-pass-1.md
 - findings:
   - high: broad-but-marked project roots are not concretely excluded
   - medium: moved-checkout canonical identity drift is not exercised
@@ -68,7 +67,6 @@ Verdict: findings present. The spec is close, but a few acceptance holes still l
   - supporting repo contracts reviewed: Infrastructure/scripts/lib/ask/skills_sdk/project_install.py, Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py, Infrastructure/scripts/lib/ask/skills_sdk/capability_status.py, Infrastructure/scripts/validate_all_impl.sh, Infrastructure/tests/test_skills_sdk_validation_scope.py, Infrastructure/tests/test_skills_sdk_capability_status.py
 - next_action:
   - update the spec acceptance language and validation matrix so a future implementation cannot pass without proving root-safety floor, canonical identity drift handling, and empty-project lockfile semantics
-- manifest_path: /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/agent-runs/adversarial-reviewer-019e9ddf-3987-7f00-a32c-6ecf5b0b79a2/manifest.json
 - useful_findings:
   - root-safety floor needs explicit forbidden roots
   - moved-checkout identity drift needs a dedicated acceptance case
@@ -86,4 +84,4 @@ Verdict: findings present. The spec is close, but a few acceptance holes still l
   - when canonical identity is part of the contract, add a moved-checkout or bind-mount test, not just symlink and relative-path cases
 - coordinator_score: 8
 
-WROTE: /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/reviews/pu-012-breaker-loop-1-pass-1.md
+WROTE: .harness/reviews/pu-012-breaker-loop-1-pass-1.md

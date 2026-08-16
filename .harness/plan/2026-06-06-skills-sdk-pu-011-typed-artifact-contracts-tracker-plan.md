@@ -65,7 +65,6 @@ The tracker tasks intentionally do not add registry, publish, signing, trust-sto
 - `git status --short --branch`
 - `sed -n '1,280p' .harness/plan/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-trace-plan.md`
 - `sed -n '1,430p' .harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md`
-- `wc -l .harness/review-artifacts/pu-011-trace-plan-adversarial-contract-runtime-pass2.md .harness/review-artifacts/pu-011-trace-plan-adversarial-validation-artifacts-pass2.md`
 
 ## Validation
 
@@ -90,5 +89,4 @@ Tracker-plan validation in this stage:
 ## Next Stage
 
 Recommended next stage: `sy-execution-plan` for this tracker plan and the approved trace plan, followed by `sy-work` in a clean feature worktree.
-
 

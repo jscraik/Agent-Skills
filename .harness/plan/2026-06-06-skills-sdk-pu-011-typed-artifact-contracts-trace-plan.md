@@ -8,13 +8,6 @@ title: "PU-011: Skills SDK Typed Artifact Contracts Trace Plan"
 status: trace_ready_for_execution_plan
 date: 2026-06-06
 target_spec: .harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md
-source_review_artifacts:
-  - .harness/review-artifacts/pu-011-adversarial-contract-runtime.md
-  - .harness/review-artifacts/pu-011-adversarial-artifact-validation.md
-  - .harness/review-artifacts/pu-011-trace-plan-adversarial-contract-runtime.md
-  - .harness/review-artifacts/pu-011-trace-plan-adversarial-validation-artifacts.md
-  - .harness/review-artifacts/pu-011-trace-plan-adversarial-contract-runtime-pass2.md
-  - .harness/review-artifacts/pu-011-trace-plan-adversarial-validation-artifacts-pass2.md
 repo_mutation_scope: trace_artifact_only
 external_mutation_status: not_authorized
 ---
@@ -30,9 +23,6 @@ The trace keeps install, rollback, and uninstall mutation behavior out of scope.
 ## Target
 
 - Spec: `.harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md`
-- Review artifacts:
-  - `.harness/review-artifacts/pu-011-adversarial-contract-runtime.md`
-  - `.harness/review-artifacts/pu-011-adversarial-artifact-validation.md`
 - Current SDK truth: `./bin/ask sdk status --json --robot` reports 27 capabilities, 9 implemented, 3 preview-only, 6 deferred, 4 optional placeholders, 1 blocked placeholder, 1 blocked adapter, 3 out of scope, 12 executable or preview-backed rows, and 3 bounded mutation rows.
 - Current local state: primary repo is on `main...origin/main` with untracked PU-011 spec/review/trace artifacts.
 - External lanes: PR, CI, review-thread, tracker, mergeability, and deployment state were not checked.
