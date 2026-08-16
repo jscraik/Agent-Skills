@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -108,7 +109,8 @@ def repo_attach_detached_head(
     """Attach a detached checkout to a collision-safe branch and fast-forward when safe."""
     result = CallResult()
     result.data["validation_commands"] = [
-        f"./bin/ask repo attach-detached-head --branch-prefix {branch_prefix} --json --robot"
+        "./bin/ask repo attach-detached-head --branch-prefix "
+        f"{shlex.quote(branch_prefix)} --json --robot"
     ]
     if not _valid_branch_prefix(repo_root, branch_prefix):
         result.status = "error"
