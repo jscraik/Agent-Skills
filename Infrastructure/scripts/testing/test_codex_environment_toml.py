@@ -445,6 +445,7 @@ esac
         self.assertIn("./bin/ask repo attach-detached-head", command)
         self.assertIn('--branch-prefix "${BRANCH_PREFIX:-codex/feature}"', command)
         self.assertNotIn("git ", command)
+        self.assertLess(command.index("mise install"), command.index("./bin/ask"))
 
     def test_mise_action_normalizes_path_before_prepending(self) -> None:
         """Mise must remove duplicate PATH entries before prepending candidates."""

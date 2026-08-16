@@ -178,9 +178,9 @@ done
 export PATH
 
 command -v mise >/dev/null 2>&1
-./bin/ask repo attach-detached-head --branch-prefix "${BRANCH_PREFIX:-codex/feature}"
 mise trust --yes .mise.toml || true
 mise install
+./bin/ask repo attach-detached-head --branch-prefix "${BRANCH_PREFIX:-codex/feature}"
 '''
 
 [[actions]]

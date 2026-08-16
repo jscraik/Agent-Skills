@@ -65,6 +65,25 @@ class TestRepoAttachDetachedHead(unittest.TestCase):
         self.assertEqual(result.data["reason"], "already_attached")
         self.assertEqual(result.data["branch"], "main")
 
+    def test_validation_command_quotes_git_valid_branch_prefix(self) -> None:
+        """Replay commands must not execute metacharacters in valid Git ref prefixes."""
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            _init_repo(repo)
+            result = repo_attach_detached_head(
+                repo,
+                branch_prefix="codex/$(touch${IFS}/tmp/pwn)",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(
+            result.data["validation_commands"],
+            [
+                "./bin/ask repo attach-detached-head --branch-prefix "
+                "'codex/$(touch${IFS}/tmp/pwn)' --json --robot"
+            ],
+        )
+
     def test_detached_head_gets_collision_safe_branch(self) -> None:
         with tempfile.TemporaryDirectory(suffix="-Repo Name") as tmp:
             repo = Path(tmp)
