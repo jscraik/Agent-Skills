@@ -29,7 +29,7 @@ from typing import Any, Dict, Iterator, List, Optional, Set
 
 # Configuration
 CANDIDATES_PATH = Path(".harness/evidence/skill-graphs/telemetry/candidates.jsonl")
-RUNS_ROOT = Path(".harness/evidence/skill-graphs/runs")
+RUNS_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/runs")
 CONTROLS_ROOT = Path(".harness/evidence/skill-graphs/controls")
 STATS_PATH = Path(".harness/evidence/skill-graphs/telemetry/skill-genome-processing-stats.json")
 WATERMARK_PATH = Path(".harness/evidence/skill-graphs/telemetry/.genome-watermark")

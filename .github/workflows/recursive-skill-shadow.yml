@@ -76,6 +76,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: recursive-skill-shadow-artifacts
+          include-hidden-files: true
           path: |
             .tmp/agent-skills-artifacts/skill-graphs
             Docs/skill-graphs/pilots/ui-skills-shadow-results.md
