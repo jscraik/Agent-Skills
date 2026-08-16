@@ -81,9 +81,10 @@
       "cloudflared",
       "vitest",
       "ruff",
+      "pylint",
       "eslint",
       "agent-browser",
-      "agentation",
+      "agentation-mcp",
       "mermaid-cli",
       "markdownlint-cli2",
       "wrangler",
@@ -110,6 +111,7 @@
       "cloudflared",
       "vitest",
       "ruff",
+      "pylint",
       "eslint",
       "agent-browser",
       "agentation-mcp",
@@ -142,7 +144,7 @@
       },
       {
         "tool": "pipx:pylint",
-        "version": "latest"
+        "version": "4.0.5"
       },
       {
         "tool": "cargo:prek",
@@ -259,10 +261,6 @@
           "icon": "tool"
         },
         {
-          "name": "Ralph",
-          "icon": "debug"
-        },
-        {
           "name": "Mise",
           "icon": "tool"
         },
@@ -288,6 +286,10 @@
         },
         {
           "name": "Ruff",
+          "icon": "debug"
+        },
+        {
+          "name": "Pylint",
           "icon": "debug"
         },
         {

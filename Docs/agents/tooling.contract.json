@@ -64,7 +64,6 @@
     { "name": "Test", "icon": "test" },
     { "name": "Prek", "icon": "test" },
     { "name": "Diagram", "icon": "tool" },
-    { "name": "Ralph", "icon": "debug" },
     { "name": "Mise", "icon": "tool" },
     { "name": "Vale", "icon": "debug" },
     { "name": "Argos", "icon": "test" },
