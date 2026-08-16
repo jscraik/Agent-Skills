@@ -83,7 +83,7 @@
       "ruff",
       "eslint",
       "agent-browser",
-      "agentation",
+      "agentation-mcp",
       "mermaid-cli",
       "markdownlint-cli2",
       "wrangler",
@@ -142,7 +142,7 @@
       },
       {
         "tool": "pipx:pylint",
-        "version": "latest"
+        "version": "4.0.5"
       },
       {
         "tool": "cargo:prek",
@@ -288,6 +288,10 @@
         },
         {
           "name": "Ruff",
+          "icon": "debug"
+        },
+        {
+          "name": "Pylint",
           "icon": "debug"
         },
         {

@@ -447,10 +447,10 @@ esac
         self.assertIn("git rev-parse --is-inside-work-tree", command)
 
     def test_mise_action_branch_name_uses_repo_slug(self) -> None:
-        """Mise action branch naming must include 'jscraik/feature/' prefix and repo slug."""
+        """Mise action branch naming must use the Codex feature prefix and repo slug."""
         env = _load_environment()
         command = _action_command(env, "Mise")
-        self.assertIn('branch_base="jscraik/feature/', command)
+        self.assertIn('branch_base="${BRANCH_PREFIX:-codex/feature}/', command)
         self.assertIn("repo_slug", command)
 
     def test_mise_action_branch_name_uses_short_sha(self) -> None:
@@ -461,10 +461,12 @@ esac
         self.assertIn("short_sha", command)
 
     def test_mise_action_avoids_duplicate_branch_names(self) -> None:
-        """Mise action must use a suffix loop to avoid duplicate branch names."""
+        """Mise action must avoid both local and remote branch-name collisions."""
         env = _load_environment()
         command = _action_command(env, "Mise")
         self.assertIn("show-ref --verify --quiet", command)
+        self.assertIn("origin_branch_exists", command)
+        self.assertIn("git ls-remote --exit-code --heads origin", command)
         self.assertIn("suffix=$((suffix + 1))", command)
 
     def test_mise_action_mise_trust_allows_failure(self) -> None:
@@ -486,10 +488,32 @@ esac
         self.assertIn("git branch --set-upstream-to=origin/main", command)
 
     def test_mise_action_fast_forwards_new_branch(self) -> None:
-        """Mise action must fast-forward the new branch with origin/main if available."""
+        """Mise action must fetch and fast-forward from origin/main when safe."""
         env = _load_environment()
         command = _action_command(env, "Mise")
-        self.assertIn("git pull --ff-only origin main", command)
+        self.assertIn("git fetch --quiet origin main", command)
+        self.assertIn('git merge --ff-only "$target_ref"', command)
+        self.assertIn('git merge-base --is-ancestor HEAD "$target_ref"', command)
+
+    # ------------------------------------------------------------------
+    # Ralph action contract
+    # ------------------------------------------------------------------
+
+    def test_ralph_action_exists(self) -> None:
+        """Ralph action must be present with the required debug icon."""
+        env = _load_environment()
+        actions = [action for action in env.get("actions", []) if action.get("name") == "Ralph"]
+
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(actions[0].get("icon"), "debug")
+
+    def test_ralph_action_runs_help(self) -> None:
+        """Ralph action must validate availability through its public CLI."""
+        env = _load_environment()
+        command = _action_command(env, "Ralph")
+
+        self.assertIn("command -v ralph >/dev/null 2>&1", command)
+        self.assertIn("ralph --help", command)
 
     # ------------------------------------------------------------------
     # Pylint action contract
@@ -569,44 +593,6 @@ echo "count=$count"
         self.assertEqual(result.returncode, 0)
         # Should appear exactly once (the initial prepend, loop guard must skip the second)
         self.assertIn("count=1", result.stdout)
-
-    def test_prepare_worktree_sh_used_when_present(self) -> None:
-        """When scripts/prepare-worktree.sh exists, it must be executed instead of npm install."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            scripts_dir = tmp_path / "scripts"
-            scripts_dir.mkdir()
-            prepare_script = scripts_dir / "prepare-worktree.sh"
-            prepare_script.write_text("#!/bin/bash\necho 'prepare-worktree-ran'\n")
-            prepare_script.chmod(0o755)
-            snippet = """
-if [[ -f scripts/prepare-worktree.sh ]]; then
-  bash scripts/prepare-worktree.sh
-else
-  echo "npm-install-ran"
-fi
-"""
-            result = _run_snippet(snippet, tmp_path)
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("prepare-worktree-ran", result.stdout)
-        self.assertNotIn("npm-install-ran", result.stdout)
-
-    def test_npm_install_used_when_prepare_worktree_absent(self) -> None:
-        """When scripts/prepare-worktree.sh is absent, npm install must be invoked."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            # Replace npm install with an echo to avoid actual npm usage
-            snippet = """
-if [[ -f scripts/prepare-worktree.sh ]]; then
-  bash scripts/prepare-worktree.sh
-else
-  echo "npm-install-ran"
-fi
-"""
-            result = _run_snippet(snippet, tmp_path)
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("npm-install-ran", result.stdout)
-        self.assertNotIn("prepare-worktree-ran", result.stdout)
 
     def test_mise_guard_skips_when_mise_unavailable(self) -> None:
         """When mise is not available, the mise trust/install block must be skipped."""
