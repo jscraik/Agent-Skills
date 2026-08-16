@@ -59,6 +59,25 @@ def test_generated_agent_review_roots_are_ignored() -> None:
     assert result.returncode == 0, result.stderr
     assert result.stdout.splitlines() == list(generated_paths)
 
+    generated_runtime_roots = (
+        "artifacts/agent-runs",
+        ".harness/agent-runs",
+        ".harness/review-artifacts",
+        ".harness/traces",
+    )
+
+    for root in generated_runtime_roots:
+        ls_result = subprocess.run(
+            ["git", "ls-files", root],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert ls_result.returncode == 0, ls_result.stderr
+        tracked_files = [line for line in ls_result.stdout.splitlines() if line.strip()]
+        assert tracked_files == [], f"Expected no tracked files in {root}, but found: {tracked_files}"
+
 
 def test_infrastructure_package_policy_files_are_policy_surface() -> None:
     cases = ["Infrastructure/pyproject.toml", "Infrastructure/uv.lock"]
@@ -326,7 +345,7 @@ def test_current_tracked_inventory_has_no_classification_required_paths() -> Non
     assert offenders == []
 
 
-def test_exact_allowlist_target_must_exist(tmp_path) -> None:
+def test_exact_allowlist_target_must_exist(tmp_path, monkeypatch) -> None:
     entry = MODULE.AllowlistEntry(
         id="retained-receipt",
         match_type="exact",
@@ -336,6 +355,11 @@ def test_exact_allowlist_target_must_exist(tmp_path) -> None:
         owner="test",
         review_after="2026-09-01",
     )
+
+    def fake_git_ls_files_empty(repo_root):
+        return []
+
+    monkeypatch.setattr(MODULE, "git_ls_files", fake_git_ls_files_empty)
 
     try:
         MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
@@ -347,7 +371,32 @@ def test_exact_allowlist_target_must_exist(tmp_path) -> None:
     target = tmp_path / entry.pattern
     target.parent.mkdir(parents=True)
     target.write_text("{}\n", encoding="utf-8")
+
+    def fake_git_ls_files_with_target(repo_root):
+        return ["artifacts/receipt.json"]
+
+    monkeypatch.setattr(MODULE, "git_ls_files", fake_git_ls_files_with_target)
     MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
+
+    untracked_entry = MODULE.AllowlistEntry(
+        id="untracked-residue",
+        match_type="exact",
+        pattern="artifacts/untracked.json",
+        classification="historical_artifact",
+        reason="Untracked residue should not satisfy.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+
+    untracked_target = tmp_path / untracked_entry.pattern
+    untracked_target.write_text("{}\n", encoding="utf-8")
+
+    try:
+        MODULE.validate_exact_allowlist_targets(tmp_path, [untracked_entry])
+    except ValueError as exc:
+        assert "untracked-residue: artifacts/untracked.json" in str(exc)
+    else:
+        raise AssertionError("untracked exact allowlist target should fail")
 
 
 def test_harness_runtime_outputs_are_violations() -> None:

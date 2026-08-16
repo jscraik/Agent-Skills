@@ -50,5 +50,10 @@ def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
                 },
             }
         ],
-        "metadata": {"inventory_scope": "tracked_existing_files", "strict": args.strict},
+        "metadata": {
+            "inventory_scope": "tracked_existing_files",
+            "strict": args.strict,
+            "changed_files_policy": "not_applied",
+            "changed_file_count": 0,
+        },
     }

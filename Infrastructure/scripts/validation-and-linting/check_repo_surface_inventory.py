@@ -478,10 +478,11 @@ def validate_exact_allowlist_targets(
     repo_root: Path, entries: list[AllowlistEntry]
 ) -> None:
     """Reject exact retention declarations whose tracked target is missing."""
+    tracked_files = set(git_ls_files(repo_root))
     missing = [
         entry
         for entry in entries
-        if entry.match_type == "exact" and not (repo_root / entry.pattern).is_file()
+        if entry.match_type == "exact" and entry.pattern not in tracked_files
     ]
     if missing:
         details = ", ".join(f"{entry.id}: {entry.pattern}" for entry in missing)
