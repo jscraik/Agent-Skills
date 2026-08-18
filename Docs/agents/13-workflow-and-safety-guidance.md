@@ -186,13 +186,13 @@ credential issue, or platform regression. If the command may invoke `gh`,
 `mise`, `uv`, or npm, export the writable state paths `GH_CONFIG_DIR`,
 `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, `MISE_STATE_DIR`, and
 `UV_CACHE_DIR` as applicable to sandbox-approved writable directories before
-the shell starts. Set `npm_config_cache` only when npm is in scope. Set `MISE_TRUSTED_CONFIG_PATHS`
-separately to one or more approved directories that contain trusted mise
-configuration; for a repository-local `.mise.toml`, use the repository
-directory (for example `$PWD`), not the `.mise.toml` file path. `GH_CONFIG_DIR`
+the shell starts. Set `npm_config_cache` only when npm is in scope. Set
+`MISE_TRUSTED_CONFIG_PATHS` to the explicitly approved repository config file
+(for example `$PWD/.mise.toml`), not the whole worktree. `GH_CONFIG_DIR`
 selects GitHub CLI configuration; `XDG_STATE_HOME` does not. Before invoking a
 tool, verify each resolved state path is inside the approved scratch directory
-and writable, and each trusted-config path is an approved directory.
+and writable, and each trusted-config path is the explicitly approved config
+file.
 
 After two equivalent failures, change the environment, permission request,
 command shape, or repo contract before trying again. Do not keep rotating
