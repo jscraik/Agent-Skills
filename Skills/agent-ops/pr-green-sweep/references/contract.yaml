@@ -240,8 +240,8 @@ environment_contract:
       requirement: "required when npm is in scope"
   trusted_config_path_contract:
     variable: MISE_TRUSTED_CONFIG_PATHS
-    form: "one or more explicitly approved mise config files"
-    repository_example: "$PWD/.mise.toml"
+    form: "one or more explicitly approved mise config files resolved from the repository root"
+    repository_example: "$(git rev-parse --show-toplevel)/.mise.toml"
   applies_to:
     - gh
     - mise

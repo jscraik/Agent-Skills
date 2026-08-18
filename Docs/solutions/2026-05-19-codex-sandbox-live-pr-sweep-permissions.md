@@ -37,16 +37,17 @@ For live PR sweep work in Codex sandboxed sessions:
    live-state commands as networked operations.
 2. Run them with explicit network permission before classifying failures as
    service outages, bad credentials, or repo defects.
-3. Before the shell starts, export approved writable paths for every tool in
-   scope: `GH_CONFIG_DIR`, `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
-   `MISE_CACHE_DIR`, `MISE_STATE_DIR`, and `UV_CACHE_DIR`. Set
-   `npm_config_cache` only when npm is in scope. Set
-   `MISE_TRUSTED_CONFIG_PATHS` to the explicitly approved repository config file
-   (for example `$PWD/.mise.toml`), not the whole worktree. `GH_CONFIG_DIR`
-   selects GitHub CLI configuration;
-   `XDG_STATE_HOME` does not. Verify each resolved state path is inside the
-   approved scratch directory and writable, and the trusted-config path is the
-   explicitly approved config file, before invoking `gh`, `mise`, `uv`, or npm.
+3. Before the shell starts, export approved writable paths for the stateful
+   tools in scope: `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`,
+   `MISE_STATE_DIR`, and `UV_CACHE_DIR`. Set `npm_config_cache` only when npm
+   is in scope. Retain the operator-authenticated `gh` configuration; set
+   `GH_CONFIG_DIR` only when an explicitly supplied configuration is already
+   authenticated. Resolve the repository root with
+   `git rev-parse --show-toplevel`, then set `MISE_TRUSTED_CONFIG_PATHS` to its
+   explicitly approved `.mise.toml` file, not the current subdirectory or the
+   whole worktree. Verify each resolved state path is inside the approved
+   scratch directory and writable, and the trusted-config path is that approved
+   config file, before invoking `gh`, `mise`, `uv`, or npm.
 4. Keep live-state probes short and non-watch unless actively waiting for one
    known check.
 5. After two equivalent command, approval, or permission failures, stop the

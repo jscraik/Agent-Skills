@@ -132,7 +132,7 @@ cases:
       by (the )?(current )?(execution )?environment|sandbox|repo(?:sitory)? (identifier|full name).*need|merge (action|attempt).{0,80}(cancelled|blocked)|workspace.{0,80}read-only|blocked
       from writing|no ability to edit|cannot.*apply fixes
   - type: regex
-    value: (?is)(?=.*\bXDG_CACHE_HOME\b)(?=.*\bXDG_STATE_HOME\b)(?=.*\bMISE_CACHE_DIR\b)(?=.*\bMISE_STATE_DIR\b)(?=.*\bMISE_TRUSTED_CONFIG_PATHS\b)(?=.*\bUV_CACHE_DIR\b).*
+    value: (?is)(?=.*\bXDG_CACHE_HOME\b)(?=.*\bXDG_STATE_HOME\b)(?=.*\bMISE_CACHE_DIR\b)(?=.*\bMISE_STATE_DIR\b)(?=.*\bUV_CACHE_DIR\b)(?=.*(?:\bMISE_TRUSTED_CONFIG_PATHS\b.{0,160}\bgit\s+rev-parse\s+--show-toplevel\b|\bgit\s+rev-parse\s+--show-toplevel\b.{0,160}\bMISE_TRUSTED_CONFIG_PATHS\b))(?!.*\bMISE_TRUSTED_CONFIG_PATHS\s*=\s*\$PWD(?:/|\s|$)).*
   - type: regex
     value: (?i)(github|coderabbit|circleci|merge|prune)
   unit: open PR sweep
