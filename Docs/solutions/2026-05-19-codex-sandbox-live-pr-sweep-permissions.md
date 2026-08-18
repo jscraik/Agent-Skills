@@ -39,9 +39,9 @@ For live PR sweep work in Codex sandboxed sessions:
    service outages, bad credentials, or repo defects.
 3. Before the shell starts, export approved writable paths for every tool in
    scope: `GH_CONFIG_DIR`, `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
-   `MISE_CACHE_DIR`, `MISE_STATE_DIR`, `UV_CACHE_DIR`, and `npm_config_cache`
-   when npm is in scope. Set `MISE_TRUSTED_CONFIG_PATHS` separately to one or
-   more approved directories containing trusted mise configuration; for a
+   `MISE_CACHE_DIR`, `MISE_STATE_DIR`, and `UV_CACHE_DIR`. Set
+   `npm_config_cache` only when npm is in scope. Set `MISE_TRUSTED_CONFIG_PATHS`
+   separately to one or more approved directories containing trusted mise configuration; for a
    repository-local `.mise.toml`, use the repository directory (`$PWD`), not
    the `.mise.toml` file path. `GH_CONFIG_DIR` selects GitHub CLI configuration;
    `XDG_STATE_HOME` does not. Verify each resolved state path is inside the

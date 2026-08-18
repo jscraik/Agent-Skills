@@ -75,7 +75,8 @@ network permission before classifying GitHub, CircleCI, Snyk, package registry,
 or other external services as down. For commands that invoke `mise`, either set
 `MISE_CACHE_DIR` to a writable temporary path such as
 `/private/tmp/agent-skills-mise-cache` or request narrow write permission for
-the cache directory. Cache write warnings are not API connectivity evidence.
+the cache directory. When npm is in scope, set `npm_config_cache` to a separate
+writable temporary path. Cache write warnings are not API connectivity evidence.
 
 Do not keep retrying the same failing command. After two equivalent failures,
 change the environment, permission profile, command shape, or diagnostic path,
@@ -183,9 +184,9 @@ Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API
 commands with explicit network permission before diagnosing an outage,
 credential issue, or platform regression. If the command may invoke `gh`,
 `mise`, `uv`, or npm, export the writable state paths `GH_CONFIG_DIR`,
-`XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, `MISE_STATE_DIR`,
-`UV_CACHE_DIR`, and `npm_config_cache` as applicable to sandbox-approved
-writable directories before the shell starts. Set `MISE_TRUSTED_CONFIG_PATHS`
+`XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, `MISE_STATE_DIR`, and
+`UV_CACHE_DIR` as applicable to sandbox-approved writable directories before
+the shell starts. Set `npm_config_cache` only when npm is in scope. Set `MISE_TRUSTED_CONFIG_PATHS`
 separately to one or more approved directories that contain trusted mise
 configuration; for a repository-local `.mise.toml`, use the repository
 directory (for example `$PWD`), not the `.mise.toml` file path. `GH_CONFIG_DIR`

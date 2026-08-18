@@ -233,7 +233,10 @@ environment_contract:
     - MISE_CACHE_DIR
     - MISE_STATE_DIR
     - UV_CACHE_DIR
-    - npm_config_cache
+  conditional_writable_state:
+    - tool: npm
+      variable: npm_config_cache
+      requirement: "required when npm is in scope"
   trusted_config_path_contract:
     variable: MISE_TRUSTED_CONFIG_PATHS
     form: "one or more approved directories containing trusted mise configuration"
@@ -242,6 +245,7 @@ environment_contract:
     - gh
     - mise
     - uv
+    - npm
     - github
     - coderabbit
     - circleci
