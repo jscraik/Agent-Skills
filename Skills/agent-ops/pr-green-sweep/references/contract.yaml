@@ -232,9 +232,12 @@ environment_contract:
     - XDG_STATE_HOME
     - MISE_CACHE_DIR
     - MISE_STATE_DIR
-    - MISE_TRUSTED_CONFIG_PATHS
     - UV_CACHE_DIR
     - npm_config_cache
+  trusted_config_path_contract:
+    variable: MISE_TRUSTED_CONFIG_PATHS
+    form: "one or more approved directories containing trusted mise configuration"
+    repository_example: "$PWD"
   applies_to:
     - gh
     - mise

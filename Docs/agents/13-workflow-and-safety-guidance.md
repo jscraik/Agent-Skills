@@ -182,13 +182,16 @@ For sandboxed Codex runs, live PR and CI operations are networked operations.
 Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API
 commands with explicit network permission before diagnosing an outage,
 credential issue, or platform regression. If the command may invoke `gh`,
-`mise`, `uv`, or npm, export `GH_CONFIG_DIR`, `XDG_CACHE_HOME`,
-`XDG_STATE_HOME`, `MISE_CACHE_DIR`, `MISE_STATE_DIR`,
-`MISE_TRUSTED_CONFIG_PATHS`, `UV_CACHE_DIR`, and `npm_config_cache` as
-applicable to sandbox-approved writable directories before the shell starts.
-`GH_CONFIG_DIR` selects GitHub CLI configuration; `XDG_STATE_HOME` does not.
-Before invoking a tool, verify each resolved path is inside the approved scratch
-directory and is writable.
+`mise`, `uv`, or npm, export the writable state paths `GH_CONFIG_DIR`,
+`XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, `MISE_STATE_DIR`,
+`UV_CACHE_DIR`, and `npm_config_cache` as applicable to sandbox-approved
+writable directories before the shell starts. Set `MISE_TRUSTED_CONFIG_PATHS`
+separately to one or more approved directories that contain trusted mise
+configuration; for a repository-local `.mise.toml`, use the repository
+directory (for example `$PWD`), not the `.mise.toml` file path. `GH_CONFIG_DIR`
+selects GitHub CLI configuration; `XDG_STATE_HOME` does not. Before invoking a
+tool, verify each resolved state path is inside the approved scratch directory
+and writable, and each trusted-config path is an approved directory.
 
 After two equivalent failures, change the environment, permission request,
 command shape, or repo contract before trying again. Do not keep rotating

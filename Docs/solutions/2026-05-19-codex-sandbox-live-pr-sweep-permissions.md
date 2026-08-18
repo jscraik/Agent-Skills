@@ -39,11 +39,14 @@ For live PR sweep work in Codex sandboxed sessions:
    service outages, bad credentials, or repo defects.
 3. Before the shell starts, export approved writable paths for every tool in
    scope: `GH_CONFIG_DIR`, `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
-   `MISE_CACHE_DIR`, `MISE_STATE_DIR`, `MISE_TRUSTED_CONFIG_PATHS`,
-   `UV_CACHE_DIR`, and `npm_config_cache` when npm is in scope. `GH_CONFIG_DIR`
-   selects GitHub CLI configuration; `XDG_STATE_HOME` does not. Verify each
-   resolved path is inside the approved scratch directory and writable before
-   invoking `gh`, `mise`, `uv`, or npm.
+   `MISE_CACHE_DIR`, `MISE_STATE_DIR`, `UV_CACHE_DIR`, and `npm_config_cache`
+   when npm is in scope. Set `MISE_TRUSTED_CONFIG_PATHS` separately to one or
+   more approved directories containing trusted mise configuration; for a
+   repository-local `.mise.toml`, use the repository directory (`$PWD`), not
+   the `.mise.toml` file path. `GH_CONFIG_DIR` selects GitHub CLI configuration;
+   `XDG_STATE_HOME` does not. Verify each resolved state path is inside the
+   approved scratch directory and writable, and each trusted-config path is an
+   approved directory, before invoking `gh`, `mise`, `uv`, or npm.
 4. Keep live-state probes short and non-watch unless actively waiting for one
    known check.
 5. After two equivalent command, approval, or permission failures, stop the
