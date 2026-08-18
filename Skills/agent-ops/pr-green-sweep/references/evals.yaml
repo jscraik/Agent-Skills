@@ -132,7 +132,7 @@ cases:
       by (the )?(current )?(execution )?environment|sandbox|repo(?:sitory)? (identifier|full name).*need|merge (action|attempt).{0,80}(cancelled|blocked)|workspace.{0,80}read-only|blocked
       from writing|no ability to edit|cannot.*apply fixes
   - type: regex
-    value: (?i)(network permission|explicit network|XDG_CACHE_HOME|XDG_STATE_HOME|MISE_CACHE_DIR|UV_CACHE_DIR|sandbox.*cache|writable.*state)
+    value: (?is)(?=.*\bXDG_CACHE_HOME\b)(?=.*\bXDG_STATE_HOME\b)(?=.*\bMISE_CACHE_DIR\b)(?=.*\bMISE_STATE_DIR\b)(?=.*\bMISE_TRUSTED_CONFIG_PATHS\b)(?=.*\bUV_CACHE_DIR\b).*
   - type: regex
     value: (?i)(github|coderabbit|circleci|merge|prune)
   unit: open PR sweep
