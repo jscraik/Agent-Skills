@@ -227,10 +227,14 @@ waiver_contract:
 environment_contract:
   live_network_requires_explicit_permission: true
   sandbox_writable_state_required:
+    - GH_CONFIG_DIR
     - XDG_CACHE_HOME
     - XDG_STATE_HOME
     - MISE_CACHE_DIR
+    - MISE_STATE_DIR
+    - MISE_TRUSTED_CONFIG_PATHS
     - UV_CACHE_DIR
+    - npm_config_cache
   applies_to:
     - gh
     - mise
