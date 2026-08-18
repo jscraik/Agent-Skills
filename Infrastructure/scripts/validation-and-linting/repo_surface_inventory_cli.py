@@ -6,6 +6,9 @@ import argparse
 from typing import Any
 
 
+SERVICE_ID = "agent-skills"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Classify tracked repository paths by repo surface ownership policy.")
     parser.add_argument("--json", action="store_true", help="Emit JSON-only stdout.")
@@ -40,6 +43,7 @@ def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
                 "reason": str(exc),
                 "recommendation": "Fix the inventory command inputs or allowlist schema.",
                 "metadata": {
+                    "service": SERVICE_ID,
                     "next_steps": [
                         {
                             "type": "fix",
@@ -51,6 +55,7 @@ def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
             }
         ],
         "metadata": {
+            "service": SERVICE_ID,
             "inventory_scope": "tracked_existing_files",
             "strict": args.strict,
             "changed_files_policy": "not_applied",

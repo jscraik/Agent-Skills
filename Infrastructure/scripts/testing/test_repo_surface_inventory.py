@@ -29,6 +29,15 @@ def test_artifact_event_stream_is_historical_artifact() -> None:
     assert finding.blocking is False
 
 
+def test_inventory_reports_identify_the_agent_skills_service() -> None:
+    report = MODULE.build_report([], strict=False)
+    assert report["metadata"]["service"] == "agent-skills"
+
+    args = type("Args", (), {"strict": False})()
+    error = MODULE.error_report(args, RuntimeError("fixture failure"))
+    assert error["metadata"]["service"] == "agent-skills"
+
+
 def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
     finding = MODULE.classify_path(".harness/review-artifacts/pu-010-adversarial-cli-tests-status.md")
 

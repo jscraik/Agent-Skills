@@ -17,7 +17,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from repo_surface_inventory_cli import error_report, parse_args
+from repo_surface_inventory_cli import SERVICE_ID, error_report, parse_args
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -654,6 +654,7 @@ def build_report(
         },
         "findings": [asdict(finding) for finding in findings],
         "metadata": {
+            "service": SERVICE_ID,
             "inventory_scope": "tracked_existing_files",
             "strict": strict,
             "changed_files_policy": (
