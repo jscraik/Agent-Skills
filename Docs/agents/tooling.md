@@ -83,7 +83,6 @@ Repo-local tooling inventory generated from `Docs/agents/tooling.contract.json`.
 | `Test` | `test` |
 | `Prek` | `test` |
 | `Diagram` | `tool` |
-| `Ralph` | `debug` |
 | `Mise` | `tool` |
 | `Vale` | `debug` |
 | `Argos` | `test` |
