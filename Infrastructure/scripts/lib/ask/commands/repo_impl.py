@@ -6,6 +6,7 @@ from typing import Any
 from . import repo_impl_closeout as _closeout
 from . import repo_impl_core as _core
 from . import repo_impl_doctor as _doctor
+from . import repo_impl_git as _git
 from . import repo_impl_surfaces as _surfaces
 
 
@@ -22,7 +23,7 @@ def _facade_value(value: Any, module_name: str) -> Any:
     return rebound
 
 
-for _module in (_core, _doctor, _closeout, _surfaces):
+for _module in (_core, _doctor, _closeout, _git, _surfaces):
     for _name in _module.__all__:
         if _module is not _core and _name in globals():
             continue

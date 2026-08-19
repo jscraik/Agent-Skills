@@ -217,8 +217,8 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
         self.assertTrue(loaded['cases'])
 
     def test_structured_reference_fallback_preserves_nested_rubric_scoring(self) -> None:
-        text = 'schema_version: 1\nquality_criteria:\n  current_state_before_action:\n    purpose: Uses live PR state.\n    why_it_matters: Prevents stale merge claims.\n    observable_evidence:\n      - latest_head_sha\n      - required_checks\n    scoring:\n      "5": Latest-head proof is complete.\n      "4": Minor evidence detail is missing.\n      "3": Evidence is present but incomplete.\n      "2": Evidence is stale or partial.\n      "1": No live PR evidence is provided.\nautomatic_failure_conditions:\n  - Claims waived external CI as green.\n'
-        mock_stdout = '{"schema_version":1,"quality_criteria":{"current_state_before_action":{"purpose":"Uses live PR state.","why_it_matters":"Prevents stale merge claims.","observable_evidence":["latest_head_sha","required_checks"],"scoring":{"5":"Latest-head proof is complete.","4":"Minor evidence detail is missing.","3":"Evidence is present but incomplete.","2":"Evidence is stale or partial.","1":"No live PR evidence is provided."}}},"automatic_failure_conditions":["Claims waived external CI as green."]}'
+        text = 'schema_version: 1\nquality_criteria:\n  current_state_before_action:\n    purpose: Uses live PR state.\n    why_it_matters: Prevents stale merge claims.\n    observable_evidence:\n      - latest_head_sha\n      - required_checks\n    scoring:\n      "5": Latest-head proof is complete.\n      "4": Minor evidence detail is missing.\n      "3": Evidence is present but incomplete.\n      "2": Evidence is stale or partial.\n      "1": No live PR evidence is provided.\nautomatic_failure_conditions:\n  - Claims blocked external CI as green.\n'
+        mock_stdout = '{"schema_version":1,"quality_criteria":{"current_state_before_action":{"purpose":"Uses live PR state.","why_it_matters":"Prevents stale merge claims.","observable_evidence":["latest_head_sha","required_checks"],"scoring":{"5":"Latest-head proof is complete.","4":"Minor evidence detail is missing.","3":"Evidence is present but incomplete.","2":"Evidence is stale or partial.","1":"No live PR evidence is provided."}}},"automatic_failure_conditions":["Claims blocked external CI as green."]}'
         mock_process = package_contracts.subprocess.CompletedProcess(args=['ruby'], returncode=0, stdout=mock_stdout, stderr='')
         with tempfile.NamedTemporaryFile('w', suffix='.yaml', encoding='utf-8') as handle:
             handle.write(text)
@@ -232,6 +232,10 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
         criterion = loaded['quality_criteria']['current_state_before_action']
         self.assertEqual(criterion['observable_evidence'], ['latest_head_sha', 'required_checks'])
         self.assertEqual(criterion['scoring']['5'], 'Latest-head proof is complete.')
+        self.assertEqual(
+            loaded['automatic_failure_conditions'],
+            ['Claims blocked external CI as green.'],
+        )
 
     def test_sdk_contract_accepts_optional_valid_skillflow(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

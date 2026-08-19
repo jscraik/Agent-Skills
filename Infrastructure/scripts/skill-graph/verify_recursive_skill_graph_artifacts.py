@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-RUNNER = ".harness/evidence/skill-graphs/runs"
+RUNNER = ".tmp/agent-skills-artifacts/skill-graphs/runs"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 REQUIRED_BASE_FILES: Set[str] = {

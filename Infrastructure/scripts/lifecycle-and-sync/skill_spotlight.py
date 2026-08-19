@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 
-RUNS_ROOT = Path(".harness/evidence/skill-graphs/runs")
+RUNS_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/runs")
 TELEMETRY_ROOT = Path(".harness/evidence/skill-graphs/telemetry")
 SKILLS_ROOT = Path("skills")
 

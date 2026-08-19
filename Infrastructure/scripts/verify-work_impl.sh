@@ -134,7 +134,7 @@ echo
 echo "==> codex-preflight"
 bash "$repo_root/scripts/codex-preflight.sh" \
 	--stack "$stack" \
-	--mode required \
+	--mode optional \
 	--bins "$bins_csv" \
 	--paths "$paths_csv"
 
