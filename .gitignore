@@ -199,6 +199,9 @@ Infrastructure/artifacts/policy/
 
 # Agent run manifests are generated evidence; retain curated summaries instead.
 /artifacts/agent-runs/
+/.harness/agent-runs/
+/.harness/review-artifacts/
+/.harness/traces/
 
 # Validation evidence policy:
 # - ignore timestamped local run directories by default

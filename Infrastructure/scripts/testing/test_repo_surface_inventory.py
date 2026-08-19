@@ -29,6 +29,15 @@ def test_artifact_event_stream_is_historical_artifact() -> None:
     assert finding.blocking is False
 
 
+def test_inventory_reports_identify_the_agent_skills_service() -> None:
+    report = MODULE.build_report([], strict=False)
+    assert report["metadata"]["service"] == "agent-skills"
+
+    args = type("Args", (), {"strict": False})()
+    error = MODULE.error_report(args, RuntimeError("fixture failure"))
+    assert error["metadata"]["service"] == "agent-skills"
+
+
 def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
     finding = MODULE.classify_path(".harness/review-artifacts/pu-010-adversarial-cli-tests-status.md")
 
@@ -36,6 +45,124 @@ def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
     assert finding.status == "warning"
     assert finding.code == "tracked_harness_snapshot"
     assert finding.blocking is False
+
+
+def test_harness_evidence_trace_is_trackable_historical_evidence() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    path = ".harness/evidence/harness/traces/example.md"
+    finding = MODULE.classify_path(path)
+
+    assert finding.classification == "historical_artifact"
+    assert finding.status == "warning"
+    assert finding.code == "tracked_harness_snapshot"
+    assert finding.blocking is False
+
+    result = subprocess.run(
+        ["git", "check-ignore", "--quiet", path],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1, result.stderr
+
+
+def test_harness_evidence_trace_requires_exact_retention_before_tracking() -> None:
+    path = ".harness/evidence/harness/traces/example.md"
+    blocked = MODULE.classify_paths([path], changed_files={path})[0]
+
+    assert blocked.blocking is True
+    assert blocked.code == "new_historical_artifact_debt"
+
+    retention = MODULE.AllowlistEntry(
+        id="retained-trace-example",
+        match_type="exact",
+        pattern=path,
+        classification="historical_artifact",
+        reason="Reviewed trace retention example.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+    retained = MODULE.classify_paths(
+        [path], [retention], changed_files={path}
+    )[0]
+
+    assert retained.blocking is False
+    assert retained.allowlist_entry == retention.id
+
+
+def test_generated_agent_review_roots_are_ignored() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)
+    retained_cited_entries = [
+        entry
+        for entry in allowlist
+        if entry.id.startswith("retained-cited-")
+    ]
+    retained_agent_run_entries = [
+        entry
+        for entry in retained_cited_entries
+        if entry.pattern.startswith("artifacts/agent-runs/")
+    ]
+    retained_agent_run_paths = {entry.pattern for entry in retained_agent_run_entries}
+    retained_trace_paths = {
+        entry.pattern
+        for entry in retained_cited_entries
+        if entry.pattern.startswith(".harness/traces/")
+    }
+
+    assert len(retained_cited_entries) == 23
+    assert all(entry.match_type == "exact" for entry in retained_cited_entries)
+    assert all(entry.classification == "historical_artifact" for entry in retained_cited_entries)
+    assert len(retained_agent_run_entries) == 20
+    assert all(path.startswith("artifacts/agent-runs/") for path in retained_agent_run_paths)
+    assert retained_trace_paths == {
+        ".harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md"
+    }
+
+    generated_paths = (
+        "artifacts/agent-runs/example/manifest.json",
+        ".harness/agent-runs/example/manifest.json",
+        ".harness/review-artifacts/example.md",
+        ".harness/traces/example.md",
+    )
+
+    result = subprocess.run(
+        ["git", "check-ignore", "--stdin"],
+        cwd=repo_root,
+        input="\n".join(generated_paths),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == list(generated_paths)
+
+    generated_runtime_roots = (
+        "artifacts/agent-runs",
+        ".harness/agent-runs",
+        ".harness/review-artifacts",
+        ".harness/traces",
+    )
+
+    for root in generated_runtime_roots:
+        ls_result = subprocess.run(
+            ["git", "ls-files", root],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert ls_result.returncode == 0, ls_result.stderr
+        tracked_files = [line for line in ls_result.stdout.splitlines() if line.strip()]
+        if root == "artifacts/agent-runs":
+            assert set(tracked_files) == retained_agent_run_paths
+        elif root == ".harness/traces":
+            assert set(tracked_files) == retained_trace_paths
+        else:
+            assert tracked_files == [], f"Expected no tracked files in {root}, but found: {tracked_files}"
 
 
 def test_infrastructure_package_policy_files_are_policy_surface() -> None:
@@ -293,6 +420,7 @@ def test_harness_curated_context_paths_are_classified() -> None:
 
 def test_current_tracked_inventory_has_no_classification_required_paths() -> None:
     allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)
+    MODULE.validate_exact_allowlist_targets(MODULE.REPO_ROOT, allowlist)
     findings = MODULE.classify_paths(MODULE.git_ls_files(MODULE.REPO_ROOT), allowlist)
     offenders = [
         finding.path
@@ -301,6 +429,60 @@ def test_current_tracked_inventory_has_no_classification_required_paths() -> Non
     ]
 
     assert offenders == []
+
+
+def test_exact_allowlist_target_must_exist(tmp_path, monkeypatch) -> None:
+    entry = MODULE.AllowlistEntry(
+        id="retained-receipt",
+        match_type="exact",
+        pattern="artifacts/receipt.json",
+        classification="historical_artifact",
+        reason="Retained by a current consumer.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+
+    def fake_git_ls_files_empty(repo_root):
+        return []
+
+    monkeypatch.setattr(MODULE, "git_ls_files", fake_git_ls_files_empty)
+
+    try:
+        MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
+    except ValueError as exc:
+        assert "retained-receipt: artifacts/receipt.json" in str(exc)
+    else:
+        raise AssertionError("missing exact allowlist target should fail")
+
+    target = tmp_path / entry.pattern
+    target.parent.mkdir(parents=True)
+    target.write_text("{}\n", encoding="utf-8")
+
+    def fake_git_ls_files_with_target(repo_root):
+        return ["artifacts/receipt.json"]
+
+    monkeypatch.setattr(MODULE, "git_ls_files", fake_git_ls_files_with_target)
+    MODULE.validate_exact_allowlist_targets(tmp_path, [entry])
+
+    untracked_entry = MODULE.AllowlistEntry(
+        id="untracked-residue",
+        match_type="exact",
+        pattern="artifacts/untracked.json",
+        classification="historical_artifact",
+        reason="Untracked residue should not satisfy.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+
+    untracked_target = tmp_path / untracked_entry.pattern
+    untracked_target.write_text("{}\n", encoding="utf-8")
+
+    try:
+        MODULE.validate_exact_allowlist_targets(tmp_path, [untracked_entry])
+    except ValueError as exc:
+        assert "untracked-residue: artifacts/untracked.json" in str(exc)
+    else:
+        raise AssertionError("untracked exact allowlist target should fail")
 
 
 def test_harness_runtime_outputs_are_violations() -> None:

@@ -13,6 +13,13 @@ from pathlib import Path
 from typing import Any
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from repo_surface_inventory_cli import SERVICE_ID, error_report, parse_args
+
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ALLOWLIST = Path("Infrastructure") / "policy" / "repo_surface_allowlist.json"
 
@@ -34,6 +41,7 @@ HARNESS_HISTORICAL_PREFIXES = (
     ".harness/agent-runs",
     ".harness/artifacts",
     ".harness/ci-migrate-snapshots",
+    ".harness/evidence/harness/traces",
     ".harness/review-artifacts",
     ".harness/traces",
 )
@@ -467,6 +475,21 @@ def load_allowlist(path: Path) -> list[AllowlistEntry]:
     return parsed
 
 
+def validate_exact_allowlist_targets(
+    repo_root: Path, entries: list[AllowlistEntry]
+) -> None:
+    """Reject exact retention declarations whose tracked target is missing."""
+    tracked_files = set(git_ls_files(repo_root))
+    missing = [
+        entry
+        for entry in entries
+        if entry.match_type == "exact" and entry.pattern not in tracked_files
+    ]
+    if missing:
+        details = ", ".join(f"{entry.id}: {entry.pattern}" for entry in missing)
+        raise ValueError(f"exact allowlist targets must exist: {details}")
+
+
 def _allowlist_score(entry: AllowlistEntry) -> tuple[int, int, str]:
     match_rank = {"exact": 0, "prefix": 1, "glob": 2}[entry.match_type]
     return (match_rank, -len(entry.pattern), entry.id)
@@ -632,6 +655,7 @@ def build_report(
         },
         "findings": [asdict(finding) for finding in findings],
         "metadata": {
+            "service": SERVICE_ID,
             "inventory_scope": "tracked_existing_files",
             "strict": strict,
             "changed_files_policy": (
@@ -690,101 +714,42 @@ def print_human_report(report: dict[str, Any]) -> None:
         print(f"  - ... {summary['blocking_findings'] - len(notable)} more blocking findings")
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--json", action="store_true", help="Emit JSON-only stdout.")
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when blocking findings exist.")
-    parser.add_argument(
-        "--repo-root",
-        default=str(REPO_ROOT),
-        help="Repository root to inventory. Defaults to this checkout.",
+def _build_report_for_args(args: argparse.Namespace) -> dict[str, Any]:
+    repo_root = Path(args.repo_root or REPO_ROOT).resolve()
+    allowlist_path = Path(args.allowlist or DEFAULT_ALLOWLIST)
+    if not allowlist_path.is_absolute():
+        allowlist_path = repo_root / allowlist_path
+    allowlist_entries = load_allowlist(allowlist_path)
+    validate_exact_allowlist_targets(repo_root, allowlist_entries)
+    changed_files = _load_changed_files(args, repo_root)
+    paths = sorted(
+        set(git_ls_files(repo_root))
+        | {path for path in changed_files if (repo_root / path).exists()}
     )
-    parser.add_argument(
-        "--allowlist",
-        default=str(DEFAULT_ALLOWLIST),
-        help="Allowlist JSON path. Missing file is treated as an empty allowlist.",
-    )
-    parser.add_argument(
-        "--changed-files",
-        nargs="*",
-        default=[],
-        help=(
-            "Repo-relative changed paths. Historical artifact findings for these "
-            "paths are blocking unless allowlisted."
-        ),
-    )
-    parser.add_argument(
-        "--changed-files-from",
-        default=None,
-        help="Read repo-relative changed paths from a newline-delimited file.",
-    )
-    return parser.parse_args()
+    findings = classify_paths(paths, allowlist_entries, changed_files=changed_files)
+    return build_report(findings, strict=args.strict, changed_files=changed_files)
+
+def _load_changed_files(args: argparse.Namespace, repo_root: Path) -> list[str]:
+    changed_files = [_normalize_path(path) for path in args.changed_files if str(path).strip()]
+    if args.changed_files_from:
+        changed_files_path = Path(args.changed_files_from)
+        if not changed_files_path.is_absolute():
+            changed_files_path = repo_root / changed_files_path
+        changed_files.extend(
+            _normalize_path(line)
+            for line in changed_files_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        )
+    return sorted(set(changed_files))
 
 
 def main() -> int:
     args = parse_args()
-    repo_root = Path(args.repo_root).resolve()
-    allowlist_path = Path(args.allowlist)
-    if not allowlist_path.is_absolute():
-        allowlist_path = repo_root / allowlist_path
-
     try:
-        allowlist_entries = load_allowlist(allowlist_path)
-        changed_files = [_normalize_path(path) for path in args.changed_files if str(path).strip()]
-        if args.changed_files_from:
-            changed_files_path = Path(args.changed_files_from)
-            if not changed_files_path.is_absolute():
-                changed_files_path = repo_root / changed_files_path
-            changed_files.extend(
-                _normalize_path(line)
-                for line in changed_files_path.read_text(encoding="utf-8").splitlines()
-                if line.strip()
-            )
-        changed_files = sorted(set(changed_files))
-        paths = sorted(set(git_ls_files(repo_root)) | {path for path in changed_files if (repo_root / path).exists()})
-        findings = classify_paths(paths, allowlist_entries, changed_files=changed_files)
-        report = build_report(findings, strict=args.strict, changed_files=changed_files)
+        report = _build_report_for_args(args)
     except Exception as exc:
         if args.json:
-            print(
-                json.dumps(
-                    {
-                        "schema_version": 1,
-                        "status": "error",
-                        "summary": {
-                            "total_paths": 0,
-                            "blocking_findings": 1,
-                            "counts_by_classification": {},
-                            "counts_by_status": {"violation": 1},
-                            "counts_by_code": {"inventory_error": 1},
-                        },
-                        "findings": [
-                            {
-                                "path": "",
-                                "classification": "unknown",
-                                "status": "violation",
-                                "code": "inventory_error",
-                                "severity": "error",
-                                "blocking": True,
-                                "allowlist_entry": None,
-                                "reason": str(exc),
-                                "recommendation": "Fix the inventory command inputs or allowlist schema.",
-                                "metadata": {
-                                    "next_steps": [
-                                        _next_step(
-                                            "fix",
-                                            "python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --help",
-                                            "Fix the inventory command inputs or allowlist schema.",
-                                        )
-                                    ]
-                                },
-                            }
-                        ],
-                        "metadata": {"inventory_scope": "tracked_existing_files", "strict": args.strict},
-                    },
-                    sort_keys=True,
-                )
-            )
+            print(json.dumps(error_report(args, exc), sort_keys=True))
         else:
             print(f"repo surface inventory failed: {exc}", file=sys.stderr)
         return 1

@@ -24,7 +24,7 @@ outputs:
 - blocked_by
 - next_stage: tracker-plan
 allowed_writes:
-- ".harness/traces/** for trace maps; no tracker mutation, slice spec, or implementation."
+- ".harness/evidence/harness/traces/** for local trace maps; a tracked trace requires an exact, reviewed repo-surface allowlist record; no tracker mutation, slice spec, or implementation."
 forbidden_writes:
 - generated runtime projections as source
 - external tracker, PR, CI, release, or deployment mutation without authorization

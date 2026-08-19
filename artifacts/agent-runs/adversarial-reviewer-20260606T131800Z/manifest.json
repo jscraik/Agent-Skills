@@ -1,9 +1,0 @@
-{
-  "agent_id": "019e9d11-bd05-7041-8bc1-188256c46aaf",
-  "agent_type": "adversarial-reviewer",
-  "run_id": "20260606T131800Z",
-  "artifact_path": "/Users/jamiecraik/dev/agent-skills/.harness/review-artifacts/pu-011-trace-plan-adversarial-validation-artifacts.md",
-  "manifest_path": "/Users/jamiecraik/dev/agent-skills/artifacts/agent-runs/adversarial-reviewer-20260606T131800Z/manifest.json",
-  "task": "Review PU-011 trace plan for gaps and errors from validation/artifact perspective",
-  "status": "complete"
-}

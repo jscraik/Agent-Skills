@@ -1,9 +1,0 @@
-{
-  "agent": "explorer",
-  "run_id": "019ea772-7eec-70b0-89cd-551d74e45b2d",
-  "status": "complete",
-  "artifact": "artifacts/reviews/explorer.md",
-  "manifest_path": "artifacts/agent-runs/explorer-019ea772-7eec-70b0-89cd-551d74e45b2d/manifest.json",
-  "scope": "read-only hook and push-state probe",
-  "repo": "/Users/jamiecraik/dev/agent-skills"
-}

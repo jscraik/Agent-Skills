@@ -9,13 +9,6 @@ status: execution_plan_ready
 date: 2026-06-05
 source_spec: .harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md
 source_trace_plan: .harness/plan/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-trace-plan.md
-source_review_artifacts:
-  - .harness/review-artifacts/pu-010-adversarial-filesystem-safety.md
-  - .harness/review-artifacts/pu-010-adversarial-receipt-lockfile.md
-  - .harness/review-artifacts/pu-010-adversarial-cli-tests-status.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-coverage.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-validation.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-slicing.md
 source_pipeline_artifact: artifacts/recommended-skills-sdk-pipeline.html
 source_lifecycle_artifact: artifacts/skills-sdk-user-lifecycle-one-page.html
 origin: user_requested_sy_execution_plan
@@ -53,9 +46,6 @@ next_stage: governed implementation in a feature worktree
 | --- | --- | --- |
 | .harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md | Scope is rollback and uninstall from valid project install receipts. Global cleanup, registry, publishing, trust, signing, sandbox, and live-repo mutation are outside PU-010. | Keep the plan bounded to project-local cleanup and temp-project proof. |
 | .harness/plan/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-trace-plan.md | Trace rows TR-001 through TR-024 split decisions, CLI, receipt authority, lockfile authority, filesystem safety, journal behavior, status truth, artifacts, and PR closeout. | Use the trace rows as slice acceptance IDs and avoid merging safety concerns into broad buckets. |
-| .harness/review-artifacts/pu-010-trace-adversarial-coverage.md | Review required concrete filesystem, journal, receipt, and artifact-sync proof. | Add separate implementation gates for each destructive edge case and truth surface. |
-| .harness/review-artifacts/pu-010-trace-adversarial-validation.md | Review required explicit negative commands, wrapper parity, and two-step journal interruption proof. | Validation must include refusal commands and recovery semantics, not only success-path tests. |
-| .harness/review-artifacts/pu-010-trace-adversarial-slicing.md | Review required journal-before-mutation sequencing and frozen design decisions before implementation. | Slice 0 blocks later slices until cleanup schema, receipt identity, duplicate install policy, before-state policy, and journal location are decided. |
 | UBIQUITOUS_LANGUAGE.md | ask CLI, Feature Worktree, Runtime Projection, and Canonical Skill Source have repo-specific meanings. | Use repo vocabulary and avoid hand-editing runtime projections. |
 | Infrastructure/scripts/lib/ask/commands/sdk.py | SDK dispatch is centralized here; current actions include check, install, lifecycle, and status. | Add rollback and uninstall parser branches here, with exact preview/apply mode validation. |
 | Infrastructure/scripts/lib/ask/skills_sdk/project_install.py | PU-009 install already owns project-root refusal, path metadata checks, digest helpers, atomic JSON writes, install receipts, and lockfile writes. | Reuse or extract helpers rather than inventing a parallel authority model. |

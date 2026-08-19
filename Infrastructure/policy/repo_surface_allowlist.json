@@ -101,33 +101,6 @@
       "review_after": "2026-10-02"
     },
     {
-      "id": "improve-agent-native-menubar-launchservices-run-manifest",
-      "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json",
-      "classification": "historical_artifact",
-      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the menubar LaunchServices debug lane to its PM report and review artifact.",
-      "owner": "skills-sdk",
-      "review_after": "2026-10-02"
-    },
-    {
-      "id": "improve-agent-native-ratchet-review-run-manifest",
-      "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f24aa-b948-7fe2-8155-f4457bb4e47d/manifest.json",
-      "classification": "historical_artifact",
-      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native release-ratchet review lane to its PM report and review artifact.",
-      "owner": "skills-sdk",
-      "review_after": "2026-10-02"
-    },
-    {
-      "id": "improve-agent-native-ratchet-validator-run-manifest",
-      "match_type": "exact",
-      "pattern": "artifacts/agent-runs/default-019f24ba-a5c8-7e01-9767-e1544212b3df/manifest.json",
-      "classification": "historical_artifact",
-      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native validator lane to its PM report and review artifact.",
-      "owner": "skills-sdk",
-      "review_after": "2026-10-02"
-    },
-    {
       "id": "improve-agent-native-default-review-artifact",
       "match_type": "exact",
       "pattern": "artifacts/reviews/default.md",
@@ -216,6 +189,213 @@
       "reason": "Workflow guardrail candidates are a tracked Codex eval-pack source with tasks, criteria, scorer calibration, and Tessl project metadata used to test repeated workflow failure classes.",
       "owner": "codex evals",
       "review_after": "2026-10-05"
+    },
+    {
+      "id": "retained-cited-pu018-review-results",
+      "match_type": "exact",
+      "pattern": ".harness/review/2026-06-11-pu-018-adversarial-review-results.csv",
+      "classification": "historical_artifact",
+      "reason": "PU-018 adversarial-review result cited by an active review summary; retained until the consuming review record is retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-pu018-review-results-round2",
+      "match_type": "exact",
+      "pattern": ".harness/review/2026-06-11-pu-018-adversarial-review-results-round2.csv",
+      "classification": "historical_artifact",
+      "reason": "PU-018 second-pass adversarial-review result cited by an active review summary; retained until the consuming review record is retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-pu018-trace-plan",
+      "match_type": "exact",
+      "pattern": ".harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md",
+      "classification": "historical_artifact",
+      "reason": "PU-018 trace plan cited by active plan and review summaries; retained until its consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9dc5",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9dc5-cc3b-7481-bc30-40ff038ea4f2/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9ddf",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9ddf-3e9a-7ed1-b048-beaca8728a81/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9de7",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9de7-9c6c-7ac3-856d-7d09a182a34e/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9ded-9987",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9ded-9987-7fd1-8d16-c0049d2f9773/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9ded-9e94",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9ded-9e94-7182-b781-72deda74ac98/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-019e9df2",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-019e9df2-617d-73f1-a1e6-65a1e9e6f790/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-20260606",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-2026-06-06T17-11-47-644Z/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-pu015",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-2026-06-08-pu015-final-check/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-pu012-breaker-2",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-pu-012-breaker-2-20260606/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-adversarial-reviewer-pu012-breaker-loop",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/adversarial-reviewer-pu-012-breaker-loop-4-pass-2-20260606/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited adversarial-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-agent-native-reviewer-pu014-loop-1",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/agent-native-reviewer-2026-06-07-pu-014-loop-1/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited agent-native-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-agent-native-reviewer-pu014-loop-2",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/agent-native-reviewer-pu-014-loop-2/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited agent-native-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-agent-native-reviewer-pu014-loop-3",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/agent-native-reviewer-pu-014-loop-3/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited agent-native-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-architecture-strategist-pu015",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/architecture-strategist-20260608-pu015-review/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited architecture-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-autoresearch-validator-pu014-loop-1",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/autoresearch-validator-pu-014-loop-1/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited validation manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-autoresearch-validator-pu014-loop-2",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/autoresearch-validator-pu-014-loop-2/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited validation manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-autoresearch-validator-pu014-loop-3",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/autoresearch-validator-pu-014-loop-3/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited validation manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-code-simplicity-reviewer",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/code-simplicity-reviewer-20260607T220000Z/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited simplicity-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-coderabbit",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/coderabbit-20260608T204500Z/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited CodeRabbit manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
+    },
+    {
+      "id": "retained-cited-agent-run-correctness-reviewer",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/correctness-reviewer-019e7ab3-fda5-7071-8e47-9ea75386d53b/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Cited correctness-review manifest retained until the active plan and review-summary consumers are retired or rehomed.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-19"
     }
   ]
 }

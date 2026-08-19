@@ -8,13 +8,6 @@ title: "PU-010: Receipt-Proven Rollback and Uninstall Lifecycle Trace Plan"
 status: trace_ready_for_plan
 date: 2026-06-05
 target_spec: .harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md
-source_review_artifacts:
-  - .harness/review-artifacts/pu-010-adversarial-filesystem-safety.md
-  - .harness/review-artifacts/pu-010-adversarial-receipt-lockfile.md
-  - .harness/review-artifacts/pu-010-adversarial-cli-tests-status.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-coverage.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-validation.md
-  - .harness/review-artifacts/pu-010-trace-adversarial-slicing.md
 repo_mutation_scope: trace_artifact_only
 external_mutation_status: not_authorized
 ---
