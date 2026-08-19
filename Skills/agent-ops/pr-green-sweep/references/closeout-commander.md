@@ -171,7 +171,7 @@ Use service plugins first for live PR/service truth, then CLIs when local reprod
 | `gh` CLI | Plugin access is blocked, a repo wrapper expects `gh`, or local shell evidence is easier to reproduce. | Exact command, redacted output summary, exit status. |
 | [@coderabbit] plugin | Review-thread inventory, severity, stale classification, or resolution support is needed. | Thread id, finding class, action taken, stale/blocked reason. |
 | [@circleci] plugin | Pipeline, workflow, job, rerun, or log truth is needed from CircleCI. | Workflow/job id, failed step, exact failure text, merge blocker status. |
-| CircleCI CLI | Local CircleCI inspection or rerun path is needed. Invoke through `op run --env-file ~/.codex/.env` without printing values. | Exact command, redacted auth state, failed job/log evidence. |
+| CircleCI CLI | Local CircleCI inspection or rerun path is needed. Discover and invoke the host-configured auth-backed wrapper with `~/.codex/.env`, without printing values. | Exact command, redacted auth state, failed job/log evidence. |
 | Context7 skill or CLI | A blocker depends on current external library, API, or CLI docs, especially version-sensitive flags or behavior. | Library id/source basis, retrieval path, inference vs docs-backed conclusion. |
 
 Do not run every CLI by default. Each lane must name the evidence it adds, or it stays unused.
@@ -189,8 +189,9 @@ For each failing check, return:
 
 CircleCI evidence should come from the [@circleci] plugin or the CircleCI CLI
 lane. Invoke credentialed CircleCI commands through
-`op run --env-file ~/.codex/.env`, but never print secrets or copy env values
-into reports.
+the host-configured auth-backed wrapper with `~/.codex/.env`; discover the
+wrapper from the active Codex environment, never invoke an unqualified wrapper
+or `op` directly, and never print secrets or copy env values into reports.
 
 ## Closeout Ledger
 

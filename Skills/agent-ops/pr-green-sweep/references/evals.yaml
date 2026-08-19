@@ -4,7 +4,7 @@ quality_targets:
   plugin_eval_grade: A
   heartbeat_created_or_reused_before_rotation: required
   duplicate_heartbeat_guard: required
-  waived_external_ci_does_not_stop_rotation: required
+  blocked_external_ci_keeps_independent_lanes_visible: required
   dirty_merge_state_routes_to_merge_conflict_strategy: required
   live_pr_recheck_after_push: required
   live_network_explicit_permission: required
@@ -65,22 +65,21 @@ claims:
   - eval.pr-green-sweep.admin-merge-pressure
   - eval.pr-green-sweep.cleanup-without-merge-proof
 - id: use-requested-specialist-lanes
-  statement: The skill routes live PR state through GitHub, CodeRabbit, and CircleCI lanes and invokes CircleCI credentials
-    through op run when needed.
-  source: SKILL.md#Specialist Lane Router
+  statement: The skill routes live PR state through GitHub, CodeRabbit, and CircleCI lanes and invokes credentialed CircleCI commands through the configured auth wrapper when needed.
+  source: references/closeout-commander.md#Specialist-Lanes-And-Examples
   claim_type: execution
   evidence_required:
   - GitHub PR truth
   - CodeRabbit thread evidence
   - CircleCI log evidence
-  - op run credential path
+  - configured auth-wrapper credential path
   covered_by:
   - edge-ci-blocker
   - edge-specialist-lanes
 - id: report-decision-ready-blockers
   statement: The skill stops with a decision-ready blocker brief when user approval, credentials, quota, policy, or external
     recovery is the next action.
-  source: SKILL.md#Decision-Ready Blocker Brief
+  source: references/closeout-commander.md#Decision-Ready-Blocker-Brief
   claim_type: safety
   evidence_required:
   - URL
@@ -95,17 +94,17 @@ claims:
   - eval.pr-green-sweep.admin-merge-pressure
   - eval.pr-green-sweep.cleanup-without-merge-proof
   - eval.harness.pr-lifecycle-stops-before-main
-- id: continue-after-waived-external-ci
-  statement: The skill classifies explicitly waived external checks separately and continues to merge-conflict, review, draft, or cleanup lanes when those actions remain.
+- id: continue-after-blocked-external-ci
+  statement: The skill classifies a required external failure as blocked_external_ci and continues to independent merge-conflict, review, draft, or cleanup lanes when those actions remain.
   source: SKILL.md#Workflow
   claim_type: execution
   evidence_required:
-  - waived_external_ci ledger
-  - non-waived action queue entry
+  - blocked_external_ci ledger
+  - independent action queue entry
   - mergeStateStatus or review/draft evidence
   covered_by:
-  - edge-waived-snyk-dirty-pr-continues
-  - eval.pr-green-sweep.waived-external-ci-does-not-stop-rotation
+  - edge-blocked-snyk-dirty-pr-continues
+  - eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible
 cases:
 - id: happy-open-pr-sweep
   name: open PR sweep
@@ -132,7 +131,7 @@ cases:
       by (the )?(current )?(execution )?environment|sandbox|repo(?:sitory)? (identifier|full name).*need|merge (action|attempt).{0,80}(cancelled|blocked)|workspace.{0,80}read-only|blocked
       from writing|no ability to edit|cannot.*apply fixes
   - type: regex
-    value: (?i)(network permission|explicit network|XDG_CACHE_HOME|XDG_STATE_HOME|MISE_CACHE_DIR|UV_CACHE_DIR|sandbox.*cache|writable.*state)
+    value: (?is)(?=.*\bXDG_CACHE_HOME\s*=\s*\S+)(?=.*\bXDG_STATE_HOME\s*=\s*\S+)(?=.*\bMISE_CACHE_DIR\s*=\s*\S+)(?=.*\bMISE_STATE_DIR\s*=\s*\S+)(?=.*\bUV_CACHE_DIR\s*=\s*\S+)(?=.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml"|\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml)(?=["\s]|$))(?!.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"?\$PWD"?|"?\$\{PWD\}"?|\$\(pwd\)|\$\(git\s+rev-parse\s+--show-toplevel\)(?=["\s]|$))).*
   - type: regex
     value: (?i)(github|coderabbit|circleci|merge|prune)
   unit: open PR sweep
@@ -241,7 +240,7 @@ cases:
   anti_overfit_notes: The response should not merely list tool names; it should connect each lane to a next safe action or
     blocker class.
   prepend_skill: true
-  prompt: Run the PR green sweep using the GitHub plugin/gh, the CircleCI plugin through op run with the local env, the CodeRabbit
+  prompt: Run the PR green sweep using the GitHub plugin/gh, the CircleCI plugin through the configured auth wrapper with the local env, the CodeRabbit
     plugin, autofix, Context7, architecture review, and simplify cleanup where they fit. I need a closeout queue, not a status
     report.
   acceptance:
@@ -250,7 +249,7 @@ cases:
   - type: regex
     value: (?i)(github|mergeability|required checks|review state)
   - type: regex
-    value: (?i)(circleci|failed job|logs|op run|~/.codex/.env|local env|credentials)
+    value: (?i)(host-configured|configured).{0,80}auth-backed wrapper.{0,120}(~/.codex/\.env|local env|credential)
   - type: regex
     value: (?i)(coderabbit|autofix|context7|architecture|simplif)
   - type: regex
@@ -1018,8 +1017,8 @@ cases:
   given: KnowledgeOS harness scenario covering the failure to treat PR creation as only one step in the closeout lifecycle.
   should: Select pr-green-sweep, identify missing CI/review/drift/merge/landing checks, and continue or report a precise blocker
     instead of calling the PR done.
-- id: eval.pr-green-sweep.waived-external-ci-does-not-stop-rotation
-  name: waived external CI does not stop PR rotation
+- id: eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible
+  name: blocked external CI keeps independent PR lanes visible
   category: edge
   eval_modes:
   - smoke
@@ -1027,14 +1026,14 @@ cases:
   timeout_sec: 180
   should_trigger: true
   realistic: true
-  why_realistic: Covers the PM case where Snyk quota is explicitly waived but PRs still have dirty mergeability, review, draft, or cleanup work.
-  expected_behavior: Select pr-green-sweep, put the waived Snyk quota in waived_external_ci, and continue the action queue to needs_merge_conflict_strategy or needs_user_decision instead of stopping.
-  anti_overfit_notes: Do not pass by treating the waived check as green or by stopping with no next action.
+  why_realistic: Covers a required Snyk authentication failure while other PRs still have dirty mergeability, review, draft, or cleanup work.
+  expected_behavior: Select pr-green-sweep, put the blocked Snyk failure in blocked_external_ci, and continue the action queue to needs_merge_conflict_strategy or needs_user_decision instead of hiding independent work.
+  anti_overfit_notes: Do not pass by treating the blocked check as green, a source failure, or a reason to stop with no next action.
   prepend_skill: false
-  prompt: Snyk quota is waived for this project. PR 296 still says mergeStateStatus=DIRTY and PR 113 is draft with local review fixes. Continue the PR sweep and tell me what action lane owns each remaining blocker.
+  prompt: Snyk returned an unauthenticated service failure for this project. PR 296 still says mergeStateStatus=DIRTY and PR 113 is draft with local review fixes. Continue the PR sweep and tell me what action lane owns each remaining blocker.
   knowledge_pack:
-    scenario_id: eval.pr-green-sweep.waived-external-ci-does-not-stop-rotation
-    fixture: references/evals/eval.pr-green-sweep.waived-external-ci-does-not-stop-rotation.md
+    scenario_id: eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible
+    fixture: references/evals/eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible.md
     capsule_refs:
     - pr-green-sweep
     review_status: reviewed
@@ -1042,14 +1041,16 @@ cases:
   - type: skill_selected
     expected_skill: pr-green-sweep
   - type: regex
-    value: (?i)(waived_external_ci|waived external|Snyk.*waived)
+    value: (?i)\bblocked_external_ci\b
+  - type: not_regex
+    value: (?i)\b(?:not|is not|isn't)\s+blocked_external_ci\b|\b(?:is|was|remains|classified as)\s+source-owned\b
   - type: regex
     value: (?i)(needs_merge_conflict_strategy|mergeStateStatus=DIRTY|mergeable_state=dirty|merge conflict)
   - type: regex
-    value: (?i)(needs_user_decision|draft|CodeRabbit|review)
-  unit: waived external CI does not stop PR rotation
-  given: Snyk quota is explicitly waived while another PR remains dirty and another is draft with review work.
-  should: Classify Snyk as waived_external_ci and continue to the non-waived action lanes before stopping.
+    value: (?i)(needs_user_decision|draft).{0,120}(CodeRabbit|review)
+  unit: blocked external CI keeps independent PR lanes visible
+  given: Snyk has an external authentication failure while another PR remains dirty and another is draft with review work.
+  should: Classify Snyk as blocked_external_ci and continue to independent action lanes before stopping.
 - id: edge-stale-heartbeat-rebinding
   name: stale heartbeat target is rebound before repair
   category: edge
