@@ -76,8 +76,9 @@ or other external services as down. Before launching commands that invoke `gh`,
 `mise`, `uv`, or npm, set `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
 `MISE_CACHE_DIR`, `MISE_STATE_DIR`, and `UV_CACHE_DIR` to sandbox-approved
 writable paths. For a repository `mise` config, set
-`MISE_TRUSTED_CONFIG_PATHS` to the approved config file (for example,
-`$PWD/.mise.toml`), not the worktree. Set `npm_config_cache` only when npm is
+`MISE_TRUSTED_CONFIG_PATHS` to the approved repository-root directory from
+`git rev-parse --show-toplevel`, not the current subdirectory or a `.mise.toml`
+file. Set `npm_config_cache` only when npm is
 in scope. Retain the operator-authenticated `gh` configuration; set
 `GH_CONFIG_DIR` only when an explicitly supplied configuration is already
 authenticated. Cache or state write warnings are not API connectivity evidence.
@@ -192,8 +193,10 @@ the shell starts. `GH_CONFIG_DIR` selects GitHub CLI configuration, not
 `XDG_STATE_HOME`; do not point it at an empty scratch directory. Set it only
 when the operation is given an explicitly supplied, authenticated configuration.
 Before invoking a tool, verify each resolved cache or state path is inside the
-approved scratch directory and writable, and each trusted-config path is the
-explicitly approved config file.
+approved scratch directory and writable. Treat `MISE_TRUSTED_CONFIG_PATHS` as
+a separate trust control: set it to the explicitly approved repository-root
+directory from `git rev-parse --show-toplevel`, never to writable state, a
+current subdirectory, or a `.mise.toml` file.
 
 After two equivalent failures, change the environment, permission request,
 command shape, or repo contract before trying again. Do not keep rotating

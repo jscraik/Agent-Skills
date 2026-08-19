@@ -16,14 +16,11 @@ metadata:
 
 # PR Green Sweep
 
-## Philosophy
+### Operating Intent
 
-Own PR closeout from live evidence to merge and cleanup. Turn "make the PRs
-green" into a bounded action queue, apply only evidence-backed fixes, keep one
-continuation heartbeat when monitoring is requested, and stop on the smallest
-concrete blocker when the sweep cannot finish. A waived external check is not a
-stop condition when review, conflict, draft, merge, or cleanup work still has a
-next safe action.
+Own PR closeout from live evidence through merge and cleanup. Use an
+evidence-backed action queue and one continuation heartbeat; a required
+external failure blocks its PR while unrelated entries keep their safe action.
 
 ## When To Use
 
@@ -32,16 +29,14 @@ next safe action.
   triage, Context7 docs checks, merge, or cleanup.
 - The user wants merged PR branches and worktrees pruned after merge proof.
 
-## Avoid
+### Avoid
 
 - Read-only PR summaries when the user asked for until-green follow-through.
 - Local test debugging with no PR, review, merge, or continuation workflow.
-- Broadening from the current repo unless the user says "all", "everything",
-  "broad", or names multiple repos/orgs.
+- Broadening from the current repo unless the user says "all", "everything", "broad", or names multiple repos/orgs.
 - Admin merges, force pushes, remote branch deletion, or worktree deletion
   without explicit approval for that action class.
-- Declaring green from local tests while live required checks are pending,
-  failing, stale, or attached to an older head SHA.
+- Declaring green from local tests while live required checks are pending, failing, stale, or attached to an older head SHA.
 
 ## Inputs
 
@@ -49,23 +44,21 @@ Use the current repo unless the user names a broader scope. Gather target PRs,
 heartbeat cadence, merge/check policy, approval posture, and GitHub/CodeRabbit/
 CircleCI auth context. Start with two or three focused failure surfaces before
 broadening a multi-repository sweep. Run credentialed CircleCI commands through
-`op run --env-file ~/.codex/.env` without printing secrets.
+the repository-owned `run-auth-backed.sh --env-file ~/.codex/.env` wrapper
+without printing secrets.
 
 ## Outputs
 
-Emit `schema_version: 1` with structured sweep outputs. Start non-trivial
-responses with `heartbeat_status`. Include an action queue
-with `auto_fixable_now`, `needs_merge_conflict_strategy`,
-`blocked_policy_or_approval`, `blocked_external_ci`, `waived_external_ci`,
-`blocked_pr_metadata`, `blocked_artifact_context`, `needs_user_decision`, and
-`cleanup_only`; include heartbeat-target, dirty-worktree, validation,
-artifact-receipt, merge, cleanup, and remaining-blocker ledgers. Include a
-`recurring_finding_classes` ledger that groups materially equivalent review or
-CI findings across the active queue and records `finding_class_id`,
-`fingerprint_sha256`, `normalized_invariant`, `occurrences`, `root_cause`,
-`guardrail`, and `merge_eligible`.
+Emit `schema_version: 1` with `heartbeat_status`, an action queue
+(`auto_fixable_now`, `needs_merge_conflict_strategy`, `blocked_policy_or_approval`,
+`blocked_external_ci`, `blocked_pr_metadata`, `blocked_artifact_context`,
+`needs_user_decision`, `cleanup_only`), and heartbeat, dirty-worktree,
+validation, receipt, merge, cleanup, and blocker ledgers. Group repeats in
+`recurring_finding_classes` with
+`finding_class_id`, `fingerprint_sha256`, `normalized_invariant`, occurrences,
+root cause, guardrail, and merge eligibility.
 
-## Current-State And Authority
+### Current-State And Authority
 
 Before editing, after every push, before merge, before cleanup, and before any
 branch movement that treats PR closeout as complete, refresh the full PR URL,
@@ -93,10 +86,9 @@ verification.
 4. Create, update, or reuse one heartbeat only after binding it to the current
    target PR cards. Record the stop rule: all target
    PRs merged to `main`, cleanup completed, or a concrete blocker needs the user.
-5. Apply explicit user or repo-policy waivers before stop-rule evaluation. Put waived external
-   checks in `waived_external_ci`; do not patch source for them and do not let
-   them stop rotation while merge conflicts, review findings, draft decisions,
-   or cleanup proof remain unresolved.
+5. Never waive or route around a required check. Classify an external failure as
+   `blocked_external_ci`; it blocks that PR's merge, while independent action
+   lanes may continue to their own next safe action.
 6. Treat `mergeStateStatus=DIRTY`, conflict markers, failed mergeability checks,
    or branch divergence as `needs_merge_conflict_strategy`. Inspect the live PR
    and local branch/worktree state, then report the proposed strategy before any
@@ -108,8 +100,7 @@ verification.
    class occurs twice, or matches an existing steering-uptake pattern, stop
    that fix lane until the closest reusable test, validator, schema, lint rule,
    shared helper, or workflow contract is added and its validation passes. A
-   blocked guardrail records an owner, evidence, expiry, and next review, but
-   remains non-merge-eligible; it is not a waiver.
+   blocked guardrail records an owner and evidence and remains non-merge-eligible.
 8. Rotate through the ranked action queue one PR at a time.
 9. For unresolved review threads, fix actionable items, classify stale or blocked
    items, validate the source path, refresh live thread state, then resolve.
@@ -143,31 +134,30 @@ verification.
     artifact receipts, merge authority, cleanup authority, blockers, and exact
     validation evidence. A passing lane never infers another lane.
 
-## Constraints
+## Execution Boundaries
 
-- Redact secrets and preserve unrelated local changes.
-- Create, reuse, or block on exactly one heartbeat before monitor or until-green
-  rotation.
-- Build the action queue before patching; work one PR at a time.
-- Build the recurring-finding ledger before patching. Do not merge a second
-  occurrence of the same finding class without schema-valid, executable
-  durable-guardrail proof. A `blocked_durable_guardrail` classification keeps
-  the PR blocked.
-- Classify dirty paths and validation surfaces before side effects.
-- Fail fast at the first required gate until fixed, classified, or explicitly
-  waived.
-- A waived check is not green and not a source failure. Keep it in
-  `waived_external_ci` and continue to non-waived action lanes.
-- If the same failure recurs twice, encode the learned contract before retry.
+Do not treat local proof, historical evidence, or another PR's result as hosted
+approval, merge authority, or a repaired external check.
 
-## Failure mode
+Redact secrets and preserve unrelated changes. Establish one heartbeat, build
+the queue before patching, and work one PR at a time. Classify dirty paths and
+validation surfaces before side effects. Before a second recurrence can merge,
+validate its durable guardrail; never waive, route around, or relabel a required
+failure as green.
+
+## Gotchas
+
+An external failure can block one PR without blocking independent, safe queue
+actions; it is neither green nor a source-owned defect.
+
+## Failure Mode
 
 When the sweep cannot continue, report the smallest blocker that prevents the
 next safe action and keep the repair loop explicit:
 
 - blocked_heartbeat: heartbeat creation or reuse cannot be attempted.
-- blocked_external_ci: an unwaived external service blocks current evidence.
-- waived_external_ci: the check is explicitly waived and other lanes continue.
+- blocked_external_ci: an external service, credential, or policy gate blocks
+  merge until its owner repairs it.
 - needs_merge_conflict_strategy: dirty mergeability or branch divergence needs
   a proposed strategy before branch movement.
 - blocked_dirty_worktree: primary checkout dirt is not clean for branch
@@ -183,18 +173,17 @@ The repair loop is: classify the owner, name the next safe action, encode any
 repeated steering as a validator, workflow rule, or eval case, then rerun only
 the gate that proves that owner class.
 
-## Evidence Contract
+### Evidence Contract
 
 Complete only with URL-first PR cards, latest head SHAs, live review-thread
 state, required-check outcomes, mergeability, dirty-work ownership, validation
-commands, cleanup proof, waived external checks, and remaining blockers. Report
+commands, cleanup proof, external blockers, and remaining blockers. Report
 each command or tool outcome as `pass`, `fail`, or `blocked`.
 
 ## Validation
 
 Fail fast: stop at the first failed required gate and do not proceed to the next
-PR action until the failure is fixed, classified to its owner, or explicitly
-waived by an applicable repository or operator policy. Before merge, validate
+PR action until the failure is fixed by its owner. Before merge, validate
 the latest immutable head, required checks, review threads, mergeability, and
 every repeated-finding guardrail required by the action queue. Validate this
 skill contract itself with:
@@ -208,37 +197,7 @@ python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.p
 Treat either non-zero exit as blocking. A local or historical pass does not
 replace live hosted evidence for the PR head being merged.
 
-## Specialist Lane Router
-
-Use the smallest lane set that changes the next safe action: GitHub or `gh`
-for live PR truth; CodeRabbit for review threads; CircleCI for failed jobs;
-autofix for approved review fixes; Context7 for version-sensitive docs;
-architecture and simplify lanes for structural or cleanup blockers.
-
-## Decision-Ready Blocker Brief
-
-When user action is next, do not report only a status label or URL. Include:
-
-- full canonical URL and title
-- why the decision is needed now
-- latest head SHA or branch/worktree identity
-- completed proof and exact commands/tool outcomes
-- exact remaining blocker text, check name, thread id, policy, or missing access
-- material tradeoffs, residual risk, and what was not proven
-- recommended next action and the exact choices available
-
-## Examples
-
-- "Set up a heartbeat to rotate through my open PRs, inspect CodeRabbit and
-  CircleCI blockers, fix the real failures, then merge them."
-- "PR #42 has CodeRabbit comments and a failing CircleCI job; fix only the
-  proven blockers and push a follow-up."
-- "After the release PRs merge, prune merged branches and stale worktrees with
-  proof that no unique commits will be lost."
-- "Before pushing this PR fix, classify dirty source, generated manifests,
-  validation output, temp references, and unrelated local edits."
-
-## Progressive Disclosure
+## References
 
 - Read `references/closeout-commander.md` for the full queue, validator,
   authorization, CI, merge, and cleanup operating model.
@@ -250,14 +209,3 @@ When user action is next, do not report only a status label or URL. Include:
 - Use `references/eval-scenarios.json`, the reviewed eval fixture files named
   under `references/evals.yaml`, `references/contract.yaml`, and
   `references/task-profile.json` for SDK evaluation and proof claims.
-
-## See Also
-
-| Skill | When to use together |
-|---|---|
-| [[he-heartbeat]] | Create or reuse the continuation loop before until-green monitoring |
-| [[autofix]] | Address actionable CodeRabbit review findings |
-| [[context7]] | Verify current external docs for a blocker |
-| [[improve-codebase-architecture]] | Repair structural blockers |
-| [[simplify]] | Reduce post-fix noise |
-| [[verification-before-completion]] | Confirm latest-head merge readiness and cleanup evidence |

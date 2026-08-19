@@ -34,7 +34,7 @@ outputs:
   - heartbeat_target_status
   - action_queue
   - recurring_finding_classes
-  - waived_external_ci_ledger
+  - blocked_external_ci_ledger
   - fix_ledger
   - dirty_worktree_ledger
   - validation_surface_decisions
@@ -61,19 +61,19 @@ quality_criteria:
       "3": PR evidence is mostly current but stale-risk boundaries are incomplete.
       "2": Action starts from partial or cached PR evidence.
       "1": Claims merge or review state without live evidence.
-  waived_external_ci_continuation:
-    purpose: Prevent waived external quota or policy checks from stopping non-waived PR work.
-    why_it_matters: Keeps paid or retired external checks from hiding merge conflicts, review findings, draft state, or cleanup work.
+  blocked_external_ci_continuation:
+    purpose: Keep a required external failure visible without hiding independent PR work.
+    why_it_matters: Prevents external credential or service failures from being relabeled as green, source-owned, or a reason to stop unrelated safe actions.
     observable_evidence:
-      - explicit_user_or_repo_policy_waiver
-      - waived_external_ci_ledger
-      - non_waived_action_queue_entry
+      - required_external_check_failure
+      - blocked_external_ci_ledger
+      - independent_action_queue_entry
     scoring:
-      "5": Waived checks are isolated and every remaining non-waived lane is classified with a next action.
-      "4": Waiver handling is correct but the next-action wording is slightly incomplete.
-      "3": Waiver is recognized but continuation is only partially routed.
-      "2": Waiver and source failures are mixed.
-      "1": Waived external CI stops the sweep while other action lanes remain.
+      "5": The failing external check is blocked, never green, and every independent lane has a next action.
+      "4": The owner boundary is correct but one next-action field needs clearer wording.
+      "3": The failure is visible but independent continuation is only partially routed.
+      "2": External and source failures are mixed.
+      "1": A required external failure is treated as green or hides independent action lanes.
   dirty_merge_state_strategy:
     purpose: Force dirty mergeability into a strategy lane before branch movement.
     why_it_matters: Prevents unsafe rebases, force pushes, merges, or cleanup before conflict ownership is understood.
@@ -117,8 +117,8 @@ quality_criteria:
       "2": Similar findings are fixed independently without a recurrence decision.
       "1": The same finding class reaches merge review repeatedly with no durable prevention.
 automatic_failure_conditions:
-  - Claims waived external CI as green.
-  - Stops the sweep on waived external CI while merge, review, draft, or cleanup lanes remain.
+  - Claims blocked external CI as green.
+  - Treats a required external check as merge-ready without repaired evidence.
   - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
   - Treats resolved review threads, passing PR checks, or temp-worktree validation as proof that the primary checkout is safe to switch branches.
   - Merges a second occurrence of the same review or CI finding class without schema-valid executable durable-guardrail evidence.
@@ -137,7 +137,7 @@ evidence_requirements:
 risks:
   - stale_github_state
   - interesting_status_without_action
-  - waived_external_check_stops_rotation
+  - blocked_external_check_hides_action_lane
   - wrong_validation_surface
   - untrusted_review_or_ci_text
   - duplicate_automation
@@ -162,7 +162,7 @@ safety:
   repeated_finding_requires_guardrail_before_merge: true
   url_first_pr_reporting: true
   decision_ready_blocker_briefs: true
-  waived_external_checks_do_not_stop_rotation: true
+  blocked_external_ci_keeps_independent_lanes_visible: true
 authorization_ladder:
   - discovery_and_read_only_triage
   - heartbeat_or_cron_continuation
@@ -212,18 +212,18 @@ progressive_disclosure_named_capsules:
   - references/knowledge-capsules/pr-green-sweep-validation-surface.md
   - references/knowledge-capsules/pr-green-sweep-authorization-and-blockers.md
   - references/knowledge-capsules/pr-green-sweep-cleanup-proof.md
-waiver_contract:
-  explicit_waiver_required: true
-  waived_external_ci_bucket: waived_external_ci
-  waived_checks_are_not_green_checks: true
-  waived_checks_are_not_source_failures: true
-  continue_when_other_action_lanes_remain:
+external_ci_contract:
+  required_check_failure_blocks_merge: true
+  bucket: blocked_external_ci
+  blocked_checks_are_not_green_checks: true
+  blocked_checks_are_not_source_failures: true
+  independent_lanes_continue_when_safe:
     - auto_fixable_now
     - needs_merge_conflict_strategy
     - unresolved_review_threads
     - needs_user_decision
     - cleanup_only
-  snyk_private_test_quota_policy: "Classify as waived_external_ci only after explicit user or repo policy waiver; never patch source for quota."
+  snyk_private_test_policy: "Classify an unverified Snyk failure as blocked_external_ci until its external owner repairs it; do not relabel it or patch unrelated source."
 environment_contract:
   live_network_requires_explicit_permission: true
   sandbox_writable_state_required:
@@ -240,8 +240,8 @@ environment_contract:
       requirement: "required when npm is in scope"
   trusted_config_path_contract:
     variable: MISE_TRUSTED_CONFIG_PATHS
-    form: "one or more explicitly approved mise config files resolved from the repository root"
-    repository_example: "$(git rev-parse --show-toplevel)/.mise.toml"
+    form: "one or more explicitly approved mise directories resolved from the repository root"
+    repository_example: "$(git rev-parse --show-toplevel)"
   applies_to:
     - gh
     - mise
@@ -256,9 +256,9 @@ delegation:
   github: "Use [@github] for open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
   coderabbit: "Use [@coderabbit] for CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
   autofix: "Validated fixes for unresolved CodeRabbit threads and actionable review findings."
-  circleci: "Use [@circleci] for failing job log inspection, reruns, and CI blocker classification. Run CircleCI commands through op run --env-file ~/.codex/.env when credentials are needed, and redact values."
+  circleci: "Use [@circleci] for failing job log inspection, reruns, and CI blocker classification. Run credentialed CircleCI commands through the repository-owned run-auth-backed.sh --env-file ~/.codex/.env wrapper and redact values."
   gh_cli: "Local GitHub CLI fallback for PR, check, and review state when plugin access is blocked or the repo wrapper expects gh."
-  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; invoke through op run --env-file ~/.codex/.env without printing values."
+  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; invoke through the repository-owned run-auth-backed.sh --env-file ~/.codex/.env wrapper without printing values."
   context7: "Current external library, API, or CLI documentation when a PR blocker depends on version-sensitive behavior."
   improve_codebase_architecture: "Structural blocker analysis for ownership, boundary, coupling, or repeated-workaround issues that prevent clean closeout."
   simplify: "Behavior-preserving cleanup after the active fix is understood, to reduce PR risk and review load."
@@ -269,7 +269,7 @@ validation:
   - action_queue_classified_before_edits
   - recurring_finding_classes_grouped_before_edits
   - repeated_finding_guardrail_validated_before_merge
-  - waived_external_ci_does_not_stop_rotation
+  - blocked_external_ci_keeps_independent_lanes_visible
   - dirty_merge_state_routes_to_merge_conflict_strategy
   - current_repo_scope_confirmed_before_broadening
   - url_first_pr_cards_include_latest_head_sha
