@@ -131,7 +131,7 @@ cases:
       by (the )?(current )?(execution )?environment|sandbox|repo(?:sitory)? (identifier|full name).*need|merge (action|attempt).{0,80}(cancelled|blocked)|workspace.{0,80}read-only|blocked
       from writing|no ability to edit|cannot.*apply fixes
   - type: regex
-    value: (?is)(?=.*\bXDG_CACHE_HOME\s*=\s*\S+)(?=.*\bXDG_STATE_HOME\s*=\s*\S+)(?=.*\bMISE_CACHE_DIR\s*=\s*\S+)(?=.*\bMISE_STATE_DIR\s*=\s*\S+)(?=.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml"|\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml)(?=["\s]|$))(?!.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"?\$PWD"?|"?\$\{PWD\}"?|\$\(pwd\)|\$\(git\s+rev-parse\s+--show-toplevel\)(?=["\s]|$))).*
+    value: (?is)(?=.*\bXDG_CACHE_HOME\s*=\s*\S+)(?=.*\bXDG_STATE_HOME\s*=\s*\S+)(?=.*\bMISE_CACHE_DIR\s*=\s*\S+)(?=.*\bMISE_STATE_DIR\s*=\s*\S+)(?=.*\bUV_CACHE_DIR\s*=\s*\S+)(?=.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml"|\$\(git\s+rev-parse\s+--show-toplevel\)/\.mise\.toml)(?=["\s]|$))(?!.*\bMISE_TRUSTED_CONFIG_PATHS\b\s*=\s*(?:"?\$PWD"?|"?\$\{PWD\}"?|\$\(pwd\)|\$\(git\s+rev-parse\s+--show-toplevel\)(?=["\s]|$))).*
   - type: regex
     value: (?i)(github|coderabbit|circleci|merge|prune)
   unit: open PR sweep

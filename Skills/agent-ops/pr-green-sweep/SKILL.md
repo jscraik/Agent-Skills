@@ -92,11 +92,12 @@ root cause, guardrail, and merge eligibility.
    queue. Give each class a stable branded `finding_class_id`, a SHA-256
    fingerprint of its normalized invariant, and exact occurrence evidence.
    Validate the ledger with `scripts/validate_recurring_findings.py`. When a
-   class occurs twice, or matches an existing steering-uptake pattern, stop
-   that fix lane until the closest reusable test, validator, schema, lint rule,
-   shared helper, or workflow contract is added and its validation passes. A
-   blocked guardrail records `status`, owner, `blocker_ref`, `expires_at`, and
-   `next_review_at`, and remains non-merge-eligible.
+   class recurs across three independent tasks, or matches an explicitly
+   selected steering-uptake pattern, stop that fix lane until the closest
+   reusable test, validator, schema, lint rule, shared helper, or workflow
+   contract is added and its validation passes. A blocked guardrail records
+   `status`, owner, `blocker_ref`, `expires_at`, and `next_review_at`, and
+   remains non-merge-eligible.
 9. Rotate through the ranked action queue one PR at a time.
 10. For unresolved review threads, fix actionable items, classify stale or blocked
    items, validate the source path, refresh live thread state, then resolve.

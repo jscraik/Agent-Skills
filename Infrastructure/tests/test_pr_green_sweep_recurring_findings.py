@@ -18,7 +18,7 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
-def _ledger(*, occurrences: int = 2, guardrail_status: str = "validated", merge_eligible: bool = True):
+def _ledger(*, occurrences: int = 3, guardrail_status: str = "validated", merge_eligible: bool = True):
     invariant = "latest head must be validated before merge"
     occurrence_rows = [
         {
@@ -71,6 +71,10 @@ def test_repeated_finding_with_validated_guardrail_is_merge_eligible():
     assert MODULE.validate_ledger(_ledger()) == []
 
 
+def test_two_occurrences_do_not_require_a_durable_guardrail():
+    assert MODULE.validate_ledger(_ledger(occurrences=2)) == []
+
+
 def test_repeated_finding_with_blocked_guardrail_cannot_be_merge_eligible():
     errors = MODULE.validate_ledger(_ledger(guardrail_status="blocked"))
     assert errors == ["merge_eligible must be false: finding_latest_head_validation"]
@@ -118,13 +122,13 @@ def test_pr_sweep_environment_contract_requires_root_trust_config_file():
     assert trusted["repository_example"] == "$(git rev-parse --show-toplevel)/.mise.toml"
     assert re.search(
         _sandbox_environment_acceptance(),
-        'XDG_CACHE_HOME=/tmp/cache XDG_STATE_HOME=/tmp/state MISE_CACHE_DIR=/tmp/mise-cache MISE_STATE_DIR=/tmp/mise-state MISE_TRUSTED_CONFIG_PATHS="$(git rev-parse --show-toplevel)/.mise.toml" gh pr list',
+        'XDG_CACHE_HOME=/tmp/cache XDG_STATE_HOME=/tmp/state MISE_CACHE_DIR=/tmp/mise-cache MISE_STATE_DIR=/tmp/mise-state UV_CACHE_DIR=/tmp/uv-cache MISE_TRUSTED_CONFIG_PATHS="$(git rev-parse --show-toplevel)/.mise.toml" gh pr list',
     )
 
 
 def test_pr_sweep_environment_contract_rejects_noncanonical_mise_trust_paths():
     pattern = _sandbox_environment_acceptance()
-    base = "XDG_CACHE_HOME=/tmp/cache XDG_STATE_HOME=/tmp/state MISE_CACHE_DIR=/tmp/mise-cache MISE_STATE_DIR=/tmp/mise-state "
+    base = "XDG_CACHE_HOME=/tmp/cache XDG_STATE_HOME=/tmp/state MISE_CACHE_DIR=/tmp/mise-cache MISE_STATE_DIR=/tmp/mise-state UV_CACHE_DIR=/tmp/uv-cache "
 
     for invalid_value in ("$PWD", "${PWD}", "$(pwd)", "$(git rev-parse --show-toplevel)"):
         assert not re.search(pattern, f"{base}MISE_TRUSTED_CONFIG_PATHS={invalid_value} gh pr list")
@@ -133,6 +137,17 @@ def test_pr_sweep_environment_contract_rejects_noncanonical_mise_trust_paths():
 def test_pr_sweep_environment_contract_rejects_bare_variable_mentions():
     pattern = _sandbox_environment_acceptance()
     response = "XDG_CACHE_HOME XDG_STATE_HOME MISE_CACHE_DIR MISE_STATE_DIR MISE_TRUSTED_CONFIG_PATHS"
+
+    assert not re.search(pattern, response)
+
+
+def test_pr_sweep_environment_contract_rejects_missing_uv_cache_directory():
+    pattern = _sandbox_environment_acceptance()
+    response = (
+        "XDG_CACHE_HOME=/tmp/cache XDG_STATE_HOME=/tmp/state "
+        "MISE_CACHE_DIR=/tmp/mise-cache MISE_STATE_DIR=/tmp/mise-state "
+        'MISE_TRUSTED_CONFIG_PATHS="$(git rev-parse --show-toplevel)/.mise.toml" gh pr list'
+    )
 
     assert not re.search(pattern, response)
 

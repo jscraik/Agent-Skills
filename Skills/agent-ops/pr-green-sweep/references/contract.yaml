@@ -111,7 +111,7 @@ quality_criteria:
       - durable_guardrail_or_blocker
       - guardrail_validation
     scoring:
-      "5": Every repeated class has a branded identity, normalized fingerprint, exact occurrence evidence, and the second occurrence is blocked from merge until a reusable guardrail is validated; a blocked guardrail is never merge authority.
+      "5": Every class recurring across three independent tasks has a branded identity, normalized fingerprint, exact occurrence evidence, and is blocked from merge until a reusable guardrail is validated; a blocked guardrail is never merge authority.
       "4": Repeated classes and guardrails are correct but one secondary provenance field is incomplete.
       "3": Repetition is noticed but root cause or guardrail proof is incomplete.
       "2": Similar findings are fixed independently without a recurrence decision.
@@ -121,7 +121,7 @@ automatic_failure_conditions:
   - Treats a required external check as merge-ready without repaired evidence.
   - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
   - Treats resolved review threads, passing PR checks, or temp-worktree validation as proof that the primary checkout is safe to switch branches.
-  - Merges a second occurrence of the same review or CI finding class without schema-valid executable durable-guardrail evidence.
+  - Merges a class recurring across three independent tasks without schema-valid executable durable-guardrail evidence.
   - Treats a blocked_durable_guardrail classification as merge authority.
 evidence_requirements:
   - exact_command_or_tool_outcome_for_each_claim
@@ -251,7 +251,7 @@ environment_contract:
     - coderabbit
     - circleci
     - package_registry
-  repeated_failure_refinement: "After two repeated live-state, sandbox, approval, or user-correction failures, stop rotation, encode the learned fix in the closest durable contract, validate it, and only then resume."
+  repeated_failure_refinement: "After a live-state, sandbox, approval, or user-correction failure recurs across three independent tasks, or matches an explicitly selected steering-uptake pattern, stop that fix lane, encode the learned fix in the closest durable contract, validate it, and only then resume."
 delegation:
   github: "Use [@github] for open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
   coderabbit: "Use [@coderabbit] for CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
