@@ -169,3 +169,7 @@ def test_blocked_external_ci_eval_rejects_negated_classification():
         rejection["value"],
         "Snyk is blocked_external_ci and the merge remains blocked.",
     )
+    assert not re.search(
+        rejection["value"],
+        "Snyk is not source-owned; it is blocked_external_ci.",
+    )
