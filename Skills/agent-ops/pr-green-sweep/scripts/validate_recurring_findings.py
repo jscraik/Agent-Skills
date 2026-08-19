@@ -47,7 +47,7 @@ def validate_ledger(ledger: object) -> list[str]:
         if len(occurrence_keys) != len(occurrences):
             errors.append(f"duplicate occurrence evidence: {class_id}")
 
-        repeated = len(occurrences) >= 2
+        repeated = len(occurrences) >= 3
         guardrail_validated = finding["guardrail"]["status"] == "validated"
         expected_merge_eligible = not repeated or guardrail_validated
         if finding["merge_eligible"] != expected_merge_eligible:
