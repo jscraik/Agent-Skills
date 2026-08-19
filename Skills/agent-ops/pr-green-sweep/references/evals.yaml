@@ -1042,6 +1042,8 @@ cases:
     expected_skill: pr-green-sweep
   - type: regex
     value: (?i)\bblocked_external_ci\b
+  - type: not_regex
+    value: (?i)\b(?:not|is not|isn't)\s+blocked_external_ci\b|\bsource-owned\b
   - type: regex
     value: (?i)(needs_merge_conflict_strategy|mergeStateStatus=DIRTY|mergeable_state=dirty|merge conflict)
   - type: regex

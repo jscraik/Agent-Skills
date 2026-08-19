@@ -135,3 +135,22 @@ def test_pr_sweep_environment_contract_rejects_bare_variable_mentions():
     response = "XDG_CACHE_HOME XDG_STATE_HOME MISE_CACHE_DIR MISE_STATE_DIR MISE_TRUSTED_CONFIG_PATHS"
 
     assert not re.search(pattern, response)
+
+
+def test_blocked_external_ci_eval_rejects_negated_classification():
+    payload = yaml.safe_load(EVALS_PATH.read_text(encoding="utf-8"))
+    case = next(
+        item
+        for item in payload["cases"]
+        if item["id"] == "eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible"
+    )
+    rejection = next(item for item in case["acceptance"] if item["type"] == "not_regex")
+
+    assert re.search(
+        rejection["value"],
+        "Snyk is not blocked_external_ci; it is source-owned.",
+    )
+    assert not re.search(
+        rejection["value"],
+        "Snyk is blocked_external_ci and the merge remains blocked.",
+    )
