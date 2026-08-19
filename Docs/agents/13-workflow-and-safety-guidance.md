@@ -72,10 +72,16 @@ api.github.com` may be a Codex sandbox network-permission issue even when it
 
 For Codex sandboxed network operations, retry API commands with explicit
 network permission before classifying GitHub, CircleCI, Snyk, package registry,
-or other external services as down. For commands that invoke `mise`, either set
-`MISE_CACHE_DIR` to a writable temporary path such as
-`/private/tmp/agent-skills-mise-cache` or request narrow write permission for
-the cache directory. Cache write warnings are not API connectivity evidence.
+or other external services as down. Before launching commands that invoke `gh`,
+`mise`, `uv`, or npm, set `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
+`MISE_CACHE_DIR`, `MISE_STATE_DIR`, and `UV_CACHE_DIR` to sandbox-approved
+writable paths. For a repository `mise` config, set
+`MISE_TRUSTED_CONFIG_PATHS` to the root configuration file
+`$(git rev-parse --show-toplevel)/.mise.toml`, not the current subdirectory or
+the entire repository directory. Set `npm_config_cache` only when npm is
+in scope. Retain the operator-authenticated `gh` configuration; set
+`GH_CONFIG_DIR` only when an explicitly supplied configuration is already
+authenticated. Cache or state write warnings are not API connectivity evidence.
 
 Do not keep retrying the same failing command. After two equivalent failures,
 change the environment, permission profile, command shape, or diagnostic path,
@@ -182,9 +188,15 @@ For sandboxed Codex runs, live PR and CI operations are networked operations.
 Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API
 commands with explicit network permission before diagnosing an outage,
 credential issue, or platform regression. If the command may invoke `gh`,
-`mise`, or `uv`, set `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
-`MISE_CACHE_DIR`, and `UV_CACHE_DIR` to sandbox-approved writable directories
-before treating cache or state warnings as failures.
+`mise`, `uv`, or npm, apply the sandbox-state environment contract above before
+the shell starts. `GH_CONFIG_DIR` selects GitHub CLI configuration, not
+`XDG_STATE_HOME`; do not point it at an empty scratch directory. Set it only
+when the operation is given an explicitly supplied, authenticated configuration.
+Before invoking a tool, verify each resolved cache or state path is inside the
+approved scratch directory and writable. Treat `MISE_TRUSTED_CONFIG_PATHS` as
+a separate trust control: set it to the explicitly approved root
+`$(git rev-parse --show-toplevel)/.mise.toml` file, never to writable state,
+a current subdirectory, or the entire repository directory.
 
 After two equivalent failures, change the environment, permission request,
 command shape, or repo contract before trying again. Do not keep rotating
