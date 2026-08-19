@@ -40,7 +40,7 @@
 - Ruff is the primary Python linter and MUST pass for changed Python paths.
 - Keep style and import ordering consistent with repo lint configuration.
 - Use Pyright for static type checks where configured; failing type checks MUST block merge.
-- Waivers or suppressions MUST include reason, tracking reference, and expiry when temporary.
+- Fix type and lint findings in the owning source; suppressions are not supported.
 
 ## Testing
 - Use `pytest` for Python unit and behavior checks where Python logic is non-trivial.

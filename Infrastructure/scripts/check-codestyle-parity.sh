@@ -5,7 +5,7 @@ set -euo pipefail
 command -v realpath >/dev/null || { echo "[codestyle-parity] error: realpath is required but not found" >&2; exit 1; }
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT_DEFAULT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+REPO_ROOT_DEFAULT="$(cd -- "$SCRIPT_DIR/../.." && pwd -P)"
 
 repo_root="$REPO_ROOT_DEFAULT"
 manifest_path=""

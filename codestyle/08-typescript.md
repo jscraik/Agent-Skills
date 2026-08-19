@@ -22,8 +22,8 @@
 - Use strict TypeScript configuration and keep boundary validation explicit.
 - Repository TypeScript projects SHOULD keep `strict`,
   `noUncheckedIndexedAccess`, and `exactOptionalPropertyTypes` enabled unless
-  a documented migration or waiver explains why a target cannot support them.
-- `any` SHOULD be avoided in production paths; use concrete types or `unknown` plus narrowing. If a temporary `any` is unavoidable, keep it local, justified, and covered by tests or a follow-up waiver.
+  a documented migration replaces the affected target.
+- `any` SHOULD be avoided in production paths; use concrete types or `unknown` plus narrowing. Remove any temporary boundary adaptation before merge.
 
 ## Banned patterns
 - Unjustified `: any`, `as any`, `Promise<any>`, and `Record<string, any>` in production code.
@@ -95,6 +95,6 @@
   - `pnpm check`
   - `bash scripts/validate-codestyle.sh`
   - `bash scripts/verify-work.sh --fast`
-- Avoid soft bypasses for type/lint errors; temporary suppressions require waiver metadata with rule ID or section, reason, tracking ticket, and expiry or ADR reference.
+- Avoid soft bypasses for type or lint errors; fix the owning source before merge.
 - Validation evidence MUST be explicit:
   - `Command: <exact command> -> pass|fail|blocked (<reason>)`

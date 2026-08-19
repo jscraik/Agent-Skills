@@ -64,4 +64,4 @@
 ## Enforcement
 - Security findings at CRITICAL severity are merge blockers.
 - Security-sensitive changes SHOULD run configured scans such as Semgrep, package-manager audit, secret scanning, container scanning, SBOM/provenance validation, or language-native vulnerability checks.
-- Exceptions require waiver metadata with rule ID, reason, tracking issue, and expiry or ADR.
+- Security failures must be fixed or the affected surface must be removed; no waiver path exists.
