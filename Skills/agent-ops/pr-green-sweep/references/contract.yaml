@@ -240,8 +240,8 @@ environment_contract:
       requirement: "required when npm is in scope"
   trusted_config_path_contract:
     variable: MISE_TRUSTED_CONFIG_PATHS
-    form: "one or more explicitly approved mise directories resolved from the repository root"
-    repository_example: "$(git rev-parse --show-toplevel)"
+    form: "one or more explicitly approved root mise config files"
+    repository_example: "$(git rev-parse --show-toplevel)/.mise.toml"
   applies_to:
     - gh
     - mise
@@ -256,9 +256,9 @@ delegation:
   github: "Use [@github] for open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
   coderabbit: "Use [@coderabbit] for CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
   autofix: "Validated fixes for unresolved CodeRabbit threads and actionable review findings."
-  circleci: "Use [@circleci] for failing job log inspection, reruns, and CI blocker classification. Run credentialed CircleCI commands through the repository-owned run-auth-backed.sh --env-file ~/.codex/.env wrapper and redact values."
+  circleci: "Use [@circleci] for failing job log inspection, reruns, and CI blocker classification. Run credentialed CircleCI commands through the host-configured auth-backed wrapper with ~/.codex/.env, and redact values."
   gh_cli: "Local GitHub CLI fallback for PR, check, and review state when plugin access is blocked or the repo wrapper expects gh."
-  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; invoke through the repository-owned run-auth-backed.sh --env-file ~/.codex/.env wrapper without printing values."
+  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; invoke through the host-configured auth-backed wrapper with ~/.codex/.env without printing values."
   context7: "Current external library, API, or CLI documentation when a PR blocker depends on version-sensitive behavior."
   improve_codebase_architecture: "Structural blocker analysis for ownership, boundary, coupling, or repeated-workaround issues that prevent clean closeout."
   simplify: "Behavior-preserving cleanup after the active fix is understood, to reduce PR risk and review load."

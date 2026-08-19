@@ -188,9 +188,10 @@ For each failing check, return:
 - whether it blocks merge
 
 CircleCI evidence should come from the [@circleci] plugin or the CircleCI CLI
-lane. Invoke credentialed CircleCI commands through the repository-owned
-`run-auth-backed.sh --env-file ~/.codex/.env` wrapper, but never print secrets
-or copy env values into reports.
+lane. Invoke credentialed CircleCI commands through
+the host-configured auth-backed wrapper with `~/.codex/.env`; discover the
+wrapper from the active Codex environment, never invoke an unqualified wrapper
+or `op` directly, and never print secrets or copy env values into reports.
 
 ## Closeout Ledger
 

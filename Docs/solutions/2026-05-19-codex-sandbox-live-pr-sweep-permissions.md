@@ -44,11 +44,12 @@ For live PR sweep work in Codex sandboxed sessions:
    `GH_CONFIG_DIR` only when an explicitly supplied configuration is already
    authenticated. Resolve the repository root with
    `git rev-parse --show-toplevel`, then set `MISE_TRUSTED_CONFIG_PATHS` to
-   that explicitly approved directory. It is a Mise trust control, not
-   writable sandbox state: never substitute the current subdirectory or a
-   `.mise.toml` file. Verify each resolved state path is inside the approved
-   scratch directory and writable, then confirm the trusted-config directory
-   is the repository root before invoking `gh`, `mise`, `uv`, or npm.
+   that root `.mise.toml` file. It is a Mise trust control, not writable
+   sandbox state: never substitute the current subdirectory or the entire
+   repository directory. Verify each resolved state path is inside the
+   approved scratch directory and writable, then confirm the trusted config is
+   the repository-root `.mise.toml` before invoking `gh`, `mise`, `uv`, or
+   npm.
 4. Keep live-state probes short and non-watch unless actively waiting for one
    known check.
 5. After two equivalent command, approval, or permission failures, stop the

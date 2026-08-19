@@ -232,6 +232,10 @@ class TestAskSkillsPackageContract(_AskSkillsPackageContractBase):
         criterion = loaded['quality_criteria']['current_state_before_action']
         self.assertEqual(criterion['observable_evidence'], ['latest_head_sha', 'required_checks'])
         self.assertEqual(criterion['scoring']['5'], 'Latest-head proof is complete.')
+        self.assertEqual(
+            loaded['automatic_failure_conditions'],
+            ['Claims blocked external CI as green.'],
+        )
 
     def test_sdk_contract_accepts_optional_valid_skillflow(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
