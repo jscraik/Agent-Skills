@@ -1,0 +1,41 @@
+{
+  "status": "complete",
+  "artifact_paths": [
+    ".harness/reviews/pu-012-breaker-2.md",
+    "artifacts/agent-runs/adversarial-reviewer-pu-012-breaker-2-20260606/manifest.json"
+  ],
+  "manifest_path": "artifacts/agent-runs/adversarial-reviewer-pu-012-breaker-2-20260606/manifest.json",
+  "findings": [
+    {
+      "severity": "high",
+      "title": "PU-012 can be marked complete without ever running PU-012 coverage"
+    },
+    {
+      "severity": "medium",
+      "title": "Mise trust warnings can be mistaken for SDK failures in the temp worktree"
+    },
+    {
+      "severity": "medium",
+      "title": "Project-root identity is not pinned tightly enough to stop alias-based false positives"
+    }
+  ],
+  "failures_or_blockers": [],
+  "improvement_opportunities": [
+    "Add an explicit PU-012 validation slug or scope mapping, then assert it in the scope tests.",
+    "Define the validation environment contract for trusted mise config paths and state/cache dirs, and classify leftover warnings as blocked_environment.",
+    "Pin the project-root canonicalization rule to strict resolution and root-identity comparison."
+  ],
+  "strengths": [
+    "The spec already avoids mutation and network access, which keeps the slice bounded.",
+    "The spec already points at temp-project coverage and schema-valid robot JSON output.",
+    "The spec already calls out the known mise temp-worktree warning class, which is the right place to close the loop."
+  ],
+  "validation_evidence": [
+    "Spec review at /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
+    "Validation scope router at /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/Infrastructure/scripts/validate_all_impl.sh",
+    "Scope tests at /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/Infrastructure/tests/test_skills_sdk_validation_scope.py",
+    "Project-root contract at /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/Infrastructure/scripts/lib/ask/skills_sdk/project_install.py and /private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py"
+  ],
+  "next_action": "Tighten the spec with explicit validation-scope coverage, a setup-blocker rule for mise warnings, and a canonical project-root identity contract."
+}
+

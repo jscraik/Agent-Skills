@@ -70,6 +70,33 @@ def test_harness_evidence_trace_is_trackable_historical_evidence() -> None:
 
 def test_generated_agent_review_roots_are_ignored() -> None:
     repo_root = Path(__file__).resolve().parents[3]
+    allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)
+    retained_cited_entries = [
+        entry
+        for entry in allowlist
+        if entry.id.startswith("retained-cited-")
+    ]
+    retained_agent_run_entries = [
+        entry
+        for entry in retained_cited_entries
+        if entry.pattern.startswith("artifacts/agent-runs/")
+    ]
+    retained_agent_run_paths = {entry.pattern for entry in retained_agent_run_entries}
+    retained_trace_paths = {
+        entry.pattern
+        for entry in retained_cited_entries
+        if entry.pattern.startswith(".harness/traces/")
+    }
+
+    assert len(retained_cited_entries) == 23
+    assert all(entry.match_type == "exact" for entry in retained_cited_entries)
+    assert all(entry.classification == "historical_artifact" for entry in retained_cited_entries)
+    assert len(retained_agent_run_entries) == 20
+    assert all(path.startswith("artifacts/agent-runs/") for path in retained_agent_run_paths)
+    assert retained_trace_paths == {
+        ".harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md"
+    }
+
     generated_paths = (
         "artifacts/agent-runs/example/manifest.json",
         ".harness/agent-runs/example/manifest.json",
@@ -106,7 +133,12 @@ def test_generated_agent_review_roots_are_ignored() -> None:
         )
         assert ls_result.returncode == 0, ls_result.stderr
         tracked_files = [line for line in ls_result.stdout.splitlines() if line.strip()]
-        assert tracked_files == [], f"Expected no tracked files in {root}, but found: {tracked_files}"
+        if root == "artifacts/agent-runs":
+            assert set(tracked_files) == retained_agent_run_paths
+        elif root == ".harness/traces":
+            assert set(tracked_files) == retained_trace_paths
+        else:
+            assert tracked_files == [], f"Expected no tracked files in {root}, but found: {tracked_files}"
 
 
 def test_infrastructure_package_policy_files_are_policy_surface() -> None:
