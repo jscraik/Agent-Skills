@@ -41,6 +41,7 @@ HARNESS_HISTORICAL_PREFIXES = (
     ".harness/agent-runs",
     ".harness/artifacts",
     ".harness/ci-migrate-snapshots",
+    ".harness/evidence/harness/traces",
     ".harness/review-artifacts",
     ".harness/traces",
 )

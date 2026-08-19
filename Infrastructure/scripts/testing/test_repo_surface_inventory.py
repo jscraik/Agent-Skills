@@ -47,6 +47,27 @@ def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
     assert finding.blocking is False
 
 
+def test_harness_evidence_trace_is_trackable_historical_evidence() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    path = ".harness/evidence/harness/traces/example.md"
+    finding = MODULE.classify_path(path)
+
+    assert finding.classification == "historical_artifact"
+    assert finding.status == "warning"
+    assert finding.code == "tracked_harness_snapshot"
+    assert finding.blocking is False
+
+    result = subprocess.run(
+        ["git", "check-ignore", "--quiet", path],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1, result.stderr
+
+
 def test_generated_agent_review_roots_are_ignored() -> None:
     repo_root = Path(__file__).resolve().parents[3]
     generated_paths = (

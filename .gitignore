@@ -202,7 +202,6 @@ Infrastructure/artifacts/policy/
 /.harness/agent-runs/
 /.harness/review-artifacts/
 /.harness/traces/
-/.harness/evidence/harness/traces/
 
 # Validation evidence policy:
 # - ignore timestamped local run directories by default
