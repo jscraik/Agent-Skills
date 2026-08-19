@@ -68,6 +68,30 @@ def test_harness_evidence_trace_is_trackable_historical_evidence() -> None:
     assert result.returncode == 1, result.stderr
 
 
+def test_harness_evidence_trace_requires_exact_retention_before_tracking() -> None:
+    path = ".harness/evidence/harness/traces/example.md"
+    blocked = MODULE.classify_paths([path], changed_files={path})[0]
+
+    assert blocked.blocking is True
+    assert blocked.code == "new_historical_artifact_debt"
+
+    retention = MODULE.AllowlistEntry(
+        id="retained-trace-example",
+        match_type="exact",
+        pattern=path,
+        classification="historical_artifact",
+        reason="Reviewed trace retention example.",
+        owner="test",
+        review_after="2026-09-01",
+    )
+    retained = MODULE.classify_paths(
+        [path], [retention], changed_files={path}
+    )[0]
+
+    assert retained.blocking is False
+    assert retained.allowlist_entry == retention.id
+
+
 def test_generated_agent_review_roots_are_ignored() -> None:
     repo_root = Path(__file__).resolve().parents[3]
     allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)

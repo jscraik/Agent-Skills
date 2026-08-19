@@ -9,7 +9,7 @@
 - branch: main
 - target: Skills SDK governed stage skill product contract
 - source_spec: .harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md
-- source_trace: not_retained; the accepted slice spec is the authoritative prior-stage contract
+- source_trace: retained_superseded_evidence at .harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md; the accepted slice spec is the authoritative prior-stage contract
 - next_stage: work
 
 ## Approved Intent
@@ -23,7 +23,7 @@ The work stage must update validator behavior, scaffold output, scaffold tests, 
 - Active repo: `/Users/jamiecraik/dev/agent-skills`
 - Active branch: `main`
 - Previous-stage artifact: `.harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md`
-- Superseded trace artifact: not retained; its accepted product contract is materialized by the slice spec.
+- Superseded trace artifact: retained as cited historical evidence at `.harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md`; its accepted product contract is materialized by the slice spec.
 - Review artifacts:
   - `.harness/review/2026-06-11-pu-018-adversarial-review-results.csv`
   - `.harness/review/2026-06-11-pu-018-adversarial-review-results-round2.csv`
