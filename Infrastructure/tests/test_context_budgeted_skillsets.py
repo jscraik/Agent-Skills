@@ -103,6 +103,7 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         first_row = json.loads(lines[0])
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
+        self.assertNotIn("source_revision", first_row["provenance"])
 
     def test_system_manifest_provenance_hashes_canonical_system_store(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
@@ -395,7 +396,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": policy_identity(),
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")
@@ -497,7 +497,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": "test",
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")
@@ -524,7 +523,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": "stale-old-identity",
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")

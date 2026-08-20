@@ -236,7 +236,7 @@ def validate_written_manifest_provenance(
                     "line": line_no,
                 })
                 continue
-            required = {"generator", "projection_mode", "policy_identity", "source_revision", "source_sha256"}
+            required = {"generator", "projection_mode", "policy_identity", "source_sha256"}
             missing = sorted(key for key in required if not provenance.get(key))
             if missing:
                 violations.append({
