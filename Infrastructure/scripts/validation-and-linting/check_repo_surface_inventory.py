@@ -358,7 +358,8 @@ def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding 
 
 def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
     return normalized in {"artifacts/recommended-skills-sdk-pipeline.html", "artifacts/skills-sdk-user-lifecycle-one-page.html"} or (
-        _starts_with(normalized, "Skills") and "/references/scorer-calibration/" in normalized
+        _starts_with_any(normalized, ("Skills", "codex/agents/evals"))
+        and "/references/scorer-calibration/" in normalized
     )
 
 
@@ -373,6 +374,8 @@ def _classify_governed_generated_surface(normalized: str) -> SurfaceFinding | No
 
 
 def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+    if normalized in POLICY_EXACT_PATHS:
+        return _finding(normalized, "policy_surface")
     governed_finding = _classify_governed_generated_surface(normalized)
     if governed_finding is not None:
         return governed_finding

@@ -147,6 +147,27 @@ def test_skill_scorer_calibration_examples_are_source() -> None:
     assert finding.blocking is False
 
 
+def test_codex_scorer_calibration_examples_are_source() -> None:
+    finding = MODULE.classify_path(
+        "codex/agents/evals/workflow-guardrail-candidates/"
+        "references/scorer-calibration/examples.jsonl"
+    )
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "authored_source_surface"
+    assert finding.blocking is False
+
+
+def test_artifact_agent_guide_is_policy_surface() -> None:
+    finding = MODULE.classify_path("artifacts/AGENTS.md")
+
+    assert finding.classification == "policy"
+    assert finding.status == "ok"
+    assert finding.code == "policy_surface"
+    assert finding.blocking is False
+
+
 def test_pipeline_status_artifact_is_governed_source() -> None:
     finding = MODULE.classify_path("artifacts/recommended-skills-sdk-pipeline.html")
 
