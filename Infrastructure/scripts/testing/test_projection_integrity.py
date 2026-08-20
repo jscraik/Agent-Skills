@@ -362,6 +362,15 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertTrue(alias.is_symlink())
             self.assertEqual((alias.parent / os.readlink(alias)).resolve(), canonical.resolve())
 
+    def test_validation_wrapper_defaults_to_ignored_artifact_root(self) -> None:
+        wrapper = SCRIPT.parent / "validate_projection_integrity.sh"
+        content = wrapper.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '.tmp/agent-skills-artifacts/validation/projection-integrity/latest.json',
+            content,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
