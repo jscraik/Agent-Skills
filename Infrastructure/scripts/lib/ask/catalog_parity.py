@@ -18,7 +18,7 @@ REQUIRED_SURFACES = (
     "ask skills list",
     "route considered metadata",
 )
-HISTORY_PATH = Path("Infrastructure/artifacts/selection-quality/history.jsonl")
+HISTORY_PATH = Path(".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
 
 
 def _extract_readme_count(readme_path: Path) -> int | None:
@@ -161,6 +161,39 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
     return current, None
 
 
+def _policy_identity_drift(
+    surfaces: list[dict[str, Any]],
+    active_policy_identity: str,
+) -> tuple[str, str, str] | None:
+    """Return a blocking tuple when a stamped surface has stale policy identity."""
+    for surface in surfaces:
+        if surface["policy_identity_required"] and surface.get("policy_identity") != active_policy_identity:
+            return (
+                "missing_or_mismatched_policy_identity",
+                "missing_policy_identity",
+                "Refresh projections so policy identity stamps match the active selection policy.",
+            )
+    return None
+
+
+def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | None]:
+    """Classify local trend history without turning missing telemetry into source drift."""
+    _, history_issue = _latest_history_metrics(repo_root / HISTORY_PATH)
+    if history_issue in {"insufficient_history", "missing_history"}:
+        return "not_collected", None
+    if history_issue == "schema_invalid_history":
+        return (
+            history_issue,
+            ("trend_schema_invalid_history", "schema_invalid_history", f"Repair {HISTORY_PATH.as_posix()} to valid schema entries."),
+        )
+    if history_issue == "trend_deterioration":
+        return (
+            history_issue,
+            ("trend_deterioration", "soft_gate_deterioration", "Resolve routing-quality deterioration before strict validation can pass."),
+        )
+    return "available", None
+
+
 def compute_catalog_parity(
     repo_root: Path,
     *,
@@ -240,6 +273,7 @@ def compute_catalog_parity(
     drift_detected = any(not item["parity_ok"] for item in surfaces)
     drift_class = "count_mismatch" if drift_detected else None
     blocking_reason = "required_surface_count_mismatch" if drift_detected else None
+    history_status = "not_checked"
     operator_action = (
         "Run `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, regenerate catalog projections, then rerun doctor-catalog."
         if drift_detected
@@ -247,38 +281,16 @@ def compute_catalog_parity(
     )
 
     if strict and not drift_detected:
-        for surface in surfaces:
-            if not surface["policy_identity_required"]:
-                continue
-            if surface.get("policy_identity") != active_policy_identity:
-                drift_detected = True
-                drift_class = "missing_or_mismatched_policy_identity"
-                blocking_reason = "missing_policy_identity"
-                operator_action = "Refresh projections so policy identity stamps match the active selection policy."
-                break
+        identity_drift = _policy_identity_drift(surfaces, active_policy_identity)
+        if identity_drift is not None:
+            drift_class, blocking_reason, operator_action = identity_drift
+            drift_detected = True
 
     if strict and not drift_detected:
-        _, history_issue = _latest_history_metrics(repo_root / HISTORY_PATH)
-        if history_issue == "insufficient_history":
+        history_status, history_drift = _history_trend_drift(repo_root)
+        if history_drift is not None:
+            drift_class, blocking_reason, operator_action = history_drift
             drift_detected = True
-            drift_class = "trend_insufficient_history"
-            blocking_reason = "insufficient_history"
-            operator_action = "Collect at least 7 prior routing-quality runs before strict trend enforcement."
-        elif history_issue == "schema_invalid_history":
-            drift_detected = True
-            drift_class = "trend_schema_invalid_history"
-            blocking_reason = "schema_invalid_history"
-            operator_action = "Repair Infrastructure/artifacts/selection-quality/history.jsonl to valid schema entries."
-        elif history_issue == "missing_history":
-            drift_detected = True
-            drift_class = "trend_insufficient_history"
-            blocking_reason = "insufficient_history"
-            operator_action = "Create Infrastructure/artifacts/selection-quality/history.jsonl from completed validation runs."
-        elif history_issue == "trend_deterioration":
-            drift_detected = True
-            drift_class = "trend_deterioration"
-            blocking_reason = "soft_gate_deterioration"
-            operator_action = "Resolve routing-quality deterioration before strict validation can pass."
 
     report = {
         "schema_version": CATALOG_PARITY_SCHEMA_VERSION,
@@ -288,6 +300,7 @@ def compute_catalog_parity(
         "drift_detected": drift_detected,
         "drift_class": drift_class,
         "blocking_reason": blocking_reason,
+        "history_status": history_status,
         "operator_action": operator_action,
         "decision_status": "blocked_catalog_parity" if drift_detected else "resolved",
         "required_surfaces": list(REQUIRED_SURFACES),

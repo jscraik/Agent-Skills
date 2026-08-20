@@ -178,7 +178,7 @@ Out of scope:
 - Should this execution plan assume greenfield route/plugin scaffolding?
   - Resolution: no. Plan assumes existing baseline implementations and focuses on spec-complete hardening.
 - Should strict mode rely on ad-hoc run data?
-  - Resolution: no. Use canonical history artifact (`Infrastructure/artifacts/selection-quality/history.jsonl`) only.
+  - Resolution: no. Use the canonical local history (`.tmp/agent-skills-artifacts/selection-quality/history.jsonl`) only.
 
 ### Deferred to Implementation
 
@@ -320,14 +320,14 @@ flowchart TD
 - Modify: `Infrastructure/scripts/testing/test_skill_lifecycle_validation.py`
 - Create: `Infrastructure/tests/test_ask_repo_doctor_catalog.py`
 - Modify: `Infrastructure/tests/test_ask_cli.py`
-- Create: `Infrastructure/artifacts/selection-quality/history.jsonl` (bootstrap artifact contract)
+- Create: `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` (local bootstrap history contract)
 
 **Approach:**
 
 - Implement canonical `repo doctor-catalog` output contract and alias normalization (`ask doctor catalog` -> `ask repo doctor-catalog`).
 - Enforce strict-mode escalation rules, including missing projection/policy stamps and soft-gate deterioration breaches.
-- Compute trend state exclusively from `Infrastructure/artifacts/selection-quality/history.jsonl` and block strict outcomes when history is insufficient.
-- Define ownership semantics for `Infrastructure/artifacts/selection-quality/history.jsonl`: append-only per completed validation run, oldest-first retention pruning by explicit cap, and schema-preserving writes only through validation/reporting pathways.
+- Compute trend state exclusively from `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`; block strict outcomes only for malformed or deteriorating collected history, while a fresh checkout reports that local trend history is not collected.
+- Define ownership semantics for `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`: append-only per completed validation run, oldest-first retention pruning by explicit cap, schema-preserving writes only through validation/reporting pathways, and no Git tracking.
 
 **Execution note:** Build strict-mode behavior with explicit synthetic-history fixtures before wiring to live history updates.
 
@@ -516,7 +516,7 @@ tasks:
 ## Documentation and Operational Notes
 
 - Preserve the existing plan path as the canonical execution artifact for this wave.
-- Maintain canonical artifact history at `Infrastructure/artifacts/selection-quality/history.jsonl` and ensure retention policy is implemented with deterministic append/rotation behavior.
+- Maintain canonical local history at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` and ensure retention policy is implemented with deterministic append/rotation behavior.
 - Keep release evidence focused on required gates and explicit blocker reasons; wave-1 spec-critical checks must not rely on warn-only posture.
 - Rollback posture: disable newly added action wiring or strict-mode pathways selectively while preserving existing stable command surfaces.
 

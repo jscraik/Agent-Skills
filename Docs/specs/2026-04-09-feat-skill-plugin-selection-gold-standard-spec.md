@@ -186,7 +186,7 @@ Strict mode semantics (`--strict`):
 - Default mode checks required surfaces only (`README`, root `SKILL.md`, `ask skills list`, route considered metadata).
 - Strict mode additionally treats missing surface projections and missing per-surface policy identity stamps as blocking drift, not warnings.
 - Strict mode escalates soft-gate deterioration signals into blocking catalog diagnostics when deterioration thresholds are breached.
-- Strict mode computes soft-gate deterioration only from the canonical routing-quality history artifact at `Infrastructure/artifacts/selection-quality/history.jsonl`.
+- Strict mode computes soft-gate deterioration only when canonical local routing-quality history exists at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`; a fresh checkout reports `not_collected` rather than treating absent generated telemetry as source drift.
 - If strict mode has insufficient trend history (`<7` prior completed runs from canonical history), it must return a blocking outcome with `drift_class: trend_insufficient_history` and `blocking_reason: insufficient_history`.
 
 ### D. Plugin visibility lifecycle (`ask plugins list|status|doctor`)
@@ -205,7 +205,7 @@ Lifecycle ownership rule:
   - `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py` owns canonical catalog manifest derivation.
   - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` owns required projection refresh for root `SKILL.md` and `README.md`.
 - Strict trend history ownership is explicit:
-  - `Infrastructure/artifacts/selection-quality/history.jsonl` is append-only per completed validation run.
+  - `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` is append-only per completed validation run and is not release evidence.
   - retention pruning is oldest-first under explicit cap and must preserve schema-valid entries.
   - direct mutation outside validation/reporting pathways is out of contract.
 
@@ -240,7 +240,7 @@ Governance and parity dependencies:
   - Canonical manifest source: `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py`.
   - Projection refresh source: `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`.
 - Validation wrappers (`Infrastructure/scripts/validation-and-linting/verify-work.sh`, `ask repo validate`) to run fail-fast parity and routing quality gates.
-- Canonical routing-quality trend history source at `Infrastructure/artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
+- Canonical routing-quality trend history source at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
 
 Contract versioning dependencies:
 
@@ -355,7 +355,7 @@ Required artifacts:
 
 - `RoutingQualityArtifact` for route and goal decisions.
 - `CatalogParityReport` artifact from diagnostic checks.
-- Canonical trend history artifact at `Infrastructure/artifacts/selection-quality/history.jsonl` for strict-mode deterioration checks.
+- Canonical local trend history at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` for strict-mode deterioration checks.
 
 Artifact minimum fields:
 

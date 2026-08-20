@@ -716,7 +716,7 @@ schedule_check required skill-graph-profiles "🕸️  Validating skill graph pr
 schedule_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then
-  selection_contract_cmd+=(--history-path "Infrastructure/artifacts/selection-quality/history.jsonl")
+  selection_contract_cmd+=(--history-path ".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
 fi
 schedule_check required selection-contract "🎯 Verifying selection contract fixtures..." "${selection_contract_cmd[@]}"
 schedule_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" Infrastructure/scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
