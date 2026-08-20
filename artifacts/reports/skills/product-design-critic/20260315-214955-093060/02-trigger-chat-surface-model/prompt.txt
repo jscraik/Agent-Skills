@@ -1,1 +1,0 @@
-We have a chat assistant that also opens a side panel for evidence. Decide what belongs in chat versus side panel for a risky policy-change workflow.
