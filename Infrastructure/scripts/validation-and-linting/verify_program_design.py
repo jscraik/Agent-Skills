@@ -12,9 +12,8 @@ AST can judge every abstraction choice:
 * newly added explicit or module-level mutable global state.
 
 Existing debt is ratcheted: unchanged findings remain visible to the next
-refactoring slice but do not make an unrelated change fail.  New or worsened
-findings fail unless the owning change removes them or records a time-boxed
-waiver in the owning review surface.
+refactoring slice but do not make an unrelated change fail. New or worsened
+findings fail until the owning change removes them.
 """
 
 from __future__ import annotations
@@ -25,12 +24,9 @@ import os
 import subprocess
 import sys
 from collections import Counter
-from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import date
 from functools import lru_cache
 from pathlib import Path
-from types import MappingProxyType
 
 _SCRIPT_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPT_DIR not in sys.path:
@@ -61,10 +57,6 @@ MUTABLE_VALUE_NODES = (
 MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset(
     {"Counter", "bytearray", "defaultdict", "deque", "dict", "list", "set"}
 )
-PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
-WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
-
-
 @dataclass(frozen=True)
 class Finding:
     """A source location and stable key for one design smell."""
@@ -72,11 +64,6 @@ class Finding:
     line: int
     key: str
     detail: str
-    waiver_key: str | None = None
-
-    @property
-    def effective_waiver_key(self) -> str:
-        return self.waiver_key or self.key
 
 
 @dataclass(frozen=True)
@@ -229,7 +216,6 @@ def _broad_exceptions(tree: ast.AST) -> list[Finding]:
                         node.lineno,
                         name,
                         f"except {name}",
-                        f"{name}@{node.lineno}:{node.col_offset}",
                     )
                 )
     return findings
@@ -535,37 +521,6 @@ def _exact_move_baseline(path: Path, current_text: str, revision: str) -> str | 
     )
 
 
-def _check_waiver_metadata(
-    waivers: Mapping[str, Mapping[str, str]] | None,
-    *,
-    validation_date: date,
-) -> list[str]:
-    issues: list[str] = []
-    for key, metadata in sorted((waivers or PROGRAM_DESIGN_WAIVERS).items()):
-        missing = [field for field in WAIVER_FIELDS if not metadata.get(field)]
-        if missing:
-            issues.append(f"{key} program-design waiver missing field(s): {', '.join(missing)}")
-            continue
-        try:
-            expires = date.fromisoformat(metadata["expires"])
-        except ValueError:
-            issues.append(f"{key} program-design waiver has invalid expires date: {metadata['expires']}")
-            continue
-        if expires < validation_date:
-            issues.append(f"{key} program-design waiver expired on {metadata['expires']}")
-    return issues
-
-
-def _is_waived(
-    relpath: str,
-    rule_id: str,
-    finding: Finding | str,
-    waivers: Mapping[str, Mapping[str, str]] | None,
-) -> bool:
-    finding_key = finding.effective_waiver_key if isinstance(finding, Finding) else finding
-    return f"{relpath}:{rule_id}:{finding_key}" in (waivers or PROGRAM_DESIGN_WAIVERS)
-
-
 def _new_findings(current: tuple[Finding, ...], baseline: tuple[Finding, ...]) -> list[Finding]:
     def identity(item: Finding) -> tuple[str, str]:
         return item.key, item.detail
@@ -585,7 +540,6 @@ def _check_smells(
     relpath: str,
     current: DesignMetrics,
     baseline: DesignMetrics,
-    waivers: Mapping[str, Mapping[str, str]] | None,
 ) -> list[str]:
     checks = (
         ("boolean flag argument", "boolean-flag", current.boolean_flags, baseline.boolean_flags),
@@ -596,8 +550,6 @@ def _check_smells(
     issues: list[str] = []
     for label, rule_id, current_findings, baseline_findings in checks:
         for finding in _new_findings(current_findings, baseline_findings):
-            if _is_waived(relpath, rule_id, finding, waivers):
-                continue
             issues.append(f"{relpath}:{finding.line}:{label}: {finding.detail}")
     return issues
 
@@ -608,7 +560,6 @@ def _check_source(
     baseline_text: str | None,
     *,
     max_public_parameters: int = MAX_PUBLIC_PARAMETERS,
-    waivers: Mapping[str, Mapping[str, str]] | None = None,
 ) -> list[str]:
     try:
         current = _metrics(current_text)
@@ -630,13 +581,12 @@ def _check_source(
         if (
             count > max_public_parameters
             and count > baseline_count
-            and not _is_waived(relpath, "public-interface", name, waivers)
         ):
             issues.append(
                 f"{relpath}:{line}:{name} public interface is too wide ({count} parameters > {max_public_parameters})"
             )
 
-    issues.extend(_check_smells(relpath, current, baseline, waivers))
+    issues.extend(_check_smells(relpath, current, baseline))
     return issues
 
 
@@ -756,15 +706,6 @@ def _scan_paths(
 def main() -> int:
     args = parse_args()
     changed_files = tuple(args.changed_files)
-    metadata_issues = _check_waiver_metadata(
-        None,
-        validation_date=date.today(),
-    )
-    if metadata_issues:
-        print("Program design waiver metadata failed:")
-        for issue in metadata_issues:
-            print(f"- {issue}")
-        return 1
     baseline_ref = args.baseline_ref or _default_baseline_ref(staged_source=args.staged_source, source_ref=args.source_ref)
     if not baseline_ref:
         print("Program design verification blocked: baseline revision could not be determined")

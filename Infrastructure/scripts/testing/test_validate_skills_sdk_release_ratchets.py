@@ -426,7 +426,7 @@ def test_release_ratchets_fail_nested_malformed_tessl_receipt_without_crashing()
         ".harness/evidence/handoff/fixture-skill/tessl-malformed.json"
     ]
 
-def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
+def test_release_ratchets_reject_legacy_evidence_exceptions() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
         root = Path(temp_dir)
@@ -457,12 +457,11 @@ def test_release_ratchets_allow_explicit_legacy_evidence_exceptions() -> None:
         (evidence / "release-ratchet-exceptions.json").write_text(json.dumps(exception_payload), encoding="utf-8")
 
         payload = module.validate(root, "Skills/agent-ops/fixture-skill")
-    assert payload["status"] == "pass"
+    assert payload["status"] == "fail"
     lane = next(check for check in payload["checks"] if check["code"] == "tessl_lane_naming")
-    assert lane["evidence"]["ignored_legacy"] == [".harness/evidence/handoff/fixture-skill/tessl-legacy.json"]
+    assert lane["evidence"]["missing_lane"] == [".harness/evidence/handoff/fixture-skill/tessl-legacy.json"]
     advisories = next(check for check in payload["checks"] if check["code"] == "no_carried_advisories")
-    assert advisories["evidence"]["carried"] == []
-    assert set(advisories["evidence"]["ignored_legacy"]) == {
+    assert set(advisories["evidence"]["carried"]) == {
         ".harness/evidence/handoff/fixture-skill/tessl-legacy.json:Expecting value: line 1 column 1 (char 0)",
         ".harness/evidence/handoff/fixture-skill/package-verify-legacy.json:advisories",
     }
