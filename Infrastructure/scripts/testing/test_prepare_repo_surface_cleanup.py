@@ -92,6 +92,18 @@ def test_retired_skill_reference_hits_block_group(tmp_path) -> None:
     assert retired_group["blockers"] == ["reference_scan_found_hits"]
 
 
+def test_candidate_requires_owner_disposition_and_falsification(tmp_path) -> None:
+    report = MODULE.build_cleanup_report(_inventory(), repo_root=tmp_path, retired_skill_names=[])
+    historical_group = next(
+        group for group in report["groups"] if group["name"] == "historical_generated_artifacts"
+    )
+
+    assert historical_group["state"] == "candidate"
+    assert historical_group["blockers"] == [
+        "future_cleanup_pr_must_confirm_owner_disposition_and_falsification"
+    ]
+
+
 def test_write_reports_creates_json_and_markdown(tmp_path) -> None:
     report = MODULE.build_cleanup_report(_inventory(), repo_root=tmp_path, retired_skill_names=[])
     retired_group = next(group for group in report["groups"] if group["name"] == "retired_skill_debris")
