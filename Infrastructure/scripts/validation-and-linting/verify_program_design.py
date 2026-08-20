@@ -542,13 +542,13 @@ def _check_smells(
     baseline: DesignMetrics,
 ) -> list[str]:
     checks = (
-        ("boolean flag argument", "boolean-flag", current.boolean_flags, baseline.boolean_flags),
-        ("broad exception handler", "broad-exception", current.broad_exceptions, baseline.broad_exceptions),
-        ("global statement", "global-state", current.global_statements, baseline.global_statements),
-        ("module mutable state", "mutable-module-state", current.mutable_module_state, baseline.mutable_module_state),
+        ("boolean flag argument", current.boolean_flags, baseline.boolean_flags),
+        ("broad exception handler", current.broad_exceptions, baseline.broad_exceptions),
+        ("global statement", current.global_statements, baseline.global_statements),
+        ("module mutable state", current.mutable_module_state, baseline.mutable_module_state),
     )
     issues: list[str] = []
-    for label, rule_id, current_findings, baseline_findings in checks:
+    for label, current_findings, baseline_findings in checks:
         for finding in _new_findings(current_findings, baseline_findings):
             issues.append(f"{relpath}:{finding.line}:{label}: {finding.detail}")
     return issues

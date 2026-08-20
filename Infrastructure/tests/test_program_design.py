@@ -115,6 +115,26 @@ class TestProgramDesign(unittest.TestCase):
 
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", "\n" + source, source), [])
 
+    def test_new_duplicate_broad_exception_is_reported(self) -> None:
+        validator = _load_validator()
+        baseline = """try:
+    first()
+except Exception:
+    pass
+"""
+        current = baseline + """
+try:
+    second()
+except Exception:
+    pass
+"""
+
+        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline)
+
+        rendered = "\n".join(issues)
+        self.assertEqual(rendered.count("broad exception handler"), 1)
+        self.assertIn(":8:broad exception handler", rendered)
+
     def test_non_production_paths_are_not_selected(self) -> None:
         validator = _load_validator()
         self.assertEqual(
