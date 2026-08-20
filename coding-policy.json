@@ -81,7 +81,6 @@
 			"requiredGates": [
 				"pnpm lint",
 				"pnpm typecheck",
-				"pnpm run quality:size",
 				"pnpm run quality:debt",
 				"pnpm run test:related"
 			]

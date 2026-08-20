@@ -16,7 +16,10 @@
 - Production paths SHOULD favor immutable updates over in-place mutation.
 - Functions SHOULD remain focused and deeply nested logic SHOULD be split into named helpers.
 
-- Changed production `src/**` files MUST pass `pnpm run quality:size`; oversized legacy files MUST be reduced below the enforced limit or the obsolete owning surface MUST be retired. No size-waiver or allowlist path exists.
+- Changed production code MUST run its owning package or repository structural
+  validation. Oversized legacy code MUST be reduced below the owning limit or
+  its obsolete owner surface MUST be retired. No size-waiver or allowlist path
+  exists.
 
 ## Misuse-resistant interface design
 
@@ -66,10 +69,9 @@ Examples:
 
 ## Enforcement
 
-- Changed production code MUST run `pnpm run quality:size` before handoff.
 - When `harness fitness` reports a `quality-structure` finding, handoff MUST
   include the rerun command and whether the finding was cleared, still present,
-  or intentionally deferred with a tracked reason.
+  or blocked by a concrete missing prerequisite.
 
 - Pattern changes SHOULD be reviewed with targeted examples in PR notes.
 - Any deliberate deviation from these defaults MUST include rationale and a tracker reference.
