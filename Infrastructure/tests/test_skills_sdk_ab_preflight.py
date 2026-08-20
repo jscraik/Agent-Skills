@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import contextmanager
+import importlib
 import sys
 import json
 import os
@@ -16,18 +17,24 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
-from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.ab_transport_contracts import CONFIGS_AUTH_WRAPPER, CONFIGS_CODEX_EXEC_WRAPPER  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-    _approved_cloud_auth_fact,
-    _cloud_catalog_fact,
-    _cloud_runtime_fact,
-    _catalog_probe_result,
-    build_lane_preflight,
-)
-from ask.skills_sdk.eval_profiles import select_judge_profile  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+_catalog_probe = importlib.import_module("ask.skills_sdk.cloud_catalog_probe")
+_transport_contracts = importlib.import_module("ask.skills_sdk.ab_transport_contracts")
+_profile_contracts = importlib.import_module("ask.skills_sdk.ab_profile_contracts")
+_preflight = importlib.import_module("ask.skills_sdk.eval_ab_preflight")
+_profiles = importlib.import_module("ask.skills_sdk.eval_profiles")
+_fixtures = importlib.import_module("skills_sdk_preflight_fixtures")
+
+probe_catalog = _catalog_probe.probe_catalog
+CONFIGS_AUTH_WRAPPER = _transport_contracts.CONFIGS_AUTH_WRAPPER
+CONFIGS_CODEX_EXEC_WRAPPER = _transport_contracts.CONFIGS_CODEX_EXEC_WRAPPER
+AbLanePreflight = _profile_contracts.AbLanePreflight
+_approved_cloud_auth_fact = _preflight._approved_cloud_auth_fact
+_cloud_catalog_fact = _preflight._cloud_catalog_fact
+_cloud_runtime_fact = _preflight._cloud_runtime_fact
+_catalog_probe_result = _preflight._catalog_probe_result
+build_lane_preflight = _preflight.build_lane_preflight
+select_judge_profile = _profiles.select_judge_profile
+declared_profile_preflight = _fixtures.declared_profile_preflight
 
 
 class _CustomBoundarySignal(BaseException):

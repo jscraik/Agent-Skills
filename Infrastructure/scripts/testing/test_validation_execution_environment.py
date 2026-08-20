@@ -25,6 +25,10 @@ DIRECT_BOOTSTRAP_SCRIPTS = (
     "verify_router_schema.py",
     "verify_runtime_budget.py",
 )
+DIRECT_BOOTSTRAP_TESTS = (
+    "test_skills_sdk_ab_preflight.py",
+    "test_skills_sdk_cloud_smoke_contract.py",
+)
 
 
 def _run(*command: str, cwd: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -143,6 +147,16 @@ def test_direct_validation_scripts_do_not_suppress_import_order() -> None:
 
     for script_name in DIRECT_BOOTSTRAP_SCRIPTS:
         source = (script_dir / script_name).read_text(encoding="utf-8")
+        assert "# noqa: E402" not in source
+        assert "importlib.import_module" in source
+
+
+def test_direct_validation_tests_do_not_suppress_import_order() -> None:
+    """Source-bootstrap tests must use explicit runtime module binding."""
+    test_dir = REPO_ROOT / "Infrastructure/tests"
+
+    for test_name in DIRECT_BOOTSTRAP_TESTS:
+        source = (test_dir / test_name).read_text(encoding="utf-8")
         assert "# noqa: E402" not in source
         assert "importlib.import_module" in source
 

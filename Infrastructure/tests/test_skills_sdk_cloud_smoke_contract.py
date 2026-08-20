@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import sys
 import unittest
 from pathlib import Path
@@ -8,8 +9,13 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.ab_transport_contracts import CONFIGS_AUTH_WRAPPER, CONFIGS_CODEX_EXEC_WRAPPER  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.cloud_smoke_contract import cloud_smoke_receipt_findings, valid_cloud_smoke_receipt  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+_transport_contracts = importlib.import_module("ask.skills_sdk.ab_transport_contracts")
+_cloud_smoke_contract = importlib.import_module("ask.skills_sdk.cloud_smoke_contract")
+
+CONFIGS_AUTH_WRAPPER = _transport_contracts.CONFIGS_AUTH_WRAPPER
+CONFIGS_CODEX_EXEC_WRAPPER = _transport_contracts.CONFIGS_CODEX_EXEC_WRAPPER
+cloud_smoke_receipt_findings = _cloud_smoke_contract.cloud_smoke_receipt_findings
+valid_cloud_smoke_receipt = _cloud_smoke_contract.valid_cloud_smoke_receipt
 
 
 def _valid_smoke_receipt() -> dict[str, object]:
