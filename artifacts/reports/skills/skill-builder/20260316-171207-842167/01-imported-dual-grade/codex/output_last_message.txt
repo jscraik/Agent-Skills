@@ -1,8 +1,0 @@
-`$skill-builder` isn’t a registered session skill alias here, so I verified the repository’s `utilities/skill-builder` contract directly. Your requested rule is already implemented verbatim and enforced in multiple places.
-
-- Unified conformance + dual-grade requirement is explicit in [utilities/skill-builder/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md#L85) and [utilities/skill-builder/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md#L320).
-- Install flow requires upstream checks plus gold validators with combined reporting in [utilities/skill-builder/references/imported-eval-interop.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/imported-eval-interop.md#L38).
-- The exact eval case/prompt you gave is already present as `imported-dual-grade` in [utilities/skill-builder/references/evals.yaml](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/evals.yaml#L179).
-
-No file changes were needed.  
-1. If you want, I can add a stricter CI assertion that fails whenever this dual-grade contract text is removed or weakened.
