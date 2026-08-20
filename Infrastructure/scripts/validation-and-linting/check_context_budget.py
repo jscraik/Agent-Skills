@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -18,16 +19,22 @@ if str(LIFECYCLE_DIR) not in sys.path:
 if str(RUNTIME_SEP_DIR) not in sys.path:
     sys.path.insert(0, str(RUNTIME_SEP_DIR))
 
-from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
-from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
-from rooted_projection_runtime import direct_runtime_names_from_manifest_report  # type: ignore  # noqa: E402
-from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
-from yaml_compat import load_yaml_mapping  # type: ignore  # noqa: E402
+_root_skill_sets = importlib.import_module("generate_root_skill_sets")
+_skillset_manifests = importlib.import_module("generate_skillset_manifests")
+_projection_runtime = importlib.import_module("rooted_projection_runtime")
+_selection_policy = importlib.import_module("selection_policy")
+_yaml_compat = importlib.import_module("yaml_compat")
+build_roots = _root_skill_sets.build_roots
+build_manifest_report = _skillset_manifests.build_manifest_report
+direct_runtime_names_from_manifest_report = _projection_runtime.direct_runtime_names_from_manifest_report
+ROOT_SKILL_SET_NAMES = _selection_policy.ROOT_SKILL_SET_NAMES
+policy_identity = _selection_policy.policy_identity
+load_yaml_mapping = _yaml_compat.load_yaml_mapping
 
 # codex-primary-runtime is an active runtime projection directory, not a rooted
 # policy skill set, but manifest provenance may legitimately point through it.
 ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS = set(ROOT_SKILL_SET_NAMES) | {"codex-primary-runtime"}
-from skillset_model import file_hash  # type: ignore  # noqa: E402
+file_hash = importlib.import_module("skillset_model").file_hash
 
 CONFIG_PATH = REPO_ROOT / "Infrastructure" / "GOVERNANCE" / "context-budget.yaml"
 DEFAULTS = {

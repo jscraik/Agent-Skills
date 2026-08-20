@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import importlib
 import os
 import subprocess
 import sys
@@ -35,7 +36,7 @@ from types import MappingProxyType
 _SCRIPT_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPT_DIR not in sys.path:
     sys.path.insert(0, _SCRIPT_DIR)
-import program_design_exact_moves as _exact_moves  # noqa: E402
+_exact_moves = importlib.import_module("program_design_exact_moves")
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MAX_PUBLIC_PARAMETERS = 5

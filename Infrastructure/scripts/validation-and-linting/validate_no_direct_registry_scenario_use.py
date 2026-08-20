@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -11,7 +12,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
 sys.path.insert(0, str(LIB_DIR))
 
-from ask.skills_sdk.scenario_registry_guardrails import validate_no_direct_registry_scenario_use  # noqa: E402
+_guardrails = importlib.import_module("ask.skills_sdk.scenario_registry_guardrails")
+validate_no_direct_registry_scenario_use = _guardrails.validate_no_direct_registry_scenario_use
 
 
 def main(argv: list[str] | None = None) -> int:

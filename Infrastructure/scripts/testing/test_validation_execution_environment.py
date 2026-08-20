@@ -13,6 +13,18 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[3]
 VALIDATE_ALL = REPO_ROOT / "Infrastructure/scripts/validate_all.sh"
 INSTALL_PREK_HOOKS = REPO_ROOT / "Infrastructure/scripts/install-prek-hooks.sh"
+DIRECT_BOOTSTRAP_SCRIPTS = (
+    "check_context_budget.py",
+    "run_oss_cloud_smoke.py",
+    "run_oss_local_smoke.py",
+    "validate_no_direct_registry_scenario_use.py",
+    "validate_skill_authoring_family_benchmarks.py",
+    "validate_skills_sdk_release_ratchets.py",
+    "validate_thread_pm_delivery.py",
+    "verify_program_design.py",
+    "verify_router_schema.py",
+    "verify_runtime_budget.py",
+)
 
 
 def _run(*command: str, cwd: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -123,6 +135,16 @@ def test_validate_all_uses_locked_infrastructure_python() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     assert "Python launcher: uv run --frozen --project Infrastructure" in result.stdout
     assert "Python launcher: python3" not in result.stdout
+
+
+def test_direct_validation_scripts_do_not_suppress_import_order() -> None:
+    """Direct scripts must bootstrap imports without carrying E402 suppression debt."""
+    script_dir = REPO_ROOT / "Infrastructure/scripts/validation-and-linting"
+
+    for script_name in DIRECT_BOOTSTRAP_SCRIPTS:
+        source = (script_dir / script_name).read_text(encoding="utf-8")
+        assert "# noqa: E402" not in source
+        assert "importlib.import_module" in source
 
 
 def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 from collections import defaultdict
@@ -15,30 +16,29 @@ LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
 if str(LIFECYCLE_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_DIR))
 
-from selection_policy import (  # type: ignore  # noqa: E402
-    DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
-    DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
-    DEFAULT_PROJECTION_MODE,
-    PLUGIN_SKILL_COLLISION_POLICIES,
-    ROOT_SKILL_SET_NAMES,
-    SYSTEM_BRIDGE_SKILL_NAMES,
-    policy_identity,
-)
-from rooted_projection_runtime import direct_runtime_names_from_skillsets  # type: ignore  # noqa: E402
-from skill_discovery import (  # type: ignore  # noqa: E402
-    HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
-    PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
-    PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
-    USER_SKILL_SCOPE_PRECEDENCE,
-    classify_skill_scope,
-    discover_catalog_entries,
-    discover_skill_entries,
-    is_plugin_owned_skill_dir,
-    iter_flat_skill_dirs,
-    iter_plugin_skill_dirs,
-    iter_repo_skill_dirs,
-    iter_system_lane_skill_dirs,
-)
+_selection_policy = importlib.import_module("selection_policy")
+_projection_runtime = importlib.import_module("rooted_projection_runtime")
+_skill_discovery = importlib.import_module("skill_discovery")
+DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS = _selection_policy.DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS
+DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES = _selection_policy.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES
+DEFAULT_PROJECTION_MODE = _selection_policy.DEFAULT_PROJECTION_MODE
+PLUGIN_SKILL_COLLISION_POLICIES = _selection_policy.PLUGIN_SKILL_COLLISION_POLICIES
+ROOT_SKILL_SET_NAMES = _selection_policy.ROOT_SKILL_SET_NAMES
+SYSTEM_BRIDGE_SKILL_NAMES = _selection_policy.SYSTEM_BRIDGE_SKILL_NAMES
+policy_identity = _selection_policy.policy_identity
+direct_runtime_names_from_skillsets = _projection_runtime.direct_runtime_names_from_skillsets
+DISCOVERY_HIDDEN_FLAT_SKILL_NAMES = _skill_discovery.HIDDEN_FLAT_SKILL_NAMES
+DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES = _skill_discovery.PLUGIN_HIDDEN_LANE_SKILL_NAMES
+DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = _skill_discovery.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
+USER_SKILL_SCOPE_PRECEDENCE = _skill_discovery.USER_SKILL_SCOPE_PRECEDENCE
+classify_skill_scope = _skill_discovery.classify_skill_scope
+discover_catalog_entries = _skill_discovery.discover_catalog_entries
+discover_skill_entries = _skill_discovery.discover_skill_entries
+is_plugin_owned_skill_dir = _skill_discovery.is_plugin_owned_skill_dir
+iter_flat_skill_dirs = _skill_discovery.iter_flat_skill_dirs
+iter_plugin_skill_dirs = _skill_discovery.iter_plugin_skill_dirs
+iter_repo_skill_dirs = _skill_discovery.iter_repo_skill_dirs
+iter_system_lane_skill_dirs = _skill_discovery.iter_system_lane_skill_dirs
 
 DEFAULT_MAX_VISIBLE = 120
 ADVANCED_WARN_VISIBLE = 60

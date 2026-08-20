@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Compatibility facade for skill-authoring family benchmark validation."""
 
+import importlib
 import sys
 from pathlib import Path
 from types import FunctionType
@@ -10,10 +11,10 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import validate_skill_authoring_family_benchmarks_cli as _cli  # noqa: E402
-import validate_skill_authoring_family_benchmarks_context_checks as _context_checks  # noqa: E402
-import validate_skill_authoring_family_benchmarks_core as _core  # noqa: E402
-import validate_skill_authoring_family_benchmarks_eval_checks as _eval_checks  # noqa: E402
+_cli = importlib.import_module("validate_skill_authoring_family_benchmarks_cli")
+_context_checks = importlib.import_module("validate_skill_authoring_family_benchmarks_context_checks")
+_core = importlib.import_module("validate_skill_authoring_family_benchmarks_core")
+_eval_checks = importlib.import_module("validate_skill_authoring_family_benchmarks_eval_checks")
 
 
 _HELPER_MODULE_NAMES = frozenset(

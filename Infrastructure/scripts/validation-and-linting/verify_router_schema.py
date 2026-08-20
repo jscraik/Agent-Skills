@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -29,7 +30,8 @@ for schema_lib in schema_lib_candidates:
     if schema_lib.exists() and str(schema_lib) not in sys.path:
         sys.path.insert(0, str(schema_lib))
 
-from skill_router_schema import validate_router_result  # noqa: E402
+_router_schema = importlib.import_module("skill_router_schema")
+validate_router_result = _router_schema.validate_router_result
 
 
 def load_payload(path: Path | None) -> Dict[str, Any]:
