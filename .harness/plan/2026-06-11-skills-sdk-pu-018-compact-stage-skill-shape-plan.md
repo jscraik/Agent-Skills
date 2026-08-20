@@ -24,10 +24,7 @@ The work stage must update validator behavior, scaffold output, scaffold tests, 
 - Active branch: `main`
 - Previous-stage artifact: `.harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md`
 - Superseded trace artifact: retained as cited historical evidence at `.harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md`; its accepted product contract is materialized by the slice spec.
-- Review artifacts:
-  - `.harness/review/2026-06-11-pu-018-adversarial-review-results.csv`
-  - `.harness/review/2026-06-11-pu-018-adversarial-review-results-round2.csv`
-  - `.harness/review/2026-06-11-pu-018-adversarial-review-results-round3.csv`
+- Historical reviewer output for this completed stage is not a current proof source.
 - Final adversarial review status: round 3 clean across contract-boundary, implementation-readiness, and evidence-risk lanes.
 - Current dirty baseline from `git status --short --branch`:
   - modified: `Infrastructure/config/skills-sdk/capability-matrix.v1.json`

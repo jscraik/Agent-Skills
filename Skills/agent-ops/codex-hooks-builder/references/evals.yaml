@@ -196,7 +196,7 @@ cases:
   timeout_sec: 240
   should_trigger: true
   prepend_skill: false
-  prompt: Upgrade the repo-local hook pack at codex/hooks/reviewer-swarm/hooks.json for Codex-native reviewer swarms. SubagentStart must inject a task envelope from .harness/runtime/current-card.json, SubagentStop must verify artifacts/reviews/correctness-reviewer.md, hook telemetry must append JSONL to .harness/hooks/events.jsonl, and Stop must check claim-vs-evidence for validation and review-thread readiness.
+  prompt: Upgrade a repository hook pack for Codex-native reviewer swarms. SubagentStart must inject a task envelope from the configured runtime-card source, SubagentStop must verify that reviewer-receipt.json conforms to references/contract.yaml, hook telemetry must append JSONL to its configured sink, and Stop must check claim-vs-evidence for validation and review-thread readiness.
   acceptance:
   - type: skill_selected
     expected_skill: codex-hooks-builder

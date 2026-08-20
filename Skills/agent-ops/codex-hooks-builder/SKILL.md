@@ -26,6 +26,10 @@ Keep the workflow focused on the requested hook decision. Prefer repo-local cont
 ## Inputs
 Require the target hook pack path, install boundary (repo-local, user-level, or plugin-owned), trigger events, script runtime, validation commands, schema/runtime evidence source, active hook sources, and rollback owner before writing.
 
+## Outputs
+
+For non-trivial hook work, return `schema_version: 1`, target hook pack, install boundary, changed paths, runtime contract, validation evidence, rollback, blocker or residual risk, and confidence.
+
 ## Discovery Interview
 
 - Ask one round at a time.
@@ -109,13 +113,9 @@ If hook source, active config layer, trust state, runtime schema, runtime-card f
 - Upgrade Stop from wording checks to conservative claim-vs-evidence verification for tests, artifacts, PR readiness, review threads, and goal completion.
 - Common repair loop: edit source, run `jq empty <hooks.json>`, run the repo hook validator, rerun Plugin Eval, and record rollback.
 
-## Progressive Disclosure
+## References
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/hook-examples.md for current Codex hook JSON and script examples.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.
 - Use Infrastructure/references/deferred-skill-context/agent-ops-codex-hooks-builder/ for legacy examples, scripts, assets, or long-form details.
-
-## Output Format
-
-For non-trivial hook work, return `schema_version: 1`, target hook pack, install boundary, changed paths, runtime contract, validation evidence, rollback, blocker or residual risk, and confidence.
