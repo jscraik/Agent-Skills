@@ -1,9 +1,0 @@
-{
-  "agent_id": "019e9ded-9987-7fd1-8d16-c0049d2f9773",
-  "agent_type": "adversarial-reviewer",
-  "review_scope": "PU-012 spec review after latest fixes",
-  "target_spec": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
-  "report_path": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/reviews/pu-012-breaker-loop-3-pass-1.md",
-  "findings_count": 1,
-  "status": "complete"
-}

@@ -1,9 +1,0 @@
-{
-  "reviewer": "correctness-reviewer",
-  "status": "complete",
-  "artifact_paths": [
-    "artifacts/reviews/codex-pr217.md",
-    "artifacts/reviews/correctness-reviewer.md"
-  ],
-  "findings_count": 0
-}
