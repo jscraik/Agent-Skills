@@ -1,7 +1,0 @@
-## Scope and triggers
-Why this matters: the right fix depends on whether we are changing the global instruction layer, the repo root guidance, or a narrower nested override, because those have different discovery and precedence behavior.
-
-## Required inputs
-- The instruction scope you want to change first.
-
-Which instruction scope are we changing here?

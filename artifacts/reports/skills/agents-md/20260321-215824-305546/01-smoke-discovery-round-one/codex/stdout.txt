@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019d13b1-b23b-7623-8e42-401027c49bc7"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m using the `agents-md` skill and keeping this to round 1 discovery only. The first thing to pin down is scope, because global, repo-root, and nested `AGENTS.md` files have different precedence and cleanup strategies, and choosing the wrong layer can make the instruction chain more confusing instead of less."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Which layer feels messy right now: your global Codex guidance, this repo’s root `AGENTS.md`, or a nested directory override?"}}
-{"type":"turn.completed","usage":{"input_tokens":43299,"cached_input_tokens":2432,"output_tokens":459}}
