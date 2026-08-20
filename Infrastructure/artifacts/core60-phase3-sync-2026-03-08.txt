@@ -1,8 +1,0 @@
-[OK] Updated symlink: /Users/jamiecraik/dev/agent-skills/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
-[OK] Updated symlink: /Users/jamiecraik/.codex/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
-[OK] Updated symlink: /Users/jamiecraik/.agents/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
-[OK] Updated symlink: /Users/jamiecraik/.codex/skills -> /Users/jamiecraik/dev/agent-skills/.agents/skills
-[OK] Updated symlink: /Users/jamiecraik/.openai/codex/skills -> /Users/jamiecraik/dev/agent-skills/skills-codex
-[OK] Updated symlink: /Users/jamiecraik/.openai/skills -> /Users/jamiecraik/dev/agent-skills/skills-codex
-[OK] Updated symlink: /Users/jamiecraik/.codex/skills -> /Users/jamiecraik/dev/agent-skills/skills-codex
-Synced symlinks and regenerated SKILL.md.
