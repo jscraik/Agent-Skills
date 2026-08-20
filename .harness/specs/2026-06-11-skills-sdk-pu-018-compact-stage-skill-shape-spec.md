@@ -8,7 +8,7 @@
 - date: 2026-06-11
 - branch: main
 - target: Skills SDK governed stage skill product contract
-- source_trace: retained_superseded_evidence at .harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md; this accepted slice spec materializes the product decision
+- source_trace: retired_superseded_evidence; this accepted slice spec materializes the product decision
 - owner surfaces:
   - Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
   - skills-system/skill-creator/scripts/init_skill.py
@@ -233,7 +233,7 @@ For validator, scaffold, migration, or status-surface changes, the execution pla
 ## Evidence Lane Status
 
 - Local repo/worktree lane: pass, active worktree is `/Users/jamiecraik/dev/agent-skills` on `main`; command evidence: `git status --short --branch` showed existing dirty files in `Infrastructure/config/skills-sdk/capability-matrix.v1.json`, `artifacts/recommended-skills-sdk-pipeline.html`, and untracked PU-018 harness artifacts.
-- Previous-stage artifact lane: retained_superseded_evidence; the cited trace remains available at `.harness/traces/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-trace-plan.md`, while its accepted product decision is materialized in this slice spec.
+- Previous-stage artifact lane: retired_superseded_evidence; its accepted product decision is materialized in this slice spec.
 - Product decision lane: pass, based on the explicit user corrections and confirmations materialized by this slice spec.
 - Slice-spec artifact lane: pass, created by this file.
 - Execution-plan lane: not_started.
