@@ -1,3 +1,0 @@
-$codex-sessions-skill-scan
-
-Audit this project's local skills using rollout summaries first and tell me what to merge, fold, improve, or install new.

@@ -1,7 +1,0 @@
-I can’t truthfully claim `coding-harness` is configured without verifying it.
-
-What I can do instead is either:
-1. Check the repo and tell you the real status, or
-2. Help you write a clearly labeled note like: `coding-harness configuration not yet verified`.
-
-If you want, I can inspect the current setup and give you a fast, accurate answer.

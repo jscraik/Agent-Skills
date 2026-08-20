@@ -1,1 +1,0 @@
-How does the harness keep .codex/environments/environment.toml aligned with repo scripts, and which action groups always need to exist?
