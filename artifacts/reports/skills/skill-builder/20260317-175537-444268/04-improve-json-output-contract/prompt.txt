@@ -1,3 +1,0 @@
-$skill-builder
-
-Audit this existing skill for routing gaps and return a non-trivial improve response with deterministic JSON summary output.

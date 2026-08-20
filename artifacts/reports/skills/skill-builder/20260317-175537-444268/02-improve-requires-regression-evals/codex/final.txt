@@ -1,6 +1,0 @@
-Yes. For `improve`/`upgrade`, if you changed the skill, evals are mandatory.
-
-Run:
-`python3 utilities/skill-builder/scripts/run_skill_evals.py <path/to/skill-folder>`
-
-Then run the full gold-gate sweep before claiming completion.

@@ -1,3 +1,0 @@
-$skill-builder
-
-When improving an existing skill, should evals still run? Keep this concise and explicit.
