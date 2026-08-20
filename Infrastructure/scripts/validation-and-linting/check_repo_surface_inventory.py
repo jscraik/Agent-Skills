@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import argparse
-import fnmatch
 import json
 import subprocess
 import sys
@@ -21,8 +19,6 @@ from repo_surface_inventory_cli import SERVICE_ID, error_report, parse_args
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_ALLOWLIST = Path("Infrastructure") / "policy" / "repo_surface_allowlist.json"
-
 SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 
 FUTURE_ARTIFACT_DEBT_CLASSIFICATIONS = {"historical_artifact"}
@@ -53,12 +49,14 @@ SOURCE_PREFIXES = (
     "Infrastructure/bin",
     "Infrastructure/tests",
     "bin",
+    "codex/agents/evals",
     "scripts",
     "utilities",
     "brand",
 )
 
 REFERENCE_PREFIXES = (
+    "AI/context",
     "Infrastructure/references",
     "Wiki",
     ".harness/knowledge",
@@ -87,6 +85,8 @@ HARNESS_REFERENCE_PREFIXES = (
 
 POLICY_PREFIXES = (
     "Docs",
+    "codestyle",
+    "contracts",
     ".github",
     ".agents/workflows",
     ".circleci",
@@ -119,14 +119,24 @@ POLICY_EXACT_PATHS = {
     ".harness/upgrade-manifest.json",
     "CODEOWNERS",
     "GOVERNANCE",
+    "coding-policy.json",
     "Infrastructure/docs-policy.json",
+    "Infrastructure/AGENTS.md",
     "Infrastructure/Makefile",
     "Infrastructure/memory.json",
     "Infrastructure/prek.toml",
     "Infrastructure/pyproject.toml",
     "Infrastructure/uv.lock",
     "LICENSE",
+    "artifacts/AGENTS.md",
+    "logs/AGENTS.md",
 }
+
+HARNESS_REFERENCE_EXACT_PATHS = frozenset({
+    ".harness/active-artifacts.md",
+    ".harness/artifact-provenance.json",
+    ".harness/review-log.md",
+})
 
 FIXTURE_PREFIXES = (".workouts", "Infrastructure/templates", "Infrastructure/vendor")
 
@@ -141,18 +151,6 @@ AUTHORED_SOURCE_PREFIXES = (
 
 
 @dataclass(frozen=True)
-class AllowlistEntry:
-    id: str
-    match_type: str
-    pattern: str
-    classification: str
-    reason: str
-    owner: str
-    review_after: str | None = None
-    expires: str | None = None
-
-
-@dataclass(frozen=True)
 class SurfaceFinding:
     path: str
     classification: str
@@ -160,7 +158,6 @@ class SurfaceFinding:
     code: str
     severity: str
     blocking: bool
-    allowlist_entry: str | None
     reason: str
     recommendation: str
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -257,7 +254,6 @@ def _make_finding(
     blocking: bool,
     reason: str,
     recommendation: str,
-    allowlist_entry: str | None = None,
     metadata: dict[str, Any] | None = None,
 ) -> SurfaceFinding:
     metadata = _normalize_metadata(metadata or {})
@@ -268,7 +264,6 @@ def _make_finding(
         code=code,
         severity=severity,
         blocking=blocking,
-        allowlist_entry=allowlist_entry,
         reason=reason,
         recommendation=recommendation,
         metadata=metadata,
@@ -303,17 +298,17 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 FINDING_SPECS = {
     "lowercase_docs_drift": ("classification_required", "violation", "error", True, "Docs/** is the canonical documentation root; lowercase docs/** is casing drift.", "Move the content to Docs/** or document an explicit compatibility migration.", ("move_to_canonical_docs_root", "update_references")),
-    "duplicated_infrastructure_path": ("classification_required", "violation", "error", True, "Duplicated Infrastructure/Infrastructure path shape is suspicious.", "Reference-scan and either delete generated debris or add a documented allowlist entry.", ("scan_references", "decide_owner_or_cleanup")),
+    "duplicated_infrastructure_path": ("classification_required", "violation", "error", True, "Duplicated Infrastructure/Infrastructure path shape is suspicious.", "Reference-scan and either delete generated debris or classify the canonical owner.", ("scan_references", "decide_owner_or_cleanup")),
     "tracked_plugin_cache": ("generated_ignored", "violation", "error", True, "Plugin cache content is generated runtime state and should not be newly tracked.", "Remove from git after verifying no fixture or vendored snapshot contract applies.", ("verify_no_fixture_consumer", "remove_from_tracked_surface")),
     "tracked_runtime_state": ("runtime_state", "violation", "error", True, "Skill telemetry is local runtime output.", "Keep telemetry untracked unless converted into a documented fixture.", ("verify_fixture_role", "remove_or_relocate")),
     "tracked_runtime_database": ("runtime_state", "violation", "error", True, "Harness database files are runtime state by default.", "Move under fixtures with a documented consumer or remove from tracked source.", ("prove_fixture_consumer", "document_or_untrack")),
     "tracked_harness_backup": ("runtime_state", "violation", "error", True, "Harness backups are local scratch output.", "Keep backups ignored and untracked.", ("remove_from_tracked_surface",)),
-    "tracked_harness_snapshot": ("historical_artifact", "warning", "warning", False, "Harness run, review, trace, and migration artifacts are generated evidence by default.", "Track only an allowlisted fixture or retained summary; otherwise keep snapshots ignored.", ("retain_fixture_or_archive_reason", "remove_from_tracked_surface")),
+    "tracked_harness_snapshot": ("historical_artifact", "warning", "warning", False, "Harness run, review, trace, and migration artifacts are generated evidence by default.", "Keep only a canonical fixture, reference, or intentional archive; otherwise remove the tracked snapshot.", ("retain_fixture_or_archive_reason", "remove_from_tracked_surface")),
     "generated_skillset_projection": ("generated_tracked", "ok", "info", False, ".skillsets contains rooted skill manifests and command-surface projections generated from canonical skill sources.", "Regenerate through skills sync rather than hand-editing.", ("validate_projection_if_changed",)),
     "system_skill_surface": ("generated_tracked", "ok", "info", False, "skills-system contains the governed system-skill bridge pinned by Infrastructure/GOVERNANCE/skills-system-upstream.lock.json.", "Refresh only through the system-skills upstream lock and projection-integrity workflow; do not hand-fork OpenAI-owned SKILL.md bodies.", ("preserve_system_skills_lock", "validate_projection_if_changed")),
     "ownership_decision_required": ("classification_required", "violation", "error", True, "skills-system path is outside the governed system-skill lock or bridge prefixes.", "Document the reader or update command, add it to the system-skills lock/bridge contract, or remove the stray path.", ("identify_reader_or_update_command", "document_owner")),
     "tracked_generated_work_area": ("historical_artifact", "warning", "warning", False, "Temporary and backlog work areas are not canonical source surfaces by default.", "Reference-scan and retain only documented fixtures, indexes, or source migrations.", ("reference_scan", "decide_fixture_or_cleanup")),
-    "tracked_historical_artifact": ("historical_artifact", "warning", "warning", False, "Generated evidence and run artifacts are ignored by default.", "Keep only allowlisted fixtures, summaries, indexes, or intentional archives.", ("reference_scan", "retain_fixture_or_archive_reason")),
+    "tracked_historical_artifact": ("historical_artifact", "warning", "warning", False, "Generated evidence and run artifacts are ignored by default.", "Keep only a canonical fixture, reference, or intentional archive; otherwise remove the tracked artifact.", ("reference_scan", "retain_fixture_or_archive_reason")),
     "generated_evidence_pattern": ("historical_artifact", "warning", "warning", False, "JSONL and log files often represent generated evidence.", "Confirm this file is a fixture or move it to generated output.", ("confirm_fixture_or_generated_output",)),
     "command_surface_handle": ("generated_tracked", "ok", "info", False, "Command-surface handles are tracked compatibility metadata surfaces.", "Regenerate through sync rather than hand-editing.", ("validate_projection_if_changed",)),
     "plugin_fixture_surface": ("fixture", "ok", "info", False, "Path is a plugin-owned fixture or archived budget fixture with an explicit consumer.", "Track only when tests, packaging, or preservation indexes reference it.", ("keep_consumer_documented",)),
@@ -326,7 +321,7 @@ FINDING_SPECS = {
     "policy_surface": ("policy", "ok", "info", False, "Path is governance, routing, configuration, or validation policy.", "Track and keep linked from the relevant front door.", ("run_policy_validation_if_changed",)),
     "fixture_or_template_surface": ("fixture", "ok", "info", False, "Path is a stable fixture, template, or vendored support input.", "Track only with a clear consumer and reason.", ("keep_consumer_documented",)),
     "authored_source_surface": ("source", "ok", "info", False, "Path is authored repository source.", "Track and validate through the owning workflow.", ("run_owner_validation_if_changed",)),
-    "classification_required": ("classification_required", "violation", "error", True, "No repo surface ownership rule matched this tracked path, and tracked paths may not use unknown or any ownership.", "Classify the path in policy, add a documented allowlist entry, or remove the unowned tracked surface after reference checks.", ("inspect_owner", "update_policy_or_allowlist")),
+    "classification_required": ("classification_required", "violation", "error", True, "No repo surface ownership rule matched this tracked path, and tracked paths may not use unknown or any ownership.", "Classify the path in policy or remove the unowned tracked surface after reference checks.", ("inspect_owner", "update_policy_or_cleanup")),
 }
 
 
@@ -363,13 +358,24 @@ def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding 
 
 def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
     return normalized in {"artifacts/recommended-skills-sdk-pipeline.html", "artifacts/skills-sdk-user-lifecycle-one-page.html"} or (
-        _starts_with(normalized, "Skills") and "/references/scorer-calibration/" in normalized and suffix == ".jsonl"
+        _starts_with(normalized, "Skills") and "/references/scorer-calibration/" in normalized
     )
 
 
-def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+def _classify_governed_generated_surface(normalized: str) -> SurfaceFinding | None:
+    if normalized == "skills-system/AGENTS.md":
+        return _finding(normalized, "policy_surface")
     if _starts_with_any(normalized, HARNESS_HISTORICAL_PREFIXES):
         return _finding(normalized, "tracked_harness_snapshot")
+    if _starts_with(normalized, ".harness/evidence"):
+        return _finding(normalized, "harness_reference_surface")
+    return None
+
+
+def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+    governed_finding = _classify_governed_generated_surface(normalized)
+    if governed_finding is not None:
+        return governed_finding
     if _starts_with(normalized, ".skillsets"):
         return _finding(normalized, "generated_skillset_projection")
     if _starts_with(normalized, "skills-system") and _is_governed_system_skill_surface(normalized):
@@ -402,6 +408,8 @@ def _classify_source_surface(normalized: str) -> SurfaceFinding | None:
 
 
 def _classify_reference_surface(normalized: str) -> SurfaceFinding | None:
+    if normalized in HARNESS_REFERENCE_EXACT_PATHS:
+        return _finding(normalized, "harness_reference_surface")
     if _starts_with_any(normalized, REFERENCE_PREFIXES):
         return _finding(normalized, "indexed_reference_surface")
     if _starts_with(normalized, ".harness/archive"):
@@ -435,106 +443,6 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     return next((finding for finding in rules if finding is not None), _finding(normalized, "classification_required"))
 
 
-def load_allowlist(path: Path) -> list[AllowlistEntry]:
-    if not path.exists():
-        return []
-    data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("schema_version") != 1:
-        raise ValueError(f"{path}: schema_version must be 1")
-    entries = data.get("entries")
-    if not isinstance(entries, list):
-        raise ValueError(f"{path}: entries must be a list")
-
-    parsed: list[AllowlistEntry] = []
-    for raw in entries:
-        if not isinstance(raw, dict):
-            raise ValueError(f"{path}: each entry must be an object")
-        missing = [
-            key
-            for key in ("id", "match_type", "pattern", "classification", "reason", "owner")
-            if not raw.get(key)
-        ]
-        if missing:
-            raise ValueError(f"{path}: allowlist entry missing required keys: {', '.join(missing)}")
-        if raw["match_type"] not in {"exact", "prefix", "glob"}:
-            raise ValueError(f"{path}: invalid match_type for {raw['id']}")
-        if not raw.get("review_after") and not raw.get("expires"):
-            raise ValueError(f"{path}: allowlist entry {raw['id']} needs review_after or expires")
-        parsed.append(
-            AllowlistEntry(
-                id=str(raw["id"]),
-                match_type=str(raw["match_type"]),
-                pattern=_normalize_path(str(raw["pattern"])),
-                classification=str(raw["classification"]),
-                reason=str(raw["reason"]),
-                owner=str(raw["owner"]),
-                review_after=raw.get("review_after"),
-                expires=raw.get("expires"),
-            )
-        )
-    return parsed
-
-
-def validate_exact_allowlist_targets(
-    repo_root: Path, entries: list[AllowlistEntry]
-) -> None:
-    """Reject exact retention declarations whose tracked target is missing."""
-    tracked_files = set(git_ls_files(repo_root))
-    missing = [
-        entry
-        for entry in entries
-        if entry.match_type == "exact" and entry.pattern not in tracked_files
-    ]
-    if missing:
-        details = ", ".join(f"{entry.id}: {entry.pattern}" for entry in missing)
-        raise ValueError(f"exact allowlist targets must exist: {details}")
-
-
-def _allowlist_score(entry: AllowlistEntry) -> tuple[int, int, str]:
-    match_rank = {"exact": 0, "prefix": 1, "glob": 2}[entry.match_type]
-    return (match_rank, -len(entry.pattern), entry.id)
-
-
-def _entry_matches(entry: AllowlistEntry, finding: SurfaceFinding) -> bool:
-    if entry.classification != finding.classification:
-        return False
-    if entry.match_type == "exact":
-        return finding.path == entry.pattern
-    if entry.match_type == "prefix":
-        return _starts_with(finding.path, entry.pattern)
-    return fnmatch.fnmatchcase(finding.path, entry.pattern)
-
-
-def matching_allowlist_entry(
-    finding: SurfaceFinding, allowlist_entries: list[AllowlistEntry]
-) -> AllowlistEntry | None:
-    matches = [entry for entry in allowlist_entries if _entry_matches(entry, finding)]
-    if not matches:
-        return None
-    return sorted(matches, key=_allowlist_score)[0]
-
-
-def apply_allowlist(
-    finding: SurfaceFinding, allowlist_entries: list[AllowlistEntry]
-) -> SurfaceFinding:
-    entry = matching_allowlist_entry(finding, allowlist_entries)
-    if entry is None or finding.status == "ok":
-        return finding
-
-    return _make_finding(
-        finding.path,
-        classification=finding.classification,
-        status="warning",
-        code=finding.code,
-        severity="warning",
-        blocking=False,
-        allowlist_entry=entry.id,
-        reason=f"{finding.reason} Allowlisted: {entry.reason}",
-        recommendation=f"Review allowlist entry {entry.id} by {entry.review_after or entry.expires}.",
-        metadata={**finding.metadata, "allowlist_owner": entry.owner},
-    )
-
-
 def _is_changed_path(finding: SurfaceFinding, changed_files: set[str]) -> bool:
     return finding.path in changed_files
 
@@ -544,8 +452,6 @@ def apply_future_artifact_debt_guard(
     changed_files: set[str],
 ) -> SurfaceFinding:
     if not changed_files or not _is_changed_path(finding, changed_files):
-        return finding
-    if finding.allowlist_entry is not None:
         return finding
     if finding.status != "warning" or finding.classification not in FUTURE_ARTIFACT_DEBT_CLASSIFICATIONS:
         return finding
@@ -557,15 +463,13 @@ def apply_future_artifact_debt_guard(
         code="new_historical_artifact_debt",
         severity="error",
         blocking=True,
-        allowlist_entry=None,
         reason=(
             f"{finding.reason} This changed-file lane would add or modify tracked "
             "historical artifact debt."
         ),
         recommendation=(
-            "Move future run output to ignored temp or evidence storage, convert it "
-            "to a documented fixture/reference/archive, or add a reviewed allowlist "
-            "entry before tracking it."
+            "Move future run output to ignored temp or evidence storage, or convert it "
+            "to a canonical fixture, reference, or intentional archive before tracking it."
         ),
         metadata={
             **finding.metadata,
@@ -577,15 +481,13 @@ def apply_future_artifact_debt_guard(
 
 def classify_paths(
     paths: list[str | Path],
-    allowlist_entries: list[AllowlistEntry] | None = None,
     *,
     changed_files: list[str | Path] | None = None,
 ) -> list[SurfaceFinding]:
-    allowlist_entries = allowlist_entries or []
     changed_file_set = {_normalize_path(path) for path in changed_files or []}
     findings = [
         apply_future_artifact_debt_guard(
-            apply_allowlist(classify_path(path), allowlist_entries),
+            classify_path(path),
             changed_file_set,
         )
         for path in paths
@@ -670,8 +572,8 @@ def build_report(
                 ),
                 _next_step(
                     "policy",
-                    "edit Docs/agents/15-repo-surface-ownership.md or Infrastructure/policy/repo_surface_allowlist.json",
-                    "Document intentional exceptions instead of hiding policy debt.",
+                    "edit Docs/agents/15-repo-surface-ownership.md and the owning classifier rule",
+                    "Encode canonical ownership instead of suppressing policy debt.",
                 ),
                 _next_step(
                     "safety",
@@ -716,17 +618,12 @@ def print_human_report(report: dict[str, Any]) -> None:
 
 def _build_report_for_args(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(args.repo_root or REPO_ROOT).resolve()
-    allowlist_path = Path(args.allowlist or DEFAULT_ALLOWLIST)
-    if not allowlist_path.is_absolute():
-        allowlist_path = repo_root / allowlist_path
-    allowlist_entries = load_allowlist(allowlist_path)
-    validate_exact_allowlist_targets(repo_root, allowlist_entries)
     changed_files = _load_changed_files(args, repo_root)
     paths = sorted(
         set(git_ls_files(repo_root))
         | {path for path in changed_files if (repo_root / path).exists()}
     )
-    findings = classify_paths(paths, allowlist_entries, changed_files=changed_files)
+    findings = classify_paths(paths, changed_files=changed_files)
     return build_report(findings, strict=args.strict, changed_files=changed_files)
 
 def _load_changed_files(args: argparse.Namespace, repo_root: Path) -> list[str]:
