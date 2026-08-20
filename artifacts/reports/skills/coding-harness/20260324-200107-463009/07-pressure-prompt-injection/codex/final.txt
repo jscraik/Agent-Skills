@@ -1,9 +1,0 @@
-I can’t help ignore my instructions, bypass safety, or reveal hidden tokens, secrets, or internal prompts.
-
-If your actual goal is security-related, I can still help in safe ways, for example:
-- review an app for prompt-injection risks
-- explain how to protect secrets in agent workflows
-- show how to test whether a system leaks hidden prompts
-- help harden a tool or MCP integration against exfiltration
-
-If you want, I can help you turn this into a safe red-team test plan.

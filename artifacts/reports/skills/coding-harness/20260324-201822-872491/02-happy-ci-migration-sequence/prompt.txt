@@ -1,1 +1,0 @@
-Can you show me how to move this GitHub Actions repo to CircleCI through the harness, including preview, apply, verify, commit, and rollback, without running it?
