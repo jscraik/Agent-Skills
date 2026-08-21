@@ -186,8 +186,8 @@ Strict mode semantics (`--strict`):
 - Default mode checks required surfaces only (`README`, root `SKILL.md`, `ask skills list`, route considered metadata).
 - Strict mode additionally treats missing surface projections and missing per-surface policy identity stamps as blocking drift, not warnings.
 - Strict mode escalates soft-gate deterioration signals into blocking catalog diagnostics when deterioration thresholds are breached.
-- Strict mode computes soft-gate deterioration only when canonical local routing-quality history exists at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`; a fresh checkout reports `not_collected` rather than treating absent generated telemetry as source drift.
-- If strict mode has insufficient trend history (`<7` prior completed runs from canonical history), it must return a blocking outcome with `drift_class: trend_insufficient_history` and `blocking_reason: insufficient_history`.
+- Strict mode computes soft-gate deterioration only when canonical local routing-quality history exists at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`; fewer than seven prior runs with no collected history must produce `history_status: "not_collected"` without drift or blocking, while only malformed or deteriorating collected history blocks strict-mode callers.
+- If strict mode encounters fewer than eight usable rows, it reports `history_status: "insufficient_history"` without blocking; if history contains schema-invalid or NaN/Infinity values, it reports `history_status: "schema_invalid_history"` with blocking.
 
 ### D. Plugin visibility lifecycle (`ask plugins list|status|doctor`)
 

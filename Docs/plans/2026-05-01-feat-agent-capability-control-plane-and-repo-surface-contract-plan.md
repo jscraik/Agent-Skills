@@ -286,11 +286,13 @@ contract:
 Unknown ownership is never a deletion signal. It is a blocker until one of the
 decision tests produces evidence and the policy records the outcome.
 
-### Historical Allowlist Proposal
+### Historical Note: Allowlist Contract Superseded
 
-The first-slice allowlist proposal was retired. Repo-surface findings now carry
-their ownership classification and repair guidance directly; none may be
-downgraded through an exception file.
+The first-slice allowlist proposal from early drafts was retired during
+implementation. The canonical repo-surface contract reports findings with
+ownership classification and repair guidance directly; exception files cannot
+downgrade findings. The implemented contract does not include `allowlist_entry`
+remediation payloads or retention requirements for allowlist structures.
 
 ## High-Level Technical Design
 

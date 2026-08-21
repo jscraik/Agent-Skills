@@ -122,10 +122,18 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
             unresolved = unresolved_count / fixtures
             no_candidate = no_candidate_count / fixtures
         try:
+            unresolved_float = float(unresolved)
+            no_candidate_float = float(no_candidate)
+            # Reject NaN and Infinity values before trend comparisons
+            import math
+            if math.isnan(unresolved_float) or math.isinf(unresolved_float):
+                return None, "schema_invalid_history"
+            if math.isnan(no_candidate_float) or math.isinf(no_candidate_float):
+                return None, "schema_invalid_history"
             rows.append(
                 {
-                    "unresolved_ambiguity_rate": float(unresolved),
-                    "no_candidate_rate": float(no_candidate),
+                    "unresolved_ambiguity_rate": unresolved_float,
+                    "no_candidate_rate": no_candidate_float,
                 }
             )
         except (TypeError, ValueError):

@@ -145,7 +145,7 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
     grade_text = grade.strip() if isinstance(grade, str) else grade
     score_value = int(score_raw) if score_raw is not None else 0
     grade_floor_met = _grade_rank(grade_text) >= _grade_rank("B+")
-    grade_acceptable = grade_floor_met
+    grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B")
     blocking_fail_count = fail_count
     posture, posture_detail = _plugin_eval_posture(
         fail_count=fail_count,

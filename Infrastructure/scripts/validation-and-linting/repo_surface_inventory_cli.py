@@ -45,7 +45,7 @@ def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
                     "next_steps": [
                         {
                             "type": "fix",
-                            "command": "python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --help",
+                            "command": "./bin/ask repo surface --help",
                             "rationale": "Fix the inventory command inputs or canonical ownership rule.",
                         }
                     ]

@@ -537,13 +537,13 @@ Selected contract:
   later planning confirms the command router can support it without
   command-surface confusion.
 - JSON must use policy language: `classification`, `status`, `code`,
-  `severity`, `blocking`, `reason`, `recommendation`, `allowlist_entry`, and
+  `severity`, `blocking`, `reason`, `recommendation`, and
   `metadata.next_steps`.
-- `allowlist_entry` is required and must be either `null` or the matching
-  allowlist entry `id`.
 - `metadata.next_steps` is the authoritative machine-readable next-action field.
   Any human `next command` summary is derived from it and must not conflict with
   it.
+- Findings are reported with ownership and repair guidance; waiver or exception
+  files cannot downgrade findings.
 - Human output may use bloat language, but it must never recommend deletion
   before reference scan and classification.
 

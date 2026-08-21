@@ -100,10 +100,12 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         self.assertTrue(manifest.is_file())
         lines = manifest.read_text(encoding="utf-8").splitlines()
         self.assertTrue(lines, "Expected at least one manifest row")
-        first_row = json.loads(lines[0])
-        self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
-        self.assertTrue(first_row["provenance"]["source_sha256"])
-        self.assertNotIn("source_revision", first_row["provenance"])
+        # Verify provenance requirements for every generated row, not just first_row
+        for line in lines:
+            row = json.loads(line)
+            self.assertEqual(row["provenance"]["projection_mode"], "rooted")
+            self.assertTrue(row["provenance"]["source_sha256"])
+            self.assertNotIn("source_revision", row["provenance"])
 
     def test_system_manifest_provenance_hashes_canonical_system_store(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
