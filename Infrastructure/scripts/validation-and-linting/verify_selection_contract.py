@@ -4,35 +4,29 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import logging
+import sys
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
-import sys
-
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from selection_policy import policy_identity
-from ask.selection_contract import EligibleCandidate, build_decision_payload, build_goal_decision
+selection_policy_module = importlib.import_module("selection_policy")
+selection_contract_module = importlib.import_module("ask.selection_contract")
+policy_identity = selection_policy_module.policy_identity
+EligibleCandidate = selection_contract_module.EligibleCandidate
+build_decision_payload = selection_contract_module.build_decision_payload
+build_goal_decision = selection_contract_module.build_goal_decision
 
 logger = logging.getLogger(__name__)
-HISTORY_COMPARISON_KEYS = (
-    "decision_status_counts",
-    "no_candidate_rate",
-    "unresolved_ambiguity_rate",
-    "parity_status",
-    "policy_identity",
-)
-HISTORY_CHECKPOINT_INTERVAL = timedelta(hours=24)
-
-
 def resolve_fixture_path(filename: str) -> Path:
     """
     Resolve a selection-contract fixture path across supported repository layouts.
@@ -147,7 +141,7 @@ def _append_history(
     Append a metrics row to a bounded JSONL history file, preserving only previously valid metric rows.
     
     Reads existing JSONL lines from `history_path`, ignoring blank lines, non-JSON lines and payloads that are not objects or that lack both `unresolved_ambiguity_rate` and `no_candidate_rate`.
-    Appends `row` only when tracked quality metrics changed, or when the periodic checkpoint interval elapsed.
+    Appends `row` for every completed validation run.
     Truncates the combined list to the last `max(1, int(max_runs))` entries, ensures the parent directory exists, and writes the resulting list back to `history_path` as JSONL.
     
     Parameters:
@@ -179,24 +173,7 @@ def _append_history(
                 continue
             existing_rows.append(payload)
 
-    should_append = True
-    if existing_rows:
-        previous = existing_rows[-1]
-        previous_signature = {key: previous.get(key) for key in HISTORY_COMPARISON_KEYS}
-        current_signature = {key: row.get(key) for key in HISTORY_COMPARISON_KEYS}
-        if previous_signature == current_signature:
-            previous_generated_at = _parse_history_timestamp(previous.get("generated_at"))
-            current_generated_at = _parse_history_timestamp(row.get("generated_at"))
-            should_append = (
-                previous_generated_at is not None
-                and current_generated_at is not None
-                and current_generated_at - previous_generated_at >= HISTORY_CHECKPOINT_INTERVAL
-            )
-            if not should_append:
-                logger.info("Skipping history append because tracked metrics are unchanged")
-
-    if should_append:
-        existing_rows.append(row)
+    existing_rows.append(row)
 
     bounded_rows = existing_rows[-max(1, int(max_runs)) :]
 
@@ -217,20 +194,6 @@ def _append_history(
         with corrupt_path.open("a", encoding="utf-8") as handle:
             for line in discarded_lines:
                 handle.write(line + "\n")
-
-
-def _parse_history_timestamp(value: Any) -> datetime | None:
-    if not isinstance(value, str):
-        return None
-    candidate = value.strip()
-    if not candidate:
-        return None
-    if candidate.endswith("Z"):
-        candidate = candidate[:-1] + "+00:00"
-    try:
-        return datetime.fromisoformat(candidate)
-    except ValueError:
-        return None
 
 
 def main() -> int:

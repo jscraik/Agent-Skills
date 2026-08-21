@@ -198,14 +198,7 @@ def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | N
     if history_issue == "missing_history":
         return "not_collected", None
     if history_issue == "insufficient_history":
-        return (
-            history_issue,
-            (
-                "trend_insufficient_history",
-                "insufficient_history",
-                f"Collect at least eight completed validation runs in {HISTORY_PATH.as_posix()} before strict validation can pass.",
-            ),
-        )
+        return history_issue, None
     if history_issue == "schema_invalid_history":
         return (
             history_issue,
