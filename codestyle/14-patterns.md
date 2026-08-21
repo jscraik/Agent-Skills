@@ -16,7 +16,7 @@
 - Production paths SHOULD favor immutable updates over in-place mutation.
 - Functions SHOULD remain focused and deeply nested logic SHOULD be split into named helpers.
 
-- Changed production `src/**` files MUST pass `pnpm run quality:size`; oversized legacy files MUST have an explicit allowlist entry and SHOULD be reduced opportunistically rather than expanded.
+- Changed production `src/**` files MUST pass `pnpm run quality:size`; oversized legacy files MUST be reduced below the enforced limit or the obsolete owning surface MUST be retired. No size-waiver or allowlist path exists.
 
 ## Misuse-resistant interface design
 
