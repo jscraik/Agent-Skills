@@ -101,7 +101,7 @@ before removing historical artifacts or adding broader product golden paths.
 - R3. Detect tracked generated/historical artifacts under `artifacts/**` and
   `Infrastructure/artifacts/**` without deleting them in the first slice.
 - R4. Flag suspicious nested infra paths such as `Infrastructure/Infrastructure/**`
-  unless explicitly allowlisted with a reason.
+  until an active owner and consumer are classified or the path is removed.
 - R5. Force explicit ownership decisions for `.skillsets/**`, `.harness/*.db`,
   `skills-system/**`, and `Plugins/cache/**`.
 - R6. Preserve deferred context behind indexed references and keep it out of
@@ -211,7 +211,7 @@ canonical JSON contract should use surface inventory language.
 
 The first PR must not delete tracked artifacts. It creates the policy,
 classifier, command route, tests, and live report. Cleanup starts only after
-reference scanning and allowlist behavior are tested.
+reference scanning and ownership classification are tested.
 
 ### D3: Classifier Owns Categories, Policy Owns Meaning
 
@@ -524,7 +524,7 @@ through an exception file.
 - Include the rule that unknown ownership is a blocker, not a delete signal.
 - Include the ownership decision-test matrix from this plan so unresolved
   surfaces cannot be classified by assertion alone.
-- Include the allowlist contract and matching precedence from this plan.
+- Include the ownership contract and its no-downgrade finding semantics.
 - Include the rule that deferred context is preserved behind indexes.
 
 **Test scenarios:**
@@ -571,7 +571,7 @@ in parallel if it imports policy constants locally.
 - Use `git ls-files` from the repo root for tracked-file inventory.
 - Classify by path pattern first, then by extension/pattern for generated
   evidence such as `.jsonl`, `.log`, timestamped validation dirs, and runtime DBs.
-- Detect `Infrastructure/Infrastructure/**` as a violation unless allowlisted.
+- Detect `Infrastructure/Infrastructure/**` as a violation until classified or removed.
 - Emit JSON and human summaries.
 - Support a strict mode that exits non-zero on violations.
 - Do not delete, move, or rewrite candidate files.
@@ -711,7 +711,7 @@ direct script invocation.
   - zero runtime readers or projection dependencies;
   - zero deferred-context references unless the material is moved behind an
     indexed reference;
-  - an explicit owner, allowlist, or retention decision.
+  - an explicit owner and retention decision.
 - Record what remains blocked by ownership resolution before any later deletion
   PR.
 
@@ -921,8 +921,8 @@ marketing-only rewrite.
   as ownership decisions, not cleanup candidates, until evidence is gathered.
 - The command taxonomy already has `doctor-catalog`; avoid introducing a
   conflicting `doctor` shape without router tests.
-- Historical artifacts may include useful fixtures. Require allowlist reasons and
-  reference scans.
+- Historical artifacts may include useful fixtures. Require an owned fixture path,
+  an active consumer, and reference scans.
 - P0-P2 are tracked-surface contract v1. Untracked/runtime-state discovery must
   be added later as report-only behavior before it can influence cleanup.
 
@@ -948,7 +948,7 @@ marketing-only rewrite.
 | 2026-05-01 | Deepened plan for first-slice execution readiness. | Added first-slice rules, test paths, command envelope, strict-mode behavior, and stop conditions.                                                                                                                                                                       |
 | 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                                                                                                                  |
 | 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                                                                                                      |
-| 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.                                                                                        |
+| 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, ownership classification, deterministic ordering, and expected strict-mode failure on live policy debt.                                                                                 |
 | 2026-05-01 | Completed P2 `ask repo surface` route.             | Added the public `ask repo surface` command, strict mode, trace-id coverage, human summary output, and focused CLI envelope tests.                                                                                                                                      |
 | 2026-05-01 | Completed P3 cleanup preparation.                  | Added `prepare_repo_surface_cleanup.py`, focused tests, ignored generated reports at `artifacts/reports/repo-surface/`, and generated non-destructive reference-scan evidence.                                                                                          |
 | 2026-05-01 | Completed P4 product command contracts.            | Added namespace-first contracts for `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills explain`, `ask skills prove`, `ask repo next`, and `ask repo closeout`; repaired README catalog count so `ask skills goal` can route after catalog parity. |
