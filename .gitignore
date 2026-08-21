@@ -188,7 +188,6 @@ environment.toml
 .harness/evidence/skill-graphs/telemetry/.genome-watermark
 
 # Selection quality history (mutable runtime artifact)
-Infrastructure/artifacts/selection-quality/history.jsonl
 
 # Skill workout runtime telemetry
 .skill-telemetry/

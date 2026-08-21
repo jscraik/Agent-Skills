@@ -526,10 +526,8 @@ class TestManifestJsonlSchema(unittest.TestCase):
         "generator",
         "policy_identity",
         "projection_mode",
-        "source_revision",
         "source_sha256",
     })
-    EXPECTED_SOURCE_REVISION = "fea571666"
 
     def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:
         """
@@ -569,17 +567,6 @@ class TestManifestJsonlSchema(unittest.TestCase):
             self.assertFalse(
                 missing,
                 f"{manifest_path}:{lineno} provenance is missing fields: {missing}",
-            )
-
-    def test_all_manifest_records_have_updated_source_revision(self) -> None:
-        """Every manifest record's provenance.source_revision must equal the new revision."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            actual = record["provenance"]["source_revision"]
-            self.assertEqual(
-                actual,
-                self.EXPECTED_SOURCE_REVISION,
-                f"{manifest_path}:{lineno} has source_revision={actual!r}, "
-                f"expected {self.EXPECTED_SOURCE_REVISION!r}",
             )
 
     def test_all_manifest_records_have_non_empty_id_and_description(self) -> None:

@@ -6,8 +6,6 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import shutil
-import subprocess
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -147,22 +145,6 @@ def canonical_source_path(path: str) -> str:
     if parts and parts[0] == "plugins":
         return Path("Plugins", *parts[1:]).as_posix()
     return path
-
-
-def source_revision(repo_root_path: Path | None = None) -> str:
-    git_bin = shutil.which("git")
-    if not git_bin:
-        return "unknown"
-    root = repo_root(repo_root_path)
-    try:
-        return subprocess.check_output(
-            [git_bin, "rev-parse", "--short", "HEAD"],
-            cwd=root,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except (subprocess.CalledProcessError, OSError):
-        return "unknown"
 
 
 def file_hash(path: Path) -> str:
@@ -456,7 +438,6 @@ def build_skill_modules(repo_root_path: Path | None = None) -> tuple[list[SkillM
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
     root = repo_root(repo_root_path)
-    revision = source_revision(root)
     current_policy_identity = policy_identity()
     for source_dir in iter_candidate_skill_dirs(root):
         skill_md = source_dir / "SKILL.md"
@@ -496,7 +477,6 @@ def build_skill_modules(repo_root_path: Path | None = None) -> tuple[list[SkillM
                     "generator": GENERATOR_NAME,
                     "projection_mode": "rooted",
                     "policy_identity": current_policy_identity,
-                    "source_revision": revision,
                     "source_sha256": file_hash(source_for_hash),
                 },
             )

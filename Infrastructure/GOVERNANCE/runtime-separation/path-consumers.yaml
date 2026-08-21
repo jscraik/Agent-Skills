@@ -1,4 +1,4 @@
-row_count: 346
+row_count: 344
 rows:
   -
     consumer_path: ".agents/workflows/sync-skills.md"
@@ -906,34 +906,6 @@ rows:
       - 18
       - 19
     match_count: 26
-    root: plugins
-  -
-    consumer_path: "Infrastructure/artifacts/validation/projection-integrity/latest.json"
-    is_executable: false
-    line_numbers:
-      - 44
-      - 60
-      - 76
-      - 92
-    match_count: 4
-    root: .agents
-  -
-    consumer_path: "Infrastructure/artifacts/validation/projection-integrity/latest.json"
-    is_executable: false
-    line_numbers:
-      - 13
-      - 14
-      - 21
-      - 22
-      - 29
-      - 30
-      - 37
-      - 38
-      - 43
-      - 59
-      - 75
-      - 91
-    match_count: 12
     root: plugins
   -
     consumer_path: bin/ask

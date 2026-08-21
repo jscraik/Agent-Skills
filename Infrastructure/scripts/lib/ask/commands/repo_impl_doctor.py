@@ -563,7 +563,7 @@ def _repo_surface_diagnostic_summary(summary: dict[str, Any]) -> dict[str, Any]:
     return {
         "diagnostic_class": "repo_surface_ownership_debt",
         "top_blocking_codes": top_codes,
-        "next_action": "classify_allowlist_or_cleanup_tracked_surface",
+        "next_action": "classify_or_cleanup_tracked_surface",
         "operator_rule": (
             "Do not flatten high-count repo-surface findings into generic "
             "nonblocking debt; report dominant categories, owner decision, "

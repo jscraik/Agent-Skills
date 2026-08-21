@@ -29,10 +29,8 @@ changed-file ratchet for Python production code under `Infrastructure/bin/`,
 The existing `ask-cli-modularity` gate remains responsible for entrypoint
 size, changed-file function length, and complexity. The two gates are
 intentionally complementary. Existing findings are ratcheted rather than
-re-litigated on every unrelated patch; a new exception needs a documented,
-time-boxed owner waiver in `PROGRAM_DESIGN_WAIVERS` with owner, rule ID,
-ticket, reason, and expiry. Expired or incomplete waiver metadata fails the
-gate.
+re-litigated on every unrelated patch; a new finding must be removed in its
+owning change before the gate passes.
 
 The gate is wired into `Infrastructure/scripts/validate_all_impl.sh` as a
 required `program-design` check for `all`, `lint`, and `typecheck` scopes and
@@ -49,8 +47,7 @@ def publish(request: PublishRequest, *, clock: Clock) -> Receipt:
     return Publisher(clock=clock).publish(request)
 ```
 
-The changed-file ratchet rejects new versions of these shapes unless the
-owner records a time-boxed waiver:
+The changed-file ratchet rejects new versions of these shapes:
 
 ```python
 def publish(name, version, workspace, token, dry_run=False, force=False):

@@ -6,16 +6,12 @@ from __future__ import annotations
 import argparse
 import ast
 import subprocess
-from datetime import date
 from pathlib import Path
-from types import MappingProxyType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-LEGACY_SHAPE_DEBT = MappingProxyType({})
-LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
     """
     Create and parse command-line arguments for verifying the ask CLI modularity.
@@ -311,8 +307,6 @@ def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
 
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     line_count = len(current.splitlines())
     baseline_line_count = len(baseline.splitlines()) if baseline is not None else 0
     if line_count <= args.max_file_lines:
@@ -330,8 +324,6 @@ def _check_function_shape(
     shape_baseline: dict[str, object] | None = None,
 ) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     current_metrics = _function_metrics(current, source="current")
     baseline_metrics = (
         _function_metrics(baseline, source="baseline")
@@ -348,13 +340,6 @@ def _check_function_shape(
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
-    # The changed-file hook must remain usable while unrelated, time-boxed
-    # legacy waivers are being retired.  A full repository run (without
-    # --changed-files) still fails closed on expired metadata; this scoped
-    # mode enforces the shape budget for the files in the current patch and
-    # leaves the repository-wide debt report to the dedicated full gate.
-    if not args.changed_files:
-        issues.extend(_check_legacy_shape_debt_metadata())
     for path in _changed_python_paths(tuple(args.changed_files)):
         current = path.read_text(encoding="utf-8")
         try:
@@ -365,25 +350,6 @@ def _check_python_shape(args: argparse.Namespace) -> list[str]:
         except RuntimeError as exc:
             issues.append(f"{path.relative_to(REPO_ROOT).as_posix()} shape baseline unavailable: {exc}")
             break
-    return issues
-
-
-def _check_legacy_shape_debt_metadata() -> list[str]:
-    issues: list[str] = []
-    required_fields = ("owner", "rule_id", "ticket", "reason", "expires")
-    today = date.today()
-    for relpath, metadata in sorted(LEGACY_SHAPE_DEBT.items()):
-        missing = [field for field in required_fields if not metadata.get(field)]
-        if missing:
-            issues.append(f"{relpath} legacy shape debt missing waiver field(s): {', '.join(missing)}")
-            continue
-        try:
-            expires = date.fromisoformat(metadata["expires"])
-        except ValueError:
-            issues.append(f"{relpath} legacy shape debt has invalid expires date: {metadata['expires']}")
-            continue
-        if expires < today:
-            issues.append(f"{relpath} legacy shape debt expired on {metadata['expires']}")
     return issues
 
 

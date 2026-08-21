@@ -109,85 +109,13 @@ class TestProgramDesign(unittest.TestCase):
         source = "def run(value, enabled=False):\n    return value\n"
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", source, source), [])
 
-    def test_waiver_metadata_is_required_and_expiry_is_enforced(self) -> None:
-        validator = _load_validator()
-        self.assertIn(
-            "missing field(s): ticket",
-            validator._check_waiver_metadata(
-                {
-                    "Infrastructure/scripts/example.py:broad-exception": {
-                        "owner": "tests",
-                        "rule_id": "program-design",
-                        "reason": "fixture",
-                        "expires": "2099-01-01",
-                    }
-                },
-                validation_date=date(2026, 7, 12),
-            )[0],
-        )
-        self.assertIn(
-            "expired on 2020-01-01",
-            validator._check_waiver_metadata(
-                {
-                    "Infrastructure/scripts/example.py:broad-exception": {
-                        "owner": "tests",
-                        "rule_id": "program-design",
-                        "ticket": "TEST-1",
-                        "reason": "fixture",
-                        "expires": "2020-01-01",
-                    }
-                },
-                validation_date=date(2026, 7, 12),
-            )[0],
-        )
-
-    def test_valid_waiver_suppresses_only_the_registered_rule(self) -> None:
-        validator = _load_validator()
-        source = "def run(value, enabled=False):\n    try:\n        return value\n    except Exception:\n        return None\n"
-        waivers = {
-            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
-                "owner": "tests",
-                "rule_id": "program-design",
-                "ticket": "TEST-2",
-                "reason": "fixture",
-                "expires": "2099-01-01",
-            }
-        }
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-        rendered = "\n".join(issues)
-        self.assertNotIn("boolean flag argument", rendered)
-        self.assertIn("broad exception handler", rendered)
-
     def test_finding_identity_ignores_line_shifts(self) -> None:
         validator = _load_validator()
         source = "def run(value):\n    try:\n        return value\n    except Exception:\n        return None\n"
 
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", "\n" + source, source), [])
 
-    def test_broad_exception_waiver_is_scoped_to_one_handler(self) -> None:
-        validator = _load_validator()
-        source = """try:
-    first()
-except Exception:
-    pass
-
-try:
-    second()
-except Exception:
-    pass
-"""
-        metrics = validator._metrics(source)
-        first, second = metrics.broad_exceptions
-        self.assertNotEqual(first.effective_waiver_key, second.effective_waiver_key)
-        waivers = {
-            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
-        }
-
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-
-        self.assertEqual("\n".join(issues).count("broad exception handler"), 1)
-
-    def test_new_duplicate_broad_exception_is_not_hidden_by_baseline_waiver(self) -> None:
+    def test_new_duplicate_broad_exception_is_reported(self) -> None:
         validator = _load_validator()
         baseline = """try:
     first()
@@ -200,34 +128,12 @@ try:
 except Exception:
     pass
 """
-        first = validator._metrics(current).broad_exceptions[0]
-        waivers = {
-            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
-        }
 
-        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline, waivers=waivers)
+        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline)
 
         rendered = "\n".join(issues)
         self.assertEqual(rendered.count("broad exception handler"), 1)
         self.assertIn(":8:broad exception handler", rendered)
-
-    def test_waiver_is_scoped_to_one_finding(self) -> None:
-        validator = _load_validator()
-        source = "def run(value, enabled=False, verbose=False):\n    return value\n"
-        waivers = {
-            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
-                "owner": "tests",
-                "rule_id": "program-design",
-                "ticket": "TEST-3",
-                "reason": "fixture",
-                "expires": "2099-01-01",
-            }
-        }
-
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-
-        self.assertNotIn("run(enabled=bool)", "\n".join(issues))
-        self.assertIn("run(verbose=bool)", "\n".join(issues))
 
     def test_non_production_paths_are_not_selected(self) -> None:
         validator = _load_validator()

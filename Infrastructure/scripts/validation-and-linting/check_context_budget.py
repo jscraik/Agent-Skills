@@ -236,7 +236,16 @@ def validate_written_manifest_provenance(
                     "line": line_no,
                 })
                 continue
-            required = {"generator", "projection_mode", "policy_identity", "source_revision", "source_sha256"}
+            required = {"generator", "projection_mode", "policy_identity", "source_sha256"}
+            allowed = required | {"generated_at"}
+            unknown = sorted(key for key in provenance.keys() if key not in allowed)
+            if unknown:
+                violations.append({
+                    "code": "SKILLSET_PROVENANCE_UNKNOWN_KEYS",
+                    "path": rel_path.as_posix(),
+                    "line": line_no,
+                    "unknown_keys": unknown,
+                })
             missing = sorted(key for key in required if not provenance.get(key))
             if missing:
                 violations.append({

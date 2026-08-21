@@ -26,8 +26,9 @@
 - PR evidence checklist gates for governance/security-relevant edits.
 - Optional scanner steps in `.github/Infrastructure/scripts/gov_security_gates.py`.
 - `CODEOWNERS` and branch policy manifest for policy-path protection.
-- Exception/incidents records for bypasses.
+- Incident records with permanent corrective actions.
 
 ## Severity response
 
-- High/severe issues must be documented immediately in `GOVERNANCE/exceptions.md` and `GOVERNANCE/incidents.md`.
+- High/severe issues must be documented immediately in `GOVERNANCE/incidents.md`
+  and resolved at the owning control without suppressing its detector.

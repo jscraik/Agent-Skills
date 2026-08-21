@@ -1283,33 +1283,6 @@ class TestCommandSurfaceJsonJsc351Contract(unittest.TestCase):
                 with self.subTest(handle=handle.get("handle")):
                     self.assertTrue(src.endswith("/SKILL.md"), src)
 
-    def test_no_handle_references_old_source_revision(self) -> None:
-        """The command surface must not reference the pre-JSC-351 source revision."""
-        old_revisions = {"7b1cf7a49", "bc58ae8d1"}
-        for handle in self.handles:
-            prov = handle.get("provenance", {})
-            rev = prov.get("source_revision", "")
-            with self.subTest(handle=handle.get("handle")):
-                self.assertNotIn(
-                    rev,
-                    old_revisions,
-                    f"Handle '{handle.get('handle')}' still references old revision '{rev}'",
-                )
-
-    def test_all_handles_source_revision_is_consistent(self) -> None:
-        """All generated handles in the command surface must share a single source revision."""
-        revisions = {
-            handle.get("provenance", {}).get("source_revision", "")
-            for handle in self.handles
-            if handle.get("provenance", {}).get("source_revision", "")
-        }
-        self.assertGreater(len(revisions), 0, "No source_revision values found in command-surface handles")
-        self.assertEqual(
-            len(revisions),
-            1,
-            f"Expected one consistent source_revision in command-surface, got: {sorted(revisions)}",
-        )
-
 
 # ---------------------------------------------------------------------------
 # Manifest JSONL cross-skillset consistency tests (JSC-351 specific)
@@ -1349,47 +1322,6 @@ class TestManifestJsc351Consistency(unittest.TestCase):
             with self.subTest(manifest=path.name):
                 self.assertGreater(len(rows), 0, f"Empty manifest: {path}")
 
-    def test_all_manifests_use_consistent_source_revision(self) -> None:
-        """All manifest entries across all skillsets must share one source revision.
-
-        After JSC-351, a single sync pass updated all manifests together,
-        so source_revision must be identical across all skillset manifests.
-        """
-        revisions = set()
-        for entry in self.all_rows:
-            rev = entry["row"].get("provenance", {}).get("source_revision", "")
-            if rev:
-                revisions.add(rev)
-        self.assertGreater(len(revisions), 0, "No source_revision values found in manifests")
-        self.assertEqual(
-            len(revisions),
-            1,
-            f"Expected one consistent source_revision across all manifests after JSC-351 sync, "
-            f"got multiple: {sorted(revisions)}",
-        )
-
-    def test_source_revision_matches_command_surface_revision(self) -> None:
-        """Manifest source_revision must match the source_revision in command-surface.json."""
-        surface_data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
-        surface_revisions = {
-            h.get("provenance", {}).get("source_revision", "")
-            for h in surface_data.get("handles", [])
-            if h.get("provenance", {}).get("source_revision", "")
-        }
-        if not surface_revisions:
-            self.skipTest("No source revisions found in command-surface.json")
-
-        manifest_revisions = {
-            entry["row"].get("provenance", {}).get("source_revision", "")
-            for entry in self.all_rows
-            if entry["row"].get("provenance", {}).get("source_revision", "")
-        }
-        self.assertEqual(
-            surface_revisions,
-            manifest_revisions,
-            "source_revision in manifests and command-surface.json must match",
-        )
-
     def test_all_manifests_use_rooted_projection_mode(self) -> None:
         """All manifests must use the rooted projection mode established in JSC-351."""
         for entry in self.all_rows:
@@ -1399,18 +1331,6 @@ class TestManifestJsc351Consistency(unittest.TestCase):
                     prov.get("projection_mode"),
                     "rooted",
                     f"'{entry['row'].get('id')}' in {entry['file'].name} has wrong projection_mode",
-                )
-
-    def test_no_manifest_references_old_source_revision(self) -> None:
-        """No manifest entry should reference the pre-JSC-351 source revision."""
-        old_revisions = {"7b1cf7a49", "bc58ae8d1"}
-        for entry in self.all_rows:
-            rev = entry["row"].get("provenance", {}).get("source_revision", "")
-            with self.subTest(id=entry["row"].get("id"), file=entry["file"].name):
-                self.assertNotIn(
-                    rev,
-                    old_revisions,
-                    f"'{entry['row'].get('id')}' in {entry['file'].name} still has old revision '{rev}'",
                 )
 
     def test_manifest_ids_are_unique_within_each_skillset(self) -> None:

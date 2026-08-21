@@ -203,7 +203,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Review the role-router entry for a repo-local correctness reviewer in /Users/jamiecraik/dev/agent-skills. The primary surface is .skillsets/agent-ops/manifest.jsonl, the role source is Skills/agent-ops/codex-agent-creator/SKILL.md, and the expected reviewer artifact is artifacts/reviews/correctness-reviewer.md. Require a runtime card, task envelope, artifact receipt, authority fields, and blocker classes before any swarm is recommended.
+  prompt: Review a role-router entry for a repo-local correctness reviewer. The primary surface is the routing manifest, the role source is SKILL.md, and the expected reviewer output is reviewer-receipt.json conforming to references/contract.yaml. Require a runtime card, task envelope, artifact receipt, authority fields, and blocker classes before any swarm is recommended.
   acceptance:
   - type: skill_selected
     expected_skill: codex-agent-creator

@@ -13,10 +13,10 @@
     "failure_class": {"type": "string", "enum": ["none", "manifest_invalid", "receipt_invalid", "risk_classifier_unavailable", "preview_would_write", "placeholder_not_available", "permission_denied", "tool_missing", "external_source_untrusted", "validation_failed"]},
     "exit_code": {"type": "integer", "minimum": 0},
     "work_mode": {"type": "string", "enum": ["computational", "inferential", "hybrid"]},
-    "proof": {"type": "object", "additionalProperties": false, "properties": {"type": {"type": "string", "enum": ["schema_validation", "fixture_test", "command_output", "no_write_assertion", "placeholder_state"]}, "evidence_kind": {"type": "string", "enum": ["json_schema", "pytest", "receipt", "artifact", "manual_waiver"]}, "evidence_ref": {"type": "string", "minLength": 1}}, "required": ["type", "evidence_kind", "evidence_ref"]},
+    "proof": {"type": "object", "additionalProperties": false, "properties": {"type": {"type": "string", "enum": ["schema_validation", "fixture_test", "command_output", "no_write_assertion", "placeholder_state"]}, "evidence_kind": {"type": "string", "enum": ["json_schema", "pytest", "receipt", "artifact"]}, "evidence_ref": {"type": "string", "minLength": 1}}, "required": ["type", "evidence_kind", "evidence_ref"]},
     "sensor": {"$ref": "#/definitions/sensor"},
     "actor": {"type": "object", "additionalProperties": false, "properties": {"role": {"type": "string", "enum": ["agent", "human", "ci", "system"]}}, "required": ["role"]},
-    "approval_decision": {"type": "string", "enum": ["not_required", "approved", "denied", "waived", "pending"]},
+    "approval_decision": {"type": "string", "enum": ["not_required", "approved", "denied", "pending"]},
     "redaction": {"type": "string", "enum": ["none", "redacted", "not_applicable"]},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-008", "FR-009", "SA-004", "SA-005", "VP-002", "VP-011", "VP-021"]}}
   },

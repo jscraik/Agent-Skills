@@ -28,7 +28,6 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
 from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: E402
 
 from skills_sdk_release_receipts import REQUIRED_GATE_CHAIN, build_receipt_findings  # noqa: E402
-from release_ratchet_exceptions import release_ratchet_exception_paths  # noqa: E402
 
 
 CENTRAL_RUBRIC = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")
@@ -307,15 +306,10 @@ def _missing_capsule_routing(refs: Path, capsule_paths: list[str]) -> list[str]:
 def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
     handoff_dir = root / ".harness" / "evidence" / "handoff" / skill_dir.name
     receipts = sorted(handoff_dir.glob("tessl*.json")) if handoff_dir.is_dir() else []
-    accepted_legacy = release_ratchet_exception_paths(handoff_dir, "tessl_lane_naming")
     missing: list[str] = []
-    ignored_legacy: list[str] = []
 
     def _classify(rel_path: str) -> None:
-        if rel_path in accepted_legacy:
-            ignored_legacy.append(rel_path)
-        else:
-            missing.append(rel_path)
+        missing.append(rel_path)
 
     for receipt in receipts:
         rel_path = _rel(receipt, root)
@@ -341,7 +335,6 @@ def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
             "handoff_dir": _rel(handoff_dir, root),
             "receipt_count": len(receipts),
             "missing_lane": missing,
-            "ignored_legacy": ignored_legacy,
         },
     )
 

@@ -55,4 +55,4 @@
   - `bash scripts/validate-codestyle.sh`
   - `bash scripts/verify-work.sh --fast`
 - For component-system work, include Storybook/accessibility checks when configured in the touched project.
-- All waivers require documented metadata with rule ID or section, reason, tracking ticket, and expiry or ADR reference.
+- Web-policy failures must be fixed in the owning source before merge; no waiver path exists.

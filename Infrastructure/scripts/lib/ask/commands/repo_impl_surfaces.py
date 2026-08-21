@@ -182,8 +182,8 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
         blocking = report.get("summary", {}).get("blocking_findings", "unknown")
         message = f"Repo surface inventory found {blocking} blocking finding(s)."
         suggestion = (
-            "Review data.repo_surface.findings and classify, allowlist, or cleanup "
-            "intentional exceptions before relying on strict mode."
+            "Review data.repo_surface.findings and classify or clean up the owning "
+            "tracked surfaces before relying on strict mode."
         )
         if not parse_ok:
             message = "Repo surface inventory emitted invalid JSON."
