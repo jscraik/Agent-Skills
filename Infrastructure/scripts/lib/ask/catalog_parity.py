@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 from statistics import median
@@ -124,11 +125,9 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
         try:
             unresolved_float = float(unresolved)
             no_candidate_float = float(no_candidate)
-            # Reject NaN and Infinity values before trend comparisons
-            import math
-            if math.isnan(unresolved_float) or math.isinf(unresolved_float):
+            if not math.isfinite(unresolved_float):
                 return None, "schema_invalid_history"
-            if math.isnan(no_candidate_float) or math.isinf(no_candidate_float):
+            if not math.isfinite(no_candidate_float):
                 return None, "schema_invalid_history"
             rows.append(
                 {
@@ -187,8 +186,17 @@ def _policy_identity_drift(
 def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | None]:
     """Classify local trend history without turning missing telemetry into source drift."""
     _, history_issue = _latest_history_metrics(repo_root / HISTORY_PATH)
-    if history_issue in {"insufficient_history", "missing_history"}:
+    if history_issue == "missing_history":
         return "not_collected", None
+    if history_issue == "insufficient_history":
+        return (
+            history_issue,
+            (
+                "trend_insufficient_history",
+                "insufficient_history",
+                f"Collect at least eight completed validation runs in {HISTORY_PATH.as_posix()} before strict validation can pass.",
+            ),
+        )
     if history_issue == "schema_invalid_history":
         return (
             history_issue,

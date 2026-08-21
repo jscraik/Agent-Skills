@@ -291,8 +291,8 @@ decision tests produces evidence and the policy records the outcome.
 The first-slice allowlist proposal from early drafts was retired during
 implementation. The canonical repo-surface contract reports findings with
 ownership classification and repair guidance directly; exception files cannot
-downgrade findings. The implemented contract does not include `allowlist_entry`
-remediation payloads or retention requirements for allowlist structures.
+downgrade findings. The required `allowlist_entry` compatibility field is
+always `null` and cannot authorize suppression or change finding severity.
 
 ## High-Level Technical Design
 
@@ -337,8 +337,8 @@ Internal `data.*` payload guidance:
       "severity": "error",
       "blocking": true,
       "allowlist_entry": null,
-      "reason": "nested Infrastructure path is not allowlisted",
-      "recommendation": "audit source and either remove, move to fixture, or allowlist with reason"
+      "reason": "nested Infrastructure path violates the ownership contract",
+      "recommendation": "audit source and either remove it or move it to its owned source or fixture path"
     }
   ]
 }
@@ -418,8 +418,8 @@ Compatibility rules:
   `command`, and `rationale`.
 - `findings[*]` must include stable `path`, `classification`, `status`, `code`,
   `severity`, `blocking`, `allowlist_entry`, `reason`, and `recommendation`
-  fields. `allowlist_entry` is either `null` or the matching allowlist entry
-  `id`.
+  fields. `allowlist_entry` is a compatibility field whose only supported value
+  is `null`; it cannot downgrade or suppress a finding.
 - Findings must be sorted deterministically by `blocking` descending, `severity`,
   then normalized repository-relative `path`, then `code`.
 - Severity rank is fixed as `error`, `warning`, then `info`.

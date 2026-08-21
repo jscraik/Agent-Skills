@@ -137,6 +137,74 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             self.assertEqual(result.status, "success")
             self.assertFalse(result.data["catalog_parity"]["drift_detected"])
 
+    def test_doctor_catalog_strict_blocks_insufficient_runtime_history(self) -> None:
+        """Strict catalog parity blocks when canonical history has fewer than eight rows."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            self._write_readme(repo, 1)
+            self._write_root_index(repo, 1)
+            (repo / "utilities" / "demo").mkdir(parents=True, exist_ok=True)
+            (repo / "utilities" / "demo" / "SKILL.md").write_text(
+                "---\nname: demo\ndescription: demo skill description that is long enough\n---\n",
+                encoding="utf-8",
+            )
+            history_path = repo / HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            row = {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1}
+            history_path.write_text(
+                "".join(f"{json.dumps(row)}\n" for _ in range(7)),
+                encoding="utf-8",
+            )
+
+            stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
+
+            self.assertEqual(result.status, "error")
+            report = result.data["catalog_parity"]
+            self.assertTrue(report["drift_detected"])
+            self.assertEqual(report["history_status"], "insufficient_history")
+            self.assertEqual(report["drift_class"], "trend_insufficient_history")
+            self.assertEqual(report["blocking_reason"], "insufficient_history")
+
+    def test_doctor_catalog_strict_blocks_non_finite_runtime_history(self) -> None:
+        """Strict catalog parity rejects non-finite trend metrics."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            self._write_readme(repo, 1)
+            self._write_root_index(repo, 1)
+            (repo / "utilities" / "demo").mkdir(parents=True, exist_ok=True)
+            (repo / "utilities" / "demo" / "SKILL.md").write_text(
+                "---\nname: demo\ndescription: demo skill description that is long enough\n---\n",
+                encoding="utf-8",
+            )
+            history_path = repo / HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            rows = [
+                {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1}
+                for _ in range(7)
+            ]
+            rows.append({"unresolved_ambiguity_rate": float("nan"), "no_candidate_rate": 0.1})
+            history_path.write_text(
+                "".join(f"{json.dumps(row)}\n" for row in rows),
+                encoding="utf-8",
+            )
+
+            stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
+
+            report = result.data["catalog_parity"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(report["history_status"], "schema_invalid_history")
+            self.assertEqual(report["blocking_reason"], "schema_invalid_history")
+
 
 if __name__ == "__main__":
     unittest.main()

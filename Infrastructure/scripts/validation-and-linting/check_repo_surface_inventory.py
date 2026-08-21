@@ -160,6 +160,7 @@ class SurfaceFinding:
     blocking: bool
     reason: str
     recommendation: str
+    allowlist_entry: dict[str, Any] | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -363,11 +364,13 @@ def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
     )
 
 
-def _classify_governed_generated_surface(normalized: str) -> SurfaceFinding | None:
+def _classify_governed_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
     if normalized == "skills-system/AGENTS.md":
         return _finding(normalized, "policy_surface")
     if _starts_with_any(normalized, HARNESS_HISTORICAL_PREFIXES):
         return _finding(normalized, "tracked_harness_snapshot")
+    if _starts_with(normalized, ".harness/evidence") and suffix in {".jsonl", ".log"}:
+        return _finding(normalized, "generated_evidence_pattern")
     if _starts_with(normalized, ".harness/evidence"):
         return _finding(normalized, "harness_reference_surface")
     return None
@@ -376,7 +379,7 @@ def _classify_governed_generated_surface(normalized: str) -> SurfaceFinding | No
 def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
     if normalized in POLICY_EXACT_PATHS:
         return _finding(normalized, "policy_surface")
-    governed_finding = _classify_governed_generated_surface(normalized)
+    governed_finding = _classify_governed_generated_surface(normalized, suffix)
     if governed_finding is not None:
         return governed_finding
     if _starts_with(normalized, ".skillsets"):

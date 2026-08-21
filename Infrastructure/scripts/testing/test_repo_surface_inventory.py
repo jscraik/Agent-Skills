@@ -423,6 +423,7 @@ def test_json_report_has_required_fields_and_deterministic_order() -> None:
         "blocking",
         "reason",
         "recommendation",
+        "allowlist_entry",
         "metadata",
     }
     for finding in report["findings"]:
@@ -465,6 +466,31 @@ def test_changed_historical_artifact_debt_blocks_future_artifacts() -> None:
     assert report["status"] == "error"
     assert report["summary"]["blocking_findings"] == 1
     assert report["metadata"]["changed_files_policy"] == "future_artifact_debt_blocking"
+
+
+def test_changed_generated_harness_evidence_blocks_future_artifacts() -> None:
+    for path in (
+        ".harness/evidence/runtime-proof/events.jsonl",
+        ".harness/evidence/runtime-proof/run.log",
+    ):
+        findings = MODULE.classify_paths([path], changed_files=[path])
+
+        [finding] = findings
+        assert finding.classification == "historical_artifact"
+        assert finding.status == "violation"
+        assert finding.severity == "error"
+        assert finding.blocking is True
+        assert finding.code == "new_historical_artifact_debt"
+        assert finding.metadata["original_code"] == "generated_evidence_pattern"
+
+
+def test_curated_harness_evidence_remains_reference_surface() -> None:
+    finding = MODULE.classify_path(
+        ".harness/evidence/runtime-proof/testing/codex/runtime-card.json"
+    )
+
+    assert finding.classification == "reference"
+    assert finding.code == "harness_reference_surface"
 
 
 def test_unchanged_historical_artifact_backlog_remains_advisory() -> None:

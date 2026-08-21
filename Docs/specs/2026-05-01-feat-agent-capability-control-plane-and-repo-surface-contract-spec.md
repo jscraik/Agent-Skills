@@ -537,8 +537,10 @@ Selected contract:
   later planning confirms the command router can support it without
   command-surface confusion.
 - JSON must use policy language: `classification`, `status`, `code`,
-  `severity`, `blocking`, `reason`, `recommendation`, and
+  `severity`, `blocking`, `reason`, `recommendation`, `allowlist_entry`, and
   `metadata.next_steps`.
+- `allowlist_entry` is a required compatibility field whose only supported
+  value is `null`. It does not represent an active waiver or exception route.
 - `metadata.next_steps` is the authoritative machine-readable next-action field.
   Any human `next command` summary is derived from it and must not conflict with
   it.

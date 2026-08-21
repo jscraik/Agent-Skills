@@ -589,7 +589,7 @@ def test_plugin_eval_deferred_budget_fail_blocks_when_active_budget_moderate_and
 """
     )
 
-    assert parsed["grade_acceptable"] is True
+    assert parsed["grade_acceptable"] is False
     assert parsed["fail_count"] == 1
     assert parsed["blocking_fail_count"] == 1
     assert parsed["posture"] == "blocking"
