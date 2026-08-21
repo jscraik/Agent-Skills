@@ -63,7 +63,11 @@ Build the smallest role surface that can be validated from current Codex evidenc
 
 ## Outputs
 
-For non-trivial role work, return `schema_version: 1`, target role, source kind, side-effect class, changed paths, evidence ledger, validation, rollback, confidence, and residual risk.
+For non-trivial role work, return `schema_version: 1`, target role, source kind,
+side-effect class, changed paths, evidence ledger, validation, rollback,
+confidence, and residual risk. For orchestration roles, also return the runtime
+card source, an authority-bounded task envelope, the artifact receipt, and a
+`blocked_*` result class when the handoff cannot complete.
 
 Use confidence bands from `references/role-creation-guide.md`; never claim 100%
 confidence for generative skill quality.

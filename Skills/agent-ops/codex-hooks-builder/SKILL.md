@@ -28,7 +28,12 @@ Require the target hook pack path, install boundary (repo-local, user-level, or 
 
 ## Outputs
 
-For non-trivial hook work, return `schema_version: 1`, target hook pack, install boundary, changed paths, runtime contract, validation evidence, rollback, blocker or residual risk, and confidence.
+For non-trivial hook work, return `schema_version: 1`, target hook pack,
+install boundary, changed paths, runtime contract, validation evidence,
+rollback, blocker or residual risk, and confidence. The runtime contract must
+name the runtime-card source, task-envelope injection, `SubagentStop`
+reviewer-receipt validation, JSONL telemetry sink, and Stop
+claim-versus-evidence checks when those lifecycle hooks are selected.
 
 ## Discovery Interview
 

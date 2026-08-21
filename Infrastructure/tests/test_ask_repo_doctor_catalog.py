@@ -12,7 +12,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from ask.commands.repo import DoctorCatalogOptions, doctor_catalog  # noqa: E402
-from ask.catalog_parity import HISTORY_PATH  # noqa: E402
+from ask.catalog_parity import HISTORY_PATH, _history_rates  # noqa: E402
 
 
 class TestAskRepoDoctorCatalog(unittest.TestCase):
@@ -233,6 +233,60 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             )
 
             stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
+
+            report = result.data["catalog_parity"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(report["history_status"], "schema_invalid_history")
+            self.assertEqual(report["blocking_reason"], "schema_invalid_history")
+
+    def test_history_rates_reject_out_of_range_metrics(self) -> None:
+        """History parsing rejects impossible direct rates and nested counts."""
+        invalid_payloads = (
+            {"unresolved_ambiguity_rate": -0.1, "no_candidate_rate": 0.1},
+            {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 1.1},
+            {
+                "totals": {"fixtures": 2},
+                "status_counts": {"unresolved_ambiguity": -1, "degraded_no_candidates": 0},
+            },
+            {
+                "totals": {"fixtures": 2},
+                "status_counts": {"unresolved_ambiguity": 0, "degraded_no_candidates": 3},
+            },
+        )
+
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                rates, issue = _history_rates(payload)
+                self.assertIsNone(rates)
+                self.assertEqual(issue, "schema_invalid_history")
+
+    def test_doctor_catalog_strict_rejects_latest_row_without_metrics(self) -> None:
+        """Strict catalog parity rejects a malformed latest row instead of using stale metrics."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            self._write_readme(repo, 1)
+            self._write_root_index(repo, 1)
+            skill_dir = repo / "utilities" / "demo"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: demo\ndescription: demo skill description that is long enough\n---\n",
+                encoding="utf-8",
+            )
+            history_path = repo / HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            rows = [{"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1} for _ in range(8)]
+            rows.append({})
+            history_path.write_text(
+                "".join(f"{json.dumps(row)}\n" for row in rows),
+                encoding="utf-8",
+            )
+
+            stub = SimpleNamespace(name="demo", source_dir=skill_dir)
             with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
                 "ask.catalog_parity.get_policy_identity",
                 return_value="0123456789abcdef",

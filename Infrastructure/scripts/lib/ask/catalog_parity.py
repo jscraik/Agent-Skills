@@ -78,9 +78,13 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     return match.group(1)
 
 
-def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
-    totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
-    status_counts = payload.get("status_counts") if isinstance(payload.get("status_counts"), dict) else {}
+def _history_counts(payload: dict[str, Any]) -> tuple[tuple[float, float, float] | None, str | None]:
+    totals = payload.get("totals")
+    status_counts = payload.get("status_counts")
+    if not isinstance(totals, dict) or not isinstance(status_counts, dict):
+        return None, "schema_invalid_history"
+    if "fixtures" not in totals or not {"unresolved_ambiguity", "degraded_no_candidates"}.issubset(status_counts):
+        return None, "schema_invalid_history"
     try:
         fixtures = float(totals.get("fixtures", 0) or 0)
         unresolved = float(status_counts.get("unresolved_ambiguity", 0) or 0)
@@ -89,8 +93,18 @@ def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | N
         return None, "schema_invalid_history"
     if not all(math.isfinite(value) for value in (fixtures, unresolved, no_candidate)):
         return None, "schema_invalid_history"
+    return (fixtures, unresolved, no_candidate), None
+
+
+def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
+    counts, issue = _history_counts(payload)
+    if issue or counts is None:
+        return None, issue
+    fixtures, unresolved, no_candidate = counts
     if fixtures <= 0:
         return None, None
+    if unresolved < 0 or no_candidate < 0 or unresolved > fixtures or no_candidate > fixtures:
+        return None, "schema_invalid_history"
     return {
         "unresolved_ambiguity_rate": unresolved / fixtures,
         "no_candidate_rate": no_candidate / fixtures,
@@ -110,6 +124,8 @@ def _history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, st
     except (TypeError, ValueError):
         return None, "schema_invalid_history"
     if not all(math.isfinite(value) for value in rates.values()):
+        return None, "schema_invalid_history"
+    if not all(0 <= value <= 1 for value in rates.values()):
         return None, "schema_invalid_history"
     return rates, None
 

@@ -7,6 +7,7 @@ import sys
 import unittest
 
 from pydantic import ValidationError
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -142,7 +143,7 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
                     truth_lane="schema_contract",
                 )
                 self.assertEqual(result.status, "fail", result.diagnostics)
-                with self.assertRaises(ValidationError):
+                with pytest.raises(ValidationError):
                     contracts.validate_check_receipt(copy.deepcopy(invalid_payload))
 
     def test_invalid_sdk_check_missing_contract_fields_fails_schema_and_model(self) -> None:
