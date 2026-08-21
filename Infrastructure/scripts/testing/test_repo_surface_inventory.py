@@ -160,6 +160,23 @@ def test_codex_scorer_calibration_examples_are_source() -> None:
     assert finding.blocking is False
 
 
+def test_scorer_calibration_generated_output_is_not_source() -> None:
+    paths = [
+        "Skills/agent-ops/sdk-scenario-generator/references/scorer-calibration/run.log",
+        (
+            "codex/agents/evals/workflow-guardrail-candidates/"
+            "references/scorer-calibration/events.jsonl"
+        ),
+    ]
+
+    for path in paths:
+        finding = MODULE.classify_path(path)
+        assert finding.classification == "historical_artifact"
+        assert finding.status == "warning"
+        assert finding.code == "generated_evidence_pattern"
+        assert finding.blocking is False
+
+
 def test_artifact_agent_guide_is_policy_surface() -> None:
     finding = MODULE.classify_path("artifacts/AGENTS.md")
 

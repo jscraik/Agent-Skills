@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import importlib
 import json
 import subprocess
 import sys
@@ -15,7 +17,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from repo_surface_inventory_cli import SERVICE_ID, error_report, parse_args
+_CLI = importlib.import_module("repo_surface_inventory_cli")
+SERVICE_ID = _CLI.SERVICE_ID
+error_report = _CLI.error_report
+parse_args = _CLI.parse_args
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -358,8 +363,15 @@ def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding 
 
 
 def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
-    return normalized in {"artifacts/recommended-skills-sdk-pipeline.html", "artifacts/skills-sdk-user-lifecycle-one-page.html"} or (
-        _starts_with_any(normalized, ("Skills", "codex/agents/evals"))
+    if normalized in {
+        "artifacts/recommended-skills-sdk-pipeline.html",
+        "artifacts/skills-sdk-user-lifecycle-one-page.html",
+    }:
+        return True
+    return (
+        suffix == ".jsonl"
+        and Path(normalized).name == "examples.jsonl"
+        and _starts_with_any(normalized, ("Skills", "codex/agents/evals"))
         and "/references/scorer-calibration/" in normalized
     )
 
