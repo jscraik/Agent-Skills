@@ -458,23 +458,13 @@ The exact filename can change in planning, but it must provide:
 
 - JSON output
 - non-zero exit on policy violations when strict mode is enabled
-- allowlist support with reasons
+- ownership classification with repair guidance
 - enough detail for agents to repair or report findings without reading every
   path manually
 
-Allowlist contract:
-
-- Canonical path: `Infrastructure/policy/repo_surface_allowlist.json`.
-- Shape: a JSON object with `schema_version: 1` and an `entries` array.
-- Each entry must include `id`, `match_type`, `pattern`, `classification`,
-  `reason`, `owner`, and `expires` or `review_after`.
-- `match_type` must be one of `exact`, `glob`, or `prefix`; regex matching is
-  excluded from the first slice to keep matching deterministic.
-- Allowlist entries can downgrade a finding from blocking to warning only when
-  the entry classification matches the classifier result and the reason is
-  non-empty.
-- More specific entries win in this order: `exact`, then longest `prefix`, then
-  longest `glob` pattern. Ties sort by `id`.
+The temporary allowlist design described in the first slice was retired. The
+inventory reports ownership and repair guidance directly; it does not downgrade
+findings through a waiver or exception file.
 
 ## Interface Design Pass
 

@@ -286,20 +286,11 @@ contract:
 Unknown ownership is never a deletion signal. It is a blocker until one of the
 decision tests produces evidence and the policy records the outcome.
 
-### Allowlist Contract
+### Historical Allowlist Proposal
 
-P0 must create or document this first-slice allowlist contract:
-
-- Canonical path: `Infrastructure/policy/repo_surface_allowlist.json`.
-- Shape: a JSON object with `schema_version: 1` and an `entries` array.
-- Required entry fields: `id`, `match_type`, `pattern`, `classification`,
-  `reason`, `owner`, and `expires` or `review_after`.
-- Allowed `match_type` values: `exact`, `glob`, and `prefix`. Regex matching is
-  excluded from the first slice.
-- Entries can downgrade a strict blocking finding to a warning only when the
-  entry classification matches the classifier result and `reason` is non-empty.
-- Matching precedence is deterministic: `exact`, then longest `prefix`, then
-  longest `glob` pattern, with ties sorted by `id`.
+The first-slice allowlist proposal was retired. Repo-surface findings now carry
+their ownership classification and repair guidance directly; none may be
+downgraded through an exception file.
 
 ## High-Level Technical Design
 
@@ -505,6 +496,10 @@ tasks:
 
 **Goal:** Create the reviewable policy contract for repo surface ownership.
 
+**Historical note:** The proposed allowlist was retired. The implemented policy
+reports ownership and repair guidance directly and does not downgrade findings
+through an exception file.
+
 **Requirements:** R1, R5, R6
 
 **Dependencies:** None.
@@ -512,7 +507,6 @@ tasks:
 **Files:**
 
 - Create: `Docs/agents/15-repo-surface-ownership.md`
-- Create if allowlist entries are needed: `Infrastructure/policy/repo_surface_allowlist.json`
 - Modify: `AGENTS.md` or `README.md` only if needed to link the policy front
   door.
 - Test: policy presence should be covered by P1/P2 inventory tests rather than a

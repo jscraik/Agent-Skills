@@ -123,6 +123,28 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_check_receipt(_json(FIXTURE_DIR / "invalid" / "check-receipt-pass-placeholder.json"))
 
+    def test_check_receipt_rejects_waiver_values(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "check-receipt.json")
+        self.assertIsInstance(payload, dict)
+        cases = (
+            ("manual_waiver_evidence", {**payload, "proof": {**payload["proof"], "evidence_kind": "manual_waiver"}}),
+            ("waived_approval", {**payload, "approval_decision": "waived"}),
+        )
+
+        for case_name, invalid_payload in cases:
+            with self.subTest(case_name=case_name):
+                result = schema_validation.validate_payload_against_schema(
+                    invalid_payload,
+                    self.schemas["check-receipt"],
+                    {**self.schemas, **self.schemas_by_file},
+                    schema_path=SCHEMA_DIR / SCHEMA_FILES["check-receipt"],
+                    payload_source=f"inline:{case_name}",
+                    truth_lane="schema_contract",
+                )
+                self.assertEqual(result.status, "fail", result.diagnostics)
+                with self.assertRaises(ValidationError):
+                    contracts.validate_check_receipt(copy.deepcopy(invalid_payload))
+
     def test_invalid_sdk_check_missing_contract_fields_fails_schema_and_model(self) -> None:
         for fixture_name, missing_field in (
             ("sdk-check-missing-canonical-source-path.json", "canonical_source_path"),

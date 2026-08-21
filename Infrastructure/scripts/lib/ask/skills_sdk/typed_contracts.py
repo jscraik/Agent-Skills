@@ -580,7 +580,7 @@ class ProofRecord(_SdkContractModel):
         "no_write_assertion",
         "placeholder_state",
     ]
-    evidence_kind: Literal["json_schema", "pytest", "receipt", "artifact", "manual_waiver"]
+    evidence_kind: Literal["json_schema", "pytest", "receipt", "artifact"]
     evidence_ref: str
 
 
@@ -619,7 +619,7 @@ class CheckReceipt(_SdkContractModel):
     proof: ProofRecord
     sensor: CheckSensor
     actor: CheckActor
-    approval_decision: Literal["not_required", "approved", "denied", "waived", "pending"]
+    approval_decision: Literal["not_required", "approved", "denied", "pending"]
     redaction: Literal["none", "redacted", "not_applicable"]
     acceptance_trace: list[Literal["FR-008", "FR-009", "SA-004", "SA-005", "VP-002", "VP-011", "VP-021"]]
 
