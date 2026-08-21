@@ -21,10 +21,12 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 
 selection_policy_module = importlib.import_module("selection_policy")
 selection_contract_module = importlib.import_module("ask.selection_contract")
+catalog_parity_module = importlib.import_module("ask.catalog_parity")
 policy_identity = selection_policy_module.policy_identity
 EligibleCandidate = selection_contract_module.EligibleCandidate
 build_decision_payload = selection_contract_module.build_decision_payload
 build_goal_decision = selection_contract_module.build_goal_decision
+candidate_history_issue = catalog_parity_module._candidate_history_issue
 
 logger = logging.getLogger(__name__)
 def resolve_fixture_path(filename: str) -> Path:
@@ -136,41 +138,28 @@ def _append_history(
     row: dict[str, Any],
     *,
     max_runs: int,
-) -> None:
+) -> str | None:
     """
-    Append a metrics row to a bounded JSONL history file, preserving only previously valid metric rows.
-    
-    Reads existing JSONL lines from `history_path`, ignoring blank lines, non-JSON lines and payloads that are not objects or that lack both `unresolved_ambiguity_rate` and `no_candidate_rate`.
-    Appends `row` for every completed validation run.
-    Truncates the combined list to the last `max(1, int(max_runs))` entries, ensures the parent directory exists, and writes the resulting list back to `history_path` as JSONL.
+    Append one accepted metrics row without rewriting invalid or deteriorating history.
     
     Parameters:
     	history_path (Path): Path to the JSONL history file to read and overwrite.
     	row (dict[str, Any]): Metrics row to append (no schema enforcement is performed here).
     	max_runs (int): Maximum number of history rows to retain; values less than 1 are treated as 1.
     """
+    issue = candidate_history_issue(history_path, row)
+    if issue:
+        return issue
+
     existing_rows: list[dict[str, Any]] = []
-    discarded_count = 0
-    discarded_lines: list[str] = []
     if history_path.exists():
         for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
             line = raw.strip()
             if not line:
                 continue
-            try:
-                payload = json.loads(line)
-            except json.JSONDecodeError:
-                discarded_count += 1
-                discarded_lines.append(line)
-                continue
+            payload = json.loads(line)
             if not isinstance(payload, dict):
-                discarded_count += 1
-                discarded_lines.append(line)
-                continue
-            if "unresolved_ambiguity_rate" not in payload or "no_candidate_rate" not in payload:
-                discarded_count += 1
-                discarded_lines.append(line)
-                continue
+                return "schema_invalid_history"
             existing_rows.append(payload)
 
     existing_rows.append(row)
@@ -182,18 +171,33 @@ def _append_history(
         "".join(json.dumps(item, sort_keys=True) + "\n" for item in bounded_rows),
         encoding="utf-8",
     )
+    return None
 
-    if discarded_count:
-        logger.warning(
-            "Discarded %d malformed or incompatible history rows while parsing %s",
-            discarded_count,
-            history_path,
-        )
-        corrupt_path = history_path.with_suffix(history_path.suffix + ".corrupt")
-        corrupt_path.parent.mkdir(parents=True, exist_ok=True)
-        with corrupt_path.open("a", encoding="utf-8") as handle:
-            for line in discarded_lines:
-                handle.write(line + "\n")
+
+def _routing_history_row(
+    artifact: dict[str, Any],
+    active_policy_identity: str,
+    unresolved_ambiguity_rate: float,
+    no_candidate_rate: float,
+) -> dict[str, Any]:
+    """Build the accepted routing-quality sample persisted after validation."""
+    return {
+        "schema_version": "routing-quality-history.v1",
+        "run_id": artifact["run_id"],
+        "generated_at": artifact["generated_at"],
+        "policy_identity": active_policy_identity,
+        "decision_status_counts": artifact["decision_status_counts"],
+        "unresolved_ambiguity_rate": unresolved_ambiguity_rate,
+        "no_candidate_rate": no_candidate_rate,
+        "parity_status": artifact["parity_status"],
+    }
+
+
+def _record_history(args: argparse.Namespace, failed: list[dict[str, Any]], row: dict[str, Any]) -> str | None:
+    """Persist one accepted sample when the current fixture run passed."""
+    if not args.history_path or failed:
+        return None
+    return _append_history(args.history_path, row, max_runs=args.history_max_runs)
 
 
 def main() -> int:
@@ -414,22 +418,14 @@ def main() -> int:
     args.artifact.parent.mkdir(parents=True, exist_ok=True)
     args.artifact.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    if args.history_path and not failed:
-        history_row = {
-            "schema_version": "routing-quality-history.v1",
-            "run_id": artifact["run_id"],
-            "generated_at": artifact["generated_at"],
-            "policy_identity": active_policy_identity,
-            "decision_status_counts": artifact["decision_status_counts"],
-            "unresolved_ambiguity_rate": unresolved_ambiguity_rate,
-            "no_candidate_rate": no_candidate_rate,
-            "parity_status": artifact["parity_status"],
-        }
-        _append_history(
-            args.history_path,
-            history_row,
-            max_runs=args.history_max_runs,
-        )
+    history_issue = _record_history(
+        args,
+        failed,
+        _routing_history_row(artifact, active_policy_identity, unresolved_ambiguity_rate, no_candidate_rate),
+    )
+    if history_issue:
+        print(f"Selection history rejected: {history_issue}")
+        return 1
 
     print(f"Selection contract fixtures: total={len(all_results)} failed={len(failed)}")
     print(f"Policy identity: {active_policy_identity}")

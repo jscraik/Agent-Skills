@@ -177,6 +177,23 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
     return current, None
 
 
+def _candidate_history_issue(history_path: Path, candidate: dict[str, Any]) -> str | None:
+    """Validate one candidate against the retained baseline without mutating it."""
+    candidate_rates, issue = _history_rates(candidate)
+    if issue or candidate_rates is None:
+        return issue or "schema_invalid_history"
+    if not history_path.exists():
+        return None
+    rows, issue = _read_history_rows(history_path)
+    if issue:
+        return issue
+    if rows is None or len(rows) < 7:
+        return None
+    if _history_deteriorated(candidate_rates, rows[-7:]):
+        return "trend_deterioration"
+    return None
+
+
 def _policy_identity_drift(
     surfaces: list[dict[str, Any]],
     active_policy_identity: str,

@@ -187,7 +187,7 @@ Strict mode semantics (`--strict`):
 - Strict mode additionally treats missing surface projections and missing per-surface policy identity stamps as blocking drift, not warnings.
 - Strict mode escalates soft-gate deterioration signals into blocking catalog diagnostics when deterioration thresholds are breached.
 - Strict mode computes soft-gate deterioration only when canonical local routing-quality history exists at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`. Missing history reports `history_status: "not_collected"` without drift because absent telemetry is unknown, not source failure.
-- If collected history contains fewer than eight usable rows, strict mode blocks with `drift_class: "trend_insufficient_history"`, `blocking_reason: "insufficient_history"`, and `history_status: "insufficient_history"`. Schema-invalid or non-finite values block with `history_status: "schema_invalid_history"`.
+- If collected history contains fewer than eight usable rows, strict mode reports `history_status: "insufficient_history"` as an explicit collecting state without claiming trend health or source drift. Schema-invalid or non-finite values block with `history_status: "schema_invalid_history"`.
 
 ### D. Plugin visibility lifecycle (`ask plugins list|status|doctor`)
 
@@ -379,13 +379,13 @@ Soft-gate deterioration thresholds:
 
 - Deterioration is true when either metric increases by more than 20% relative to the rolling baseline median and by at least +1 absolute percentage point.
 - Baseline is the median of the previous 7 completed validation runs within the rolling window.
-- Insufficient history (<7 runs) is reported as `trend_insufficient_history` and cannot be treated as healthy-by-default.
+- Insufficient baseline history (<7 prior accepted runs) is reported as `insufficient_history`; it remains an explicit collecting state and is never labeled healthy-by-default.
 
 Breach behavior:
 
 - Any hard-gate breach blocks release-ready status.
 - Soft-gate deterioration requires explicit operator note in validation artifact before progression.
-- Strict-mode diagnostics must block on insufficient or schema-invalid canonical history; missing history cannot be treated as healthy-by-default.
+- Strict-mode diagnostics block on schema-invalid canonical history and deterioration. Missing or insufficient history remains explicitly unknown or collecting, rather than being treated as healthy-by-default.
 
 ## Acceptance and Test Matrix
 

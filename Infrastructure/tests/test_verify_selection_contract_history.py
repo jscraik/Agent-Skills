@@ -14,6 +14,7 @@ SCRIPT_PATH = (
 )
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
 from ask.catalog_parity import _latest_history_metrics  # noqa: E402
 
@@ -57,6 +58,36 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             metrics, issue = _latest_history_metrics(history_path)
             self.assertIsNone(metrics)
             self.assertEqual(issue, "insufficient_history")
+
+    def test_malformed_history_is_preserved_and_rejected(self) -> None:
+        """A producer run cannot erase corruption before strict diagnostics see it."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+            history_path.write_text("not-json\n", encoding="utf-8")
+            row = {"unresolved_ambiguity_rate": 0.0, "no_candidate_rate": 0.0}
+
+            issue = MODULE._append_history(history_path, row, max_runs=200)
+
+            self.assertEqual(issue, "schema_invalid_history")
+            self.assertEqual(history_path.read_text(encoding="utf-8"), "not-json\n")
+
+    def test_deteriorating_candidate_is_not_added_to_baseline(self) -> None:
+        """Repeated failed candidates cannot age a healthy baseline out of the window."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+            baseline = [
+                {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1}
+                for _ in range(7)
+            ]
+            original = "".join(json.dumps(row) + "\n" for row in baseline)
+            history_path.write_text(original, encoding="utf-8")
+            candidate = {"unresolved_ambiguity_rate": 0.3, "no_candidate_rate": 0.1}
+
+            for _ in range(5):
+                issue = MODULE._append_history(history_path, candidate, max_runs=200)
+                self.assertEqual(issue, "trend_deterioration")
+
+            self.assertEqual(history_path.read_text(encoding="utf-8"), original)
 
 
 if __name__ == "__main__":
