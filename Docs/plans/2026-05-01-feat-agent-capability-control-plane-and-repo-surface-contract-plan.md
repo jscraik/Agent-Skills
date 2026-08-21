@@ -281,7 +281,7 @@ contract:
 | `.skillsets/**`                    | canonical generated snapshot, reproducible generated output, runtime projection | If a repo command regenerates it from `Skills/**` or plugin sources without manual edits, classify as generated output or generated snapshot; if tests/docs treat exact checked-in content as a fixture contract, classify only the fixture subset as fixture; if production routing reads it as the source of truth with no generator, document the owner before classifying as source/policy. |
 | `.harness/*.db`                    | runtime state, fixture, accidental tracked file                                 | If the DB is written by runtime commands or local harness execution, classify as runtime state; if tests load a stable fixture DB, move or document it under a fixture path; if no reader or fixture exists, classify as unknown/blocker until owner review.                                                                                                                                    |
 | `skills-system/**`                 | vendored snapshot, generated mirror, legacy surface                             | If an update command or upstream plugin source can reproduce it, classify as vendored/generated with update command; if active runtime readers consume it directly, document reader and owner before preserving; if only stale docs mention it, classify as cleanup candidate after reference scan.                                                                                             |
-| `Infrastructure/Infrastructure/**` | accidental nested output, historical artifact, intentional archive              | If no active source/runtime reader depends on it, classify as historical artifact or cleanup candidate; if retained, require an allowlist reason that explains the duplicated path shape.                                                                                                                                                                                                       |
+| `Infrastructure/Infrastructure/**` | accidental nested output, historical artifact, intentional archive              | If no active source/runtime reader depends on it, classify as historical artifact or cleanup candidate; if retained, document its current owner and consumer without downgrading the finding.                                                                                                                                                                                                    |
 
 Unknown ownership is never a deletion signal. It is a blocker until one of the
 decision tests produces evidence and the policy records the outcome.
@@ -302,7 +302,7 @@ route, and one test set.
 ```text
 git tracked files
   -> surface inventory classifier
-  -> path policy / allowlist
+  -> ownership policy
   -> JSON report
   -> human summary
   -> strict validation result

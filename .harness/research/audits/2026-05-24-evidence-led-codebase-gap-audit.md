@@ -401,7 +401,9 @@ Repo surface diagnostics should distinguish accepted historical archive from new
 Evidence-led workflow requires source-of-truth boundaries, stale-state detection, and validators that prevent drift rather than making humans read enormous inventories.
 
 **Code Evidence:**
-- Live repo doctor repo_surface signal includes diagnostic_class repo_surface_ownership_debt and next_action classify_allowlist_or_cleanup_tracked_surface.
+- Historical repo doctor evidence used the retired action
+  `classify_allowlist_or_cleanup_tracked_surface`; the current action is
+  `classify_or_cleanup_tracked_surface` and does not provide a suppression path.
 - repo surface is a warning in repo doctor, not the current blocker.
 
 **Risk:**

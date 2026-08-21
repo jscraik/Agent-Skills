@@ -74,8 +74,8 @@ Out of scope:
   The plugin scaffolder currently emits many broad `[TODO: ...]` placeholders and is the clearest false-green generation risk.
 - [init_skill.py](/Users/jamiecraik/dev/Agent-Skills/skill-builder/Infrastructure/scripts/init_skill.py)
   This is the canonical skill scaffolder used by `skill-builder`, so lifecycle-aware realism-first generation has to land here first.
-- [exceptions.md](/Users/jamiecraik/dev/Agent-Skills/GOVERNANCE/exceptions.md)
-  Existing governance already uses owner/risk/review-date patterns, which is a useful alignment point for lifecycle metadata and review cadence semantics.
+- [risk-management.md](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/GOVERNANCE/risk-management.md)
+  Existing governance already uses owner, risk, and review-cadence patterns, which is a useful alignment point for lifecycle metadata without introducing a suppression route.
 
 ### Institutional Learnings
 
@@ -186,7 +186,7 @@ Policy note:
 **Execution note:** characterization-first
 
 **Patterns to follow:**
-- [exceptions.md](/Users/jamiecraik/dev/Agent-Skills/GOVERNANCE/exceptions.md)
+- [risk-management.md](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/GOVERNANCE/risk-management.md)
 - [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md](/Users/jamiecraik/dev/Agent-Skills/Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md)
 
 **Test scenarios:**
@@ -530,4 +530,4 @@ Traceability: `SA6`, `SA8`
 - [Learning-preserving delivery plan](/Users/jamiecraik/dev/Agent-Skills/Docs/plans/2026-03-10-feat-learning-preserving-skill-design-plan.md)
 - [Skill creator scaffold](/Users/jamiecraik/dev/Agent-Skills/skill-creator/Infrastructure/scripts/init_skill.py)
 - [Plugin creator scaffold](/Users/jamiecraik/dev/Agent-Skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py)
-- [Governance exceptions register](/Users/jamiecraik/dev/Agent-Skills/GOVERNANCE/exceptions.md)
+- [Governance risk management](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/GOVERNANCE/risk-management.md)

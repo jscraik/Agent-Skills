@@ -11,8 +11,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.repo import DoctorCatalogOptions, doctor_catalog
-from ask.catalog_parity import HISTORY_PATH
+from ask.commands.repo import DoctorCatalogOptions, doctor_catalog  # noqa: E402
+from ask.catalog_parity import HISTORY_PATH  # noqa: E402
 
 
 class TestAskRepoDoctorCatalog(unittest.TestCase):
@@ -190,6 +190,45 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             rows.append({"unresolved_ambiguity_rate": float("nan"), "no_candidate_rate": 0.1})
             history_path.write_text(
                 "".join(f"{json.dumps(row)}\n" for row in rows),
+                encoding="utf-8",
+            )
+
+            stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
+                "ask.catalog_parity.get_policy_identity",
+                return_value="0123456789abcdef",
+            ):
+                result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
+
+            report = result.data["catalog_parity"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(report["history_status"], "schema_invalid_history")
+            self.assertEqual(report["blocking_reason"], "schema_invalid_history")
+
+    def test_doctor_catalog_strict_blocks_malformed_nested_runtime_history(self) -> None:
+        """Strict catalog parity classifies malformed nested counts instead of raising."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            self._write_readme(repo, 1)
+            self._write_root_index(repo, 1)
+            (repo / "utilities" / "demo").mkdir(parents=True, exist_ok=True)
+            (repo / "utilities" / "demo" / "SKILL.md").write_text(
+                "---\nname: demo\ndescription: demo skill description that is long enough\n---\n",
+                encoding="utf-8",
+            )
+            history_path = repo / HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            history_path.write_text(
+                json.dumps(
+                    {
+                        "totals": {"fixtures": "invalid"},
+                        "status_counts": {
+                            "unresolved_ambiguity": 1,
+                            "degraded_no_candidates": 0,
+                        },
+                    }
+                )
+                + "\n",
                 encoding="utf-8",
             )
 

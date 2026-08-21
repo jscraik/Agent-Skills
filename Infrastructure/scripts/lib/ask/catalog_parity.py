@@ -78,26 +78,44 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     return match.group(1)
 
 
-def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None, str | None]:
-    """
-    Parse routing-quality history JSONL and determine the latest metrics and trend status.
+def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
+    totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
+    status_counts = payload.get("status_counts") if isinstance(payload.get("status_counts"), dict) else {}
+    try:
+        fixtures = float(totals.get("fixtures", 0) or 0)
+        unresolved = float(status_counts.get("unresolved_ambiguity", 0) or 0)
+        no_candidate = float(status_counts.get("degraded_no_candidates", 0) or 0)
+    except (TypeError, ValueError):
+        return None, "schema_invalid_history"
+    if not all(math.isfinite(value) for value in (fixtures, unresolved, no_candidate)):
+        return None, "schema_invalid_history"
+    if fixtures <= 0:
+        return None, None
+    return {
+        "unresolved_ambiguity_rate": unresolved / fixtures,
+        "no_candidate_rate": no_candidate / fixtures,
+    }, None
 
-    Reads the provided history JSONL, validates records, computes median baselines from the previous seven entries, and detects routing-quality deterioration in the latest row.
 
-    Returns:
-        A tuple of `(current_metrics, status)`:
-        - `current_metrics` (`dict[str, float] | None`): the most recent record containing keys `unresolved_ambiguity_rate` and `no_candidate_rate`, or `None` when a usable current record cannot be produced.
-        - `status` (`str | None`): one of:
-            - `"missing_history"` — history file does not exist.
-            - `"schema_invalid_history"` — the file contains invalid JSON or unexpected schema/values.
-            - `"insufficient_history"` — fewer than eight usable rows available to compute baselines.
-            - `"trend_deterioration"` — latest metrics show deterioration versus the baseline.
-            - `None` — parsing succeeded and no deterioration was detected.
-    """
-    if not history_path.exists():
-        return None, "missing_history"
+def _history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
+    unresolved = payload.get("unresolved_ambiguity_rate")
+    no_candidate = payload.get("no_candidate_rate")
+    if unresolved is None or no_candidate is None:
+        return _nested_history_rates(payload)
+    try:
+        rates = {
+            "unresolved_ambiguity_rate": float(unresolved),
+            "no_candidate_rate": float(no_candidate),
+        }
+    except (TypeError, ValueError):
+        return None, "schema_invalid_history"
+    if not all(math.isfinite(value) for value in rates.values()):
+        return None, "schema_invalid_history"
+    return rates, None
 
-    rows: list[dict[str, Any]] = []
+
+def _read_history_rows(history_path: Path) -> tuple[list[dict[str, float]] | None, str | None]:
+    rows: list[dict[str, float]] = []
     for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
         line = raw.strip()
         if not line:
@@ -108,62 +126,37 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
             return None, "schema_invalid_history"
         if not isinstance(payload, dict):
             return None, "schema_invalid_history"
+        rates, issue = _history_rates(payload)
+        if issue:
+            return None, issue
+        if rates:
+            rows.append(rates)
+    return rows, None
 
-        unresolved = payload.get("unresolved_ambiguity_rate")
-        no_candidate = payload.get("no_candidate_rate")
-        if unresolved is None or no_candidate is None:
-            # Allow alternate nested structure emitted by some validators.
-            totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
-            fixtures = float(totals.get("fixtures", 0) or 0)
-            status_counts = payload.get("status_counts") if isinstance(payload.get("status_counts"), dict) else {}
-            unresolved_count = float(status_counts.get("unresolved_ambiguity", 0) or 0)
-            no_candidate_count = float(status_counts.get("degraded_no_candidates", 0) or 0)
-            if fixtures <= 0:
-                continue
-            unresolved = unresolved_count / fixtures
-            no_candidate = no_candidate_count / fixtures
-        try:
-            unresolved_float = float(unresolved)
-            no_candidate_float = float(no_candidate)
-            if not math.isfinite(unresolved_float):
-                return None, "schema_invalid_history"
-            if not math.isfinite(no_candidate_float):
-                return None, "schema_invalid_history"
-            rows.append(
-                {
-                    "unresolved_ambiguity_rate": unresolved_float,
-                    "no_candidate_rate": no_candidate_float,
-                }
-            )
-        except (TypeError, ValueError):
-            return None, "schema_invalid_history"
 
-    if len(rows) < 8:
-        return None, "insufficient_history"
+def _metric_deteriorated(current_value: float, baseline_value: float) -> bool:
+    return current_value > baseline_value * 1.2 and current_value - baseline_value >= 0.01
 
-    current = rows[-1]
-    baseline_window = rows[-8:-1]
-    unresolved_baseline = median(row["unresolved_ambiguity_rate"] for row in baseline_window)
-    no_candidate_baseline = median(row["no_candidate_rate"] for row in baseline_window)
 
-    def deteriorated(current_value: float, baseline_value: float) -> bool:
-        """
-        Determine whether a metric has deteriorated relative to a baseline.
-
-        A deterioration is reported when the current value exceeds the baseline by more than 20% and the absolute increase is at least 0.01.
-
-        Parameters:
-            current_value (float): The current metric value.
-            baseline_value (float): The baseline metric value to compare against.
-
-        Returns:
-            bool: `True` if the current value is greater than the baseline by more than 20% and by at least 0.01, `False` otherwise.
-        """
-        return (current_value > baseline_value * 1.2) and ((current_value - baseline_value) >= 0.01)
-
-    if deteriorated(current["unresolved_ambiguity_rate"], unresolved_baseline) or deteriorated(
+def _history_deteriorated(current: dict[str, float], baseline: list[dict[str, float]]) -> bool:
+    unresolved_baseline = median(row["unresolved_ambiguity_rate"] for row in baseline)
+    no_candidate_baseline = median(row["no_candidate_rate"] for row in baseline)
+    return _metric_deteriorated(current["unresolved_ambiguity_rate"], unresolved_baseline) or _metric_deteriorated(
         current["no_candidate_rate"], no_candidate_baseline
-    ):
+    )
+
+
+def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None, str | None]:
+    """Return the latest routing-quality metrics and their validation status."""
+    if not history_path.exists():
+        return None, "missing_history"
+    rows, issue = _read_history_rows(history_path)
+    if issue:
+        return None, issue
+    if rows is None or len(rows) < 8:
+        return None, "insufficient_history"
+    current = rows[-1]
+    if _history_deteriorated(current, rows[-8:-1]):
         return current, "trend_deterioration"
     return current, None
 

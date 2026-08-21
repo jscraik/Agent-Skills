@@ -36,6 +36,7 @@ def test_inventory_reports_identify_the_agent_skills_service() -> None:
     args = type("Args", (), {"strict": False})()
     error = MODULE.error_report(args, RuntimeError("fixture failure"))
     assert error["metadata"]["service"] == "agent-skills"
+    assert error["findings"][0]["allowlist_entry"] is None
 
 
 def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:

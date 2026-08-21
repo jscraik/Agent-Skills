@@ -19,6 +19,31 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _inventory_error_finding(exc: Exception) -> dict[str, Any]:
+    recommendation = "Fix the inventory command inputs or canonical ownership rule."
+    return {
+        "path": "",
+        "classification": "unknown",
+        "status": "violation",
+        "code": "inventory_error",
+        "severity": "error",
+        "blocking": True,
+        "allowlist_entry": None,
+        "reason": str(exc),
+        "recommendation": recommendation,
+        "metadata": {
+            "service": SERVICE_ID,
+            "next_steps": [
+                {
+                    "type": "fix",
+                    "command": "./bin/ask repo surface --help",
+                    "rationale": recommendation,
+                }
+            ],
+        },
+    }
+
+
 def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
     return {
         "schema_version": 1,
@@ -30,28 +55,7 @@ def error_report(args: argparse.Namespace, exc: Exception) -> dict[str, Any]:
             "counts_by_status": {"violation": 1},
             "counts_by_code": {"inventory_error": 1},
         },
-        "findings": [
-            {
-                "path": "",
-                "classification": "unknown",
-                "status": "violation",
-                "code": "inventory_error",
-                "severity": "error",
-                "blocking": True,
-                "reason": str(exc),
-                "recommendation": "Fix the inventory command inputs or canonical ownership rule.",
-                "metadata": {
-                    "service": SERVICE_ID,
-                    "next_steps": [
-                        {
-                            "type": "fix",
-                            "command": "./bin/ask repo surface --help",
-                            "rationale": "Fix the inventory command inputs or canonical ownership rule.",
-                        }
-                    ]
-                },
-            }
-        ],
+        "findings": [_inventory_error_finding(exc)],
         "metadata": {
             "service": SERVICE_ID,
             "inventory_scope": "tracked_existing_files",

@@ -464,7 +464,8 @@ The exact filename can change in planning, but it must provide:
 
 The temporary allowlist design described in the first slice was retired. The
 inventory reports ownership and repair guidance directly; it does not downgrade
-findings through a waiver or exception file.
+findings through a waiver or exception file. Any historical `allowlist_entry`
+field is a nullable compatibility field only and cannot authorize suppression.
 
 ## Interface Design Pass
 
