@@ -367,10 +367,10 @@ class ProjectionIntegrityTests(unittest.TestCase):
         content = wrapper.read_text(encoding="utf-8")
 
         self.assertIn(
-            '.tmp/agent-skills-artifacts/validation/projection-integrity/latest.json',
+            'manifest_out="${PROJECTION_INTEGRITY_MANIFEST:-'
+            '.tmp/agent-skills-artifacts/validation/projection-integrity/latest.json}"',
             content,
         )
-
 
 if __name__ == "__main__":
     unittest.main()
