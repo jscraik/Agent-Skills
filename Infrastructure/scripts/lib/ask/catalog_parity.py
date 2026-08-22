@@ -116,7 +116,7 @@ def _history_counts(
         fixtures = float(totals.get("fixtures", 0) or 0)
         unresolved = float(status_counts.get("unresolved_ambiguity", 0) or 0)
         no_candidate = float(status_counts.get("degraded_no_candidates", 0) or 0)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None, "schema_invalid_history"
     if not all(math.isfinite(value) for value in (fixtures, unresolved, no_candidate)):
         return None, "schema_invalid_history"
@@ -161,7 +161,7 @@ def _history_rates(
             "unresolved_ambiguity_rate": float(unresolved),
             "no_candidate_rate": float(no_candidate),
         }
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None, "schema_invalid_history"
     if not all(math.isfinite(value) for value in rates.values()):
         return None, "schema_invalid_history"

@@ -78,6 +78,28 @@ class TestRejectedHistoryEvidence(unittest.TestCase):
                     _history_rates(payload), (None, "schema_invalid_history")
                 )
 
+    def test_oversized_history_metrics_are_invalid(self) -> None:
+        """Arbitrary-size JSON integers cannot crash history validation."""
+        oversized = 10**1000
+        payloads = (
+            {
+                "unresolved_ambiguity_rate": oversized,
+                "no_candidate_rate": 0.1,
+            },
+            {
+                "totals": {"fixtures": oversized},
+                "status_counts": {
+                    "unresolved_ambiguity": 0,
+                    "degraded_no_candidates": 0,
+                },
+            },
+        )
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.assertEqual(
+                    _history_rates(payload), (None, "schema_invalid_history")
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
