@@ -20,7 +20,8 @@ REQUIRED_SURFACES = (
     "route considered metadata",
 )
 HISTORY_PATH = Path(".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
-HISTORY_WINDOW_RUNS = 8
+HISTORY_WINDOW_RUNS = 14
+HISTORY_BASELINE_RUNS = 7
 
 
 def rejected_history_path(history_path: Path) -> Path:
@@ -84,6 +85,11 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     return match.group(1)
 
 
+def _contains_boolean(*values: object) -> bool:
+    """Return whether any metric value is a Boolean masquerading as a number."""
+    return any(isinstance(value, bool) for value in values)
+
+
 def _history_counts(
     payload: dict[str, Any],
 ) -> tuple[tuple[float, float, float] | None, str | None]:
@@ -95,6 +101,13 @@ def _history_counts(
         "unresolved_ambiguity",
         "degraded_no_candidates",
     }.issubset(status_counts):
+        return None, "schema_invalid_history"
+    raw_counts = (
+        totals.get("fixtures"),
+        status_counts.get("unresolved_ambiguity"),
+        status_counts.get("degraded_no_candidates"),
+    )
+    if _contains_boolean(*raw_counts):
         return None, "schema_invalid_history"
     try:
         fixtures = float(totals.get("fixtures", 0) or 0)
@@ -138,6 +151,8 @@ def _history_rates(
     no_candidate = payload.get("no_candidate_rate")
     if unresolved is None or no_candidate is None:
         return _nested_history_rates(payload)
+    if isinstance(unresolved, bool) or isinstance(no_candidate, bool):
+        return None, "schema_invalid_history"
     try:
         rates = {
             "unresolved_ambiguity_rate": float(unresolved),
@@ -156,7 +171,11 @@ def _read_history_rows(
     history_path: Path,
 ) -> tuple[list[dict[str, float]] | None, str | None]:
     rows: list[dict[str, float]] = []
-    for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    try:
+        raw_rows = history_path.read_text(encoding="utf-8").splitlines()
+    except UnicodeError:
+        return None, "schema_invalid_history"
+    for raw in raw_rows:
         line = raw.strip()
         if not line:
             continue
@@ -199,10 +218,10 @@ def _latest_history_metrics(
     rows, issue = _read_history_rows(history_path)
     if issue:
         return None, issue
-    if rows is None or len(rows) < HISTORY_WINDOW_RUNS:
+    if rows is None or len(rows) <= HISTORY_BASELINE_RUNS:
         return None, "insufficient_history"
     current = rows[-1]
-    if _history_deteriorated(current, rows[-HISTORY_WINDOW_RUNS:-1]):
+    if _history_deteriorated(current, rows[-(HISTORY_BASELINE_RUNS + 1) : -1]):
         return current, "trend_deterioration"
     return current, None
 
@@ -219,10 +238,9 @@ def candidate_history_issue(
     rows, issue = _read_history_rows(history_path)
     if issue:
         return issue
-    baseline_runs = HISTORY_WINDOW_RUNS - 1
-    if rows is None or len(rows) < baseline_runs:
+    if rows is None or len(rows) < HISTORY_BASELINE_RUNS:
         return None
-    if _history_deteriorated(candidate_rates, rows[-baseline_runs:]):
+    if _history_deteriorated(candidate_rates, rows[-HISTORY_BASELINE_RUNS:]):
         return "trend_deterioration"
     return None
 

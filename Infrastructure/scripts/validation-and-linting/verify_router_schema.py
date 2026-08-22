@@ -98,7 +98,7 @@ def _selection_status_issues(payload: Dict[str, Any]) -> List[str]:
         "degraded_no_candidates": "NO_ELIGIBLE_CANDIDATES",
         "blocked_catalog_parity": "CATALOG_PARITY_DRIFT",
     }
-    if status not in status_failures:
+    if not isinstance(status, str) or status not in status_failures:
         return ["invalid decision_status"]
     expected = status_failures[status]
     actual = payload.get("failure_class")
@@ -126,7 +126,10 @@ def _selection_type_issues(payload: Dict[str, Any]) -> List[str]:
         "truncated_count": (int, "an integer"),
     }
     for field, (expected, label) in expected_types.items():
-        if not isinstance(payload.get(field), expected):
+        value = payload.get(field)
+        if expected is int and type(value) is not int:
+            issues.append(f"{field} must be {label}")
+        elif expected is not int and not isinstance(value, expected):
             issues.append(f"{field} must be {label}")
     return issues
 
@@ -157,7 +160,7 @@ def validate_selection_decision(payload: Dict[str, Any]) -> List[str]:
 def _goal_status_issues(payload: Dict[str, Any]) -> List[str]:
     """Validate conditional goal-decision status fields."""
     status = payload.get("decision_status")
-    if status not in {"resolved", "intent_unresolved"}:
+    if not isinstance(status, str) or status not in {"resolved", "intent_unresolved"}:
         return ["invalid decision_status"]
     if status == "resolved":
         issues = []

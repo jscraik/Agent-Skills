@@ -318,17 +318,17 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertIsNone(blocker)
 
     def test_history_retention_never_drops_below_trend_window(self) -> None:
-        """Direct callers retain the minimum complete eight-sample window."""
+        """Direct callers retain the complete 14-sample rolling window."""
         with TemporaryDirectory() as tmpdir:
             history_path = Path(tmpdir) / "history.jsonl"
-            for index in range(9):
+            for index in range(15):
                 row = {
                     "unresolved_ambiguity_rate": 0.1,
                     "no_candidate_rate": 0.1,
                     "generated_at": str(index),
                 }
                 self.assertIsNone(MODULE._append_history(history_path, row, max_runs=1))
-            self.assertEqual(len(history_path.read_text().splitlines()), 8)
+            self.assertEqual(len(history_path.read_text().splitlines()), 14)
 
     def test_accepted_append_clears_rejected_sidecar(self) -> None:
         """A successful append removes stale rejection evidence."""
@@ -540,6 +540,17 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             path = Path(tmpdir) / "artifact.json"
             path.write_text("{}\n", encoding="utf-8")
             path.chmod(0o644)
+
+            MODULE._write_artifact(path, {"current": True})
+
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+
+    def test_artifact_replacement_restores_owner_write_access(self) -> None:
+        """Atomic receipt replacement always produces the required owner mode."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "artifact.json"
+            path.write_text("{}\n", encoding="utf-8")
+            path.chmod(0o400)
 
             MODULE._write_artifact(path, {"current": True})
 

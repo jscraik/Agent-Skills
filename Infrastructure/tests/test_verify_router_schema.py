@@ -172,5 +172,41 @@ class TestRoutingQualitySchema(unittest.TestCase):
             self.assertIn("service=router-schema-verifier", logs.output[0])
 
 
+class TestDecisionSchemaBoundaries(unittest.TestCase):
+    """Reject JSON values that exploit Python's container and Boolean types."""
+
+    def test_container_decision_statuses_are_invalid(self) -> None:
+        """Selection and goal validators return issues instead of raising."""
+        self.assertEqual(
+            MODULE._selection_status_issues({"decision_status": []}),
+            ["invalid decision_status"],
+        )
+        self.assertEqual(
+            MODULE._goal_status_issues({"decision_status": {}}),
+            ["invalid decision_status"],
+        )
+
+    def test_boolean_selection_counters_are_invalid(self) -> None:
+        """Boolean values cannot satisfy integer counter fields."""
+        payload = {
+            "selected_candidates": [],
+            "considered_candidates": [],
+            "excluded_candidates": [],
+            "considered_limit": True,
+            "considered_total": False,
+            "considered_truncated": False,
+            "truncated_count": True,
+        }
+
+        self.assertEqual(
+            MODULE._selection_type_issues(payload),
+            [
+                "considered_limit must be an integer",
+                "considered_total must be an integer",
+                "truncated_count must be an integer",
+            ],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

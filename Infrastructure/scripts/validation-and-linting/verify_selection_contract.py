@@ -9,7 +9,6 @@ import importlib
 import json
 import logging
 import os
-import stat
 import sys
 from collections import Counter
 from collections.abc import Iterator
@@ -182,9 +181,11 @@ def _append_history_locked(
 
     existing_rows: list[dict[str, Any]] = []
     if history_path.exists():
-        for raw in history_path.read_text(
-            encoding="utf-8", errors="ignore"
-        ).splitlines():
+        try:
+            raw_rows = history_path.read_text(encoding="utf-8").splitlines()
+        except UnicodeError:
+            return "schema_invalid_history"
+        for raw in raw_rows:
             line = raw.strip()
             if not line:
                 continue
@@ -687,7 +688,7 @@ def _restore_persistence_transaction(
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
     """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    target_mode = stat.S_IMODE(path.stat().st_mode) & 0o600 if path.exists() else 0o600
+    target_mode = 0o600
     content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
     with NamedTemporaryFile(
         mode="w",
