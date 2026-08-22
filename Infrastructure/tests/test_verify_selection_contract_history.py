@@ -228,6 +228,39 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertEqual(status, "available")
             self.assertIsNone(blocker)
 
+    def test_invalid_rejected_sidecar_names_repository_relative_repair_path(
+        self,
+    ) -> None:
+        """Strict remediation identifies the actual rejected evidence path."""
+        with TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            history_path = repo_root / MODULE.catalog_parity_module.HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            history_path.write_text(
+                json.dumps(
+                    {
+                        "unresolved_ambiguity_rate": 0.1,
+                        "no_candidate_rate": 0.1,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            rejected_history_path(history_path).write_text(
+                "not-json\n", encoding="utf-8"
+            )
+
+            status, blocker = _history_trend_drift(repo_root)
+
+            self.assertEqual(status, "schema_invalid_history")
+            self.assertIsNotNone(blocker)
+            self.assertIn(
+                rejected_history_path(
+                    MODULE.catalog_parity_module.HISTORY_PATH
+                ).as_posix(),
+                blocker[2] if blocker else "",
+            )
+
     def test_orphaned_rejection_sidecar_is_not_collected(self) -> None:
         """Rejected evidence alone does not invent canonical history telemetry."""
         with TemporaryDirectory() as tmpdir:
@@ -326,6 +359,34 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
                 artifact["gate_outcomes"]["hard"]["history_persistence"], "fail"
             )
             self.assertTrue(rejected_history_path(history_path).exists())
+
+    def test_artifact_write_failure_rolls_back_history_mutation(self) -> None:
+        """A failed required receipt cannot advance the accepted baseline."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            artifact_path = root / "artifact-as-directory"
+            artifact_path.mkdir()
+            args = MODULE.argparse.Namespace(
+                artifact=artifact_path,
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+
+            with self.assertRaises(OSError):
+                MODULE._persist_artifact_and_history(args, [], artifact, "policy")
+
+            self.assertFalse(history_path.exists())
+            self.assertFalse(rejected_history_path(history_path).exists())
 
 
 if __name__ == "__main__":

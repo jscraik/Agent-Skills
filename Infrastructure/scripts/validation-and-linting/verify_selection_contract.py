@@ -663,6 +663,70 @@ def _apply_history_outcome(
     return issue
 
 
+def _optional_bytes(path: Path) -> bytes | None:
+    """Capture an optional file while the history writer lock is held."""
+    return path.read_bytes() if path.exists() else None
+
+
+def _restore_optional_file(path: Path, content: bytes | None) -> None:
+    """Restore one transaction snapshot without retaining a partial mutation."""
+    if content is None:
+        path.unlink(missing_ok=True)
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+
+
+def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
+    """Write the required routing-quality artifact."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+def _persist_artifact_and_history(
+    args: argparse.Namespace,
+    results: list[dict[str, Any]],
+    artifact: dict[str, Any],
+    active_policy: str,
+) -> str | None:
+    """Persist one artifact-bound history outcome or roll the history back."""
+    failed = [item for item in results if not item["passed"]]
+    if not args.history_path or failed:
+        issue = _apply_history_outcome(args, results, artifact, active_policy)
+        _write_artifact(args.artifact, artifact)
+        return issue
+
+    history_path = args.history_path
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    rejected_path = rejected_history_path(history_path)
+    with _history_lock(history_path):
+        history_snapshot = _optional_bytes(history_path)
+        rejected_snapshot = _optional_bytes(rejected_path)
+        row = _routing_history_row(
+            artifact,
+            active_policy,
+            artifact["unresolved_ambiguity_rate"],
+            artifact["no_candidate_rate"],
+        )
+        issue = _append_history_locked(
+            history_path, row, max_runs=args.history_max_runs
+        )
+        status = issue or "accepted"
+        artifact["history_status"] = status
+        artifact["gate_outcomes"]["hard"]["history_persistence"] = (
+            "fail" if issue else "pass"
+        )
+        try:
+            _write_artifact(args.artifact, artifact)
+        except OSError:
+            _restore_optional_file(history_path, history_snapshot)
+            _restore_optional_file(rejected_path, rejected_snapshot)
+            raise
+        return issue
+
+
 def main() -> int:
     """Verify fixtures and emit the routing-quality artifact."""
     args = parse_args()
@@ -676,10 +740,8 @@ def main() -> int:
     statuses, failures = route[1] + goal[1], route[2] + goal[2]
     counters = statuses, failures, route[3], route[4], route[5] + goal[3]
     artifact = _artifact(args, active_policy, results, counters)
-    history_issue = _apply_history_outcome(args, results, artifact, active_policy)
-    args.artifact.parent.mkdir(parents=True, exist_ok=True)
-    args.artifact.write_text(
-        json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    history_issue = _persist_artifact_and_history(
+        args, results, artifact, active_policy
     )
     return _report(args, active_policy, results, artifact, history_issue)
 

@@ -274,6 +274,7 @@ def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | N
         return history_issue, None
     if history_issue == "schema_invalid_history":
         rejected = rejected_history_path(history_path)
+        rejected_relpath = rejected.relative_to(repo_root).as_posix()
         return (
             history_issue,
             (
@@ -281,7 +282,7 @@ def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | N
                 "schema_invalid_history",
                 (
                     f"Repair {HISTORY_PATH.as_posix()} to valid schema entries; "
-                    f"remove or repair {rejected.name} if the rejected sidecar is corrupt."
+                    f"remove or repair {rejected_relpath} if the rejected sidecar is corrupt."
                 ),
             ),
         )
