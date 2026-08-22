@@ -3,17 +3,49 @@
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { collectChangedPaths } from "./lib/changed-files.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const args = new Set(process.argv.slice(2));
+const supportedArgs = new Set(["--all", "--staged"]);
+const unsupportedArgs = [...args].filter((arg) => !supportedArgs.has(arg));
+if (unsupportedArgs.length > 0) {
+	console.error(
+		`[structural-validation] unsupported argument(s): ${unsupportedArgs.join(", ")}`,
+	);
+	process.exit(2);
+}
+
+const stagedSource = args.has("--staged");
+const changedPaths = collectChangedPaths({
+	repoRoot,
+	modeAll: args.has("--all"),
+	modeStaged: stagedSource,
+});
 const structuralChecks = [
-	"scripts/validation-and-linting/verify_ask_cli_modularity.py",
-	"scripts/validation-and-linting/verify_program_design.py",
+	{
+		path: "scripts/validation-and-linting/verify_ask_cli_modularity.py",
+		stagedSource: false,
+	},
+	{
+		path: "scripts/validation-and-linting/verify_program_design.py",
+		stagedSource: true,
+	},
 ];
 
 for (const check of structuralChecks) {
+	const checkArgs = [
+		"Infrastructure/scripts/run-infrastructure-python.sh",
+		check.path,
+		"--changed-files",
+		...changedPaths,
+	];
+	if (stagedSource && check.stagedSource) {
+		checkArgs.push("--staged-source");
+	}
 	const result = spawnSync(
 		"bash",
-		["Infrastructure/scripts/run-infrastructure-python.sh", check],
+		checkArgs,
 		{ cwd: repoRoot, stdio: "inherit" },
 	);
 	if (result.error) {
