@@ -60,6 +60,24 @@ class TestRejectedHistoryEvidence(unittest.TestCase):
                     _history_rates(payload), (None, "schema_invalid_history")
                 )
 
+    def test_string_history_metrics_are_invalid(self) -> None:
+        """Numeric-looking strings cannot become trusted baseline evidence."""
+        payloads = (
+            {"unresolved_ambiguity_rate": "0.1", "no_candidate_rate": 0.1},
+            {
+                "totals": {"fixtures": "10"},
+                "status_counts": {
+                    "unresolved_ambiguity": 0,
+                    "degraded_no_candidates": 0,
+                },
+            },
+        )
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.assertEqual(
+                    _history_rates(payload), (None, "schema_invalid_history")
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

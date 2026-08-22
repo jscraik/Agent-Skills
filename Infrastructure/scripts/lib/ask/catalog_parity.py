@@ -85,9 +85,12 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     return match.group(1)
 
 
-def _contains_boolean(*values: object) -> bool:
-    """Return whether any metric value is a Boolean masquerading as a number."""
-    return any(isinstance(value, bool) for value in values)
+def _contains_non_numeric(*values: object) -> bool:
+    """Return whether any metric is not a JSON number."""
+    return any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        for value in values
+    )
 
 
 def _history_counts(
@@ -107,7 +110,7 @@ def _history_counts(
         status_counts.get("unresolved_ambiguity"),
         status_counts.get("degraded_no_candidates"),
     )
-    if _contains_boolean(*raw_counts):
+    if _contains_non_numeric(*raw_counts):
         return None, "schema_invalid_history"
     try:
         fixtures = float(totals.get("fixtures", 0) or 0)
@@ -151,7 +154,7 @@ def _history_rates(
     no_candidate = payload.get("no_candidate_rate")
     if unresolved is None or no_candidate is None:
         return _nested_history_rates(payload)
-    if isinstance(unresolved, bool) or isinstance(no_candidate, bool):
+    if _contains_non_numeric(unresolved, no_candidate):
         return None, "schema_invalid_history"
     try:
         rates = {
