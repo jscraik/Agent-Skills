@@ -33,6 +33,39 @@ SPEC.loader.exec_module(MODULE)
 
 
 class TestVerifySelectionContractHistory(unittest.TestCase):
+    def test_route_fixture_loader_rejects_malformed_json(self) -> None:
+        """Malformed route input returns the stable invalid-fixture result."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "routes.json"
+            path.write_text("not-json", encoding="utf-8")
+
+            self.assertIsNone(MODULE._load_routes(path))
+
+    def test_route_fixture_loader_rejects_non_object_entries(self) -> None:
+        """Route evaluation never receives scalar fixture entries."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "routes.json"
+            path.write_text('{"fixtures": [1]}', encoding="utf-8")
+
+            self.assertIsNone(MODULE._load_routes(path))
+
+    def test_goal_fixture_loader_reports_invalid_root(self) -> None:
+        """Optional goal input records a failed result instead of raising."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "goals.json"
+            path.write_text("[]", encoding="utf-8")
+
+            results, statuses, failures, mapping_failures = MODULE._evaluate_goals(
+                path, "policy"
+            )
+
+            self.assertEqual(results[0]["id"], "goal-fixtures")
+            self.assertEqual(results[0]["issues"], ["fixture_root_must_be_object"])
+            self.assertFalse(results[0]["passed"])
+            self.assertFalse(statuses)
+            self.assertFalse(failures)
+            self.assertEqual(mapping_failures, 0)
+
     def test_consecutive_unchanged_runs_append_distinct_history_rows(self) -> None:
         """Every completed persistent run contributes one bounded history sample."""
         with TemporaryDirectory() as tmpdir:

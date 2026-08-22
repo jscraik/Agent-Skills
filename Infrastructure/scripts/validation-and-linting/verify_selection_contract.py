@@ -389,9 +389,11 @@ def _evaluate_goals(path: Path, active_policy: str) -> tuple[Any, ...]:
     failure_mapping_failures = 0
     if not path.exists():
         return results, status_counter, failure_counter, failure_mapping_failures
-    fixtures = json.loads(path.read_text(encoding="utf-8")).get("fixtures", [])
-    if not isinstance(fixtures, list):
+    fixtures, issue = _read_fixture_objects(path)
+    if issue:
+        results.append(_result("goal-fixtures", "goal", {}, [issue]))
         return results, status_counter, failure_counter, failure_mapping_failures
+    assert fixtures is not None
     for fixture in fixtures:
         decision, issues = _goal_decision(fixture, active_policy)
         issues.extend(
@@ -530,11 +532,36 @@ def _load_routes(path: Path) -> list[dict[str, Any]] | None:
     if not path.exists():
         print(f"Fixture file not found: {path}")
         return None
-    fixtures = json.loads(path.read_text(encoding="utf-8")).get("fixtures", [])
-    if not isinstance(fixtures, list) or not fixtures:
+    fixtures, issue = _read_fixture_objects(path)
+    if issue:
+        print(f"Invalid fixtures in {path}: {issue}")
+        return None
+    if not fixtures:
         print(f"No fixtures found in {path}")
         return None
     return fixtures
+
+
+def _read_fixture_objects(
+    path: Path,
+) -> tuple[list[dict[str, Any]] | None, str | None]:
+    """Read one fixture document and validate its external input shape."""
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        issue = f"fixture_read_error:{type(exc).__name__}"
+        logger.error("service=%s event=fixture_rejected code=%s", SERVICE_ID, issue)
+        return None, issue
+    if not isinstance(document, dict):
+        issue = "fixture_root_must_be_object"
+    elif not isinstance(document.get("fixtures", []), list):
+        issue = "fixtures_must_be_array"
+    elif not all(isinstance(item, dict) for item in document.get("fixtures", [])):
+        issue = "fixture_entries_must_be_objects"
+    else:
+        return document.get("fixtures", []), None
+    logger.error("service=%s event=fixture_rejected code=%s", SERVICE_ID, issue)
+    return None, issue
 
 
 def _report(
