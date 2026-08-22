@@ -73,6 +73,7 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
                 for line in history_path.read_text(encoding="utf-8").splitlines()
             ]
             self.assertEqual(issues, [None] * 16)
+            self.assertEqual(len(rows), 16)
             self.assertEqual(
                 {row["generated_at"] for row in rows}, {str(i) for i in range(16)}
             )
@@ -385,6 +386,36 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             with self.assertRaises(OSError):
                 MODULE._persist_artifact_and_history(args, [], artifact, "policy")
 
+            self.assertFalse(history_path.exists())
+            self.assertFalse(rejected_history_path(history_path).exists())
+
+    def test_artifact_serialization_failure_rolls_back_and_logs(self) -> None:
+        """Invalid receipt data cannot advance history without a diagnostic."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            args = MODULE.argparse.Namespace(
+                artifact=root / "artifact.json",
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+                "invalid": object(),
+            }
+
+            with self.assertLogs(MODULE.logger, level="ERROR") as logs:
+                with self.assertRaises(TypeError):
+                    MODULE._persist_artifact_and_history(args, [], artifact, "policy")
+
+            self.assertIn("service=selection-contract-verifier", logs.output[0])
+            self.assertIn("code=history_rolled_back", logs.output[0])
             self.assertFalse(history_path.exists())
             self.assertFalse(rejected_history_path(history_path).exists())
 

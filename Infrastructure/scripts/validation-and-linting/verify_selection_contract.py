@@ -11,6 +11,7 @@ import logging
 import os
 import sys
 from collections import Counter
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -174,7 +175,7 @@ def _append_history(
 
 
 @contextmanager
-def _history_lock(history_path: Path):
+def _history_lock(history_path: Path) -> Iterator[None]:
     """Serialize history validation and replacement across verifier processes."""
     lock_path = history_path.with_suffix(f"{history_path.suffix}.lock")
     with lock_path.open("a", encoding="utf-8") as lock_file:
@@ -237,6 +238,11 @@ def _atomic_write_history(history_path: Path, rows: list[dict[str, Any]]) -> Non
         os.replace(temporary_path, history_path)
     finally:
         temporary_path.unlink(missing_ok=True)
+    directory = os.open(history_path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
 
 
 def _write_rejected_history(
@@ -697,8 +703,17 @@ def _persist_artifact_and_history(
         issue = _apply_history_outcome(args, results, artifact, active_policy)
         _write_artifact(args.artifact, artifact)
         return issue
+    return _persist_locked_history_outcome(args, artifact, active_policy)
 
+
+def _persist_locked_history_outcome(
+    args: argparse.Namespace,
+    artifact: dict[str, Any],
+    active_policy: str,
+) -> str | None:
+    """Bind one successful fixture run to its required artifact transaction."""
     history_path = args.history_path
+    assert history_path is not None
     history_path.parent.mkdir(parents=True, exist_ok=True)
     rejected_path = rejected_history_path(history_path)
     with _history_lock(history_path):
@@ -720,7 +735,11 @@ def _persist_artifact_and_history(
         )
         try:
             _write_artifact(args.artifact, artifact)
-        except OSError:
+        except (OSError, TypeError, ValueError):
+            logger.exception(
+                "service=%s event=artifact_write_failed code=history_rolled_back",
+                SERVICE_ID,
+            )
             _restore_optional_file(history_path, history_snapshot)
             _restore_optional_file(rejected_path, rejected_snapshot)
             raise
