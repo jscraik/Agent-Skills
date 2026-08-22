@@ -725,19 +725,20 @@ def _persist_locked_history_outcome(
             artifact["unresolved_ambiguity_rate"],
             artifact["no_candidate_rate"],
         )
-        issue = _append_history_locked(
-            history_path, row, max_runs=args.history_max_runs
-        )
-        status = issue or "accepted"
-        artifact["history_status"] = status
-        artifact["gate_outcomes"]["hard"]["history_persistence"] = (
-            "fail" if issue else "pass"
-        )
         try:
+            issue = _append_history_locked(
+                history_path, row, max_runs=args.history_max_runs
+            )
+            status = issue or "accepted"
+            artifact["history_status"] = status
+            artifact["gate_outcomes"]["hard"]["history_persistence"] = (
+                "fail" if issue else "pass"
+            )
             _write_artifact(args.artifact, artifact)
         except (OSError, TypeError, ValueError):
             logger.exception(
-                "service=%s event=artifact_write_failed code=history_rolled_back",
+                "service=%s event=persistence_transaction_failed "
+                "code=history_rolled_back",
                 SERVICE_ID,
             )
             _restore_optional_file(history_path, history_snapshot)

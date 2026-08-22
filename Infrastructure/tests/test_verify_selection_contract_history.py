@@ -5,6 +5,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 
 SCRIPT_PATH = (
@@ -388,6 +389,45 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
 
             self.assertFalse(history_path.exists())
             self.assertFalse(rejected_history_path(history_path).exists())
+
+    def test_sidecar_cleanup_failure_rolls_back_history_mutation(self) -> None:
+        """A partial history append cannot escape the receipt transaction."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            rejected_path = rejected_history_path(history_path)
+            rejected_path.write_text("preserved\n", encoding="utf-8")
+            args = MODULE.argparse.Namespace(
+                artifact=root / "artifact.json",
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+            original_unlink = Path.unlink
+            failed_once = False
+
+            def fail_sidecar_cleanup(path: Path, *, missing_ok: bool = False) -> None:
+                nonlocal failed_once
+                if path == rejected_path and not failed_once:
+                    failed_once = True
+                    raise OSError("sidecar cleanup failed")
+                original_unlink(path, missing_ok=missing_ok)
+
+            with patch.object(Path, "unlink", fail_sidecar_cleanup):
+                with self.assertRaises(OSError):
+                    MODULE._persist_artifact_and_history(args, [], artifact, "policy")
+
+            self.assertFalse(history_path.exists())
+            self.assertEqual(rejected_path.read_text(encoding="utf-8"), "preserved\n")
+            self.assertFalse(args.artifact.exists())
 
     def test_artifact_serialization_failure_rolls_back_and_logs(self) -> None:
         """Invalid receipt data cannot advance history without a diagnostic."""
