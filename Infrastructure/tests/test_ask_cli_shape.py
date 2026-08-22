@@ -338,6 +338,7 @@ class Runner:
         shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
 
         with (
+            unittest.mock.patch.object(validator, "_staged_paths", return_value=frozenset({args.changed_files[0]})),
             unittest.mock.patch.object(validator, "_current_source", return_value="def staged():\n    return 1\n") as source,
             unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
             unittest.mock.patch.object(validator, "_check_file_size"),
@@ -371,6 +372,24 @@ class Runner:
             ["staged_only.py:oversized exceeds function line budget (41 > 40)"],
         )
 
+    def test_python_shape_skips_staged_deletion(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_deletion_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("deleted.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+
     @staticmethod
     def _prepare_staged_missing_worktree_fixture(root: Path) -> None:
         subprocess.run(("git", "init", "-q"), cwd=root, check=True)
@@ -394,6 +413,28 @@ class Runner:
         staged_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
         subprocess.run(("git", "add", "staged_only.py"), cwd=root, check=True)
         staged_path.unlink()
+
+    @staticmethod
+    def _prepare_staged_deletion_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        deleted_path = root / "deleted.py"
+        deleted_path.write_text("VALUE = 1\n", encoding="utf-8")
+        subprocess.run(("git", "add", "deleted.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish deletion baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        subprocess.run(("git", "rm", "-q", "deleted.py"), cwd=root, check=True)
 
     def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
         validator = _load_validator()
