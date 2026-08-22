@@ -515,8 +515,8 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             )
             self.assertFalse(history_path.exists())
 
-    def test_artifact_replacement_preserves_readable_mode(self) -> None:
-        """Atomic receipt replacement retains the existing access contract."""
+    def test_artifact_replacement_removes_group_and_world_access(self) -> None:
+        """Atomic receipt replacement restricts the artifact to its owner."""
         with TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "artifact.json"
             path.write_text("{}\n", encoding="utf-8")
@@ -524,7 +524,7 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
 
             MODULE._write_artifact(path, {"current": True})
 
-            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o644)
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
 
     def test_artifact_directory_fsync_failure_restores_previous_receipt(self) -> None:
         """A post-replace durability failure restores all transaction files."""

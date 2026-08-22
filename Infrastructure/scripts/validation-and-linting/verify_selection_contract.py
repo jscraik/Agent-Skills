@@ -691,7 +691,9 @@ def _restore_persistence_transaction(
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
     """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    target_mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o644
+    target_mode = (
+        stat.S_IMODE(path.stat().st_mode) & 0o600 if path.exists() else 0o600
+    )
     content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
     with NamedTemporaryFile(
         mode="w",
