@@ -23,7 +23,7 @@ GIT_DIR="$hook_git_dir" GIT_INDEX_FILE="$hook_git_index_file" \
 changed_files_file="$(mktemp "$TMPDIR/agent-skills-pre-commit.XXXXXX")"
 trap 'rm -f "$changed_files_file"' EXIT
 
-git diff --cached --name-only --diff-filter=ACMR -- >"$changed_files_file"
+git diff --cached --name-only --diff-filter=ACMRT -- >"$changed_files_file"
 changed_file_count="$(wc -l <"$changed_files_file" | tr -d " ")"
 
 if [[ "$changed_file_count" -eq 0 ]]; then

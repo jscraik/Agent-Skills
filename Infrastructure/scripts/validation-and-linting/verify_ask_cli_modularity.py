@@ -113,7 +113,18 @@ def _git_lines(args: list[str]) -> list[str]:
 
 
 def _staged_paths() -> frozenset[str]:
-    return frozenset(_git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"]))
+    candidates = _git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"])
+    return frozenset(path for path in candidates if path in _regular_index_paths())
+
+
+def _regular_index_paths() -> frozenset[str]:
+    paths: set[str] = set()
+    for entry in _git_output(["ls-files", "--stage", "-z"]).split("\0"):
+        metadata, separator, path = entry.partition("\t")
+        mode, _, _ = metadata.partition(" ")
+        if separator and mode in {"100644", "100755"}:
+            paths.add(path)
+    return frozenset(paths)
 
 
 def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
@@ -330,13 +341,15 @@ def _changed_python_paths(paths: tuple[str, ...], *, staged_source: bool = False
     staged_paths = _staged_paths() if staged_source else frozenset()
     python_paths: list[Path] = []
     for path_text in paths:
-        if path_text.endswith(PYTHON_SUFFIX):
-            path = _repo_path(path_text)
-            normalized = path.relative_to(REPO_ROOT).as_posix()
-            if (staged_source and normalized in staged_paths) or (
-                not staged_source and path.exists() and path.is_file()
-            ):
-                python_paths.append(path)
+        if not path_text.endswith(PYTHON_SUFFIX):
+            continue
+        if staged_source:
+            if path_text in staged_paths:
+                python_paths.append(REPO_ROOT / path_text)
+            continue
+        path = _repo_path(path_text)
+        if path.exists() and path.is_file():
+            python_paths.append(path)
     return sorted(set(python_paths))
 
 
