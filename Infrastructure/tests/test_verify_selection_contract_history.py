@@ -496,6 +496,46 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             )
             self.assertFalse(history_path.exists())
 
+    def test_artifact_directory_fsync_failure_restores_previous_receipt(self) -> None:
+        """A post-replace durability failure restores all transaction files."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            artifact_path = root / "artifacts" / "artifact.json"
+            artifact_path.parent.mkdir()
+            previous = b'{"previous": true}\n'
+            artifact_path.write_bytes(previous)
+            args = MODULE.argparse.Namespace(
+                artifact=artifact_path,
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+            original_fsync = MODULE.os.fsync
+            fsync_calls = 0
+
+            def fail_artifact_directory(descriptor: int) -> None:
+                nonlocal fsync_calls
+                fsync_calls += 1
+                if fsync_calls == 4:
+                    raise OSError("artifact directory fsync failed")
+                original_fsync(descriptor)
+
+            with patch.object(MODULE.os, "fsync", fail_artifact_directory):
+                with self.assertRaises(OSError):
+                    MODULE._persist_artifact_and_history(args, [], artifact, "policy")
+
+            self.assertEqual(artifact_path.read_bytes(), previous)
+            self.assertFalse(history_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

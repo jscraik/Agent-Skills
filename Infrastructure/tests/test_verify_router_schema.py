@@ -1,9 +1,13 @@
 """Focused routing-quality receipt schema tests."""
 
 import importlib.util
+import math
 import sys
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 SCRIPT_PATH = (
@@ -65,6 +69,36 @@ class TestRoutingQualitySchema(unittest.TestCase):
             "history_status contradicts history_persistence gate",
             MODULE.validate_routing_quality(payload),
         )
+
+    def test_boolean_and_non_finite_rates_fail(self) -> None:
+        """Malformed JSON-compatible numeric values cannot pass as rates."""
+        for value in (True, math.nan, math.inf, -math.inf):
+            with self.subTest(value=value):
+                payload = routing_quality_payload()
+                payload["no_candidate_rate"] = value
+                self.assertIn(
+                    "no_candidate_rate must be numeric",
+                    MODULE.validate_routing_quality(payload),
+                )
+
+    def test_invalid_input_reports_service_and_source(self) -> None:
+        """Input failures return a contextual service-owned diagnostic."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "invalid.json"
+            path.write_text("not-json", encoding="utf-8")
+            output = StringIO()
+            original_argv = sys.argv
+            self.addCleanup(setattr, sys, "argv", original_argv)
+            sys.argv = [str(SCRIPT_PATH), "--input", str(path)]
+
+            with self.assertLogs(MODULE.logger, level="ERROR") as logs:
+                with redirect_stdout(output):
+                    status = MODULE.main()
+
+            self.assertEqual(status, 1)
+            self.assertIn("service=router-schema-verifier", output.getvalue())
+            self.assertIn(str(path), output.getvalue())
+            self.assertIn("service=router-schema-verifier", logs.output[0])
 
 
 if __name__ == "__main__":

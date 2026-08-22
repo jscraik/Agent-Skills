@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+import math
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -31,6 +33,10 @@ for schema_lib in schema_lib_candidates:
         sys.path.insert(0, str(schema_lib))
 
 from skill_router_schema import validate_router_result  # noqa: E402
+
+
+SERVICE_ID = "router-schema-verifier"
+logger = logging.getLogger(SERVICE_ID)
 
 
 def load_payload(path: Path | None) -> Dict[str, Any]:
@@ -254,7 +260,7 @@ def _routing_rate_issues(payload: Dict[str, Any]) -> List[str]:
     )
     for field in fields:
         value = payload.get(field)
-        if not isinstance(value, (int, float)):
+        if type(value) not in (int, float) or not math.isfinite(value):
             issues.append(f"{field} must be numeric")
         elif value < 0 or value > 1:
             issues.append(f"{field} must be within [0,1]")
@@ -364,9 +370,9 @@ def _validation_result(
 def _report_validation(mode: str, issues: List[str]) -> int:
     """Print one stable schema-validation result."""
     if not issues:
-        print(f"{mode.title()} schema validation passed.")
+        print(f"service={SERVICE_ID} {mode.title()} schema validation passed.")
         return 0
-    print(f"{mode.title()} schema validation failed:")
+    print(f"service={SERVICE_ID} {mode.title()} schema validation failed:")
     for issue in issues:
         print(f"- {issue}")
     return 1
@@ -375,9 +381,20 @@ def _report_validation(mode: str, issues: List[str]) -> int:
 def main() -> int:
     """Load, route, and report one router or selection payload."""
     args = parse_args()
-    payload = load_payload(args.input)
+    try:
+        payload = load_payload(args.input)
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        source = str(args.input) if args.input else "stdin"
+        logger.exception(
+            "service=%s event=input_rejected source=%s error=%s",
+            SERVICE_ID,
+            source,
+            type(exc).__name__,
+        )
+        print(f"service={SERVICE_ID} Router schema input rejected: {source}")
+        return 1
     if not payload:
-        print("No payload provided; schema verification skipped.")
+        print(f"service={SERVICE_ID} No payload provided; schema verification skipped.")
         return 0
     mode, issues = _validation_result(
         payload,

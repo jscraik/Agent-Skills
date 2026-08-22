@@ -683,6 +683,14 @@ def _restore_optional_file(path: Path, content: bytes | None) -> None:
     path.write_bytes(content)
 
 
+def _restore_persistence_transaction(
+    snapshots: tuple[tuple[Path, bytes | None], ...],
+) -> None:
+    """Restore every file participating in a failed persistence transaction."""
+    for path, content in snapshots:
+        _restore_optional_file(path, content)
+
+
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
     """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -735,8 +743,10 @@ def _persist_locked_history_outcome(
     history_path.parent.mkdir(parents=True, exist_ok=True)
     rejected_path = rejected_history_path(history_path)
     with _history_lock(history_path):
-        history_snapshot = _optional_bytes(history_path)
-        rejected_snapshot = _optional_bytes(rejected_path)
+        snapshots = tuple(
+            (path, _optional_bytes(path))
+            for path in (history_path, rejected_path, args.artifact)
+        )
         row = _routing_history_row(
             artifact,
             active_policy,
@@ -759,8 +769,7 @@ def _persist_locked_history_outcome(
                 "code=history_rolled_back",
                 SERVICE_ID,
             )
-            _restore_optional_file(history_path, history_snapshot)
-            _restore_optional_file(rejected_path, rejected_snapshot)
+            _restore_persistence_transaction(snapshots)
             raise
         return issue
 
