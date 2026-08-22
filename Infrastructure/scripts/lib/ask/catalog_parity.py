@@ -22,6 +22,7 @@ REQUIRED_SURFACES = (
 HISTORY_PATH = Path(".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
 HISTORY_WINDOW_RUNS = 14
 HISTORY_BASELINE_RUNS = 7
+MAX_EXACT_JSON_INTEGER = (2**53) - 1
 
 
 def rejected_history_path(history_path: Path) -> Path:
@@ -93,9 +94,17 @@ def _contains_non_numeric(*values: object) -> bool:
     )
 
 
+def _contains_invalid_count(*values: object) -> bool:
+    """Return whether any count is not an exactly representable JSON integer."""
+    return any(
+        type(value) is not int or abs(value) > MAX_EXACT_JSON_INTEGER
+        for value in values
+    )
+
+
 def _history_counts(
     payload: dict[str, Any],
-) -> tuple[tuple[float, float, float] | None, str | None]:
+) -> tuple[tuple[int, int, int] | None, str | None]:
     totals = payload.get("totals")
     status_counts = payload.get("status_counts")
     if not isinstance(totals, dict) or not isinstance(status_counts, dict):
@@ -110,16 +119,9 @@ def _history_counts(
         status_counts.get("unresolved_ambiguity"),
         status_counts.get("degraded_no_candidates"),
     )
-    if _contains_non_numeric(*raw_counts):
+    if _contains_invalid_count(*raw_counts):
         return None, "schema_invalid_history"
-    try:
-        fixtures = float(totals.get("fixtures", 0) or 0)
-        unresolved = float(status_counts.get("unresolved_ambiguity", 0) or 0)
-        no_candidate = float(status_counts.get("degraded_no_candidates", 0) or 0)
-    except (TypeError, ValueError, OverflowError):
-        return None, "schema_invalid_history"
-    if not all(math.isfinite(value) for value in (fixtures, unresolved, no_candidate)):
-        return None, "schema_invalid_history"
+    fixtures, unresolved, no_candidate = raw_counts
     return (fixtures, unresolved, no_candidate), None
 
 

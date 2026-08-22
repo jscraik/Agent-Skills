@@ -100,6 +100,21 @@ class TestRejectedHistoryEvidence(unittest.TestCase):
                     _history_rates(payload), (None, "schema_invalid_history")
                 )
 
+    def test_inexact_nested_counts_are_invalid(self) -> None:
+        """Counts beyond JSON's exact integer range cannot bypass ordering."""
+        fixtures = 2**53
+        payload = {
+            "totals": {"fixtures": fixtures},
+            "status_counts": {
+                "unresolved_ambiguity": fixtures + 1,
+                "degraded_no_candidates": 0,
+            },
+        }
+
+        self.assertEqual(
+            _history_rates(payload), (None, "schema_invalid_history")
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
