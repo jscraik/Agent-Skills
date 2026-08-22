@@ -19,8 +19,11 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 from ask.catalog_parity import _latest_history_metrics  # noqa: E402
 
 
-SPEC = importlib.util.spec_from_file_location("verify_selection_contract_history", SCRIPT_PATH)
-assert SPEC and SPEC.loader
+SPEC = importlib.util.spec_from_file_location(
+    "verify_selection_contract_history", SCRIPT_PATH
+)
+assert SPEC is not None
+assert SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
@@ -40,7 +43,10 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             MODULE._append_history(history_path, first, max_runs=200)
             MODULE._append_history(history_path, second, max_runs=200)
 
-            rows = [json.loads(line) for line in history_path.read_text(encoding="utf-8").splitlines()]
+            rows = [
+                json.loads(line)
+                for line in history_path.read_text(encoding="utf-8").splitlines()
+            ]
             self.assertEqual(rows, [first, second])
 
     def test_partial_history_remains_explicit_without_blocking(self) -> None:
