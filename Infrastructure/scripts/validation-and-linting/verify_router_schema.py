@@ -260,7 +260,9 @@ def _routing_rate_issues(payload: Dict[str, Any]) -> List[str]:
     )
     for field in fields:
         value = payload.get(field)
-        if type(value) not in (int, float) or not math.isfinite(value):
+        if type(value) not in (int, float) or (
+            isinstance(value, float) and not math.isfinite(value)
+        ):
             issues.append(f"{field} must be numeric")
         elif value < 0 or value > 1:
             issues.append(f"{field} must be within [0,1]")
@@ -277,14 +279,18 @@ def _history_evidence_issues(payload: Dict[str, Any]) -> List[str]:
         "trend_deterioration": "fail",
     }
     issues = []
-    if status not in expected_gates:
+    if not isinstance(status, str) or status not in expected_gates:
         issues.append("invalid history_status")
     outcomes = payload.get("gate_outcomes")
     hard = outcomes.get("hard") if isinstance(outcomes, dict) else None
     gate = hard.get("history_persistence") if isinstance(hard, dict) else None
     if gate not in {"pass", "fail", "not_applicable"}:
         issues.append("invalid history_persistence gate")
-    elif status in expected_gates and gate != expected_gates[status]:
+    elif (
+        isinstance(status, str)
+        and status in expected_gates
+        and gate != expected_gates[status]
+    ):
         issues.append("history_status contradicts history_persistence gate")
     return issues
 

@@ -81,6 +81,25 @@ class TestRoutingQualitySchema(unittest.TestCase):
                     MODULE.validate_routing_quality(payload),
                 )
 
+    def test_oversized_integer_rate_reports_range_error(self) -> None:
+        """Arbitrary-size JSON integers cannot crash finite-value checks."""
+        payload = routing_quality_payload()
+        payload["no_candidate_rate"] = 10**1000
+
+        self.assertIn(
+            "no_candidate_rate must be within [0,1]",
+            MODULE.validate_routing_quality(payload),
+        )
+
+    def test_unhashable_history_status_is_invalid(self) -> None:
+        """Malformed container statuses return schema issues instead of raising."""
+        payload = routing_quality_payload()
+        payload["history_status"] = []
+
+        self.assertIn(
+            "invalid history_status", MODULE.validate_routing_quality(payload)
+        )
+
     def test_invalid_input_reports_service_and_source(self) -> None:
         """Input failures return a contextual service-owned diagnostic."""
         with TemporaryDirectory() as tmpdir:
