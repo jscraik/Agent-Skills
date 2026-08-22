@@ -16,7 +16,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.catalog_parity import _latest_history_metrics  # noqa: E402
+from ask.catalog_parity import (  # noqa: E402
+    _history_trend_drift,
+    _latest_history_metrics,
+    _rejected_history_path,
+)
 
 
 SPEC = importlib.util.spec_from_file_location(
@@ -94,6 +98,69 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
                 self.assertEqual(issue, "trend_deterioration")
 
             self.assertEqual(history_path.read_text(encoding="utf-8"), original)
+
+    def test_rejected_candidate_remains_visible_to_strict_diagnostics(self) -> None:
+        """Strict diagnostics consume rejection evidence without polluting baseline."""
+        with TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            history_path = repo_root / MODULE.catalog_parity_module.HISTORY_PATH
+            baseline = [
+                {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1}
+                for _ in range(7)
+            ]
+            history_path.parent.mkdir(parents=True)
+            history_path.write_text(
+                "".join(json.dumps(row) + "\n" for row in baseline), encoding="utf-8"
+            )
+            candidate = {"unresolved_ambiguity_rate": 0.3, "no_candidate_rate": 0.1}
+
+            self.assertEqual(
+                MODULE._append_history(history_path, candidate, max_runs=200),
+                "trend_deterioration",
+            )
+            status, blocker = _history_trend_drift(repo_root)
+            self.assertEqual(status, "trend_deterioration")
+            self.assertEqual(blocker[0] if blocker else None, "trend_deterioration")
+
+    def test_history_retention_never_drops_below_trend_window(self) -> None:
+        """Direct callers retain the minimum complete eight-sample window."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+            for index in range(9):
+                row = {
+                    "unresolved_ambiguity_rate": 0.1,
+                    "no_candidate_rate": 0.1,
+                    "generated_at": str(index),
+                }
+                self.assertIsNone(MODULE._append_history(history_path, row, max_runs=1))
+            self.assertEqual(len(history_path.read_text().splitlines()), 8)
+
+    def test_history_rejection_is_bound_into_artifact(self) -> None:
+        """The emitted artifact cannot claim success when history is rejected."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+            history_path.write_text("not-json\n", encoding="utf-8")
+            args = MODULE.argparse.Namespace(
+                history_path=history_path, history_max_runs=200
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+
+            issue = MODULE._apply_history_outcome(args, [], artifact, "policy")
+
+            self.assertEqual(issue, "schema_invalid_history")
+            self.assertEqual(artifact["history_status"], "schema_invalid_history")
+            self.assertEqual(
+                artifact["gate_outcomes"]["hard"]["history_persistence"], "fail"
+            )
+            self.assertTrue(_rejected_history_path(history_path).exists())
 
 
 if __name__ == "__main__":

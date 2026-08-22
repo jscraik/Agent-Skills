@@ -27,9 +27,11 @@ EligibleCandidate = selection_contract_module.EligibleCandidate
 build_decision_payload = selection_contract_module.build_decision_payload
 build_goal_decision = selection_contract_module.build_goal_decision
 candidate_history_issue = catalog_parity_module._candidate_history_issue
+rejected_history_path = catalog_parity_module._rejected_history_path
 
 logger = logging.getLogger(__name__)
 SERVICE_ID = "selection-contract-verifier"
+MINIMUM_HISTORY_RUNS = 8
 
 
 def resolve_fixture_path(filename: str) -> Path:
@@ -91,11 +93,21 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--history-max-runs",
-        type=int,
+        type=_history_max_runs,
         default=200,
         help="Max schema-valid history rows to retain when --history-path is provided.",
     )
     return parser.parse_args()
+
+
+def _history_max_runs(value: str) -> int:
+    """Require enough retained rows for one complete trend window."""
+    runs = int(value)
+    if runs < MINIMUM_HISTORY_RUNS:
+        raise argparse.ArgumentTypeError(
+            f"history-max-runs must be at least {MINIMUM_HISTORY_RUNS}"
+        )
+    return runs
 
 
 def _check_explainability(decision: dict[str, Any]) -> list[str]:
@@ -154,6 +166,7 @@ def _append_history(
     """Append one accepted row without rewriting invalid or deteriorating history."""
     issue = candidate_history_issue(history_path, row)
     if issue:
+        _write_rejected_history(history_path, row, issue)
         return issue
 
     existing_rows: list[dict[str, Any]] = []
@@ -171,14 +184,27 @@ def _append_history(
 
     existing_rows.append(row)
 
-    bounded_rows = existing_rows[-max(1, int(max_runs)) :]
+    bounded_rows = existing_rows[-max(MINIMUM_HISTORY_RUNS, int(max_runs)) :]
 
     history_path.parent.mkdir(parents=True, exist_ok=True)
     history_path.write_text(
         "".join(json.dumps(item, sort_keys=True) + "\n" for item in bounded_rows),
         encoding="utf-8",
     )
+    rejected_history_path(history_path).unlink(missing_ok=True)
     return None
+
+
+def _write_rejected_history(
+    history_path: Path, row: dict[str, Any], issue: str
+) -> None:
+    """Preserve rejected evidence separately from the accepted baseline."""
+    path = rejected_history_path(history_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"issue": issue, "candidate": row}, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _routing_history_row(
@@ -516,19 +542,10 @@ def _report(
     active_policy: str,
     results: list[dict[str, Any]],
     artifact: dict[str, Any],
+    history_issue: str | None,
 ) -> int:
     """Persist history and print the stable command result."""
     failed = [item for item in results if not item["passed"]]
-    history_issue = _record_history(
-        args,
-        failed,
-        _routing_history_row(
-            artifact,
-            active_policy,
-            artifact["unresolved_ambiguity_rate"],
-            artifact["no_candidate_rate"],
-        ),
-    )
     if history_issue:
         logger.error(
             "service=%s event=history_rejected code=%s", SERVICE_ID, history_issue
@@ -549,6 +566,31 @@ def _report(
     return 0
 
 
+def _apply_history_outcome(
+    args: argparse.Namespace,
+    results: list[dict[str, Any]],
+    artifact: dict[str, Any],
+    active_policy: str,
+) -> str | None:
+    """Persist accepted history and bind its outcome into the artifact."""
+    failed = [item for item in results if not item["passed"]]
+    row = _routing_history_row(
+        artifact,
+        active_policy,
+        artifact["unresolved_ambiguity_rate"],
+        artifact["no_candidate_rate"],
+    )
+    issue = _record_history(args, failed, row)
+    status = issue or (
+        "accepted" if args.history_path and not failed else "not_recorded"
+    )
+    artifact["history_status"] = status
+    artifact["gate_outcomes"]["hard"]["history_persistence"] = (
+        "fail" if issue else "pass"
+    )
+    return issue
+
+
 def main() -> int:
     """Verify fixtures and emit the routing-quality artifact."""
     args = parse_args()
@@ -562,11 +604,12 @@ def main() -> int:
     statuses, failures = route[1] + goal[1], route[2] + goal[2]
     counters = statuses, failures, route[3], route[4], route[5] + goal[3]
     artifact = _artifact(args, active_policy, results, counters)
+    history_issue = _apply_history_outcome(args, results, artifact, active_policy)
     args.artifact.parent.mkdir(parents=True, exist_ok=True)
     args.artifact.write_text(
         json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    return _report(args, active_policy, results, artifact)
+    return _report(args, active_policy, results, artifact, history_issue)
 
 
 if __name__ == "__main__":
