@@ -201,18 +201,26 @@ def validate_goal_decision(payload: Dict[str, Any]) -> List[str]:
     return issues
 
 
+def _catalog_history_status_issues(payload: Dict[str, Any]) -> List[str]:
+    """Validate catalog history state emitted by every diagnostic mode."""
+    allowed = {
+        "available",
+        "insufficient_history",
+        "not_checked",
+        "not_collected",
+        "schema_invalid_history",
+        "trend_deterioration",
+    }
+    status = payload.get("history_status")
+    return (
+        []
+        if isinstance(status, str) and status in allowed
+        else ["invalid history_status"]
+    )
+
+
 def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
-    """
-    Validate a catalog-parity payload and collect schema or semantic issues.
-
-    Checks for required fields and validates types and conditional constraints specific to catalog-parity payloads. In particular it enforces allowed `decision_status` values and, when `decision_status` is `blocked_catalog_parity`, requires `drift_detected` to be `True` and a non-empty `operator_action`.
-
-    Parameters:
-        payload (Dict[str, Any]): Parsed JSON object representing a catalog-parity payload.
-
-    Returns:
-        List[str]: A list of human-readable issue messages; empty when the payload satisfies all checks.
-    """
+    """Validate catalog-parity schema and blocked-state semantics."""
     issues: List[str] = []
     if payload.get("schema_version") != "catalog-parity.v1":
         issues.append("invalid schema_version: expected 'catalog-parity.v1'")
@@ -226,6 +234,7 @@ def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
         "blocking_reason",
         "operator_action",
         "decision_status",
+        "history_status",
     }
     missing = sorted(required - set(payload.keys()))
     if missing:
@@ -237,6 +246,8 @@ def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
         issues.append("surfaces must be a list")
     if not isinstance(payload.get("drift_detected"), bool):
         issues.append("drift_detected must be boolean")
+
+    issues.extend(_catalog_history_status_issues(payload))
 
     decision_status = payload.get("decision_status")
     if decision_status not in {"resolved", "blocked_catalog_parity"}:

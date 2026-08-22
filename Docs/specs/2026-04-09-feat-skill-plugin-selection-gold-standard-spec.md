@@ -128,7 +128,7 @@ Not owned by this spec:
 
 - `CatalogParityReport`
   - Diagnostic payload for trust-state checks.
-  - Required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `operator_action`.
+  - Required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `history_status`, `operator_action`.
 
 - `PluginStateSnapshot`
   - Read-only plugin lifecycle state.
@@ -136,7 +136,7 @@ Not owned by this spec:
 
 - `RoutingQualityArtifact`
   - Validation artifact for cross-run comparison.
-  - Required fields: `run_id`, `policy_identity`, `decision_status_counts`, `unresolved_ambiguity_rate`, `no_candidate_rate`, `top_rejection_reasons`, `explainability_completeness_ratio`, `parity_status`.
+  - Required fields: `run_id`, `policy_identity`, `decision_status_counts`, `unresolved_ambiguity_rate`, `no_candidate_rate`, `top_rejection_reasons`, `explainability_completeness_ratio`, `parity_status`, `history_status`, `gate_outcomes`.
 
 ## Main Flow / Lifecycle
 
@@ -177,7 +177,7 @@ Not owned by this spec:
 1. Read canonical counts from `CatalogManifest`.
 2. Read projected counts for `README`, root `SKILL.md`, `ask skills list`, and route considered metadata.
 3. Compare each surface to canonical counts.
-4. Return `CatalogParityReport` including all required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, and `operator_action`.
+4. Return `CatalogParityReport` including all required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `history_status`, and `operator_action`.
 5. Emit `blocked_catalog_parity` when any required surface parity fails.
 6. Fail validation when any required surface parity fails.
 
@@ -367,6 +367,8 @@ Artifact minimum fields:
 - `top_rejection_reasons`
 - `explainability_completeness_ratio`
 - `parity_status`
+- `history_status`
+- `gate_outcomes`
 
 Readiness gates:
 

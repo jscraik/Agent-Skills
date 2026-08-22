@@ -41,6 +41,58 @@ def routing_quality_payload() -> dict[str, object]:
     }
 
 
+def catalog_parity_payload() -> dict[str, object]:
+    """Return one minimal valid catalog-parity receipt."""
+    return {
+        "schema_version": "catalog-parity.v1",
+        "policy_identity": "policy",
+        "canonical_count": 1,
+        "surfaces": [],
+        "drift_detected": False,
+        "drift_class": None,
+        "blocking_reason": None,
+        "operator_action": None,
+        "decision_status": "resolved",
+        "history_status": "available",
+    }
+
+
+class TestCatalogParitySchema(unittest.TestCase):
+    """Enforce explicit catalog history status evidence."""
+
+    def test_valid_history_statuses_pass(self) -> None:
+        """Every status emitted by catalog parity satisfies the schema."""
+        for status in (
+            "available",
+            "insufficient_history",
+            "not_checked",
+            "not_collected",
+            "schema_invalid_history",
+            "trend_deterioration",
+        ):
+            with self.subTest(status=status):
+                payload = catalog_parity_payload()
+                payload["history_status"] = status
+                self.assertEqual(MODULE.validate_catalog_parity(payload), [])
+
+    def test_missing_history_status_fails(self) -> None:
+        """Catalog receipts cannot omit authoritative history evidence."""
+        payload = catalog_parity_payload()
+        del payload["history_status"]
+
+        issues = MODULE.validate_catalog_parity(payload)
+
+        self.assertIn("missing required fields: history_status", issues)
+        self.assertIn("invalid history_status", issues)
+
+    def test_unhashable_history_status_is_invalid(self) -> None:
+        """Malformed container statuses return schema issues instead of raising."""
+        payload = catalog_parity_payload()
+        payload["history_status"] = []
+
+        self.assertIn("invalid history_status", MODULE.validate_catalog_parity(payload))
+
+
 class TestRoutingQualitySchema(unittest.TestCase):
     """Enforce history evidence on routing-quality receipts."""
 

@@ -226,6 +226,25 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
 
             self.assertEqual(victim.read_text(encoding="utf-8"), "preserved\n")
 
+    def test_rejected_history_refuses_symlinked_parent(self) -> None:
+        """Untrusted parent links cannot redirect rejected-history writes."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            victim = root / "victim"
+            victim.mkdir()
+            linked_parent = root / "linked"
+            linked_parent.symlink_to(victim, target_is_directory=True)
+            history_path = linked_parent / "history.jsonl"
+
+            with self.assertRaisesRegex(OSError, "refusing symlinked"):
+                MODULE._write_rejected_history(
+                    history_path,
+                    {"unresolved_ambiguity_rate": 0.3},
+                    "trend_deterioration",
+                )
+
+            self.assertFalse((victim / "history.rejected.jsonl").exists())
+
     def test_repaired_history_revalidates_preserved_candidate(self) -> None:
         """A repaired baseline unblocks a preserved candidate that now validates."""
         with TemporaryDirectory() as tmpdir:

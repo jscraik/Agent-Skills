@@ -16,7 +16,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -130,20 +130,7 @@ def _check_explainability(decision: dict[str, Any]) -> list[str]:
 
 
 def _fixture_to_eligible(fixture: dict[str, Any]) -> list[EligibleCandidate]:
-    """
-    Convert a route fixture's `eligible_candidates` entries into a list of `EligibleCandidate` objects.
-
-    Parameters:
-        fixture (dict): Fixture object expected to contain an `eligible_candidates` list of candidate mappings.
-            Each candidate mapping should include:
-            - `name` (required): candidate name
-            - `path` (required): candidate path
-            - `description` (optional): candidate description (defaults to empty string)
-            - `scope_rank` (optional): numeric rank (defaults to 999)
-
-    Returns:
-        list[EligibleCandidate]: A list of `EligibleCandidate` instances built from the fixture entries.
-    """
+    """Convert fixture candidate mappings into eligible candidates."""
     items = []
     for candidate in fixture.get("eligible_candidates", []):
         items.append(
@@ -245,8 +232,17 @@ def _write_rejected_history(
 ) -> None:
     """Preserve rejected evidence separately from the accepted baseline."""
     path = rejected_history_path(history_path)
-    if path.is_symlink():
-        raise OSError(f"refusing symlinked rejected-history sidecar: {path}")
+    system_temp_root = Path(gettempdir())
+    symlink = next(
+        (
+            candidate
+            for candidate in (path, *path.parents)
+            if candidate != system_temp_root and candidate.is_symlink()
+        ),
+        None,
+    )
+    if symlink is not None:
+        raise OSError(f"refusing symlinked rejected-history path component: {symlink}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps({"issue": issue, "candidate": row}, sort_keys=True) + "\n",
@@ -691,9 +687,7 @@ def _restore_persistence_transaction(
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
     """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    target_mode = (
-        stat.S_IMODE(path.stat().st_mode) & 0o600 if path.exists() else 0o600
-    )
+    target_mode = stat.S_IMODE(path.stat().st_mode) & 0o600 if path.exists() else 0o600
     content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
     with NamedTemporaryFile(
         mode="w",
