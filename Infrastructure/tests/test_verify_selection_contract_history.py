@@ -2,6 +2,7 @@ import importlib.util
 import json
 import sys
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -33,6 +34,34 @@ SPEC.loader.exec_module(MODULE)
 
 
 class TestVerifySelectionContractHistory(unittest.TestCase):
+    def test_concurrent_history_writers_preserve_every_sample(self) -> None:
+        """Serialized atomic updates do not lose accepted concurrent rows."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+
+            def append(index: int) -> str | None:
+                return MODULE._append_history(
+                    history_path,
+                    {
+                        "generated_at": str(index),
+                        "no_candidate_rate": 0.0,
+                        "unresolved_ambiguity_rate": 0.0,
+                    },
+                    max_runs=32,
+                )
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                issues = list(executor.map(append, range(16)))
+
+            rows = [
+                json.loads(line)
+                for line in history_path.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(issues, [None] * 16)
+            self.assertEqual(
+                {row["generated_at"] for row in rows}, {str(i) for i in range(16)}
+            )
+
     def test_route_fixture_loader_rejects_malformed_json(self) -> None:
         """Malformed route input returns the stable invalid-fixture result."""
         with TemporaryDirectory() as tmpdir:

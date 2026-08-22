@@ -4,13 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import importlib
 import json
 import logging
+import os
 import sys
 from collections import Counter
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -164,6 +168,30 @@ def _append_history(
     max_runs: int,
 ) -> str | None:
     """Append one accepted row without rewriting invalid or deteriorating history."""
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with _history_lock(history_path):
+        return _append_history_locked(history_path, row, max_runs=max_runs)
+
+
+@contextmanager
+def _history_lock(history_path: Path):
+    """Serialize history validation and replacement across verifier processes."""
+    lock_path = history_path.with_suffix(f"{history_path.suffix}.lock")
+    with lock_path.open("a", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def _append_history_locked(
+    history_path: Path,
+    row: dict[str, Any],
+    *,
+    max_runs: int,
+) -> str | None:
+    """Validate and replace history while the caller holds its writer lock."""
     issue = candidate_history_issue(history_path, row)
     if issue:
         _write_rejected_history(history_path, row, issue)
@@ -186,13 +214,29 @@ def _append_history(
 
     bounded_rows = existing_rows[-max(MINIMUM_HISTORY_RUNS, int(max_runs)) :]
 
-    history_path.parent.mkdir(parents=True, exist_ok=True)
-    history_path.write_text(
-        "".join(json.dumps(item, sort_keys=True) + "\n" for item in bounded_rows),
-        encoding="utf-8",
-    )
+    _atomic_write_history(history_path, bounded_rows)
     rejected_history_path(history_path).unlink(missing_ok=True)
     return None
+
+
+def _atomic_write_history(history_path: Path, rows: list[dict[str, Any]]) -> None:
+    """Durably replace history through a temporary file in the same directory."""
+    content = "".join(json.dumps(item, sort_keys=True) + "\n" for item in rows)
+    with NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=history_path.parent,
+        prefix=f".{history_path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.write(content)
+        temporary.flush()
+        os.fsync(temporary.fileno())
+        temporary_path = Path(temporary.name)
+    try:
+        os.replace(temporary_path, history_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
 
 
 def _write_rejected_history(
