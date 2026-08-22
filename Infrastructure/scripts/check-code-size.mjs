@@ -26,11 +26,11 @@ const changedPaths = collectChangedPaths({
 	repoRoot,
 	modeAll: args.has("--all"),
 	modeStaged: stagedSource,
-});
+}).filter((path) => path.endsWith(".py"));
 const structuralChecks = [
 	{
 		path: "scripts/validation-and-linting/verify_ask_cli_modularity.py",
-		stagedSource: false,
+		stagedSource: true,
 	},
 	{
 		path: "scripts/validation-and-linting/verify_program_design.py",

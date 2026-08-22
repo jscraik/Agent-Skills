@@ -186,7 +186,11 @@ class Runner:
 
     def test_shape_baseline_failure_is_reported_and_stops_changed_file_scan(self) -> None:
         validator = _load_validator()
-        args = SimpleNamespace(changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",))
+        args = SimpleNamespace(
+            baseline_ref="HEAD",
+            changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",),
+            staged_source=False,
+        )
         with unittest.mock.patch.object(
             validator,
             "_shape_baseline",
@@ -211,7 +215,7 @@ class Runner:
             return completed(command, 0, "def baseline():\n    pass\n", "")
 
         with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result) as run:
-            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py")
+            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py", "BASE")
 
         self.assertEqual(baseline["deleted_python_paths"], ["deleted.py"])
         self.assertEqual(baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"])
@@ -219,7 +223,7 @@ class Runner:
         self.assertEqual(run.call_count, 4)
         self.assertIn(
             unittest.mock.call(
-                ["git", "ls-tree", "-r", "--name-only", "HEAD", "--", "Infrastructure/tests"],
+                ["git", "ls-tree", "-r", "--name-only", "BASE", "--", "Infrastructure/tests"],
                 cwd=REPO_ROOT,
                 text=True,
                 capture_output=True,
@@ -289,7 +293,11 @@ class Runner:
 
     def test_python_shape_passes_loaded_baseline_to_move_scan(self) -> None:
         validator = _load_validator()
-        args = SimpleNamespace(changed_files=("Infrastructure/tests/test_ask_cli_shape.py",))
+        args = SimpleNamespace(
+            baseline_ref="BASE",
+            changed_files=("Infrastructure/tests/test_ask_cli_shape.py",),
+            staged_source=False,
+        )
         shape_baseline = {
             "deleted_python_paths": [],
             "sibling_python_paths": [],
@@ -304,7 +312,11 @@ class Runner:
             issues = validator._check_python_shape(args)
 
         self.assertEqual(issues, [])
-        load_baseline.assert_called_once_with(REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py")
+        load_baseline.assert_called_once_with(
+            REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
+            "BASE",
+            staged_source=False,
+        )
         check_function_shape.assert_called_once_with(
             REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
             (REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py").read_text(encoding="utf-8"),
@@ -313,6 +325,66 @@ class Runner:
             issues,
             shape_baseline,
         )
+
+    def test_python_shape_reads_staged_source_against_head(self) -> None:
+        validator = _load_validator()
+        path = REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py"
+        args = SimpleNamespace(
+            baseline_ref=None,
+            changed_files=(path.relative_to(REPO_ROOT).as_posix(),),
+            staged_source=True,
+        )
+        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+
+        with (
+            unittest.mock.patch.object(validator, "_current_source", return_value="def staged():\n    return 1\n") as source,
+            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(validator, "_check_file_size"),
+            unittest.mock.patch.object(validator, "_check_function_shape"),
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+        source.assert_called_once_with(path, staged_source=True)
+        baseline.assert_called_once_with(path, "HEAD", staged_source=True)
+
+    def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
+        validator = _load_validator()
+        completed = subprocess.CompletedProcess
+
+        def git_result(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(command[:3], ["git", "merge-base", "HEAD"])
+            if command[3] == "origin/main":
+                return completed(command, 0, "base-sha\n", "")
+            return completed(command, 1, "", "missing")
+
+        with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result):
+            baseline = validator._default_baseline_ref()
+
+        self.assertEqual(baseline, "base-sha")
+
+    def test_python_shape_reuses_one_baseline_per_parent(self) -> None:
+        validator = _load_validator()
+        paths = (
+            REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
+            REPO_ROOT / "Infrastructure/tests/test_git_metadata_preflight.py",
+        )
+        args = SimpleNamespace(
+            baseline_ref="BASE",
+            changed_files=tuple(path.relative_to(REPO_ROOT).as_posix() for path in paths),
+            staged_source=False,
+        )
+        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+
+        with (
+            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(validator, "_check_file_size"),
+            unittest.mock.patch.object(validator, "_check_function_shape"),
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+        baseline.assert_called_once_with(paths[0], "BASE", staged_source=False)
 
 
 if __name__ == "__main__":

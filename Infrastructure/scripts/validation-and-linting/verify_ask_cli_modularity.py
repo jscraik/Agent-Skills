@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
         help="Maximum allowed line count for Infrastructure/bin/ask.",
     )
     parser.add_argument("--changed-files", nargs="*", default=(), help="Repo-relative changed files to shape-check.")
+    parser.add_argument("--baseline-ref", help="Git revision used as the pre-change shape baseline.")
+    parser.add_argument("--staged-source", action="store_true", help="Read changed Python source from the Git index.")
     parser.add_argument("--max-file-lines", type=int, default=800, help="Maximum lines for new Python files.")
     parser.add_argument("--max-function-lines", type=int, default=40, help="Maximum lines for new or worsened functions.")
     parser.add_argument("--max-complexity", type=int, default=12, help="Maximum cyclomatic complexity for new or worsened functions.")
@@ -110,10 +112,35 @@ def _git_lines(args: list[str]) -> list[str]:
     return [line.strip() for line in _git_output(args).splitlines() if line.strip()]
 
 
-def _shape_baseline(path: Path | None = None) -> dict[str, object]:
+def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
+    if staged_source:
+        return "HEAD"
+    for candidate in ("origin/main", "main", "HEAD^"):
+        result = subprocess.run(
+            ["git", "merge-base", "HEAD", candidate],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return None
+
+
+def _shape_baseline(
+    path: Path | None = None,
+    baseline_ref: str = "HEAD",
+    *,
+    staged_source: bool = False,
+) -> dict[str, object]:
+    diff_args = ["diff"]
+    if staged_source:
+        diff_args.append("--cached")
+    diff_args.extend(("--name-only", "--diff-filter=D", baseline_ref, "--"))
     deleted = [
         item
-        for item in _git_lines(["diff", "--name-only", "--diff-filter=D", "HEAD", "--"])
+        for item in _git_lines(diff_args)
         if item.endswith(PYTHON_SUFFIX)
     ]
     siblings: list[str] = []
@@ -122,11 +149,11 @@ def _shape_baseline(path: Path | None = None) -> dict[str, object]:
         parent = Path(relative).parent.as_posix()
         siblings = [
             item
-            for item in _git_lines(["ls-tree", "-r", "--name-only", "HEAD", "--", parent])
+            for item in _git_lines(["ls-tree", "-r", "--name-only", baseline_ref, "--", parent])
             if item.endswith(PYTHON_SUFFIX)
         ]
     baseline_paths = dict.fromkeys([*deleted, *siblings])
-    head_text = {item: _git_output(["show", f"HEAD:{item}"]) for item in baseline_paths}
+    head_text = {item: _git_output(["show", f"{baseline_ref}:{item}"]) for item in baseline_paths}
     return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
 
 
@@ -305,6 +332,13 @@ def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
     return sorted(set(python_paths))
 
 
+def _current_source(path: Path, *, staged_source: bool = False) -> str:
+    if not staged_source:
+        return path.read_text(encoding="utf-8")
+    relpath = path.relative_to(REPO_ROOT).as_posix()
+    return _git_output(["show", f":{relpath}"])
+
+
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
     line_count = len(current.splitlines())
@@ -340,10 +374,18 @@ def _check_function_shape(
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
+    staged_source = bool(getattr(args, "staged_source", False))
+    baseline_ref = getattr(args, "baseline_ref", None) or _default_baseline_ref(staged_source=staged_source)
+    if not baseline_ref:
+        return ["shape baseline unavailable: baseline revision could not be determined"]
+    baseline_by_parent: dict[Path, dict[str, object]] = {}
     for path in _changed_python_paths(tuple(args.changed_files)):
-        current = path.read_text(encoding="utf-8")
         try:
-            shape_baseline = _shape_baseline(path)
+            current = _current_source(path, staged_source=staged_source)
+            shape_baseline = baseline_by_parent.get(path.parent)
+            if shape_baseline is None:
+                shape_baseline = _shape_baseline(path, baseline_ref, staged_source=staged_source)
+                baseline_by_parent[path.parent] = shape_baseline
             baseline = _baseline_head_text(path, shape_baseline)
             _check_file_size(path, current, baseline, args, issues)
             _check_function_shape(path, current, baseline, args, issues, shape_baseline)

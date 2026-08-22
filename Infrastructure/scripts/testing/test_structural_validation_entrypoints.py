@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -83,8 +84,33 @@ class StructuralValidationEntrypointTests(unittest.TestCase):
                 self.assertIn("--changed-files", invocation)
                 for path in validator_paths:
                     self.assertIn(path.relative_to(root).as_posix(), invocation)
-            self.assertNotIn("--staged-source", invocations[0])
+            self.assertIn("--staged-source", invocations[0])
             self.assertIn("--staged-source", invocations[1])
+
+    def test_checker_all_mode_forwards_only_python_paths(self) -> None:
+        """All-mode avoids oversized argv payloads by filtering before spawning."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            checker, validator_paths = self._prepare_staged_validator_repo(root)
+            readme = root / "README.md"
+            readme.write_text("tracked non-Python input\n", encoding="utf-8")
+            self._git(root, "add", readme.relative_to(root).as_posix())
+            capture = root / "captured.jsonl"
+            completed = subprocess.run(
+                ("node", str(checker), "--all"),
+                cwd=root,
+                env=self._capture_environment(root, capture),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            invocations = [json.loads(line) for line in capture.read_text(encoding="utf-8").splitlines()]
+            for invocation in invocations:
+                self.assertNotIn("README.md", invocation)
+                for path in validator_paths:
+                    self.assertIn(path.relative_to(root).as_posix(), invocation)
 
     def _prepare_staged_validator_repo(self, root: Path) -> tuple[Path, tuple[Path, Path]]:
         """Create a Git fixture whose two validator edits exist only in the index."""
@@ -140,10 +166,10 @@ class StructuralValidationEntrypointTests(unittest.TestCase):
             hooks_dir.mkdir(parents=True)
             wrapper = scripts_dir / HOOK.name
             shutil.copy2(HOOK, wrapper)
-            marker = root / "canonical-hook-ran"
+            marker = root / "canonical hook's marker"
             canonical = hooks_dir / "pre-commit.sh"
             canonical.write_text(
-                f"#!/usr/bin/env bash\nprintf '%s\\n' canonical > {marker!s}\n",
+                f"#!/usr/bin/env bash\nprintf '%s\\n' canonical > {shlex.quote(str(marker))}\n",
                 encoding="utf-8",
             )
             projected = root / "projected-pre-commit"
