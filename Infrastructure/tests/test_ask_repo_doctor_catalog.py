@@ -137,8 +137,8 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             self.assertEqual(result.status, "success")
             self.assertFalse(result.data["catalog_parity"]["drift_detected"])
 
-    def test_doctor_catalog_strict_blocks_insufficient_runtime_history(self) -> None:
-        """Strict catalog parity blocks when canonical history has fewer than eight rows."""
+    def test_doctor_catalog_strict_collects_insufficient_runtime_history(self) -> None:
+        """Strict catalog parity reports partial history without blocking validation."""
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)
             self._write_readme(repo, 1)
@@ -163,12 +163,12 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             ):
                 result = doctor_catalog(repo, DoctorCatalogOptions(strict=True))
 
-            self.assertEqual(result.status, "error")
+            self.assertEqual(result.status, "success")
             report = result.data["catalog_parity"]
-            self.assertTrue(report["drift_detected"])
+            self.assertFalse(report["drift_detected"])
             self.assertEqual(report["history_status"], "insufficient_history")
-            self.assertEqual(report["drift_class"], "trend_insufficient_history")
-            self.assertEqual(report["blocking_reason"], "insufficient_history")
+            self.assertIsNone(report["drift_class"])
+            self.assertIsNone(report["blocking_reason"])
 
     def test_doctor_catalog_strict_blocks_non_finite_runtime_history(self) -> None:
         """Strict catalog parity rejects non-finite trend metrics."""

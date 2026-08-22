@@ -20,6 +20,14 @@ REQUIRED_SURFACES = (
     "route considered metadata",
 )
 HISTORY_PATH = Path(".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
+HISTORY_WINDOW_RUNS = 14
+HISTORY_BASELINE_RUNS = 7
+MAX_EXACT_JSON_INTEGER = (2**53) - 1
+
+
+def rejected_history_path(history_path: Path) -> Path:
+    """Return the sidecar used to preserve the latest rejected candidate."""
+    return history_path.with_name(f"{history_path.stem}.rejected.json")
 
 
 def _extract_readme_count(readme_path: Path) -> int | None:
@@ -78,32 +86,62 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     return match.group(1)
 
 
-def _history_counts(payload: dict[str, Any]) -> tuple[tuple[float, float, float] | None, str | None]:
+def _contains_non_numeric(*values: object) -> bool:
+    """Return whether any metric is not a JSON number."""
+    return any(
+        isinstance(value, bool) or not isinstance(value, (int, float))
+        for value in values
+    )
+
+
+def _contains_invalid_count(*values: object) -> bool:
+    """Return whether any count is not an exactly representable JSON integer."""
+    return any(
+        type(value) is not int or abs(value) > MAX_EXACT_JSON_INTEGER
+        for value in values
+    )
+
+
+def _history_counts(
+    payload: dict[str, Any],
+) -> tuple[tuple[int, int, int] | None, str | None]:
     totals = payload.get("totals")
     status_counts = payload.get("status_counts")
     if not isinstance(totals, dict) or not isinstance(status_counts, dict):
         return None, "schema_invalid_history"
-    if "fixtures" not in totals or not {"unresolved_ambiguity", "degraded_no_candidates"}.issubset(status_counts):
+    if "fixtures" not in totals or not {
+        "unresolved_ambiguity",
+        "degraded_no_candidates",
+    }.issubset(status_counts):
         return None, "schema_invalid_history"
-    try:
-        fixtures = float(totals.get("fixtures", 0) or 0)
-        unresolved = float(status_counts.get("unresolved_ambiguity", 0) or 0)
-        no_candidate = float(status_counts.get("degraded_no_candidates", 0) or 0)
-    except (TypeError, ValueError):
+    raw_counts = (
+        totals.get("fixtures"),
+        status_counts.get("unresolved_ambiguity"),
+        status_counts.get("degraded_no_candidates"),
+    )
+    if _contains_invalid_count(*raw_counts):
         return None, "schema_invalid_history"
-    if not all(math.isfinite(value) for value in (fixtures, unresolved, no_candidate)):
-        return None, "schema_invalid_history"
+    fixtures, unresolved, no_candidate = raw_counts
     return (fixtures, unresolved, no_candidate), None
 
 
-def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
+def _nested_history_rates(
+    payload: dict[str, Any],
+) -> tuple[dict[str, float] | None, str | None]:
     counts, issue = _history_counts(payload)
     if issue or counts is None:
         return None, issue
     fixtures, unresolved, no_candidate = counts
+    if fixtures < 0:
+        return None, "schema_invalid_history"
     if fixtures <= 0:
         return None, None
-    if unresolved < 0 or no_candidate < 0 or unresolved > fixtures or no_candidate > fixtures:
+    if (
+        unresolved < 0
+        or no_candidate < 0
+        or unresolved > fixtures
+        or no_candidate > fixtures
+    ):
         return None, "schema_invalid_history"
     return {
         "unresolved_ambiguity_rate": unresolved / fixtures,
@@ -111,17 +149,21 @@ def _nested_history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | N
     }, None
 
 
-def _history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, str | None]:
+def _history_rates(
+    payload: dict[str, Any],
+) -> tuple[dict[str, float] | None, str | None]:
     unresolved = payload.get("unresolved_ambiguity_rate")
     no_candidate = payload.get("no_candidate_rate")
     if unresolved is None or no_candidate is None:
         return _nested_history_rates(payload)
+    if _contains_non_numeric(unresolved, no_candidate):
+        return None, "schema_invalid_history"
     try:
         rates = {
             "unresolved_ambiguity_rate": float(unresolved),
             "no_candidate_rate": float(no_candidate),
         }
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None, "schema_invalid_history"
     if not all(math.isfinite(value) for value in rates.values()):
         return None, "schema_invalid_history"
@@ -130,9 +172,15 @@ def _history_rates(payload: dict[str, Any]) -> tuple[dict[str, float] | None, st
     return rates, None
 
 
-def _read_history_rows(history_path: Path) -> tuple[list[dict[str, float]] | None, str | None]:
+def _read_history_rows(
+    history_path: Path,
+) -> tuple[list[dict[str, float]] | None, str | None]:
     rows: list[dict[str, float]] = []
-    for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    try:
+        raw_rows = history_path.read_text(encoding="utf-8").splitlines()
+    except UnicodeError:
+        return None, "schema_invalid_history"
+    for raw in raw_rows:
         line = raw.strip()
         if not line:
             continue
@@ -151,30 +199,72 @@ def _read_history_rows(history_path: Path) -> tuple[list[dict[str, float]] | Non
 
 
 def _metric_deteriorated(current_value: float, baseline_value: float) -> bool:
-    return current_value > baseline_value * 1.2 and current_value - baseline_value >= 0.01
-
-
-def _history_deteriorated(current: dict[str, float], baseline: list[dict[str, float]]) -> bool:
-    unresolved_baseline = median(row["unresolved_ambiguity_rate"] for row in baseline)
-    no_candidate_baseline = median(row["no_candidate_rate"] for row in baseline)
-    return _metric_deteriorated(current["unresolved_ambiguity_rate"], unresolved_baseline) or _metric_deteriorated(
-        current["no_candidate_rate"], no_candidate_baseline
+    return (
+        current_value > baseline_value * 1.2 and current_value - baseline_value >= 0.01
     )
 
 
-def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None, str | None]:
+def _history_deteriorated(
+    current: dict[str, float], baseline: list[dict[str, float]]
+) -> bool:
+    unresolved_baseline = median(row["unresolved_ambiguity_rate"] for row in baseline)
+    no_candidate_baseline = median(row["no_candidate_rate"] for row in baseline)
+    return _metric_deteriorated(
+        current["unresolved_ambiguity_rate"], unresolved_baseline
+    ) or _metric_deteriorated(current["no_candidate_rate"], no_candidate_baseline)
+
+
+def _latest_history_metrics(
+    history_path: Path,
+) -> tuple[dict[str, float] | None, str | None]:
     """Return the latest routing-quality metrics and their validation status."""
     if not history_path.exists():
         return None, "missing_history"
     rows, issue = _read_history_rows(history_path)
     if issue:
         return None, issue
-    if rows is None or len(rows) < 8:
+    if rows is None or len(rows) <= HISTORY_BASELINE_RUNS:
         return None, "insufficient_history"
     current = rows[-1]
-    if _history_deteriorated(current, rows[-8:-1]):
+    if _history_deteriorated(current, rows[-(HISTORY_BASELINE_RUNS + 1) : -1]):
         return current, "trend_deterioration"
     return current, None
+
+
+def candidate_history_issue(
+    history_path: Path, candidate: dict[str, Any]
+) -> str | None:
+    """Validate one candidate against the retained baseline without mutating it."""
+    candidate_rates, issue = _history_rates(candidate)
+    if issue or candidate_rates is None:
+        return issue or "schema_invalid_history"
+    if not history_path.exists():
+        return None
+    rows, issue = _read_history_rows(history_path)
+    if issue:
+        return issue
+    if rows is None or len(rows) < HISTORY_BASELINE_RUNS:
+        return None
+    if _history_deteriorated(candidate_rates, rows[-HISTORY_BASELINE_RUNS:]):
+        return "trend_deterioration"
+    return None
+
+
+def _rejected_history_issue(history_path: Path) -> str | None:
+    """Revalidate preserved rejection evidence against the current history."""
+    rejected_path = rejected_history_path(history_path)
+    if not history_path.exists() or not rejected_path.exists():
+        return None
+    try:
+        payload = json.loads(rejected_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return "schema_invalid_history"
+    if not isinstance(payload, dict):
+        return "schema_invalid_history"
+    candidate = payload.get("candidate")
+    if not isinstance(candidate, dict):
+        return "schema_invalid_history"
+    return candidate_history_issue(history_path, candidate)
 
 
 def _policy_identity_drift(
@@ -183,7 +273,10 @@ def _policy_identity_drift(
 ) -> tuple[str, str, str] | None:
     """Return a blocking tuple when a stamped surface has stale policy identity."""
     for surface in surfaces:
-        if surface["policy_identity_required"] and surface.get("policy_identity") != active_policy_identity:
+        if (
+            surface["policy_identity_required"]
+            and surface.get("policy_identity") != active_policy_identity
+        ):
             return (
                 "missing_or_mismatched_policy_identity",
                 "missing_policy_identity",
@@ -194,29 +287,131 @@ def _policy_identity_drift(
 
 def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | None]:
     """Classify local trend history without turning missing telemetry into source drift."""
-    _, history_issue = _latest_history_metrics(repo_root / HISTORY_PATH)
+    history_path = repo_root / HISTORY_PATH
+    history_issue = _rejected_history_issue(history_path)
+    if history_issue is None:
+        _, history_issue = _latest_history_metrics(history_path)
     if history_issue == "missing_history":
         return "not_collected", None
     if history_issue == "insufficient_history":
+        return history_issue, None
+    if history_issue == "schema_invalid_history":
+        rejected = rejected_history_path(history_path)
+        rejected_relpath = rejected.relative_to(repo_root).as_posix()
         return (
             history_issue,
             (
-                "trend_insufficient_history",
-                "insufficient_history",
-                f"Collect at least eight completed validation runs in {HISTORY_PATH.as_posix()} before strict validation can pass.",
+                "trend_schema_invalid_history",
+                "schema_invalid_history",
+                (
+                    f"Repair {HISTORY_PATH.as_posix()} to valid schema entries; "
+                    f"remove or repair {rejected_relpath} if the rejected sidecar is corrupt."
+                ),
             ),
-        )
-    if history_issue == "schema_invalid_history":
-        return (
-            history_issue,
-            ("trend_schema_invalid_history", "schema_invalid_history", f"Repair {HISTORY_PATH.as_posix()} to valid schema entries."),
         )
     if history_issue == "trend_deterioration":
         return (
             history_issue,
-            ("trend_deterioration", "soft_gate_deterioration", "Resolve routing-quality deterioration before strict validation can pass."),
+            (
+                "trend_deterioration",
+                "soft_gate_deterioration",
+                "Resolve routing-quality deterioration before strict validation can pass.",
+            ),
         )
     return "available", None
+
+
+def _surface(
+    name: str,
+    observed: int | None,
+    canonical: int,
+    *,
+    identity: str | None,
+    required: bool,
+) -> dict[str, Any]:
+    """Build one catalog parity surface record."""
+    return {
+        "surface_name": name,
+        "observed_count": observed,
+        "canonical_count": canonical,
+        "parity_ok": observed == canonical,
+        "policy_identity": identity,
+        "policy_identity_required": required,
+    }
+
+
+def _catalog_surfaces(
+    repo_root: Path,
+    canonical: int,
+    identity: str,
+    skills_list_count: int | None,
+    route_considered_total: int | None,
+) -> list[dict[str, Any]]:
+    """Collect canonical and runtime-facing count surfaces."""
+    list_count = canonical if skills_list_count is None else skills_list_count
+    considered = canonical if route_considered_total is None else route_considered_total
+    return [
+        _surface(
+            "README.md",
+            _extract_readme_count(repo_root / "README.md"),
+            canonical,
+            identity=None,
+            required=False,
+        ),
+        _surface(
+            "SKILL.md",
+            _extract_root_skill_index_count(repo_root / "SKILL.md"),
+            canonical,
+            identity=_extract_root_skill_index_policy_identity(repo_root / "SKILL.md"),
+            required=True,
+        ),
+        _surface(
+            "ask skills list", list_count, canonical, identity=identity, required=True
+        ),
+        _surface(
+            "route considered metadata",
+            considered,
+            canonical,
+            identity=identity,
+            required=True,
+        ),
+    ]
+
+
+def _catalog_drift(
+    repo_root: Path,
+    surfaces: list[dict[str, Any]],
+    identity: str,
+    *,
+    strict: bool,
+) -> tuple[bool, str | None, str | None, str, str | None]:
+    """Resolve count, identity, and history drift in precedence order."""
+    if any(not item["parity_ok"] for item in surfaces):
+        return (
+            True,
+            "count_mismatch",
+            "required_surface_count_mismatch",
+            "not_checked",
+            (
+                "Run `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, regenerate catalog projections, then rerun doctor-catalog."
+            ),
+        )
+    if not strict:
+        return False, None, None, "not_checked", None
+    identity_drift = _policy_identity_drift(surfaces, identity)
+    if identity_drift:
+        drift_class, reason, action = identity_drift
+        return True, drift_class, reason, "not_checked", action
+    history_status, history_drift = _history_trend_drift(repo_root)
+    if history_drift:
+        return (
+            True,
+            history_drift[0],
+            history_drift[1],
+            history_status,
+            history_drift[2],
+        )
+    return False, None, None, history_status, None
 
 
 def compute_catalog_parity(
@@ -226,109 +421,26 @@ def compute_catalog_parity(
     skills_list_count: int | None = None,
     route_considered_total: int | None = None,
 ) -> dict[str, Any]:
-    """
-    Produce a diagnostic report comparing the canonical catalog and active policy identity against observed counts and metadata across repository and runtime surfaces.
-
-    Parameters:
-        repo_root (Path): Repository root used to read README.md, SKILL.md, and history artifacts.
-        strict (bool): When True, require matching policy identity on stamped surfaces and enforce routing-quality history gates.
-        skills_list_count (int | None): Optional override for the observed "ask skills list" total; when None the canonical count is used.
-        route_considered_total (int | None): Optional override for the observed "route considered metadata" total; when None the canonical count is used.
-
-    Returns:
-        report (dict[str, Any]): Diagnostic report with the following keys:
-            - `schema_version`: report schema identifier.
-            - `policy_identity`: active policy identity used for comparisons.
-            - `canonical_count`: canonical skill count discovered from the catalog.
-            - `surfaces`: list of per-surface dictionaries containing `surface_name`, `observed_count`, `canonical_count`, `parity_ok`, `policy_identity`, and `policy_identity_required`.
-            - `drift_detected`: `True` if any gating condition failed, `False` otherwise.
-            - `drift_class`: classification of the detected drift or `None`.
-            - `blocking_reason`: short code describing why strict validation is blocked, or `None`.
-            - `operator_action`: human-readable remediation guidance when blocked, or `None`.
-            - `decision_status`: `"blocked_catalog_parity"` when blocked, otherwise `"resolved"`.
-            - `required_surfaces`: list of surfaces considered required.
-            - `strict_mode`: echoes the `strict` parameter.
-    """
-    # Keep parity anchored to repository-owned discovery so local runtime
-    # projection drift cannot spuriously block doctor-catalog/route workflows.
-    canonical_count = len(discover_catalog_entries(source="repo"))
-    active_policy_identity = get_policy_identity()
-
-    readme_count = _extract_readme_count(repo_root / "README.md")
-    skill_index_count = _extract_root_skill_index_count(repo_root / "SKILL.md")
-    skill_index_policy_identity = _extract_root_skill_index_policy_identity(repo_root / "SKILL.md")
-    list_count = skills_list_count if skills_list_count is not None else canonical_count
-    considered_total = route_considered_total if route_considered_total is not None else canonical_count
-
-    surfaces = [
-        {
-            "surface_name": "README.md",
-            "observed_count": readme_count,
-            "canonical_count": canonical_count,
-            "parity_ok": readme_count == canonical_count,
-            "policy_identity": None,
-            "policy_identity_required": False,
-        },
-        {
-            "surface_name": "SKILL.md",
-            "observed_count": skill_index_count,
-            "canonical_count": canonical_count,
-            "parity_ok": skill_index_count == canonical_count,
-            "policy_identity": skill_index_policy_identity,
-            "policy_identity_required": True,
-        },
-        {
-            "surface_name": "ask skills list",
-            "observed_count": list_count,
-            "canonical_count": canonical_count,
-            "parity_ok": list_count == canonical_count,
-            "policy_identity": active_policy_identity,
-            "policy_identity_required": True,
-        },
-        {
-            "surface_name": "route considered metadata",
-            "observed_count": considered_total,
-            "canonical_count": canonical_count,
-            "parity_ok": considered_total == canonical_count,
-            "policy_identity": active_policy_identity,
-            "policy_identity_required": True,
-        },
-    ]
-
-    drift_detected = any(not item["parity_ok"] for item in surfaces)
-    drift_class = "count_mismatch" if drift_detected else None
-    blocking_reason = "required_surface_count_mismatch" if drift_detected else None
-    history_status = "not_checked"
-    operator_action = (
-        "Run `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, regenerate catalog projections, then rerun doctor-catalog."
-        if drift_detected
-        else None
+    """Compute repository-owned catalog parity diagnostics."""
+    canonical = len(discover_catalog_entries(source="repo"))
+    identity = get_policy_identity()
+    surfaces = _catalog_surfaces(
+        repo_root, canonical, identity, skills_list_count, route_considered_total
     )
-
-    if strict and not drift_detected:
-        identity_drift = _policy_identity_drift(surfaces, active_policy_identity)
-        if identity_drift is not None:
-            drift_class, blocking_reason, operator_action = identity_drift
-            drift_detected = True
-
-    if strict and not drift_detected:
-        history_status, history_drift = _history_trend_drift(repo_root)
-        if history_drift is not None:
-            drift_class, blocking_reason, operator_action = history_drift
-            drift_detected = True
-
-    report = {
+    detected, drift_class, reason, history_status, action = _catalog_drift(
+        repo_root, surfaces, identity, strict=strict
+    )
+    return {
         "schema_version": CATALOG_PARITY_SCHEMA_VERSION,
-        "policy_identity": active_policy_identity,
-        "canonical_count": canonical_count,
+        "policy_identity": identity,
+        "canonical_count": canonical,
         "surfaces": surfaces,
-        "drift_detected": drift_detected,
+        "drift_detected": detected,
         "drift_class": drift_class,
-        "blocking_reason": blocking_reason,
+        "blocking_reason": reason,
         "history_status": history_status,
-        "operator_action": operator_action,
-        "decision_status": "blocked_catalog_parity" if drift_detected else "resolved",
+        "operator_action": action,
+        "decision_status": "blocked_catalog_parity" if detected else "resolved",
         "required_surfaces": list(REQUIRED_SURFACES),
         "strict_mode": strict,
     }
-    return report
