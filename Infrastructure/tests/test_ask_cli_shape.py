@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import subprocess
 import sys
+import tempfile
 import unittest
 import unittest.mock
 from pathlib import Path
@@ -347,6 +348,52 @@ class Runner:
         self.assertEqual(issues, [])
         source.assert_called_once_with(path, staged_source=True)
         baseline.assert_called_once_with(path, "HEAD", staged_source=True)
+
+    def test_python_shape_checks_staged_file_missing_from_worktree(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_missing_worktree_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("staged_only.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(
+            issues,
+            ["staged_only.py:oversized exceeds function line budget (41 > 40)"],
+        )
+
+    @staticmethod
+    def _prepare_staged_missing_worktree_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        (root / "baseline.py").write_text("VALUE = 1\n", encoding="utf-8")
+        subprocess.run(("git", "add", "baseline.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        staged_path = root / "staged_only.py"
+        staged_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        subprocess.run(("git", "add", "staged_only.py"), cwd=root, check=True)
+        staged_path.unlink()
 
     def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
         validator = _load_validator()
