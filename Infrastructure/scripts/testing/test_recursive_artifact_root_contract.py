@@ -43,6 +43,21 @@ verifier = _load_module(
 
 
 class RecursiveArtifactRootContractTests(unittest.TestCase):
+    def test_retired_tracked_pilot_root_is_absent(self) -> None:
+        self.assertFalse((REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").exists())
+
+    def test_live_scripts_do_not_write_the_retired_tracked_pilot_root(self) -> None:
+        scripts_root = REPO_ROOT / "Infrastructure/scripts"
+        retired_root = "Infrastructure/artifacts/skill-graphs/pilot"
+        offenders = [
+            path.relative_to(REPO_ROOT)
+            for directory in (scripts_root / "lifecycle-and-sync", scripts_root / "skill-graph")
+            for pattern in ("*.py", "*.sh")
+            for path in directory.rglob(pattern)
+            if retired_root in path.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(offenders, [])
+
     def test_run_consumers_share_the_shadow_cycle_output_root(self) -> None:
         self.assertEqual(Path(verifier.RUNNER), RUNS_ROOT)
         self.assertEqual(genome_loop.RUNS_ROOT, RUNS_ROOT)
