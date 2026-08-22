@@ -28,7 +28,8 @@
 ## Build and verify loop
 1. Implement the smallest meaningful increment.
 2. Run the smallest real executable path that exercises the exact production code touched whenever feasible.
-3. Relevant tests/validators MUST run immediately, including `pnpm run quality:docstrings`, `pnpm run quality:size`, and `pnpm run test:related` for changed production source.
+3. Relevant tests and validators MUST run immediately through the owning package
+   or repository entrypoint for the changed production source.
 
 4. If runtime behavior or generated artifacts changed, `pnpm test:deep` MUST run before handoff.
 5. Failures MUST be fixed before expanding scope.
@@ -50,18 +51,9 @@
 
 ## Enforcement
 - Required baseline validation for this repository:
-  - `pnpm lint`
-  - `pnpm typecheck`
-  - `pnpm run quality:docstrings`
-  - `pnpm run quality:size`
-  - `pnpm run test:related`
-
-  - `pnpm test:deep` when runtime behavior or generated artifacts change
-
-  - `pnpm test`
-  - `pnpm audit`
-  - `pnpm check`
-  - `bash scripts/validate-codestyle.sh`
-  - `bash scripts/verify-work.sh --fast`
+  - `./bin/ask repo validate --scope lint --ephemeral --changed-files <paths> --json --robot`
+  - the focused test command declared by the changed source owner
+  - `./bin/ask repo closeout --changed --json --robot` when the selected scope
+    requires aggregate closeout evidence
 - Use exact command evidence format:
   - `Command: <exact command> -> pass|fail|blocked (<reason>)`

@@ -60,18 +60,18 @@
 - Surface cancellation as expected behavior, not as opaque failures.
 
 ## Size and decomposition
-- `pnpm run quality:size` is the executable size gate for changed production
-  source. Treat its failures as blockers.
+- Do not infer a repository-root `pnpm run quality:size` gate. A package that
+  owns TypeScript source must declare its own structural validation command,
+  and root Agent-Skills changes use the repository validation entrypoint.
 - Changed production modules MUST stay at or below 400 logical lines, functions
   MUST stay at or below 80 logical lines, and function complexity MUST stay at or
   below 10.
 - Changed test files MUST stay at or below 1,200 logical lines.
-- `scripts/check-code-size.mjs` enforces these limits directly. Prefer extracting
-  pure helpers, schema tables, or adapter-specific logic before raising a limit.
-- `harness fitness` normalizes `pnpm run quality:size -- --json` artifacts into
-  the deterministic `quality-structure` lane. Treat those findings as repair
-  contracts with concrete metrics, required-fix constraints, and acceptance
-  criteria; do not infer structure by parsing human-readable messages.
+- Prefer extracting pure helpers, schema tables, or adapter-specific logic
+  before raising a limit.
+- Treat deterministic `quality-structure` findings as repair contracts with
+  concrete metrics, required-fix constraints, and acceptance criteria; do not
+  infer structure by parsing human-readable messages.
 - Advisory AI review can suggest cohesion improvements, but it MUST NOT promote
   itself into blocking authority without a deterministic gate or explicit
   contract change.
@@ -87,7 +87,6 @@
   - `pnpm typecheck`
   - `pnpm run quality:docstrings`
 
-  - `pnpm run quality:size`
   - `pnpm run test:related`
 
   - `pnpm test`
