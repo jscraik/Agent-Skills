@@ -459,6 +459,43 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertFalse(history_path.exists())
             self.assertFalse(rejected_history_path(history_path).exists())
 
+    def test_artifact_replace_failure_preserves_previous_receipt(self) -> None:
+        """A failed atomic replacement retains the last usable receipt."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            artifact_path = root / "artifact.json"
+            artifact_path.write_text('{"previous": true}\n', encoding="utf-8")
+            args = MODULE.argparse.Namespace(
+                artifact=artifact_path,
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+            original_replace = MODULE.os.replace
+
+            def fail_artifact_replace(source: Path, destination: Path) -> None:
+                if Path(destination) == artifact_path:
+                    raise OSError("artifact replacement failed")
+                original_replace(source, destination)
+
+            with patch.object(MODULE.os, "replace", fail_artifact_replace):
+                with self.assertRaises(OSError):
+                    MODULE._persist_artifact_and_history(args, [], artifact, "policy")
+
+            self.assertEqual(
+                artifact_path.read_text(encoding="utf-8"), '{"previous": true}\n'
+            )
+            self.assertFalse(history_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -684,11 +684,29 @@ def _restore_optional_file(path: Path, content: bytes | None) -> None:
 
 
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
-    """Write the required routing-quality artifact."""
+    """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
+    with NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.write(content)
+        temporary.flush()
+        os.fsync(temporary.fileno())
+        temporary_path = Path(temporary.name)
+    try:
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+    directory = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
 
 
 def _persist_artifact_and_history(
