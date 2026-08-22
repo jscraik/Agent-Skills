@@ -10,8 +10,8 @@
 ## Decision
 
 - **Result:** `HOLD` (no-go for broad active rollout)
-- **Recorded evidence:** the 2026-02-25 shadow dashboard snapshot (retired
-  generated output) recorded this decision.
+- **Recorded evidence:** this retained dated summary is the audit record for the
+  `HOLD` decision distilled from the retired shadow-dashboard output.
 
 ## Evidence snapshot
 
