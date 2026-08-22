@@ -752,4 +752,23 @@ def _eval_contract_migration_summary(cases: Sequence[EvalCase], *, eval_mode: st
         "uncalibrated_pass_rate_thresholds": uncalibrated_thresholds,
     }
 
+
+from run_skill_evals_references import (  # noqa: E402
+    _render_case_references,
+    attach_declared_references,
+)
+
+_load_evals_without_declared_references = load_evals
+
+
+def load_evals_with_declared_references(evals_path: Path) -> List[EvalCase]:
+    """Attach validated package references without changing legacy case parsing."""
+    document = _load_evals_document(evals_path)
+    cases = _load_evals_without_declared_references(evals_path)
+    return attach_declared_references(evals_path, cases, document)
+
+
+load_evals = load_evals_with_declared_references
+
+
 __all__ = [name for name in globals() if not name.startswith("__")]

@@ -36,6 +36,7 @@ from run_skill_evals import (  # noqa: E402
     EvalCase,
     _claim_to_evidence_summary,
     _load_evals_document,
+    _render_case_references,
     _weak_acceptance_reasons,
     load_evals,
     load_neutral_baseline_approvals,
@@ -45,6 +46,64 @@ from run_skill_evals import (  # noqa: E402
 
 
 class RunSkillEvalsContractTests(unittest.TestCase):
+    def test_render_case_references_embeds_only_declared_package_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "operational.md").write_text("# Operational\n", encoding="utf-8")
+
+            rendered = _render_case_references(skill_dir, ("references/operational.md",))
+
+            self.assertIn('<REFERENCE path="references/operational.md">', rendered)
+            self.assertIn("# Operational", rendered)
+
+    def test_render_case_references_rejects_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "must stay under references"):
+                _render_case_references(Path(tmp), ("../outside.md",))
+
+    def test_render_case_references_rejects_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            outside = Path(tmp) / "outside.md"
+            outside.write_text("outside\n", encoding="utf-8")
+            (references / "linked.md").symlink_to(outside)
+
+            with self.assertRaisesRegex(ValueError, "package-local regular file"):
+                _render_case_references(skill_dir, ("references/linked.md",))
+
+    def test_load_evals_parses_reference_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "operational.md").write_text("# Operational\n", encoding="utf-8")
+            evals_path = references / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: reference-case
+                        name: Reference case
+                        prompt: Use the declared reference.
+                        acceptance:
+                          - contains: done
+                        reference_paths:
+                          - references/operational.md
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            case = load_evals(evals_path)[0]
+
+            self.assertEqual(case.reference_paths, ("references/operational.md",))
+            self.assertIn('<REFERENCE path="references/operational.md">', case.prompt)
+            self.assertIn("User task:\nUse the declared reference.", case.prompt)
+
     def test_repo_evals_include_family_contract_cases(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"
 

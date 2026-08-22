@@ -338,6 +338,7 @@ class EvalCase:
     expected_signals: Optional[Dict[str, Any]] = None
     budgets: Optional[Dict[str, Any]] = None
     prepend_skill: bool = True
+    reference_paths: Tuple[str, ...] = ()
     timeout_sec: Optional[float] = None
     timeout_profile: Optional[str] = None
     smoke_mode: Optional[str] = None

@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
+from ask.skills_sdk.knowledge_source_context import merge_knowledge_source_context
+from ask.skills_sdk.operational_references import validate_operational_references
 
 
 SCHEMA_VERSION = "skills-sdk-knowledge-ingest.v1"
@@ -68,6 +70,7 @@ def build_knowledge_ingest(
     if vendored_demand != demand:
         findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
     _validate_source_files(extraction_root, source_files, findings)
+    validate_operational_references(extraction_root, manifest, findings)
     preflight = (
         _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files, manifest=manifest)
         if preflight_security and not findings
@@ -75,7 +78,6 @@ def build_knowledge_ingest(
     )
     if preflight and preflight["status"] != "pass":
         findings.append("staged_security_gate_failed")
-
     copied: list[dict[str, Any]] = []
     eval_routes = _eval_reference_routes(extraction_root, source_files)
     for source_file in source_files:
@@ -177,6 +179,7 @@ def _update_knowledge_routing_files(
     _update_source_context(
         _safe_skill_package_path(skill_dir, Path("references/source-context.yaml"), label="source context"),
         eval_routes=eval_routes,
+        manifest=manifest,
     )
     _update_capsule_routing_index(
         _safe_skill_package_path(
@@ -526,7 +529,12 @@ def _append_reference_links(text: str, *, eval_routes: dict[str, bool]) -> str:
     return updated.rstrip() + "\n"
 
 
-def _update_source_context(source_context: Path, *, eval_routes: dict[str, bool]) -> None:
+def _update_source_context(
+    source_context: Path,
+    *,
+    eval_routes: dict[str, bool],
+    manifest: dict[str, Any],
+) -> None:
     if source_context.is_file():
         loaded = _load_yaml(source_context, label="references/source-context.yaml")
     else:
@@ -536,100 +544,7 @@ def _update_source_context(source_context: Path, *, eval_routes: dict[str, bool]
             "skill": _skill_name(skill_dir / "SKILL.md"),
             "references": [],
         }
-    references = loaded.setdefault("references", [])
-    if not isinstance(references, list):
-        raise ValueError("references/source-context.yaml references must be a list.")
-    entries = [
-        {
-            "path": "references/knowledge-demand.yaml",
-            "kind": "knowledge_profile",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "deciding which pack-backed capsule is relevant",
-            "allowed_claims": ["knowledge demand profile for this skill"],
-            "forbidden_claims": ["target repo readiness", "raw source availability"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "small",
-            "claim_scope": "knowledge_profile",
-            "bounded_unit": True,
-        },
-        {
-            "path": "references/knowledge-capsule.manifest.yaml",
-            "kind": "capsule_manifest",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "selecting a bounded KnowledgeOS capsule",
-            "allowed_claims": ["selected capsules and upstream pack snapshot digests"],
-            "forbidden_claims": ["raw source completeness", "runtime dependency on KnowledgeOS"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "small",
-            "claim_scope": "capsule_manifest",
-            "bounded_unit": True,
-        },
-        {
-            "path": "references/knowledge-capsules/",
-            "kind": "generated_knowledge_capsules",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "only after the manifest selects the relevant capsule",
-            "allowed_claims": ["bounded expert viewpoint or evidence lane captured in the selected capsule"],
-            "forbidden_claims": ["load all capsules by default", "claims outside selected capsule text"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "selective",
-            "claim_scope": "bounded_capsules",
-            "bounded_unit": True,
-        },
-    ]
-    if eval_routes["scenarios"]:
-        entries.append(
-            {
-                "path": "references/eval-scenarios.json",
-                "kind": "knowledge_eval_scenarios",
-                "provenance": "vendored KnowledgeOS extraction",
-                "load_when": "checking selected KnowledgeOS eval scenario metadata",
-                "allowed_claims": ["selected eval scenario IDs, prompts, and expected failure modes"],
-                "forbidden_claims": [
-                    "runtime dependency on KnowledgeOS",
-                    "Tessl result quality without execution evidence",
-                ],
-                "freshness": "knowledge_os_snapshot",
-                "context_budget": "small",
-                "claim_scope": "eval_scenarios",
-                "bounded_unit": True,
-            }
-        )
-    if eval_routes["fixtures"]:
-        entries.append(
-            {
-                "path": "references/evals/",
-                "kind": "knowledge_eval_fixtures",
-                "provenance": "vendored KnowledgeOS extraction",
-                "load_when": "only when a selected scenario fixture needs detail beyond references/evals.yaml",
-                "allowed_claims": ["fixture detail for selected KnowledgeOS eval scenarios"],
-                "forbidden_claims": ["load all fixtures by default", "claims outside selected fixture text"],
-                "freshness": "knowledge_os_snapshot",
-                "context_budget": "selective",
-                "claim_scope": "eval_fixture_detail",
-                "bounded_unit": True,
-            }
-        )
-    existing_paths = {str(item.get("path")) for item in references if isinstance(item, dict)}
-    for entry in entries:
-        if entry["path"] not in existing_paths:
-            references.append(entry)
-    allowed_claims = loaded.setdefault("allowed_claims", [])
-    if (
-        isinstance(allowed_claims, list)
-        and "KnowledgeOS capsules are vendored references, not runtime dependencies" not in allowed_claims
-    ):
-        allowed_claims.append("KnowledgeOS capsules are vendored references, not runtime dependencies")
-    if (
-        eval_routes["scenarios"]
-        and eval_routes["fixtures"]
-        and isinstance(allowed_claims, list)
-        and "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
-        not in allowed_claims
-    ):
-        allowed_claims.append(
-            "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
-        )
+    merge_knowledge_source_context(loaded, eval_routes=eval_routes, manifest=manifest)
     source_context.write_text(_yaml_safe_dump_data(loaded), encoding="utf-8")
 
 
