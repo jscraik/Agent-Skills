@@ -428,6 +428,41 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertFalse(history_path.exists())
             self.assertFalse(rejected_history_path(history_path).exists())
 
+    def test_rejected_history_directory_emits_schema_invalid_receipt(self) -> None:
+        """A corrupt sidecar path cannot escape the guarded history outcome."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            rejected_path = rejected_history_path(history_path)
+            rejected_path.mkdir()
+            args = MODULE.argparse.Namespace(
+                artifact=root / "artifact.json",
+                history_path=history_path,
+                history_max_runs=200,
+            )
+            artifact = {
+                "run_id": "run",
+                "generated_at": "now",
+                "decision_status_counts": {},
+                "parity_status": "pass",
+                "unresolved_ambiguity_rate": 0.0,
+                "no_candidate_rate": 0.0,
+                "gate_outcomes": {"hard": {}},
+            }
+
+            issue = MODULE._persist_artifact_and_history(
+                args, [], artifact, "policy"
+            )
+
+            self.assertEqual(issue, "schema_invalid_history")
+            self.assertEqual(artifact["history_status"], "schema_invalid_history")
+            self.assertEqual(
+                artifact["gate_outcomes"]["hard"]["history_persistence"], "fail"
+            )
+            self.assertTrue(rejected_path.is_dir())
+            receipt = json.loads(args.artifact.read_text(encoding="utf-8"))
+            self.assertEqual(receipt["history_status"], "schema_invalid_history")
+
     def test_sidecar_cleanup_failure_rolls_back_history_mutation(self) -> None:
         """A partial history append cannot escape the receipt transaction."""
         with TemporaryDirectory() as tmpdir:

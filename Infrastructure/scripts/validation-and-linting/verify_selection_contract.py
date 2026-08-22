@@ -174,6 +174,9 @@ def _append_history_locked(
     max_runs: int,
 ) -> str | None:
     """Validate and replace history while the caller holds its writer lock."""
+    rejected_path = rejected_history_path(history_path)
+    if rejected_path.exists() and not rejected_path.is_file():
+        return "schema_invalid_history"
     issue = candidate_history_issue(history_path, row)
     if issue:
         _write_rejected_history(history_path, row, issue)
@@ -665,7 +668,7 @@ def _apply_history_outcome(
 
 def _optional_bytes(path: Path) -> bytes | None:
     """Capture an optional file while the history writer lock is held."""
-    return path.read_bytes() if path.exists() else None
+    return path.read_bytes() if path.is_file() else None
 
 
 def _restore_optional_file(path: Path, content: bytes | None) -> None:
