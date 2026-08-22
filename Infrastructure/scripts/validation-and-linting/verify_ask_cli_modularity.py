@@ -112,6 +112,10 @@ def _git_lines(args: list[str]) -> list[str]:
     return [line.strip() for line in _git_output(args).splitlines() if line.strip()]
 
 
+def _staged_paths() -> frozenset[str]:
+    return frozenset(_git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"]))
+
+
 def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
     if staged_source:
         return "HEAD"
@@ -322,12 +326,16 @@ def _function_fingerprint_metrics(
     return records
 
 
-def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
+def _changed_python_paths(paths: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
+    staged_paths = _staged_paths() if staged_source else frozenset()
     python_paths: list[Path] = []
     for path_text in paths:
         if path_text.endswith(PYTHON_SUFFIX):
             path = _repo_path(path_text)
-            if path.exists() and path.is_file():
+            normalized = path.relative_to(REPO_ROOT).as_posix()
+            if (staged_source and normalized in staged_paths) or (
+                not staged_source and path.exists() and path.is_file()
+            ):
                 python_paths.append(path)
     return sorted(set(python_paths))
 
@@ -379,7 +387,7 @@ def _check_python_shape(args: argparse.Namespace) -> list[str]:
     if not baseline_ref:
         return ["shape baseline unavailable: baseline revision could not be determined"]
     baseline_by_parent: dict[Path, dict[str, object]] = {}
-    for path in _changed_python_paths(tuple(args.changed_files)):
+    for path in _changed_python_paths(tuple(args.changed_files), staged_source=staged_source):
         try:
             current = _current_source(path, staged_source=staged_source)
             shape_baseline = baseline_by_parent.get(path.parent)
