@@ -174,9 +174,9 @@ def _append_history_locked(
     max_runs: int,
 ) -> str | None:
     """Validate and replace history while the caller holds its writer lock."""
-    rejected_path = rejected_history_path(history_path)
-    if rejected_path.exists() and not rejected_path.is_file():
-        return "schema_invalid_history"
+    for path in (history_path, rejected_history_path(history_path)):
+        if path.exists() and not path.is_file():
+            return "schema_invalid_history"
     issue = candidate_history_issue(history_path, row)
     if issue:
         _write_rejected_history(history_path, row, issue)

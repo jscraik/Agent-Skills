@@ -73,6 +73,16 @@ class TestCatalogParitySchema(unittest.TestCase):
             with self.subTest(status=status):
                 payload = catalog_parity_payload()
                 payload["history_status"] = status
+                if status in {"schema_invalid_history", "trend_deterioration"}:
+                    payload.update(
+                        {
+                            "decision_status": "blocked_catalog_parity",
+                            "drift_detected": True,
+                            "drift_class": status,
+                            "blocking_reason": status,
+                            "operator_action": "Repair history evidence.",
+                        }
+                    )
                 self.assertEqual(MODULE.validate_catalog_parity(payload), [])
 
     def test_missing_history_status_fails(self) -> None:
@@ -91,6 +101,41 @@ class TestCatalogParitySchema(unittest.TestCase):
         payload["history_status"] = []
 
         self.assertIn("invalid history_status", MODULE.validate_catalog_parity(payload))
+
+    def test_blocking_history_requires_complete_blocked_catalog_state(self) -> None:
+        """Strict history blockers cannot be paired with resolved catalog evidence."""
+        for status in ("schema_invalid_history", "trend_deterioration"):
+            with self.subTest(status=status):
+                payload = catalog_parity_payload()
+                payload["history_status"] = status
+
+                issues = MODULE.validate_catalog_parity(payload)
+
+                self.assertIn(
+                    "blocking history_status must block catalog parity", issues
+                )
+                self.assertIn(
+                    "blocked catalog parity must set drift_detected=true", issues
+                )
+                self.assertIn(
+                    "blocked catalog parity must include blocking_reason", issues
+                )
+
+    def test_blocked_catalog_requires_all_diagnostic_fields(self) -> None:
+        """Blocked receipts carry drift classification, reason, and recovery."""
+        payload = catalog_parity_payload()
+        payload.update(
+            {
+                "decision_status": "blocked_catalog_parity",
+                "drift_detected": True,
+                "history_status": "trend_deterioration",
+                "drift_class": "trend_deterioration",
+                "blocking_reason": "soft_gate_deterioration",
+                "operator_action": "Repair routing quality.",
+            }
+        )
+
+        self.assertEqual(MODULE.validate_catalog_parity(payload), [])
 
 
 class TestRoutingQualitySchema(unittest.TestCase):
@@ -151,6 +196,20 @@ class TestRoutingQualitySchema(unittest.TestCase):
         self.assertIn(
             "invalid history_status", MODULE.validate_routing_quality(payload)
         )
+
+    def test_unhashable_history_persistence_gate_is_invalid(self) -> None:
+        """Malformed gate containers return schema issues instead of raising."""
+        for gate in ([], {}):
+            with self.subTest(gate=gate):
+                payload = routing_quality_payload()
+                payload["gate_outcomes"] = {
+                    "hard": {"history_persistence": gate}
+                }
+
+                self.assertIn(
+                    "invalid history_persistence gate",
+                    MODULE.validate_routing_quality(payload),
+                )
 
     def test_invalid_input_reports_service_and_source(self) -> None:
         """Input failures return a contextual service-owned diagnostic."""

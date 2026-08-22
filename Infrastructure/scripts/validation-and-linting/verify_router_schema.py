@@ -222,6 +222,27 @@ def _catalog_history_status_issues(payload: Dict[str, Any]) -> List[str]:
     )
 
 
+def _catalog_blocking_state_issues(payload: Dict[str, Any]) -> List[str]:
+    """Require complete blocked-state evidence for blocking history outcomes."""
+    decision = payload.get("decision_status")
+    status = payload.get("history_status")
+    history_blocking = isinstance(status, str) and status in {
+        "schema_invalid_history", "trend_deterioration"
+    }
+    if decision != "blocked_catalog_parity" and not history_blocking:
+        return []
+    issues = []
+    if decision != "blocked_catalog_parity":
+        issues.append("blocking history_status must block catalog parity")
+    if payload.get("drift_detected") is not True:
+        issues.append("blocked catalog parity must set drift_detected=true")
+    for field in ("drift_class", "blocking_reason", "operator_action"):
+        value = payload.get(field)
+        if not isinstance(value, str) or not value.strip():
+            issues.append(f"blocked catalog parity must include {field}")
+    return issues
+
+
 def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
     """Validate catalog-parity schema and blocked-state semantics."""
     issues: List[str] = []
@@ -255,11 +276,7 @@ def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
     decision_status = payload.get("decision_status")
     if decision_status not in {"resolved", "blocked_catalog_parity"}:
         issues.append("invalid decision_status")
-    if decision_status == "blocked_catalog_parity":
-        if payload.get("drift_detected") is not True:
-            issues.append("blocked_catalog_parity must set drift_detected=true")
-        if not str(payload.get("operator_action") or "").strip():
-            issues.append("blocked_catalog_parity must include operator_action")
+    issues.extend(_catalog_blocking_state_issues(payload))
 
     return issues
 
@@ -298,7 +315,7 @@ def _history_evidence_issues(payload: Dict[str, Any]) -> List[str]:
     outcomes = payload.get("gate_outcomes")
     hard = outcomes.get("hard") if isinstance(outcomes, dict) else None
     gate = hard.get("history_persistence") if isinstance(hard, dict) else None
-    if gate not in {"pass", "fail", "not_applicable"}:
+    if not isinstance(gate, str) or gate not in {"pass", "fail", "not_applicable"}:
         issues.append("invalid history_persistence gate")
     elif (
         isinstance(status, str)
