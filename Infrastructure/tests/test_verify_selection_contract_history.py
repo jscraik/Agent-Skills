@@ -155,6 +155,45 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertEqual(status, "trend_deterioration")
             self.assertEqual(blocker[0] if blocker else None, "trend_deterioration")
 
+    def test_repaired_history_revalidates_preserved_candidate(self) -> None:
+        """A repaired baseline unblocks a preserved candidate that now validates."""
+        with TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            history_path = repo_root / MODULE.catalog_parity_module.HISTORY_PATH
+            history_path.parent.mkdir(parents=True)
+            candidate = {
+                "unresolved_ambiguity_rate": 0.1,
+                "no_candidate_rate": 0.1,
+            }
+            MODULE._write_rejected_history(
+                history_path, candidate, "schema_invalid_history"
+            )
+            history_path.write_text(
+                "".join(json.dumps(candidate) + "\n" for _ in range(8)),
+                encoding="utf-8",
+            )
+
+            status, blocker = _history_trend_drift(repo_root)
+
+            self.assertEqual(status, "available")
+            self.assertIsNone(blocker)
+
+    def test_orphaned_rejection_sidecar_is_not_collected(self) -> None:
+        """Rejected evidence alone does not invent canonical history telemetry."""
+        with TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            history_path = repo_root / MODULE.catalog_parity_module.HISTORY_PATH
+            MODULE._write_rejected_history(
+                history_path,
+                {"unresolved_ambiguity_rate": 0.3, "no_candidate_rate": 0.1},
+                "trend_deterioration",
+            )
+
+            status, blocker = _history_trend_drift(repo_root)
+
+            self.assertEqual(status, "not_collected")
+            self.assertIsNone(blocker)
+
     def test_history_retention_never_drops_below_trend_window(self) -> None:
         """Direct callers retain the minimum complete eight-sample window."""
         with TemporaryDirectory() as tmpdir:

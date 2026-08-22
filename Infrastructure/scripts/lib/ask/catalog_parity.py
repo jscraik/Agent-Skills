@@ -224,9 +224,9 @@ def _candidate_history_issue(
 
 
 def _rejected_history_issue(history_path: Path) -> str | None:
-    """Return a valid preserved rejection issue, if present."""
+    """Revalidate preserved rejection evidence against the current history."""
     rejected_path = _rejected_history_path(history_path)
-    if not rejected_path.exists():
+    if not history_path.exists() or not rejected_path.exists():
         return None
     try:
         payload = json.loads(rejected_path.read_text(encoding="utf-8"))
@@ -234,12 +234,10 @@ def _rejected_history_issue(history_path: Path) -> str | None:
         return "schema_invalid_history"
     if not isinstance(payload, dict):
         return "schema_invalid_history"
-    issue = payload.get("issue")
-    return (
-        issue
-        if issue in {"schema_invalid_history", "trend_deterioration"}
-        else "schema_invalid_history"
-    )
+    candidate = payload.get("candidate")
+    if not isinstance(candidate, dict):
+        return "schema_invalid_history"
+    return _candidate_history_issue(history_path, candidate)
 
 
 def _policy_identity_drift(
