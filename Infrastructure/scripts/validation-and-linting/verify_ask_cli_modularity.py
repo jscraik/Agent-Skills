@@ -113,7 +113,7 @@ def _git_lines(args: list[str]) -> list[str]:
 
 
 def _staged_paths() -> frozenset[str]:
-    return frozenset(_git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"]))
+    return frozenset(_git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"]))
 
 
 def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
