@@ -13,6 +13,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CHECKER = REPO_ROOT / "Infrastructure" / "scripts" / "check-code-size.mjs"
 HOOK = REPO_ROOT / "Infrastructure" / "scripts" / "hook-pre-commit.sh"
+CANONICAL_HOOK = REPO_ROOT / "Infrastructure" / "scripts" / "hooks" / "pre-commit.sh"
 
 
 class StructuralValidationEntrypointTests(unittest.TestCase):
@@ -40,6 +41,12 @@ class StructuralValidationEntrypointTests(unittest.TestCase):
         self.assertNotIn("quality:size", source)
         self.assertNotIn("npm run", source)
         self.assertNotIn("pnpm", source)
+
+    def test_canonical_hook_collects_staged_type_changes(self) -> None:
+        """The pre-commit scope includes staged type changes before validation."""
+        source = CANONICAL_HOOK.read_text(encoding="utf-8")
+
+        self.assertIn("--diff-filter=ACMRT", source)
 
     def test_entrypoints_have_valid_syntax(self) -> None:
         """Both compatibility entrypoints parse before runtime execution."""
@@ -86,6 +93,43 @@ class StructuralValidationEntrypointTests(unittest.TestCase):
                     self.assertIn(path.relative_to(root).as_posix(), invocation)
             self.assertIn("--staged-source", invocations[0])
             self.assertIn("--staged-source", invocations[1])
+
+    def test_checker_forwards_staged_python_type_changes(self) -> None:
+        """The staged checker cannot omit a symlink-to-regular Python transition."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            checker, _ = self._prepare_staged_validator_repo(root)
+            type_changed = root / "type_changed.py"
+            (root / "README.md").write_text("baseline\n", encoding="utf-8")
+            type_changed.symlink_to("README.md")
+            self._git(root, "add", "README.md", "type_changed.py")
+            self._git(
+                root,
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-m",
+                "test: establish type-change baseline",
+            )
+            type_changed.unlink()
+            type_changed.write_text("def changed():\n    return 1\n", encoding="utf-8")
+            self._git(root, "add", "type_changed.py")
+            capture = root / "captured.jsonl"
+            completed = subprocess.run(
+                ("node", str(checker), "--staged"),
+                cwd=root,
+                env=self._capture_environment(root, capture),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            invocations = [json.loads(line) for line in capture.read_text(encoding="utf-8").splitlines()]
+            for invocation in invocations:
+                self.assertIn("type_changed.py", invocation)
 
     def test_checker_all_mode_forwards_only_python_paths(self) -> None:
         """All-mode avoids oversized argv payloads by filtering before spawning."""

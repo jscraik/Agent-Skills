@@ -411,6 +411,24 @@ class Runner:
             ["type_changed.py:oversized exceeds function line budget (41 > 40)"],
         )
 
+    def test_python_shape_skips_staged_symlink_type_change(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_symlink_type_change_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("type_changed.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+
     @staticmethod
     def _prepare_staged_missing_worktree_fixture(root: Path) -> None:
         subprocess.run(("git", "init", "-q"), cwd=root, check=True)
@@ -480,6 +498,31 @@ class Runner:
         )
         type_changed_path.unlink()
         type_changed_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
+
+    @staticmethod
+    def _prepare_staged_symlink_type_change_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        type_changed_path = root / "type_changed.py"
+        type_changed_path.write_text("VALUE = 1\n", encoding="utf-8")
+        (root / "target.txt").write_text("not Python source\n", encoding="utf-8")
+        subprocess.run(("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish regular-file baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        type_changed_path.unlink()
+        type_changed_path.symlink_to("target.txt")
         subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
 
     def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
