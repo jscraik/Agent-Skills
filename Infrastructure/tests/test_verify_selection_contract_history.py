@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 from ask.catalog_parity import (  # noqa: E402
     _history_trend_drift,
     _latest_history_metrics,
-    _rejected_history_path,
+    rejected_history_path,
 )
 
 
@@ -34,6 +34,21 @@ SPEC.loader.exec_module(MODULE)
 
 
 class TestVerifySelectionContractHistory(unittest.TestCase):
+    def test_negative_fixture_count_is_invalid_history(self) -> None:
+        """Corrupt negative totals cannot be downgraded to absent history."""
+        rates, issue = MODULE.catalog_parity_module._history_rates(
+            {
+                "totals": {"fixtures": -1},
+                "status_counts": {
+                    "unresolved_ambiguity": 0,
+                    "degraded_no_candidates": 0,
+                },
+            }
+        )
+
+        self.assertIsNone(rates)
+        self.assertEqual(issue, "schema_invalid_history")
+
     def test_concurrent_history_writers_preserve_every_sample(self) -> None:
         """Serialized atomic updates do not lose accepted concurrent rows."""
         with TemporaryDirectory() as tmpdir:
@@ -69,6 +84,9 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             path.write_text("not-json", encoding="utf-8")
 
             self.assertIsNone(MODULE._load_routes(path))
+            fixtures, issue = MODULE._read_fixture_objects(path)
+            self.assertIsNone(fixtures)
+            self.assertEqual(issue, "fixture_read_error:JSONDecodeError")
 
     def test_route_fixture_loader_rejects_non_object_entries(self) -> None:
         """Route evaluation never receives scalar fixture entries."""
@@ -77,6 +95,9 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             path.write_text('{"fixtures": [1]}', encoding="utf-8")
 
             self.assertIsNone(MODULE._load_routes(path))
+            fixtures, issue = MODULE._read_fixture_objects(path)
+            self.assertIsNone(fixtures)
+            self.assertEqual(issue, "fixture_entries_must_be_objects")
 
     def test_goal_fixture_loader_reports_invalid_root(self) -> None:
         """Optional goal input records a failed result instead of raising."""
@@ -236,6 +257,49 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
                 self.assertIsNone(MODULE._append_history(history_path, row, max_runs=1))
             self.assertEqual(len(history_path.read_text().splitlines()), 8)
 
+    def test_accepted_append_clears_rejected_sidecar(self) -> None:
+        """A successful append removes stale rejection evidence."""
+        with TemporaryDirectory() as tmpdir:
+            history_path = Path(tmpdir) / "history.jsonl"
+            row = {"unresolved_ambiguity_rate": 0.1, "no_candidate_rate": 0.1}
+            MODULE._write_rejected_history(history_path, row, "trend_deterioration")
+            self.assertTrue(rejected_history_path(history_path).exists())
+
+            self.assertIsNone(MODULE._append_history(history_path, row, max_runs=200))
+
+            self.assertFalse(rejected_history_path(history_path).exists())
+
+    def test_not_recorded_history_is_not_a_passing_gate(self) -> None:
+        """Skipped persistence is explicit for absent paths and failed fixtures."""
+        artifact = {
+            "run_id": "run",
+            "generated_at": "now",
+            "decision_status_counts": {},
+            "parity_status": "pass",
+            "unresolved_ambiguity_rate": 0.0,
+            "no_candidate_rate": 0.0,
+            "gate_outcomes": {"hard": {}},
+        }
+        args = MODULE.argparse.Namespace(history_path=None, history_max_runs=200)
+
+        self.assertIsNone(MODULE._apply_history_outcome(args, [], artifact, "policy"))
+        self.assertEqual(artifact["history_status"], "not_recorded")
+        self.assertEqual(
+            artifact["gate_outcomes"]["hard"]["history_persistence"],
+            "not_applicable",
+        )
+
+        args.history_path = Path("unused.jsonl")
+        failed = [{"passed": False}]
+        self.assertIsNone(
+            MODULE._apply_history_outcome(args, failed, artifact, "policy")
+        )
+        self.assertEqual(artifact["history_status"], "not_recorded")
+        self.assertEqual(
+            artifact["gate_outcomes"]["hard"]["history_persistence"],
+            "not_applicable",
+        )
+
     def test_history_rejection_is_bound_into_artifact(self) -> None:
         """The emitted artifact cannot claim success when history is rejected."""
         with TemporaryDirectory() as tmpdir:
@@ -261,7 +325,7 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             self.assertEqual(
                 artifact["gate_outcomes"]["hard"]["history_persistence"], "fail"
             )
-            self.assertTrue(_rejected_history_path(history_path).exists())
+            self.assertTrue(rejected_history_path(history_path).exists())
 
 
 if __name__ == "__main__":

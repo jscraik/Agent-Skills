@@ -20,9 +20,10 @@ REQUIRED_SURFACES = (
     "route considered metadata",
 )
 HISTORY_PATH = Path(".tmp/agent-skills-artifacts/selection-quality/history.jsonl")
+HISTORY_WINDOW_RUNS = 8
 
 
-def _rejected_history_path(history_path: Path) -> Path:
+def rejected_history_path(history_path: Path) -> Path:
     """Return the sidecar used to preserve the latest rejected candidate."""
     return history_path.with_name(f"{history_path.stem}.rejected.json")
 
@@ -113,6 +114,8 @@ def _nested_history_rates(
     if issue or counts is None:
         return None, issue
     fixtures, unresolved, no_candidate = counts
+    if fixtures < 0:
+        return None, "schema_invalid_history"
     if fixtures <= 0:
         return None, None
     if (
@@ -196,15 +199,15 @@ def _latest_history_metrics(
     rows, issue = _read_history_rows(history_path)
     if issue:
         return None, issue
-    if rows is None or len(rows) < 8:
+    if rows is None or len(rows) < HISTORY_WINDOW_RUNS:
         return None, "insufficient_history"
     current = rows[-1]
-    if _history_deteriorated(current, rows[-8:-1]):
+    if _history_deteriorated(current, rows[-HISTORY_WINDOW_RUNS:-1]):
         return current, "trend_deterioration"
     return current, None
 
 
-def _candidate_history_issue(
+def candidate_history_issue(
     history_path: Path, candidate: dict[str, Any]
 ) -> str | None:
     """Validate one candidate against the retained baseline without mutating it."""
@@ -216,16 +219,17 @@ def _candidate_history_issue(
     rows, issue = _read_history_rows(history_path)
     if issue:
         return issue
-    if rows is None or len(rows) < 7:
+    baseline_runs = HISTORY_WINDOW_RUNS - 1
+    if rows is None or len(rows) < baseline_runs:
         return None
-    if _history_deteriorated(candidate_rates, rows[-7:]):
+    if _history_deteriorated(candidate_rates, rows[-baseline_runs:]):
         return "trend_deterioration"
     return None
 
 
 def _rejected_history_issue(history_path: Path) -> str | None:
     """Revalidate preserved rejection evidence against the current history."""
-    rejected_path = _rejected_history_path(history_path)
+    rejected_path = rejected_history_path(history_path)
     if not history_path.exists() or not rejected_path.exists():
         return None
     try:
@@ -237,7 +241,7 @@ def _rejected_history_issue(history_path: Path) -> str | None:
     candidate = payload.get("candidate")
     if not isinstance(candidate, dict):
         return "schema_invalid_history"
-    return _candidate_history_issue(history_path, candidate)
+    return candidate_history_issue(history_path, candidate)
 
 
 def _policy_identity_drift(
@@ -269,12 +273,16 @@ def _history_trend_drift(repo_root: Path) -> tuple[str, tuple[str, str, str] | N
     if history_issue == "insufficient_history":
         return history_issue, None
     if history_issue == "schema_invalid_history":
+        rejected = rejected_history_path(history_path)
         return (
             history_issue,
             (
                 "trend_schema_invalid_history",
                 "schema_invalid_history",
-                f"Repair {HISTORY_PATH.as_posix()} to valid schema entries.",
+                (
+                    f"Repair {HISTORY_PATH.as_posix()} to valid schema entries; "
+                    f"remove or repair {rejected.name} if the rejected sidecar is corrupt."
+                ),
             ),
         )
     if history_issue == "trend_deterioration":
@@ -293,6 +301,7 @@ def _surface(
     name: str,
     observed: int | None,
     canonical: int,
+    *,
     identity: str | None,
     required: bool,
 ) -> dict[str, Any]:
@@ -322,18 +331,26 @@ def _catalog_surfaces(
             "README.md",
             _extract_readme_count(repo_root / "README.md"),
             canonical,
-            None,
-            False,
+            identity=None,
+            required=False,
         ),
         _surface(
             "SKILL.md",
             _extract_root_skill_index_count(repo_root / "SKILL.md"),
             canonical,
-            _extract_root_skill_index_policy_identity(repo_root / "SKILL.md"),
-            True,
+            identity=_extract_root_skill_index_policy_identity(repo_root / "SKILL.md"),
+            required=True,
         ),
-        _surface("ask skills list", list_count, canonical, identity, True),
-        _surface("route considered metadata", considered, canonical, identity, True),
+        _surface(
+            "ask skills list", list_count, canonical, identity=identity, required=True
+        ),
+        _surface(
+            "route considered metadata",
+            considered,
+            canonical,
+            identity=identity,
+            required=True,
+        ),
     ]
 
 
@@ -341,6 +358,7 @@ def _catalog_drift(
     repo_root: Path,
     surfaces: list[dict[str, Any]],
     identity: str,
+    *,
     strict: bool,
 ) -> tuple[bool, str | None, str | None, str, str | None]:
     """Resolve count, identity, and history drift in precedence order."""
@@ -386,7 +404,7 @@ def compute_catalog_parity(
         repo_root, canonical, identity, skills_list_count, route_considered_total
     )
     detected, drift_class, reason, history_status, action = _catalog_drift(
-        repo_root, surfaces, identity, strict
+        repo_root, surfaces, identity, strict=strict
     )
     return {
         "schema_version": CATALOG_PARITY_SCHEMA_VERSION,

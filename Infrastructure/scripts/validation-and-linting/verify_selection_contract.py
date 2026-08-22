@@ -30,12 +30,12 @@ policy_identity = selection_policy_module.policy_identity
 EligibleCandidate = selection_contract_module.EligibleCandidate
 build_decision_payload = selection_contract_module.build_decision_payload
 build_goal_decision = selection_contract_module.build_goal_decision
-candidate_history_issue = catalog_parity_module._candidate_history_issue
-rejected_history_path = catalog_parity_module._rejected_history_path
+candidate_history_issue = catalog_parity_module.candidate_history_issue
+rejected_history_path = catalog_parity_module.rejected_history_path
+MINIMUM_HISTORY_RUNS = catalog_parity_module.HISTORY_WINDOW_RUNS
 
 logger = logging.getLogger(__name__)
 SERVICE_ID = "selection-contract-verifier"
-MINIMUM_HISTORY_RUNS = 8
 
 
 def resolve_fixture_path(filename: str) -> Path:
@@ -594,16 +594,18 @@ def _read_fixture_objects(
         document = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         issue = f"fixture_read_error:{type(exc).__name__}"
-        logger.error("service=%s event=fixture_rejected code=%s", SERVICE_ID, issue)
+        logger.exception("service=%s event=fixture_rejected code=%s", SERVICE_ID, issue)
         return None, issue
     if not isinstance(document, dict):
         issue = "fixture_root_must_be_object"
-    elif not isinstance(document.get("fixtures", []), list):
-        issue = "fixtures_must_be_array"
-    elif not all(isinstance(item, dict) for item in document.get("fixtures", [])):
-        issue = "fixture_entries_must_be_objects"
     else:
-        return document.get("fixtures", []), None
+        entries = document.get("fixtures", [])
+        if not isinstance(entries, list):
+            issue = "fixtures_must_be_array"
+        elif not all(isinstance(item, dict) for item in entries):
+            issue = "fixture_entries_must_be_objects"
+        else:
+            return entries, None
     logger.error("service=%s event=fixture_rejected code=%s", SERVICE_ID, issue)
     return None, issue
 
@@ -656,9 +658,8 @@ def _apply_history_outcome(
         "accepted" if args.history_path and not failed else "not_recorded"
     )
     artifact["history_status"] = status
-    artifact["gate_outcomes"]["hard"]["history_persistence"] = (
-        "fail" if issue else "pass"
-    )
+    gate = "fail" if issue else "pass" if status == "accepted" else "not_applicable"
+    artifact["gate_outcomes"]["hard"]["history_persistence"] = gate
     return issue
 
 
