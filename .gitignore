@@ -97,6 +97,9 @@ Infrastructure/artifacts/run_skill_validation.sh
 .tmp/agent-skills-artifacts/skill-graphs/drills/
 Infrastructure/artifacts/skills/**/structure-gate.json
 Infrastructure/artifacts/skills/**/structure-gate.sarif
+Infrastructure/artifacts/skills/dashboard.json
+Infrastructure/artifacts/skills/dashboard.md
+Infrastructure/artifacts/skills/skill-structure-gates.sarif
 Infrastructure/artifacts/skills/autoresearch/
 Infrastructure/artifacts/skill-reviews/
 # Ignore timestamped eval run artifacts (e.g., coding-harness/YYYYMMDD-HHMMSS-*/...)

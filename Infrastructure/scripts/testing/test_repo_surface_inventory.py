@@ -131,6 +131,29 @@ def test_generated_agent_review_roots_are_ignored() -> None:
     assert result.stdout.splitlines() == list(generated_paths)
 
 
+def test_generated_skill_quality_outputs_are_ignored() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    generated_paths = (
+        "Infrastructure/artifacts/skills/dashboard.json",
+        "Infrastructure/artifacts/skills/dashboard.md",
+        "Infrastructure/artifacts/skills/skill-structure-gates.sarif",
+        "Infrastructure/artifacts/skills/example/structure-gate.json",
+        "Infrastructure/artifacts/skills/example/20260822-120000-run/scorecard.json",
+    )
+
+    result = subprocess.run(
+        ["git", "check-ignore", "--stdin"],
+        cwd=repo_root,
+        input="\n".join(generated_paths),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == list(generated_paths)
+
+
 
 def test_infrastructure_package_policy_files_are_policy_surface() -> None:
     cases = ["Infrastructure/pyproject.toml", "Infrastructure/uv.lock"]
