@@ -4,7 +4,6 @@ import importlib.util
 import sys
 import tempfile
 import unittest
-from datetime import date
 from pathlib import Path
 from types import ModuleType
 from unittest import mock
@@ -473,9 +472,18 @@ def publish(a, b, c, d, e, f, enabled=False):
         validator = _load_validator()
         validator._staged_paths.cache_clear()
         staged_listing = mock.Mock(returncode=0, stdout="Infrastructure/scripts/example.py\n", stderr="")
+        index_listing = mock.Mock(
+            returncode=0,
+            stdout="100644 abc123 0\tInfrastructure/scripts/example.py\0",
+            stderr="",
+        )
         staged_source = mock.Mock(returncode=0, stdout="def run(value):\n    return value\n", stderr="")
 
-        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_listing, staged_source]) as run:
+        with mock.patch.object(
+            validator.subprocess,
+            "run",
+            side_effect=[staged_listing, index_listing, staged_source],
+        ) as run:
             source = validator._current_source_text(
                 validator.REPO_ROOT / "Infrastructure/scripts/example.py",
                 staged_source=True,
@@ -483,7 +491,72 @@ def publish(a, b, c, d, e, f, enabled=False):
 
         self.assertEqual(source, staged_source.stdout)
         self.assertIn("--cached", run.call_args_list[0].args[0])
-        self.assertEqual(run.call_args_list[1].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
+        self.assertEqual(run.call_args_list[1].args[0], ["git", "ls-files", "--stage", "-z"])
+        self.assertEqual(run.call_args_list[2].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
+
+    def test_staged_paths_keep_only_regular_index_entries(self) -> None:
+        validator = _load_validator()
+        validator._staged_paths.cache_clear()
+        changed = mock.Mock(
+            returncode=0,
+            stdout="Infrastructure/scripts/regular.py\nInfrastructure/scripts/link.py\n",
+            stderr="",
+        )
+        index = mock.Mock(
+            returncode=0,
+            stdout=(
+                "100644 abc123 0\tInfrastructure/scripts/regular.py\0"
+                "120000 def456 0\tInfrastructure/scripts/link.py\0"
+            ),
+            stderr="",
+        )
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[changed, index]) as run:
+            self.assertEqual(
+                validator._staged_paths(),
+                frozenset({"Infrastructure/scripts/regular.py"}),
+            )
+
+        self.assertIn("--diff-filter=ACMRT", run.call_args_list[0].args[0])
+        self.assertEqual(run.call_args_list[1].args[0], ["git", "ls-files", "--stage", "-z"])
+
+    def test_staged_paths_do_not_resolve_worktree_symlinks(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scripts = root / "Infrastructure" / "scripts"
+            scripts.mkdir(parents=True)
+            target = root / "target.py"
+            target.write_text("VALUE = 1\n", encoding="utf-8")
+            candidate = scripts / "changed.py"
+            candidate.symlink_to(target)
+            relpath = "Infrastructure/scripts/changed.py"
+            with (
+                mock.patch.object(validator, "REPO_ROOT", root),
+                mock.patch.object(validator, "_staged_paths", return_value=frozenset({relpath})),
+            ):
+                paths = validator._changed_paths((relpath,), staged_source=True)
+
+        self.assertEqual(paths, [candidate])
+
+    def test_staged_symlink_is_excluded_even_when_target_is_python(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scripts = root / "Infrastructure" / "scripts"
+            scripts.mkdir(parents=True)
+            target = root / "target.py"
+            target.write_text("VALUE = 1\n", encoding="utf-8")
+            candidate = scripts / "changed.py"
+            candidate.symlink_to(target)
+            relpath = "Infrastructure/scripts/changed.py"
+            with (
+                mock.patch.object(validator, "REPO_ROOT", root),
+                mock.patch.object(validator, "_staged_paths", return_value=frozenset()),
+            ):
+                paths = validator._changed_paths((relpath,), staged_source=True)
+
+        self.assertEqual(paths, [])
 
     def test_current_source_text_uses_worktree_outside_staged_lane(self) -> None:
         validator = _load_validator()
