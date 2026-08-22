@@ -47,6 +47,19 @@ class StructuralValidationEntrypointTests(unittest.TestCase):
                 completed = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
                 self.assertEqual(completed.returncode, 0, completed.stderr)
 
+    def test_checker_rejects_conflicting_scope_modes(self) -> None:
+        """The checker fails closed before resolving paths for conflicting modes."""
+        completed = subprocess.run(
+            ("node", str(CHECKER), "--all", "--staged"),
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 2, completed.stderr)
+        self.assertIn("--all and --staged are mutually exclusive", completed.stderr)
+
     def test_checker_forwards_staged_validator_paths_and_index_source(self) -> None:
         """Staged validator edits cannot fall outside their own validation scope."""
         with tempfile.TemporaryDirectory() as temp_dir:

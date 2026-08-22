@@ -16,6 +16,11 @@ if (unsupportedArgs.length > 0) {
 	process.exit(2);
 }
 
+if (args.has("--all") && args.has("--staged")) {
+	console.error("[structural-validation] --all and --staged are mutually exclusive");
+	process.exit(2);
+}
+
 const stagedSource = args.has("--staged");
 const changedPaths = collectChangedPaths({
 	repoRoot,
