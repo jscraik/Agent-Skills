@@ -10,7 +10,8 @@
 ## Decision
 
 - **Result:** `HOLD` (no-go for broad active rollout)
-- **Source:** `/Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json` generated `2026-02-25T11:46:37Z`
+- **Recorded evidence:** the 2026-02-25 shadow dashboard snapshot (retired
+  generated output) recorded this decision.
 
 ## Evidence snapshot
 
@@ -29,7 +30,8 @@ Blocking reasons:
 
 ## Rollback drill results
 
-Evidence: `/Infrastructure/artifacts/skill-graphs/pilot/rollback-drill-report.json` and `/docs/skill-graphs/pilots/rollback-drill.md`
+Evidence: the 2026-02-25 rollback-drill snapshot and
+`/docs/skill-graphs/pilots/rollback-drill.md`
 
 - `baseline_active` → exit `0`, blocker `none`
 - `kill_switch` → exit `4`, blocker `kill_switch_activated`
