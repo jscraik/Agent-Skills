@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import stat
 import sys
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -206,6 +207,24 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
             status, blocker = _history_trend_drift(repo_root)
             self.assertEqual(status, "trend_deterioration")
             self.assertEqual(blocker[0] if blocker else None, "trend_deterioration")
+
+    def test_rejected_history_refuses_symlinked_sidecar(self) -> None:
+        """Untrusted sidecars cannot redirect rejected-history writes."""
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            history_path = root / "history.jsonl"
+            victim = root / "victim.txt"
+            victim.write_text("preserved\n", encoding="utf-8")
+            rejected_history_path(history_path).symlink_to(victim)
+
+            with self.assertRaisesRegex(OSError, "refusing symlinked"):
+                MODULE._write_rejected_history(
+                    history_path,
+                    {"unresolved_ambiguity_rate": 0.3},
+                    "trend_deterioration",
+                )
+
+            self.assertEqual(victim.read_text(encoding="utf-8"), "preserved\n")
 
     def test_repaired_history_revalidates_preserved_candidate(self) -> None:
         """A repaired baseline unblocks a preserved candidate that now validates."""
@@ -495,6 +514,17 @@ class TestVerifySelectionContractHistory(unittest.TestCase):
                 artifact_path.read_text(encoding="utf-8"), '{"previous": true}\n'
             )
             self.assertFalse(history_path.exists())
+
+    def test_artifact_replacement_preserves_readable_mode(self) -> None:
+        """Atomic receipt replacement retains the existing access contract."""
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "artifact.json"
+            path.write_text("{}\n", encoding="utf-8")
+            path.chmod(0o644)
+
+            MODULE._write_artifact(path, {"current": True})
+
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o644)
 
     def test_artifact_directory_fsync_failure_restores_previous_receipt(self) -> None:
         """A post-replace durability failure restores all transaction files."""

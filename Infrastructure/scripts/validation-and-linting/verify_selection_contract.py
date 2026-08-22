@@ -9,6 +9,7 @@ import importlib
 import json
 import logging
 import os
+import stat
 import sys
 from collections import Counter
 from collections.abc import Iterator
@@ -40,13 +41,7 @@ SERVICE_ID = "selection-contract-verifier"
 
 
 def resolve_fixture_path(filename: str) -> Path:
-    """
-    Resolve a selection-contract fixture path across supported repository layouts.
-
-    Prefers `<repo>/tests/fixtures/selection-contract/<filename>` and falls back
-    to `<repo>/Infrastructure/tests/fixtures/selection-contract/<filename>`.
-    Returns the primary path when neither exists.
-    """
+    """Resolve a fixture across the root and Infrastructure layouts."""
     primary = REPO_ROOT / "tests" / "fixtures" / "selection-contract" / filename
     fallback = (
         REPO_ROOT
@@ -78,9 +73,9 @@ def parse_args() -> argparse.Namespace:
         "--artifact",
         type=Path,
         default=REPO_ROOT
-        / "artifacts"
-        / "validation"
-        / "latest"
+        / ".tmp"
+        / "agent-skills-artifacts"
+        / "selection-quality"
         / "routing-quality.json",
         help="Path to write routing quality artifact.",
     )
@@ -250,6 +245,8 @@ def _write_rejected_history(
 ) -> None:
     """Preserve rejected evidence separately from the accepted baseline."""
     path = rejected_history_path(history_path)
+    if path.is_symlink():
+        raise OSError(f"refusing symlinked rejected-history sidecar: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps({"issue": issue, "candidate": row}, sort_keys=True) + "\n",
@@ -694,6 +691,7 @@ def _restore_persistence_transaction(
 def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
     """Atomically replace the required routing-quality artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    target_mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o644
     content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
     with NamedTemporaryFile(
         mode="w",
@@ -706,6 +704,7 @@ def _write_artifact(path: Path, artifact: dict[str, Any]) -> None:
         temporary.flush()
         os.fsync(temporary.fileno())
         temporary_path = Path(temporary.name)
+    os.chmod(temporary_path, target_mode)
     try:
         os.replace(temporary_path, path)
     finally:
