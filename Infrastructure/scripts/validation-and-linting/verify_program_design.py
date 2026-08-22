@@ -418,17 +418,33 @@ def _rename_map(revision: str, *, staged: bool) -> dict[str, str]:
 
 @lru_cache(maxsize=1)
 def _staged_paths() -> frozenset[str]:
-    result = subprocess.run(
-        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"],
+    changed = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
-    if result.returncode != 0:
-        detail = result.stderr.strip() or "staged file list could not be read"
+    if changed.returncode != 0:
+        detail = changed.stderr.strip() or "staged file list could not be read"
         raise BaselineUnavailable(f"staged source lookup failed: {detail}")
-    return frozenset(line for line in result.stdout.splitlines() if line)
+    index = subprocess.run(
+        ["git", "ls-files", "--stage", "-z"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if index.returncode != 0:
+        detail = index.stderr.strip() or "Git index could not be read"
+        raise BaselineUnavailable(f"staged source lookup failed: {detail}")
+    regular_paths = {
+        path
+        for entry in index.stdout.split("\0")
+        for metadata, separator, path in (entry.partition("\t"),)
+        if separator and metadata.partition(" ")[0] in {"100644", "100755"}
+    }
+    return frozenset(path for path in changed.stdout.splitlines() if path in regular_paths)
 
 
 def _current_source_text(
@@ -613,6 +629,21 @@ def _is_changed_production_python(
     return _is_production_python(normalized, path=path, source_text=source_text)
 
 
+def _changed_candidate(
+    normalized: str,
+    staged_paths: frozenset[str],
+    *,
+    staged_source: bool,
+) -> Path | None:
+    relative = Path(normalized)
+    if relative.is_absolute() or ".." in relative.parts:
+        return None
+    if staged_source and normalized not in staged_paths:
+        return None
+    candidate = REPO_ROOT / normalized
+    return candidate if staged_source else candidate.resolve()
+
+
 def _changed_paths(
     changed_files: tuple[str, ...], *, staged_source: bool = False, source_ref: str | None = None
 ) -> list[Path]:
@@ -632,8 +663,9 @@ def _changed_paths(
     paths: list[Path] = []
     for relpath in changed_files:
         normalized = relpath.removeprefix("./")
-        candidate = REPO_ROOT / normalized
-        path = candidate.resolve()
+        path = _changed_candidate(normalized, staged_paths, staged_source=staged_source)
+        if path is None:
+            continue
         try:
             path.relative_to(REPO_ROOT)
         except ValueError:
