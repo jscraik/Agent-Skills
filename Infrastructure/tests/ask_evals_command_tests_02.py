@@ -60,8 +60,8 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
     assert result.data["totals"]["summaries_scanned"] == 1
     assert result.data["totals"]["events"] == 2
     assert result.data["totals"]["behavior_patterns"] == 2
-    assert result.data["artifacts"]["events_jsonl"].startswith(
-        ".tmp/agent-skills-artifacts/evals/macro/"
+    assert result.data["artifacts"]["events_jsonl"] == (
+        ".tmp/agent-skills-artifacts/evals/macro/macro-eval-events.jsonl"
     )
     events_path = tmp_path / result.data["artifacts"]["events_jsonl"]
     assert not (tmp_path / "Infrastructure" / "artifacts" / "evals" / "macro").exists()
