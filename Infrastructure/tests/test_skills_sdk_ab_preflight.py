@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import contextmanager
+import importlib
 import sys
 import json
 import os
@@ -16,18 +17,24 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
-from ask.skills_sdk.cloud_catalog_probe import probe_catalog  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.ab_transport_contracts import CONFIGS_AUTH_WRAPPER, CONFIGS_CODEX_EXEC_WRAPPER  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.ab_profile_contracts import AbLanePreflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from ask.skills_sdk.eval_ab_preflight import (  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-    _approved_cloud_auth_fact,
-    _cloud_catalog_fact,
-    _cloud_runtime_fact,
-    _catalog_probe_result,
-    build_lane_preflight,
-)
-from ask.skills_sdk.eval_profiles import select_judge_profile  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
-from skills_sdk_preflight_fixtures import declared_profile_preflight  # noqa: E402  # reason: local Infrastructure path bootstrap; issue: PR-386; expires: 2026-12-31; ADR: source-checkout imports
+_catalog_probe = importlib.import_module("ask.skills_sdk.cloud_catalog_probe")
+_transport_contracts = importlib.import_module("ask.skills_sdk.ab_transport_contracts")
+_profile_contracts = importlib.import_module("ask.skills_sdk.ab_profile_contracts")
+_preflight = importlib.import_module("ask.skills_sdk.eval_ab_preflight")
+_profiles = importlib.import_module("ask.skills_sdk.eval_profiles")
+_fixtures = importlib.import_module("skills_sdk_preflight_fixtures")
+
+probe_catalog = _catalog_probe.probe_catalog
+CONFIGS_AUTH_WRAPPER = _transport_contracts.CONFIGS_AUTH_WRAPPER
+CONFIGS_CODEX_EXEC_WRAPPER = _transport_contracts.CONFIGS_CODEX_EXEC_WRAPPER
+AbLanePreflight = _profile_contracts.AbLanePreflight
+_approved_cloud_auth_fact = _preflight._approved_cloud_auth_fact
+_cloud_catalog_fact = _preflight._cloud_catalog_fact
+_cloud_runtime_fact = _preflight._cloud_runtime_fact
+_catalog_probe_result = _preflight._catalog_probe_result
+build_lane_preflight = _preflight.build_lane_preflight
+select_judge_profile = _profiles.select_judge_profile
+declared_profile_preflight = _fixtures.declared_profile_preflight
 
 
 class _CustomBoundarySignal(BaseException):
@@ -50,7 +57,7 @@ class _HostileEnvelope:
         return object.__getattribute__(self, name)
 
 
-class TestSkillsSdkAbPreflight(unittest.TestCase):
+class SkillsSdkAbPreflightFixture:
     @contextmanager
     def _approved_cloud_auth_context(self):
         """Provide a metadata-valid FIFO without opening its secret stream."""
@@ -139,6 +146,21 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
                 result_class=result_class, catalog_digest=None, match_count=None,
             )
         return cls._catalog_payload(result_class=result_class)
+
+    def _catalog_fact_for_process(
+        self, completed: subprocess.CompletedProcess[str],
+    ) -> dict[str, object]:
+        with self._approved_cloud_auth_context():
+            approved = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
+            return _cloud_catalog_fact(
+                "deepseek-v4-flash:0731-cloud",
+                Path("/mock/oss-cloud.config.toml"),
+                approved,
+                lambda _command: completed,
+            )
+
+
+class TestSkillsSdkAbPreflight(SkillsSdkAbPreflightFixture, unittest.TestCase):
     def test_default_preflight_blocks_when_runtime_surfaces_are_absent(self) -> None:
         empty_environment = {"HOME": "/tmp/skills-sdk-empty-home", "PATH": "/tmp/skills-sdk-empty-bin"}
         with patch.dict("os.environ", empty_environment, clear=True):
@@ -639,168 +661,5 @@ class TestSkillsSdkAbPreflight(unittest.TestCase):
         self.assertIsNone(payload)
         self.assertEqual(failure, "probe_stderr_nonempty")
         self.assertNotIn(secret, json.dumps(evidence))
-    def test_cloud_catalog_requires_exact_integer_zero_process_exit(self) -> None:
-        class IntSubclass(int):
-            pass
-        invalid_values = (False, True, 0.0, "0", None, IntSubclass(0))
-        for returncode in invalid_values:
-            with self.subTest(returncode_type=type(returncode).__name__):
-                self._assert_invalid_catalog_returncode(returncode)
-        for returncode in (-9, 1, 255):
-            with self.subTest(returncode=returncode):
-                self._assert_nonzero_catalog_returncode(returncode)
-
-    def test_cloud_catalog_requires_closed_transport_envelope(self) -> None:
-        class StringSubclass(str):
-            pass
-        class MissingReturncode:
-            stdout = json.dumps(self._catalog_payload())
-            stderr = ""
-        class RaisingAttribute:
-            @property
-            def returncode(self) -> int:
-                raise RuntimeError("secret-like exception text")
-            stdout = json.dumps(self._catalog_payload())
-            stderr = ""
-        valid_stdout = json.dumps(self._catalog_payload())
-        cases = (
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=valid_stdout.encode(), stderr=""),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=bytearray(valid_stdout.encode()), stderr=""),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=memoryview(valid_stdout.encode()), stderr=""),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=None, stderr=""),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=valid_stdout, stderr=None),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=StringSubclass(valid_stdout), stderr=""),
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=valid_stdout, stderr=StringSubclass("")),
-            {"returncode": 0, "stdout": valid_stdout, "stderr": ""},
-            (0, valid_stdout, ""),
-            MissingReturncode(),
-            RaisingAttribute(),
-        )
-        for completed in cases:
-            with self.subTest(transport_type=type(completed).__name__):
-                payload, failure, evidence = _catalog_probe_result(
-                    ["op", "run"], lambda _command, result=completed: result,  # type: ignore[arg-type,return-value]
-                )
-                self.assertIsNone(payload)
-                self.assertEqual(failure, "invalid_probe_transport_envelope")
-                self.assertEqual(evidence["probe_transport_class"], "invalid")
-                self.assertNotIn("secret-like", json.dumps(evidence))
-
-    def test_cloud_catalog_contains_hostile_attribute_base_exceptions(self) -> None:
-        exception_cases = (
-            KeyboardInterrupt("keyboard-secret-text"),
-            SystemExit("system-secret-text"),
-            GeneratorExit("generator-secret-text"),
-            RuntimeError("runtime-secret-text"),
-            _CustomBoundarySignal("custom-secret-text"),
-        )
-        valid_stdout = json.dumps(self._catalog_payload())
-        for attribute in ("returncode", "stdout", "stderr"):
-            for raised in exception_cases:
-                with self.subTest(attribute=attribute):
-                    completed = _HostileEnvelope(attribute, raised, valid_stdout)
-                    payload, failure, evidence = _catalog_probe_result(
-                        ["op", "run"], lambda _command, result=completed: result,
-                    )
-                    self.assertIsNone(payload)
-                    self.assertEqual(failure, "invalid_probe_transport_envelope")
-                    self.assertEqual(evidence["probe_transport_class"], "invalid")
-                    self.assertEqual(
-                        evidence[f"probe_{attribute}_class"], "attribute_access_failure",
-                    )
-                    rendered = json.dumps(evidence)
-                    self.assertNotIn("secret-text", rendered)
-                    self.assertNotIn("BoundarySignal", rendered)
-
-    def test_cloud_catalog_rejects_oversized_and_control_framed_stdout(self) -> None:
-        valid_stdout = json.dumps(self._catalog_payload())
-        cases = (
-            valid_stdout + "x" * (1024 * 1024),
-            "\x00" + valid_stdout,
-            valid_stdout + "\t",
-            valid_stdout + "\r",
-            valid_stdout + "\n\n",
-        )
-        for stdout in cases:
-            completed = subprocess.CompletedProcess(["op", "run"], 0, stdout=stdout, stderr="")
-            with self.subTest(suffix=repr(stdout[-2:])):
-                payload, failure, evidence = _catalog_probe_result(
-                    ["op", "run"], lambda _command, result=completed: result,
-                )
-                self.assertIsNone(payload)
-                self.assertEqual(failure, "invalid_probe_transport_envelope")
-                self.assertEqual(evidence["probe_transport_class"], "invalid")
-
-        completed = subprocess.CompletedProcess(
-            ["op", "run"], 0, stdout=valid_stdout + "\n", stderr="",
-        )
-        payload, failure, evidence = _catalog_probe_result(
-            ["op", "run"], lambda _command: completed,
-        )
-        self.assertIsNotNone(payload)
-        self.assertIsNone(failure)
-        self.assertEqual(evidence["probe_stdout_class"], "bounded_json_text")
-
-    def _assert_invalid_catalog_returncode(self, returncode: object) -> None:
-        completed = subprocess.CompletedProcess(
-            ["op", "run"], returncode,
-            stdout=json.dumps(self._catalog_payload()), stderr="",
-        )
-        fact = self._catalog_fact_for_process(completed)
-        self.assertEqual(fact["status"], "blocked")
-        self.assertIn("invalid_probe_transport_envelope", fact["blocker"]["reason"])
-        self.assertIsInstance(json.dumps(fact), str)
-        payload, failure, evidence = _catalog_probe_result(
-            ["op", "run"], lambda _command: completed,
-        )
-        self.assertIsNone(payload)
-        self.assertEqual(failure, "invalid_probe_transport_envelope")
-        self.assertEqual(evidence["probe_returncode_class"], "invalid_type")
-    def _assert_nonzero_catalog_returncode(self, returncode: int) -> None:
-        completed = self._catalog_process(self._catalog_payload(), returncode=returncode)
-        fact = self._catalog_fact_for_process(completed)
-        self.assertEqual(fact["status"], "blocked")
-        payload, failure, evidence = _catalog_probe_result(
-            ["op", "run"], lambda _command: completed,
-        )
-        self.assertIsNone(payload)
-        self.assertEqual(failure, "probe_exit_contract_mismatch")
-        self.assertEqual(evidence["probe_exit_class"], "nonzero")
-        self.assertEqual(evidence["probe_exit_code"], returncode)
-    def _catalog_fact_for_process(
-        self, completed: subprocess.CompletedProcess[str],
-    ) -> dict[str, object]:
-        with self._approved_cloud_auth_context():
-            approved = _approved_cloud_auth_fact("deepseek-v4-flash:0731-cloud")
-            return _cloud_catalog_fact(
-                "deepseek-v4-flash:0731-cloud", Path("/mock/oss-cloud.config.toml"), approved,
-                lambda _command: completed,
-            )
-    def test_cloud_catalog_rejects_malformed_or_contradictory_child_contracts(self) -> None:
-        duplicate = json.dumps(self._catalog_payload()).replace(
-            '"result_class": "pass"', '"result_class": "pass", "result_class": "pass"',
-        )
-        raw_cases = (
-            "{}",
-            duplicate,
-            json.dumps(self._catalog_payload()) + " {}",
-            json.dumps(self._catalog_payload(http_status=True)),
-            json.dumps(self._catalog_payload(match_count=True)),
-            json.dumps(self._catalog_payload(http_status=float("nan"))),
-            json.dumps(self._catalog_payload(network_accessed=False)),
-            json.dumps(self._catalog_payload(matched_model=None)),
-            json.dumps(self._catalog_payload(catalog_digest="sha256:not-a-digest")),
-            json.dumps(self._catalog_payload(result_class="model_missing", match_count=1)),
-        )
-        completed_cases = [
-            subprocess.CompletedProcess(["op", "run"], 0, stdout=raw, stderr="")
-            for raw in raw_cases
-        ]
-        completed_cases.append(self._catalog_process(self._catalog_payload(), stderr="unexpected"))
-        for index, completed in enumerate(completed_cases):
-            with self.subTest(index=index):
-                fact = self._catalog_fact_for_process(completed)
-                self.assertEqual(fact["status"], "blocked")
-                self.assertFalse(fact["secret_value_observed"])
 if __name__ == "__main__":
     unittest.main()

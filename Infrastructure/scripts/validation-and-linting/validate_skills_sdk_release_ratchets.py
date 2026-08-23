@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import re
 import sys
@@ -21,13 +22,14 @@ if str(ASK_LIB) not in sys.path:
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from ask.skills_sdk.package_contracts import (  # noqa: E402
-    _scenario_cases_from_reference,
-    read_structured_reference,
-)
-from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures  # noqa: E402
-
-from skills_sdk_release_receipts import REQUIRED_GATE_CHAIN, build_receipt_findings  # noqa: E402
+_package_contracts = importlib.import_module("ask.skills_sdk.package_contracts")
+_eval_fixtures = importlib.import_module("ask.skills_sdk.generated_eval_fixtures")
+_release_receipts = importlib.import_module("skills_sdk_release_receipts")
+_scenario_cases_from_reference = _package_contracts._scenario_cases_from_reference
+read_structured_reference = _package_contracts.read_structured_reference
+parse_generated_eval_fixtures = _eval_fixtures.parse_generated_eval_fixtures
+REQUIRED_GATE_CHAIN = _release_receipts.REQUIRED_GATE_CHAIN
+build_receipt_findings = _release_receipts.build_receipt_findings
 
 
 CENTRAL_RUBRIC = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")

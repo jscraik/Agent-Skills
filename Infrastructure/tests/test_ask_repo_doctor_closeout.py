@@ -1,3 +1,4 @@
+import importlib
 import subprocess
 import tempfile
 import unittest
@@ -6,28 +7,34 @@ from unittest.mock import patch
 
 import pytest
 
-# pyright: reportMissingImports=false  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+_doctor = importlib.import_module("tests.test_ask_repo_doctor")
+_envelope = importlib.import_module("ask.envelope")
+_repo_impl = importlib.import_module("ask.commands.repo_impl")
+_repo_closeout = importlib.import_module("ask.commands.repo_impl_closeout")
+_fixtures = importlib.import_module("tests.helpers.ask_repo_doctor_fixtures")
 
-from test_ask_repo_doctor import (  # noqa: E402  # test-only cross-module imports; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-    COMMAND_HANDLE_CHECK_COMMAND,
-    REPO_ROOT,
-    _bootstrap_proof,
-    _budget_result,
-    _catalog_result,
-    _closeout_doctor_payload,
-    _handles_projection_check_failed_without_violations_result,
-    _handles_projection_drift_result,
-    _handles_result,
-    _result,
-    _status_result,
-    _surface_result,
-    repo_closeout,
-    repo_doctor,
+COMMAND_HANDLE_CHECK_COMMAND = _doctor.COMMAND_HANDLE_CHECK_COMMAND
+REPO_ROOT = _doctor.REPO_ROOT
+_bootstrap_proof = _doctor._bootstrap_proof
+_budget_result = _doctor._budget_result
+_catalog_result = _doctor._catalog_result
+_closeout_doctor_payload = _doctor._closeout_doctor_payload
+_handles_projection_check_failed_without_violations_result = (
+    _doctor._handles_projection_check_failed_without_violations_result
 )
-from ask.envelope import CallResult, ErrorObject  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.commands.repo_impl import _runtime_evidence_schema_validation  # noqa: E402  # test-only Infrastructure import; JSC-388; expires 2026-12-31; ADR: closeout subprocess failure coverage
-from ask.commands.repo_impl_closeout import RepoCloseoutOptions, _coerce_repo_closeout_options  # noqa: E402  # test-only Infrastructure import; JSC-388; expires 2026-12-31; ADR: typed closeout options coverage
-from helpers.ask_repo_doctor_fixtures import write_runtime_card as _write_runtime_card  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
+_handles_projection_drift_result = _doctor._handles_projection_drift_result
+_handles_result = _doctor._handles_result
+_result = _doctor._result
+_status_result = _doctor._status_result
+_surface_result = _doctor._surface_result
+repo_closeout = _doctor.repo_closeout
+repo_doctor = _doctor.repo_doctor
+CallResult = _envelope.CallResult
+ErrorObject = _envelope.ErrorObject
+_runtime_evidence_schema_validation = _repo_impl._runtime_evidence_schema_validation
+RepoCloseoutOptions = _repo_closeout.RepoCloseoutOptions
+_coerce_repo_closeout_options = _repo_closeout._coerce_repo_closeout_options
+_write_runtime_card = _fixtures.write_runtime_card
 
 
 class TestAskRepoDoctorCloseout(unittest.TestCase):

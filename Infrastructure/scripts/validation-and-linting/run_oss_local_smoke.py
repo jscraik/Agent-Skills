@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import os
 import shutil
@@ -14,8 +15,11 @@ from typing import Any
 
 from check_oss_local_smoke_output import DEFAULT_MAX_TOKENS_USED, _findings
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from ask.skills_sdk.local_codex_catalog import augment_local_codex_profile_config  # noqa: E402
+LIB_DIR = Path(__file__).resolve().parents[1] / "lib"
+if str(LIB_DIR) not in sys.path:
+    sys.path.insert(0, str(LIB_DIR))
+_catalog = importlib.import_module("ask.skills_sdk.local_codex_catalog")
+augment_local_codex_profile_config = _catalog.augment_local_codex_profile_config
 
 
 DEFAULT_PROFILE_SOURCE = Path("/Users/jamiecraik/.codex/oss-local.config.toml")

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 from datetime import datetime
@@ -12,7 +13,7 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-import validate_thread_report  # noqa: E402
+validate_thread_report = importlib.import_module("validate_thread_report")
 
 
 SCHEMA_VERSION = "thread-report-delivery/v1"
