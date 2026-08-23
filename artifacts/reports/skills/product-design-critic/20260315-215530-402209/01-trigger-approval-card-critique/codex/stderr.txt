@@ -1,1 +1,0 @@
-2026-03-16T03:55:32.313713Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Authentication required\", resource_metadata=\"https://circleci.mcp.kapa.ai/.well-known/oauth-protected-resource\"" })
