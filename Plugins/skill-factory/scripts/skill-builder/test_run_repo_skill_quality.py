@@ -21,6 +21,16 @@ import run_repo_skill_quality
 
 
 class RunRepoSkillQualityTests(unittest.TestCase):
+    def test_default_outputs_are_runtime_owned(self) -> None:
+        with patch.object(sys, "argv", ["run_repo_skill_quality.py"]):
+            args = run_repo_skill_quality.parse_args()
+
+        self.assertEqual(args.reports_dir, ".tmp/agent-skills-artifacts/skills")
+        self.assertEqual(
+            args.benchmark_output_json,
+            ".tmp/agent-skills-artifacts/industry-benchmark-latest.json",
+        )
+
     def test_find_skill_dirs_keeps_live_allowlisted_skills_after_recategory_drift(self) -> None:
         skills = {path.relative_to(REPO_ROOT).as_posix() for path in run_repo_skill_quality.find_skill_dirs(REPO_ROOT)}
         expected = {
@@ -153,14 +163,14 @@ description: Test skill
             self.assertEqual(len(payload["structure_sarif_reports"]), 1)
             self.assertEqual(len(payload["scorecards"]), 1)
             self.assertEqual(len(payload["eval_junit_reports"]), 1)
-            self.assertTrue(Path(payload["aggregate_sarif"]).exists())
+            self.assertTrue((root / payload["aggregate_sarif"]).exists())
             self.assertTrue(Path(payload["repo_artifact_index"]).exists())
 
             skill_gate_cmd = next(cmd for cmd in recorded_commands if Path(cmd[1]).name == "skill_gate.py")
             self.assertIn("--sarif-out", skill_gate_cmd)
             eval_cmd = next(cmd for cmd in recorded_commands if Path(cmd[1]).name == "run_skill_evals.py")
             self.assertIn("--junit-out", eval_cmd)
-            expected_reports_suffix = Path("Infrastructure/artifacts/skills/codex-agent-builder")
+            expected_reports_suffix = Path(".tmp/agent-skills-artifacts/skills/codex-agent-builder")
             self.assertTrue(
                 any(expected_reports_suffix.as_posix() in value for value in skill_gate_cmd),
                 msg=f"expected canonical reports dir in skill gate command: {skill_gate_cmd}",
