@@ -1,20 +1,15 @@
-# Agent Skills
+# Agent Skills Kit
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose SDK skill names, and sync routed skills and plugins into flat runtime projections through the `ask` CLI.
-
-Agent Skills Kit is the governed repository for teaching Codex and other AI
-coding agents how this workspace works.
-
-Use it to author skills once, validate them, expose SDK skill names, and project
-the right capabilities into flat runtime without turning every workflow into
-prompt context.
+Agent Skills Kit is the governed workspace for authoring, validating, and
+projecting skills and plugins for Codex and compatible AI coding agents. Its
+public command surface is `./bin/ask`: use it to find a skill, check its source,
+prove the relevant behavior, and refresh generated runtime views.
 
 The short version:
 
-- An active SDK candidate may have source in `Skills/**` or
-  `Plugins/*/skills/**`; a retained package's source lives in
-  `/Users/jamiecraik/dev/skills-foundry`. An explicit owner decision decides
-  which is canonical.
+- Active SDK candidate source may live in `Skills/**` or
+  `Plugins/*/skills/**`. Retained package source lives in Skills Foundry. An
+  explicit owner decision determines which source is canonical.
 - Generated runtime surfaces live in `.agents/**`.
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
@@ -29,7 +24,7 @@ For the product framing and proof boundary, read
 
 - [First five minutes](#first-five-minutes)
 - [Pick the right path](#pick-the-right-path)
-- [Everyday commands](#everyday-commands)
+- [Expert and repository commands](#expert-and-repository-commands)
 - [Runtime surfaces](#runtime-surfaces)
 - [Quality and readiness](#quality-and-readiness)
 - [Repository layout](#repository-layout)
@@ -39,20 +34,31 @@ For the product framing and proof boundary, read
 
 ## First five minutes
 
-On a fresh checkout, prove the repo-local command surface before relying on
-`./bin/ask`:
+You need Git, Bash, and either `uv` or Python 3.12 or newer. The repository root
+has no package-manager install step.
+
+From a fresh checkout, bootstrap and diagnose the repo-local command surface:
 
 ```bash
 bash scripts/bootstrap-ask.sh --json
-python3 bin/ask repo status --json
+./bin/ask repo doctor --json --robot
 ```
 
-If the bootstrap wrapper is unavailable in your shell, use
-`python3 bin/ask repo status --json` as the fallback. After status passes,
-follow the next command reported by `repo doctor`.
+The bootstrap verifies both `./bin/ask` and the documented fallback. If the
+wrapper cannot run, use `python3 bin/ask repo status --json` to inspect the
+repository without assuming the managed environment is available.
 
-For a local skill journey, use this sequence and stop when the current result
-does not name a next action:
+`repo doctor` separates blocking failures from diagnostic advice and reports
+one next command when action is useful. A linked worktree may intentionally
+report an unmaterialized workspace projection; that warning does not block
+source-only documentation or skill work. Commands that require runtime
+reachability, including `sdk check`, will remain blocked there until the
+reported workspace-sync action is deliberately run or the check is repeated in
+the materialized checkout.
+
+For a local skill journey, replace `<skill>` with a handle such as
+`technical-writer`. Run the commands in order, and stop if a result reports a
+blocker or no further action:
 
 ```bash
 ./bin/ask sdk start <skill> --json --robot
@@ -61,7 +67,7 @@ does not name a next action:
 ./bin/ask skills prove <skill> --json --robot
 ```
 
-That path answers:
+This path answers:
 
 - is this the skill I meant;
 - is its source structurally valid;
@@ -70,15 +76,17 @@ That path answers:
 
 ## Pick the right path
 
-| Reader job     | Start here                                                        | Why                                                                                 |
-| -------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Start          | `./bin/ask sdk start <skill> --json --robot`                      | Resolves the target, local state, and one next action.                              |
-| Check          | `./bin/ask sdk check <skill> --json --robot`                      | Gives a compact structural summary and one actionable follow-up.                    |
-| Verify package | `./bin/ask skills package verify <skill> --strict --json --robot` | Enforces target-bound package readiness without installing or changing the runtime. |
-| Prove          | `./bin/ask skills prove <skill> --json --robot`                   | Keeps structural, runtime, and task-outcome truth separate.                         |
+| Goal | Command | What it proves |
+| --- | --- | --- |
+| Find the next action | `./bin/ask sdk start <skill> --json --robot` | Resolves the target and reports its current local state. |
+| Inspect structure | `./bin/ask sdk check <skill> --json --robot` | Summarizes structural evidence and any actionable follow-up. |
+| Verify packaging | `./bin/ask skills package verify <skill> --strict --json --robot` | Checks target-bound package readiness without installing it or changing runtime state. |
+| Prove behavior | `./bin/ask skills prove <skill> --json --robot` | Reports structural, behavioral, and runtime evidence as separate claims. |
 
-Use `--robot` when an agent is driving the CLI. The wrapper corrects clear
-syntax mistakes and returns structured errors when intent is ambiguous.
+Use `--robot` when an agent is driving the CLI. Combine it with `--json` for a
+stable machine-readable envelope, including errors and suggested next steps.
+When a command returns `status: error` or `status: blocked`, follow its
+`fix_suggestion` or `next_command`; do not treat partial evidence as readiness.
 
 ## Expert and repository commands
 
