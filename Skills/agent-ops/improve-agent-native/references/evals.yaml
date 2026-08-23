@@ -111,6 +111,171 @@ release_scenario_sets:
         - eval.harness.local-pass-ci-unknown
         - eval.harness.done-without-validation
 cases:
+- id: eval.knowledge-os.capsule-design-without-relationships
+  name: operational reference rejects prose-only capsule design
+  category: negative
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: Knowledge handoffs can look polished while omitting the relationships and eval surfaces needed to change downstream behavior.
+  unit: improve-agent-native operational reference admission
+  given: A KnowledgeOS capsule-design handoff has ordinary operational headings but omits its source model, relationship map, downstream integration, failure modes, and eval scenarios.
+  should: Use the routed KnowledgeOS capsule-design reference and reject the handoff with capsule-design-missing-sections instead of accepting polished prose.
+  actual_artifact: staged-artifacts/skills/improve-agent-native/latest/operational-reference-review.txt
+  expected_artifact: references/knowledge-os-capsule-design.md
+  reproduce: ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case eval.knowledge-os.capsule-design-without-relationships --skip-tessl --no-dashboard --json --robot
+  should_trigger: true
+  prepend_skill: true
+  reference_paths:
+  - references/knowledge-os-capsule-design.md
+  knowledge_pack:
+    pack_id: pack.knowledge-os-kernel-quality
+    scenario_id: eval.knowledge-os.capsule-design-without-relationships
+    fixture: references/evals/eval.knowledge-os.capsule-design-without-relationships.md
+    capsule_refs:
+    - knowledge-os-capsule-design
+  claim_ids:
+  - improve-agent-native.execution
+  prompt: |-
+    Review whether this proposed KnowledgeOS handoff is ready to be vendored into a skill's `references/` directory. Do not call tools. Return a concise decision and rationale.
+
+    # Proposed Handoff
+    ## Core Thesis
+    Prefer concise, reusable guidance.
+    ## Principles
+    Keep the reference focused.
+    ## Guidance
+    Write clearly for downstream agents.
+    ## Decision Rules
+    Reject material that is difficult to read.
+    ## Output Shape
+    Return a short Markdown reference.
+    ## Examples
+    Include one concise example.
+    ## Recovery
+    Revise unclear prose.
+    ## Validation Ideas
+    Check that every required heading exists.
+    ## Boundaries
+    Do not include raw source bodies.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Rejects the polished handoff because an operational capsule-design reference must preserve its source model, relationships, downstream integration, failure modes, and eval scenarios.
+  - type: not_regex
+    value: '(?is)\b(?:is|looks|appears)\s+ready\b.{0,80}(concise|headings)|(?:concise|headings).{0,80}\b(?:is|looks|appears)\s+ready\b'
+- id: eval.knowledge-os.export-pass-overclaims-quality
+  name: export pass does not prove knowledge quality
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: A successful export smoke test is frequently mistaken for proof that the exported knowledge was reviewed and is ready to publish.
+  unit: improve-agent-native KnowledgeOS export proof boundary
+  given: A pack export smoke test passes, but its asset review, synthesis quality, and lifecycle evidence have not been inspected.
+  should: Report export smoke proof as one passing lane while keeping synthesis quality, review status, lifecycle status, and publication readiness unknown.
+  actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.knowledge-os.export-pass-overclaims-quality/final.json
+  expected_artifact: references/evals/eval.knowledge-os.export-pass-overclaims-quality.md
+  reproduce: ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case eval.knowledge-os.export-pass-overclaims-quality --skip-tessl --no-dashboard --json --robot
+  should_trigger: true
+  prepend_skill: true
+  reference_paths:
+  - references/knowledge-os-export-readiness.md
+  knowledge_pack:
+    pack_id: pack.knowledge-os-kernel-quality
+    scenario_id: eval.knowledge-os.export-pass-overclaims-quality
+    fixture: references/evals/eval.knowledge-os.export-pass-overclaims-quality.md
+    capsule_refs:
+    - knowledge-os-export-readiness
+  claim_ids:
+  - improve-agent-native.execution
+  prompt: A KnowledgeOS pack export smoke test passed, but no asset review, synthesis-quality review, lifecycle transition, or publication check was performed. State exactly what is and is not proved.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Separates the passing export smoke lane from unknown synthesis quality, review status, lifecycle status, and publication readiness.
+  - type: not_regex
+    value: '(?is)(high quality|reviewed|validated|publishable).{0,80}(because|since).{0,80}export.{0,40}pass'
+- id: eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+  name: extraction handoff does not prove SDK ingest
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: Producer extraction receipts can be mistaken for downstream Skills SDK acceptance when the ingest command is blocked or never ran.
+  unit: improve-agent-native Skills SDK handoff proof boundary
+  given: A Skills SDK handoff points at a valid extraction package, but the downstream ingest command is blocked or was not run.
+  should: Record downstream ingest as blocked and state that extraction structure does not prove skill quality or SDK acceptance.
+  actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest/final.json
+  expected_artifact: references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md
+  reproduce: ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case eval.knowledge-os.skills-sdk-handoff-overclaims-ingest --skip-tessl --no-dashboard --json --robot
+  should_trigger: true
+  prepend_skill: true
+  reference_paths:
+  - references/knowledge-os-export-readiness.md
+  knowledge_pack:
+    pack_id: pack.knowledge-os-kernel-quality
+    scenario_id: eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+    fixture: references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md
+    capsule_refs:
+    - knowledge-os-export-readiness
+  claim_ids:
+  - improve-agent-native.execution
+  prompt: A producer extraction package is structurally valid. Its downstream command log ends before any result receipt is produced. Assess what the handoff proves.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Records Skills SDK ingest as blocked or not run and keeps producer extraction proof separate from downstream skill quality and SDK acceptance.
+  - type: not_regex
+    value: '(?is)(skill (was|is) improved|accepted by (the )?Skills SDK).{0,100}(extraction|package)'
+- id: eval.knowledge-os.consumer-receipt-stale-digest
+  name: consumer receipt rejects a stale digest
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: A previously passing consumer receipt becomes stale when its referenced feed changes, even if its downstream command passed earlier.
+  unit: improve-agent-native consumer receipt binding
+  given: A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.
+  should: Reject the stale receipt and require the feed to be rebuilt or revalidated before using it as consumer proof.
+  actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.knowledge-os.consumer-receipt-stale-digest/final.json
+  expected_artifact: references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md
+  reproduce: ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case eval.knowledge-os.consumer-receipt-stale-digest --skip-tessl --no-dashboard --json --robot
+  should_trigger: true
+  prepend_skill: true
+  reference_paths:
+  - references/knowledge-os-export-readiness.md
+  knowledge_pack:
+    pack_id: pack.knowledge-os-kernel-quality
+    scenario_id: eval.knowledge-os.consumer-receipt-stale-digest
+    fixture: references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md
+    capsule_refs:
+    - knowledge-os-export-readiness
+  claim_ids:
+  - improve-agent-native.execution
+  prompt: A consumer receipt once passed, but its recorded digest no longer matches the current feed artifact. Decide whether it is valid proof and name the smallest next step.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Rejects the stale receipt and requires rebuild or revalidation against the current feed digest before it can count as consumer proof.
+  - type: not_regex
+    value: '(?is)(receipt|proof).{0,80}\b(?:is|remains|still)\s+(?:valid|accepted)\b.{0,80}(previously|once|earlier).{0,40}pass'
 - id: smoke-discovery-target
   name: discovery target contract
   category: happy
@@ -238,6 +403,8 @@ cases:
     --skip-tessl --no-dashboard --json --robot
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/agents-md-best-practices.md
   claim_ids:
   - improve-agent-native.execution
   prompt: 'Review agent guidance routing before implementation work starts. Do not edit files and do not call tools; use only
@@ -316,6 +483,8 @@ cases:
     --skip-tessl --no-dashboard --json --robot
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/harness-readiness-rubric.md
   claim_ids:
   - improve-agent-native.activation
   - improve-agent-native.execution
@@ -393,6 +562,8 @@ cases:
     --skip-tessl --no-dashboard --json --robot
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/harness-readiness-rubric.md
   claim_ids:
   - improve-agent-native.execution
   - improve-agent-native.portability
@@ -481,6 +652,8 @@ cases:
   realistic: true
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/docs-structure-and-maintenance.md
   prompt: Audit this repository documentation situation read-only. The root AGENTS.md was updated this week, but project-docs/projects/old-redesign/tasks.md
     still says an old migration is active and project-docs/architecture/current.md references a different owner. Produce the
     improve-agent-native scorecard fields for just this docs-freshness slice. Decide whether the old task file should be moved,
@@ -592,6 +765,8 @@ cases:
     gap that should be caught during readiness review.
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/agent-native-primitives.md
   claim_ids:
   - improve-agent-native.product_capability_readiness
   prompt: A product UI lets users create and delete feed items, but the agent tools only list feed items. Audit the readiness
@@ -1251,6 +1426,8 @@ cases:
     --no-dashboard --json --robot
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/harness-evidence-boundary.md
   knowledge_pack:
     pack_id: pack.harness-engineering
     scenario_id: eval.harness.local-pass-ci-unknown
@@ -1875,6 +2052,8 @@ cases:
     --no-dashboard --json --robot
   should_trigger: true
   prepend_skill: true
+  reference_paths:
+  - references/harness-pr-lifecycle.md
   knowledge_pack:
     pack_id: pack.harness-engineering
     scenario_id: eval.harness.pr-lifecycle-stops-before-main

@@ -108,6 +108,30 @@ authoring_contract:
       path: references/harness-readiness-rubric.md
       read_when: "A readiness score or comparison needs the package's named assessment dimensions."
       scenario_ids: [edge-no-validation-entrypoint, happy-proof-loop-gap]
+    - id: agents-md-best-practices
+      path: references/agents-md-best-practices.md
+      read_when: "Root, nested, and supplemental AGENTS guidance must be classified as keep, move, or delete without flattening scoped authority."
+      scenario_ids: [happy-agents-md-audit]
+    - id: docs-structure-and-maintenance
+      path: references/docs-structure-and-maintenance.md
+      read_when: "Documentation placement, freshness, archival, or stale project guidance must be judged from ownership and maintenance evidence."
+      scenario_ids: [edge-docs-freshness]
+    - id: agent-native-primitives
+      path: references/agent-native-primitives.md
+      read_when: "A product UI action must be compared with agent tool/action parity and outcome proof."
+      scenario_ids: [edge-ui-action-without-agent-capability]
+    - id: harness-evidence-boundary
+      path: references/harness-evidence-boundary.md
+      read_when: "Local, hosted, review, runtime, or release evidence lanes must be separated before a readiness claim."
+      scenario_ids: [eval.harness.local-pass-ci-unknown]
+    - id: harness-pr-lifecycle
+      path: references/harness-pr-lifecycle.md
+      read_when: "An opened PR or changed files are being treated as completion before independent lifecycle closeout."
+      scenario_ids: [eval.harness.pr-lifecycle-stops-before-main]
+    - id: knowledge-os-capsule-design
+      path: references/knowledge-os-capsule-design.md
+      read_when: "A KnowledgeOS handoff or references/*.md artifact must be judged as an operational reference rather than accepted as prose."
+      scenario_ids: [eval.knowledge-os.capsule-design-without-relationships]
   output_contract:
     required_fields:
       - score
@@ -137,10 +161,46 @@ authoring_contract:
       removal_test:
         scenario_ids: [edge-no-validation-entrypoint, happy-proof-loop-gap]
         expected_effect: "Removing readiness-rubric must make the controlled scorecard lose its named assessment dimensions."
+    - kind: reference_route
+      target: agents-md-best-practices
+      scenario_ids: [happy-agents-md-audit]
+      removal_test:
+        scenario_ids: [happy-agents-md-audit]
+        expected_effect: "Removing agents-md-best-practices must make the controlled audit lose the root, nested, and supplemental guidance distinctions behind its keep, move, or delete decisions."
+    - kind: reference_route
+      target: docs-structure-and-maintenance
+      scenario_ids: [edge-docs-freshness]
+      removal_test:
+        scenario_ids: [edge-docs-freshness]
+        expected_effect: "Removing docs-structure-and-maintenance must make the controlled audit lose its ownership, freshness, archival, and backlink checks before deletion."
+    - kind: reference_route
+      target: agent-native-primitives
+      scenario_ids: [edge-ui-action-without-agent-capability]
+      removal_test:
+        scenario_ids: [edge-ui-action-without-agent-capability]
+        expected_effect: "Removing agent-native-primitives must make the controlled product audit lose the action-parity rule connecting user actions to agent capabilities and outcome proof."
+    - kind: reference_route
+      target: harness-evidence-boundary
+      scenario_ids: [eval.harness.local-pass-ci-unknown]
+      removal_test:
+        scenario_ids: [eval.harness.local-pass-ci-unknown]
+        expected_effect: "Removing harness-evidence-boundary must make the controlled closeout blur local validation with hosted CI, review, mergeability, or queue evidence."
+    - kind: reference_route
+      target: harness-pr-lifecycle
+      scenario_ids: [eval.harness.pr-lifecycle-stops-before-main]
+      removal_test:
+        scenario_ids: [eval.harness.pr-lifecycle-stops-before-main]
+        expected_effect: "Removing harness-pr-lifecycle must make the controlled closeout treat an opened PR as completion without an independent delivery gate or lifecycle receipt."
+    - kind: reference_route
+      target: knowledge-os-capsule-design
+      scenario_ids: [eval.knowledge-os.capsule-design-without-relationships]
+      removal_test:
+        scenario_ids: [eval.knowledge-os.capsule-design-without-relationships]
+        expected_effect: "Removing knowledge-os-capsule-design must make the controlled review accept ordinary prose headings without the required relationship and eval surfaces."
   focused_proof: "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
   behavior_proof:
     command_template: "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
-    scenario_ids: [happy-scorecard, edge-no-validation-entrypoint]
+    scenario_ids: [happy-scorecard, happy-agents-md-audit, edge-no-validation-entrypoint, edge-ui-action-without-agent-capability, eval.knowledge-os.capsule-design-without-relationships]
     observed_fields: [outcome, evidence, validation, residual_risk]
   readiness_evidence:
     required_lanes: [structural, package, behavioral, runtime]
