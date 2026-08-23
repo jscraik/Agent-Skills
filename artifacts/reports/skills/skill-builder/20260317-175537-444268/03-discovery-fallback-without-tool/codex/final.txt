@@ -1,3 +1,0 @@
-1. Which result do you want from this run: create a new skill, improve an existing one, evaluate it, benchmark it, package it, or install/distribute it, and what exact skill folder path should we use?
-
-This matters because it sets the workflow mode, required checks, and final deliverables before we do anything else.

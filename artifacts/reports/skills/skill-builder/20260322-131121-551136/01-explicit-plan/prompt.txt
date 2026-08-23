@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you plan a new Codex skill for generating release notes? In this first response, use the required headings, ask only for missing inputs, and list deliverables including SKILL.md and references/plan.md.

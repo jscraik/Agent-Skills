@@ -1,3 +1,0 @@
-$skill-builder
-
-I want install-distribute mode for an imported skill. In the first response, include provenance checks and rollback expectations.
