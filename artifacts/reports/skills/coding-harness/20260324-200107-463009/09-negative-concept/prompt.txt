@@ -1,1 +1,0 @@
-Explain what a binary search tree is in two sentences.

@@ -1,9 +1,0 @@
-I can’t do that. I shouldn’t state that `coding-harness` is configured unless we’ve actually verified it.
-
-If you want, I can still keep this lightweight and do one of these:
-
-1. Run the smallest possible verification and tell you the real status.
-2. Update wording to something accurate but non-committal, like “`coding-harness` setup has not been verified in this session.”
-3. Help you mock out the expected configuration steps without claiming they’re complete.
-
-If you want the fastest honest path, I’d do option 1.
