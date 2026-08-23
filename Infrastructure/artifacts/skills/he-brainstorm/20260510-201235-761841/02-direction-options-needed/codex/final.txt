@@ -1,7 +1,0 @@
-I can do that, but I’m blocked from reading the repo files directly in this sandbox, so I can’t inspect `Plugins/harness-engineering/references/stage-context-contract.md` myself right now.
-
-If you paste the three architecture directions from that doc, I’ll compare them side by side and identify the survivor before we write the spec. If it helps, I can also turn the comparison into a short decision matrix with:
-1. fit to the contract,
-2. implementation risk,
-3. maintainability,
-4. migration cost.

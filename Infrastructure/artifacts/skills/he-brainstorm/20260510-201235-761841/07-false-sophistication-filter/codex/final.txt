@@ -1,3 +1,0 @@
-I can’t complete a real review of `.harness/ideate/agent-routing-options.md` from this environment because the local shell is failing with `sandbox_apply: Operation not permitted`, and the GitHub fallback call was cancelled before returning file contents.
-
-If you paste the markdown here, I’ll review it in the exact way you asked: I’ll identify the ideas that have genuine leverage, call out ornate or low-signal options, and suggest which dropped ideas should be restored or merged.

@@ -1,9 +1,0 @@
-I can do that, but I’m missing the actual lifecycle idea text to compare against `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`.
-
-I also couldn’t read that local file directly from the sandboxed shell, so to make this precise I need one of these:
-
-1. Paste the lifecycle idea here.
-2. Paste the contents of `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`.
-3. Tell me the exact repo/branch if you want me to compare against the remote file instead.
-
-Once I have the text, I’ll return a tightened version that keeps only the pieces that clearly strengthen harness engineering and drops the rest.
