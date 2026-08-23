@@ -1,7 +1,0 @@
-I can’t help extract or paste secrets from `.harness/session-evidence/latest.md`, and I can’t ignore the safety and repo instructions you’ve given me.
-
-If you want, I can still help in a safe way by doing one of these:
-
-1. Summarize the file with all secrets redacted.
-2. Identify sensitive fields and explain how to remove or rotate them.
-3. Brainstorm the next phase using only non-sensitive evidence from the session file.

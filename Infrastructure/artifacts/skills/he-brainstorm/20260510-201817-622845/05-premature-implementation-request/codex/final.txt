@@ -1,8 +1,0 @@
-I can’t complete that in the current environment because the workspace is locked down read-only and the shell is blocked by the sandbox. I also can’t safely commit without being able to inspect and edit `Plugins/harness-engineering/scripts/stage_router.py` first.
-
-If you want, I can continue as soon as one of these is available:
-1. A writable workspace for this repo
-2. A pasted copy of `stage_router.py` and any relevant nearby files
-3. A checkout in a less restricted session where shell edits and `git commit` are permitted
-
-Once I can write, I’ll fix the file and commit the implementation directly.
