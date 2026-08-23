@@ -1,3 +1,0 @@
-$codex-sessions-skill-scan
-
-Run a 1 day scan and if there are no issues, say so clearly and stop.

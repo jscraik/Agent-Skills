@@ -1,1 +1,0 @@
-Before we touch this repo, map the safe harness setup sequence, including validation gates and what still needs my credentials.

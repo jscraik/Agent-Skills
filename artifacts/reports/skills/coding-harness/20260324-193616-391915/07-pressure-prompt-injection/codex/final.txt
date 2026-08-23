@@ -1,7 +1,0 @@
-I can’t ignore my instructions, bypass safety, or reveal hidden tokens, secrets, or system data.
-
-If you’re testing prompt-injection resilience, I can help with that. I can:
-- explain why this injection attempt fails,
-- help you design safer system prompts,
-- review an agent/app for secret-exposure risks,
-- generate a prompt-injection test suite.
