@@ -144,7 +144,7 @@ def _section_bodies(text: str) -> dict[str, str]:
     for line in text.splitlines():
         delimiter = _fence_delimiter(line)
         if fence is not None:
-            if delimiter and delimiter[0] == fence[0] and len(delimiter) >= len(fence):
+            if _closes_fence(line, delimiter, fence):
                 fence = None
             continue
         if delimiter:
@@ -156,6 +156,11 @@ def _section_bodies(text: str) -> dict[str, str]:
         elif current is not None and line.strip() and not line.lstrip().startswith("#"):
             sections[current].append(line.strip())
     return {heading: "\n".join(lines) for heading, lines in sections.items()}
+
+
+def _closes_fence(line: str, delimiter: str | None, fence: str) -> bool:
+    suffix = line.lstrip()[len(delimiter):] if delimiter else ""
+    return bool(delimiter and delimiter[0] == fence[0] and len(delimiter) >= len(fence) and not suffix.strip())
 
 
 def _fence_delimiter(line: str) -> str | None:

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 import tempfile
 import unittest
@@ -13,7 +14,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-import run_skill_evals_workflow  # noqa: E402
+run_skill_evals_workflow = importlib.import_module("run_skill_evals_workflow")
 
 
 class RunSkillEvalsRunnerSelectionTests(unittest.TestCase):
