@@ -12,6 +12,7 @@ complexity: medium
 # Skill Authoring Family — Release-Ready Certification Plan
 
 ## Table of Contents
+
 - [Problem Frame](#problem-frame)
 - [Root Cause Diagnosis](#root-cause-diagnosis)
 - [Scope Boundaries](#scope-boundaries)
@@ -28,11 +29,11 @@ Three gaps block release-ready certification of the skill-authoring family
 (skill-builder, skill-creator, skill-installer, plugin-creator) after the P0-P3
 gold-standard gate upgrade:
 
-| Gap | Current state | Required state |
-|-----|--------------|---------------|
-| Telemetry freshness | `TELEMETRY_HEALTH_STALE`: generated 2026-03-31 (~5 days ago) | `daily-skill-health.md` Generated at < 24h |
-| Artifact parity | 0% compliant (85/87 `missing_mandatory`) | compliance_rate > 0% |
-| Release certificate | No `evidence-index.json` exists | Gate exits 0; index has all 4 skills `outcome: passed` |
+| Gap                 | Current state                                                | Required state                                         |
+| ------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| Telemetry freshness | `TELEMETRY_HEALTH_STALE`: generated 2026-03-31 (~5 days ago) | `daily-skill-health.md` Generated at < 24h             |
+| Artifact parity     | 0% compliant (85/87 `missing_mandatory`)                     | compliance_rate > 0%                                   |
+| Release certificate | No `evidence-index.json` exists                              | Gate exits 0; index has all 4 skills `outcome: passed` |
 
 Gaps 1 and 2 share a root cause and a single fix (see below).
 
@@ -54,6 +55,7 @@ and needs no credentials or model access.
 ## Scope Boundaries
 
 **In scope:**
+
 - Fix shadow cycle workflow: daily schedule + `contents: write` + commit-back step
 - Manual one-shot shadow cycle run to generate fresh telemetry and run artifacts
 - Regenerate `wave-readiness.json` to verify `wave-0-controls.ready: true`
@@ -62,6 +64,7 @@ and needs no credentials or model access.
 - Commit updated artifacts + CI fix as a PR
 
 **Out of scope:**
+
 - Changes to validator scripts
 - Skill content changes
 - Wave-1 / wave-2 onboarding
@@ -91,12 +94,14 @@ so `daily-skill-health.md` is always fresh in the repo.
 **Changes:**
 
 1. Change schedule from weekly to daily at 06:00 UTC:
+
    ```yaml
    schedule:
      - cron: "0 6 * * *"
    ```
 
 2. Upgrade `permissions` to allow write-back:
+
    ```yaml
    permissions:
      contents: write
@@ -108,6 +113,7 @@ so `daily-skill-health.md` is always fresh in the repo.
    - `actions/upload-artifact` → pin to commit SHA for v4
 
 4. Add commit-back step after shadow cycle run, before artifact upload:
+
    ```yaml
    - name: Commit telemetry artifacts
      run: |
@@ -122,6 +128,7 @@ so `daily-skill-health.md` is always fresh in the repo.
          -m "chore(telemetry): daily skill-health refresh [skip ci]"
        git push
    ```
+
    Note: `[skip ci]` prevents the commit from re-triggering itself. `git diff --cached --quiet || git commit` skips the commit when nothing changed (idempotent).
 
 5. Add a failure guard — fail the job if `daily-skill-health.md` is not updated:
@@ -153,6 +160,7 @@ so `daily-skill-health.md` is always fresh in the repo.
 `[skip ci]` tag. Wave-readiness would pass telemetry check.
 
 **Verification:**
+
 - `git log --oneline -5` — shows telemetry commit
 - `head -3 docs/skill-graphs/telemetry/daily-skill-health.md` — shows fresh timestamp
 - Job exits 0 in Actions UI
@@ -187,18 +195,21 @@ python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifact
 ```
 
 **Files produced / updated:**
+
 - `docs/skill-graphs/telemetry/daily-skill-health.md` — fresh Generated at timestamp
 - `Infrastructure/artifacts/skill-graphs/runs/run_*/` — populated with mandatory files
 - `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json` — wave-0 re-evaluated
 - `Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json` — parity re-evaluated
 
 **Test scenarios:**
+
 - Shadow cycle exits 0
 - `daily-skill-health.md` Generated at is within 24h of now
 - At least one `run_*/` directory contains all six mandatory files
 - `artifact-parity-manifest.json` compliance_rate > 0.0
 
 **Verification:**
+
 ```bash
 # Telemetry fresh
 head -3 docs/skill-graphs/telemetry/daily-skill-health.md
@@ -232,6 +243,7 @@ credentials required.
 This is a checkpoint gate, not a separate fix.
 
 **Check command:**
+
 ```bash
 python3 -c "
 import json, sys
@@ -258,6 +270,7 @@ expected date range. If this persists after P1, re-run with `--window-days 14`.
 `evidence-index.json` certifying all four skill-authoring family members.
 
 **Command:**
+
 ```bash
 SKILL_FAMILY_RELEASE_READY=1 \
 SKILL_FAMILY_LIVE_EVALS=1 \
@@ -266,12 +279,14 @@ bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_fami
 ```
 
 **Expected output:**
+
 - `[family-gate] release-ready mode: evidence will be captured at Infrastructure/artifacts/validation/family-gate/<timestamp>/`
 - Per-skill: `[family-gate] contract/eval/security benchmarks passed: <skill>`
 - `[family-gate] pass (release-ready): all authoring-family skills met trusted live eval/security benchmarks`
 - `[family-gate] evidence artifacts: Infrastructure/artifacts/validation/family-gate/<timestamp>/`
 
 **Verify evidence index:**
+
 ```bash
 EVIDENCE=$(ls -d Infrastructure/artifacts/validation/family-gate/*/  | sort | tail -1)
 python3 -c "
@@ -287,6 +302,7 @@ print('branch:', idx['branch'], 'sha:', idx['commit_sha'])
 ```
 
 **Files produced:**
+
 - `Infrastructure/artifacts/validation/family-gate/<timestamp>/evidence-index.json`
 - Per-skill eval reports under `Infrastructure/artifacts/validation/family-gate/<timestamp>/<skill-slug>/`
 
@@ -294,6 +310,7 @@ Note: `Infrastructure/artifacts/validation/family-gate/` is gitignored. Evidence
 by design — the gate exit code is the repo-visible certification signal.
 
 **Fallback if gate fails mid-run:**
+
 - If one skill fails, fix the specific contract/eval finding and re-run only that skill
   using `quick_validate.py <skill_dir> --mode compat`
 - Retry the full release-ready gate after fixing
@@ -306,6 +323,7 @@ by design — the gate exit code is the repo-visible certification signal.
 artifacts, parity manifest, wave-readiness) in a PR so CI automation takes over.
 
 **Files to commit:**
+
 ```text
 .github/workflows/recursive-skill-shadow.yml   # daily schedule + write-back
 docs/skill-graphs/telemetry/daily-skill-health.md
@@ -315,13 +333,16 @@ Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 ```
 
 **Do NOT commit:**
+
 - `Infrastructure/artifacts/validation/family-gate/` — gitignored (eval run outputs with absolute paths)
 
 **Commit strategy:** Two logical commits:
+
 1. `fix(ci): run shadow cycle daily and commit telemetry write-back` — CI workflow only
 2. `chore(telemetry): first certified telemetry refresh and wave-0 clearance` — artifacts
 
 **PR checklist:**
+
 - [ ] AC1 — `daily-skill-health.md` Generated at < 24h at time of push (AC1)
 - [ ] AC2 — `wave-readiness.json` `wave-0-controls.ready: true` (AC2)
 - [ ] AC3 — `artifact-parity-manifest.json` compliance_rate > 0.0 (AC3)
@@ -354,31 +375,31 @@ tasks:
 
 ## Acceptance Criteria
 
-| ID | Criterion | Source | Verification |
-|----|-----------|--------|-------------|
-| AC1 | `daily-skill-health.md` Generated at < 24h | R1 | `head -3` shows today's timestamp |
-| AC2 | `wave-readiness.json` `wave-0-controls.ready: true`, zero blockers | R3 | Python check exits 0 |
-| AC3 | `artifact-parity-manifest.json` compliance_rate > 0.0 | R2 | `jq .compliance_rate` > 0 — NOT MET (compliance_rate currently 0.0) |
-| AC4 | `recursive-skill-shadow.yml` CI job passes on schedule with commit-back | R5 | Actions UI shows green; git log shows telemetry commit |
-| AC5 | Family gate exits 0 in structural mode (PR CI) | R4 | `authoring-family-gate` CI job passes |
-| AC6 | Release-ready gate exits 0 with `evidence-index.json` (local/manual cert) | R4 | Evidence index shows all 4 skills `outcome: passed` — NOT MET (evidence-index.json not yet generated with passing outcomes) |
+| ID  | Criterion                                                                 | Source | Verification                                                                                                                |
+| --- | ------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| AC1 | `daily-skill-health.md` Generated at < 24h                                | R1     | `head -3` shows today's timestamp                                                                                           |
+| AC2 | `wave-readiness.json` `wave-0-controls.ready: true`, zero blockers        | R3     | Python check exits 0                                                                                                        |
+| AC3 | `artifact-parity-manifest.json` compliance_rate > 0.0                     | R2     | `jq .compliance_rate` > 0 — NOT MET (compliance_rate currently 0.0)                                                         |
+| AC4 | `recursive-skill-shadow.yml` CI job passes on schedule with commit-back   | R5     | Actions UI shows green; git log shows telemetry commit                                                                      |
+| AC5 | Family gate exits 0 in structural mode (PR CI)                            | R4     | `authoring-family-gate` CI job passes                                                                                       |
+| AC6 | Release-ready gate exits 0 with `evidence-index.json` (local/manual cert) | R4     | Evidence index shows all 4 skills `outcome: passed` — NOT MET (evidence-index.json not yet generated with passing outcomes) |
 
 ## Execution Ledger
 
-| Phase | Status | Notes |
-|-------|--------|-------|
-| P0 — Fix shadow CI workflow | `done` | Already committed in c3ab24d (daily schedule, write-back, freshness check) |
-| P1 — Local shadow cycle run | `done` | 8 runs across 4 profiles, 6 passed, 2 escalated (expected) |
-| P2 — Verify wave-0 passes | `done` | wave-0-controls.ready=true, zero blockers |
-| P3 — Release-ready gate | `open` | Structural gate passed; AC3 and AC6 not yet met (compliance_rate=0.0, evidence not release-ready) |
-| P4 — PR with artifacts + CI fix | `open` | PR #86 updated; plan open pending AC3/AC6 completion |
+| Phase                           | Status | Notes                                                                                             |
+| ------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| P0 — Fix shadow CI workflow     | `done` | Already committed in c3ab24d (daily schedule, write-back, freshness check)                        |
+| P1 — Local shadow cycle run     | `done` | 8 runs across 4 profiles, 6 passed, 2 escalated (expected)                                        |
+| P2 — Verify wave-0 passes       | `done` | wave-0-controls.ready=true, zero blockers                                                         |
+| P3 — Release-ready gate         | `open` | Structural gate passed; AC3 and AC6 not yet met (compliance_rate=0.0, evidence not release-ready) |
+| P4 — PR with artifacts + CI fix | `open` | PR #86 updated; plan open pending AC3/AC6 completion                                              |
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|-----------|
-| Shadow cycle exits non-zero (missing profiles or schema mismatch) | Low | High | Check `docs/skill-graphs/schemas/examples/pilot-profiles.json` exists; run with `--runs-per-profile 1` to reduce time |
-| `TELEMETRY_WINDOW_MISMATCH` persists after P1 | Low | Medium | Re-run with `--window-days 14`; the window expands to cover current date range |
-| Release-ready gate times out (60+ min) | Low | Medium | Run smoke evals separately first; use `SKILL_FAMILY_CODEX_PROFILE=fast` |
-| `contents: write` commit creates a loop on main | Low | Medium | `[skip ci]` tag on the telemetry commit prevents re-trigger |
-| evidence-index freshness (7 days) violated before PR merges | Low | Low | Produce cert evidence immediately before PR creation; merge same day |
+| Risk                                                              | Likelihood | Impact | Mitigation                                                                                                            |
+| ----------------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| Shadow cycle exits non-zero (missing profiles or schema mismatch) | Low        | High   | Check `docs/skill-graphs/schemas/examples/pilot-profiles.json` exists; run with `--runs-per-profile 1` to reduce time |
+| `TELEMETRY_WINDOW_MISMATCH` persists after P1                     | Low        | Medium | Re-run with `--window-days 14`; the window expands to cover current date range                                        |
+| Release-ready gate times out (60+ min)                            | Low        | Medium | Run smoke evals separately first; use `SKILL_FAMILY_CODEX_PROFILE=fast`                                               |
+| `contents: write` commit creates a loop on main                   | Low        | Medium | `[skip ci]` tag on the telemetry commit prevents re-trigger                                                           |
+| evidence-index freshness (7 days) violated before PR merges       | Low        | Low    | Produce cert evidence immediately before PR creation; merge same day                                                  |

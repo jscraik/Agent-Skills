@@ -10,6 +10,7 @@ Daily operator artifacts for recursive loop health monitoring.
 - `.harness/evidence/skill-graphs/telemetry/promotion-queue.md`
 
 `promotion-queue.md` entries should include:
+
 - run id + profile id
 - confidence score + confidence bucket
 - evidence completeness score
@@ -28,6 +29,7 @@ The generated daily-health evidence should include:
 - uplift gate decision counts (`pass|hold|insufficient_data|regressed`) for promotion and auto-apply paths
 
 `shadow-baseline.json` should include:
+
 - captured-at timestamp
 - baseline window
 - window size in days
@@ -51,6 +53,7 @@ blocker_code: "run_rollforward_blocked|run_rollback_required|kill_switch_activat
 ```
 
 Required per run:
+
 - `events.jsonl` must exist (always-on output).
 - At least one `run_state_changed` event must be present.
 - Approved decisions must emit `promotion_approved`.

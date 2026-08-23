@@ -11,6 +11,7 @@ spec_depth: lite
 # Skills Knowledge Graph Visual Interface Spec
 
 ## Table of Contents
+
 - [Enhancement Summary](#enhancement-summary)
 - [Problem Statement](#problem-statement)
 - [Goals](#goals)
@@ -40,14 +41,17 @@ spec_depth: lite
 - Closed v1 persona/export ambiguity with explicit defaults and a required decision-record artifact.
 
 ## Problem Statement
+
 Current skill-graph reporting is generated as static operational artifacts (for example state-map HTML, onboarding readiness JSON, parity and telemetry files), but there is no explicit behavioral contract for an operator-facing visual interface that explains graph structure, readiness/risk state, and next actions in one consistent interaction model.
 
 Without a spec-level contract, future UI work risks:
+
 - breaking established data semantics (entity aliases, wave/readiness meaning, parity states),
 - creating inconsistent failure handling versus control-file precedence,
 - hiding observability signals required for safe rollout decisions.
 
 ## Goals
+
 - Define a deterministic visual interface contract for skill knowledge graph navigation and operation review.
 - Preserve canonical skill-graph semantics already defined by existing schemas, runbooks, and renderer inputs.
 - Specify lifecycle behavior across load, filtering, node selection, refresh, and degraded-data scenarios.
@@ -55,26 +59,32 @@ Without a spec-level contract, future UI work risks:
 - Define observability and validation gates so `/prompts:workflow-plan` can produce implementation phases without inventing behavior.
 
 ## Non-Goals
+
 - No implementation patching of `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` or front-end code in this spec.
 - No schema redesign of existing skill-graph contracts (`task-profile`, `evidence-packet`, event envelope).
 - No expansion of rollout policy/governance thresholds beyond current runbook thresholds.
 - No replacement of existing generated artifacts; the interface is a consumer of canonical outputs, not a new source of truth.
 
 ## System Boundary
+
 Owned by this component:
+
 - Visual rendering and interaction behavior for skill graph exploration and operations triage.
 - Read-only aggregation of canonical artifacts into a unified UI state model.
 - Explicit user actions for filtering, inspecting nodes/edges, and viewing blocker/recovery context.
 - Accessibility behavior (focus order, keyboard traversal, reduced-motion parity) and interaction latency contract.
 
 Not owned by this component:
+
 - Generation of core artifacts (profile generation, parity manifests, candidate computation, shadow cycle orchestration).
 - Promotion approval decisions and governance authorization.
 - Control-file state mutation (kill switch, rollout mode, rollback required).
 - Persistence and retention policy for telemetry artifacts.
 
 ## Core Domain Model
+
 Primary entities:
+
 - `SkillProfileNode`: identity + delegation + wave/readiness + scope slice (`core|extended|system`) from profile index and task profile.
 - `RunNode`: run metadata and terminal state (`passed|failed|escalated|aborted`) with stop reason/blocker context.
 - `IterationNode`: per-run iteration details from iteration journals.
@@ -83,6 +93,7 @@ Primary entities:
 - `CanonicalLessonNode`: approved lesson lineage with supersession references.
 
 Primary edges:
+
 - `profile -> run`
 - `run -> iteration`
 - `iteration -> candidate_lesson`
@@ -91,12 +102,15 @@ Primary edges:
 - `canonical_lesson -> canonical_lesson` (supersedes)
 
 Normalization rules:
+
 - Alias joins are strict and ambiguity-safe; ambiguous aliases are excluded from automatic joins rather than guessed.
 - Delegation mode normalizes to `autopilot|co-pilot|manual`; legacy `collaboration` is treated as compatibility input only.
 - Parity and blocker values are treated as enums from existing contracts; unknown values are surfaced as `unknown` with warning state.
 
 ## Main Flow / Lifecycle
+
 Lifecycle states:
+
 - `S0_UNINITIALIZED`: initial state before artifact discovery.
 - `S1_LOADING`: reading controls and required artifacts.
 - `S2_READY`: fully materialized and interactive.
@@ -105,6 +119,7 @@ Lifecycle states:
 - `S5_REFRESHING`: manual refresh in progress with prior snapshot retained.
 
 Allowed transitions:
+
 - `S0 -> S1`
 - `S1 -> S2 | S3 | S4`
 - `S2 -> S5 | S3 | S4`
@@ -113,30 +128,37 @@ Allowed transitions:
 - `S4 -> S1` only after controls clear and the re-check trigger runs (automatic 30s poll or explicit operator "Re-check controls now" action)
 
 Disallowed transitions:
+
 - Any direct transition to `S2` that bypasses `S1`.
 - Any transition that exits `S4` without re-running control resolution.
 
 Step contract:
+
 1. Bootstrap (`S0 -> S1`)
+
 - Load artifact pointers and verify required inputs are readable.
 - Parse control files with fail-closed defaults: invalid/unknown values force safe lock behavior.
 
 2. Materialization (`S1 -> S2|S3|S4`)
+
 - Build canonical node set from profile inventory and system-slice policy.
 - Attach run/parity/promotion/candidate telemetry via strict alias-safe joins.
 - Emit composed UI state with explicit completeness flags and unmatched-join buckets.
 
 3. Initial render (`S2` or `S3`)
+
 - Present global status strip, graph/map view, run/compliance table, and learning/change view.
 - Default to read-only degraded mode when mandatory event envelope requirements fail.
 
 4. Interaction lifecycle (`S2` steady state)
+
 - Filter by slice/wave/delegation/blocker.
 - Select node to inspect details, linked runs, and recovery hints.
 - Toggle scope density (`core` vs `full`) without mutating source artifacts.
 - High-frequency actions must provide visible feedback in <=100ms perceived latency.
 
 5. Refresh lifecycle (`S2|S3 -> S5 -> S2|S3|S4`)
+
 - Manual refresh re-loads all source artifacts atomically for one consistent snapshot.
 - Budget contract:
   - Global refresh deadline: `6000ms` wall-clock per refresh attempt.
@@ -146,15 +168,19 @@ Step contract:
 - Staleness warning threshold: 30 minutes without successful refresh.
 
 6. Reduced motion lifecycle (cross-state)
+
 - Motion communicates focus/context only; when reduced motion is enabled, transitions become non-animated state changes with identical information content.
 
 7. Blocked-state recovery lifecycle (`S4 -> S1`)
+
 - While blocked, controls are re-evaluated on a 30s poll interval and on explicit operator re-check.
 - When blocking controls clear, transition to `S1_LOADING` must occur within 60s.
 - Re-entry from `S4` must replay full control precedence before any transition to `S2_READY`.
 
 ## Interfaces and Dependencies
+
 Primary local contracts:
+
 - `docs/skill-graphs/knowledge-graph-operating-model.md`
 - `docs/skill-graphs/schemas/task-profile.schema.md`
 - `docs/skill-graphs/schemas/evidence-packet.schema.md`
@@ -163,10 +189,12 @@ Primary local contracts:
 - `docs/skill-graphs/runbooks/skill-genome-loop.md`
 
 v1 UI input contract (authoritative):
+
 - UI must consume only pipeline-composed outputs from `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` adapters and canonical telemetry summaries.
 - Raw artifact files are upstream/transitive dependencies and must not be independently parsed by UI code paths.
 
 Primary upstream artifact dependencies (transitive via composed outputs):
+
 - `Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json`
 - `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
 - `.harness/evidence/skill-graphs/pilot/shadow-dashboard.json`
@@ -176,14 +204,17 @@ Primary upstream artifact dependencies (transitive via composed outputs):
 - `Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md`
 
 Implementation anchor (existing pipeline):
+
 - `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` remains the authoritative state composition pipeline for input shape and join semantics.
 - v1 ingestion contract: UI consumes canonical pipeline-composed outputs; direct raw artifact ingestion is out of scope.
 - v1 decision artifact: `docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md` is required input for persona/export defaults.
 
 ## Authorization and Access Control
+
 Service-local authorization is required for all diagnostics export and runbook actions; global platform controls may be additive but are not sufficient by themselves.
 
 Identity and role model:
+
 - Identity source: authenticated operator identity resolved by the interface runtime before action dispatch.
   - Accepted credentials must be signed and verified against an explicit issuer allowlist.
   - Audience must match the interface service audience (`skill-graph-ui`).
@@ -192,17 +223,20 @@ Identity and role model:
 - Roles: `viewer`, `operator`, `release-owner`.
 
 Permission matrix:
+
 - `view` graph/list/detail telemetry: `viewer|operator|release-owner`.
 - `refresh` and `re-check controls`: `operator|release-owner`.
 - `open runbook`: `viewer|operator|release-owner` via static runbook ID allowlist only.
 - `download diagnostics`: `operator|release-owner` only.
 
 Deny-by-default behavior:
+
 - Any unknown or missing role mapping must deny action and emit `ui_action_denied` with reason.
 - Unauthorized diagnostics requests must return a redacted denial payload and no filesystem path disclosure.
 - All diagnostics downloads must emit `ui_diagnostics_downloaded` audit events with actor role, artifact ID, and timestamp.
 
 ## Invariants / Safety Requirements
+
 - The interface must remain read-only against source artifacts and controls.
 - Control precedence is fail-closed and never overridden by UI preference.
 - Ambiguous identity joins must be dropped and surfaced, never silently resolved.
@@ -242,7 +276,9 @@ Deny-by-default behavior:
   - `auto` semantics: `TR-04`/`TR-05` hard gate from Phase 3+, `TR-06` hard gate from Phase 4+.
 
 ## Failure Model and Recovery
+
 Failure classes:
+
 - Artifact missing/unreadable.
 - Artifact malformed/schema-incompatible.
 - Join ambiguity or orphaned references.
@@ -250,6 +286,7 @@ Failure classes:
 - Stale snapshot or partial refresh.
 
 Recovery behavior:
+
 - Missing mandatory artifact class: keep last-known-good data, mark section as degraded, show repo-relative missing path identifier.
 - Malformed payload: isolate failed data source, keep unaffected panels functional, emit parse error summary.
 - Join ambiguity: suppress ambiguous mappings, place impacted rows in an explicit `unmatched` bucket.
@@ -263,6 +300,7 @@ Recovery behavior:
 - Rollback clear/re-entry: after incident resolution, operators must clear blocking controls (`rollback-required` and/or `kill-switch`) via the approved atomic control-write path, with detector+release-owner approval (or documented emergency override), trigger control re-check, and verify `S4 -> S1 -> S2|S3` with envelope integrity passing before rollout can resume.
 
 Retry/timeout policy:
+
 - Retryable: transient read errors and stale snapshot conditions.
 - Non-retryable until operator action: kill-switch active, rollback-required active, invalid control file contents, schema-version incompatibility.
 - Retry schedule: up to 2 retry attempts with exponential backoff (`250ms`, `500ms`) during a single refresh, but only for fast-fail transient errors and only inside the `6000ms` global refresh deadline.
@@ -272,13 +310,16 @@ Retry/timeout policy:
   - lock age `>60s`: mark stale, release locally, and re-attempt once.
 
 Abort vs retry:
+
 - Abort to `S4_BLOCKED` when kill-switch or rollback-required controls are active.
 - Remain in `S3_DEGRADED` for envelope/schema failures until corrected upstream, unless envelope escalation threshold is met.
 - Combined-failure precedence: when control blockers and envelope failures co-occur, `S4_BLOCKED` is primary state for action gating and `S3_DEGRADED` diagnostics remain visible as secondary context.
 - `S4` exit check cadence: evaluate blocker clearance every 30s and on explicit operator re-check; if controls clear, transition to `S1` must happen within 60s.
 
 ## Observability
+
 Required UI-visible telemetry:
+
 - Data snapshot timestamp and source artifact version markers.
 - Control state banner including active blocker code when present.
 - Completeness indicators per evidence class (`events|logs|traces|session_signals|checks`).
@@ -288,6 +329,7 @@ Required UI-visible telemetry:
 - Explicit HOLD reason list derived from gate failures (for example critical non-regression <100%, budget <95%).
 
 Required logs/metrics for interface runtime:
+
 - `ui_snapshot_loaded` (counts of loaded/missing sources, latency).
 - `ui_join_ambiguity_detected` (alias key, affected rows count).
 - `ui_degraded_mode_entered` and `ui_degraded_mode_cleared`.
@@ -300,6 +342,7 @@ Required logs/metrics for interface runtime:
 - `ui_action_denied` and `ui_diagnostics_downloaded` for authorization/audit coverage.
 
 Metric semantics:
+
 - `ui_interaction_latency_ms` is measured from `interaction_start` to `next_paint_complete`.
 - `ui_interaction_latency_ms` dimensions: `action_type`, `fixture_size`, `device_class`, `reduced_motion`.
 - `ui_interaction_complete_ms` is measured from `interaction_start` to `state_committed`.
@@ -311,16 +354,20 @@ Metric semantics:
 - Alert windows requiring percentile checks that miss runtime guard must emit `insufficient_data` and carry evaluation to the 24h window.
 
 Operational thresholds:
+
 - `ui_interaction_latency_ms`: p95 `<=100ms`, p99 `<=150ms`.
 - `ui_interaction_complete_ms`: p95 `<=150ms`, p99 `<=250ms`.
 - `refresh_end_to_end_ms`: p95 `<=6000ms`, p99 `<=6000ms` (hard deadline alignment).
 
 Operational SLO windows:
+
 - 7-day window for `TR-01`, `TR-02`, `TR-03`, `TR-04`.
 - 14-day window for `TR-05`, `TR-06`.
 
 ## Acceptance and Test Matrix
+
 Contract and data correctness:
+
 - Verify entity and edge mapping fidelity against existing operating model.
 - Verify alias-collision behavior results in explicit unmatched output, not incorrect joins.
 - Verify enum normalization for delegation and terminal statuses.
@@ -331,6 +378,7 @@ Contract and data correctness:
   - `run_aborted` (legacy alias) -> `kill_switch_activated` normalization before terminal mapping
 
 Failure and recovery:
+
 - Simulate missing `events.jsonl`/parity/candidate inputs and confirm degraded render behavior.
 - Simulate malformed JSON and confirm isolation to affected panel.
 - Simulate control conflicts and confirm fail-closed action gating.
@@ -340,6 +388,7 @@ Failure and recovery:
 - Simulate rollback clear/re-entry sequence and validate `S4 -> S1 -> S2|S3` recovery with post-clear envelope checks.
 
 Accessibility and interaction:
+
 - Keyboard-only traversal across all primary panes and node detail actions.
 - Screen reader labels/roles on graph nodes, filters, and state banners.
 - Reduced-motion parity test for all animated transitions.
@@ -349,6 +398,7 @@ Accessibility and interaction:
 - Verify runbook navigation rejects unknown IDs and non-allowlisted URI schemes.
 
 Performance and responsiveness:
+
 - High-frequency selection/filter feedback under 100ms perceived latency.
 - High-frequency selection/filter/toggle feedback must meet p95 `<=100ms` and p99 `<=150ms` with lab/runtime sample guards.
 - High-frequency selection/filter/toggle completion must meet `ui_interaction_complete_ms` p95 `<=150ms` and p99 `<=250ms`.
@@ -357,6 +407,7 @@ Performance and responsiveness:
 - Refresh lifecycle p95/p99 remain within the `6000ms` global end-to-end budget with parallel source fan-out.
 
 Operational validation:
+
 - Cross-check rendered metrics against `daily-skill-health.md` and `promotion-queue.md`.
 - Validate blocker state consistency with rollback drill expectations and control hierarchy.
 - Validate gate threshold rendering against schema targets:
@@ -372,11 +423,13 @@ Operational validation:
 - Validate refresh exits for all branches (`S5 -> S2|S3|S4`) with atomic snapshot consistency.
 
 Validation command set (spec verification hygiene):
+
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Open Questions
+
 - No blocking open questions for v1.
 - v1 defaults are frozen as:
   - persona priority: `operator-first`.
@@ -384,6 +437,7 @@ Validation command set (spec verification hygiene):
 - Decision record requirement: `docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md` must exist before implementation start; if absent, these defaults remain mandatory (fail closed).
 
 ## Definition of Done
+
 - A reviewed spec exists at this path with all required contract sections completed.
 - System boundary and ownership are explicit enough that implementation planning requires no behavior invention.
 - Failure/recovery and observability rules are explicit and aligned with existing runbooks and telemetry contracts.

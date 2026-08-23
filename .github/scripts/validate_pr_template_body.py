@@ -17,6 +17,10 @@ CHECKBOX_RE = re.compile(r"^- \[[ xX]\] (?P<label>.+?)\s*$", re.MULTILINE)
 FIELD_RE = re.compile(r"^- (?P<label>[^:\n]+):", re.MULTILINE)
 FIELD_LINE_RE = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE)
 PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
+CHOICE_PLACEHOLDERS = (
+    "Prototype / Portfolio / Product / Harness / n.a. because reason",
+    "yes, with changelog / no / n.a. because reason",
+)
 CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
 ANGLE_BRACKET_URL_RE = re.compile(r"^<https?://[^>\s]+>$")
 DEPENDABOT_GROUPED_HEADER_RE = re.compile(
@@ -35,6 +39,14 @@ SAFE_HTML_TAG_RE = re.compile(
     r"(?:\s+[^>\n]*)?\s*/?>",
     re.IGNORECASE,
 )
+HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+COMMAND_EVIDENCE_RE = re.compile(
+    r"^-\s*Command:\s*(?:`[^\n`]+`|(?=\S).*?\S)\s*->\s*"
+    r"(?:(?:pass|fail)(?:\s*\([^)]+\)\.?)?|"
+    r"(?:n\.a\.|n/a)(?:\s*\([^)]+\))?|"
+    r"blocked\s*\([^)]+\))\s*$",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -42,6 +54,11 @@ class TemplateContract:
     sections: list[str]
     checklist_items: list[str]
     fields_by_section: dict[str, list[str]]
+
+
+def _without_html_comments(markdown: str) -> str:
+    """Return the author-facing Markdown without template guidance comments."""
+    return HTML_COMMENT_RE.sub("", markdown)
 
 
 def _section_blocks(markdown: str) -> dict[str, str]:
@@ -56,8 +73,12 @@ def _section_blocks(markdown: str) -> dict[str, str]:
 
 
 def _template_contract(template: str) -> TemplateContract:
-    sections = [match.group("title").strip() for match in SECTION_RE.finditer(template)]
-    blocks = _section_blocks(template)
+    visible_template = _without_html_comments(template)
+    sections = [
+        match.group("title").strip()
+        for match in SECTION_RE.finditer(visible_template)
+    ]
+    blocks = _section_blocks(visible_template)
     checklist_items = [
         _normalize_checklist_label(match.group("label"))
         for match in CHECKBOX_RE.finditer(blocks.get("Checklist", ""))
@@ -86,14 +107,18 @@ def _body_from_args(args: argparse.Namespace) -> str:
 
 def _section_errors(contract: TemplateContract, body: str) -> list[str]:
     errors: list[str] = []
-    body_sections = [match.group("title").strip() for match in SECTION_RE.finditer(body)]
+    visible_body = _without_html_comments(body)
+    body_sections = [
+        match.group("title").strip()
+        for match in SECTION_RE.finditer(visible_body)
+    ]
     if body_sections != contract.sections:
         errors.append(
             "PR body sections must match .github/PULL_REQUEST_TEMPLATE.md exactly. "
             f"expected={contract.sections!r} actual={body_sections!r}"
         )
 
-    body_blocks = _section_blocks(body)
+    body_blocks = _section_blocks(visible_body)
     missing_sections = [section for section in contract.sections if section not in body_blocks]
     for section in missing_sections:
         errors.append(f"Missing required section: ## {section}")
@@ -103,22 +128,36 @@ def _section_errors(contract: TemplateContract, body: str) -> list[str]:
 def _field_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> list[str]:
     errors: list[str] = []
     for section, expected_fields in contract.fields_by_section.items():
-        block = body_blocks.get(section, "")
-        field_values, field_counts = _field_values(block)
-        expected_counts = Counter(expected_fields)
-        actual_fields = list(field_values)
-        missing_fields = [field for field, count in expected_counts.items() if field_counts.get(field, 0) < count]
-        extra_fields = [field for field in actual_fields if field not in expected_fields]
-        for field, count in field_counts.items():
-            if field in expected_counts and count > expected_counts[field]:
-                errors.append(f"Duplicate field in ## {section}: {field}:")
-        for field in missing_fields:
-            errors.append(f"Missing required field in ## {section}: {field}:")
-        for field in extra_fields:
-            errors.append(f"Unexpected field in ## {section}: {field}:")
-        for field in expected_fields:
-            if field in field_values and field_values[field] == "":
-                errors.append(f"Required field in ## {section} is empty: {field}:")
+        errors.extend(_section_field_errors(section, expected_fields, body_blocks.get(section, "")))
+    return errors
+
+
+def _section_field_errors(section: str, expected_fields: list[str], block: str) -> list[str]:
+    field_values, field_counts = _field_values(block)
+    expected_counts = Counter(expected_fields)
+    # Command evidence is a list item that looks like a field. It is validated
+    # separately and must not be treated as an unexpected or duplicate field.
+    actual_fields = [field for field in field_values if field != "Command"]
+    errors = [
+        f"Duplicate field in ## {section}: {field}:"
+        for field, count in field_counts.items()
+        if field != "Command" and field in expected_counts and count > expected_counts[field]
+    ]
+    errors.extend(
+        f"Missing required field in ## {section}: {field}:"
+        for field, count in expected_counts.items()
+        if field_counts.get(field, 0) < count
+    )
+    errors.extend(
+        f"Unexpected field in ## {section}: {field}:"
+        for field in actual_fields
+        if field not in expected_fields
+    )
+    errors.extend(
+        f"Required field in ## {section} is empty: {field}:"
+        for field in expected_fields
+        if field in field_values and field_values[field] == ""
+    )
     return errors
 
 
@@ -175,9 +214,12 @@ def _unchecked_checklist_errors(checklist_block: str) -> list[str]:
 
 
 def _placeholder_errors(template: str, body: str) -> list[str]:
-    template_tokens = set(PLACEHOLDER_RE.findall(template))
+    visible_template = _without_html_comments(template)
+    visible_body = _without_html_comments(body)
+    template_tokens = set(PLACEHOLDER_RE.findall(visible_template))
     placeholders = [
         "pass/fail",
+        *CHOICE_PLACEHOLDERS,
         "Add one-paragraph merge rationale here.",
         "describe the observable behavior, issue, or n.a. reason",
         "list exact commands run here",
@@ -185,9 +227,9 @@ def _placeholder_errors(template: str, body: str) -> list[str]:
     ]
     errors: list[str] = []
     for placeholder in placeholders:
-        if placeholder in body:
+        if placeholder in visible_body:
             errors.append(f"Replace template placeholder: {placeholder}")
-    for token in PLACEHOLDER_RE.findall(body):
+    for token in PLACEHOLDER_RE.findall(visible_body):
         if (
             token.startswith("<!--")
             or ANGLE_BRACKET_URL_RE.match(token)
@@ -196,6 +238,29 @@ def _placeholder_errors(template: str, body: str) -> list[str]:
             continue
         if token in template_tokens or " " in token or "/" in token:
             errors.append(f"Replace unresolved placeholder token: {token}")
+    return errors
+
+
+def _validation_command_errors(validation_block: str) -> list[str]:
+    """Require replayable command evidence in the Validation section."""
+    command_lines = [
+        line.strip()
+        for line in validation_block.splitlines()
+        if re.match(r"^-\s*Command:\s*", line, re.IGNORECASE)
+    ]
+    if not command_lines:
+        return [
+            "Validation section must include at least one Command evidence line."
+        ]
+
+    errors: list[str] = []
+    for line in command_lines:
+        if not COMMAND_EVIDENCE_RE.fullmatch(line):
+            errors.append(
+                "Command evidence must use `Command: <exact command> -> pass|fail`, "
+                "`-> n.a.|n/a` (optional reason), or `-> blocked (<required reason>)` "
+                f"format: {line}"
+            )
     return errors
 
 
@@ -238,10 +303,13 @@ def validate_pr_body(template: str, body: str, *, author: str | None = None) -> 
             return ["Dependabot body exception requires the trusted Dependabot PR author."]
         return _dependabot_body_errors(body)
 
-    body_blocks = _section_blocks(body)
+    body_blocks = _section_blocks(_without_html_comments(body))
     errors = _section_errors(contract, body)
     errors.extend(_field_errors(contract, body_blocks))
     errors.extend(_checklist_errors(contract, body_blocks))
+    validation_block = body_blocks.get("Validation")
+    if validation_block is not None:
+        errors.extend(_validation_command_errors(validation_block))
     errors.extend(_placeholder_errors(template, body))
     return errors
 

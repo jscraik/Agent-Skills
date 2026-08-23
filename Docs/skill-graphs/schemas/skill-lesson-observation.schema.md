@@ -41,24 +41,24 @@ profile_id: string
 scope_skill: string
 scope_profile: string
 rubric_version: string
-created_at: string                    # ISO-8601
-source: string                        # post_run_review | shadow_cycle | manual_review | user_feedback
-feedback_status: string               # worked | partly | didnt_work | missing
+created_at: string # ISO-8601
+source: string # post_run_review | shadow_cycle | manual_review | user_feedback
+feedback_status: string # worked | partly | didnt_work | missing
 summary:
-  outcome_label: string               # strengthen | hold | investigate | reject_candidate
+  outcome_label: string # strengthen | hold | investigate | reject_candidate
   rationale: string
   strongest_positive_dimensions: [string]
   strongest_negative_dimensions: [string]
 observations:
   - dimension_id: string
-    verdict: string                   # positive | negative | mixed | unknown
-    confidence: float                 # 0..1
+    verdict: string # positive | negative | mixed | unknown
+    confidence: float # 0..1
     summary: string
     evidence: [string]
     recommendation: string
     target_paths: [string]
 promotion_hint:
-  patch_strategy: string              # eval_only | reference_doc | skill_text | hold
+  patch_strategy: string # eval_only | reference_doc | skill_text | hold
   min_confirming_runs: int
   blocking_reasons: [string]
   related_lesson_ids: [string]
@@ -140,9 +140,7 @@ Recommended thresholds:
   "promotion_hint": {
     "patch_strategy": "reference_doc",
     "min_confirming_runs": 3,
-    "blocking_reasons": [
-      "single_run_only"
-    ],
+    "blocking_reasons": ["single_run_only"],
     "related_lesson_ids": []
   }
 }

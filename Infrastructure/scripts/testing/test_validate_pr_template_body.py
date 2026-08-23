@@ -39,6 +39,8 @@ def _filled_template_body() -> str:
         "pass/fail/blocked (<reason>)": "pass",
         "pass/fail/n.a.": "pass",
         "pass/fail": "pass",
+        "Prototype / Portfolio / Product / Harness / n.a. because reason": "Harness",
+        "yes, with changelog / no / n.a. because reason": "no",
         "Add one-paragraph merge rationale here.": "Template validator keeps PR bodies aligned with the repo contract.",
     }
     for before, after in replacements.items():
@@ -48,6 +50,11 @@ def _filled_template_body() -> str:
         if match.group("value").strip() == ""
         else match.group(0),
         body,
+    )
+    body = body.replace(
+        "- Regression coverage: repo-relative evidence",
+        "- Regression coverage: repo-relative evidence\n- Command: `python3 .github/scripts/validate_pr_template_body.py --body-file /tmp/body.md` -> pass",
+        1,
     )
     return body
 
@@ -60,28 +67,60 @@ def test_accepts_filled_canonical_template_shape() -> None:
     assert errors == []
 
 
+def test_template_guidance_comments_do_not_become_required_fields() -> None:
+    validator = _load_validator()
+    contract = validator._template_contract(_template())
+
+    assert "Command" not in contract.fields_by_section["Validation"]
+
+
+def test_rejects_validation_without_command_evidence() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace(
+        "- Command: `python3 .github/scripts/validate_pr_template_body.py --body-file /tmp/body.md` -> pass\n",
+        "",
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert "Validation section must include at least one Command evidence line." in errors
+
+
+def test_rejects_unresolved_release_choice_placeholder() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace(
+        "- Release mode: Harness",
+        "- Release mode: Prototype / Portfolio / Product / Harness / n.a. because reason",
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert (
+        "Replace template placeholder: Prototype / Portfolio / Product / Harness / n.a. because reason"
+        in errors
+    )
+
+
 def test_template_contract_tracks_release_boundary_section_and_fields() -> None:
     validator = _load_validator()
     contract = validator._template_contract(_template())
 
     assert contract.sections == [
-        "What Problem This Solves",
-        "Release Boundary",
-        "Why This Change Was Made",
-        "Behavior Proof",
-        "Work performed",
+        "Summary",
+        "Release boundary",
+        "Behavior proof",
+        "Change details",
         "Checklist",
-        "Testing",
-        "Review artifacts",
-        "Notes",
+        "Validation",
+        "Review and closeout",
     ]
-    assert contract.fields_by_section["Release Boundary"] == [
+    assert contract.fields_by_section["Release boundary"] == [
         "Release mode",
-        "Done line",
-        "Explicit non-goals",
-        "Allowed polish",
-        "Deferred polish / follow-up work",
-        "Promotion rule",
+        "Completion condition",
+        "Deferred work",
+        "Stronger-proof condition",
     ]
 
 
@@ -120,37 +159,38 @@ def test_rejects_short_body_that_only_matches_legacy_required_sections() -> None
 - [x] Code change is scoped.
 - [x] Local validation passed.
 
-## Testing
+## Validation
 
-- pytest -> pass
+- Command: `pytest` -> pass
 
-## Review artifacts
+## Review and closeout
 
 - CodeRabbit: pass
-
-## Notes
-
-Intentionally isolated.
+- Independent reviewer evidence: n.a. because this fixture has no independent review.
+- Codex: pass
+- CodeRabbit Semgrep: n.a. because this fixture has no Semgrep run.
+- User-facing impact: no
+- Remaining findings or waivers: none
+- Current blockers: none
 """
 
     errors = validator.validate_pr_body(_template(), body)
 
     assert any("PR body sections must match" in error for error in errors)
-    assert "Missing required section: ## What Problem This Solves" in errors
-    assert "Missing required section: ## Why This Change Was Made" in errors
-    assert "Missing required section: ## Behavior Proof" in errors
-    assert "Missing required section: ## Work performed" in errors
+    assert "Missing required section: ## Behavior proof" in errors
+    assert "Missing required section: ## Change details" in errors
+    assert "Missing required section: ## Release boundary" in errors
     assert any("Checklist item text/order must match" in error for error in errors)
 
 
 def test_rejects_body_with_template_section_reordered() -> None:
     validator = _load_validator()
-    body = _filled_template_body().replace("## What Problem This Solves", "## What Problem This Solves Renamed", 1)
+    body = _filled_template_body().replace("## Summary", "## Summary renamed", 1)
 
     errors = validator.validate_pr_body(_template(), body)
 
     assert any("PR body sections must match" in error for error in errors)
-    assert "Missing required section: ## What Problem This Solves" in errors
+    assert "Missing required section: ## Summary" in errors
 
 
 def test_rejects_unresolved_placeholder_tokens() -> None:
@@ -168,7 +208,7 @@ def test_rejects_empty_required_fields() -> None:
 
     errors = validator.validate_pr_body(_template(), body)
 
-    assert "Required field in ## Why This Change Was Made is empty: Problem:" in errors
+    assert "Required field in ## Summary is empty: Problem:" in errors
 
 
 def test_rejects_duplicate_required_fields() -> None:
@@ -181,15 +221,15 @@ def test_rejects_duplicate_required_fields() -> None:
 
     errors = validator.validate_pr_body(_template(), body)
 
-    assert "Duplicate field in ## Why This Change Was Made: Problem:" in errors
+    assert "Duplicate field in ## Summary: Problem:" in errors
 
 
 def test_accepts_required_field_with_nested_continuation_content() -> None:
     validator = _load_validator()
     body = _filled_template_body()
     body = body.replace(
-        "- Any other command(s): repo-relative evidence",
-        "- Any other command(s):\n  - Command: `pytest` -> pass",
+        "- Untested or blocked paths: repo-relative evidence",
+        "- Untested or blocked paths:\n  - Command: `pytest` -> pass",
         1,
     )
 

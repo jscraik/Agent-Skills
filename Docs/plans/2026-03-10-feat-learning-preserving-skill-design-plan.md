@@ -23,6 +23,7 @@ deepened: 2026-03-10
 - Added a no-regression execution contract: canonical pilot targets are fixed, every candidate change must beat a recorded five-gate baseline, and checklist advancement is blocked until that bar is met.
 
 ## Table of Contents
+
 - [Enhancement Summary](#enhancement-summary)
 - [Overview](#overview)
 - [Origin Traceability](#origin-traceability)
@@ -43,12 +44,14 @@ deepened: 2026-03-10
 Implement the learning-preserving skill design pilot as a spec-preserving repo improvement across docs, pilot skills, evaluation metadata, telemetry classification, and conformance reporting.
 
 Plan posture:
+
 - contract-first, not implementation-first
 - preserve canonical delegation mode semantics
 - propagate the concept once at repo level, then into a bounded pilot set
 - require evaluation and observability before claiming pilot completion
 
 Execution rules:
+
 - do not edit pilot skill behavior before Phase 0 baseline evidence exists
 - do not let posture metadata mutate or shadow `delegation.mode`
 - treat missing eval or telemetry support as a rollout hold, not a documentation follow-up
@@ -63,6 +66,7 @@ Execution rules:
 ## Origin Traceability
 
 Mapped from the brainstorm and spec into this execution plan:
+
 - bounded-autonomy compatibility from the brainstorm is preserved by keeping `LearningPosture` separate from canonical delegation mode
 - pilot-first rollout from the brainstorm is preserved by freezing the four named pilot skills before broader template propagation
 - spec compatibility rules are preserved by making metadata/validator work complete before skill prose and eval changes ship
@@ -73,6 +77,7 @@ Mapped from the brainstorm and spec into this execution plan:
 The spec defines `LearningPosture` as a second dimension alongside existing `DelegationMode`, but the repo does not yet have the implementation sequence needed to add that concept safely.
 
 Without a plan, execution risks:
+
 - mixing `LearningPosture` into existing `delegation.mode` contracts
 - updating skill prose without matching eval or telemetry support
 - drifting across pilot skills without a canonical repo-level definition
@@ -83,6 +88,7 @@ This plan defines the implementation order, dependencies, and validation gates n
 ## Scope and Non-Goals
 
 In scope:
+
 - define and publish the repo-level `LearningPosture` contract
 - extend the skill authoring surface for pilot adoption
 - add pilot machine-readable metadata or validation hooks needed for posture-aware evals
@@ -91,6 +97,7 @@ In scope:
 - produce a conformance summary artifact for the pilot
 
 Non-goals:
+
 - repo-wide migration of all skills
 - changing canonical `autopilot | co-pilot | manual` semantics
 - redesigning question lifecycle or promotion-gate ownership
@@ -104,6 +111,7 @@ Non-goals:
 Objective: establish the authoritative source set and freeze pilot boundaries before touching pilot skills.
 
 Work:
+
 - Confirm the linked spec remains the source of truth.
 - Freeze the initial pilot skill set from the spec:
   - `Skills/skill-builder`
@@ -139,6 +147,7 @@ Work:
 - Record the current public-web evidence source for Agentation separately from repo history. If the public site is unavailable, parked, or otherwise non-authoritative, mark the web evidence as blocked instead of silently replacing it with unstated assumptions.
 
 Exit criteria:
+
 - Pilot skill list is frozen.
 - Baseline files and validation commands are recorded.
 - No unresolved contract-level ambiguity remains about posture vocabulary or pilot scope.
@@ -146,6 +155,7 @@ Exit criteria:
 - All four pilot skills have a recorded five-gate baseline matrix that later edits can be compared against.
 
 Hold rules:
+
 - If any pilot skill is missing baseline metadata or eval files, stop before Phase 1 and resolve the pilot surface mismatch first.
 - If the linked spec changes materially during baseline capture, restart Phase 0 and re-freeze scope.
 - If a pilot skill does not have a trustworthy historical or current baseline, do not start improvements for that skill until the missing baseline evidence is reconstructed.
@@ -155,6 +165,7 @@ Hold rules:
 Objective: define the concept once at repo level and create the canonical propagation path.
 
 Work:
+
 - Add the canonical `LearningPosture` definition to `docs/skill-graphs/index.md`.
 - Add a contributor-facing summary to `README.md`.
 - Extend `Infrastructure/templates/SKILL.md.template` with a reusable pilot-ready contract shape for posture guidance.
@@ -163,11 +174,13 @@ Work:
 - Run `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` immediately after this phase.
 
 Exit criteria:
+
 - There is one authoritative repo-level definition of `LearningPosture`.
 - The authoring template can express posture support without redefining delegation mode.
 - Repo docs do not contradict the spec or each other.
 
 Hold rules:
+
 - If repo-level docs and template wording disagree on posture names or semantics, stop here and reconcile them before touching pilot skills.
 
 ### Phase 2: Machine-Readable Metadata and Validation Hooks
@@ -175,6 +188,7 @@ Hold rules:
 Objective: make posture-aware validation possible without corrupting existing task-profile contracts.
 
 Work:
+
 - Decide the machine-readable home for pilot posture metadata consistent with the spec:
   - `Infrastructure/references/task-profile.json`
   - or a tightly-scoped companion artifact if that proves safer
@@ -231,12 +245,14 @@ Work:
 - If `Infrastructure/references/task-profile.json` cannot hold the posture data without compromising the schema boundary, freeze that decision explicitly and route the pilot to a companion artifact rather than half-extending the current contract.
 
 Exit criteria:
+
 - Pilot metadata can express posture in a machine-readable way.
 - Invalid pairings such as `autopilot + learn` are caught deterministically.
 - Existing delegation-mode validation remains intact.
 - Phase-2 decision artifact exists and is explicit before any pilot skill changes begin.
 
 Hold rules:
+
 - If validator design requires redefining `delegation.mode`, Phase 2 fails closed and must be redesigned before Phase 3.
 - If the metadata location remains ambiguous after design review, do not begin skill edits.
 
@@ -245,6 +261,7 @@ Hold rules:
 Objective: update each pilot skill to declare posture support and behavior expectations in spec-preserving language.
 
 Work:
+
 - Update `Skills/skill-builder` first to establish the standards-setting pattern other pilot skills should follow.
 - Update `frontend/tools/agentation` second to distinguish throughput-first autopilot behavior from learning-preserving guidance without weakening its execution contract.
 - For `frontend/tools/agentation`, treat both source families as required inputs before any wording change is accepted:
@@ -261,12 +278,14 @@ Work:
   - rerun the full five-gate matrix for that skill and compare it to the Phase 0 baseline before moving on
 
 Exit criteria:
+
 - All four pilot skills declare posture support consistently.
 - No pilot skill redefines delegation/runtime mode.
 - Execution-first warnings are explicit where required by the spec.
 - No pilot skill lands below its Phase 0 five-gate baseline.
 
 Hold rules:
+
 - If one pilot skill requires posture semantics that contradict the repo-level definition, stop propagation and resolve the contract before continuing to the next skill.
 - If any pilot skill regresses on any of the five gates relative to its recorded baseline, restore the last acceptable version before attempting another improvement round.
 
@@ -275,6 +294,7 @@ Hold rules:
 Objective: ensure pilot posture claims are tested, not just documented.
 
 Work:
+
 - Extend pilot evals to cover posture-sensitive behavior:
   - explanation quality
   - code-reading or reasoning support
@@ -295,12 +315,14 @@ Work:
   - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py interview/interview-me --runner codex`
 
 Exit criteria:
+
 - Pilot skills have posture-aware eval coverage.
 - Output-only success cannot mask posture-contract failure in pilot checks.
 - Negative cases cover blocked or degraded combinations explicitly.
 - All four canonical eval commands above complete with exit code `0`.
 
 Hold rules:
+
 - If a pilot skill has updated posture prose but no posture-specific eval coverage, it cannot be marked complete or included in rollout review.
 
 ### Phase 5: Telemetry and Conformance Summary
@@ -308,6 +330,7 @@ Hold rules:
 Objective: make the pilot observable as an operational contract, not just a prose change.
 
 Work:
+
 - Add structured interaction-pattern tags aligned to the spec:
   - `conceptual_inquiry`
   - `explain_then_generate`
@@ -407,11 +430,13 @@ Work:
     ```
 
 Exit criteria:
+
 - Pilot conformance can be inspected in one summary artifact or report.
 - Missing telemetry is surfaced as degraded or partial, not silent success.
 - The summary is machine-diffable and usable for follow-up rollout decisions.
 
 Hold rules:
+
 - If telemetry cannot distinguish interaction-pattern categories without schema drift or ambiguous tagging, mark the pilot `partial` and stop before rollout expansion.
 
 ### Phase 6: Validation, Rollout Gate, and Handoff
@@ -419,6 +444,7 @@ Hold rules:
 Objective: complete the pilot with explicit evidence and a safe handoff for broader work.
 
 Work:
+
 - Run focused validation on docs, metadata, and pilot-specific validators.
 - Run broader repo validation using canonical commands.
 - Review pilot outcomes against the spec’s conformance expectations.
@@ -433,12 +459,14 @@ Work:
   - `bash Infrastructure/scripts/validate_all.sh`
 
 Exit criteria:
+
 - Validation passes with evidence.
 - Pilot conformance summary exists and is reviewable.
 - Remaining open questions are implementation-shaped, not contract-shaped.
 - The repo is ready for follow-on work without reopening the spec.
 
 Hold rules:
+
 - Any failing strict validator or missing conformance summary blocks rollout signoff.
 - If the rollout decision is `revise contract before expansion`, the handoff must route back to spec/plan refinement rather than implementation expansion.
 
@@ -588,6 +616,7 @@ tasks:
 ## Evidence Paths and Gate Commands
 
 Primary evidence paths:
+
 - [Docs/specs/2026-03-10-feat-learning-preserving-skill-design-spec.md](/Users/jamiecraik/dev/agent-skills/Docs/specs/2026-03-10-feat-learning-preserving-skill-design-spec.md)
 - [docs/brainstorms/2026-03-10-learning-preserving-skills-brainstorm.md](/Users/jamiecraik/dev/agent-skills/docs/brainstorms/2026-03-10-learning-preserving-skills-brainstorm.md)
 - [docs/skill-graphs/index.md](/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/index.md)
@@ -605,6 +634,7 @@ Primary evidence paths:
 - [Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py)
 
 Gate commands:
+
 - Baseline per-skill diagnostics:
   - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py skill-builder`
   - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py agentation`
@@ -614,53 +644,54 @@ Gate commands:
   - `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
 - Metadata-home decision verification:
   - `python3 - <<'PY'
-from pathlib import Path
-import json
+    from pathlib import Path
+    import json
 
 path = Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json")
 payload = json.loads(path.read_text(encoding="utf-8"))
 if payload.get("selected_metadata_home") not in {
-    "Infrastructure/references/task-profile.json",
-    "Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json",
+"Infrastructure/references/task-profile.json",
+"Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json",
 }:
-    raise SystemExit("selected_metadata_home must be constrained to a documented option")
+raise SystemExit("selected_metadata_home must be constrained to a documented option")
 required = {
-    "selected_metadata_home",
-    "pilot_profile_candidates",
-    "compatibility_rationale",
-    "approver",
-    "approval",
-    "decision_status",
-    "decision_rationale",
-    "decided_at",
+"selected_metadata_home",
+"pilot_profile_candidates",
+"compatibility_rationale",
+"approver",
+"approval",
+"decision_status",
+"decision_rationale",
+"decided_at",
 }
 if not required.issubset(payload):
-    raise SystemExit("Decision artifact missing required keys")
+raise SystemExit("Decision artifact missing required keys")
 if not payload.get("pilot_profile_candidates"):
-    raise SystemExit("Decision artifact has no profile candidates")
+raise SystemExit("Decision artifact has no profile candidates")
 if payload.get("decision_status") != "approved":
-    raise SystemExit("metadata-home decision has not been approved")
+raise SystemExit("metadata-home decision has not been approved")
 print("metadata-home decision artifact verified")
 PY`
+
 - Pilot conformance summary generation and freshness check:
   - `python3 Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
   - `python3 - <<'PY'
 from pathlib import Path
 artifact = Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json")
 sources = [
-    Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json"),
-    Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json"),
-    Path("Skills/skill-builder/Infrastructure/references/task-profile.json"),
-    Path("Skills/skill-builder/Infrastructure/references/evals.yaml"),
-    Path("frontend/tools/agentation/Infrastructure/references/task-profile.json"),
-    Path("frontend/tools/agentation/Infrastructure/references/evals.yaml"),
-    Path("Skills/systematic-debugging/Infrastructure/references/task-profile.json"),
-    Path("Skills/systematic-debugging/Infrastructure/references/evals.yaml"),
-    Path("interview/interview-me/Infrastructure/references/task-profile.json"),
-    Path("interview/interview-me/Infrastructure/references/evals.yaml"),
+Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json"),
+Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json"),
+Path("Skills/skill-builder/Infrastructure/references/task-profile.json"),
+Path("Skills/skill-builder/Infrastructure/references/evals.yaml"),
+Path("frontend/tools/agentation/Infrastructure/references/task-profile.json"),
+Path("frontend/tools/agentation/Infrastructure/references/evals.yaml"),
+Path("Skills/systematic-debugging/Infrastructure/references/task-profile.json"),
+Path("Skills/systematic-debugging/Infrastructure/references/evals.yaml"),
+Path("interview/interview-me/Infrastructure/references/task-profile.json"),
+Path("interview/interview-me/Infrastructure/references/evals.yaml"),
 ]
 if not artifact.exists() or artifact.stat().st_mtime < max(p.stat().st_mtime for p in sources if p.exists()):
-    raise SystemExit("conformance summary is missing or stale")
+raise SystemExit("conformance summary is missing or stale")
 print("conformance summary freshness check passed")
 PY`
 - Repo docs and plan structure:
@@ -674,6 +705,7 @@ PY`
 ## Test and Validation Strategy
 
 Focused checks after each major phase:
+
 - Phase 1: docs lint after repo-level doc/template edits
 - Phase 2: relevant strict validator checks after metadata/validation changes
 - Phase 3: per-skill diagnostics after each pilot skill update
@@ -681,6 +713,7 @@ Focused checks after each major phase:
 - Phase 5: artifact/conformance verification after telemetry summary changes
 
 Broader checks before completion:
+
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-03-10-feat-learning-preserving-skill-design-plan.md`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --runner codex`
@@ -692,6 +725,7 @@ Broader checks before completion:
 - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
 
 Coverage expectations:
+
 - invalid posture/mode pairings are blocked or degraded explicitly
 - pilot skills all declare posture support consistently
 - pilot evals test learning-preserving behavior, not just routing/output success
@@ -702,11 +736,13 @@ Coverage expectations:
 ## Rollout / Migration / Monitoring
 
 Rollout shape:
+
 - pilot-only rollout
 - no all-skills adoption in this plan
 - expansion only after human review of conformance results
 
 Monitoring expectations:
+
 - inspect pilot conformance summary after each implementation pass
 - inspect posture-specific eval failures separately from general output failures
 - treat missing telemetry coverage as degraded pilot health
@@ -716,6 +752,7 @@ Monitoring expectations:
   - `+24h`: rerun broad repo validation and artifact-integrity checks before deciding whether to expand beyond the pilot
 
 Migration notes:
+
 - existing non-pilot skills remain unchanged
 - legacy artifacts remain readable; new posture metadata must not break current consumers
 - if posture metadata proves unstable in the chosen machine-readable location, stop at pilot scope and revise before expansion

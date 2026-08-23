@@ -40,11 +40,42 @@ def test_inventory_reports_identify_the_agent_skills_service() -> None:
 
 
 def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
-    finding = MODULE.classify_path(".harness/review-artifacts/pu-010-adversarial-cli-tests-status.md")
+    finding = MODULE.classify_path(".harness/archive/2026-08-15-artifact-retirement/review-artifacts/pu-010-adversarial-cli-tests-status.md")
 
-    assert finding.classification == "historical_artifact"
-    assert finding.status == "warning"
-    assert finding.code == "tracked_harness_snapshot"
+    assert finding.classification == "intentional_archive"
+    assert finding.status == "ok"
+    assert finding.code == "harness_archive_surface"
+    assert finding.blocking is False
+
+
+def test_harness_archive_jsonl_is_intentional_archive() -> None:
+    finding = MODULE.classify_path(
+        ".harness/archive/2026-08-15-artifact-retirement/artifacts/sync-receipts.jsonl"
+    )
+
+    assert finding.classification == "intentional_archive"
+    assert finding.status == "ok"
+    assert finding.code == "harness_archive_surface"
+    assert finding.blocking is False
+
+
+def test_docs_receipts_are_policy_surface() -> None:
+    finding = MODULE.classify_path("Docs/goals/example/receipts.jsonl")
+
+    assert finding.classification == "policy"
+    assert finding.status == "ok"
+    assert finding.code == "policy_surface"
+    assert finding.blocking is False
+
+
+def test_codex_eval_calibration_is_source_surface() -> None:
+    finding = MODULE.classify_path(
+        "codex/agents/evals/workflow-guardrail-candidates/references/scorer-calibration/examples.jsonl"
+    )
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "source_path"
     assert finding.blocking is False
 
 
@@ -554,6 +585,6 @@ def test_cli_strict_json_mode_passes_without_blockers() -> None:
 
     payload = json.loads(result.stdout)
     assert result.returncode == 0
-    assert payload["status"] in {"ok", "warning"}
+    assert payload["status"] in {"success", "ok", "warning"}
     assert payload["summary"]["blocking_findings"] == 0
     assert result.stderr == ""

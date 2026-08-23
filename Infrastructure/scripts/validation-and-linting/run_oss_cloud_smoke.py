@@ -547,6 +547,34 @@ def _emit_public_receipt(receipt: dict[str, Any], *, as_json: bool) -> bool:
     return completed.returncode == 0
 
 
+def _runtime_findings(
+    args: argparse.Namespace, paths: dict[str, Path], findings: list[dict[str, str]],
+    command: list[str] | None, exit_code: int | None,
+) -> list[dict[str, str]]:
+    if command is None:
+        return []
+    runtime_findings = _findings(
+        "\n".join((_read(paths["stdout"]), _read(paths["stderr"]))), CLOUD_SMOKE_MAX_TOKENS_USED,
+    )
+    warnings = [item for item in runtime_findings if item["code"] in CLOUD_SMOKE_NON_BLOCKING_CODES]
+    findings.extend(item for item in runtime_findings if item["code"] not in CLOUD_SMOKE_NON_BLOCKING_CODES)
+    if exit_code != 0:
+        findings.append({"code": "oss_cloud_smoke_exit_nonzero", "message": f"Codex exited with {exit_code}."})
+    if _read(paths["stdout"]).strip() != args.marker:
+        findings.append({"code": "oss_cloud_smoke_marker_mismatch", "message": "Cloud smoke marker did not match."})
+    return warnings
+
+
+def _redacted_command(command: list[str] | None) -> list[str] | None:
+    if command is None:
+        return None
+    redacted = list(command)
+    for index, value in enumerate(redacted[:-1]):
+        if value == "--env-file":
+            redacted[index + 1] = "<operator-approved-opaque-env-stream>"
+    return redacted
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.timeout_seconds < 1:

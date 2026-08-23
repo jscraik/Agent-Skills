@@ -96,11 +96,11 @@ Do not rewrite the skill after every run.
 
 Use this policy instead:
 
-| Evidence level | Action |
-| --- | --- |
-| 1 run | Capture observations only |
-| 2 matching runs | Create or refine eval coverage |
-| 3 matching runs | Propose a candidate skill/reference patch |
+| Evidence level                                    | Action                                              |
+| ------------------------------------------------- | --------------------------------------------------- |
+| 1 run                                             | Capture observations only                           |
+| 2 matching runs                                   | Create or refine eval coverage                      |
+| 3 matching runs                                   | Propose a candidate skill/reference patch           |
 | benchmark lift or strong repeated failure pattern | Allow promotion review even if the run count is low |
 
 Promotion blockers:

@@ -23,6 +23,7 @@
 - Uplift decision counts (promotion): `unknown=8` (no usable uplift sample yet)
 
 Blocking reasons:
+
 - Insufficient sample size and per-profile coverage.
 - Critical non-regression compliance below required threshold.
 - Budget compliance below required threshold.

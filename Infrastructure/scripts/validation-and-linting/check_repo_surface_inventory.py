@@ -25,7 +25,6 @@ parse_args = _CLI.parse_args
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
-
 FUTURE_ARTIFACT_DEBT_CLASSIFICATIONS = {"historical_artifact"}
 
 SYSTEM_SKILL_SURFACE_PREFIXES = (
@@ -37,7 +36,6 @@ SYSTEM_SKILL_SURFACE_PREFIXES = (
     "skills-system/skill-creator",
     "skills-system/skill-installer",
 )
-
 HARNESS_HISTORICAL_PREFIXES = (
     ".harness/agent-runs",
     ".harness/artifacts",
@@ -46,28 +44,27 @@ HARNESS_HISTORICAL_PREFIXES = (
     ".harness/review-artifacts",
     ".harness/traces",
 )
-
 SOURCE_PREFIXES = (
     "Skills",
     "skills-sdk",
     "Infrastructure/scripts",
     "Infrastructure/bin",
     "Infrastructure/tests",
+    "codex/agents/evals",
     "bin",
     "codex/agents/evals",
     "scripts",
     "utilities",
     "brand",
 )
-
 REFERENCE_PREFIXES = (
     "AI/context",
     "Infrastructure/references",
     "Wiki",
+    "AI/context",
     ".harness/knowledge",
     ".harness/memory",
 )
-
 HARNESS_REFERENCE_PREFIXES = (
     ".harness/knowledge",
     ".harness/memory",
@@ -87,7 +84,6 @@ HARNESS_REFERENCE_PREFIXES = (
     ".harness/plan",
     ".harness/reviews",
 )
-
 POLICY_PREFIXES = (
     "Docs",
     "codestyle",
@@ -114,7 +110,6 @@ POLICY_PREFIXES = (
     ".harness/quality",
     ".harness/solutions",
 )
-
 POLICY_EXACT_PATHS = {
     ".agents/PLANS.md",
     ".harness/README.md",
@@ -122,6 +117,13 @@ POLICY_EXACT_PATHS = {
     ".harness/ci-required-checks.json",
     ".harness/restore-manifest.json",
     ".harness/upgrade-manifest.json",
+    ".harness/active-artifacts.md",
+    ".harness/artifact-provenance.json",
+    ".harness/review-log.md",
+    "Infrastructure/AGENTS.md",
+    ".harness/archive/2026-08-15-artifact-retirement/root-artifacts/AGENTS.md",
+    "skills-system/AGENTS.md",
+    "coding-policy.json",
     "CODEOWNERS",
     "GOVERNANCE",
     "coding-policy.json",
@@ -144,7 +146,6 @@ HARNESS_REFERENCE_EXACT_PATHS = frozenset({
 })
 
 FIXTURE_PREFIXES = (".workouts", "Infrastructure/templates", "Infrastructure/vendor")
-
 AUTHORED_SOURCE_PREFIXES = (
     "Plugins",
     "Prototypes",
@@ -153,8 +154,6 @@ AUTHORED_SOURCE_PREFIXES = (
     "Infrastructure/reports",
     "Infrastructure/storage",
 )
-
-
 @dataclass(frozen=True)
 class SurfaceFinding:
     path: str
@@ -167,37 +166,23 @@ class SurfaceFinding:
     recommendation: str
     allowlist_entry: dict[str, Any] | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-
-
 def _normalize_path(path: str | Path) -> str:
     normalized = Path(str(path).strip()).as_posix()
     if normalized.startswith("./"):
         return normalized[2:]
     return normalized
-
-
 def _path_parts(path: str) -> tuple[str, ...]:
     return tuple(part for part in Path(path).parts if part not in ("", "."))
-
-
 def _starts_with(path: str, prefix: str) -> bool:
     return path == prefix or path.startswith(f"{prefix}/")
-
-
 def _starts_with_any(path: str, prefixes: tuple[str, ...]) -> bool:
     return any(_starts_with(path, prefix) for prefix in prefixes)
-
-
 def _is_governed_system_skill_surface(path: str) -> bool:
     return any(_starts_with(path, prefix) for prefix in SYSTEM_SKILL_SURFACE_PREFIXES)
-
-
 def _matches_plugin_subpath(path: str, subpath: str) -> bool:
     """Return whether a Plugins path has the expected third component."""
     parts = _path_parts(path)
     return len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == subpath
-
-
 def _is_root_front_door_doc(path: str) -> bool:
     """Return whether path is a top-level front-door doc filename."""
     if "/" in path:
@@ -218,8 +203,6 @@ def _is_root_front_door_doc(path: str) -> bool:
         "WORKFLOW.md",
     }
     return path in names
-
-
 def _is_root_config(path: str) -> bool:
     """Return whether path is a recognized top-level config filename."""
     if "/" in path:
@@ -248,8 +231,6 @@ def _is_root_config(path: str) -> bool:
         "prek.toml",
     }
     return path in names
-
-
 def _make_finding(
     path: str,
     *,
@@ -274,24 +255,18 @@ def _make_finding(
         recommendation=recommendation,
         metadata=metadata,
     )
-
-
 def _next_step(step_type: str, command: str, rationale: str) -> dict[str, str]:
     return {
         "type": step_type,
         "command": command,
         "rationale": rationale,
     }
-
-
 def _step_from_token(token: str) -> dict[str, str]:
     return _next_step(
         "manual",
         token,
         f"Complete the {token.replace('_', ' ')} step before changing tracked content.",
     )
-
-
 def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     next_steps = metadata.get("next_steps")
     if isinstance(next_steps, list) and all(isinstance(step, str) for step in next_steps):
@@ -300,8 +275,6 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
             "next_steps": [_step_from_token(step) for step in next_steps],
         }
     return metadata
-
-
 FINDING_SPECS = {
     "lowercase_docs_drift": ("classification_required", "violation", "error", True, "Docs/** is the canonical documentation root; lowercase docs/** is casing drift.", "Move the content to Docs/** or document an explicit compatibility migration.", ("move_to_canonical_docs_root", "update_references")),
     "duplicated_infrastructure_path": ("classification_required", "violation", "error", True, "Duplicated Infrastructure/Infrastructure path shape is suspicious.", "Reference-scan and either delete generated debris or classify the canonical owner.", ("scan_references", "decide_owner_or_cleanup")),
@@ -414,6 +387,8 @@ def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding 
 
 
 def _classify_source_surface(normalized: str) -> SurfaceFinding | None:
+    if _is_governed_source_artifact(normalized, Path(normalized).suffix.lower()):
+        return _finding(normalized, "authored_source_surface")
     if _matches_plugin_subpath(normalized, "fixtures"):
         return _finding(normalized, "plugin_fixture_surface")
     if _matches_plugin_subpath(normalized, "references"):
@@ -453,10 +428,10 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     suffix = Path(normalized).suffix.lower()
     rules = (
         _classify_violation_surface(normalized, suffix),
-        _classify_generated_surface(normalized, suffix),
         _classify_source_surface(normalized),
         _classify_reference_surface(normalized),
         _classify_policy_surface(normalized),
+        _classify_generated_surface(normalized, suffix),
     )
     return next((finding for finding in rules if finding is not None), _finding(normalized, "classification_required"))
 

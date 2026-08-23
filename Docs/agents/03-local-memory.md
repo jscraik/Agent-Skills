@@ -4,7 +4,6 @@
 - [Workflow](#workflow)
 - [Harness Memory Governance](#harness-memory-governance)
 - [Store rules](#store-rules)
-- [Minimal session convention](#minimal-session-convention)
 - [See Also](#see-also)
 
 ## Workflow
@@ -33,8 +32,6 @@ Format convention:
 - Do not store secrets, tokens, keys, or PII.
 - Keep observations short and stable.
 
-## Minimal session convention
-Use `repo:<name>:task:<id>` style session ids when calling local-memory tools.
-
 ## See Also
-- [Local Memory Skill](/Skills/local-memory/SKILL.md) - Tool reference and usage examples
+- [Root agent guidance](/AGENTS.md#further-guidance)
+- [High-Signal Steering Feedback](/Docs/agents/19-high-signal-steering-feedback.md)

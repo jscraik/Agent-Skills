@@ -6,23 +6,23 @@ Validates promotion decision artifacts for compliance before merge.
 
 ## ABBREVIATION MAP
 
-| Abbr | Meaning |
-|------|---------|
+| Abbr | Meaning                           |
+| ---- | --------------------------------- |
 | RPGW | Recursive promotion gate workflow |
-| PD | Promotion decision |
-| IJ | Iteration journal |
-| RUN | Run artifact |
-| VAL | Validation |
-| CO | Changed-only |
+| PD   | Promotion decision                |
+| IJ   | Iteration journal                 |
+| RUN  | Run artifact                      |
+| VAL  | Validation                        |
+| CO   | Changed-only                      |
 
 ---
 
 ## TRIGGER MATRIX
 
-| EVENT | PATHS | MODE |
-|-------|-------|------|
-| PR | `**/promotion_decision.json`, `**/iteration_journal.jsonl`, `**/run.json`, `lessons/**`, `recursive-loop-approvers.{yaml,sig}`, `human_promote_recursive_run.sh`, `validate_recursive_promotions.sh`, `validate_recursive_promotion.py`, workflow self | CO |
-| WDsp | Same paths | Full |
+| EVENT | PATHS                                                                                                                                                                                                                                                  | MODE |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
+| PR    | `**/promotion_decision.json`, `**/iteration_journal.jsonl`, `**/run.json`, `lessons/**`, `recursive-loop-approvers.{yaml,sig}`, `human_promote_recursive_run.sh`, `validate_recursive_promotions.sh`, `validate_recursive_promotion.py`, workflow self | CO   |
+| WDsp  | Same paths                                                                                                                                                                                                                                             | Full |
 
 ---
 
@@ -56,11 +56,11 @@ permissions:
 
 ## JOB: VALIDATE PROMOTION ARTIFACTS
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
+| CONFIG   | VALUE                           |
+| -------- | ------------------------------- |
+| Runner   | `ubuntu-latest`                 |
 | Checkout | Full history (`fetch-depth: 0`) |
-| Python | `3.12` |
+| Python   | `3.12`                          |
 
 ### PR Mode (Changed-Only)
 
@@ -83,13 +83,13 @@ bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh 
 
 ### Flags
 
-| FLAG | DESCRIPTION |
-|------|-------------|
+| FLAG             | DESCRIPTION                              |
+| ---------------- | ---------------------------------------- |
 | `--changed-only` | Validate only changed files in git range |
-| `--base-sha` | Base commit for comparison |
-| `--head-sha` | Head commit for comparison |
-| `--report-json` | Output validation report path |
-| `--strict-runs` | Enforce strict run parity checks |
+| `--base-sha`     | Base commit for comparison               |
+| `--head-sha`     | Head commit for comparison               |
+| `--report-json`  | Output validation report path            |
+| `--strict-runs`  | Enforce strict run parity checks         |
 
 ---
 

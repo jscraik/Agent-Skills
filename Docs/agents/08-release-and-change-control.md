@@ -18,7 +18,7 @@
 - Keep `.agents/PLANS.md` idempotent when plan work touches it.
 
 ## Governance gates
-- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md` (external dependency)
+- `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper)
 
 - If either command fails, fix first failure, then rerun until green.

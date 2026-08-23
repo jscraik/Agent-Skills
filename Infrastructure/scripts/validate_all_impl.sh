@@ -8,8 +8,8 @@ Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [-
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
-  --persistent  Write logs to Infrastructure/artifacts/validation/<timestamp> and refresh
-                Infrastructure/artifacts/validation/latest. This is the default behavior.
+  --persistent  Write logs to .tmp/agent-skills-artifacts/validation/<timestamp> and refresh
+                .tmp/agent-skills-artifacts/validation/latest. This is the default behavior.
   --fail-fast   Stop scheduling new checks after the first required failure.
   --staged-source
                 Validate staged Git index blobs for the program-design check.
@@ -170,7 +170,7 @@ if [[ "$output_mode" == "ephemeral" ]]; then
   run_dir="$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-validate-all.XXXXXX")"
   cleanup_ephemeral_logs=1
 else
-  log_root="Infrastructure/artifacts/validation"
+  log_root=".tmp/agent-skills-artifacts/validation"
   run_dir="$log_root/$run_id"
   latest_dir="$log_root/latest"
 
