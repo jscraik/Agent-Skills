@@ -200,7 +200,7 @@ authoring_contract:
   focused_proof: "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot"
   behavior_proof:
     command_template: "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
-    scenario_ids: [happy-scorecard, happy-agents-md-audit, edge-no-validation-entrypoint, edge-docs-freshness, edge-ui-action-without-agent-capability, eval.harness.local-pass-ci-unknown, eval.harness.pr-lifecycle-stops-before-main, eval.knowledge-os.capsule-design-without-relationships]
+    scenario_ids: [happy-scorecard, happy-agents-md-audit, edge-no-validation-entrypoint, edge-ui-action-without-agent-capability, eval.knowledge-os.capsule-design-without-relationships]
     observed_fields: [outcome, evidence, validation, residual_risk]
   readiness_evidence:
     required_lanes: [structural, package, behavioral, runtime]

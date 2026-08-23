@@ -1,0 +1,72 @@
+import os
+import tempfile
+import unittest
+from pathlib import Path
+
+from ask.skills_sdk.knowledge_source_context import merge_knowledge_source_context
+from ask.skills_sdk.operational_references import validate_operational_references
+
+
+def _manifest(target_path: str) -> dict[str, object]:
+    return {"capsules": [{"target_path": target_path}]}
+
+
+class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
+    def test_merge_rejects_non_list_allowed_claims(self) -> None:
+        loaded = {"references": [], "allowed_claims": {"invalid": True}}
+
+        with self.assertRaisesRegex(ValueError, "allowed_claims must be a list"):
+            merge_knowledge_source_context(
+                loaded,
+                eval_routes={"scenarios": False, "fixtures": False},
+                manifest=_manifest("references/capsule.md"),
+            )
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_validation_blocks_capsule_under_symlinked_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            extraction = Path(tmp) / "extraction"
+            references = extraction / "references"
+            references.mkdir(parents=True)
+            outside = Path(tmp) / "outside"
+            outside.mkdir()
+            (outside / "capsule.md").write_text("# Capsule\n", encoding="utf-8")
+            try:
+                (references / "linked").symlink_to(outside, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            findings: list[str] = []
+
+            validate_operational_references(
+                extraction,
+                _manifest("references/linked/capsule.md"),
+                findings,
+            )
+
+            self.assertIn(
+                "references:symlinked_capsule:references/linked/capsule.md",
+                findings,
+            )
+
+    def test_validation_reports_capsule_read_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            extraction = Path(tmp) / "extraction"
+            references = extraction / "references"
+            references.mkdir(parents=True)
+            (references / "directory.md").mkdir()
+            findings: list[str] = []
+
+            validate_operational_references(
+                extraction,
+                _manifest("references/directory.md"),
+                findings,
+            )
+
+            self.assertIn(
+                "references:missing_or_invalid_capsule:references/directory.md",
+                findings,
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

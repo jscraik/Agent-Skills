@@ -119,7 +119,7 @@ def _eval_entries(eval_routes: dict[str, bool]) -> list[dict[str, Any]]:
 def _merge_allowed_claims(loaded: dict[str, Any], eval_routes: dict[str, bool]) -> None:
     allowed_claims = loaded.setdefault("allowed_claims", [])
     if not isinstance(allowed_claims, list):
-        return
+        raise ValueError("references/source-context.yaml allowed_claims must be a list.")
     capsule_claim = "KnowledgeOS capsules are vendored references, not runtime dependencies"
     if capsule_claim not in allowed_claims:
         allowed_claims.append(capsule_claim)

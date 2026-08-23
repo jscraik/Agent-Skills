@@ -1,6 +1,7 @@
 # Operational reference contract for Skills SDK
 
-Status: design context; not yet implemented in the repository.
+Status: the narrow operational-reference ingest contract is implemented; the
+full reference-card schema below remains design context.
 
 ## Outcome
 

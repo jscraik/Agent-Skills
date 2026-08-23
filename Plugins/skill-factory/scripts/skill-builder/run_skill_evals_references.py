@@ -34,7 +34,10 @@ def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> 
     blocks: List[str] = []
     for declared_path in reference_paths:
         resolved = _resolve_reference(skill_dir, declared_path)
-        content = resolved.read_text(encoding="utf-8")
+        try:
+            content = resolved.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            raise ValueError(f"reference_paths entry could not be read: {declared_path}") from exc
         blocks.append(f'<REFERENCE path="{declared_path}">\n{content}\n</REFERENCE>')
     if not blocks:
         return ""

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 import textwrap
@@ -63,6 +64,7 @@ class RunSkillEvalsContractTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "must stay under references"):
                 _render_case_references(Path(tmp), ("../outside.md",))
 
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
     def test_render_case_references_rejects_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             skill_dir = Path(tmp) / "demo-skill"
@@ -74,6 +76,16 @@ class RunSkillEvalsContractTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "package-local regular file"):
                 _render_case_references(skill_dir, ("references/linked.md",))
+
+    def test_render_case_references_reports_unreadable_utf8(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "invalid.md").write_bytes(b"\xff")
+
+            with self.assertRaisesRegex(ValueError, "could not be read"):
+                _render_case_references(skill_dir, ("references/invalid.md",))
 
     def test_load_evals_parses_reference_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -103,6 +115,44 @@ class RunSkillEvalsContractTests(unittest.TestCase):
             self.assertEqual(case.reference_paths, ("references/operational.md",))
             self.assertIn('<REFERENCE path="references/operational.md">', case.prompt)
             self.assertIn("User task:\nUse the declared reference.", case.prompt)
+
+    def test_load_evals_without_references_preserves_prompt_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            prompt = "Keep  spacing, punctuation—and Unicode.\n"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: plain-case
+                        name: Plain case
+                        prompt: "Keep  spacing, punctuation—and Unicode.\\n"
+                        acceptance:
+                          - contains: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            case = load_evals(evals_path)[0]
+
+            self.assertEqual(case.prompt, prompt)
+            self.assertEqual(case.reference_paths, ())
+
+    def test_load_evals_parses_document_once(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                "cases:\n  - name: once\n    prompt: once\n    acceptance: []\n",
+                encoding="utf-8",
+            )
+            with unittest.mock.patch(
+                "run_skill_evals._load_evals_document",
+                wraps=_load_evals_document,
+            ) as loader:
+                load_evals(evals_path)
+
+            loader.assert_called_once_with(evals_path)
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"

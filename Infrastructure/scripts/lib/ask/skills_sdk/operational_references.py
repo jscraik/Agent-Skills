@@ -73,7 +73,7 @@ def _validate_capsule(
         return
     try:
         text = source_path.read_text(encoding="utf-8")
-    except (FileNotFoundError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         findings.append(f"references:missing_or_invalid_capsule:{target_path}")
         return
     _validate_capsule_text(text, target_path, findings)
@@ -88,23 +88,32 @@ def _validate_capsule_path(
     relative = PurePosixPath(target_path)
     if relative.is_absolute() or ".." in relative.parts or relative.parts[:1] != ("references",):
         findings.append(f"references:invalid_capsule_path:{target_path}")
-        return
+        return None
     if relative.suffix != ".md":
         findings.append(f"references:capsule_not_markdown:{target_path}")
-        return
+        return None
     if relative.parts[1:2] == ("knowledge-capsules",) and not _legacy_capsule_subdirectory_allowed(manifest):
         findings.append(f"references:legacy_knowledge_capsule_subdir_unjustified:{target_path}")
-        return
+        return None
     source_path = extraction_root.joinpath(*relative.parts)
-    if source_path.is_symlink():
+    if _path_or_parent_is_symlink(extraction_root, source_path):
         findings.append(f"references:symlinked_capsule:{target_path}")
-        return
+        return None
     try:
         source_path.resolve().relative_to(extraction_root.resolve())
     except ValueError:
         findings.append(f"references:invalid_capsule_path:{target_path}")
         return None
     return source_path
+
+
+def _path_or_parent_is_symlink(extraction_root: Path, source_path: Path) -> bool:
+    current = source_path
+    while current != extraction_root:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return extraction_root.is_symlink()
 
 
 def _legacy_capsule_subdirectory_allowed(manifest: dict[str, Any]) -> bool:

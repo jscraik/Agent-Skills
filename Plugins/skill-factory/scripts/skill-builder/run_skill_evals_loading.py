@@ -1,4 +1,14 @@
 from run_skill_evals_core import *  # noqa: F403
+from run_skill_evals_references import (
+    _render_case_references as _render_case_references_impl,
+    attach_declared_references,
+)
+
+
+def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> str:
+    """Expose reference rendering through the compatibility facade."""
+    return _render_case_references_impl(skill_dir, reference_paths)
+
 
 def _evaluate_baseline_output(
     *,
@@ -384,7 +394,7 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 pass_rate_calibration_artifact=_optional_case_artifact_string(c.get("pass_rate_calibration_artifact"), field_name="pass_rate_calibration_artifact", case_number=i),
             )
         )
-    return cases
+    return attach_declared_references(evals_path, cases, obj)
 
 
 def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
@@ -751,24 +761,6 @@ def _eval_contract_migration_summary(cases: Sequence[EvalCase], *, eval_mode: st
         "weak_acceptance_cases": weak_acceptance,
         "uncalibrated_pass_rate_thresholds": uncalibrated_thresholds,
     }
-
-
-from run_skill_evals_references import (  # noqa: E402
-    _render_case_references,
-    attach_declared_references,
-)
-
-_load_evals_without_declared_references = load_evals
-
-
-def load_evals_with_declared_references(evals_path: Path) -> List[EvalCase]:
-    """Attach validated package references without changing legacy case parsing."""
-    document = _load_evals_document(evals_path)
-    cases = _load_evals_without_declared_references(evals_path)
-    return attach_declared_references(evals_path, cases, document)
-
-
-load_evals = load_evals_with_declared_references
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

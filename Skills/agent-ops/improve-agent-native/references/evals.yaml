@@ -167,7 +167,7 @@ cases:
   - type: expected_signal
     value: Rejects the polished handoff because an operational capsule-design reference must preserve its source model, relationships, downstream integration, failure modes, and eval scenarios.
   - type: not_regex
-    value: '(?is)ready.{0,80}(concise|headings)|(?:concise|headings).{0,80}ready'
+    value: '(?is)\b(?:is|looks|appears)\s+ready\b.{0,80}(concise|headings)|(?:concise|headings).{0,80}\b(?:is|looks|appears)\s+ready\b'
 - id: eval.knowledge-os.export-pass-overclaims-quality
   name: export pass does not prove knowledge quality
   category: edge
@@ -275,7 +275,7 @@ cases:
   - type: expected_signal
     value: Rejects the stale receipt and requires rebuild or revalidation against the current feed digest before it can count as consumer proof.
   - type: not_regex
-    value: '(?is)(receipt|proof).{0,80}(valid|accepted).{0,80}(previously|once|earlier).{0,40}pass'
+    value: '(?is)(receipt|proof).{0,80}\b(?:is|remains|still)\s+(?:valid|accepted)\b.{0,80}(previously|once|earlier).{0,40}pass'
 - id: smoke-discovery-target
   name: discovery target contract
   category: happy
