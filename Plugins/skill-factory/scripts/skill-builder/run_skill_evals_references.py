@@ -8,6 +8,9 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 from run_skill_evals_core import EvalCase, _normalize_string_list
 
+MAX_REFERENCE_BYTES = 64 * 1024
+MAX_CASE_REFERENCE_BYTES = 256 * 1024
+
 
 def _skill_dir_for_evals(evals_path: Path) -> Path:
     if evals_path.parent.name == "references":
@@ -32,12 +35,29 @@ def _resolve_reference(skill_dir: Path, declared_path: str) -> Path:
 
 def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> str:
     blocks: List[str] = []
+    total_bytes = 0
     for declared_path in reference_paths:
         resolved = _resolve_reference(skill_dir, declared_path)
         try:
+            size_bytes = resolved.stat().st_size
+            if size_bytes > MAX_REFERENCE_BYTES:
+                raise ValueError(
+                    f"reference_paths entry exceeds {MAX_REFERENCE_BYTES} bytes: {declared_path}"
+                )
             content = resolved.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
             raise ValueError(f"reference_paths entry could not be read: {declared_path}") from exc
+        size_bytes = len(content.encode("utf-8"))
+        if size_bytes > MAX_REFERENCE_BYTES:
+            raise ValueError(
+                f"reference_paths entry exceeds {MAX_REFERENCE_BYTES} bytes: {declared_path}"
+            )
+        total_bytes += size_bytes
+        if total_bytes > MAX_CASE_REFERENCE_BYTES:
+            raise ValueError(
+                "reference_paths entries exceed "
+                f"{MAX_CASE_REFERENCE_BYTES} cumulative bytes at: {declared_path}"
+            )
         blocks.append(f'<REFERENCE path="{declared_path}">\n{content}\n</REFERENCE>')
     if not blocks:
         return ""

@@ -42,6 +42,10 @@ from run_skill_evals import (  # noqa: E402
     load_evals,
     load_neutral_baseline_approvals,
 )
+from run_skill_evals_references import (  # noqa: E402
+    MAX_CASE_REFERENCE_BYTES,
+    MAX_REFERENCE_BYTES,
+)
 
 
 
@@ -86,6 +90,32 @@ class RunSkillEvalsContractTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "could not be read"):
                 _render_case_references(skill_dir, ("references/invalid.md",))
+
+    def test_render_case_references_rejects_oversized_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            oversized = references / "oversized.md"
+            oversized.write_bytes(b"x" * (MAX_REFERENCE_BYTES + 1))
+
+            with self.assertRaisesRegex(ValueError, "oversized.md"):
+                _render_case_references(skill_dir, ("references/oversized.md",))
+
+    def test_render_case_references_rejects_cumulative_overflow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            reference_paths = []
+            file_size = MAX_REFERENCE_BYTES
+            for index in range((MAX_CASE_REFERENCE_BYTES // file_size) + 1):
+                relative = f"references/part-{index}.md"
+                (skill_dir / relative).write_bytes(b"x" * file_size)
+                reference_paths.append(relative)
+
+            with self.assertRaisesRegex(ValueError, reference_paths[-1]):
+                _render_case_references(skill_dir, tuple(reference_paths))
 
     def test_load_evals_parses_reference_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
