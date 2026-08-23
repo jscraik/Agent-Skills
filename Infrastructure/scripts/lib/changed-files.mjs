@@ -62,10 +62,10 @@ export function collectChangedPaths({
 
 	const paths = new Set();
 	const diffModes = modeStaged
-		? [["diff", "--cached", "--name-only", "--diff-filter=ACMR"]]
+		? [["diff", "--cached", "--name-only", "--diff-filter=ACMRT"]]
 		: [
-				["diff", "--cached", "--name-only", "--diff-filter=ACMR"],
-				["diff", "--name-only", "--diff-filter=ACMR"],
+				["diff", "--cached", "--name-only", "--diff-filter=ACMRT"],
+				["diff", "--name-only", "--diff-filter=ACMRT"],
 				["ls-files", "--others", "--exclude-standard"],
 			];
 
@@ -82,7 +82,7 @@ export function collectChangedPaths({
 				runGit(repoRoot, [
 					"diff",
 					"--name-only",
-					"--diff-filter=ACMR",
+					"--diff-filter=ACMRT",
 					`${base}...HEAD`,
 				]),
 			)) {

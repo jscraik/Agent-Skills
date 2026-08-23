@@ -13,8 +13,8 @@
 - Fabricated data/entropy: `Math.random()` (or equivalent) used to fabricate data without injected seed
 - Hard-coded mock responses in production paths
 - `TODO`/`FIXME`/`HACK` comments in production paths
-- Placeholder stubs (“will be wired later”, “not implemented”, etc.)
-- Disabled features signaling gaps (`console.warn("not implemented")`, dead flags)
+- Incomplete stubs that advertise deferred wiring
+- Disabled features signaling gaps (warning-only paths, dead flags)
 - Fake metrics or synthetic telemetry presented as real
 
 **Production code path** = any code that:
@@ -29,7 +29,7 @@
 
 **Detection**
 - Pattern guards/AST-Grep/Semgrep/CI checks SHOULD fail on violations where those checks are configured in the repository.
-- Exceptions require an ADR and a time-boxed waiver (see Appendix B).
+- Violations must be fixed or the owning surface must be retired; no waiver path exists.
 
 ---
 

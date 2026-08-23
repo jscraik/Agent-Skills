@@ -28,23 +28,10 @@ Authoritative repository docs MUST pass the configured documentation gates.
 * Vale **errors** MUST fail CI.
 * Warnings/suggestions MAY be elevated repo-wide.
 
-### Suppression / waivers (required discipline)
+### Lint failures
 
-Markdown:
-
-```md
-<!-- vale off -- reason: legacy quote; ticket: GOV-123; expires: 2026-03-01 -->
-...
-<!-- vale on -->
-```
-
-MDX:
-
-```mdx
-{/* vale off -- reason: legal text; ticket: GOV-124; expires: 2026-03-01 */}
-...
-{/* vale on */}
-```
+Do not suppress Vale findings. Rewrite, quote selectively, or move the owning
+content to a form that the active lint contract can validate.
 
 ---
 
@@ -63,7 +50,7 @@ MDX:
 * Indentation MUST be 2 spaces; tabs forbidden.
 * Avoid ambiguous scalars; prefer explicit `true`/`false`.
 * GitHub Actions YAML MUST avoid large inline scripts when a repo script exists.
-* YAML suppressions (if supported by the linter) MUST follow the same waiver model.
+* YAML findings MUST be fixed in the owning source; suppression is not a supported policy path.
 
 ### TOML
 
@@ -123,7 +110,7 @@ MDX:
 * Follow the repository PR template exactly.
 * Do not add, remove, rename, or reorder template sections.
 * Keep checklist item text exactly as written.
-* Fill required fields with concrete, non-placeholder content.
+* Fill required fields with concrete content.
 
 ### PR prep requirements
 

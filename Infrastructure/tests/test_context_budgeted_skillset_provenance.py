@@ -48,7 +48,6 @@ class TestSkillsetProvenance(unittest.TestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": policy_identity(),
-                "source_revision": "test",
                 "source_sha256": "0" * 64,
             },
         }) + "\n", encoding="utf-8")

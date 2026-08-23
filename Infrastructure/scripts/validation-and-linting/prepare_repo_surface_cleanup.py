@@ -186,7 +186,7 @@ def _group(
     if ownership_blocked:
         blockers.append("ownership_decision_required")
     if state == "candidate":
-        blockers.append("future_cleanup_pr_must_confirm_owner_allowlist_or_retention")
+        blockers.append("future_cleanup_pr_must_confirm_owner_disposition_and_falsification")
     return {
         "name": name,
         "description": description,

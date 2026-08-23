@@ -48,7 +48,6 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - [22. MCP & External Tools](#22-mcp--external-tools)
 - [23. Config References (Authoritative)](#23-config-references-authoritative)
 - [Appendix A — EU AI Act](#appendix-a--eu-ai-act-dates-for-governance)
-- [Appendix B — Waivers (Uniform Model)](#appendix-b--waivers-uniform-model)
 - [Project-Specific Style Rules](#project-specific-style-rules)
 
 ---
@@ -60,8 +59,8 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - Fabricated data/entropy: `Math.random()` (or equivalent) used to fabricate data without injected seed
 - Hard-coded mock responses in production paths
 - `TODO`/`FIXME`/`HACK` comments in production paths
-- Placeholder stubs (future-only placeholders, “unimplemented”, etc.)
-- Disabled features signaling gaps (placeholder warnings, dead flags)
+- Incomplete stub paths or future-only behavior
+- Disabled features signaling gaps (warning-only paths, dead flags)
 - Fake metrics or synthetic telemetry presented as real
 
 **Production code path** = any code that:
@@ -76,7 +75,7 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 
 **Detection**
 - Pattern guards/AST-Grep/Semgrep/CI checks fail on violations.
-- Exceptions require an ADR and a time-boxed waiver (see Appendix B).
+- Violations must be fixed or the owning surface must be retired; no waiver path exists.
 
 ---
 
@@ -86,9 +85,9 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 - **Classes**: only when required by a framework or to encapsulate unavoidable state.
 - **Functions**: SHOULD be <= 40 LOC; split if readability suffers.
 - **Program design**: architecture diagrams describe component boundaries; every implementation change MUST also be reviewed for function responsibility, abstraction level, data flow, side effects, failure paths, and caller knowledge.
-- **Small interfaces**: public Python functions SHOULD keep at most five parameters. Group cohesive data in a named value object when the interface would otherwise grow; a temporary exception MUST be visible in the owning review with an owner, reason, ticket, and expiry.
+- **Small interfaces**: public Python functions SHOULD keep at most five parameters. Group cohesive data in a named value object when the interface would otherwise grow.
 - **Flag arguments**: public functions MUST NOT add boolean default arguments to select materially different behavior. Split the commands or use an explicit policy/value object instead.
-- **State and errors**: changed Python production code MUST NOT add module-level mutable state, explicit `global` statements, or broad `except Exception`/`except BaseException`/bare handlers without a documented boundary reason and time-boxed waiver.
+- **State and errors**: changed Python production code MUST NOT add module-level mutable state, explicit `global` statements, or broad `except Exception`/`except BaseException`/bare handlers.
 - **Exports**: named exports only; no `export default`.
   - Exception: framework conventions that require default exports (e.g., certain Next.js special files).
 - **Determinism**: no ambient randomness/time in core logic; inject seeds/clocks/IDs.
@@ -138,7 +137,7 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 | `value as unknown as T`                                  | type guards or schema validation         |
 | `// @ts-ignore`, `// @ts-nocheck`                        | `// @ts-expect-error -- reason + ticket` |
 | unsafe `as SomeType` without runtime guard               | guard function or schema validator       |
-| eslint-disable without reason/expiry                     | disable with reason + ticket + expiry    |
+| eslint-disable                                            | fix the owning source                    |
 
 ### Type-checked linting (mandatory)
 
@@ -246,7 +245,7 @@ All contributors and automation agents MUST follow these rules. CI enforces them
 ### Linting (Required)
 
 * **Clippy** is required.
-* Allow-lists MUST include reason + ticket (+ expiry if temporary) per waiver model.
+* Allow-lists MUST be minimal, justified in the owning code, and covered by focused tests; they MUST NOT bypass failing policy.
 
 ### Concurrency (Required)
 
@@ -289,23 +288,10 @@ All docs and long-form prose MUST be linted with **Vale**.
 * Vale **errors** MUST fail CI.
 * Warnings/suggestions MAY be elevated repo-wide.
 
-### Suppression / waivers (required discipline)
+### Lint failures
 
-Markdown:
-
-```md
-<!-- vale off -- reason: legacy quote; ticket: GOV-123; expires: 2026-03-01 -->
-...
-<!-- vale on -->
-```
-
-MDX:
-
-```mdx
-{/* vale off -- reason: legal text; ticket: GOV-124; expires: 2026-03-01 */}
-...
-{/* vale on */}
-```
+Do not suppress Vale findings. Rewrite, quote selectively, or move the owning
+content to a form that the active lint contract can validate.
 
 ---
 
@@ -324,7 +310,7 @@ MDX:
 * Indentation MUST be 2 spaces; tabs forbidden.
 * Avoid ambiguous scalars; prefer explicit `true`/`false`.
 * GitHub Actions YAML MUST avoid large inline scripts when a repo script exists.
-* YAML suppressions (if supported by the linter) MUST follow the same waiver model.
+* YAML findings MUST be fixed in the owning source; suppression is not a supported policy path.
 
 ### TOML
 
@@ -482,29 +468,6 @@ abstraction or responsibility boundary.
 * Act in force: 1 Aug 2024
 * GPAI/foundation-model obligations applicable: 2 Aug 2025
 * Most provisions fully applicable: 2 Aug 2026
-
----
-
-## Appendix B — Waivers (Uniform Model)
-
-Any waiver across ESLint, Vale, Semgrep, Clippy, CI checks MUST include:
-
-* Rule ID
-* Reason
-* Ticket/issue reference
-* Expiry (date) OR ADR reference
-
-Expired waivers MUST fail CI.
-
-Example waiver file:
-
-```yaml
-id: WAIVER-001
-rule: no-unsafe-type-assertion
-reason: "Temporary migration of legacy API; runtime validator landing next"
-ticket: GOV-999
-expires: 2026-02-01
-```
 
 ---
 

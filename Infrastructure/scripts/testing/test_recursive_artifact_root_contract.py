@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import re
 import sys
 import unittest
 
@@ -13,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 RUNS_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/runs")
 CONTROLS_ROOT = Path(".harness/evidence/skill-graphs/controls")
 LESSONS_ROOT = Path(".harness/evidence/skill-graphs/lessons")
+RETIRED_PILOT_ROOT = (REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").resolve()
 
 
 def _load_module(name: str, path: Path):
@@ -22,6 +24,38 @@ def _load_module(name: str, path: Path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _normalized_repo_path(value: str | Path) -> Path:
+    return (REPO_ROOT / Path(value)).resolve()
+
+
+def _quoted_assignment(path: Path, name: str) -> Path:
+    source = path.read_text(encoding="utf-8")
+    match = re.search(rf'^{re.escape(name)}=["\']([^"\']+)["\']$', source, re.MULTILINE)
+    assert match is not None, f"missing {name} assignment in {path.relative_to(REPO_ROOT)}"
+    return _normalized_repo_path(match.group(1))
+
+
+def _shell_default(path: Path, name: str) -> Path:
+    source = path.read_text(encoding="utf-8")
+    match = re.search(
+        rf'^{re.escape(name)}=["\']\$\{{[A-Z0-9_]+:-([^}}]+)\}}["\']$',
+        source,
+        re.MULTILINE,
+    )
+    assert match is not None, f"missing {name} default in {path.relative_to(REPO_ROOT)}"
+    return _normalized_repo_path(match.group(1))
+
+
+def _python_default(path: Path, option: str) -> Path:
+    source = path.read_text(encoding="utf-8")
+    match = re.search(
+        rf'["\']{re.escape(option)}["\'][\s\S]*?default\s*=\s*["\']([^"\']+)["\']',
+        source,
+    )
+    assert match is not None, f"missing {option} default in {path.relative_to(REPO_ROOT)}"
+    return _normalized_repo_path(match.group(1))
 
 
 bootstrap = _load_module(
@@ -43,6 +77,49 @@ verifier = _load_module(
 
 
 class RecursiveArtifactRootContractTests(unittest.TestCase):
+    def test_retired_tracked_pilot_root_is_absent(self) -> None:
+        self.assertFalse((REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").exists())
+
+    def test_live_scripts_do_not_write_the_retired_tracked_pilot_root(self) -> None:
+        scripts_root = REPO_ROOT / "Infrastructure/scripts"
+        retired_root = "Infrastructure/artifacts/skill-graphs/pilot"
+        offenders = [
+            path.relative_to(REPO_ROOT)
+            for directory in (scripts_root / "lifecycle-and-sync", scripts_root / "skill-graph")
+            for pattern in ("*.py", "*.sh")
+            for path in directory.rglob(pattern)
+            if retired_root in path.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(offenders, [])
+
+    def test_live_pilot_producer_destinations_resolve_outside_retired_root(self) -> None:
+        lifecycle_root = REPO_ROOT / "Infrastructure/scripts/lifecycle-and-sync"
+        skill_graph_root = REPO_ROOT / "Infrastructure/scripts/skill-graph"
+        shadow_cycle = lifecycle_root / "run_recursive_skill_shadow_cycle_impl.sh"
+        rollout_drill = lifecycle_root / "run_recursive_rollout_drill_impl.sh"
+        promotion = lifecycle_root / "validate_recursive_promotions_impl.sh"
+        state_map = lifecycle_root / "build_skill_state_map_impl.py"
+
+        destinations = {
+            "bootstrap manifest": _python_default(
+                skill_graph_root / "bootstrap_recursive_skill_graph_artifacts.py",
+                "--manifest",
+            ),
+            "verifier manifest": _normalized_repo_path(verifier.DEFAULT_MANIFEST),
+            "shadow dashboard": _quoted_assignment(shadow_cycle, "dashboard_json"),
+            "shadow baseline": _quoted_assignment(shadow_cycle, "baseline_snapshot_json"),
+            "rollback report": _shell_default(rollout_drill, "report_json"),
+            "promotion report": _quoted_assignment(promotion, "report_json"),
+            "promotion manifest": _quoted_assignment(promotion, "parity_manifest"),
+            "state-map dashboard": _python_default(state_map, "--shadow-dashboard"),
+            "state-map promotion": _python_default(state_map, "--promotion-validation"),
+            "state-map manifest": _python_default(state_map, "--parity-manifest"),
+        }
+
+        for label, destination in destinations.items():
+            with self.subTest(label=label):
+                self.assertFalse(destination.is_relative_to(RETIRED_PILOT_ROOT), destination)
+
     def test_run_consumers_share_the_shadow_cycle_output_root(self) -> None:
         self.assertEqual(Path(verifier.RUNNER), RUNS_ROOT)
         self.assertEqual(genome_loop.RUNS_ROOT, RUNS_ROOT)

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 import textwrap
@@ -36,15 +37,218 @@ from run_skill_evals import (  # noqa: E402
     EvalCase,
     _claim_to_evidence_summary,
     _load_evals_document,
+    _render_case_references,
     _weak_acceptance_reasons,
     load_evals,
     load_neutral_baseline_approvals,
+)
+from run_skill_evals_references import (  # noqa: E402
+    MAX_CASE_REFERENCE_BYTES,
+    MAX_REFERENCE_BYTES,
+    attach_declared_references,
 )
 
 
 
 
 class RunSkillEvalsContractTests(unittest.TestCase):
+    def test_render_case_references_embeds_only_declared_package_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "operational.md").write_text("# Operational\n", encoding="utf-8")
+
+            rendered = _render_case_references(skill_dir, ("references/operational.md",))
+
+            self.assertIn('<REFERENCE path="references/operational.md">', rendered)
+            self.assertIn("# Operational", rendered)
+
+    def test_render_case_references_rejects_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "must stay under references"):
+                _render_case_references(Path(tmp), ("../outside.md",))
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_render_case_references_rejects_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            outside = Path(tmp) / "outside.md"
+            outside.write_text("outside\n", encoding="utf-8")
+            (references / "linked.md").symlink_to(outside)
+
+            with self.assertRaisesRegex(ValueError, "package-local regular file"):
+                _render_case_references(skill_dir, ("references/linked.md",))
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_render_case_references_rejects_symlinked_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            target_dir = skill_dir / "target"
+            target_dir.mkdir()
+            (target_dir / "operational.md").write_text("# Operational\n", encoding="utf-8")
+            try:
+                (references / "linked").symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            with self.assertRaisesRegex(ValueError, "package-local regular file"):
+                _render_case_references(skill_dir, ("references/linked/operational.md",))
+
+    def test_render_case_references_reports_unreadable_utf8(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "invalid.md").write_bytes(b"\xff")
+
+            with self.assertRaisesRegex(ValueError, "could not be read"):
+                _render_case_references(skill_dir, ("references/invalid.md",))
+
+    def test_render_case_references_rejects_oversized_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            oversized = references / "oversized.md"
+            oversized.write_bytes(b"x" * (MAX_REFERENCE_BYTES + 1))
+
+            with self.assertRaisesRegex(ValueError, "oversized.md"):
+                _render_case_references(skill_dir, ("references/oversized.md",))
+
+    def test_render_case_references_rejects_cumulative_overflow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            reference_paths = []
+            file_size = MAX_REFERENCE_BYTES
+            for index in range((MAX_CASE_REFERENCE_BYTES // file_size) + 1):
+                relative = f"references/part-{index}.md"
+                (skill_dir / relative).write_bytes(b"x" * file_size)
+                reference_paths.append(relative)
+
+            with self.assertRaisesRegex(ValueError, "cumulative bytes at: references/part-"):
+                _render_case_references(skill_dir, tuple(reference_paths))
+
+    def test_render_case_references_counts_repeated_empty_wrappers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            relative = f"references/{'r' * 180}.md"
+            (skill_dir / relative).write_text("", encoding="utf-8")
+            block = f'<REFERENCE path="{relative}">\n\n</REFERENCE>'
+            repeats = (MAX_CASE_REFERENCE_BYTES // len(block.encode("utf-8"))) + 2
+
+            with self.assertRaisesRegex(ValueError, relative):
+                _render_case_references(skill_dir, (relative,) * repeats)
+
+    def test_load_evals_parses_reference_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "operational.md").write_text("# Operational\n", encoding="utf-8")
+            evals_path = references / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: reference-case
+                        name: Reference case
+                        prompt: Use the declared reference.
+                        acceptance:
+                          - contains: done
+                        reference_paths:
+                          - references/operational.md
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            case = load_evals(evals_path)[0]
+
+            self.assertEqual(case.reference_paths, ("references/operational.md",))
+            self.assertEqual(case.task_prompt, "Use the declared reference.")
+            self.assertIn('<REFERENCE path="references/operational.md">', case.prompt)
+            self.assertIn("User task:\nUse the declared reference.", case.prompt)
+
+    def test_reference_rendering_can_follow_case_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "selected.md").write_text("# Selected\n", encoding="utf-8")
+            evals_path = references / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: selected
+                        name: Selected
+                        prompt: Use the selected reference.
+                        acceptance: []
+                        reference_paths: [references/selected.md]
+                      - id: unselected
+                        name: Unselected
+                        prompt: Ignore this case.
+                        acceptance: []
+                        reference_paths: [references/missing.md]
+                    """
+                ),
+                encoding="utf-8",
+            )
+            document = _load_evals_document(evals_path)
+            parsed = load_evals(evals_path, reference_mode="defer")
+
+            selected = attach_declared_references(evals_path, parsed[:1], document)
+
+            self.assertEqual([case.id for case in selected], ["selected"])
+            self.assertIn('<REFERENCE path="references/selected.md">', selected[0].prompt)
+
+    def test_load_evals_without_references_preserves_prompt_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            prompt = "Keep  spacing, punctuation—and Unicode.\n"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: plain-case
+                        name: Plain case
+                        prompt: "Keep  spacing, punctuation—and Unicode.\\n"
+                        acceptance:
+                          - contains: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            case = load_evals(evals_path)[0]
+
+            self.assertEqual(case.prompt, prompt)
+            self.assertEqual(case.reference_paths, ())
+
+    def test_load_evals_parses_document_once(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                "cases:\n  - name: once\n    prompt: once\n    acceptance: []\n",
+                encoding="utf-8",
+            )
+            with unittest.mock.patch(
+                "run_skill_evals._load_evals_document",
+                wraps=_load_evals_document,
+            ) as loader:
+                load_evals(evals_path)
+
+            loader.assert_called_once_with(evals_path)
+
     def test_repo_evals_include_family_contract_cases(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"
 

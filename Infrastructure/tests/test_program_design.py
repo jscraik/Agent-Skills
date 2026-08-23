@@ -4,7 +4,6 @@ import importlib.util
 import sys
 import tempfile
 import unittest
-from datetime import date
 from pathlib import Path
 from types import ModuleType
 from unittest import mock
@@ -109,85 +108,13 @@ class TestProgramDesign(unittest.TestCase):
         source = "def run(value, enabled=False):\n    return value\n"
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", source, source), [])
 
-    def test_waiver_metadata_is_required_and_expiry_is_enforced(self) -> None:
-        validator = _load_validator()
-        self.assertIn(
-            "missing field(s): ticket",
-            validator._check_waiver_metadata(
-                {
-                    "Infrastructure/scripts/example.py:broad-exception": {
-                        "owner": "tests",
-                        "rule_id": "program-design",
-                        "reason": "fixture",
-                        "expires": "2099-01-01",
-                    }
-                },
-                validation_date=date(2026, 7, 12),
-            )[0],
-        )
-        self.assertIn(
-            "expired on 2020-01-01",
-            validator._check_waiver_metadata(
-                {
-                    "Infrastructure/scripts/example.py:broad-exception": {
-                        "owner": "tests",
-                        "rule_id": "program-design",
-                        "ticket": "TEST-1",
-                        "reason": "fixture",
-                        "expires": "2020-01-01",
-                    }
-                },
-                validation_date=date(2026, 7, 12),
-            )[0],
-        )
-
-    def test_valid_waiver_suppresses_only_the_registered_rule(self) -> None:
-        validator = _load_validator()
-        source = "def run(value, enabled=False):\n    try:\n        return value\n    except Exception:\n        return None\n"
-        waivers = {
-            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
-                "owner": "tests",
-                "rule_id": "program-design",
-                "ticket": "TEST-2",
-                "reason": "fixture",
-                "expires": "2099-01-01",
-            }
-        }
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-        rendered = "\n".join(issues)
-        self.assertNotIn("boolean flag argument", rendered)
-        self.assertIn("broad exception handler", rendered)
-
     def test_finding_identity_ignores_line_shifts(self) -> None:
         validator = _load_validator()
         source = "def run(value):\n    try:\n        return value\n    except Exception:\n        return None\n"
 
         self.assertEqual(validator._check_source("Infrastructure/scripts/example.py", "\n" + source, source), [])
 
-    def test_broad_exception_waiver_is_scoped_to_one_handler(self) -> None:
-        validator = _load_validator()
-        source = """try:
-    first()
-except Exception:
-    pass
-
-try:
-    second()
-except Exception:
-    pass
-"""
-        metrics = validator._metrics(source)
-        first, second = metrics.broad_exceptions
-        self.assertNotEqual(first.effective_waiver_key, second.effective_waiver_key)
-        waivers = {
-            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
-        }
-
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-
-        self.assertEqual("\n".join(issues).count("broad exception handler"), 1)
-
-    def test_new_duplicate_broad_exception_is_not_hidden_by_baseline_waiver(self) -> None:
+    def test_new_duplicate_broad_exception_is_reported(self) -> None:
         validator = _load_validator()
         baseline = """try:
     first()
@@ -200,34 +127,12 @@ try:
 except Exception:
     pass
 """
-        first = validator._metrics(current).broad_exceptions[0]
-        waivers = {
-            f"Infrastructure/scripts/example.py:broad-exception:{first.effective_waiver_key}": {}
-        }
 
-        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline, waivers=waivers)
+        issues = validator._check_source("Infrastructure/scripts/example.py", current, baseline)
 
         rendered = "\n".join(issues)
         self.assertEqual(rendered.count("broad exception handler"), 1)
         self.assertIn(":8:broad exception handler", rendered)
-
-    def test_waiver_is_scoped_to_one_finding(self) -> None:
-        validator = _load_validator()
-        source = "def run(value, enabled=False, verbose=False):\n    return value\n"
-        waivers = {
-            "Infrastructure/scripts/example.py:boolean-flag:run:enabled": {
-                "owner": "tests",
-                "rule_id": "program-design",
-                "ticket": "TEST-3",
-                "reason": "fixture",
-                "expires": "2099-01-01",
-            }
-        }
-
-        issues = validator._check_source("Infrastructure/scripts/example.py", source, "", waivers=waivers)
-
-        self.assertNotIn("run(enabled=bool)", "\n".join(issues))
-        self.assertIn("run(verbose=bool)", "\n".join(issues))
 
     def test_non_production_paths_are_not_selected(self) -> None:
         validator = _load_validator()
@@ -567,9 +472,18 @@ def publish(a, b, c, d, e, f, enabled=False):
         validator = _load_validator()
         validator._staged_paths.cache_clear()
         staged_listing = mock.Mock(returncode=0, stdout="Infrastructure/scripts/example.py\n", stderr="")
+        index_listing = mock.Mock(
+            returncode=0,
+            stdout="100644 abc123 0\tInfrastructure/scripts/example.py\0",
+            stderr="",
+        )
         staged_source = mock.Mock(returncode=0, stdout="def run(value):\n    return value\n", stderr="")
 
-        with mock.patch.object(validator.subprocess, "run", side_effect=[staged_listing, staged_source]) as run:
+        with mock.patch.object(
+            validator.subprocess,
+            "run",
+            side_effect=[staged_listing, index_listing, staged_source],
+        ) as run:
             source = validator._current_source_text(
                 validator.REPO_ROOT / "Infrastructure/scripts/example.py",
                 staged_source=True,
@@ -577,7 +491,72 @@ def publish(a, b, c, d, e, f, enabled=False):
 
         self.assertEqual(source, staged_source.stdout)
         self.assertIn("--cached", run.call_args_list[0].args[0])
-        self.assertEqual(run.call_args_list[1].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
+        self.assertEqual(run.call_args_list[1].args[0], ["git", "ls-files", "--stage", "-z"])
+        self.assertEqual(run.call_args_list[2].args[0], ["git", "show", ":Infrastructure/scripts/example.py"])
+
+    def test_staged_paths_keep_only_regular_index_entries(self) -> None:
+        validator = _load_validator()
+        validator._staged_paths.cache_clear()
+        changed = mock.Mock(
+            returncode=0,
+            stdout="Infrastructure/scripts/regular.py\nInfrastructure/scripts/link.py\n",
+            stderr="",
+        )
+        index = mock.Mock(
+            returncode=0,
+            stdout=(
+                "100644 abc123 0\tInfrastructure/scripts/regular.py\0"
+                "120000 def456 0\tInfrastructure/scripts/link.py\0"
+            ),
+            stderr="",
+        )
+
+        with mock.patch.object(validator.subprocess, "run", side_effect=[changed, index]) as run:
+            self.assertEqual(
+                validator._staged_paths(),
+                frozenset({"Infrastructure/scripts/regular.py"}),
+            )
+
+        self.assertIn("--diff-filter=ACMRT", run.call_args_list[0].args[0])
+        self.assertEqual(run.call_args_list[1].args[0], ["git", "ls-files", "--stage", "-z"])
+
+    def test_staged_paths_do_not_resolve_worktree_symlinks(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scripts = root / "Infrastructure" / "scripts"
+            scripts.mkdir(parents=True)
+            target = root / "target.py"
+            target.write_text("VALUE = 1\n", encoding="utf-8")
+            candidate = scripts / "changed.py"
+            candidate.symlink_to(target)
+            relpath = "Infrastructure/scripts/changed.py"
+            with (
+                mock.patch.object(validator, "REPO_ROOT", root),
+                mock.patch.object(validator, "_staged_paths", return_value=frozenset({relpath})),
+            ):
+                paths = validator._changed_paths((relpath,), staged_source=True)
+
+        self.assertEqual(paths, [candidate])
+
+    def test_staged_symlink_is_excluded_even_when_target_is_python(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            scripts = root / "Infrastructure" / "scripts"
+            scripts.mkdir(parents=True)
+            target = root / "target.py"
+            target.write_text("VALUE = 1\n", encoding="utf-8")
+            candidate = scripts / "changed.py"
+            candidate.symlink_to(target)
+            relpath = "Infrastructure/scripts/changed.py"
+            with (
+                mock.patch.object(validator, "REPO_ROOT", root),
+                mock.patch.object(validator, "_staged_paths", return_value=frozenset()),
+            ):
+                paths = validator._changed_paths((relpath,), staged_source=True)
+
+        self.assertEqual(paths, [])
 
     def test_current_source_text_uses_worktree_outside_staged_lane(self) -> None:
         validator = _load_validator()

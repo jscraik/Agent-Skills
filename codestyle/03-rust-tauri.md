@@ -14,7 +14,7 @@
 ### Linting (Required)
 
 * **Clippy** is required.
-* Allow-lists MUST include rule ID, reason, tracking ticket, and expiry (date) or ADR reference per waiver model.
+* Allow-lists MUST be minimal, justified in the owning code, and covered by focused tests; they MUST NOT bypass failing policy.
 
 ### Concurrency (Required)
 

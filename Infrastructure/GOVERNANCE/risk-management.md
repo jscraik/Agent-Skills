@@ -21,8 +21,8 @@ Track and manage risks tied to this repository’s AI/system governance and rele
 ## Incident handling
 
 1. Log incident in `GOVERNANCE/incidents.md` with timeline, impact, and mitigations.
-2. Add temporary exception in `GOVERNANCE/exceptions.md` only when approved.
-3. Close and review within 30 days unless risk profile changes.
+2. Repair or contain the owning control without suppressing its detector.
+3. Record the permanent corrective action and close or review within 30 days.
 
 ## Review cadence
 

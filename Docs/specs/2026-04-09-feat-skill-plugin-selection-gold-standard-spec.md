@@ -128,7 +128,7 @@ Not owned by this spec:
 
 - `CatalogParityReport`
   - Diagnostic payload for trust-state checks.
-  - Required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `operator_action`.
+  - Required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `history_status`, `operator_action`.
 
 - `PluginStateSnapshot`
   - Read-only plugin lifecycle state.
@@ -136,7 +136,7 @@ Not owned by this spec:
 
 - `RoutingQualityArtifact`
   - Validation artifact for cross-run comparison.
-  - Required fields: `run_id`, `policy_identity`, `decision_status_counts`, `unresolved_ambiguity_rate`, `no_candidate_rate`, `top_rejection_reasons`, `explainability_completeness_ratio`, `parity_status`.
+  - Required fields: `run_id`, `policy_identity`, `decision_status_counts`, `unresolved_ambiguity_rate`, `no_candidate_rate`, `top_rejection_reasons`, `explainability_completeness_ratio`, `parity_status`, `history_status`, `gate_outcomes`.
 
 ## Main Flow / Lifecycle
 
@@ -177,7 +177,7 @@ Not owned by this spec:
 1. Read canonical counts from `CatalogManifest`.
 2. Read projected counts for `README`, root `SKILL.md`, `ask skills list`, and route considered metadata.
 3. Compare each surface to canonical counts.
-4. Return `CatalogParityReport` including all required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, and `operator_action`.
+4. Return `CatalogParityReport` including all required fields: `schema_version`, `policy_identity`, `canonical_count`, `surfaces`, `drift_detected`, `drift_class`, `blocking_reason`, `history_status`, and `operator_action`.
 5. Emit `blocked_catalog_parity` when any required surface parity fails.
 6. Fail validation when any required surface parity fails.
 
@@ -186,8 +186,8 @@ Strict mode semantics (`--strict`):
 - Default mode checks required surfaces only (`README`, root `SKILL.md`, `ask skills list`, route considered metadata).
 - Strict mode additionally treats missing surface projections and missing per-surface policy identity stamps as blocking drift, not warnings.
 - Strict mode escalates soft-gate deterioration signals into blocking catalog diagnostics when deterioration thresholds are breached.
-- Strict mode computes soft-gate deterioration only from the canonical routing-quality history artifact at `Infrastructure/artifacts/selection-quality/history.jsonl`.
-- If strict mode has insufficient trend history (`<7` prior completed runs from canonical history), it must return a blocking outcome with `drift_class: trend_insufficient_history` and `blocking_reason: insufficient_history`.
+- Strict mode computes soft-gate deterioration only when canonical local routing-quality history exists at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`. Missing history reports `history_status: "not_collected"` without drift because absent telemetry is unknown, not source failure.
+- If collected history contains fewer than eight usable rows, strict mode reports `history_status: "insufficient_history"` as an explicit collecting state without claiming trend health or source drift. Schema-invalid or non-finite values block with `history_status: "schema_invalid_history"`.
 
 ### D. Plugin visibility lifecycle (`ask plugins list|status|doctor`)
 
@@ -205,7 +205,7 @@ Lifecycle ownership rule:
   - `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py` owns canonical catalog manifest derivation.
   - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` owns required projection refresh for root `SKILL.md` and `README.md`.
 - Strict trend history ownership is explicit:
-  - `Infrastructure/artifacts/selection-quality/history.jsonl` is append-only per completed validation run.
+  - `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` is append-only per completed validation run and is not release evidence.
   - retention pruning is oldest-first under explicit cap and must preserve schema-valid entries.
   - direct mutation outside validation/reporting pathways is out of contract.
 
@@ -240,7 +240,7 @@ Governance and parity dependencies:
   - Canonical manifest source: `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py`.
   - Projection refresh source: `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`.
 - Validation wrappers (`Infrastructure/scripts/validation-and-linting/verify-work.sh`, `ask repo validate`) to run fail-fast parity and routing quality gates.
-- Canonical routing-quality trend history source at `Infrastructure/artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
+- Canonical routing-quality trend history source at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
 
 Contract versioning dependencies:
 
@@ -355,7 +355,7 @@ Required artifacts:
 
 - `RoutingQualityArtifact` for route and goal decisions.
 - `CatalogParityReport` artifact from diagnostic checks.
-- Canonical trend history artifact at `Infrastructure/artifacts/selection-quality/history.jsonl` for strict-mode deterioration checks.
+- Canonical local trend history at `.tmp/agent-skills-artifacts/selection-quality/history.jsonl` for strict-mode deterioration checks.
 
 Artifact minimum fields:
 
@@ -367,6 +367,8 @@ Artifact minimum fields:
 - `top_rejection_reasons`
 - `explainability_completeness_ratio`
 - `parity_status`
+- `history_status`
+- `gate_outcomes`
 
 Readiness gates:
 
@@ -379,13 +381,13 @@ Soft-gate deterioration thresholds:
 
 - Deterioration is true when either metric increases by more than 20% relative to the rolling baseline median and by at least +1 absolute percentage point.
 - Baseline is the median of the previous 7 completed validation runs within the rolling window.
-- Insufficient history (<7 runs) is reported as `trend_insufficient_history` and cannot be treated as healthy-by-default.
+- Insufficient baseline history (<7 prior accepted runs) is reported as `insufficient_history`; it remains an explicit collecting state and is never labeled healthy-by-default.
 
 Breach behavior:
 
 - Any hard-gate breach blocks release-ready status.
 - Soft-gate deterioration requires explicit operator note in validation artifact before progression.
-- Strict-mode diagnostics must block on insufficient or schema-invalid canonical history; missing history cannot be treated as healthy-by-default.
+- Strict-mode diagnostics block on schema-invalid canonical history and deterioration. Missing or insufficient history remains explicitly unknown or collecting, rather than being treated as healthy-by-default.
 
 ## Acceptance and Test Matrix
 

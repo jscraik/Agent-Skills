@@ -356,7 +356,7 @@ Required outputs:
 - human summary
 - JSON report
 - violation list
-- allowlist references
+- ownership evidence
 - recommended next command
 
 ### 2. Policy Decision
@@ -458,23 +458,14 @@ The exact filename can change in planning, but it must provide:
 
 - JSON output
 - non-zero exit on policy violations when strict mode is enabled
-- allowlist support with reasons
+- ownership classification with repair guidance
 - enough detail for agents to repair or report findings without reading every
   path manually
 
-Allowlist contract:
-
-- Canonical path: `Infrastructure/policy/repo_surface_allowlist.json`.
-- Shape: a JSON object with `schema_version: 1` and an `entries` array.
-- Each entry must include `id`, `match_type`, `pattern`, `classification`,
-  `reason`, `owner`, and `expires` or `review_after`.
-- `match_type` must be one of `exact`, `glob`, or `prefix`; regex matching is
-  excluded from the first slice to keep matching deterministic.
-- Allowlist entries can downgrade a finding from blocking to warning only when
-  the entry classification matches the classifier result and the reason is
-  non-empty.
-- More specific entries win in this order: `exact`, then longest `prefix`, then
-  longest `glob` pattern. Ties sort by `id`.
+The temporary allowlist design described in the first slice was retired. The
+inventory reports ownership and repair guidance directly; it does not downgrade
+findings through a waiver or exception file. Any historical `allowlist_entry`
+field is a nullable compatibility field only and cannot authorize suppression.
 
 ## Interface Design Pass
 
@@ -495,7 +486,7 @@ What it hides internally:
 - `git ls-files` scans
 - ignore-policy checks
 - generated/runtime path classification
-- allowlist matching
+- ownership-policy matching
 - size estimation
 - violation formatting
 
@@ -549,11 +540,13 @@ Selected contract:
 - JSON must use policy language: `classification`, `status`, `code`,
   `severity`, `blocking`, `reason`, `recommendation`, `allowlist_entry`, and
   `metadata.next_steps`.
-- `allowlist_entry` is required and must be either `null` or the matching
-  allowlist entry `id`.
+- `allowlist_entry` is a required compatibility field whose only supported
+  value is `null`. It does not represent an active waiver or exception route.
 - `metadata.next_steps` is the authoritative machine-readable next-action field.
   Any human `next command` summary is derived from it and must not conflict with
   it.
+- Findings are reported with ownership and repair guidance; waiver or exception
+  files cannot downgrade findings.
 - Human output may use bloat language, but it must never recommend deletion
   before reference scan and classification.
 
@@ -663,13 +656,13 @@ Files should not be tracked when they are:
 | `Plugins/*/skills/**`                                 | `source`                          | Tracked when authored plugin source.                                |
 | `.agents/skills/**`                                   | `generated_tracked` or projection | Do not hand-edit; regenerate through sync.                          |
 | `Plugins/cache/**`                                    | `generated_ignored`               | Never newly track.                                                  |
-| `Infrastructure/artifacts/**`                         | `historical_artifact`             | Ignore by default; track only allowlisted fixtures or indexes.      |
+| `Infrastructure/artifacts/**`                         | `historical_artifact`             | Ignore by default; move required fixtures to an owned fixture path. |
 | `artifacts/**`                                        | `historical_artifact`             | Ignore by default; keep summaries, not full event streams.          |
 | `.skillsets/**`                                       | undecided                         | Decide generated output vs canonical snapshot; validate either way. |
 | `.harness/*.db`                                       | `runtime_state` by default        | Do not track unless moved under fixtures and documented.            |
 | `skills-system/**`                                    | undecided                         | Decide vendored snapshot vs generated mirror vs removable.          |
 | `Infrastructure/references/deferred-skill-context/**` | `reference`                       | Preserve when indexed and intentionally referenced.                 |
-| `Infrastructure/Infrastructure/**`                    | `unknown` violation               | Audit; likely accidental nested output unless allowlisted.          |
+| `Infrastructure/Infrastructure/**`                    | `unknown` violation               | Audit; classify its owner and consumer or remove it.                 |
 
 ## Product Golden Paths
 
@@ -763,8 +756,8 @@ Expected output:
   carries important decision history.
 - Generated runtime surfaces must declare their source of truth.
 - Runtime projection must be reproducible.
-- Generated artifacts must not re-enter git after cleanup unless allowlisted as
-  fixtures, summaries, or intentional archives.
+- Generated artifacts must not re-enter git after cleanup. Required fixtures,
+  summaries, or intentional archives must use an explicitly owned source path.
 - `ask` remains the stable public interface for humans and agents.
 - JSON output must include enough detail for agents to take the next safe action.
 - Any destructive cleanup requires a reference scan and validation evidence.
@@ -780,7 +773,7 @@ still references.
 Recovery:
 
 - reference scan before deletion
-- fixture allowlist
+- explicit fixture ownership and consumer proof
 - report exact references
 - keep summary/index files for archived evidence
 
@@ -824,9 +817,8 @@ Failure: the inventory script flags real fixtures or intentional archives.
 
 Recovery:
 
-- allowlist with required reason
 - fixture path convention
-- policy doc update
+- ownership-policy update naming the fixture consumer
 - test proving the fixture is used
 
 ## Observability
@@ -837,7 +829,7 @@ The system must report:
 - tracked generated artifact count
 - historical artifact count and size estimate
 - unknown path count
-- allowlist count with reasons
+- owned fixture and intentional-archive counts
 - runtime budget counts
 - first-level/default-visible counts
 - advanced-visible counts
@@ -854,10 +846,10 @@ human prose.
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | SA1  | A repo surface ownership policy exists and defines source, fixture, policy, reference, intentional archive, vendored snapshot, generated output, runtime state, historical artifact, and unknown classifications. | `rg 'source \| fixture \| policy \| reference \| intentional_archive \| vendored_snapshot \| generated_(tracked\|ignored) \| runtime_state \| historical_artifact \| unknown' Docs/agents/15-repo-surface-ownership.md` |
 | SA2  | A surface inventory command reports tracked files by classification with JSON output.                                                                                                                             | `./bin/ask repo surface --json`                                                                                                                                                                                         |
-| SA3  | The inventory command flags tracked generated artifacts under `artifacts/**` and `Infrastructure/artifacts/**` unless they are allowlisted fixtures, summaries, or intentional archives.                          | Add a fixture test and run the inventory command in strict mode                                                                                                                                                         |
-| SA4  | The inventory command flags `Infrastructure/Infrastructure/**` unless explicitly allowlisted with a reason.                                                                                                       | Run inventory against the live tree and verify the nested path is reported or absent                                                                                                                                    |
+| SA3  | The inventory command flags tracked generated artifacts under `artifacts/**` and `Infrastructure/artifacts/**`; required fixtures, summaries, and intentional archives live under explicitly owned source paths. | Add a fixture-ownership test and run the inventory command in strict mode                                                                                                                                                |
+| SA4  | The inventory command flags `Infrastructure/Infrastructure/**` until its owner and active consumer are classified or the path is removed.                                                                         | Run inventory against the live tree and verify the nested path is reported or absent                                                                                                                                    |
 | SA5  | `.skillsets/**`, `.harness/*.db`, and `skills-system/**` have explicit ownership decisions before cleanup changes touch them.                                                                                     | Policy doc contains path rows and validation emits no `unknown` classification for those paths                                                                                                                          |
-| SA6  | Historical artifact cleanup preserves required fixtures and summaries while removing unreferenced run logs, JSONL event streams, timestamped validation output, and stale generated reports.                      | Reference scan passes; `git ls-files artifacts Infrastructure/artifacts` returns only allowlisted paths                                                                                                                 |
+| SA6  | Historical artifact cleanup preserves required fixtures and summaries in owned source paths while removing unreferenced run logs, JSONL event streams, timestamped validation output, and stale generated reports. | Reference scan passes; `git ls-files artifacts Infrastructure/artifacts` returns no obsolete generated output                                                                                                           |
 | SA7  | Retired skill debris is cleaned only after active route, deferred context, and docs references are scanned.                                                                                                       | `rg` reference scan for retired skill names is attached to cleanup evidence                                                                                                                                             |
 | SA8  | Deferred context remains reachable through indexed references and is not loaded by default.                                                                                                                       | Deferred context index check passes; runtime budget does not count deferred bodies as first-level context                                                                                                               |
 | SA9  | `ask repo doctor` provides one human-readable health summary plus JSON-compatible status for repo, sync, runtime budget, handles, surface policy, blockers, and next command.                                     | `./bin/ask repo doctor --json`                                                                                                                                                                                          |
@@ -944,7 +936,7 @@ through ./bin/ask, with tests and live JSON output against the current tree.
 Recommended follow-on plan units:
 
 ```text
-1. Remove tracked historical artifacts after reference scan and allowlist policy.
+1. Remove tracked historical artifacts after reference scan and ownership classification.
 2. Audit retired skill debris and fix stale active/deferred references.
 3. Resolve generated/runtime ownership for .skillsets, .harness databases, and skills-system.
 4. Add task-first product commands: ask repo doctor, ask repo onboard, ask skills improve, ask skills explain, ask skills prove, ask repo closeout --changed.

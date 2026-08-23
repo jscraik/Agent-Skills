@@ -169,8 +169,8 @@ v1 UI input contract (authoritative):
 Primary upstream artifact dependencies (transitive via composed outputs):
 - `Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json`
 - `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
-- `Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json`
-- `Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json`
+- `.harness/evidence/skill-graphs/pilot/shadow-dashboard.json`
+- `.harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json`
 - `Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl`
 - `Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md`
 - `Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md`

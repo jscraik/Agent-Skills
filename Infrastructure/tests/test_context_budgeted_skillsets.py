@@ -100,9 +100,12 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         self.assertTrue(manifest.is_file())
         lines = manifest.read_text(encoding="utf-8").splitlines()
         self.assertTrue(lines, "Expected at least one manifest row")
-        first_row = json.loads(lines[0])
-        self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
-        self.assertTrue(first_row["provenance"]["source_sha256"])
+        # Verify provenance requirements for every generated row, not just first_row
+        for line in lines:
+            row = json.loads(line)
+            self.assertEqual(row["provenance"]["projection_mode"], "rooted")
+            self.assertTrue(row["provenance"]["source_sha256"])
+            self.assertNotIn("source_revision", row["provenance"])
 
     def test_system_manifest_provenance_hashes_canonical_system_store(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
@@ -395,7 +398,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": policy_identity(),
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")
@@ -497,7 +499,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": "test",
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")
@@ -524,7 +525,6 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
                 "generator": "test",
                 "projection_mode": "rooted",
                 "policy_identity": "stale-old-identity",
-                "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
         }) + "\n", encoding="utf-8")
@@ -538,6 +538,35 @@ class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):
         stale = [v for v in violations if v["code"] == "SKILLSET_POLICY_IDENTITY_STALE"][0]
         self.assertEqual(stale["expected"], policy_identity())
         self.assertEqual(stale["actual"], "stale-old-identity")
+
+    def test_context_budget_rejects_unknown_provenance_keys(self) -> None:
+        from selection_policy import policy_identity  # noqa: PLC0415
+
+        repo_root = self.temp_dir / "repo"
+        skill_path = repo_root / "Skills" / "agent-ops" / "test" / "SKILL.md"
+        skill_path.parent.mkdir(parents=True)
+        skill_path.write_text("# Test skill\n", encoding="utf-8")
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "Skills/agent-ops/test/SKILL.md",
+            "provenance": {
+                "generator": "test",
+                "projection_mode": "rooted",
+                "policy_identity": policy_identity(),
+                "source_sha256": check_context_budget.file_hash(skill_path),
+                "unexpected": "value",
+            },
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=repo_root,
+        )
+
+        unknown = [v for v in violations if v["code"] == "SKILLSET_PROVENANCE_UNKNOWN_KEYS"]
+        self.assertEqual(unknown[0]["unknown_keys"], ["unexpected"])
 
 
 class TestRuntimeBudgetAndConfig(ContextBudgetTempDirTestCase):

@@ -77,4 +77,4 @@
 - Shell changes that touch JSON, package-manager, `uv`, or toolchain routing
   SHOULD run `bash scripts/run-uv-python.sh <command> [args...]` in addition
   to `pnpm run quality:scripts`.
-- Any exception to strict-mode, quoting, or destructive-command policy requires waiver metadata with rule ID or section, reason, tracking ticket, and expiry or ADR reference.
+- Strict-mode, quoting, and destructive-command failures must be fixed in the owning script before merge; no waiver path exists.

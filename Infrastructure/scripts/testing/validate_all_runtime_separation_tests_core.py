@@ -15,9 +15,10 @@ import re
 import subprocess
 import stat
 import textwrap
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -470,6 +471,32 @@ class RuntimeSeparationCurrentPathTests(unittest.TestCase):
                 "GOVERNANCE/runtime-separation/current.json",
                 f"Persistent mode must use GOVERNANCE path, got {output_path!r}",
             )
+
+    def test_persistent_mode_writes_selection_history_to_runtime_root(self) -> None:
+        """Persistent validation keeps selection history out of tracked artifacts."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            repo.run("--persistent")
+            args = repo.recorded_args_for("Infrastructure/scripts/verify_selection_contract.py")
+            self.assertIsNotNone(args, "verify_selection_contract.py was not called")
+            history_index = args.index("--history-path") + 1
+            self.assertEqual(
+                args[history_index],
+                ".tmp/agent-skills-artifacts/selection-quality/history.jsonl",
+            )
+
+    def test_persistent_ci_mode_does_not_write_local_selection_history(self) -> None:
+        """Fresh CI checkouts must not create incomplete local trend history."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            with mock.patch.dict(os.environ, {"CI": "true"}):
+                repo.run("--persistent")
+
+            args = repo.recorded_args_for("Infrastructure/scripts/verify_selection_contract.py")
+            self.assertIsNotNone(args, "verify_selection_contract.py was not called")
+            self.assertNotIn("--history-path", args)
 
     def test_ephemeral_and_persistent_current_paths_differ(self) -> None:
         """

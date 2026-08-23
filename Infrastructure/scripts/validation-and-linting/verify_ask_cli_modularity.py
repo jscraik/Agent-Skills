@@ -6,16 +6,12 @@ from __future__ import annotations
 import argparse
 import ast
 import subprocess
-from datetime import date
 from pathlib import Path
-from types import MappingProxyType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-LEGACY_SHAPE_DEBT = MappingProxyType({})
-LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 def parse_args() -> argparse.Namespace:
     """
     Create and parse command-line arguments for verifying the ask CLI modularity.
@@ -33,6 +29,8 @@ def parse_args() -> argparse.Namespace:
         help="Maximum allowed line count for Infrastructure/bin/ask.",
     )
     parser.add_argument("--changed-files", nargs="*", default=(), help="Repo-relative changed files to shape-check.")
+    parser.add_argument("--baseline-ref", help="Git revision used as the pre-change shape baseline.")
+    parser.add_argument("--staged-source", action="store_true", help="Read changed Python source from the Git index.")
     parser.add_argument("--max-file-lines", type=int, default=800, help="Maximum lines for new Python files.")
     parser.add_argument("--max-function-lines", type=int, default=40, help="Maximum lines for new or worsened functions.")
     parser.add_argument("--max-complexity", type=int, default=12, help="Maximum cyclomatic complexity for new or worsened functions.")
@@ -114,10 +112,50 @@ def _git_lines(args: list[str]) -> list[str]:
     return [line.strip() for line in _git_output(args).splitlines() if line.strip()]
 
 
-def _shape_baseline(path: Path | None = None) -> dict[str, object]:
+def _staged_paths() -> frozenset[str]:
+    candidates = _git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"])
+    return frozenset(path for path in candidates if path in _regular_index_paths())
+
+
+def _regular_index_paths() -> frozenset[str]:
+    paths: set[str] = set()
+    for entry in _git_output(["ls-files", "--stage", "-z"]).split("\0"):
+        metadata, separator, path = entry.partition("\t")
+        mode, _, _ = metadata.partition(" ")
+        if separator and mode in {"100644", "100755"}:
+            paths.add(path)
+    return frozenset(paths)
+
+
+def _default_baseline_ref(*, staged_source: bool = False) -> str | None:
+    if staged_source:
+        return "HEAD"
+    for candidate in ("origin/main", "main", "HEAD^"):
+        result = subprocess.run(
+            ["git", "merge-base", "HEAD", candidate],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return None
+
+
+def _shape_baseline(
+    path: Path | None = None,
+    baseline_ref: str = "HEAD",
+    *,
+    staged_source: bool = False,
+) -> dict[str, object]:
+    diff_args = ["diff"]
+    if staged_source:
+        diff_args.append("--cached")
+    diff_args.extend(("--name-only", "--diff-filter=D", baseline_ref, "--"))
     deleted = [
         item
-        for item in _git_lines(["diff", "--name-only", "--diff-filter=D", "HEAD", "--"])
+        for item in _git_lines(diff_args)
         if item.endswith(PYTHON_SUFFIX)
     ]
     siblings: list[str] = []
@@ -126,11 +164,11 @@ def _shape_baseline(path: Path | None = None) -> dict[str, object]:
         parent = Path(relative).parent.as_posix()
         siblings = [
             item
-            for item in _git_lines(["ls-tree", "-r", "--name-only", "HEAD", "--", parent])
+            for item in _git_lines(["ls-tree", "-r", "--name-only", baseline_ref, "--", parent])
             if item.endswith(PYTHON_SUFFIX)
         ]
     baseline_paths = dict.fromkeys([*deleted, *siblings])
-    head_text = {item: _git_output(["show", f"HEAD:{item}"]) for item in baseline_paths}
+    head_text = {item: _git_output(["show", f"{baseline_ref}:{item}"]) for item in baseline_paths}
     return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
 
 
@@ -299,20 +337,31 @@ def _function_fingerprint_metrics(
     return records
 
 
-def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
+def _changed_python_paths(paths: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
+    staged_paths = _staged_paths() if staged_source else frozenset()
     python_paths: list[Path] = []
     for path_text in paths:
-        if path_text.endswith(PYTHON_SUFFIX):
-            path = _repo_path(path_text)
-            if path.exists() and path.is_file():
-                python_paths.append(path)
+        if not path_text.endswith(PYTHON_SUFFIX):
+            continue
+        if staged_source:
+            if path_text in staged_paths:
+                python_paths.append(REPO_ROOT / path_text)
+            continue
+        path = _repo_path(path_text)
+        if path.exists() and path.is_file():
+            python_paths.append(path)
     return sorted(set(python_paths))
+
+
+def _current_source(path: Path, *, staged_source: bool = False) -> str:
+    if not staged_source:
+        return path.read_text(encoding="utf-8")
+    relpath = path.relative_to(REPO_ROOT).as_posix()
+    return _git_output(["show", f":{relpath}"])
 
 
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     line_count = len(current.splitlines())
     baseline_line_count = len(baseline.splitlines()) if baseline is not None else 0
     if line_count <= args.max_file_lines:
@@ -330,8 +379,6 @@ def _check_function_shape(
     shape_baseline: dict[str, object] | None = None,
 ) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
-    if relpath in LEGACY_SHAPE_DEBT_PATHS:
-        return
     current_metrics = _function_metrics(current, source="current")
     baseline_metrics = (
         _function_metrics(baseline, source="baseline")
@@ -348,42 +395,24 @@ def _check_function_shape(
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
-    # The changed-file hook must remain usable while unrelated, time-boxed
-    # legacy waivers are being retired.  A full repository run (without
-    # --changed-files) still fails closed on expired metadata; this scoped
-    # mode enforces the shape budget for the files in the current patch and
-    # leaves the repository-wide debt report to the dedicated full gate.
-    if not args.changed_files:
-        issues.extend(_check_legacy_shape_debt_metadata())
-    for path in _changed_python_paths(tuple(args.changed_files)):
-        current = path.read_text(encoding="utf-8")
+    staged_source = bool(getattr(args, "staged_source", False))
+    baseline_ref = getattr(args, "baseline_ref", None) or _default_baseline_ref(staged_source=staged_source)
+    if not baseline_ref:
+        return ["shape baseline unavailable: baseline revision could not be determined"]
+    baseline_by_parent: dict[Path, dict[str, object]] = {}
+    for path in _changed_python_paths(tuple(args.changed_files), staged_source=staged_source):
         try:
-            shape_baseline = _shape_baseline(path)
+            current = _current_source(path, staged_source=staged_source)
+            shape_baseline = baseline_by_parent.get(path.parent)
+            if shape_baseline is None:
+                shape_baseline = _shape_baseline(path, baseline_ref, staged_source=staged_source)
+                baseline_by_parent[path.parent] = shape_baseline
             baseline = _baseline_head_text(path, shape_baseline)
             _check_file_size(path, current, baseline, args, issues)
             _check_function_shape(path, current, baseline, args, issues, shape_baseline)
         except RuntimeError as exc:
             issues.append(f"{path.relative_to(REPO_ROOT).as_posix()} shape baseline unavailable: {exc}")
             break
-    return issues
-
-
-def _check_legacy_shape_debt_metadata() -> list[str]:
-    issues: list[str] = []
-    required_fields = ("owner", "rule_id", "ticket", "reason", "expires")
-    today = date.today()
-    for relpath, metadata in sorted(LEGACY_SHAPE_DEBT.items()):
-        missing = [field for field in required_fields if not metadata.get(field)]
-        if missing:
-            issues.append(f"{relpath} legacy shape debt missing waiver field(s): {', '.join(missing)}")
-            continue
-        try:
-            expires = date.fromisoformat(metadata["expires"])
-        except ValueError:
-            issues.append(f"{relpath} legacy shape debt has invalid expires date: {metadata['expires']}")
-            continue
-        if expires < today:
-            issues.append(f"{relpath} legacy shape debt expired on {metadata['expires']}")
     return issues
 
 

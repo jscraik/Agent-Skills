@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import subprocess
 import sys
+import tempfile
 import unittest
 import unittest.mock
 from pathlib import Path
@@ -156,23 +157,6 @@ class Runner:
         self.assertIn("function line budget", issues[0])
         self.assertIn("complexity budget", issues[1])
 
-    def test_changed_file_mode_defers_unrelated_expired_waivers(self) -> None:
-        validator = _load_validator()
-        original_debt = validator.LEGACY_SHAPE_DEBT
-        try:
-            validator.LEGACY_SHAPE_DEBT = {
-                "test/expired.py": {
-                    "owner": "test",
-                    "rule_id": "ask-cli-shape-budget",
-                    "ticket": "JSC-TEST",
-                    "reason": "test reason",
-                    "expires": "2020-01-01",
-                }
-            }
-            args = SimpleNamespace(changed_files=("README.md",))
-            self.assertEqual(validator._check_python_shape(args), [])
-        finally:
-            validator.LEGACY_SHAPE_DEBT = original_debt
     def test_moved_function_uses_deleted_sibling_as_shape_baseline(self) -> None:
         validator = _load_validator()
         args = SimpleNamespace(max_function_lines=1, max_complexity=1)
@@ -203,7 +187,11 @@ class Runner:
 
     def test_shape_baseline_failure_is_reported_and_stops_changed_file_scan(self) -> None:
         validator = _load_validator()
-        args = SimpleNamespace(changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",))
+        args = SimpleNamespace(
+            baseline_ref="HEAD",
+            changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",),
+            staged_source=False,
+        )
         with unittest.mock.patch.object(
             validator,
             "_shape_baseline",
@@ -228,7 +216,7 @@ class Runner:
             return completed(command, 0, "def baseline():\n    pass\n", "")
 
         with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result) as run:
-            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py")
+            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py", "BASE")
 
         self.assertEqual(baseline["deleted_python_paths"], ["deleted.py"])
         self.assertEqual(baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"])
@@ -236,7 +224,7 @@ class Runner:
         self.assertEqual(run.call_count, 4)
         self.assertIn(
             unittest.mock.call(
-                ["git", "ls-tree", "-r", "--name-only", "HEAD", "--", "Infrastructure/tests"],
+                ["git", "ls-tree", "-r", "--name-only", "BASE", "--", "Infrastructure/tests"],
                 cwd=REPO_ROOT,
                 text=True,
                 capture_output=True,
@@ -306,7 +294,11 @@ class Runner:
 
     def test_python_shape_passes_loaded_baseline_to_move_scan(self) -> None:
         validator = _load_validator()
-        args = SimpleNamespace(changed_files=("Infrastructure/tests/test_ask_cli_shape.py",))
+        args = SimpleNamespace(
+            baseline_ref="BASE",
+            changed_files=("Infrastructure/tests/test_ask_cli_shape.py",),
+            staged_source=False,
+        )
         shape_baseline = {
             "deleted_python_paths": [],
             "sibling_python_paths": [],
@@ -321,7 +313,11 @@ class Runner:
             issues = validator._check_python_shape(args)
 
         self.assertEqual(issues, [])
-        load_baseline.assert_called_once_with(REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py")
+        load_baseline.assert_called_once_with(
+            REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
+            "BASE",
+            staged_source=False,
+        )
         check_function_shape.assert_called_once_with(
             REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
             (REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py").read_text(encoding="utf-8"),
@@ -330,6 +326,242 @@ class Runner:
             issues,
             shape_baseline,
         )
+
+    def test_python_shape_reads_staged_source_against_head(self) -> None:
+        validator = _load_validator()
+        path = REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py"
+        args = SimpleNamespace(
+            baseline_ref=None,
+            changed_files=(path.relative_to(REPO_ROOT).as_posix(),),
+            staged_source=True,
+        )
+        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+
+        with (
+            unittest.mock.patch.object(validator, "_staged_paths", return_value=frozenset({args.changed_files[0]})),
+            unittest.mock.patch.object(validator, "_current_source", return_value="def staged():\n    return 1\n") as source,
+            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(validator, "_check_file_size"),
+            unittest.mock.patch.object(validator, "_check_function_shape"),
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+        source.assert_called_once_with(path, staged_source=True)
+        baseline.assert_called_once_with(path, "HEAD", staged_source=True)
+
+    def test_python_shape_checks_staged_file_missing_from_worktree(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_missing_worktree_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("staged_only.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(
+            issues,
+            ["staged_only.py:oversized exceeds function line budget (41 > 40)"],
+        )
+
+    def test_python_shape_skips_staged_deletion(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_deletion_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("deleted.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+
+    def test_python_shape_checks_staged_type_change(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_type_change_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("type_changed.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(
+            issues,
+            ["type_changed.py:oversized exceeds function line budget (41 > 40)"],
+        )
+
+    def test_python_shape_skips_staged_symlink_type_change(self) -> None:
+        validator = _load_validator()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            self._prepare_staged_symlink_type_change_fixture(root)
+            args = SimpleNamespace(
+                baseline_ref=None,
+                changed_files=("type_changed.py",),
+                max_complexity=12,
+                max_file_lines=800,
+                max_function_lines=40,
+                staged_source=True,
+            )
+            with unittest.mock.patch.object(validator, "REPO_ROOT", root):
+                issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+
+    @staticmethod
+    def _prepare_staged_missing_worktree_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        (root / "baseline.py").write_text("VALUE = 1\n", encoding="utf-8")
+        subprocess.run(("git", "add", "baseline.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        staged_path = root / "staged_only.py"
+        staged_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        subprocess.run(("git", "add", "staged_only.py"), cwd=root, check=True)
+        staged_path.unlink()
+
+    @staticmethod
+    def _prepare_staged_deletion_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        deleted_path = root / "deleted.py"
+        deleted_path.write_text("VALUE = 1\n", encoding="utf-8")
+        subprocess.run(("git", "add", "deleted.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish deletion baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        subprocess.run(("git", "rm", "-q", "deleted.py"), cwd=root, check=True)
+
+    @staticmethod
+    def _prepare_staged_type_change_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        (root / "target.txt").write_text("baseline\n", encoding="utf-8")
+        type_changed_path = root / "type_changed.py"
+        type_changed_path.symlink_to("target.txt")
+        subprocess.run(("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish type-change baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        type_changed_path.unlink()
+        type_changed_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
+
+    @staticmethod
+    def _prepare_staged_symlink_type_change_fixture(root: Path) -> None:
+        subprocess.run(("git", "init", "-q"), cwd=root, check=True)
+        type_changed_path = root / "type_changed.py"
+        type_changed_path.write_text("VALUE = 1\n", encoding="utf-8")
+        (root / "target.txt").write_text("not Python source\n", encoding="utf-8")
+        subprocess.run(("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True)
+        subprocess.run(
+            (
+                "git",
+                "-c",
+                "user.name=Structural Test",
+                "-c",
+                "user.email=structural@example.invalid",
+                "commit",
+                "-qm",
+                "test: establish regular-file baseline",
+            ),
+            cwd=root,
+            check=True,
+        )
+        type_changed_path.unlink()
+        type_changed_path.symlink_to("target.txt")
+        subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
+
+    def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
+        validator = _load_validator()
+        completed = subprocess.CompletedProcess
+
+        def git_result(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(command[:3], ["git", "merge-base", "HEAD"])
+            if command[3] == "origin/main":
+                return completed(command, 0, "base-sha\n", "")
+            return completed(command, 1, "", "missing")
+
+        with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result):
+            baseline = validator._default_baseline_ref()
+
+        self.assertEqual(baseline, "base-sha")
+
+    def test_python_shape_reuses_one_baseline_per_parent(self) -> None:
+        validator = _load_validator()
+        paths = (
+            REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
+            REPO_ROOT / "Infrastructure/tests/test_git_metadata_preflight.py",
+        )
+        args = SimpleNamespace(
+            baseline_ref="BASE",
+            changed_files=tuple(path.relative_to(REPO_ROOT).as_posix() for path in paths),
+            staged_source=False,
+        )
+        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+
+        with (
+            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(validator, "_check_file_size"),
+            unittest.mock.patch.object(validator, "_check_function_shape"),
+        ):
+            issues = validator._check_python_shape(args)
+
+        self.assertEqual(issues, [])
+        baseline.assert_called_once_with(paths[0], "BASE", staged_source=False)
 
 
 if __name__ == "__main__":

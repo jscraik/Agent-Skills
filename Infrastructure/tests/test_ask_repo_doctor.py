@@ -235,7 +235,7 @@ def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict]
                         "top_blocking_codes": [
                             {"code": "tracked_historical_artifact", "count": warning_count}
                         ] if warning_count else [],
-                        "next_action": "classify_allowlist_or_cleanup_tracked_surface",
+                        "next_action": "classify_or_cleanup_tracked_surface",
                         "operator_rule": "Do not flatten diagnostics.",
                     },
                 }

@@ -12,9 +12,8 @@ AST can judge every abstraction choice:
 * newly added explicit or module-level mutable global state.
 
 Existing debt is ratcheted: unchanged findings remain visible to the next
-refactoring slice but do not make an unrelated change fail.  New or worsened
-findings fail unless the owning change removes them or records a time-boxed
-waiver in the owning review surface.
+refactoring slice but do not make an unrelated change fail. New or worsened
+findings fail until the owning change removes them.
 """
 
 from __future__ import annotations
@@ -26,12 +25,9 @@ import os
 import subprocess
 import sys
 from collections import Counter
-from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import date
 from functools import lru_cache
 from pathlib import Path
-from types import MappingProxyType
 
 _SCRIPT_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPT_DIR not in sys.path:
@@ -62,10 +58,6 @@ MUTABLE_VALUE_NODES = (
 MUTABLE_CONSTRUCTOR_NAMES: frozenset[str] = frozenset(
     {"Counter", "bytearray", "defaultdict", "deque", "dict", "list", "set"}
 )
-PROGRAM_DESIGN_WAIVERS: Mapping[str, Mapping[str, str]] = MappingProxyType({})
-WAIVER_FIELDS = ("owner", "rule_id", "ticket", "reason", "expires")
-
-
 @dataclass(frozen=True)
 class Finding:
     """A source location and stable key for one design smell."""
@@ -73,11 +65,6 @@ class Finding:
     line: int
     key: str
     detail: str
-    waiver_key: str | None = None
-
-    @property
-    def effective_waiver_key(self) -> str:
-        return self.waiver_key or self.key
 
 
 @dataclass(frozen=True)
@@ -230,7 +217,6 @@ def _broad_exceptions(tree: ast.AST) -> list[Finding]:
                         node.lineno,
                         name,
                         f"except {name}",
-                        f"{name}@{node.lineno}:{node.col_offset}",
                     )
                 )
     return findings
@@ -433,17 +419,33 @@ def _rename_map(revision: str, *, staged: bool) -> dict[str, str]:
 
 @lru_cache(maxsize=1)
 def _staged_paths() -> frozenset[str]:
-    result = subprocess.run(
-        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"],
+    changed = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
-    if result.returncode != 0:
-        detail = result.stderr.strip() or "staged file list could not be read"
+    if changed.returncode != 0:
+        detail = changed.stderr.strip() or "staged file list could not be read"
         raise BaselineUnavailable(f"staged source lookup failed: {detail}")
-    return frozenset(line for line in result.stdout.splitlines() if line)
+    index = subprocess.run(
+        ["git", "ls-files", "--stage", "-z"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if index.returncode != 0:
+        detail = index.stderr.strip() or "Git index could not be read"
+        raise BaselineUnavailable(f"staged source lookup failed: {detail}")
+    regular_paths = {
+        path
+        for entry in index.stdout.split("\0")
+        for metadata, separator, path in (entry.partition("\t"),)
+        if separator and metadata.partition(" ")[0] in {"100644", "100755"}
+    }
+    return frozenset(path for path in changed.stdout.splitlines() if path in regular_paths)
 
 
 def _current_source_text(
@@ -536,37 +538,6 @@ def _exact_move_baseline(path: Path, current_text: str, revision: str) -> str | 
     )
 
 
-def _check_waiver_metadata(
-    waivers: Mapping[str, Mapping[str, str]] | None,
-    *,
-    validation_date: date,
-) -> list[str]:
-    issues: list[str] = []
-    for key, metadata in sorted((waivers or PROGRAM_DESIGN_WAIVERS).items()):
-        missing = [field for field in WAIVER_FIELDS if not metadata.get(field)]
-        if missing:
-            issues.append(f"{key} program-design waiver missing field(s): {', '.join(missing)}")
-            continue
-        try:
-            expires = date.fromisoformat(metadata["expires"])
-        except ValueError:
-            issues.append(f"{key} program-design waiver has invalid expires date: {metadata['expires']}")
-            continue
-        if expires < validation_date:
-            issues.append(f"{key} program-design waiver expired on {metadata['expires']}")
-    return issues
-
-
-def _is_waived(
-    relpath: str,
-    rule_id: str,
-    finding: Finding | str,
-    waivers: Mapping[str, Mapping[str, str]] | None,
-) -> bool:
-    finding_key = finding.effective_waiver_key if isinstance(finding, Finding) else finding
-    return f"{relpath}:{rule_id}:{finding_key}" in (waivers or PROGRAM_DESIGN_WAIVERS)
-
-
 def _new_findings(current: tuple[Finding, ...], baseline: tuple[Finding, ...]) -> list[Finding]:
     def identity(item: Finding) -> tuple[str, str]:
         return item.key, item.detail
@@ -586,19 +557,16 @@ def _check_smells(
     relpath: str,
     current: DesignMetrics,
     baseline: DesignMetrics,
-    waivers: Mapping[str, Mapping[str, str]] | None,
 ) -> list[str]:
     checks = (
-        ("boolean flag argument", "boolean-flag", current.boolean_flags, baseline.boolean_flags),
-        ("broad exception handler", "broad-exception", current.broad_exceptions, baseline.broad_exceptions),
-        ("global statement", "global-state", current.global_statements, baseline.global_statements),
-        ("module mutable state", "mutable-module-state", current.mutable_module_state, baseline.mutable_module_state),
+        ("boolean flag argument", current.boolean_flags, baseline.boolean_flags),
+        ("broad exception handler", current.broad_exceptions, baseline.broad_exceptions),
+        ("global statement", current.global_statements, baseline.global_statements),
+        ("module mutable state", current.mutable_module_state, baseline.mutable_module_state),
     )
     issues: list[str] = []
-    for label, rule_id, current_findings, baseline_findings in checks:
+    for label, current_findings, baseline_findings in checks:
         for finding in _new_findings(current_findings, baseline_findings):
-            if _is_waived(relpath, rule_id, finding, waivers):
-                continue
             issues.append(f"{relpath}:{finding.line}:{label}: {finding.detail}")
     return issues
 
@@ -609,7 +577,6 @@ def _check_source(
     baseline_text: str | None,
     *,
     max_public_parameters: int = MAX_PUBLIC_PARAMETERS,
-    waivers: Mapping[str, Mapping[str, str]] | None = None,
 ) -> list[str]:
     try:
         current = _metrics(current_text)
@@ -631,13 +598,12 @@ def _check_source(
         if (
             count > max_public_parameters
             and count > baseline_count
-            and not _is_waived(relpath, "public-interface", name, waivers)
         ):
             issues.append(
                 f"{relpath}:{line}:{name} public interface is too wide ({count} parameters > {max_public_parameters})"
             )
 
-    issues.extend(_check_smells(relpath, current, baseline, waivers))
+    issues.extend(_check_smells(relpath, current, baseline))
     return issues
 
 
@@ -664,6 +630,21 @@ def _is_changed_production_python(
     return _is_production_python(normalized, path=path, source_text=source_text)
 
 
+def _changed_candidate(
+    normalized: str,
+    staged_paths: frozenset[str],
+    *,
+    staged_source: bool,
+) -> Path | None:
+    relative = Path(normalized)
+    if relative.is_absolute() or ".." in relative.parts:
+        return None
+    if staged_source and normalized not in staged_paths:
+        return None
+    candidate = REPO_ROOT / normalized
+    return candidate if staged_source else candidate.resolve()
+
+
 def _changed_paths(
     changed_files: tuple[str, ...], *, staged_source: bool = False, source_ref: str | None = None
 ) -> list[Path]:
@@ -683,8 +664,9 @@ def _changed_paths(
     paths: list[Path] = []
     for relpath in changed_files:
         normalized = relpath.removeprefix("./")
-        candidate = REPO_ROOT / normalized
-        path = candidate.resolve()
+        path = _changed_candidate(normalized, staged_paths, staged_source=staged_source)
+        if path is None:
+            continue
         try:
             path.relative_to(REPO_ROOT)
         except ValueError:
@@ -757,15 +739,6 @@ def _scan_paths(
 def main() -> int:
     args = parse_args()
     changed_files = tuple(args.changed_files)
-    metadata_issues = _check_waiver_metadata(
-        None,
-        validation_date=date.today(),
-    )
-    if metadata_issues:
-        print("Program design waiver metadata failed:")
-        for issue in metadata_issues:
-            print(f"- {issue}")
-        return 1
     baseline_ref = args.baseline_ref or _default_baseline_ref(staged_source=args.staged_source, source_ref=args.source_ref)
     if not baseline_ref:
         print("Program design verification blocked: baseline revision could not be determined")

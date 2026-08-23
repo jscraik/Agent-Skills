@@ -259,6 +259,7 @@ class RunSkillEvalsLiftTests(unittest.TestCase):
                 + "\n",
                 encoding="utf-8",
             )
+            (refs_dir / "baseline-context.md").write_text("Package-only baseline guidance.\n", encoding="utf-8")
             (refs_dir / "evals.yaml").write_text(
                 textwrap.dedent(
                     """
@@ -267,6 +268,7 @@ class RunSkillEvalsLiftTests(unittest.TestCase):
                       - id: live-no-skill-baseline-lift
                         name: live no skill baseline lift
                         prompt: Start discovery.
+                        reference_paths: [references/baseline-context.md]
                         baseline_type: no_skill
                         prepend_skill: true
                         budgets:
@@ -279,9 +281,7 @@ class RunSkillEvalsLiftTests(unittest.TestCase):
                 + "\n",
                 encoding="utf-8",
             )
-
             prompts: list[str] = []
-
             def fake_openai_exec(**kwargs):
                 prompt = kwargs["prompt"]
                 output_path = kwargs["output_last_message_path"]
@@ -292,7 +292,6 @@ class RunSkillEvalsLiftTests(unittest.TestCase):
                     output = "Generic response without the discovery contract.\n"
                 output_path.write_text(output, encoding="utf-8")
                 return 0, output, ""
-
             reports_dir = Path(tmpdir) / "reports"
             with unittest.mock.patch("run_skill_evals.run_openai_exec", side_effect=fake_openai_exec):
                 exit_code = main(
@@ -306,11 +305,12 @@ class RunSkillEvalsLiftTests(unittest.TestCase):
                         "json",
                     ]
                 )
-
             self.assertEqual(exit_code, 0)
             self.assertEqual(len(prompts), 2)
             self.assertIn("SKILL.md", prompts[0])
+            self.assertIn("Package-only baseline guidance.", prompts[0])
             self.assertNotIn("SKILL.md", prompts[1])
+            self.assertNotIn("<REFERENCE", prompts[1])
             self.assertEqual(prompts[1].strip(), "Start discovery.")
 
             report_dirs = sorted((reports_dir / "demo-skill").glob("*"))

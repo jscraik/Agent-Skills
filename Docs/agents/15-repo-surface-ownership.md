@@ -8,7 +8,7 @@
 - [Path Policy](#path-policy)
 - [Unclassified Ownership](#unclassified-ownership)
 - [Decision Tests](#decision-tests)
-- [Allowlist Contract](#allowlist-contract)
+- [Canonical Ownership Rules](#canonical-ownership-rules)
 - [Cleanup Rules](#cleanup-rules)
 - [Validation](#validation)
 
@@ -39,7 +39,7 @@ This policy complements [Path Ownership Boundaries](/Docs/agents/14-path-ownersh
 
 - path ownership says where humans may edit;
 - repo surface ownership says how the repository classifies tracked surfaces
-  before cleanup, allowlisting, or retention decisions.
+  before cleanup or retention decisions.
 
 ## Classifications
 
@@ -55,7 +55,7 @@ This policy complements [Path Ownership Boundaries](/Docs/agents/14-path-ownersh
 | `generated_ignored`       | Reproducible generated output that should not be tracked.                                       | Ignore or remove from git after verification.               |
 | `runtime_state`           | Local state written by tools, runtimes, harnesses, or automations.                              | Do not track unless converted into a documented fixture.    |
 | `historical_artifact`     | Run output, dated evidence, logs, event streams, or generated reports.                          | Ignore by default; preserve summaries or fixtures only.     |
-| `classification_required` | Ownership has not yet been encoded in policy or allowlist evidence.                             | Treat as a blocking defect until reclassified or removed.   |
+| `classification_required` | Ownership has not yet been encoded in the canonical classifier.                                  | Treat as a blocking defect until reclassified or removed.   |
 
 Tracked surfaces must not use `any` or `unknown` as ownership classifications.
 Those labels hide authority boundaries. When ownership cannot be proven, emit
@@ -77,11 +77,11 @@ Those labels hide authority boundaries. When ownership cannot be proven, emit
 | `Infrastructure/scripts/**`                           | `source`                            | Tooling source. Track and validate with the relevant focused tests.                                                                                                                                                                                         |
 | `Infrastructure/references/**`                        | `reference`                         | Preserve when indexed and intentionally referenced.                                                                                                                                                                                                         |
 | `Infrastructure/references/deferred-skill-context/**` | `reference`                         | Preserve behind indexes; do not load by default.                                                                                                                                                                                                            |
-| `Infrastructure/artifacts/**`                         | `historical_artifact`               | Ignore by default; track only allowlisted fixtures, summaries, or indexes.                                                                                                                                                                                  |
-| `artifacts/**`                                        | `historical_artifact`               | Generated evidence. Ignore by default; keep summaries rather than event streams.                                                                                                                                                                            |
+| `Infrastructure/artifacts/**`                         | `historical_artifact`               | Ignore by default; retain only canonical fixtures, references, or intentional archives.                                                                                                                                                                     |
+| `artifacts/**`                                        | `historical_artifact`               | Generated evidence. Ignore by default; keep canonical summaries rather than event streams.                                                                                                                                                                  |
 | `.harness/*.db`                                       | `runtime_state` by default          | Do not track unless moved under fixtures and documented.                                                                                                                                                                                                    |
 | `.harness/backups/**`                                 | `runtime_state`                     | Do not track.                                                                                                                                                                                                                                               |
-| `.harness/ci-migrate-snapshots/**`                    | `historical_artifact`               | Ignore by default; track only an allowlisted fixture or retained summary.                                                                                                                                                                                   |
+| `.harness/ci-migrate-snapshots/**`                    | `historical_artifact`               | Ignore by default; retain only a canonical fixture, reference, or intentional archive.                                                                                                                                                                     |
 | `.harness/archive/**`                                 | `intentional_archive`               | Track only retained historical Harness specs, plans, and review material with an archive reason or index.                                                                                                                                                   |
 | `.harness/core/**`                                    | `policy`                            | Track repo invariants and operating rules.                                                                                                                                                                                                                  |
 | `.harness/knowledge/**`                               | `reference` or `policy`             | Preserve Project Brain linkage when intentionally indexed.                                                                                                                                                                                                  |
@@ -109,7 +109,7 @@ Those labels hide authority boundaries. When ownership cannot be proven, emit
 | `.workouts/**`                                        | `fixture` or `source`               | Track workout harness source and stable fixtures.                                                                                                                                                                                                           |
 | `.skill-telemetry/**`                                 | `runtime_state`                     | Do not track.                                                                                                                                                                                                                                               |
 | `skills-system/<locked-or-bridge>/**`                 | `generated_tracked`                 | Preserve governed system-skill bridge content pinned by `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json`; refresh only through the system-skills lock and projection-integrity workflow.                                                        |
-| `Infrastructure/Infrastructure/**`                    | `classification_required` violation | Treat duplicated path shape as suspicious until allowlisted with reason.                                                                                                                                                                                    |
+| `Infrastructure/Infrastructure/**`                    | `classification_required` violation | Treat duplicated path shape as suspicious until its canonical owner is proved or the path is removed.                                                                                                                                                       |
 
 ## Future Artifact Rule
 
@@ -118,8 +118,8 @@ Historical artifact debt is split into two lanes:
 - Existing tracked historical artifacts remain advisory diagnostic debt until a
   cleanup slice can classify and remove them safely.
 - Any changed file that classifies as `historical_artifact` is blocking unless
-  it has a reviewed allowlist entry or is converted into a fixture, reference,
-  summary, index, or intentional archive.
+  it is converted into a canonical fixture, reference, summary, index, or
+  intentional archive.
 
 Use this rule to keep the legacy backlog visible without letting new generated
 evidence, logs, event streams, or run output enter the repository as ordinary
@@ -134,8 +134,8 @@ If the gate reports `new_historical_artifact_debt`, do one of:
 1. Move the output to ignored temp or evidence storage.
 2. Convert the artifact candidate into a documented fixture/reference/archive
    with a reader and retention reason.
-3. Add a reviewed entry to `Infrastructure/policy/repo_surface_allowlist.json`
-   with owner and review date.
+3. Encode a canonical classifier rule only when the path category itself is a
+   durable source, policy, reference, fixture, or archive surface.
 
 ## Unclassified Ownership
 
@@ -150,8 +150,8 @@ When a path is `classification_required`:
    blocker.
 4. Reclassify only after evidence exists.
 
-Strict inventory mode must fail when non-allowlisted classification-required
-ownership exists. New policy rules, validators, and allowlists must not use
+Strict inventory mode must fail when classification-required ownership exists.
+New policy rules and validators must not use
 `any` or `unknown` as tracked-surface classifications.
 
 ## Decision Tests
@@ -164,49 +164,14 @@ Use these tests before resolving known ambiguous surfaces.
 | `.harness/*.db`                    | `runtime_state`, `fixture`, `classification_required`                                        | If local harness or runtime commands write it, classify as runtime state. If tests read a stable DB, move or document it under fixtures. If no reader or fixture role is proven, mark it classification-required until ownership is encoded.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `.harness/**/*.md`                 | `policy`, `reference`, `source`, `fixture`, `intentional_archive`, `classification_required` | Track curated Markdown under documented roots only. Primary execution authority belongs to roots classified as policy above, especially `.harness/linear/**`, `.harness/reframes/**`, legacy `.harness/refactors/**`, `.harness/decisions/**`, `.harness/core/**`, `.harness/brainstorm/**`, and `.harness/solutions/**`; `.harness/specs/**`, `.harness/plan/**`, `.harness/ideate/**`, and `.harness/memory/**` remain reference unless an active workflow explicitly admits a selected document as authority. Strategy, triage, review, feature docs, and archive docs remain secondary context unless admitted by the selected slice. Every tracked `.harness/**/*.md` file must have an explicit owner and classification before it is treated as source, fixture, policy, reference, or intentional archive. |
 | `skills-system/**`                 | `generated_tracked`, `historical_artifact`, `classification_required`                        | Default to `generated_tracked` only when the path remains covered by `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json` or an explicit `.system` bridge projection. If a path falls outside that lock or bridge contract, mark it classification-required until a reader, update command, or cleanup decision is recorded.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `Infrastructure/Infrastructure/**` | `historical_artifact`, `intentional_archive`, `classification_required`                      | If no active source, runtime reader, or fixture depends on it, classify as historical artifact or cleanup candidate. If retained, require an allowlist reason explaining the duplicated path shape.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `Infrastructure/Infrastructure/**` | `historical_artifact`, `intentional_archive`, `classification_required`                      | If no active source, runtime reader, or fixture depends on it, classify as historical artifact or cleanup candidate. Retain it only after moving it beneath a canonical fixture, reference, or intentional archive surface.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
-## Allowlist Contract
+## Canonical Ownership Rules
 
-Use allowlists to explain intentional exceptions, not to hide policy debt.
-
-Canonical allowlist path:
-
-```text
-Infrastructure/policy/repo_surface_allowlist.json
-```
-
-The first-slice schema is:
-
-```json
-{
-  "schema_version": 1,
-  "entries": [
-    {
-      "id": "stable-exception-id",
-      "match_type": "exact",
-      "pattern": "path/or/prefix",
-      "classification": "fixture",
-      "reason": "why this exception is intentionally tracked",
-      "owner": "owning area or person",
-      "review_after": "YYYY-MM-DD"
-    }
-  ]
-}
-```
-
-Rules:
-
-- `match_type` must be `exact`, `glob`, or `prefix`.
-- Regex matching is excluded from the first slice.
-- `reason` must be non-empty.
-- Each entry must include `expires` or `review_after`.
-- Entries can downgrade a strict blocking finding to a warning only when the
-  entry classification matches the classifier result.
-- Matching precedence is deterministic: `exact`, then longest `prefix`, then
-  longest `glob`, with ties sorted by `id`.
-- The finding payload should report `allowlist_entry: null` or the matching
-  allowlist entry `id`.
+The classifier owns the complete path-to-classification mapping. It does not
+accept exceptions, expiry dates, or a downgrade path. A path is either in a
+canonical source, policy, reference, fixture, archive, generated projection,
+or runtime-output category, or it remains a visible cleanup finding.
 
 ## Cleanup Rules
 
@@ -218,7 +183,7 @@ Before a path can be marked `safe_to_delete`, evidence must show:
 - zero runtime readers or projection dependencies;
 - zero deferred-context references unless the material is moved behind an indexed
   reference;
-- an explicit owner, allowlist, or retention decision.
+- an explicit canonical owner or retention decision.
 
 Historical artifact cleanup should preserve:
 
