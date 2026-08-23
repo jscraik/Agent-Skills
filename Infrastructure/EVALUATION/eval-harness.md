@@ -69,10 +69,10 @@ scorecard, release manifest, traces, and staged eval artifacts remain canonical.
 Run `./bin/ask evals macro-report --json --robot` after smoke or release evals
 have produced saved `summary.json` artifacts. The command writes:
 
-- `.harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/macro/macro-eval-events.jsonl`
-- `.harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/macro/macro-eval-report.json`
-- `.harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/macro/macro-eval-report.mdx`
-- `.harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/evals/macro/components/eval-report.tsx`
+- `.tmp/agent-skills-artifacts/evals/macro/macro-eval-events.jsonl`
+- `.tmp/agent-skills-artifacts/evals/macro/macro-eval-report.json`
+- `.tmp/agent-skills-artifacts/evals/macro/macro-eval-report.mdx`
+- `.tmp/agent-skills-artifacts/evals/macro/components/eval-report.tsx`
 
 Each JSONL row is one eval case with deterministic labels for `case_type`,
 `run_outcome`, `eval_finding`, and `behavior_pattern`. This is the stable input

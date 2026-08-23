@@ -1,68 +1,55 @@
 from ask_evals_command_tests_01 import *  # noqa: F403
 
-def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
+
+def _write_macro_eval_summary(tmp_path: Path) -> None:
     report_dir = tmp_path / ".tmp" / "agent-skills-artifacts" / "skills" / "demo-skill" / "run-1"
+    fixture_path = Path(__file__).parent / "fixtures" / "evals" / "macro-report-summary.json"
     report_dir.mkdir(parents=True)
-    (report_dir / "summary.json").write_text(
-        json.dumps(
-            {
-                "schema_version": "2.1",
-                "generated_at": "2026-05-25T10:00:00Z",
-                "skill": "demo-skill",
-                "run_id": "run-1",
-                "eval_mode": "release",
-                "runner_mode": "codex",
-                "decision": "fail",
-                "claim_to_evidence": {"passed": True, "blocking_gaps": []},
-                "cases": [
-                    {
-                        "id": "pricing-exception",
-                        "name": "Pricing exception",
-                        "category": "pricing",
-                        "passed": False,
-                        "baseline_type": "neutral_repo_baseline",
-                        "baseline_id": "pricing-neutral",
-                        "comparison_inputs": {"control": "without-skill"},
-                        "baseline_comparisons": {
-                            "codex": {
-                                "status": "compared",
-                                "skill_lift": 1,
-                                "is_beneficial": True,
-                                "regression": False,
-                            }
-                        },
-                        "skill_lift": 1,
-                        "is_beneficial": True,
-                        "baseline_regression": False,
-                        "readiness_state": "comparison_incomplete",
-                        "metric_availability": "available",
-                        "evidence_surfaces": ["deterministic_checks", "expected_signals"],
-                        "check_evidence": True,
-                        "hard_gates": ["no_false_completion"],
-                        "expected_evidence": ["acceptance"],
-                        "tier1_failed": True,
-                        "tier1_failures": ["expected margin guardrail evidence"],
-                        "runners": {
-                            "codex": {
-                                "metrics": {
-                                    "trace": {"tool_calls": 2},
-                                    "expected_signals": {"score": 75},
-                                },
-                            },
-                        },
-                    },
-                    {
-                        "id": "clean-path",
-                        "category": "clean",
-                        "passed": True,
-                        "runners": {},
-                    },
-                ],
-            }
-        ),
-        encoding="utf-8",
-    )
+    (report_dir / "summary.json").write_text(fixture_path.read_text(encoding="utf-8"), encoding="utf-8")
     (report_dir / "release_manifest.json").write_text('{"schema_version":"1.0"}\n', encoding="utf-8")
+
+
+def _assert_pricing_macro_event(row: dict) -> None:
+    expected = {
+        "case_type": "pricing",
+        "run_outcome": "failed",
+        "eval_finding": "expected margin guardrail evidence",
+        "behavior_pattern": "pricing:failed:expected-margin-guardrail-evidence",
+        "baseline_status": "executed_compared",
+        "baseline_type": "neutral_repo_baseline",
+        "skill_lift": 1,
+        "is_beneficial": True,
+        "baseline_regression": False,
+        "readiness_state": "comparison_incomplete",
+        "metric_availability": "available",
+        "check_evidence": True,
+        "verification_strategy": "executed_deterministic",
+    }
+    assert {key: row[key] for key in expected} == expected
+    assert row["verifier_types"] == [
+        "deterministic_checks", "executed_check_evidence", "expected_evidence",
+        "expected_signals", "hard_gates", "trace_metrics",
+    ]
+
+
+def _assert_macro_groups(groups: dict) -> None:
+    assert groups["by_skill_behavior_pattern"] == [
+        {"skill": "demo-skill", "behavior_pattern": "clean:passed:none", "trace_count": 1},
+        {"skill": "demo-skill", "behavior_pattern": "pricing:failed:expected-margin-guardrail-evidence", "trace_count": 1},
+    ]
+    assert groups["by_verification_strategy"] == [
+        {"verification_strategy": "acceptance_only", "trace_count": 1},
+        {"verification_strategy": "executed_deterministic", "trace_count": 1},
+    ]
+    assert groups["by_baseline_status"] == [
+        {"baseline_status": "executed_compared", "trace_count": 1},
+        {"baseline_status": "none_declared", "trace_count": 1},
+    ]
+    assert {"verifier_type": "trace_metrics", "trace_count": 1} in groups["by_verifier_type"]
+
+
+def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
+    _write_macro_eval_summary(tmp_path)
     component_source = tmp_path / "Infrastructure" / "templates" / "components"
     component_source.mkdir(parents=True)
     (component_source / "eval-report.tsx").write_text("export function MacroEvalTotals() { return null; }\n", encoding="utf-8")
@@ -73,29 +60,13 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
     assert result.data["totals"]["summaries_scanned"] == 1
     assert result.data["totals"]["events"] == 2
     assert result.data["totals"]["behavior_patterns"] == 2
+    assert result.data["artifacts"]["events_jsonl"].startswith(
+        ".tmp/agent-skills-artifacts/evals/macro/"
+    )
     events_path = tmp_path / result.data["artifacts"]["events_jsonl"]
+    assert not (tmp_path / "Infrastructure" / "artifacts" / "evals" / "macro").exists()
     rows = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
-    assert rows[0]["case_type"] == "pricing"
-    assert rows[0]["run_outcome"] == "failed"
-    assert rows[0]["eval_finding"] == "expected margin guardrail evidence"
-    assert rows[0]["behavior_pattern"] == "pricing:failed:expected-margin-guardrail-evidence"
-    assert rows[0]["baseline_status"] == "executed_compared"
-    assert rows[0]["baseline_type"] == "neutral_repo_baseline"
-    assert rows[0]["skill_lift"] == 1
-    assert rows[0]["is_beneficial"] is True
-    assert rows[0]["baseline_regression"] is False
-    assert rows[0]["readiness_state"] == "comparison_incomplete"
-    assert rows[0]["metric_availability"] == "available"
-    assert rows[0]["check_evidence"] is True
-    assert rows[0]["verification_strategy"] == "executed_deterministic"
-    assert rows[0]["verifier_types"] == [
-        "deterministic_checks",
-        "executed_check_evidence",
-        "expected_evidence",
-        "expected_signals",
-        "hard_gates",
-        "trace_metrics",
-    ]
+    _assert_pricing_macro_event(rows[0])
     assert rows[0]["summary_path"] == ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/summary.json"
     assert rows[0]["release_manifest_path"] == ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/release_manifest.json"
     assert rows[1]["case_type"] == "clean"
@@ -104,27 +75,7 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
     assert rows[1]["baseline_status"] == "none_declared"
     assert rows[1]["verification_strategy"] == "acceptance_only"
     assert (tmp_path / result.data["artifacts"]["report_json"]).is_file()
-    assert result.data["groups"]["by_skill_behavior_pattern"] == [
-        {
-            "skill": "demo-skill",
-            "behavior_pattern": "clean:passed:none",
-            "trace_count": 1,
-        },
-        {
-            "skill": "demo-skill",
-            "behavior_pattern": "pricing:failed:expected-margin-guardrail-evidence",
-            "trace_count": 1,
-        },
-    ]
-    assert result.data["groups"]["by_verification_strategy"] == [
-        {"verification_strategy": "acceptance_only", "trace_count": 1},
-        {"verification_strategy": "executed_deterministic", "trace_count": 1},
-    ]
-    assert result.data["groups"]["by_baseline_status"] == [
-        {"baseline_status": "executed_compared", "trace_count": 1},
-        {"baseline_status": "none_declared", "trace_count": 1},
-    ]
-    assert {"verifier_type": "trace_metrics", "trace_count": 1} in result.data["groups"]["by_verifier_type"]
+    _assert_macro_groups(result.data["groups"])
     assert (tmp_path / result.data["artifacts"]["report_components"]).is_file()
     mdx_text = (tmp_path / result.data["artifacts"]["report_mdx"]).read_text(encoding="utf-8")
     assert "schema_version: skill-macro-eval-report.mdx.v1" in mdx_text
