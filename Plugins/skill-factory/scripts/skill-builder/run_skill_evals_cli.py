@@ -1,20 +1,6 @@
 from run_skill_evals_preflight import *  # noqa: F403
 
-def build_arg_parser() -> argparse.ArgumentParser:
-    """
-    Builds and returns the command-line argument parser for run_skill_evals.py.
-
-    The parser includes options for selecting cases and runners, eval suite mode and categories,
-    timeout and runtime configuration, Codex/Codex/OpenAI CLI overrides and extra flags,
-    JSONL capture and reporting paths, and tier2 gating behavior.
-
-    Returns:
-        argparse.ArgumentParser: A parser configured with the script's CLI options.
-    """
-    p = argparse.ArgumentParser(
-        prog="run_skill_evals.py",
-        description="Run skill evals using Codex, Codex (Kimi/Zai), and/or OpenAI CLI runners.",
-    )
+def _add_case_selection_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("path", help="Path to a skill directory or SKILL.md.")
     p.add_argument(
         "--list-cases",
@@ -22,6 +8,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="List available eval cases (respects --case/--category filters) and exit.",
     )
 
+    p.add_argument("--case", action="append", default=[], help="Run only matching eval case ids/names (repeatable or comma-separated). Substring match against case id and name.")
+    p.add_argument("--eval-mode", choices=_EVAL_MODE_CHOICES, default="standard", help="Eval suite mode. `standard` preserves current behavior, `smoke` runs a faster contract/regression subset, and `release` runs the full release-grade suite.")
+    p.add_argument(
+        "--category",
+        action="append",
+        default=[],
+        help=(
+            "Run only evals in matching category (repeatable or comma-separated). "
+            f"Allowed: {', '.join(sorted(_VALID_CATEGORIES))}."
+        ),
+    )
+
+
+def _add_runner_selection_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--runner", choices=_RUNNER_CHOICES, default="codex", help="Single-run mode runner.")
     p.add_argument(
         "--smoke",
@@ -38,34 +38,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         ),
     )
     p.add_argument("--dual-run", action="store_true", help="Run both Codex and Codex-Kimi for every eval case.")
-    p.add_argument(
-        "--case",
-        action="append",
-        default=[],
-        help=(
-            "Run only matching eval case ids/names (repeatable or comma-separated). "
-            "Substring match against case id and name."
-        ),
-    )
-    p.add_argument(
-        "--eval-mode",
-        choices=_EVAL_MODE_CHOICES,
-        default="standard",
-        help=(
-            "Eval suite mode. `standard` preserves current behavior, "
-            "`smoke` runs a faster contract/regression subset, and `release` runs the full release-grade suite."
-        ),
-    )
-    p.add_argument(
-        "--category",
-        action="append",
-        default=[],
-        help=(
-            "Run only evals in matching category (repeatable or comma-separated). "
-            f"Allowed: {', '.join(sorted(_VALID_CATEGORIES))}."
-        ),
-    )
 
+
+def _add_runtime_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--workspace", default=None, help="Workspace root to run commands in (defaults to repo root guess).")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
     p.add_argument(
@@ -102,11 +77,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "(default: d). Set empty string to disable."
         ),
     )
-    p.add_argument(
-        "--codex-home",
-        default=None,
-        help="Set CODEX_HOME. This replaces the full Codex home; live Codex runs need authenticated state in the selected home.",
-    )
+
+
+def _add_provider_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--codex-home", default=None, help="Set CODEX_HOME. This replaces the full Codex home; live Codex runs need authenticated state in the selected home.")
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path.")
     p.add_argument("--openai-bin", default=None, help="Override openai CLI path.")
     p.add_argument(
@@ -126,26 +100,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="DEPRECATED: plain `codex` runner was removed. Use --codex-kimi-settings / --codex-zai-settings.",
     )
-    p.add_argument(
-        "--codex-kimi-settings",
-        default="kimi_settings.json",
-        help="Settings JSON used by runner `codex-kimi` (default: kimi_settings.json).",
-    )
-    p.add_argument(
-        "--codex-zai-settings",
-        default="zai_settings.json",
-        help="Settings JSON used by runner `codex-zai` (default: zai_settings.json).",
-    )
-    p.add_argument(
-        "--codex-kimi-command",
-        default="codex-kimi",
-        help="Interactive shell command used for runner `codex-kimi` (default: codex-kimi).",
-    )
-    p.add_argument(
-        "--codex-zai-command",
-        default="codex-zai",
-        help="Interactive shell command used for runner `codex-zai` (default: codex-zai).",
-    )
+    p.add_argument("--codex-kimi-settings", default="kimi_settings.json", help="Settings JSON used by runner `codex-kimi` (default: kimi_settings.json).")
+    p.add_argument("--codex-zai-settings", default="zai_settings.json", help="Settings JSON used by runner `codex-zai` (default: zai_settings.json).")
+    p.add_argument("--codex-kimi-command", default="codex-kimi", help="Interactive shell command used for runner `codex-kimi` (default: codex-kimi).")
+    p.add_argument("--codex-zai-command", default="codex-zai", help="Interactive shell command used for runner `codex-zai` (default: codex-zai).")
     p.add_argument(
         "--codex-arg",
         action="append",
@@ -158,12 +116,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=[],
         help="Extra flag to pass to openai CLI (repeatable; supports `--openai-arg --flag`).",
     )
+
+
+def _add_output_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--capture-jsonl", action="store_true", help="Capture Codex JSONL event stream (--json). Auto-enabled when deterministic checks or budgets are present; required for --dual-run.")
     p.add_argument(
-        "--capture-jsonl",
-        action="store_true",
-        help="Capture Codex JSONL event stream (--json). Auto-enabled when deterministic checks or budgets are present; required for --dual-run.",
+        "--reports-dir",
+        default=".tmp/agent-skills-artifacts/skills",
+        help="Runtime-owned base directory for eval reports.",
     )
-    p.add_argument("--reports-dir", default="Infrastructure/artifacts/skills", help="Base directory for eval reports.")
     p.add_argument("--scorecard-out", default=None, help="Optional explicit path for merged scorecard JSON.")
     p.add_argument("--junit-out", default=None, help="Optional explicit path for JUnit XML output (default: <run>/junit.xml).")
     p.add_argument("--format", choices=["text", "json"], default="text")
@@ -173,7 +134,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="warn",
         help="How to treat tier-2 findings (rubric/efficiency budgets).",
     )
-    return p
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    """Build the run_skill_evals command-line parser."""
+    parser = argparse.ArgumentParser(
+        prog="run_skill_evals.py",
+        description="Run skill evals using Codex, Codex (Kimi/Zai), and/or OpenAI CLI runners.",
+    )
+    _add_case_selection_args(parser)
+    _add_runner_selection_args(parser)
+    _add_runtime_args(parser)
+    _add_provider_args(parser)
+    _add_output_args(parser)
+    return parser
 
 
 def _guess_repo_root(start: Path) -> Path:

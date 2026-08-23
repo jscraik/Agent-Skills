@@ -19,10 +19,13 @@ _FM_DELIM = re.compile(r"^\s*---\s*$")
 _YAML_NAME_LINE = re.compile(r"^\s*name\s*:\s*(.+?)\s*$")
 
 
-def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run repo-wide skill quality checks.")
+def _add_eval_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--root", default=".", help="Repo root")
-    p.add_argument("--reports-dir", default=".tmp/agent-skills-artifacts/skills", help="Scorecard output directory")
+    p.add_argument(
+        "--reports-dir",
+        default=".tmp/agent-skills-artifacts/skills",
+        help="Runtime-owned scorecard output directory",
+    )
     p.add_argument("--tier2-mode", choices=["warn", "fail", "off"], default="warn")
     p.add_argument("--run-evals", action="store_true", help="Run run_skill_evals.py for each skill")
     p.add_argument("--runner", default="codex", help="Single-run eval runner.")
@@ -40,6 +43,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--codex-zai-settings", default=None, help="Path to pass through as --codex-zai-settings.")
     p.add_argument("--codex-kimi-command", default=None, help="Path/name to pass through as --codex-kimi-command.")
     p.add_argument("--codex-zai-command", default=None, help="Path/name to pass through as --codex-zai-command.")
+
+
+def _add_quality_output_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--baseline-file", default=None, help="Optional baseline JSON of known structure failures.")
     p.add_argument("--write-baseline", action="store_true", help="Write/update baseline JSON from current structure failures.")
     p.add_argument(
@@ -64,7 +70,13 @@ def parse_args() -> argparse.Namespace:
         help="Optional aggregate SARIF output path (default: <reports-dir>/skill-structure-gates.sarif).",
     )
     p.add_argument("--format", choices=["text", "json"], default="text")
-    return p.parse_args()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run repo-wide skill quality checks.")
+    _add_eval_args(parser)
+    _add_quality_output_args(parser)
+    return parser.parse_args()
 
 
 def find_skill_dirs(root: Path) -> List[Path]:

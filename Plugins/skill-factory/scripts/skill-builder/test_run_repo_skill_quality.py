@@ -21,6 +21,16 @@ import run_repo_skill_quality
 
 
 class RunRepoSkillQualityTests(unittest.TestCase):
+    def test_default_outputs_are_runtime_owned(self) -> None:
+        with patch.object(sys, "argv", ["run_repo_skill_quality.py"]):
+            args = run_repo_skill_quality.parse_args()
+
+        self.assertEqual(args.reports_dir, ".tmp/agent-skills-artifacts/skills")
+        self.assertEqual(
+            args.benchmark_output_json,
+            ".tmp/agent-skills-artifacts/industry-benchmark-latest.json",
+        )
+
     def test_find_skill_dirs_keeps_live_allowlisted_skills_after_recategory_drift(self) -> None:
         skills = {path.relative_to(REPO_ROOT).as_posix() for path in run_repo_skill_quality.find_skill_dirs(REPO_ROOT)}
         expected = {
