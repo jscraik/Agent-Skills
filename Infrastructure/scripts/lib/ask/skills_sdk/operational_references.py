@@ -140,13 +140,33 @@ def _validate_capsule_text(text: str, target_path: str, findings: list[str]) -> 
 def _section_bodies(text: str) -> dict[str, str]:
     sections: dict[str, list[str]] = {}
     current: str | None = None
+    fence: str | None = None
     for line in text.splitlines():
+        delimiter = _fence_delimiter(line)
+        if fence is not None:
+            if delimiter and delimiter[0] == fence[0] and len(delimiter) >= len(fence):
+                fence = None
+            continue
+        if delimiter:
+            fence = delimiter
+            continue
         if line.startswith("## "):
             current = _normalize_heading(line[3:])
             sections.setdefault(current, [])
         elif current is not None and line.strip() and not line.lstrip().startswith("#"):
             sections[current].append(line.strip())
     return {heading: "\n".join(lines) for heading, lines in sections.items()}
+
+
+def _fence_delimiter(line: str) -> str | None:
+    stripped = line.lstrip()
+    if len(line) - len(stripped) > 3 or not stripped:
+        return None
+    marker = stripped[0]
+    if marker not in {"`", "~"}:
+        return None
+    length = len(stripped) - len(stripped.lstrip(marker))
+    return marker * length if length >= 3 else None
 
 
 def _normalize_heading(value: str) -> str:

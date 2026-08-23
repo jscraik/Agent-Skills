@@ -131,8 +131,8 @@ def _configure_execution(context: Dict[str, Any]) -> None:
     codex_bin = _optional_executable(args, "codex_bin", "--codex-bin")
     openai_bin = _optional_executable(args, "openai_bin", "--openai-bin")
     selected_runners = _select_runners(args)
-    kimi_command = str(args.codex_kimi_command or "").strip() or "codex-kimi"
-    zai_command = str(args.codex_zai_command or "").strip() or "codex-zai"
+    kimi_command = (str(args.codex_kimi_command or "").strip() or "codex-kimi") if "codex-kimi" in selected_runners else ""
+    zai_command = (str(args.codex_zai_command or "").strip() or "codex-zai") if "codex-zai" in selected_runners else ""
     context.update({
         "workspace_root": workspace_root, "codex_home": codex_home, "codex_bin": codex_bin,
         "openai_bin": openai_bin, "selected_runners": selected_runners,

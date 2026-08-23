@@ -115,6 +115,28 @@ class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
                 any(finding.startswith("references:weak_operational_reference:") for finding in findings)
             )
 
+    def test_validation_ignores_sections_inside_fenced_examples(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            extraction = Path(tmp) / "extraction"
+            references = extraction / "references"
+            references.mkdir(parents=True)
+            (references / "capsule.md").write_text(
+                "# Capsule\n\n```markdown\n## Claim Cards\n\nExample claim.\n\n"
+                "## Checklists\n\n- [ ] Example check.\n```\n",
+                encoding="utf-8",
+            )
+            findings: list[str] = []
+
+            validate_operational_references(
+                extraction,
+                _manifest("references/capsule.md"),
+                findings,
+            )
+
+            self.assertTrue(
+                any(finding.startswith("references:weak_operational_reference:") for finding in findings)
+            )
+
     @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
     def test_validation_blocks_capsule_under_symlinked_parent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
