@@ -45,6 +45,7 @@ from run_skill_evals import (  # noqa: E402
 from run_skill_evals_references import (  # noqa: E402
     MAX_CASE_REFERENCE_BYTES,
     MAX_REFERENCE_BYTES,
+    attach_declared_references,
 )
 
 
@@ -131,8 +132,21 @@ class RunSkillEvalsContractTests(unittest.TestCase):
                 (skill_dir / relative).write_bytes(b"x" * file_size)
                 reference_paths.append(relative)
 
-            with self.assertRaisesRegex(ValueError, reference_paths[-1]):
+            with self.assertRaisesRegex(ValueError, "cumulative bytes at: references/part-"):
                 _render_case_references(skill_dir, tuple(reference_paths))
+
+    def test_render_case_references_counts_repeated_empty_wrappers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            relative = f"references/{'r' * 180}.md"
+            (skill_dir / relative).write_text("", encoding="utf-8")
+            block = f'<REFERENCE path="{relative}">\n\n</REFERENCE>'
+            repeats = (MAX_CASE_REFERENCE_BYTES // len(block.encode("utf-8"))) + 2
+
+            with self.assertRaisesRegex(ValueError, relative):
+                _render_case_references(skill_dir, (relative,) * repeats)
 
     def test_load_evals_parses_reference_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -160,8 +174,42 @@ class RunSkillEvalsContractTests(unittest.TestCase):
             case = load_evals(evals_path)[0]
 
             self.assertEqual(case.reference_paths, ("references/operational.md",))
+            self.assertEqual(case.task_prompt, "Use the declared reference.")
             self.assertIn('<REFERENCE path="references/operational.md">', case.prompt)
             self.assertIn("User task:\nUse the declared reference.", case.prompt)
+
+    def test_reference_rendering_can_follow_case_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            (references / "selected.md").write_text("# Selected\n", encoding="utf-8")
+            evals_path = references / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: selected
+                        name: Selected
+                        prompt: Use the selected reference.
+                        acceptance: []
+                        reference_paths: [references/selected.md]
+                      - id: unselected
+                        name: Unselected
+                        prompt: Ignore this case.
+                        acceptance: []
+                        reference_paths: [references/missing.md]
+                    """
+                ),
+                encoding="utf-8",
+            )
+            document = _load_evals_document(evals_path)
+            parsed = load_evals(evals_path, reference_mode="defer")
+
+            selected = attach_declared_references(evals_path, parsed[:1], document)
+
+            self.assertEqual([case.id for case in selected], ["selected"])
+            self.assertIn('<REFERENCE path="references/selected.md">', selected[0].prompt)
 
     def test_load_evals_without_references_preserves_prompt_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

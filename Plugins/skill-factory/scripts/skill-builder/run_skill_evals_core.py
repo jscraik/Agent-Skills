@@ -331,6 +331,7 @@ class EvalCase:
     name: str
     prompt: str
     acceptance: List[Assertion]
+    task_prompt: Optional[str] = None
     output_schema: Optional[str] = None
     should_trigger: Optional[bool] = None
     category: Optional[str] = None
@@ -750,6 +751,10 @@ def _case_has_executed_check_evidence(case: EvalCase, runner_records: Mapping[st
 
 def _case_requires_no_skill_baseline(case: EvalCase) -> bool:
     return case.baseline_type == "no_skill" and bool(case.prepend_skill)
+
+
+def _no_skill_baseline_prompt(case: EvalCase) -> str:
+    return case.task_prompt if case.task_prompt is not None else case.prompt
 
 
 def _baseline_comparison_from_records(

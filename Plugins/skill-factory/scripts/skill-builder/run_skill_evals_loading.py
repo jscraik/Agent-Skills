@@ -1,3 +1,5 @@
+from typing import Literal
+
 from run_skill_evals_core import *  # noqa: F403
 from run_skill_evals_references import (
     _render_case_references as _render_case_references_impl,
@@ -185,215 +187,186 @@ def load_neutral_baseline_approvals(evals_path: Path) -> Dict[str, Dict[str, Any
     return approvals
 
 
-def load_evals(evals_path: Path) -> List[EvalCase]:
+def _case_shape(raw_case: Any, case_number: int) -> Dict[str, Any]:
+    if not isinstance(raw_case, dict):
+        raise ValueError(f"Case #{case_number} must be a mapping.")
+    for field in ("name", "prompt", "acceptance"):
+        if field not in raw_case:
+            raise ValueError(f"Case #{case_number} missing `{field}`.")
+    if not isinstance(raw_case["acceptance"], list):
+        raise ValueError(f"Case #{case_number} `acceptance` must be a list.")
+    return raw_case
+
+
+def _optional_mapping(raw_case: Dict[str, Any], field: str, case_number: int) -> Optional[Dict[str, Any]]:
+    value = raw_case.get(field)
+    if value is not None and not isinstance(value, dict):
+        raise ValueError(f"Case #{case_number} `{field}` must be a mapping when provided.")
+    return value
+
+
+def _optional_bool(raw_case: Dict[str, Any], field: str, case_number: int) -> Optional[bool]:
+    value = raw_case.get(field)
+    if value is not None and not isinstance(value, bool):
+        raise ValueError(f"Case #{case_number} `{field}` must be boolean when provided.")
+    return value
+
+
+def _optional_choice(
+    raw_case: Dict[str, Any], field: str, choices: Sequence[str], case_number: int
+) -> Optional[str]:
+    value = raw_case.get(field)
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if normalized and normalized not in choices:
+        raise ValueError(f"Case #{case_number} `{field}` must be one of {sorted(choices)}; got {normalized!r}.")
+    return normalized or None
+
+
+def _optional_text(raw_case: Dict[str, Any], field: str) -> Optional[str]:
+    value = raw_case.get(field)
+    if value is None:
+        return None
+    return str(value).strip() or None
+
+
+def _case_identity_fields(raw_case: Dict[str, Any], case_number: int) -> Dict[str, Any]:
+    default_id = f"case-{case_number:02d}"
+    case_id = str(raw_case.get("id", default_id)).strip() or default_id
+    category = _optional_choice(raw_case, "category", _VALID_CATEGORIES, case_number)
+    prepend_skill = raw_case.get("prepend_skill", True)
+    if not isinstance(prepend_skill, bool):
+        raise ValueError(f"Case #{case_number} `prepend_skill` must be boolean when provided.")
+    return {
+        "id": case_id, "name": str(raw_case["name"]), "prompt": str(raw_case["prompt"]),
+        "acceptance": list(raw_case["acceptance"]), "category": category,
+        "should_trigger": _optional_bool(raw_case, "should_trigger", case_number),
+        "prepend_skill": prepend_skill,
+        "output_schema": str(raw_case["output_schema"]) if raw_case.get("output_schema") else None,
+    }
+
+
+def _case_timeout_fields(raw_case: Dict[str, Any], case_number: int) -> Dict[str, Any]:
+    timeout_sec = raw_case.get("timeout_sec")
+    if timeout_sec is not None:
+        try:
+            timeout_sec = float(timeout_sec)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Case #{case_number} `timeout_sec` must be numeric when provided.") from exc
+        if timeout_sec <= 0:
+            raise ValueError(f"Case #{case_number} `timeout_sec` must be > 0 when provided.")
+    timeout_profile = _optional_choice(raw_case, "timeout_profile", _TIMEOUT_PROFILE_CHOICES, case_number)
+    return {
+        "timeout_sec": timeout_sec,
+        "timeout_profile": timeout_profile,
+        "smoke_mode": _optional_text(raw_case, "smoke_mode"),
+        "eval_modes": _normalize_eval_modes(raw_case.get("eval_modes"), case_number=case_number),
+    }
+
+
+def _case_contract_fields(raw_case: Dict[str, Any], case_number: int) -> Dict[str, Any]:
+    return {
+        "deterministic_checks": _optional_mapping(raw_case, "deterministic_checks", case_number),
+        "expected_signals": _optional_mapping(raw_case, "expected_signals", case_number),
+        "budgets": _optional_mapping(raw_case, "budgets", case_number),
+        "comparison_inputs": _optional_mapping(raw_case, "comparison_inputs", case_number),
+        "iteration_round_state": _optional_choice(raw_case, "iteration_round_state", _ROUND_STATE_CHOICES, case_number),
+        "metric_availability": _optional_choice(raw_case, "metric_availability", _METRIC_AVAILABILITY_CHOICES, case_number),
+        "readiness_state": _optional_choice(raw_case, "readiness_state", _READINESS_STATE_CHOICES, case_number),
+        "comparison_review_artifact": _optional_text(raw_case, "comparison_review_artifact"),
+    }
+
+
+def _case_claim_fields(
+    raw_case: Dict[str, Any], case_number: int, claims: Dict[str, Any]
+) -> Dict[str, Any]:
+    claim_ids = _normalize_string_list(raw_case.get("claim_ids"), field_name="claim_ids", case_number=case_number)
+    unknown = [claim_id for claim_id in claim_ids if claims and claim_id not in claims]
+    if unknown:
+        raise ValueError(f"Case #{case_number} references unknown claim_ids: {', '.join(unknown)}.")
+    return {
+        "claim_ids": claim_ids,
+        "realistic": _optional_bool(raw_case, "realistic", case_number),
+        "why_realistic": _optional_text(raw_case, "why_realistic"),
+        "hard_gates": _normalize_string_list(raw_case.get("hard_gates"), field_name="hard_gates", case_number=case_number),
+        "expected_evidence": _normalize_string_list(raw_case.get("expected_evidence"), field_name="expected_evidence", case_number=case_number),
+    }
+
+
+def _case_baseline_fields(
+    raw_case: Dict[str, Any], case_number: int, baselines: Dict[str, Any]
+) -> Dict[str, Any]:
+    baseline_type = _optional_choice(raw_case, "baseline_type", _BASELINE_TYPE_CHOICES, case_number)
+    approval_id = _optional_text(raw_case, "neutral_baseline_approval_id")
+    baseline_id = _optional_text(raw_case, "baseline_id")
+    if baseline_id is not None and baseline_id not in baselines:
+        raise ValueError(f"Case #{case_number} references unknown baseline_id={baseline_id!r}.")
+    if baseline_type == "neutral_repo_baseline" and not approval_id:
+        raise ValueError(
+            f"Case #{case_number} uses baseline_type=neutral_repo_baseline but is missing `neutral_baseline_approval_id`."
+        )
+    return {
+        "baseline_type": baseline_type,
+        "baseline_id": baseline_id,
+        "neutral_baseline_approval_id": approval_id,
+    }
+
+
+def _case_artifact_fields(raw_case: Dict[str, Any], case_number: int) -> Dict[str, Any]:
+    fields = ("actual_artifact", "expected_artifact", "raw_response_artifact", "judge_detail_artifact")
+    result = {
+        field: _optional_case_artifact_string(raw_case.get(field), field_name=field, case_number=case_number)
+        for field in fields
+    }
+    result.update({
+        "unit": _optional_case_string(raw_case.get("unit")),
+        "given": _optional_case_string(raw_case.get("given")),
+        "should": _optional_case_string(raw_case.get("should")),
+        "reproduce": _optional_case_string(raw_case.get("reproduce")),
+        "pass_rate_calibration_artifact": _optional_case_artifact_string(
+            raw_case.get("pass_rate_calibration_artifact"),
+            field_name="pass_rate_calibration_artifact", case_number=case_number,
+        ),
+    })
+    return result
+
+
+def _build_eval_case(
+    raw_case: Any, case_number: int, claims: Dict[str, Any], baselines: Dict[str, Any]
+) -> EvalCase:
+    case = _case_shape(raw_case, case_number)
+    fields: Dict[str, Any] = {}
+    for values in (
+        _case_identity_fields(case, case_number),
+        _case_timeout_fields(case, case_number),
+        _case_contract_fields(case, case_number),
+        _case_claim_fields(case, case_number, claims),
+        _case_baseline_fields(case, case_number, baselines),
+        _case_artifact_fields(case, case_number),
+    ):
+        fields.update(values)
+    threshold = _optional_float(case.get("pass_rate_threshold"), field_name="pass_rate_threshold", case_number=case_number)
+    if threshold is not None and not math.isfinite(threshold):
+        raise ValueError(f"Case #{case_number} `pass_rate_threshold` must be a finite number.")
+    fields["pass_rate_threshold"] = threshold
+    return EvalCase(**fields)
+
+
+def load_evals(
+    evals_path: Path,
+    *,
+    reference_mode: Literal["attach", "defer"] = "attach",
+) -> List[EvalCase]:
     obj = _load_evals_document(evals_path)
     claims = _load_claims(obj)
     baselines = _load_baselines(obj)
-
-    cases: List[EvalCase] = []
-    for i, c in enumerate(obj["cases"], 1):
-        if not isinstance(c, dict):
-            raise ValueError(f"Case #{i} must be a mapping.")
-        for k in ("name", "prompt", "acceptance"):
-            if k not in c:
-                raise ValueError(f"Case #{i} missing `{k}`.")
-        if not isinstance(c["acceptance"], list):
-            raise ValueError(f"Case #{i} `acceptance` must be a list.")
-
-        case_id_raw = c.get("id", f"case-{i:02d}")
-        case_id = str(case_id_raw).strip() or f"case-{i:02d}"
-
-        category = c.get("category")
-        if category is not None:
-            category = str(category).strip().lower()
-            if category and category not in _VALID_CATEGORIES:
-                raise ValueError(
-                    f"Case #{i} category must be one of {sorted(_VALID_CATEGORIES)}; got {category!r}."
-                )
-
-        should_trigger = c.get("should_trigger")
-        if should_trigger is not None and not isinstance(should_trigger, bool):
-            raise ValueError(f"Case #{i} `should_trigger` must be boolean when provided.")
-
-        deterministic_checks = c.get("deterministic_checks")
-        if deterministic_checks is not None and not isinstance(deterministic_checks, dict):
-            raise ValueError(f"Case #{i} `deterministic_checks` must be a mapping when provided.")
-
-        expected_signals = c.get("expected_signals")
-        if expected_signals is not None and not isinstance(expected_signals, dict):
-            raise ValueError(f"Case #{i} `expected_signals` must be a mapping when provided.")
-
-        budgets = c.get("budgets")
-        if budgets is not None and not isinstance(budgets, dict):
-            raise ValueError(f"Case #{i} `budgets` must be a mapping when provided.")
-
-        prepend_skill = c.get("prepend_skill", True)
-        if not isinstance(prepend_skill, bool):
-            raise ValueError(f"Case #{i} `prepend_skill` must be boolean when provided.")
-
-        timeout_sec = c.get("timeout_sec")
-        if timeout_sec is not None:
-            try:
-                timeout_sec = float(timeout_sec)
-            except (TypeError, ValueError) as exc:
-                raise ValueError(f"Case #{i} `timeout_sec` must be numeric when provided.") from exc
-            if timeout_sec <= 0:
-                raise ValueError(f"Case #{i} `timeout_sec` must be > 0 when provided.")
-
-        timeout_profile = c.get("timeout_profile")
-        if timeout_profile is not None:
-            timeout_profile = str(timeout_profile).strip().lower()
-            if timeout_profile and timeout_profile not in _TIMEOUT_PROFILE_CHOICES:
-                raise ValueError(
-                    f"Case #{i} `timeout_profile` must be one of {_TIMEOUT_PROFILE_CHOICES}; "
-                    f"got {timeout_profile!r}."
-                )
-
-        smoke_mode = c.get("smoke_mode")
-        if smoke_mode is not None:
-            smoke_mode = str(smoke_mode).strip()
-            if not smoke_mode:
-                smoke_mode = None
-        eval_modes = _normalize_eval_modes(c.get("eval_modes"), case_number=i)
-
-        baseline_type = c.get("baseline_type")
-        if baseline_type is not None:
-            baseline_type = str(baseline_type).strip().lower()
-            if baseline_type and baseline_type not in _BASELINE_TYPE_CHOICES:
-                raise ValueError(
-                    f"Case #{i} `baseline_type` must be one of {sorted(_BASELINE_TYPE_CHOICES)}; "
-                    f"got {baseline_type!r}."
-                )
-
-        comparison_inputs = c.get("comparison_inputs")
-        if comparison_inputs is not None and not isinstance(comparison_inputs, dict):
-            raise ValueError(f"Case #{i} `comparison_inputs` must be a mapping when provided.")
-
-        iteration_round_state = c.get("iteration_round_state")
-        if iteration_round_state is not None:
-            iteration_round_state = str(iteration_round_state).strip().lower()
-            if iteration_round_state and iteration_round_state not in _ROUND_STATE_CHOICES:
-                raise ValueError(
-                    f"Case #{i} `iteration_round_state` must be one of {sorted(_ROUND_STATE_CHOICES)}; "
-                    f"got {iteration_round_state!r}."
-                )
-
-        metric_availability = c.get("metric_availability")
-        if metric_availability is not None:
-            metric_availability = str(metric_availability).strip().lower()
-            if metric_availability and metric_availability not in _METRIC_AVAILABILITY_CHOICES:
-                raise ValueError(
-                    f"Case #{i} `metric_availability` must be one of {sorted(_METRIC_AVAILABILITY_CHOICES)}; "
-                    f"got {metric_availability!r}."
-                )
-
-        readiness_state = c.get("readiness_state")
-        if readiness_state is not None:
-            readiness_state = str(readiness_state).strip().lower()
-            if readiness_state and readiness_state not in _READINESS_STATE_CHOICES:
-                raise ValueError(
-                    f"Case #{i} `readiness_state` must be one of {sorted(_READINESS_STATE_CHOICES)}; "
-                    f"got {readiness_state!r}."
-                )
-
-        comparison_review_artifact = c.get("comparison_review_artifact")
-        if comparison_review_artifact is not None:
-            comparison_review_artifact = str(comparison_review_artifact).strip()
-            if not comparison_review_artifact:
-                comparison_review_artifact = None
-
-        neutral_baseline_approval_id = c.get("neutral_baseline_approval_id")
-        if neutral_baseline_approval_id is not None:
-            neutral_baseline_approval_id = str(neutral_baseline_approval_id).strip()
-            if not neutral_baseline_approval_id:
-                neutral_baseline_approval_id = None
-
-        claim_ids = _normalize_string_list(c.get("claim_ids"), field_name="claim_ids", case_number=i)
-        unknown_claim_ids = [claim_id for claim_id in claim_ids if claims and claim_id not in claims]
-        if unknown_claim_ids:
-            raise ValueError(
-                f"Case #{i} references unknown claim_ids: {', '.join(unknown_claim_ids)}."
-            )
-
-        realistic = c.get("realistic")
-        if realistic is not None and not isinstance(realistic, bool):
-            raise ValueError(f"Case #{i} `realistic` must be boolean when provided.")
-
-        why_realistic = c.get("why_realistic")
-        if why_realistic is not None:
-            why_realistic = str(why_realistic).strip()
-            if not why_realistic:
-                why_realistic = None
-
-        baseline_id = c.get("baseline_id")
-        if baseline_id is not None:
-            baseline_id = str(baseline_id).strip()
-            if not baseline_id:
-                baseline_id = None
-            elif baseline_id not in baselines:
-                raise ValueError(f"Case #{i} references unknown baseline_id={baseline_id!r}.")
-
-        hard_gates = _normalize_string_list(c.get("hard_gates"), field_name="hard_gates", case_number=i)
-        expected_evidence = _normalize_string_list(
-            c.get("expected_evidence"),
-            field_name="expected_evidence",
-            case_number=i,
-        )
-        pass_rate_threshold = _optional_float(
-            c.get("pass_rate_threshold"),
-            field_name="pass_rate_threshold",
-            case_number=i,
-        )
-        if pass_rate_threshold is not None and not math.isfinite(pass_rate_threshold):
-            raise ValueError(f"Case #{i} `pass_rate_threshold` must be a finite number.")
-
-        if baseline_type == "neutral_repo_baseline" and not neutral_baseline_approval_id:
-            raise ValueError(
-                f"Case #{i} uses baseline_type=neutral_repo_baseline but is missing `neutral_baseline_approval_id`."
-            )
-
-        cases.append(
-            EvalCase(
-                id=case_id,
-                name=str(c["name"]),
-                prompt=str(c["prompt"]),
-                acceptance=list(c["acceptance"]),
-                output_schema=str(c["output_schema"]) if c.get("output_schema") else None,
-                should_trigger=should_trigger,
-                category=category if category else None,
-                deterministic_checks=deterministic_checks,
-                expected_signals=expected_signals,
-                budgets=budgets,
-                prepend_skill=prepend_skill,
-                timeout_sec=timeout_sec,
-                timeout_profile=timeout_profile if timeout_profile else None,
-                smoke_mode=smoke_mode,
-                eval_modes=eval_modes,
-                baseline_type=baseline_type if baseline_type else None,
-                comparison_inputs=dict(comparison_inputs) if isinstance(comparison_inputs, dict) else None,
-                iteration_round_state=iteration_round_state if iteration_round_state else None,
-                metric_availability=metric_availability if metric_availability else None,
-                readiness_state=readiness_state if readiness_state else None,
-                comparison_review_artifact=comparison_review_artifact,
-                neutral_baseline_approval_id=neutral_baseline_approval_id,
-                claim_ids=claim_ids,
-                realistic=realistic,
-                why_realistic=why_realistic,
-                baseline_id=baseline_id,
-                hard_gates=hard_gates,
-                expected_evidence=expected_evidence,
-                unit=_optional_case_string(c.get("unit")),
-                given=_optional_case_string(c.get("given")),
-                should=_optional_case_string(c.get("should")),
-                actual_artifact=_optional_case_artifact_string(c.get("actual_artifact"), field_name="actual_artifact", case_number=i),
-                expected_artifact=_optional_case_artifact_string(c.get("expected_artifact"), field_name="expected_artifact", case_number=i),
-                reproduce=_optional_case_string(c.get("reproduce")),
-                raw_response_artifact=_optional_case_artifact_string(c.get("raw_response_artifact"), field_name="raw_response_artifact", case_number=i),
-                judge_detail_artifact=_optional_case_artifact_string(c.get("judge_detail_artifact"), field_name="judge_detail_artifact", case_number=i),
-                pass_rate_threshold=pass_rate_threshold,
-                pass_rate_calibration_artifact=_optional_case_artifact_string(c.get("pass_rate_calibration_artifact"), field_name="pass_rate_calibration_artifact", case_number=i),
-            )
-        )
+    cases = [
+        _build_eval_case(raw_case, case_number, claims, baselines)
+        for case_number, raw_case in enumerate(obj["cases"], 1)
+    ]
+    if reference_mode == "defer":
+        return cases
     return attach_declared_references(evals_path, cases, obj)
 
 

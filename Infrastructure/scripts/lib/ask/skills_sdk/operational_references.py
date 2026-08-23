@@ -144,7 +144,7 @@ def _section_bodies(text: str) -> dict[str, str]:
         if line.startswith("## "):
             current = _normalize_heading(line[3:])
             sections.setdefault(current, [])
-        elif current is not None and line.strip():
+        elif current is not None and line.strip() and not line.lstrip().startswith("#"):
             sections[current].append(line.strip())
     return {heading: "\n".join(lines) for heading, lines in sections.items()}
 

@@ -1,12 +1,16 @@
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from ask.skills_sdk.knowledge_source_context import merge_knowledge_source_context
-from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest
-from ask.skills_sdk.operational_references import validate_operational_references
-from tests.test_skills_sdk_knowledge_ingest import _write_extraction, _write_skill
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.skills_sdk.knowledge_source_context import merge_knowledge_source_context  # noqa: E402
+from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest  # noqa: E402
+from ask.skills_sdk.operational_references import validate_operational_references  # noqa: E402
+from tests.test_skills_sdk_knowledge_ingest import _write_extraction, _write_skill  # noqa: E402
 
 
 def _manifest(target_path: str) -> dict[str, object]:
@@ -50,6 +54,8 @@ class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
             "references": [
                 {"path": "references/keep.md", "kind": "package_companion"},
                 {"path": "references/old.md", "kind": "operational_reference"},
+                {"path": "references/old-capsule.md", "kind": "generated_knowledge_capsule"},
+                {"path": "references/old-capsules/*.md", "kind": "generated_knowledge_capsules_flat"},
             ]
         }
 
@@ -63,6 +69,8 @@ class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
         self.assertIn("references/keep.md", paths)
         self.assertIn("references/current.md", paths)
         self.assertNotIn("references/old.md", paths)
+        self.assertNotIn("references/old-capsule.md", paths)
+        self.assertNotIn("references/old-capsules/*.md", paths)
         self.assertNotIn("references/knowledge-capsules/", paths)
 
     def test_validation_blocks_heading_only_capsule(self) -> None:
@@ -72,6 +80,27 @@ class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
             references.mkdir(parents=True)
             (references / "capsule.md").write_text(
                 "# Capsule\n\n## Claim Cards\n\n## Checklists\n",
+                encoding="utf-8",
+            )
+            findings: list[str] = []
+
+            validate_operational_references(
+                extraction,
+                _manifest("references/capsule.md"),
+                findings,
+            )
+
+            self.assertTrue(
+                any(finding.startswith("references:weak_operational_reference:") for finding in findings)
+            )
+
+    def test_validation_blocks_child_heading_only_sections(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            extraction = Path(tmp) / "extraction"
+            references = extraction / "references"
+            references.mkdir(parents=True)
+            (references / "capsule.md").write_text(
+                "# Capsule\n\n## Claim Cards\n\n### Empty\n\n## Checklists\n\n### Empty\n",
                 encoding="utf-8",
             )
             findings: list[str] = []

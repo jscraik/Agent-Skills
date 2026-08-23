@@ -41,8 +41,9 @@ def _resolve_reference(skill_dir: Path, declared_path: str) -> Path:
 
 
 def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> str:
+    heading = "Selected package references:\n\n"
     blocks: List[str] = []
-    total_bytes = 0
+    total_bytes = len(heading.encode("utf-8"))
     for declared_path in reference_paths:
         resolved = _resolve_reference(skill_dir, declared_path)
         try:
@@ -59,16 +60,18 @@ def _render_case_references(skill_dir: Path, reference_paths: Sequence[str]) -> 
             raise ValueError(
                 f"reference_paths entry exceeds {MAX_REFERENCE_BYTES} bytes: {declared_path}"
             )
-        total_bytes += size_bytes
+        block = f'<REFERENCE path="{declared_path}">\n{content}\n</REFERENCE>'
+        separator = "\n\n" if blocks else ""
+        total_bytes += len(f"{separator}{block}".encode("utf-8"))
         if total_bytes > MAX_CASE_REFERENCE_BYTES:
             raise ValueError(
                 "reference_paths entries exceed "
                 f"{MAX_CASE_REFERENCE_BYTES} cumulative bytes at: {declared_path}"
             )
-        blocks.append(f'<REFERENCE path="{declared_path}">\n{content}\n</REFERENCE>')
+        blocks.append(block)
     if not blocks:
         return ""
-    return "Selected package references:\n\n" + "\n\n".join(blocks)
+    return heading + "\n\n".join(blocks)
 
 
 def _case_reference_paths(raw_case: Any, case_number: int) -> Tuple[str, ...]:
@@ -94,17 +97,28 @@ def attach_declared_references(
 ) -> List[EvalCase]:
     """Return cases with validated reference paths and prompt context attached."""
     raw_cases = document.get("cases")
-    if not isinstance(raw_cases, list) or len(raw_cases) != len(cases):
+    if not isinstance(raw_cases, list):
         raise ValueError("eval cases changed while declared references were being attached")
+    raw_by_id: Dict[str, List[Tuple[int, Any]]] = {}
+    for case_number, raw_case in enumerate(raw_cases, 1):
+        if not isinstance(raw_case, dict):
+            raise ValueError(f"Case #{case_number} must be a mapping.")
+        raw_id = str(raw_case.get("id", f"case-{case_number:02d}")).strip() or f"case-{case_number:02d}"
+        raw_by_id.setdefault(raw_id, []).append((case_number, raw_case))
     skill_dir = _skill_dir_for_evals(evals_path)
     result: List[EvalCase] = []
-    for case_number, (case, raw_case) in enumerate(zip(cases, raw_cases), 1):
+    for case in cases:
+        matches = raw_by_id.get(case.id, [])
+        if not matches:
+            raise ValueError(f"eval case changed while declared references were being attached: {case.id}")
+        case_number, raw_case = matches.pop(0)
         reference_paths = _case_reference_paths(raw_case, case_number)
         rendered = _render_case_references(skill_dir, reference_paths)
         result.append(
             replace(
                 case,
                 prompt=_prompt_with_references(case.prompt, rendered),
+                task_prompt=(case.task_prompt or case.prompt) if rendered else case.task_prompt,
                 reference_paths=reference_paths,
             )
         )

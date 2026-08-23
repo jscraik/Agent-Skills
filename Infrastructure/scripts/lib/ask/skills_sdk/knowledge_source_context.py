@@ -18,7 +18,9 @@ def merge_knowledge_source_context(
     managed_kinds = {
         "knowledge_profile",
         "capsule_manifest",
+        "generated_knowledge_capsule",
         "generated_knowledge_capsules",
+        "generated_knowledge_capsules_flat",
         "operational_reference",
         "knowledge_eval_scenarios",
         "knowledge_eval_fixtures",
