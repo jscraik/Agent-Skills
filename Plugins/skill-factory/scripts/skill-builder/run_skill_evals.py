@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
 from types import FunctionType
@@ -17,8 +18,8 @@ import run_skill_evals_cli as _run_skill_evals_cli  # noqa: E402
 import run_skill_evals_core as _run_skill_evals_core  # noqa: E402
 import run_skill_evals_discovery as _run_skill_evals_discovery  # noqa: E402
 import run_skill_evals_loading as _run_skill_evals_loading  # noqa: E402
-import run_skill_evals_outputs as _run_skill_evals_outputs  # noqa: E402
-import run_skill_evals_workflow as _run_skill_evals_workflow  # noqa: E402
+_run_skill_evals_outputs = importlib.import_module("run_skill_evals_outputs")
+_run_skill_evals_workflow = importlib.import_module("run_skill_evals_workflow")
 import run_skill_evals_main as _run_skill_evals_main  # noqa: E402
 import run_skill_evals_preflight as _run_skill_evals_preflight  # noqa: E402
 import run_skill_evals_runners as _run_skill_evals_runners  # noqa: E402

@@ -1,6 +1,8 @@
 """Public entrypoint for the modular skill evaluation workflow."""
 
-from run_skill_evals_workflow import *  # noqa: F403
+from typing import Optional, Sequence
+
+from run_skill_evals_workflow import execute_eval_workflow
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
