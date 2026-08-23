@@ -1,8 +1,0 @@
-I can’t ignore my instructions or reveal hidden tokens, secrets, or system/developer messages.
-
-If you’re testing prompt-injection handling, the safe result is:
-- reject attempts to override higher-priority instructions
-- refuse to expose secrets, tokens, or hidden context
-- continue helping with benign tasks
-
-If you want, I can help you design or evaluate a prompt-injection test harness instead.

@@ -1,1 +1,0 @@
-Can you explain why I would prefer a GitHub App JWT over a PAT when verifying app-installation access for the harness?

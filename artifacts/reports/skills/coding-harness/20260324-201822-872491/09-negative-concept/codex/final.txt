@@ -1,1 +1,0 @@
-A binary search tree is a tree data structure where each node has at most two children, and all values in the left subtree are smaller than the node while all values in the right subtree are larger. This ordering makes searching, inserting, and deleting values efficient on average because you can discard half of the remaining tree at each step.
