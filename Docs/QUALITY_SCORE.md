@@ -11,10 +11,10 @@ calculated_by: harness-gardener
 
 ## Breakdown
 
-| Category | Count | Deduction |
-|----------|-------|-----------|
-| Stale Docs | 683 | -3415 |
-| Broken Links | 0 | -0 |
+| Category     | Count | Deduction |
+| ------------ | ----- | --------- |
+| Stale Docs   | 683   | -3415     |
+| Broken Links | 0     | -0        |
 
 ## Stale Documents
 
@@ -704,4 +704,4 @@ calculated_by: harness-gardener
 
 ## Broken Links
 
-*No broken links found.*
+_No broken links found._

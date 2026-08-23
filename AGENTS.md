@@ -45,82 +45,24 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
 - Finish the named outcome through the smallest local change and focused proof.
   Feedback is diagnostic evidence, not automatic authority to stop delivery or
-  add process. Prefer no system change, a local implementation repair, or an
-  existing test or instruction improvement. Select the
+  add process. Select the
   [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
-  route only when Jamie asks for system improvement, a consequential boundary
-  is involved, the failure recurs across three independent tasks, or two named
-  active consumers require a contract that no existing surface can provide, or
-  current executable contracts contradict one another. That
-  selected route may use the existing ledger and validator; routine work does
-  not require a papercut log, ledger row, or new artifact. Selected work
-  requires opening and reading it in the current turn, an appropriate
-  `.harness/quality/steering-uptake.md` entry, and
-  `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`
-  evidence.
-- Runtime-handle safety is independent of steering selection: wait, poll, or
-  resume only an active handle returned by the immediately preceding tool
-  result, and perform those stateful operations serially for that handle.
-  Re-discover state with direct repository commands when no such handle exists;
-  never probe a guessed or stale identifier.
-- For networked repo operations in Codex sandboxed sessions, do not diagnose
-  `gh`, CircleCI, Snyk, package registry, or other API failures as service
-  outages until the same command has been retried with explicit network
-  permission. When a command invokes `gh`, `mise`, or `uv`, keep tool caches
-  and state inside approved temp paths before treating cache warnings as the
-  blocker. Set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`,
-  `MISE_STATE_DIR`, `MISE_TRUSTED_CONFIG_PATHS`, and `UV_CACHE_DIR` as
-  applicable for the command family. In temp worktrees with a repo `.mise.toml`,
-  set `MISE_STATE_DIR` before launching the shell so mise tracked-config writes
-  do not fall back to `~/.local/state/mise`.
-- For selected system improvement, identify the mechanism and improve the
-  smallest existing surface that serves a named consumer. State its carrying
-  cost, proof, and the overlapping surface it consolidates or replaces.
-- Jamie Brain, SSM, and CO provide outcomes and cross-project constraints. The
-  Agent Skills OC and this repository own project-specific discovery, technical
-  design, specifications, implementation plans, and delivery. Backbriefs to
-  Jamie Brain are compact evidence pointers, not duplicated technical plans.
+  only for its named conditions. Routine delivery does not require a steering
+  ledger entry or new process artifact. When that route is selected, opening and reading it in the current turn is required; record the result in
+  `.harness/quality/steering-uptake.md` and run
+  `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
+- Keep runtime handles candidate-bound: wait, poll, or resume only the active
+  handle returned by the immediately preceding tool result, and perform those
+  operations serially for that handle. See
+  [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md#runtime-handle-safety)
+  for recovery rules.
 - Skills SDK PM thread coordination: when Jamie designates one thread as the
-  Skills SDK PM decision surface, delegated execution threads must report back
-  through a validated `thread-report/v1` artifact and a PM delivery receipt
-  before their work can influence the next SDK gate decision. Use
-  [PM Thread Coordination](./Docs/agents/26-pm-thread-coordination.md) and
-  validate with
-  `python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py <report> --require-delivery --json`.
-- Tessl eval contract: when running skill/plugin evals, run the installed local
-  `tessl` CLI automatically through the repo wrapper, stage only controlled
-  input under `/tmp`, synthesize Tessl
-  `scenarios/<case-id>/{task.md,criteria.json}` files from canonical
-  `references/evals.yaml`, include a `tessl.json` project marker in the
-  staged payload, and never point Tessl at the live repo source. A controlled
-  copy of that staged payload may be uploaded to Jamie's private Tessl workspace
-  for assessment; this is a workspace/project eval lane, not a public registry
-  or publish lane. Do not use `npx tessl`, `publish`, registry upload, or
-  package upload commands. If Tessl reports no workspace/project link, classify
-  that setup blocker directly instead of re-litigating auth, sandboxing, or temp
-  staging. Tessl project identity is
-  deterministic: plugin-owned skills under `Plugins/<plugin-id>/skills/**`
-  belong to the plugin project, for example `jscraik/skill-factory`, and
-  standalone skills belong to their own skill project, for example
-  `jscraik/technical-writer`. The workspace is `jscraik`; the project is the
-  per-skill or per-plugin identity under that workspace. Wrappers must check or
-  establish that project link before running the Tessl eval/install lane,
-  relinking an existing project before creating a new one. The operator-provided
-  workspace name is binding evidence; do not substitute a personal workspace or
-  stale alias when the requested or visible Tessl workspace is `jscraik`. In
-  Codex sessions,
-  source the operator-approved
-  `/Users/jamiecraik/.codex/.env` environment stream directly when the Tessl
-  workspace token is needed; never print token values or shell-expanded
-  environment contents. Treat stable `/tmp/ask-tessl-*` paths as evidence:
-  reruns must archive prior temp contents to a sibling evidence archive rather
-  than deleting generated payloads or keeping stale scenarios under the current
-  upload root.
-- Routine corrections do not invoke external Tessl distribution or live
-  promotion. A named local eval command that requires the installed Tessl CLI
-  remains local proof and is governed by the eval contract above.
-
-## Common Commands
+  Skills SDK PM decision surface, use
+  [PM Thread Coordination](./Docs/agents/26-pm-thread-coordination.md).
+- Keep local, runtime, cloud, Tessl, and release proof separate. Use
+  [Tessl Live Skill Eval Workflow](./Docs/agents/24-tessl-live-skill-eval-workflow.md)
+  and [Skills SDK Runtime Lane Contract](./Docs/agents/25-sdk-runtime-lane-contract.md)
+  only when those lanes are selected.
 
 ## Project-specific correction boundary
 
@@ -131,14 +73,6 @@ Pre-merge local review remains required for PR-bound changes. This source-only
 path does not waive the skill-management contract: runtime projection proof is
 required before claiming a skill is usable or using it as a runtime skill; that
 proof belongs to the separately selected runtime or promotion lane.
-
-```bash
-./bin/ask repo doctor --json --robot
-./bin/ask skills improve "<goal>" --json --robot
-./bin/ask skills explain <handle> --json --robot
-./bin/ask skills prove <handle> --json --robot
-./bin/ask repo closeout --changed --json --robot
-```
 
 ## Further Guidance
 

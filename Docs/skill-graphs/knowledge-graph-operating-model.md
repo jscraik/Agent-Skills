@@ -49,14 +49,14 @@ When present, loop outputs copy this to `run.json`, `promotion_decision.json`, a
 
 ## Graph entities and edges
 
-| Entity | Source artifact | Key edges |
-| --- | --- | --- |
-| Task profile | `docs/skill-graphs/schemas/task-profile.schema.md` | profile -> run |
-| Run | `Infrastructure/artifacts/skill-graphs/runs/<run_id>/run.json` | run -> iteration, run -> decision |
-| Iteration | `iteration_journal.jsonl` | iteration -> candidate lesson |
-| Candidate lesson | `lesson_candidates.json` | candidate -> promotion decision |
-| Canonical lesson | `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl` | lesson -> supersedes lesson |
-| Promotion decision | `promotion_decision.json` | decision -> canonical lesson |
+| Entity             | Source artifact                                                         | Key edges                         |
+| ------------------ | ----------------------------------------------------------------------- | --------------------------------- |
+| Task profile       | `docs/skill-graphs/schemas/task-profile.schema.md`                      | profile -> run                    |
+| Run                | `Infrastructure/artifacts/skill-graphs/runs/<run_id>/run.json`          | run -> iteration, run -> decision |
+| Iteration          | `iteration_journal.jsonl`                                               | iteration -> candidate lesson     |
+| Candidate lesson   | `lesson_candidates.json`                                                | candidate -> promotion decision   |
+| Canonical lesson   | `Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl` | lesson -> supersedes lesson       |
+| Promotion decision | `promotion_decision.json`                                               | decision -> canonical lesson      |
 
 ## Progressive disclosure in practice
 

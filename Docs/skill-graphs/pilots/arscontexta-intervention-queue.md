@@ -3,24 +3,29 @@
 Ars Contexta-backed synthesis layer for recursive skill pilot instability. This queue does not replace the shadow gate; it converts repeated failure and recovery patterns into retrieval-ready interventions.
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Promotion Rule](#promotion-rule)
 - [Profile Queues](#profile-queues)
 - [Methodology References](#methodology-references)
 
 ## Overview
+
 - Generated: `2026-04-06T13:26:16Z`
 - Window: `2026-03-31..2026-04-06`
 - Machine-readable queue: `/Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json`
 - Operator use: review the top unstable profile, capture the intervention as a note first, then promote only repeated wins into skill references or hooks.
 
 ## Promotion Rule
+
 - `documentation`: pattern is still unstable; capture and retrieve, do not automate.
 - `skill`: repeated positive pattern is stable enough to encode in a reusable workflow or reference.
 - `hook-candidate`: only for deterministic patterns that remain clean across windows without recovery.
 
 ## Profile Queues
+
 ### `frontend-ui-design`
+
 - Stage: `documentation`
 - Scope skill: `frontend/ui/frontend-ui-design`
 - Clean runs: `0/2`
@@ -48,6 +53,7 @@ Ars Contexta-backed synthesis layer for recursive skill pilot instability. This 
   - What should be retrieved before iteration 1 so frontend-ui-design starts from the last stable intervention instead of rediscovering it?
 
 ### `interface-craft`
+
 - Stage: `documentation`
 - Scope skill: `frontend/ui/ui-ux-creative-coding`
 - Clean runs: `1/2`
@@ -74,6 +80,7 @@ Ars Contexta-backed synthesis layer for recursive skill pilot instability. This 
   - What should be retrieved before iteration 1 so interface-craft starts from the last stable intervention instead of rediscovering it?
 
 ### `react-ui-patterns`
+
 - Stage: `documentation`
 - Scope skill: `frontend/ui/react-ui-patterns`
 - Clean runs: `1/2`
@@ -100,6 +107,7 @@ Ars Contexta-backed synthesis layer for recursive skill pilot instability. This 
   - What should be retrieved before iteration 1 so react-ui-patterns starts from the last stable intervention instead of rediscovering it?
 
 ### `ui-ux-creative-coding`
+
 - Stage: `documentation`
 - Scope skill: `frontend/ui/ui-ux-creative-coding`
 - Clean runs: `1/2`
@@ -127,6 +135,7 @@ Ars Contexta-backed synthesis layer for recursive skill pilot instability. This 
   - What should be retrieved before iteration 1 so ui-ux-creative-coding starts from the last stable intervention instead of rediscovering it?
 
 ## Methodology References
+
 - `/Plugins/arscontexta/methodology/retrieval verification loop tests description quality at scale.md`
 - `/Plugins/arscontexta/methodology/queries evolve during search so agents should checkpoint.md`
 - `/Plugins/arscontexta/methodology/schema enforcement via validation agents enables soft consistency.md`

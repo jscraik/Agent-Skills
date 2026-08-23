@@ -15,12 +15,14 @@ The `recursive_skill_loop.py` script initially didn't write `events.jsonl` files
 Created `Skills/skill-builder/Infrastructure/scripts/backfill_missing_events.py` to reconstruct minimal events from `run.json` metadata:
 
 **Features:**
+
 - Reconstructs 3 event types: `run_initialized`, `run_state_changed`, and `failure_event` (for failed runs)
 - Preserves historical timestamps and metadata
 - Validates all runs have complete event telemetry
 - Can be run idempotently (skips runs that already have events)
 
 **Usage:**
+
 ```bash
 # Dry run
 python3 Skills/skill-builder/Infrastructure/scripts/backfill_missing_events.py --dry-run --verbose
@@ -35,12 +37,14 @@ python3 Skills/skill-builder/Infrastructure/scripts/backfill_missing_events.py
 ### 2. Validation Tests
 
 Created `Skills/skill-builder/Infrastructure/scripts/test_events_jsonl_required.py` to ensure:
+
 - `events.jsonl` is in `RUN_REQUIRED_FILES`
 - All runs have `events.jsonl` files
 - Files have valid JSON Lines format
 - Event types are recognized
 
 **Usage:**
+
 ```bash
 pytest Skills/skill-builder/Infrastructure/scripts/test_events_jsonl_required.py -v
 ```
@@ -48,6 +52,7 @@ pytest Skills/skill-builder/Infrastructure/scripts/test_events_jsonl_required.py
 ## Results
 
 **Before Fix:**
+
 ```
 Event envelope errors: 7
 - run_20260220T195545Z_8799c2: missing events.jsonl
@@ -60,6 +65,7 @@ Event envelope errors: 7
 ```
 
 **After Fix:**
+
 ```
 Event envelope errors: 0
 All runs have events.jsonl ✓
@@ -76,6 +82,7 @@ All runs have events.jsonl ✓
 ### Monitoring
 
 Regenerate telemetry reports after any batch of runs:
+
 ```bash
 python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py \
   --runs-root Infrastructure/artifacts/skill-graphs/runs \
@@ -83,6 +90,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow
 ```
 
 Check `docs/skill-graphs/telemetry/daily-skill-health.md` for:
+
 - Event envelope errors should be 0
 - Capture coverage should be 100%
 

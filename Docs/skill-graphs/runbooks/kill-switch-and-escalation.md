@@ -15,6 +15,7 @@ Operator runbook for safely halting autonomous behavior.
 ## When to trigger
 
 Trigger kill switch if any occur:
+
 - repeated budget overrun,
 - unresolved evaluator conflict,
 - evidence of canonical poisoning,
@@ -70,6 +71,7 @@ Use explicit onboarding waves:
    - auto-apply remains disabled until uplift/non-regression gates pass
 
 Every wave blocker in readiness artifacts must include:
+
 - `owner`
 - `due_date`
 - `escalation_date`
@@ -96,6 +98,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_rollout_drill.sh
 ```
 
 Evidence artifacts:
+
 - `/Infrastructure/artifacts/skill-graphs/pilot/rollback-drill-report.json`
 - `/docs/skill-graphs/pilots/rollback-drill.md`
 

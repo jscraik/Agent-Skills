@@ -92,8 +92,8 @@ not another reminder in prose.
 
 ## Source and evidence boundary
 
-The heuristics were cross-checked against Robert C. Martin, *Clean Code: A
-Handbook of Agile Software Craftsmanship* (Prentice Hall, 2008). That book is
+The heuristics were cross-checked against Robert C. Martin, _Clean Code: A
+Handbook of Agile Software Craftsmanship_ (Prentice Hall, 2008). That book is
 a design lens, not a contemporary universal threshold; the five-parameter and
 ratchet limits are repository policy chosen for low-noise change detection.
 

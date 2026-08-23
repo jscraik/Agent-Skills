@@ -6,27 +6,27 @@ Validates skill structure against industry benchmarks and runs optional LLM eval
 
 ## ABBREVIATION MAP
 
-| Abbr | Meaning |
-|------|---------|
-| SQ | Skill quality |
-| T1 | Tier-1 (structure gate) |
-| T2 | Tier-2 (eval gate) |
-| SG | Structure gate |
-| EB | Eval baseline |
-| BM | Benchmark |
-| EVAL | LLM evaluation |
-| WD | Workflow dispatch |
-| PR | Pull request |
+| Abbr | Meaning                 |
+| ---- | ----------------------- |
+| SQ   | Skill quality           |
+| T1   | Tier-1 (structure gate) |
+| T2   | Tier-2 (eval gate)      |
+| SG   | Structure gate          |
+| EB   | Eval baseline           |
+| BM   | Benchmark               |
+| EVAL | LLM evaluation          |
+| WD   | Workflow dispatch       |
+| PR   | Pull request            |
 
 ---
 
 ## TRIGGER MATRIX
 
-| EVENT | PATHS | MODE | JOBS |
-|-------|-------|------|------|
-| PR | `**/SKILL.md`, `**/evals.yaml`, `**/contract.yaml`, `Infrastructure/scripts/**`, `Infrastructure/templates/evals.yaml` | Auto | T1 only |
-| WD | Manual | `run_evals=false` | T1 only |
-| WD | Manual | `run_evals=true` | T1 → T2 |
+| EVENT | PATHS                                                                                                                  | MODE              | JOBS    |
+| ----- | ---------------------------------------------------------------------------------------------------------------------- | ----------------- | ------- |
+| PR    | `**/SKILL.md`, `**/evals.yaml`, `**/contract.yaml`, `Infrastructure/scripts/**`, `Infrastructure/templates/evals.yaml` | Auto              | T1 only |
+| WD    | Manual                                                                                                                 | `run_evals=false` | T1 only |
+| WD    | Manual                                                                                                                 | `run_evals=true`  | T1 → T2 |
 
 ---
 
@@ -57,14 +57,14 @@ flowchart LR
 
 ## TIER-1: STRUCTURE GATE (SG)
 
-| CHECK | COMMAND |
-|-------|---------|
-| Checkout | `actions/checkout@v6` (full) |
-| Python | `3.12` |
-| GH CLI | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh` |
-| Deps | `pip install pyyaml` |
+| CHECK    | COMMAND                                                                        |
+| -------- | ------------------------------------------------------------------------------ |
+| Checkout | `actions/checkout@v6` (full)                                                   |
+| Python   | `3.12`                                                                         |
+| GH CLI   | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh`                   |
+| Deps     | `pip install pyyaml`                                                           |
 | Validate | `run_repo_skill_quality.py --root . --baseline-file ... --benchmark-mode warn` |
-| Upload | `Infrastructure/artifacts/industry-benchmark-latest.json` |
+| Upload   | `Infrastructure/artifacts/industry-benchmark-latest.json`                      |
 
 ### SG Flags
 
@@ -111,19 +111,19 @@ python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py
 
 ### EB Outputs
 
-| ARTIFACT | PATH |
-|----------|------|
-| Reports | `Infrastructure/artifacts/skills/**` |
+| ARTIFACT  | PATH                                                      |
+| --------- | --------------------------------------------------------- |
+| Reports   | `Infrastructure/artifacts/skills/**`                      |
 | Benchmark | `Infrastructure/artifacts/industry-benchmark-latest.json` |
 
 ---
 
 ## INPUTS (WD Only)
 
-| INPUT | TYPE | DEFAULT | DESCRIPTION |
-|-------|------|---------|-------------|
-| `run_evals` | bool | `false` | Run LLM evals (requires codex/codex CLIs + auth) |
-| `tier2_mode` | string | `warn` | Tier-2 handling: `warn` \| `strict` \| `skip` |
+| INPUT        | TYPE   | DEFAULT | DESCRIPTION                                      |
+| ------------ | ------ | ------- | ------------------------------------------------ |
+| `run_evals`  | bool   | `false` | Run LLM evals (requires codex/codex CLIs + auth) |
+| `tier2_mode` | string | `warn`  | Tier-2 handling: `warn` \| `strict` \| `skip`    |
 
 ---
 
@@ -138,13 +138,13 @@ permissions:
 
 ## DEPENDENCIES
 
-| COMPONENT | SOURCE |
-|-----------|--------|
-| Baseline | `Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json` |
-| BM Policy | `Skills/skill-builder/Infrastructure/references/benchmark-policy.json` |
-| Script | `Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py` |
-| Dashboard | `Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py` |
-| Helper | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh` |
+| COMPONENT | SOURCE                                                                       |
+| --------- | ---------------------------------------------------------------------------- |
+| Baseline  | `Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json` |
+| BM Policy | `Skills/skill-builder/Infrastructure/references/benchmark-policy.json`       |
+| Script    | `Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py`      |
+| Dashboard | `Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py`  |
+| Helper    | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh`                 |
 
 ---
 

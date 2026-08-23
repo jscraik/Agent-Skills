@@ -34,13 +34,14 @@ cloud challenge cases must come from the local pool. Changes to release case
 ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
-Keep the model families independent across proof lanes: `oss-local` uses
-`qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:cloud`, and Tessl external uses
-`deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
-family, provider, and identity source. A model change starts a new baseline for
-that lane. Do not average scores across model families; compare each lane to its
-own prior baseline and use cross-lane agreement or disagreement as portability
-evidence. Configuration identity alone is not provider-invocation proof.
+Keep the model families independent across proof lanes. Resolve the `oss-local`
+and `oss-cloud` model identities from their current Configs-owned profiles, and
+resolve the external model identity from the Tessl receipt. Every eval receipt
+must carry the declared execution model, family, provider, and identity source.
+A model change starts a new baseline for that lane. Do not average scores across
+model families; compare each lane to its own prior baseline and use cross-lane
+agreement or disagreement as portability evidence. Configuration identity alone
+is not provider-invocation proof.
 
 Use `evals-router` for scenario quality review. The route must verify the
 assertion contract before changing the skill: each scenario needs a realistic
@@ -345,8 +346,8 @@ specific canonical eval case that needs file-visible wording.
 
 Before claiming completion:
 
-- prepare-tessl-scenarios --dry-run passed for the target skill when using
-  scenario generation.
+- The staging-only `prepare-tessl-scenarios` command passed for the target skill
+  when using scenario generation.
 - For every create/update skill flow that will run live Tessl, bespoke generated
   scenarios were prepared, reviewed, and imported before live scoring, unless
   `references/contract.yaml` explicitly declares a structure-only exception.
@@ -362,7 +363,7 @@ Before claiming completion:
   scenarios, targets 8, and carries the same ids proven by `oss-local` and
   `oss-cloud`.
 - OSS receipts name the execution model, family, provider, and identity source;
-  the Qwen local and DeepSeek cloud provider lanes are distinct.
+  the local and cloud provider lanes remain distinct.
 - When `oss-local` uses bounded qwen shards, every shard contains at most two
   cases and `ask sdk eval aggregate-shards` passes over repo-owned shard
   receipts with one package, dataset, rubric, profile, and exact release-set

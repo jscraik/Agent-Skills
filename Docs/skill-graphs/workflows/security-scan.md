@@ -6,27 +6,27 @@ Multi-layer security scanning: secrets detection, SAST, dependency CVEs, and art
 
 ## ABBREVIATION MAP
 
-| Abbr | Meaning |
-|------|---------|
-| SSW | Security scan workflow |
-| GL | Gitleaks (secrets) |
-| SG | Semgrep (SAST) |
-| TV | Trivy (CVE scan) |
-| ASC | Artifact secrets check |
+| Abbr  | Meaning                                    |
+| ----- | ------------------------------------------ |
+| SSW   | Security scan workflow                     |
+| GL    | Gitleaks (secrets)                         |
+| SG    | Semgrep (SAST)                             |
+| TV    | Trivy (CVE scan)                           |
+| ASC   | Artifact secrets check                     |
 | SARIF | Static analysis results interchange format |
-| SAST | Static application security testing |
-| CVE | Common vulnerabilities and exposures |
-| PR | Pull request |
+| SAST  | Static application security testing        |
+| CVE   | Common vulnerabilities and exposures       |
+| PR    | Pull request                               |
 
 ---
 
 ## TRIGGER MATRIX
 
-| EVENT | BRANCH | SCHEDULE | JOBS |
-|-------|--------|----------|------|
-| Push | `main` | — | GL, SG, TV, ASC |
-| PR | Any | — | GL, SG, TV, ASC |
-| Schedule | — | `0 2 * * *` (nightly) | GL, SG, TV, ASC |
+| EVENT    | BRANCH | SCHEDULE              | JOBS            |
+| -------- | ------ | --------------------- | --------------- |
+| Push     | `main` | —                     | GL, SG, TV, ASC |
+| PR       | Any    | —                     | GL, SG, TV, ASC |
+| Schedule | —      | `0 2 * * *` (nightly) | GL, SG, TV, ASC |
 
 ---
 
@@ -62,20 +62,20 @@ flowchart TB
 ```yaml
 permissions:
   contents: read
-  security-events: write  # SARIF upload to GitHub Advanced Security
+  security-events: write # SARIF upload to GitHub Advanced Security
 ```
 
 ---
 
 ## JOB: GITLEAKS (GL)
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
-| Checkout | Full history (`fetch-depth: 0`) |
-| Action | `gitleaks/gitleaks-action@v2` |
-| Comments | Enabled |
-| Fail mode | Hard fail on finding |
+| CONFIG    | VALUE                           |
+| --------- | ------------------------------- |
+| Runner    | `ubuntu-latest`                 |
+| Checkout  | Full history (`fetch-depth: 0`) |
+| Action    | `gitleaks/gitleaks-action@v2`   |
+| Comments  | Enabled                         |
+| Fail mode | Hard fail on finding            |
 
 ### ENV
 
@@ -88,21 +88,21 @@ GITLEAKS_ENABLE_COMMENTS: "true"
 
 ## JOB: SEMGREP (SG)
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
+| CONFIG    | VALUE             |
+| --------- | ----------------- |
+| Runner    | `ubuntu-latest`   |
 | Container | `semgrep/semgrep` |
-| Checkout | Full history |
+| Checkout  | Full history      |
 
 ### Rulesets
 
-| RULESET | CONDITION |
-|---------|-----------|
-| `p/secrets` | Always |
-| `p/python` | Always |
-| `p/typescript` | Always |
-| `p/bash` | Always |
-| `auto` | If `SEMGREP_APP_TOKEN` set |
+| RULESET        | CONDITION                  |
+| -------------- | -------------------------- |
+| `p/secrets`    | Always                     |
+| `p/python`     | Always                     |
+| `p/typescript` | Always                     |
+| `p/bash`       | Always                     |
+| `auto`         | If `SEMGREP_APP_TOKEN` set |
 
 ### Exclusions
 
@@ -125,10 +125,10 @@ semgrep scan ... -- .
 
 ### Exit Criteria
 
-| CHECK | ACTION |
-|-------|--------|
-| Exit code ≠ 0 | Fail workflow |
-| SARIF missing | Fail workflow |
+| CHECK              | ACTION        |
+| ------------------ | ------------- |
+| Exit code ≠ 0      | Fail workflow |
+| SARIF missing      | Fail workflow |
 | Findings count > 0 | Fail workflow |
 
 ### ENV
@@ -141,24 +141,24 @@ SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
 
 ## JOB: TRIVY (TV)
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
-| Action | `aquasecurity/trivy-action@master` |
-| Scan type | Filesystem (`fs`) |
-| Severity | `CRITICAL,HIGH` |
-| Exit code | `1` |
-| Unfixed | Ignored |
-| Output | `trivy.sarif` |
+| CONFIG    | VALUE                              |
+| --------- | ---------------------------------- |
+| Runner    | `ubuntu-latest`                    |
+| Action    | `aquasecurity/trivy-action@master` |
+| Scan type | Filesystem (`fs`)                  |
+| Severity  | `CRITICAL,HIGH`                    |
+| Exit code | `1`                                |
+| Unfixed   | Ignored                            |
+| Output    | `trivy.sarif`                      |
 
 ---
 
 ## JOB: ARTIFACT SECRET CHECK (ASC)
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
-| Tool | Gitleaks (latest release) |
+| CONFIG | VALUE                                 |
+| ------ | ------------------------------------- |
+| Runner | `ubuntu-latest`                       |
+| Tool   | Gitleaks (latest release)             |
 | Target | `Infrastructure/artifacts/` directory |
 
 ### Install Script
@@ -189,18 +189,18 @@ gitleaks detect \
 
 ### Upload on Failure
 
-| ARTIFACT | RETENTION |
-|----------|-----------|
-| `gitleaks-artifacts.json` | 7 days |
+| ARTIFACT                  | RETENTION |
+| ------------------------- | --------- |
+| `gitleaks-artifacts.json` | 7 days    |
 
 ---
 
 ## SARIF UPLOAD
 
-| JOB | FILE | CATEGORY |
-|-----|------|----------|
-| SG | `semgrep.sarif` | `semgrep` |
-| TV | `trivy.sarif` | `trivy` |
+| JOB | FILE            | CATEGORY  |
+| --- | --------------- | --------- |
+| SG  | `semgrep.sarif` | `semgrep` |
+| TV  | `trivy.sarif`   | `trivy`   |
 
 Upload: `github/codeql-action/upload-sarif@v3`
 Condition: `always()`
@@ -229,11 +229,11 @@ gitleaks detect --source Infrastructure/artifacts/ --no-git --redact
 
 ## FAILURE MODES
 
-| JOB | TRIGGER | RESULT |
-|-----|---------|--------|
-| GL | Secret found | Exit 1, PR comment |
-| SG | Finding > 0 | Exit 1, SARIF uploaded |
-| TV | CVE CRITICAL/HIGH | Exit 1, SARIF uploaded |
+| JOB | TRIGGER            | RESULT                  |
+| --- | ------------------ | ----------------------- |
+| GL  | Secret found       | Exit 1, PR comment      |
+| SG  | Finding > 0        | Exit 1, SARIF uploaded  |
+| TV  | CVE CRITICAL/HIGH  | Exit 1, SARIF uploaded  |
 | ASC | Secret in artifact | Exit 1, report uploaded |
 
 ---

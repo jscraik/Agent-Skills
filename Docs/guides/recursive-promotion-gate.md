@@ -74,4 +74,5 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`.
 - Rejected policy/role/signature paths emit immutable `run_blocked` evidence in `run_blocker.json` + `events.jsonl`.
 
 Related:
+
 - [Promotion gate workflow](/docs/skill-graphs/workflows/promotion-gate.md)

@@ -15,28 +15,29 @@ schema_version: string
 run_id: string
 iteration_id: int
 run_version: int
-state: string                         # accepted | rejected
-created_at: string                    # ISO-8601
+state: string # accepted | rejected
+created_at: string # ISO-8601
 created_by: string
 rubric_version: string
 evaluator_version: string
 persona_set_id: string
-prompt_hash: string                   # sha256
-applied_lessons: []                   # must be empty in MVP Phases 1-3
+prompt_hash: string # sha256
+applied_lessons: [] # must be empty in MVP Phases 1-3
 generated:
   content_ref: string
   token_estimate: int
-evaluation_report: object             # immutable embedded document
+evaluation_report: object # immutable embedded document
 diagnosis: object
 improvement_action: object
 reevaluation_report: object
-criterion_deltas:                     # key=criterion_id, value=float
+criterion_deltas: # key=criterion_id, value=float
   <criterion_id>: float
 ```
 
 ## Embedded reports
 
 `evaluation_report` minimum:
+
 - `judge_mode` (`standard` or `adversarial`)
 - `scores` map by criterion ID
 - `overall_score`
@@ -44,6 +45,7 @@ criterion_deltas:                     # key=criterion_id, value=float
 - `eligible_for_gate_check`
 
 `reevaluation_report` minimum:
+
 - same score shape as `evaluation_report`
 - `non_regression_passed`
 - `gate_decision` (`continue | pass | fail | escalate`)
@@ -85,9 +87,7 @@ criterion_deltas:                     # key=criterion_id, value=float
     "eligible_for_gate_check": true
   },
   "diagnosis": {
-    "weakest_criteria": [
-      "specificity"
-    ],
+    "weakest_criteria": ["specificity"],
     "reason": "Need concrete file paths and acceptance checks"
   },
   "improvement_action": {
@@ -114,6 +114,7 @@ criterion_deltas:                     # key=criterion_id, value=float
 ```
 
 Related:
+
 - [Task profile schema](/docs/skill-graphs/schemas/task-profile.schema.md)
 - [Capture record schema](/docs/skill-graphs/schemas/capture-record.schema.md)
 - [Evidence packet schema](/docs/skill-graphs/schemas/evidence-packet.schema.md)

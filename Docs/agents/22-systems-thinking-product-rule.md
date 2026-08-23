@@ -16,10 +16,11 @@ Those rules are not separate instincts. They are one operating loop.
 5. Validate that the blocker is now easier to diagnose or overcome.
 6. Explain the before and after in plain operational terms.
 
-When the blocker is the agent operating loop itself, the same rule applies. The
-agent must stop the stale lane, refine the environment, and prove the new
-mechanism before resuming. Continuing the old task while promising better
-behavior is evidence that the blocker has not been systematized.
+When a blocker meets the selected-system-improvement conditions in
+[High-Signal Steering Feedback](/Docs/agents/19-high-signal-steering-feedback.md),
+stop that systemic lane, refine the smallest owning mechanism, and prove it
+before resuming. Routine delivery continues through the smallest local repair
+and focused proof when those selection conditions are not met.
 
 ## Blocker Literacy
 

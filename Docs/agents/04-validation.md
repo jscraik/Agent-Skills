@@ -46,7 +46,7 @@
   authority, ownership, invariants, and operation-context errors. See
   [Misuse-Resistant Interface Design](/Docs/agents/20-misuse-resistant-interface-design.md).
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
-- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
+- `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
 - `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` when Jamie gives repeated or high-signal steering about agent behavior.
 - `python3 Infrastructure/scripts/validation-and-linting/validate_sdk_runtime_lane_contract.py --json`
@@ -116,137 +116,22 @@ the user explicitly asks for a full matrix:
 ./bin/ask skills external-review <skill-path> --json --robot
 ```
 
-For Codex smoke runs, the wrapper must select `[profiles.fast]` by passing
-`--profile fast` to the eval runner. Do not leave smoke evals on the ambient
-Codex profile when validating skill-factory output.
+For Codex smoke runs, the wrapper selects `[profiles.fast]` through
+`--profile fast`; do not rely on the ambient Codex profile.
 
-`ask evals run` must include the installed local Tessl CLI lane every time after
-the repo eval runner. Stage only the controlled Tessl input files into the
-stable evidence directory `/tmp/ask-tessl-evals/<skill-path>-<sha12>`, then run
-`tessl eval run --json <staged-temp-source>`; do not point Tessl at the live
-skill or plugin source tree. The hard boundary is registry upload: use native
-`tessl`, no `npx tessl`, no publish, no registry upload, and no package upload
-path. A controlled copy of the staged payload may be uploaded to Jamie's private
-Tessl workspace for assessment; do not describe that private workspace eval as a
-public publish, registry upload, or leak.
+`ask evals run` owns the ordinary local eval and native Tessl staging behavior.
+Use [Tessl Live Skill Eval Workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md)
+for scenario preparation, private Tessl execution, staged evidence shape, and
+project identity. Use
+[Skills SDK Runtime Lane Contract](/Docs/agents/25-sdk-runtime-lane-contract.md)
+for lane admission, runtime-profile ownership, and non-substitution rules. Do
+not duplicate model identifiers, temporary directory layouts, or Tessl project
+mutation procedures in this general validation guide.
 
-The staging layer must adapt repo-native eval metadata into Tessl's expected
-project shape: copy the skill entrypoint and eval reference files, synthesize
-`evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` from
-`references/evals.yaml`, and include a minimal `tessl.json` project marker.
-Project identity is deterministic:
-plugin-owned skills under `Plugins/<plugin-id>/skills/**` use the plugin
-project, while standalone skills use the skill project. When a Tessl workspace
-is provided, the wrapper must check the staged project link before evals run,
-relink an existing project first, and create a project only when relink proves
-one does not already exist. The requested workspace is part of the evidence
-contract: every SDK Tessl run uses the `jscraik` workspace and must create,
-link, list, and report the exact per-skill or per-plugin project identity,
-such as `jscraik/technical-writer` or `jscraik/skill-factory`, not a personal
-workspace or stale alias with the same project name. Leave the staged directory in place so the copied
-inputs, synthesized Tessl tasks, and Tessl project marker remain inspectable
-evidence. Reruns must archive prior staged contents to a sibling archive such
-as `/tmp/ask-tessl-evals/<skill-path>-<sha12>-evidence-archive/` before
-refreshing current inputs; do not delete temp evidence to get a clean
-workspace. Do not keep historical `scenarios/`, `evals/`, or
-`criteria.json` evidence under the staged upload root, because Tessl may ingest
-stale evidence as current scenarios. Do not duplicate eval cases by hand unless
-the canonical eval format changes.
-
-The live Tessl workflow is a separate explicit lane. Use
-`./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace jscraik`
-only when the operator asks for live private Tessl evidence. This lane must
-stage a plugin-shaped package under
-`/tmp/ask-tessl-evals/<skill-path>-<sha12>`, write
-`.tessl-plugin/plugin.json` with `"name": "jscraik/<plugin-name>"`,
-`"private": true`, and `"skills": "./skills/"`, copy the skill package to
-`skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into
-`evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` using Tessl's
-`weighted_checklist` criteria shape. Include local `references/**` support
-files beside the staged skill so Tessl plugin discovery and skill-relative links
-resolve from the plugin root. Run
-`tessl eval run --json --workspace jscraik <staged-plugin-dir>`.
-Stage `tessl.json` for the same
-`jscraik/<plugin-name>` identity because Tessl saves eval runs to a project.
-Before invoking Tessl evals, the wrapper must check that project link, relink an
-existing project first, and create the project only when needed. Start with
-`--tessl-live-dry-run` when proving package shape or policy before any live
-service call.
-
-For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
-is the plugin id, not the leaf skill directory. For example, live private
-validation of `Plugins/skill-factory/skills/skill-factory-router`
-must stage and save to `jscraik/skill-factory` while keeping the
-`skills` manifest entries aligned to the surviving Skill Factory skills.
-
-The live-private lane is still not a publish lane. Do not run `tessl install`,
-`tessl skill publish`, `tessl tile publish`, `tessl tile pack`, registry upload,
-or package upload from `ask evals run`. If live evals require Tessl project
-setup, classify the exact setup need: `tessl init`, `tessl project create`,
-`tessl project link`, or `tessl project repair`. For Codex sessions, load
-credentials from the operator-approved environment stream directly when needed;
-do not gate on regular-file checks, and never print API tokens.
-
-Tessl scenario generation is a separate prep lane, not part of ordinary
-`ask evals run`. When the operator asks to use Tessl's scenario-generation
-skill, run:
-
-```bash
-./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace jscraik --json --robot
-```
-
-Start with `--dry-run` to prove package shape. The command stages the target
-skill under `/tmp/ask-tessl-scenario-generation/<skill-path>-<sha12>/target-tile`
-and installs only `tessl-labs/tessl-skill-eval-scenarios@0.1.0` under the
-paired `tool-project`. Do not run this install in the repo root. This command
-prepares the workspace and points to the installed Tessl scenario skill; it does
-not by itself write the scenario files. Reruns archive the previous
-`target-tile`, `tool-project`, and generated scenario evidence under
-`evidence-archive/`; do not remove those temp artifacts manually during
-closeout. After it succeeds, follow the generated
-`scenario-generation-brief.md` and create `target-tile/evals/instructions.json`,
-`summary.json`, `summary_infeasible.json`, and sequential
-`scenario-*/{task.md,criteria.json,capability.txt}` files before claiming the
-external scenario-generation pass completed. Generated Tessl scenarios remain
-draft evidence until reviewed for instruction leakage,
-feasibility, criteria totals, and duplication. Import only selected cases back
-into canonical `references/evals.yaml`. See
-[Tessl Live Skill Eval Workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md) for
-the full agent checklist.
-
-In Codex sandboxed sessions, do not request network permission for the Tessl
-eval lane up front. The repo wrapper already limits Tessl input to the staged
-stable staged project, and asking the sandbox for network turns the command into an
-external-export approval path instead of exercising the local Tessl CLI
-contract. `--allow-tessl-project-save` is accepted for compatibility but is not
-required. Run the wrapper normally, then report any Tessl CLI credential,
-workspace/project-link, sandbox, or policy blocker from the command output with
-the exact staged command and blocker. `--skip-tessl` is only for an explicitly
-documented Tessl outage, policy block, or intentionally scoped debug run. If
-Tessl reports that no existing project safely matches the staged directory,
-classify it as a Tessl workspace/project-link setup blocker; do not loop back
-to auth, sandbox, temp-staging, or registry-upload explanations.
-
-If the native Tessl subprocess exits with a negative return code such as `-9`
-and produces no stdout or stderr, classify it as `blocked_runtime` with the
-terminating signal name, for example `SIGKILL`. Do not continue into fallback
-project relink/create attempts, and do not call the skill failed or reviewed.
-Treat the preserved `/tmp/ask-tessl-*` directory as the evidence packet for
-the staged inputs and diagnose the local Tessl CLI, sandbox, or OS runtime
-separately before rerunning the same wrapper lane.
-
-`ask skills external-review` is the durable second-check entrypoint for the
-external-review ladder. It runs strict audit, local Plugin Eval, and native
-Tessl package lint by default. Tessl content review is model-backed and requires
-the explicit `--with-tessl-review` switch. Treat `tessl skill review` path shape
-as the skill directory containing `SKILL.md`; Tessl plugin lint expects a staged package with
-`.tessl-plugin/plugin.json` and is not interchangeable. Plugin Eval is acceptable at `B+` or
-better when it has zero failures and the local/Tessl gates pass. Tessl review
-must meet the `95` threshold and must run through the wrapper, which preserves
-`/tmp/ask-tessl-reviews/<skill-path>-<sha12>/current` with
-`.tessl-plugin/plugin.json`, `tessl.json`, the copied skill, and included
-references for evidence. Reruns move the previous `current` directory under
-`evidence-archive/` before refreshing staged inputs.
+`ask skills external-review` remains the durable second-check entrypoint for
+the external-review ladder. It runs strict audit, local Plugin Eval, and native
+Tessl package lint by default; model-backed Tessl content review requires the
+explicit `--with-tessl-review` switch.
 
 When any rung is blocked, record the exact command, status, blocker class, and
 the next minimal diagnostic. Do not replace a blocked rung with a different tool

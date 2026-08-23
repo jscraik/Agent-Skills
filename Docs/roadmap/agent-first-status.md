@@ -8,15 +8,15 @@ Agent-Skills is a governed repository of canonical skills for AI coding agents (
 
 ## Current State
 
-| Surface | Status | Notes |
-|---------|--------|-------|
-| Skill discovery | ✅ operational | 120 canonical skills across 7 topic clusters + .system lane |
-| CLI (`ask`) | ✅ operational | Fuzzy matching, JSON output, trace IDs |
-| Validation | ✅ operational | 28 automated checks via `ask repo validate` |
-| CI pipeline | ✅ operational | GitHub Actions + CircleCI dual-provider |
-| Harness | ✅ operational | v0.12.0, contract-governed |
-| Graph navigation | ✅ operational | Skill relationship mapping with topic clusters |
-| Plugin system | ✅ operational | 27 plugin skills across 5 plugin packages |
+| Surface          | Status         | Notes                                                       |
+| ---------------- | -------------- | ----------------------------------------------------------- |
+| Skill discovery  | ✅ operational | 120 canonical skills across 7 topic clusters + .system lane |
+| CLI (`ask`)      | ✅ operational | Fuzzy matching, JSON output, trace IDs                      |
+| Validation       | ✅ operational | 28 automated checks via `ask repo validate`                 |
+| CI pipeline      | ✅ operational | GitHub Actions + CircleCI dual-provider                     |
+| Harness          | ✅ operational | v0.12.0, contract-governed                                  |
+| Graph navigation | ✅ operational | Skill relationship mapping with topic clusters              |
+| Plugin system    | ✅ operational | 27 plugin skills across 5 plugin packages                   |
 
 ## Key Metrics
 

@@ -277,3 +277,17 @@ Repo-specific agent knowledge base. Append-only.
 **2026-08-04 [Codex]:** Bash command 'jq' failed with exit code 124 -> summarize the failure and change approach before rerunning the same command (auto-key:698697174)
 
 **2026-08-06 [Codex]:** Bash command 'bash' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2871825019)
+
+**2026-08-07 [Codex]:** Bash command 'timeout' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:18959582)
+
+**2026-08-07 [Codex]:** Bash command 'timeout' failed with exit code 124 -> summarize the failure and change approach before rerunning the same command (auto-key:3628920832)
+
+**2026-08-10 [Codex]:** Bash command 'git' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1873044584)
+
+**2026-08-10 [Codex]:** Bash command 'git' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2931173464)
+
+**2026-08-12 [Codex]:** Bash command 'export' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:779013925)
+
+**2026-08-22 [Codex]:** Bash command 'ask' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2645054146)
+
+**2026-08-22 [Codex]:** Bash command 'ask' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2185740195)

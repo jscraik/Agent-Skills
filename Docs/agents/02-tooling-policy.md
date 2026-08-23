@@ -13,13 +13,16 @@
 
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Default to `bash -lc` for shell tooling in this repository. Use `zsh -lc` only when you must validate zsh-specific behavior.
+- Run shell commands through `zsh -lc`; invoke Bash scripts explicitly with
+  `bash`.
 
 ## Command preflight
 
 - Run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
 - The verified optional overrides are `--repo-fragment`, `--bins`, and `--paths`.
-- Confirm `pwd` is `/Users/jamiecraik/dev/Agent-Skills` before edits.
+- Confirm the repository root with `git rev-parse --show-toplevel` and use
+  `pwd -P` when the physical checkout path matters. Do not depend on path casing
+  or a personal absolute checkout path.
 - Verify required binaries with `which` before running installs.
 - Confirm target paths with `fd` before destructive operations.
 - Do not source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` or call `preflight_repo`; the current script is a bash CLI, not a shell function library.
@@ -57,7 +60,7 @@
 - `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
-- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md` (external dependency)
+- `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper preferred over `~/.codex` version)
 
 ## Skill line-budget policy

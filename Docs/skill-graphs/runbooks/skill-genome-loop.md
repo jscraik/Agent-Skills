@@ -3,6 +3,7 @@
 ## Overview
 
 The Skill Genome Loop is a nightly batch process that:
+
 1. Ingests run/session artifacts from the recursive skill loop
 2. Computes routing confusion and outcome quality signals per skill
 3. Emits high-confidence, human-gated draft PR candidates for skill-definition improvements
@@ -60,6 +61,7 @@ rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
 **Location**: `Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt`
 
 Valid values:
+
 - `off` - Skip candidate generation entirely
 - `observe_only` - Log candidates but don't emit (default)
 - `active` - Emit candidates to JSONL
@@ -80,6 +82,7 @@ echo "off" > Infrastructure/artifacts/skill-graphs/controls/rollout-mode.txt
 **Location**: `Infrastructure/artifacts/skill-graphs/controls/hard-gate-mode.txt`
 
 Valid values:
+
 - `auto` - enforce `TR-04`/`TR-05` hard from Phase 3+ and `TR-06` hard from Phase 4+ (default)
 - `force_on` - enforce `TR-04`/`TR-05`/`TR-06` as hard gates immediately
 - `force_off` - non-production override only; requires incident ticket reference
@@ -116,24 +119,25 @@ kill-switch > rollback > rollout-mode > hard-gate-mode > feature-switch
 
 ### Fields
 
-| Field | Description |
-|-------|-------------|
-| `schema_version` | Schema version (currently "1.0") |
-| `skill_path` | Skill identifier being analyzed |
-| `proposed_change_type` | Type of change proposal |
-| `composite_score` | Confidence score (0.0-1.0, threshold: 0.82) |
-| `window_id` | Week window identifier (YYYY-WNN) |
-| `decision_reason` | Human-readable rationale |
-| `candidate_id` | Deterministic ID for deduplication |
-| `window_count` | Number of windows with this signal |
-| `redaction_passed` | True if no PII/secrets detected |
-| `created_at` | ISO 8601 timestamp |
+| Field                  | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `schema_version`       | Schema version (currently "1.0")            |
+| `skill_path`           | Skill identifier being analyzed             |
+| `proposed_change_type` | Type of change proposal                     |
+| `composite_score`      | Confidence score (0.0-1.0, threshold: 0.82) |
+| `window_id`            | Week window identifier (YYYY-WNN)           |
+| `decision_reason`      | Human-readable rationale                    |
+| `candidate_id`         | Deterministic ID for deduplication          |
+| `window_count`         | Number of windows with this signal          |
+| `redaction_passed`     | True if no PII/secrets detected             |
+| `created_at`           | ISO 8601 timestamp                          |
 
 ---
 
 ## Confidence Gating
 
 A candidate is "high-confidence" if:
+
 - `composite_score >= 0.82`
 - `window_count >= 2` (repeated signal across windows)
 
@@ -180,6 +184,7 @@ cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq -c 'se
 ### 2. Evaluate Candidate
 
 For each candidate:
+
 1. Review `decision_reason` for context
 2. Check `composite_score` and `window_count` for confidence
 3. Verify `redaction_passed=true`
@@ -244,12 +249,12 @@ rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
 
 ### Key Metrics
 
-| Metric | Description | Alert Threshold |
-|--------|-------------|-----------------|
-| `candidates_raw` | Total candidates before gating | > 100/run |
-| `candidates_high_confidence` | Passing confidence gate | < 10% of raw |
-| `candidates_written` | Actually emitted | < `candidates_emitted` |
-| `redaction_failures` | Candidates blocked by PII | > 0 (investigate) |
+| Metric                       | Description                    | Alert Threshold        |
+| ---------------------------- | ------------------------------ | ---------------------- |
+| `candidates_raw`             | Total candidates before gating | > 100/run              |
+| `candidates_high_confidence` | Passing confidence gate        | < 10% of raw           |
+| `candidates_written`         | Actually emitted               | < `candidates_emitted` |
+| `redaction_failures`         | Candidates blocked by PII      | > 0 (investigate)      |
 
 ---
 
@@ -268,11 +273,13 @@ rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
 ### No Candidates Generated
 
 **Causes**:
+
 1. No runs meeting artifact requirements
 2. All candidates below confidence threshold
 3. Rollout mode is `off` or `observe_only`
 
 **Debug**:
+
 ```bash
 python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --dry-run
 ```

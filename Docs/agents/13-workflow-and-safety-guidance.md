@@ -169,23 +169,3 @@ When refactoring interfaces that affect multiple files, first update the interfa
 ## Documentation
 
 Always format markdown plan files cleanly before writing - avoid stray backticks, inconsistent heading levels, or mixed quote styles. Use `prettier --write` or equivalent for markdown files.
-
-## Repeated Steering and Environment Refinement
-
-The selected-route criteria and refinement loop above govern repeated steering.
-Repeated feedback, review findings, approval failures, and live-state mismatches
-do not stop routine work by themselves. After two equivalent failures of the
-same command, change the command, environment, permission profile, or
-diagnostic path before retrying, then record the changed evidence.
-
-For sandboxed Codex runs, live PR and CI operations are networked operations.
-Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API
-commands with explicit network permission before diagnosing an outage,
-credential issue, or platform regression. If the command may invoke `gh`,
-`mise`, or `uv`, set `XDG_CACHE_HOME`, `XDG_STATE_HOME`,
-`MISE_CACHE_DIR`, and `UV_CACHE_DIR` to sandbox-approved writable directories
-before treating cache or state warnings as failures.
-
-After two equivalent failures, change the environment, permission request,
-command shape, or repo contract before trying again. Do not keep rotating
-through the same failing command and call that progress.

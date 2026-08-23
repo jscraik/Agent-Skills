@@ -1,46 +1,43 @@
 # AI Review Governance
 
-## Table of Contents
-- [Purpose](#purpose)
-- [Authoring-family review scope](#authoring-family-review-scope)
-- [Codex Invocation Policy](#codex-invocation-policy)
-- [Gate dependency policy](#gate-dependency-policy)
-- [Approval expectations](#approval-expectations)
-
 ## Purpose
-This document defines review-time governance for AI-authored changes and AI-centered skill infrastructure updates in this repository.
 
-## Authoring-family review scope
-For changes touching skill authoring family behavior (`skill-factory-router`, `skill-creator`, `skill-installer`, `plugin-creator`), reviewers must require the `authoring-family-gate` CI job.
+This document defines focused review expectations for AI-centered skill
+infrastructure. Hosted required-check truth remains owned by
+[CI Required Checks](/Docs/agents/12-ci-required-checks.md).
 
-The gate is implemented by:
-- `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
+## Authoring-Family Review Scope
 
-Reviewers should expect this gate to enforce:
-- Contract schema and benchmark parity across all four family skills.
-- Evals contract/security coverage including prompt-injection fail cases.
-- OpenClaw security guard execution.
-- Structural smoke/release eval case coverage (or trusted-lane live eval execution when explicitly enabled).
-- In CI this gate runs with `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`, so local-memory preflight is advisory there; reviewers should still require all remaining contract/eval/security checks to pass.
+Changes to `skill-factory-router`, `skill-creator`, `skill-installer`,
+`skill-builder`, or `plugin-creator` must preserve the focused
+`authoring-family-gate` in `.github/workflows/skill-quality.yml`.
 
-## Codex Invocation Policy
-Codex workflow invocation is restricted to trusted actors only:
-- Allowed `author_association` values: `OWNER`, `MEMBER`, `COLLABORATOR`.
-- Applies to these events: `issue_comment`, `pull_request_review_comment`, `pull_request_review`, and `issues`.
-- The `issues` trigger is restricted to `opened` events only, to avoid assigner/author ambiguity on `assigned`.
+The gate runs:
 
-Traceability:
-- Workflow file: `.github/workflows/codex.yml`
-- Job condition fragment:
-  - Mention gate: `@codex` must be present in the relevant event body/title.
-  - Trust gate: event-specific `author_association` must be in `["OWNER","MEMBER","COLLABORATOR"]`.
+```bash
+bash Infrastructure/scripts/validate_skill_authoring_family.sh
+```
 
-## Gate dependency policy
-See [CI Required Checks](/Docs/agents/12-ci-required-checks.md) for the canonical PR gate dependency policy.
+Reviewers should require current-candidate evidence for contract and benchmark
+parity, security and prompt-injection cases, structural eval coverage, and
+projection integrity. In CI, `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional` makes
+only the Local Memory preflight advisory.
 
-Any change that removes or bypasses the `harness-preflight -> [repo-validate, authoring-family-gate]` dependency must be treated as governance-impacting and reviewed explicitly.
+## Workflow Ownership
 
-## Approval expectations
-- Do not grant final merge-ready status for relevant PRs while `authoring-family-gate` is failing or absent.
-- Require evidence in PR checks that dependency ordering remained intact when workflow changes are included.
-- If live eval mode is used, ensure trusted-lane safeguards are explicit and documented.
+- `.github/workflows/pr-pipeline.yml` owns repository-wide pull-request jobs.
+- `.github/workflows/skill-quality.yml` owns the path-triggered skill-quality and
+  authoring-family jobs.
+- `.harness/ci-required-checks.json` owns the registered required-check names.
+
+Do not infer a dependency between separate workflows unless the live workflow
+or required-check registry encodes it.
+
+## Approval Expectations
+
+- Do not call a relevant skill-authoring-family change ready while its focused
+  gate is failing, missing, or stale for the current candidate.
+- Keep local validation, hosted checks, review state, and merge readiness as
+  separate evidence lanes.
+- When workflow names or dependencies change, update the owning workflow,
+  required-check registry, and this guidance in one validated change.

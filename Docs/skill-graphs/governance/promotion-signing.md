@@ -52,12 +52,12 @@ across Python versions, no whitespace variation.
 
 ### Threat model
 
-| Threat | Mitigation |
-|---|---|
-| Decision file mutated after signing | HMAC mismatch → `E_DECISION_SIG_MISMATCH` blocks canonical write |
-| Key leaked in logs | Key is never printed; only the hex MAC is written to the sig file |
-| Timing attack on MAC comparison | `hmac.compare_digest` (constant-time) |
-| Key reuse across runs | Each decision body is different; no nonce needed for integrity |
+| Threat                              | Mitigation                                                        |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| Decision file mutated after signing | HMAC mismatch → `E_DECISION_SIG_MISMATCH` blocks canonical write  |
+| Key leaked in logs                  | Key is never printed; only the hex MAC is written to the sig file |
+| Timing attack on MAC comparison     | `hmac.compare_digest` (constant-time)                             |
+| Key reuse across runs               | Each decision body is different; no nonce needed for integrity    |
 
 ### Limitations
 
@@ -158,10 +158,10 @@ The validator picks up `PROMOTION_SIG_REQUIRED` automatically (or pass `--requir
 
 ## Error codes
 
-| Code | Meaning |
-|---|---|
-| `E_DECISION_SIG_MISSING` | `--require-sig` set but no sig file provided |
-| `E_DECISION_SIG_READ_FAILED` | Sig file exists but cannot be read |
-| `E_DECISION_SIG_FORMAT` | Sig file doesn't start with `hmac-sha256:` |
+| Code                              | Meaning                                             |
+| --------------------------------- | --------------------------------------------------- |
+| `E_DECISION_SIG_MISSING`          | `--require-sig` set but no sig file provided        |
+| `E_DECISION_SIG_READ_FAILED`      | Sig file exists but cannot be read                  |
+| `E_DECISION_SIG_FORMAT`           | Sig file doesn't start with `hmac-sha256:`          |
 | `E_DECISION_SIG_CANONICAL_FAILED` | Decision JSON cannot be parsed for canonicalisation |
-| `E_DECISION_SIG_MISMATCH` | MAC does not match — possible tampering |
+| `E_DECISION_SIG_MISMATCH`         | MAC does not match — possible tampering             |
