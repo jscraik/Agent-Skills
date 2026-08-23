@@ -412,18 +412,24 @@ def _projection_violations(
 
 
 def _manifest_budget_violations(
-    projection_mode: str, manifest_report: dict[str, Any]
+    projection_mode: str,
+    manifest_report: dict[str, Any],
+    repo_root_path: Path = REPO_ROOT,
 ) -> list[dict[str, Any]]:
     violations = list(manifest_report["violations"])
-    violations.extend(validate_written_manifest_provenance())
+    violations.extend(
+        validate_written_manifest_provenance(repo_root_path=repo_root_path)
+    )
     manifest_paths = [manifest["path"] for manifest in manifest_report["manifests"]]
-    missing = [path for path in manifest_paths if not (REPO_ROOT / path).is_file()]
+    missing = [path for path in manifest_paths if not (repo_root_path / path).is_file()]
     if projection_mode == "rooted" and missing:
         violations.append({"code": "MANIFEST_FILES_MISSING", "paths": missing})
     return violations
 
 
-def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
+def validate_context_budget(
+    *, projection_mode: str = "flat", repo_root_path: Path = REPO_ROOT
+) -> dict[str, Any]:
     config = load_config()
     root_report = build_roots()
     manifest_report = build_manifest_report()
@@ -434,7 +440,11 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
     violations.extend(
         _projection_violations(projection_mode, runtime_entries, manifest_report)
     )
-    violations.extend(_manifest_budget_violations(projection_mode, manifest_report))
+    violations.extend(
+        _manifest_budget_violations(
+            projection_mode, manifest_report, repo_root_path=repo_root_path
+        )
+    )
     return {
         "status": "pass" if not violations else "fail",
         "projection_mode": projection_mode,

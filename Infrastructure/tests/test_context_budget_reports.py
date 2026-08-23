@@ -1,5 +1,6 @@
 # pylint: disable=import-error,wrong-import-position
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -69,6 +70,41 @@ class TestContextBudgetReport(unittest.TestCase):
         )
         self.assertIsNotNone(missing)
         self.assertIn(".skillsets/nonexistent/manifest.jsonl", missing["paths"])
+
+    def test_context_budget_uses_injected_root_for_manifest_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            manifest_path = repo_root / ".skillsets/agent-ops/manifest.jsonl"
+            manifest_path.parent.mkdir(parents=True)
+            manifest_path.write_text("", encoding="utf-8")
+            report_payload = {
+                "manifests": [{"path": ".skillsets/agent-ops/manifest.jsonl"}],
+                "manifest_count": 1,
+                "module_count": 0,
+                "unmapped": [],
+                "violations": [],
+            }
+            with (
+                mock.patch.object(
+                    check_context_budget,
+                    "build_manifest_report",
+                    return_value=report_payload,
+                ),
+                mock.patch.object(
+                    check_context_budget,
+                    "validate_written_manifest_provenance",
+                    return_value=[],
+                ) as provenance,
+            ):
+                report = check_context_budget.validate_context_budget(
+                    projection_mode="rooted", repo_root_path=repo_root
+                )
+
+        self.assertNotIn(
+            "MANIFEST_FILES_MISSING",
+            {violation["code"] for violation in report["violations"]},
+        )
+        provenance.assert_called_once_with(repo_root_path=repo_root)
 
 
 if __name__ == "__main__":

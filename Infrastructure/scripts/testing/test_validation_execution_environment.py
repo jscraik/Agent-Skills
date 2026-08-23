@@ -151,8 +151,10 @@ def test_direct_validation_scripts_do_not_suppress_import_order() -> None:
 
     for script_name in DIRECT_BOOTSTRAP_SCRIPTS:
         source = (script_dir / script_name).read_text(encoding="utf-8")
-        assert "# noqa: E402" not in source
-        assert "importlib.import_module" in source
+        assert "# noqa: E402" not in source, f"{script_name} still suppresses E402"
+        assert "importlib.import_module" in source, (
+            f"{script_name} must bootstrap through importlib.import_module"
+        )
 
 
 def test_direct_validation_tests_do_not_suppress_import_order() -> None:
@@ -161,8 +163,10 @@ def test_direct_validation_tests_do_not_suppress_import_order() -> None:
 
     for test_name in DIRECT_BOOTSTRAP_TESTS:
         source = (test_dir / test_name).read_text(encoding="utf-8")
-        assert "# noqa: E402" not in source
-        assert "importlib.import_module" in source
+        assert "# noqa: E402" not in source, f"{test_name} still suppresses E402"
+        assert "importlib.import_module" in source, (
+            f"{test_name} must bootstrap through importlib.import_module"
+        )
 
 
 def test_prek_reinstalls_when_expected_hooks_path_is_already_configured(
