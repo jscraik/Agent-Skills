@@ -66,7 +66,7 @@ QWEN_OSS_LOCAL_MAX_BATCH_CASES = 2
 SMOKE_EVAL_MODEL = "gpt-5.3-codex-spark"
 # Codex CLI selects `[profiles.fast]` with the plain profile name.
 SMOKE_EVAL_PROFILE = "fast"
-DEFAULT_MACRO_EVAL_REPORTS_GLOB = "Infrastructure/artifacts/skills/*/*/summary.json"
+DEFAULT_MACRO_EVAL_REPORTS_GLOB = ".tmp/agent-skills-artifacts/skills/*/*/summary.json"
 TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
 TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
 TESSL_DEFAULT_WORKSPACE = "jscraik"

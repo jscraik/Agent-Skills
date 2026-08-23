@@ -36,6 +36,7 @@ if existing_trace_checks is not None:
 
 from run_skill_evals import (  # noqa: E402
     EvalCase,
+    build_arg_parser,
     _resolve_existing_optional_case_artifact_path,
     main,
     run_discovery_smoke,
@@ -48,6 +49,11 @@ from run_skill_evals import (  # noqa: E402
 
 
 class RunSkillEvalsDiscoveryTests(unittest.TestCase):
+    def test_default_reports_directory_is_runtime_owned(self) -> None:
+        args = build_arg_parser().parse_args(["Skills/agent-ops/demo"])
+
+        self.assertEqual(args.reports_dir, ".tmp/agent-skills-artifacts/skills")
+
     def test_release_manifest_includes_final_artifact_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             skill_dir = Path(tmpdir) / "demo-skill"

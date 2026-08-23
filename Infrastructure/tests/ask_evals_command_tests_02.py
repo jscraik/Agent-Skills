@@ -1,7 +1,7 @@
 from ask_evals_command_tests_01 import *  # noqa: F403
 
 def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
-    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
+    report_dir = tmp_path / ".tmp" / "agent-skills-artifacts" / "skills" / "demo-skill" / "run-1"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text(
         json.dumps(
@@ -96,8 +96,8 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
         "hard_gates",
         "trace_metrics",
     ]
-    assert rows[0]["summary_path"] == "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json"
-    assert rows[0]["release_manifest_path"] == "Infrastructure/artifacts/skills/demo-skill/run-1/release_manifest.json"
+    assert rows[0]["summary_path"] == ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/summary.json"
+    assert rows[0]["release_manifest_path"] == ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/release_manifest.json"
     assert rows[1]["case_type"] == "clean"
     assert rows[1]["run_outcome"] == "passed"
     assert rows[1]["eval_finding"] == "none"
@@ -134,7 +134,7 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
 
 
 def test_macro_eval_report_uses_claim_gap_when_case_has_no_finding(tmp_path: Path) -> None:
-    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-2"
+    report_dir = tmp_path / ".tmp" / "agent-skills-artifacts" / "skills" / "demo-skill" / "run-2"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text(
         json.dumps(
@@ -308,7 +308,7 @@ def test_tessl_live_private_sanitizer_redacts_cross_platform_home_paths() -> Non
 
 
 def test_macro_eval_report_blocks_on_malformed_existing_summary(tmp_path: Path) -> None:
-    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
+    report_dir = tmp_path / ".tmp" / "agent-skills-artifacts" / "skills" / "demo-skill" / "run-1"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text("{ not valid json", encoding="utf-8")
 
@@ -317,13 +317,13 @@ def test_macro_eval_report_blocks_on_malformed_existing_summary(tmp_path: Path) 
     assert result.status == "error"
     assert result.errors[0].code == "ERR_VALIDATION"
     assert result.data["artifact_errors"] == [{
-        "path": "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json",
+        "path": ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/summary.json",
         "message": "Could not parse JSON evidence artifact: " + str(report_dir / "summary.json"),
     }]
 
 
 def test_macro_eval_report_blocks_on_non_object_existing_summary(tmp_path: Path) -> None:
-    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
+    report_dir = tmp_path / ".tmp" / "agent-skills-artifacts" / "skills" / "demo-skill" / "run-1"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text("[]", encoding="utf-8")
 
@@ -332,7 +332,7 @@ def test_macro_eval_report_blocks_on_non_object_existing_summary(tmp_path: Path)
     assert result.status == "error"
     assert result.errors[0].code == "ERR_VALIDATION"
     assert result.data["artifact_errors"] == [{
-        "path": "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json",
+        "path": ".tmp/agent-skills-artifacts/skills/demo-skill/run-1/summary.json",
         "message": "JSON evidence artifact must be an object: " + str(report_dir / "summary.json"),
     }]
 

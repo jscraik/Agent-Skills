@@ -13,7 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from build_skill_eval_dashboard import build_dashboard, collect_scorecards, summarize_run, to_markdown
+from build_skill_eval_dashboard import build_dashboard, collect_scorecards, parse_args, summarize_run, to_markdown
 from eval_signal_contract import (
     EXPECTED_SIGNAL_COMPOSITE_KEY,
     EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY,
@@ -24,6 +24,18 @@ from eval_signal_contract import (
 
 
 class BuildSkillEvalDashboardTests(unittest.TestCase):
+    def test_default_outputs_are_runtime_owned(self) -> None:
+        argv = sys.argv
+        try:
+            sys.argv = ["build_skill_eval_dashboard.py"]
+            args = parse_args()
+        finally:
+            sys.argv = argv
+
+        self.assertEqual(args.reports_root, ".tmp/agent-skills-artifacts/skills")
+        self.assertEqual(args.out_json, ".tmp/agent-skills-artifacts/skills/dashboard.json")
+        self.assertEqual(args.out_md, ".tmp/agent-skills-artifacts/skills/dashboard.md")
+
     def test_summarize_run_uses_expected_signal_contract_metrics(self) -> None:
         summary = summarize_run(
             {

@@ -24,8 +24,8 @@ from typing import Any, Dict, List, Tuple
 
 API_BASE = "https://context7.com/api/v2"
 DEFAULT_POLICY = "Skills/skill-builder/Infrastructure/references/benchmark-policy.json"
-DEFAULT_BENCHMARK = "Infrastructure/artifacts/industry-benchmark-latest.json"
-DEFAULT_REPORT = "Infrastructure/artifacts/benchmark-policy-refresh-report.json"
+DEFAULT_BENCHMARK = ".tmp/agent-skills-artifacts/industry-benchmark-latest.json"
+DEFAULT_REPORT = ".tmp/agent-skills-artifacts/benchmark-policy-refresh-report.json"
 
 
 @dataclass(frozen=True)
