@@ -1,3 +1,4 @@
+import importlib
 import sys
 import tempfile
 import unittest
@@ -8,13 +9,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-# noqa: E402: test-only Infrastructure imports after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.commands.skills_impl import skills_package_verify  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from helpers.ask_skills_package_fixtures import (  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-    write_gold_quality_skill,
-    write_plugin_hooks,
-    write_plugin_manifest,
-)
+_skills_impl = importlib.import_module("ask.commands.skills_impl")
+_fixtures = importlib.import_module("helpers.ask_skills_package_fixtures")
+
+skills_package_verify = _skills_impl.skills_package_verify
+write_gold_quality_skill = _fixtures.write_gold_quality_skill
+write_plugin_hooks = _fixtures.write_plugin_hooks
+write_plugin_manifest = _fixtures.write_plugin_manifest
 
 
 class TestAskSkillsPackagePlugins(unittest.TestCase):

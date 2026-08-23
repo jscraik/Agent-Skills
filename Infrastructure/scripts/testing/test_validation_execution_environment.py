@@ -26,6 +26,10 @@ DIRECT_BOOTSTRAP_SCRIPTS = (
     "verify_runtime_budget.py",
 )
 DIRECT_BOOTSTRAP_TESTS = (
+    "test_ask_repo_doctor_closeout.py",
+    "test_ask_skills_external_review.py",
+    "test_ask_skills_package.py",
+    "test_ask_skills_package_plugins.py",
     "test_skills_sdk_ab_preflight.py",
     "test_skills_sdk_cloud_smoke_contract.py",
 )

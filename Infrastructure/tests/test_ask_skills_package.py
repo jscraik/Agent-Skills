@@ -1,3 +1,4 @@
+import importlib
 import sys
 import tempfile
 import unittest
@@ -9,17 +10,20 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-# noqa: E402: test-only Infrastructure imports after local path bootstrap; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.commands import skills_impl  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.commands.skills_impl import skills_package, skills_package_verify, skills_package_verify_strict  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-from helpers.ask_skills_package_fixtures import (  # noqa: E402  # test-only Infrastructure import; JSC-385; expires 2026-12-31; ADR: local test bootstrap
-    write_gold_quality_skill as _write_gold_quality_skill,
-    write_minimal_sdk_package_companions as _write_minimal_sdk_package_companions,
-    write_advisory_quality_skill as _write_advisory_quality_skill,
-    write_package_metadata_skill as _write_package_metadata_skill,
-    write_weak_quality_skill as _write_weak_quality_skill,
-)
+skills_impl = importlib.import_module("ask.commands.skills_impl")
+_package_verify = importlib.import_module("ask.skills_sdk.package_verify")
+_fixtures = importlib.import_module("helpers.ask_skills_package_fixtures")
+
+skills_package = skills_impl.skills_package
+skills_package_verify = skills_impl.skills_package_verify
+skills_package_verify_strict = skills_impl.skills_package_verify_strict
+_quality_blockers = _package_verify._quality_blockers
+_quality_checks = _package_verify._quality_checks
+_write_gold_quality_skill = _fixtures.write_gold_quality_skill
+_write_minimal_sdk_package_companions = _fixtures.write_minimal_sdk_package_companions
+_write_advisory_quality_skill = _fixtures.write_advisory_quality_skill
+_write_package_metadata_skill = _fixtures.write_package_metadata_skill
+_write_weak_quality_skill = _fixtures.write_weak_quality_skill
 
 
 class TestAskSkillsPackage(unittest.TestCase):
