@@ -1,3 +1,0 @@
-$agents-md
-
-I need help reorganizing a messy AGENTS.md setup, but I have not said whether the problem is global, repo-root, or nested. Keep this first response to round 1 discovery only, explain briefly why the question matters, and ask one intuitive scope question.
