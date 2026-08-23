@@ -1,3 +1,0 @@
-$skill-builder
-
-request_user_input is unavailable in this runtime. Continue discovery round one with a plain-language question and no tool call.

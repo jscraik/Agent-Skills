@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you finish the discovery interview for a new skill? In this response, do not keep interviewing. Provide the confirmation summary, separate facts from assumptions, and ask clearly whether it captures the skill well enough to build.
