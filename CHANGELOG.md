@@ -3,6 +3,7 @@
 All notable changes for this repository are documented in this file.
 
 ## Table of Contents
+
 - [Unreleased](#unreleased)
 - [Release Template](#release-template-copy-to-next-tagged-release)
   - [Added](#added)
@@ -11,9 +12,10 @@ All notable changes for this repository are documented in this file.
   - [Other](#other)
 
 ## Unreleased
-(entries compiled from recent history)
-### Added
 
+(entries compiled from recent history)
+
+### Added
 
 ### Changed
 
@@ -44,10 +46,13 @@ All notable changes for this repository are documented in this file.
 - `2026-02-23` [cfb3def] Harden skill-builder security gates and eval tooling
 - `2026-02-23` [a333f4a] Add codex-md skill and refresh standards references
 - `2026-02-22` [0d2e72c] Add process skills and harden skill-builder workflows
+
 ## Release Template (copy to next tagged release)
+
 ### Added
 
 ### Changed
+
 - `2026-02-23` [27c812c] ci(github): drop go from CodeQL language matrix
 - `2026-02-23` [7d509f4] ci: restore CodeQL language matrix
 - `2026-02-23` [df4209b] ci: remove go from CodeQL matrix
@@ -57,10 +62,12 @@ All notable changes for this repository are documented in this file.
 - `2026-02-23` [1bd0c85] docs-expert: bootstrap missing doc QA lint and brand baselines
 
 ### Fixed
+
 - `2026-02-23` [fd3ab94] Fix Codex skills symlink sync and update skill index
 - `2026-02-22` [8196e8b] fix codex-agent-builder accuracy and installer behavior
 
 ### Other
+
 - `2026-02-23` [d008952] Sync skill index and update sessions scan artifacts
 - `2026-02-23` [a994202] Add openai-md skill and align agents/codex docs with skill guards
 - `2026-02-23` [e71517f] Make frontend rules injection conditional on evidence

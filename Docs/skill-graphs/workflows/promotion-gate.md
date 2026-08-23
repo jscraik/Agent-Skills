@@ -60,32 +60,32 @@ stateDiagram-v2
 
 ## GATE CHECKLIST (G1-G8)
 
-| ID | CHECK | T+ CONDITION |
-|----|-------|--------------|
-| G1_RUNTIME | RUN.status terminal | ∈ {completed, stopped} |
-| G2_STOP | RUN.stop_reason explicit | ≠ null |
-| G3_EVIDENCE | IJ.latest has eval+reeval | eval_ts && reeval_ts present |
-| G4_DELTA | IJ.criterion_delta non-empty | delta[] length > 0 |
-| G5_PROV | EP.immutable_fields present | schema+rubric+evaluator+persona |
-| G6_SEC | LS.body no secrets/PII | scan.pass && sha256 recorded |
-| G7_REVIEW | PD.reviewer_ids[] | wave0-1: 1A \| wave2+: 2A |
-| G8_CTRL | CTRL.snapshot valid | mode∈{shadow,canary,live} |
+| ID          | CHECK                        | T+ CONDITION                    |
+| ----------- | ---------------------------- | ------------------------------- |
+| G1_RUNTIME  | RUN.status terminal          | ∈ {completed, stopped}          |
+| G2_STOP     | RUN.stop_reason explicit     | ≠ null                          |
+| G3_EVIDENCE | IJ.latest has eval+reeval    | eval_ts && reeval_ts present    |
+| G4_DELTA    | IJ.criterion_delta non-empty | delta[] length > 0              |
+| G5_PROV     | EP.immutable_fields present  | schema+rubric+evaluator+persona |
+| G6_SEC      | LS.body no secrets/PII       | scan.pass && sha256 recorded    |
+| G7_REVIEW   | PD.reviewer_ids[]            | wave0-1: 1A \| wave2+: 2A       |
+| G8_CTRL     | CTRL.snapshot valid          | mode∈{shadow,canary,live}       |
 
 ---
 
 ## CONTROL FILE MATRIX
 
-| FILE | PRESENCE | ACTION |
-|------|----------|--------|
-| `kill-switch.txt` | ABSENT | Continue |
-| `kill-switch.txt` | PRESENT | EXIT 1 (global halt) |
-| `rollback-required.txt` | ABSENT | Continue |
-| `rollback-required.txt` | PRESENT | Rollback mode (auto-decline) |
-| `rollout-mode.txt` | shadow | Log only, no apply |
-| `rollout-mode.txt` | canary | Limited apply + monitor |
-| `rollout-mode.txt` | live | Full apply |
-| `auto_capture.disabled` | PRESENT | Skip auto-lesson-extract |
-| `auto_apply.disabled` | PRESENT | Skip auto-promote |
+| FILE                    | PRESENCE | ACTION                       |
+| ----------------------- | -------- | ---------------------------- |
+| `kill-switch.txt`       | ABSENT   | Continue                     |
+| `kill-switch.txt`       | PRESENT  | EXIT 1 (global halt)         |
+| `rollback-required.txt` | ABSENT   | Continue                     |
+| `rollback-required.txt` | PRESENT  | Rollback mode (auto-decline) |
+| `rollout-mode.txt`      | shadow   | Log only, no apply           |
+| `rollout-mode.txt`      | canary   | Limited apply + monitor      |
+| `rollout-mode.txt`      | live     | Full apply                   |
+| `auto_capture.disabled` | PRESENT  | Skip auto-lesson-extract     |
+| `auto_apply.disabled`   | PRESENT  | Skip auto-promote            |
 
 ---
 
@@ -106,14 +106,14 @@ def invoke_boundary():
 
 ## ONBOARDING PRECONDITIONS
 
-| ID | CHECK | T+ CONDITION |
-|----|-------|--------------|
-| OB1 | Profile presence | `<skill>/Infrastructure/references/task-profile.json` exists |
-| OB2 | Profile schema | `schema_version` + `profile_id` + `scope_skill` + `criteria[]` + `thresholds` |
-| OB3 | SKILL binding | `knowledge_graph_profile: Infrastructure/references/task-profile.json` in SKILL.md |
-| OB4 | Wave sequencing | w0-controls → w1-manual → w2-co-pilot (sequential) |
-| OB5 | Governance capacity | ≥2 approvers in policy for wave promotion |
-| OB6 | Telemetry integrity | zero missing `events.jsonl` envelopes |
+| ID  | CHECK               | T+ CONDITION                                                                       |
+| --- | ------------------- | ---------------------------------------------------------------------------------- |
+| OB1 | Profile presence    | `<skill>/Infrastructure/references/task-profile.json` exists                       |
+| OB2 | Profile schema      | `schema_version` + `profile_id` + `scope_skill` + `criteria[]` + `thresholds`      |
+| OB3 | SKILL binding       | `knowledge_graph_profile: Infrastructure/references/task-profile.json` in SKILL.md |
+| OB4 | Wave sequencing     | w0-controls → w1-manual → w2-co-pilot (sequential)                                 |
+| OB5 | Governance capacity | ≥2 approvers in policy for wave promotion                                          |
+| OB6 | Telemetry integrity | zero missing `events.jsonl` envelopes                                              |
 
 ---
 
@@ -170,25 +170,25 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`
   "rids": ["reviewer1", "reviewer2"],
   "gd": "gate_summary",
   "ver": "expected_version_token",
-  "sec": {"ls_path": "...", "ls_sha256": "..."},
-  "conf": {"s": 0.92, "b": "high", "cb": "calibrated"},
-  "ev": {"ep_id": "...", "comp": 0.95},
-  "ctrl": {"mode": "canary", "cap": true, "aap": false},
-  "cuf": {"treat": 0.85, "ctrl": 0.72, "delta": 0.13, "n": 100}
+  "sec": { "ls_path": "...", "ls_sha256": "..." },
+  "conf": { "s": 0.92, "b": "high", "cb": "calibrated" },
+  "ev": { "ep_id": "...", "comp": 0.95 },
+  "ctrl": { "mode": "canary", "cap": true, "aap": false },
+  "cuf": { "treat": 0.85, "ctrl": 0.72, "delta": 0.13, "n": 100 }
 }
 ```
 
-| FIELD | DESCRIPTION |
-|-------|-------------|
-| `d` | Decision state (D/R/C/A) |
-| `rids` | Reviewer IDs (1A or 2A per wave) |
-| `gd` | Gate decision summary |
-| `ver` | Expected version token |
-| `sec` | Security: lesson path + SHA256 |
-| `conf` | Confidence: score, bucket, calibration |
-| `ev` | Evidence: packet ID, completeness |
-| `ctrl` | Controls: mode, auto_capture, auto_apply |
-| `cuf` | Counterfactual uplift: treatment, control, delta, n |
+| FIELD  | DESCRIPTION                                         |
+| ------ | --------------------------------------------------- |
+| `d`    | Decision state (D/R/C/A)                            |
+| `rids` | Reviewer IDs (1A or 2A per wave)                    |
+| `gd`   | Gate decision summary                               |
+| `ver`  | Expected version token                              |
+| `sec`  | Security: lesson path + SHA256                      |
+| `conf` | Confidence: score, bucket, calibration              |
+| `ev`   | Evidence: packet ID, completeness                   |
+| `ctrl` | Controls: mode, auto_capture, auto_apply            |
+| `cuf`  | Counterfactual uplift: treatment, control, delta, n |
 
 Approved promotions emit `promotion_approved` event in `run/events.jsonl`.
 

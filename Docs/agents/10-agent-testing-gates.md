@@ -9,8 +9,8 @@
 
 1. `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 2. `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
-3. `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md` (if plans touched)
-4. `vale sync && vale **/*.{md,mdx,adoc,rst}` (validate prose against documentation patterns)
+3. `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md` (if plans touched)
+4. `bash scripts/check-doc-style.sh` (when documentation changes are staged)
 5. `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 6. `codex review --uncommitted` before merge
 

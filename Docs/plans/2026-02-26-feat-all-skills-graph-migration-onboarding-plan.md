@@ -11,6 +11,7 @@ origin: docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md
 # feat: All-Skills Knowledge Graph Migration + Onboarding
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Closeout addendum (2026-03-30)](#closeout-addendum-2026-03-30)
 - [Goals and scope](#goals-and-scope)
@@ -27,6 +28,7 @@ origin: docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md
 Migrate the skill graph from pilot-only onboarding to all active skills with deterministic profile contracts, required SKILL bindings, wave-gated rollout controls, and machine-validated readiness artifacts.
 
 This carries forward the brainstorm decisions to:
+
 - capture every run,
 - inject lessons at start-of-run,
 - retain confidence scoring,
@@ -49,6 +51,7 @@ That closeout plan is now completed with current evidence in:
 ## Goals and scope
 
 ### In scope
+
 - Generate and validate `Infrastructure/references/task-profile.json` for every active in-scope skill.
 - Add `knowledge_graph_profile` frontmatter binding to each in-scope `SKILL.md`.
 - Publish onboarding artifacts:
@@ -62,6 +65,7 @@ That closeout plan is now completed with current evidence in:
   - Wave 2 co-pilot-skill onboarding
 
 ### Exclusions
+
 - Root index skill: `SKILL.md`
 - Internal system skills: `skills/.system/*`
 - Template-only skill paths:

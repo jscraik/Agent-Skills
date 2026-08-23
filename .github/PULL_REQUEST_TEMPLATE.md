@@ -1,151 +1,111 @@
-# Pull request checklist
+# Pull request
 
-Write for human maintainers first. Use `n.a.` with a concrete reason when a
-field does not apply. Do not paste secrets, raw transcripts, bulky telemetry,
-or local absolute paths.
+Write for maintainers. Use `n.a.` with a reason when a field does not apply.
+Do not include secrets, raw transcripts, bulky telemetry, or local absolute paths.
 
-## What Problem This Solves
-
-- Motivation:
-- Reasoning:
-- Chosen approach:
-
-## Release Boundary
-
-Choose the release standard before listing proof. Use `n.a.` with a concrete
-reason only when the change has no release-stage meaning.
-
-- Release mode: <Prototype|Portfolio|Product|Harness|n.a. because concrete reason>
-- Done line:
-- Explicit non-goals:
-- Allowed polish:
-- Deferred polish / follow-up work:
-- Promotion rule:
-
-<!--
-Prototype: prove the idea has value. Core path works; known gaps are listed; no unsafe behavior.
-Portfolio: credible, coherent, navigable, and explainable. Demo, screenshots, and trade-offs matter more than infrastructure hardening.
-Product: reusable and maintained. Tests, docs, release path, versioning, and supportable architecture are expected.
-Harness: trust boundary or repeatable proof. Deterministic checks, receipts, failure behavior, and evidence boundaries are expected.
-
-Promotion rule should name what would force this PR into a more serious mode.
-If a new improvement does not fit the selected release mode or done line, defer
-it to follow-up work instead of absorbing it into this PR.
--->
-
-## Why This Change Was Made
+## Summary
 
 - Problem:
-- Why now:
+- Change:
+- Why this approach:
 - Intended outcome:
 - Out of scope:
 - Reviewer focus:
 - Risk and rollback:
 
-## Behavior Proof
+## Release boundary
 
-Complete this section when the PR changes runtime behavior, CLI behavior,
-generated artifacts, validation behavior, agent workflow behavior, user-facing
-docs, or any observable operator experience. Use `n.a.` with a concrete reason
-for docs-only, metadata-only, or evidence-only changes where no behavior path
-exists.
+Select the release standard before you list proof. Use `n.a.` with a reason only
+when the change has no release-stage meaning.
 
-- Behavior before fix:
-- Behavior or issue addressed:
-- Real environment tested:
-- Exact steps or command run after this patch:
+- Release mode: Prototype / Portfolio / Product / Harness / n.a. because reason
+- Completion condition:
+- Deferred work:
+- Stronger-proof condition:
+
+<!--
+Prototype: Prove that the idea has value. The core path works. List known gaps.
+Portfolio: Make the work credible, coherent, navigable, and explainable.
+Product: Make the work reusable and maintainable. Include tests, documentation,
+versioning, a release path, and a supportable architecture.
+Harness: Protect a trust boundary or repeatable proof. Include deterministic
+checks, receipts, failure behavior, and evidence boundaries.
+
+Name the condition that would require a more serious mode or additional proof.
+-->
+
+## Behavior proof
+
+Complete this section when the PR changes observable behavior. For a change
+with no behavior path, write `n.a.` and explain why.
+
+- Before:
+- After:
+- Environment or operator path:
+- Verification steps:
 - Evidence after fix:
-- Observed result after fix:
-- What was not tested:
-- Proof limitations or environment constraints:
+- Untested paths and limitations:
 
-Behavior proof guidance: Behavior proof is separate from unit tests, lint,
-typecheck, and CI. Use it to show the actual production path or nearest
-meaningful operator path after the patch. If the exact path could not run,
-state the blocker and the nearest fallback. Do not paste secrets, raw
-transcripts, bulky telemetry, or local absolute paths.
+Behavior proof is separate from unit tests, lint, typecheck, and CI. Show the
+production path or nearest meaningful operator path. If that path could not
+run, state the blocker and the nearest fallback.
 
-## Work performed
+## Change details
 
 - Plan IDs:
 - Linear reference:
 - Linked issue relationship:
-- Phase / slice:
-- Session IDs:
-- Trace IDs:
-- AI session / traceability:
-<!-- Cite durable session/run/runtime-card references when available. Do not paste raw transcripts, prompts, secrets, or bulky telemetry. -->
 - Completed work:
 - Affected surfaces:
 - Documentation impact:
-- Documentation lifecycle impact:
 - SemVer impact:
-- Expected outcome alignment:
+- Acceptance trace:
+- Runtime impact:
+- Deferred work:
+
+<!-- Complete the following fields only when their admission conditions apply. -->
+- Validation evidence:
+- Review artifacts:
 - Pattern scope inventory:
 - Meta-behavior proof:
 - Repeated-error research:
-- Acceptance trace:
-- Validation evidence: See Testing.
-- Review artifacts: See Review artifacts.
 - Durable evidence map:
-<!-- For evidence-heavy PRs, include a compact index rather than bulky logs.
-Use repo-relative paths only. Do not paste raw transcripts, secrets, bulky
-telemetry, or local absolute paths.
+<!-- For evidence-heavy PRs, use a compact index. Use repo-relative paths.
 
 | Artifact | Durable reference | Schema / version | Producer command | Digest | Replay command | Authority |
 | --- | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  | `source-of-truth` / `retained context` |
-
-`source-of-truth` means the artifact is authoritative for a deterministic
-lane claim. `retained context` means the artifact supports review or
-traceability but does not prove behavior by itself. For large PRs, prefer
-splitting source/schema/CLI/validator changes from retained evidence fixtures
-or generated context instead of splitting only by feature area. -->
-- Runtime impact:
-- CodeRabbit mode coverage:
-- Closeout state:
-<!-- Closeout state must classify PR state, merge or auto-merge state, branch/worktree state, Linear state, next-lane routing, and any remaining blocker or waiting owner. -->
+-->
 - Learning / reinforcement:
-- Deferred work:
 
 ## Checklist
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
-- [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before package-manager commands).
-- [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
-- [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
-- [ ] This change is user-facing and I added a changelog entry.
-- [ ] This change is not user-facing.
+- [ ] I ran the required validation for the changed surfaces and recorded every outcome below.
+- [ ] **(Pending)** CodeRabbit review completed and findings handled or explicitly waived.
+- [ ] **(Pending)** An independent reviewer performed the review outside the coding agent.
+- [ ] **(Pending)** Codex review completed and findings handled or explicitly waived.
+- [ ] Any CodeRabbit Semgrep findings were fixed or explicitly justified.
 - [ ] Merge is blocked until all required checks pass.
-- [ ] I will delete branch/worktree after merge.
+- [ ] I will delete the branch and worktree after merge.
 
-## Testing
+## Validation
 
-- regression_test_plan:
-- verification_commands:
-- verification_outcomes:
-- blocked_steps_reason:
-<!-- Add one or more evidence lines such as:
+- Regression coverage:
+<!-- Add one evidence line for each command:
 - Command: `bash scripts/validate-codestyle.sh` -> pass
 - Command: `pnpm check` -> blocked (reason)
 - Command: `bash scripts/run-harness-gate.sh tooling-audit --path . --json` -> n.a. (reason)
 -->
-- Any other command(s):
+- Untested or blocked paths:
 
-## Review artifacts
+## Review and closeout
 
-- Review status:
-  - CodeRabbit review: pending completion and finding resolution or waiver.
-  - Independent reviewer: pending confirmation that review was performed outside the coding agent.
-  - Codex review: pending completion and finding resolution or waiver.
 - CodeRabbit:
 - Independent reviewer evidence:
 - Codex:
 - CodeRabbit Semgrep:
-- Additional evidence (if any):
-
-## Notes
-
-<!-- Add one-paragraph merge rationale before requesting review. -->
+- User-facing impact: yes, with changelog / no / n.a. because reason
+- Remaining findings or waivers:
+- Current blockers:

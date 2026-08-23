@@ -6,23 +6,23 @@ Executes shadow cycles for pilot profiles and aggregates results.
 
 ## ABBREVIATION MAP
 
-| Abbr | Meaning |
-|------|---------|
+| Abbr | Meaning                         |
+| ---- | ------------------------------- |
 | RSSW | Recursive skill shadow workflow |
-| SC | Shadow cycle |
-| RPP | Runs per profile |
-| WD | Window days |
-| WDsp | Workflow dispatch |
-| PF | Pilot profile |
+| SC   | Shadow cycle                    |
+| RPP  | Runs per profile                |
+| WD   | Window days                     |
+| WDsp | Workflow dispatch               |
+| PF   | Pilot profile                   |
 
 ---
 
 ## TRIGGER MATRIX
 
-| EVENT | SCHEDULE | INPUTS | DEFAULTS |
-|-------|----------|--------|----------|
-| WDsp | — | `runs_per_profile`, `window_days` | `2`, `7` |
-| Schedule | `0 13 * * 1` (Mon 13:00 UTC) | — | `2`, `7` |
+| EVENT    | SCHEDULE                     | INPUTS                            | DEFAULTS |
+| -------- | ---------------------------- | --------------------------------- | -------- |
+| WDsp     | —                            | `runs_per_profile`, `window_days` | `2`, `7` |
+| Schedule | `0 13 * * 1` (Mon 13:00 UTC) | —                                 | `2`, `7` |
 
 ---
 
@@ -53,18 +53,18 @@ permissions:
 
 ## JOB: SHADOW CYCLE
 
-| CONFIG | VALUE |
-|--------|-------|
-| Runner | `ubuntu-latest` |
-| Python | `3.12` |
+| CONFIG | VALUE                                                                           |
+| ------ | ------------------------------------------------------------------------------- |
+| Runner | `ubuntu-latest`                                                                 |
+| Python | `3.12`                                                                          |
 | Script | `Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh` |
 
 ### Inputs
 
-| INPUT | ENV | DEFAULT | DESCRIPTION |
-|-------|-----|---------|-------------|
-| `runs_per_profile` | `RUNS_PER_PROFILE` | `2` | Loop runs per pilot profile |
-| `window_days` | `WINDOW_DAYS` | `7` | Report aggregation window |
+| INPUT              | ENV                | DEFAULT | DESCRIPTION                 |
+| ------------------ | ------------------ | ------- | --------------------------- |
+| `runs_per_profile` | `RUNS_PER_PROFILE` | `2`     | Loop runs per pilot profile |
+| `window_days`      | `WINDOW_DAYS`      | `7`     | Report aggregation window   |
 
 ### Script Flags
 
@@ -86,10 +86,12 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
 | `--profiles-file` | `docs/skill-graphs/schemas/examples/pilot-profiles.json` |
 
 The pilot profiles file may be either:
+
 - a JSON array of profile ids, or
 - a JSON array of objects with `profile_id`, optional `objective`, and `profile_file`/`profile_path` so the shadow cycle can run against real task profiles.
 
 When using object entries, keep pilot objectives specific enough for adversarial checkpoints:
+
 - front-load explicit state coverage,
 - name accessibility behaviors such as keyboard focus and reduced-motion parity,
 - require token-backed implementation guidance, and
@@ -98,12 +100,14 @@ When using object entries, keep pilot objectives specific enough for adversarial
 ### March 2026 Quality Bar
 
 Treat the pilot as an eval program, not only a rerun harness:
+
 - keep the current strict gate on `critical non-regression`, which means every reevaluation in the run stayed clean;
 - also report `terminal non-regression` and `non-regression recovered` so operators can distinguish a clean run from a recovered run without weakening the gate;
 - freeze a baseline snapshot in `.harness/evidence/skill-graphs/pilot/shadow-baseline.json` and refresh it only on whole-window boundaries so delta KPIs stay auditable;
 - prefer stronger output contracts and verification scaffolding before raising reasoning effort or rewriting objectives wholesale.
 
 This workflow now aligns to current OpenAI guidance:
+
 - Prompt guidance for GPT-5.4 says to treat reasoning effort as a last-mile knob and add `<completeness_contract>`, `<verification_loop>`, and `<tool_persistence_rules>` first.
 - The GPT-5.4 migration guide recommends using the Responses API plus prompt optimization when upgrading long-running workflows.
 - Prompt Caching 201 notes better cache utilization with the Responses API for reasoning workloads, which matters for repeated shadow-cycle turns.
@@ -111,6 +115,7 @@ This workflow now aligns to current OpenAI guidance:
   capture unstable patterns as documentation first, checkpoint query drift during review, and only promote repeated wins upward from documentation to skill to hook.
 
 Official references:
+
 - [Prompt guidance for GPT-5.4](https://developers.openai.com/api/docs/guides/prompt-guidance/#treat-reasoning-effort-as-a-last-mile-knob)
 - [Using GPT-5.4: migration guidance](https://developers.openai.com/api/docs/guides/latest-model/#migrating-from-other-models-to-gpt-54)
 - [Prompt Caching 201: use the Responses API](https://developers.openai.com/cookbook/examples/prompt_caching_201/#45-use-the-responses-api-instead-of-chat-completions)
@@ -119,11 +124,11 @@ Official references:
 
 ## JOB: DOCS LINT
 
-| CONFIG | VALUE |
-|--------|-------|
-| Mode | `warn` |
+| CONFIG | VALUE                             |
+| ------ | --------------------------------- |
+| Mode   | `warn`                            |
 | Config | `Infrastructure/docs-policy.json` |
-| Output | `/tmp/docs-lint-shadow.json` |
+| Output | `/tmp/docs-lint-shadow.json`      |
 
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \

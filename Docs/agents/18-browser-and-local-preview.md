@@ -11,8 +11,8 @@ When browser tooling cannot access local files directly, serve the relevant
 directory with Python:
 
 ```bash
-python3 -m http.server
+python3 -m http.server 8000 --bind 127.0.0.1 --directory <preview-root>
 ```
 
-Run the server from the directory that contains the files you need to preview,
-then open the localhost URL in the browser tool.
+Replace `<preview-root>` with the directory that contains the files to preview,
+then open `http://127.0.0.1:8000/` in the browser tool.

@@ -60,11 +60,13 @@ Authoring contract for pilot skills:
 - Candidates: `.harness/evidence/skill-graphs/telemetry/candidates.jsonl`
 
 The Skill Genome Loop is a nightly batch process that:
+
 1. Ingests run/session artifacts from the recursive skill loop
 2. Computes routing confusion and outcome quality signals per skill
 3. Emits high-confidence, human-gated draft PR candidates for skill-definition improvements
 
 **Execution:**
+
 - **Schedule:** Nightly at 4:00 AM UTC (cron)
 - **Mode:** Controlled via `rollout-mode.txt` (`off | observe_only | active`)
 - **Review:** Human gate via `review_candidates.py` before candidates are finalized

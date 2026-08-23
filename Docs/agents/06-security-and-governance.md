@@ -5,7 +5,6 @@
 - [Baselines](#baselines)
 - [Repository practice](#repository-practice)
 - [External integration preflight](#external-integration-preflight)
-- [AI disclosure artifacts](#ai-disclosure-artifacts)
 
 ## Baselines
 
@@ -26,9 +25,3 @@
   3. Run a simple MCP/API connectivity check.
   4. Proceed with full operations.
 - If auth fails, debug auth first before retrying commands.
-
-## AI disclosure artifacts
-
-- CODEX governance applies to PRs:
-  - `Infrastructure/artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml`
-  - `Infrastructure/artifacts/ai/sessions/YYYY-MM-DD-<slug>.json`
