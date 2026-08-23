@@ -23,7 +23,14 @@ def _resolve_reference(skill_dir: Path, declared_path: str) -> Path:
     if relative.is_absolute() or ".." in relative.parts or relative.parts[:1] != ("references",):
         raise ValueError(f"reference_paths entry must stay under references/: {declared_path}")
     target = skill_dir / relative
-    if target.is_symlink() or not target.is_file():
+    current = target
+    has_symlink = False
+    while current != skill_dir:
+        if current.is_symlink():
+            has_symlink = True
+            break
+        current = current.parent
+    if has_symlink or not target.is_file():
         raise ValueError(f"reference_paths entry must be a package-local regular file: {declared_path}")
     resolved = target.resolve()
     try:

@@ -4,7 +4,9 @@ import unittest
 from pathlib import Path
 
 from ask.skills_sdk.knowledge_source_context import merge_knowledge_source_context
+from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest
 from ask.skills_sdk.operational_references import validate_operational_references
+from tests.test_skills_sdk_knowledge_ingest import _write_extraction, _write_skill
 
 
 def _manifest(target_path: str) -> dict[str, object]:
@@ -12,6 +14,27 @@ def _manifest(target_path: str) -> dict[str, object]:
 
 
 class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
+    def test_apply_validates_source_context_before_writing_references(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            source_context = skill_dir / "references" / "source-context.yaml"
+            source_context.write_text(
+                "schema_version: 1\nskill: improve-agent-native\n"
+                "references: []\nallowed_claims:\n  invalid: true\n",
+                encoding="utf-8",
+            )
+            extraction = _write_extraction(Path(tmp))
+
+            with self.assertRaisesRegex(ValueError, "allowed_claims must be a list"):
+                build_knowledge_ingest(
+                    root, extraction=str(extraction), skill="Skills/agent-ops/improve-agent-native",
+                    apply=True, preflight_security=False,
+                )
+
+            self.assertFalse((skill_dir / "references" / "harness-evidence-boundary.md").exists())
+
     def test_merge_rejects_non_list_allowed_claims(self) -> None:
         loaded = {"references": [], "allowed_claims": {"invalid": True}}
 
@@ -20,6 +43,47 @@ class TestSkillsSdkOperationalReferenceContract(unittest.TestCase):
                 loaded,
                 eval_routes={"scenarios": False, "fixtures": False},
                 manifest=_manifest("references/capsule.md"),
+            )
+
+    def test_merge_replaces_stale_generated_operational_routes(self) -> None:
+        loaded = {
+            "references": [
+                {"path": "references/keep.md", "kind": "package_companion"},
+                {"path": "references/old.md", "kind": "operational_reference"},
+            ]
+        }
+
+        merged = merge_knowledge_source_context(
+            loaded,
+            eval_routes={"scenarios": False, "fixtures": False},
+            manifest=_manifest("references/current.md"),
+        )
+
+        paths = {entry["path"] for entry in merged["references"]}
+        self.assertIn("references/keep.md", paths)
+        self.assertIn("references/current.md", paths)
+        self.assertNotIn("references/old.md", paths)
+        self.assertNotIn("references/knowledge-capsules/", paths)
+
+    def test_validation_blocks_heading_only_capsule(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            extraction = Path(tmp) / "extraction"
+            references = extraction / "references"
+            references.mkdir(parents=True)
+            (references / "capsule.md").write_text(
+                "# Capsule\n\n## Claim Cards\n\n## Checklists\n",
+                encoding="utf-8",
+            )
+            findings: list[str] = []
+
+            validate_operational_references(
+                extraction,
+                _manifest("references/capsule.md"),
+                findings,
+            )
+
+            self.assertTrue(
+                any(finding.startswith("references:weak_operational_reference:") for finding in findings)
             )
 
     @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")

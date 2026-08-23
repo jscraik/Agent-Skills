@@ -126,12 +126,27 @@ def _legacy_capsule_subdirectory_allowed(manifest: dict[str, Any]) -> bool:
 def _validate_capsule_text(text: str, target_path: str, findings: list[str]) -> None:
     if not text.startswith("# "):
         findings.append(f"references:missing_h1:{target_path}")
-    headings = {_normalize_heading(line[3:]) for line in text.splitlines() if line.startswith("## ")}
-    structured = "claim-cards" in headings and bool(headings & STRUCTURED_SECTIONS)
-    if structured or PLAYBOOK_SECTIONS <= headings:
+    sections = _section_bodies(text)
+    structured = bool(sections.get("claim-cards")) and any(
+        sections.get(section) for section in STRUCTURED_SECTIONS
+    )
+    playbook = all(sections.get(section) for section in PLAYBOOK_SECTIONS)
+    if structured or playbook:
         return
-    missing = ",".join(sorted(PLAYBOOK_SECTIONS - headings))
+    missing = ",".join(sorted(section for section in PLAYBOOK_SECTIONS if not sections.get(section)))
     findings.append(f"references:weak_operational_reference:{target_path}:missing:{missing}")
+
+
+def _section_bodies(text: str) -> dict[str, str]:
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in text.splitlines():
+        if line.startswith("## "):
+            current = _normalize_heading(line[3:])
+            sections.setdefault(current, [])
+        elif current is not None and line.strip():
+            sections[current].append(line.strip())
+    return {heading: "\n".join(lines) for heading, lines in sections.items()}
 
 
 def _normalize_heading(value: str) -> str:

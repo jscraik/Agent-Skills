@@ -15,15 +15,28 @@ def merge_knowledge_source_context(
     references = loaded.setdefault("references", [])
     if not isinstance(references, list):
         raise ValueError("references/source-context.yaml references must be a list.")
-    entries = _base_entries() + _operational_entries(manifest) + _eval_entries(eval_routes)
+    managed_kinds = {
+        "knowledge_profile",
+        "capsule_manifest",
+        "generated_knowledge_capsules",
+        "operational_reference",
+        "knowledge_eval_scenarios",
+        "knowledge_eval_fixtures",
+    }
+    references[:] = [
+        item
+        for item in references
+        if not isinstance(item, dict) or item.get("kind") not in managed_kinds
+    ]
+    entries = _base_entries(manifest) + _operational_entries(manifest) + _eval_entries(eval_routes)
     existing_paths = {str(item.get("path")) for item in references if isinstance(item, dict)}
     references.extend(entry for entry in entries if entry["path"] not in existing_paths)
     _merge_allowed_claims(loaded, eval_routes)
     return loaded
 
 
-def _base_entries() -> list[dict[str, Any]]:
-    return [
+def _base_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = [
         {
             "path": "references/knowledge-demand.yaml",
             "kind": "knowledge_profile",
@@ -48,19 +61,38 @@ def _base_entries() -> list[dict[str, Any]]:
             "claim_scope": "capsule_manifest",
             "bounded_unit": True,
         },
-        {
-            "path": "references/knowledge-capsules/",
-            "kind": "generated_knowledge_capsules",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "only after the manifest selects the relevant capsule",
-            "allowed_claims": ["bounded expert viewpoint or evidence lane captured in the selected capsule"],
-            "forbidden_claims": ["load all capsules by default", "claims outside selected capsule text"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "selective",
-            "claim_scope": "bounded_capsules",
-            "bounded_unit": True,
-        },
     ]
+    if _uses_legacy_capsule_directory(manifest):
+        entries.append(_legacy_capsule_entry())
+    return entries
+
+
+def _legacy_capsule_entry() -> dict[str, Any]:
+    return {
+        "path": "references/knowledge-capsules/",
+        "kind": "generated_knowledge_capsules",
+        "provenance": "vendored KnowledgeOS extraction",
+        "load_when": "only after the manifest selects the relevant capsule",
+        "allowed_claims": ["bounded expert viewpoint or evidence lane captured in the selected capsule"],
+        "forbidden_claims": ["load all capsules by default", "claims outside selected capsule text"],
+        "freshness": "knowledge_os_snapshot",
+        "context_budget": "selective",
+        "claim_scope": "bounded_capsules",
+        "bounded_unit": True,
+    }
+
+
+def _uses_legacy_capsule_directory(manifest: dict[str, Any]) -> bool:
+    storage = manifest.get("capsule_storage")
+    allowed = (
+        isinstance(storage, dict)
+        and storage.get("allow_legacy_subdirectory") is True
+        and bool(str(storage.get("justification") or "").strip())
+    )
+    return allowed and any(
+        path.startswith("references/knowledge-capsules/")
+        for path in operational_reference_paths(manifest)
+    )
 
 
 def _operational_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
@@ -124,5 +156,8 @@ def _merge_allowed_claims(loaded: dict[str, Any], eval_routes: dict[str, bool]) 
     if capsule_claim not in allowed_claims:
         allowed_claims.append(capsule_claim)
     eval_claim = "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
-    if eval_routes["scenarios"] and eval_routes["fixtures"] and eval_claim not in allowed_claims:
-        allowed_claims.append(eval_claim)
+    if eval_routes["scenarios"] and eval_routes["fixtures"]:
+        if eval_claim not in allowed_claims:
+            allowed_claims.append(eval_claim)
+    else:
+        allowed_claims[:] = [claim for claim in allowed_claims if claim != eval_claim]

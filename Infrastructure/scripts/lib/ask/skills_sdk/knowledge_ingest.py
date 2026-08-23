@@ -41,36 +41,47 @@ def build_knowledge_ingest(
     run_proof: bool = False,
     preflight_security: bool = True,
 ) -> dict[str, Any]:
+    context = _prepare_knowledge_ingest(
+        repo_root,
+        extraction=extraction,
+        skill=skill,
+        apply=apply,
+        preflight_security=preflight_security,
+    )
+    receipt = _knowledge_ingest_receipt(repo_root, context, apply=apply)
+    if context["findings"] or not apply:
+        return receipt
+    _apply_knowledge_ingest(
+        context["skill_dir"],
+        context["extraction_root"],
+        context["source_files"],
+        eval_routes=context["eval_routes"],
+        manifest=context["manifest"],
+        merged_source_context=context["merged_source_context"],
+    )
+    if run_proof:
+        receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
+        if any(item["status"] != "pass" for item in receipt["proof_results"]):
+            receipt["status"] = "applied_with_failed_proof"
+    return receipt
+
+
+def _prepare_knowledge_ingest(
+    repo_root: Path,
+    *,
+    extraction: str,
+    skill: str,
+    apply: bool,
+    preflight_security: bool,
+) -> dict[str, Any]:
     extraction_root = Path(extraction).expanduser().resolve()
     skill_dir = _resolve_skill_dir(repo_root, skill)
     source_files = _collect_reference_files(extraction_root)
-    plan = _load_yaml(extraction_root / "extraction-plan.yaml", label="extraction-plan.yaml")
-    demand = _load_yaml(extraction_root / "knowledge-demand.yaml", label="knowledge-demand.yaml")
-    vendored_demand = _load_yaml(
-        extraction_root / "references" / "knowledge-demand.yaml",
-        label="references/knowledge-demand.yaml",
-    )
-    manifest = _load_yaml(
-        extraction_root / "references" / "knowledge-capsule.manifest.yaml",
-        label="references/knowledge-capsule.manifest.yaml",
-    )
-
+    plan, demand, vendored_demand, manifest = _load_ingest_documents(extraction_root)
     skill_name = _skill_name(skill_dir / "SKILL.md")
-    findings: list[str] = []
-    _validate_skill_identity(
-        skill_name=skill_name,
-        skill_rel=_repo_relative(repo_root, skill_dir),
-        plan=plan,
-        demand=demand,
-        manifest=manifest,
-        findings=findings,
+    findings = _knowledge_ingest_findings(
+        repo_root, skill_dir, extraction_root, source_files, skill_name, plan, demand, vendored_demand, manifest
     )
-    _validate_runtime_policy(demand, findings, label="knowledge-demand")
-    _validate_runtime_policy(vendored_demand, findings, label="references/knowledge-demand")
-    if vendored_demand != demand:
-        findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
-    _validate_source_files(extraction_root, source_files, findings)
-    validate_operational_references(extraction_root, manifest, findings)
     preflight = (
         _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files, manifest=manifest)
         if preflight_security and not findings
@@ -78,22 +89,66 @@ def build_knowledge_ingest(
     )
     if preflight and preflight["status"] != "pass":
         findings.append("staged_security_gate_failed")
-    copied: list[dict[str, Any]] = []
     eval_routes = _eval_reference_routes(extraction_root, source_files)
-    for source_file in source_files:
-        relative = source_file.relative_to(extraction_root).as_posix()
-        target = skill_dir / relative
-        copied.append(
-            {
-                "source": relative,
-                "target": _repo_relative(repo_root, target),
-                "sha256": _sha256(source_file),
-                "bytes": source_file.stat().st_size,
-                "action": "write" if apply else "preview",
-            }
-        )
+    merged_source_context = _merged_source_context(skill_dir, eval_routes=eval_routes, manifest=manifest)
+    return {
+        "extraction_root": extraction_root,
+        "skill_dir": skill_dir,
+        "source_files": source_files,
+        "plan": plan,
+        "manifest": manifest,
+        "skill_name": skill_name,
+        "findings": findings,
+        "preflight": preflight,
+        "eval_routes": eval_routes,
+        "merged_source_context": merged_source_context,
+    }
 
-    receipt: dict[str, Any] = {
+
+def _load_ingest_documents(
+    extraction_root: Path,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
+    plan = _load_yaml(extraction_root / "extraction-plan.yaml", label="extraction-plan.yaml")
+    demand = _load_yaml(extraction_root / "knowledge-demand.yaml", label="knowledge-demand.yaml")
+    vendored = _load_yaml(
+        extraction_root / "references" / "knowledge-demand.yaml", label="references/knowledge-demand.yaml"
+    )
+    manifest = _load_yaml(
+        extraction_root / "references" / "knowledge-capsule.manifest.yaml",
+        label="references/knowledge-capsule.manifest.yaml",
+    )
+    return plan, demand, vendored, manifest
+
+
+def _knowledge_ingest_findings(
+    repo_root: Path,
+    skill_dir: Path,
+    extraction_root: Path,
+    source_files: list[Path],
+    skill_name: str,
+    plan: dict[str, Any],
+    demand: dict[str, Any],
+    vendored_demand: dict[str, Any],
+    manifest: dict[str, Any],
+) -> list[str]:
+    findings: list[str] = []
+    _validate_skill_identity(
+        skill_name=skill_name, skill_rel=_repo_relative(repo_root, skill_dir),
+        plan=plan, demand=demand, manifest=manifest, findings=findings,
+    )
+    _validate_runtime_policy(demand, findings, label="knowledge-demand")
+    _validate_runtime_policy(vendored_demand, findings, label="references/knowledge-demand")
+    if vendored_demand != demand:
+        findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
+    _validate_source_files(extraction_root, source_files, findings)
+    validate_operational_references(extraction_root, manifest, findings)
+    return findings
+
+
+def _knowledge_ingest_receipt(repo_root: Path, context: dict[str, Any], *, apply: bool) -> dict[str, Any]:
+    skill_rel = _repo_relative(repo_root, context["skill_dir"])
+    findings = context["findings"]
+    return {
         "schema_version": SCHEMA_VERSION,
         "status": "blocked" if findings else ("applied" if apply else "preview"),
         "owner_boundary": {
@@ -102,35 +157,36 @@ def build_knowledge_ingest(
             "runtime_dependency": "vendored_skill_references_only",
         },
         "extraction": {
-            "path": str(extraction_root),
-            "schema_version": plan.get("schema_version"),
-            "upstream_packs": plan.get("upstream_packs") or [],
+            "path": str(context["extraction_root"]),
+            "schema_version": context["plan"].get("schema_version"),
+            "upstream_packs": context["plan"].get("upstream_packs") or [],
         },
-        "skill": {
-            "name": skill_name,
-            "path": _repo_relative(repo_root, skill_dir),
-        },
-        "copied_files": copied,
-        "routing_updates": _routing_updates(repo_root, skill_dir, apply=apply),
+        "skill": {"name": context["skill_name"], "path": skill_rel},
+        "copied_files": _copied_file_receipts(repo_root, context, apply=apply),
+        "routing_updates": _routing_updates(repo_root, context["skill_dir"], apply=apply),
         "validation_commands": [
-            f"./bin/ask skills audit {_repo_relative(repo_root, skill_dir)} --level strict --json --robot",
-            f"./bin/ask skills package verify {_repo_relative(repo_root, skill_dir)} --json --robot",
+            f"./bin/ask skills audit {skill_rel} --level strict --json --robot",
+            f"./bin/ask skills package verify {skill_rel} --json --robot",
         ],
         "proof_results": [],
-        "staged_preflight": preflight,
+        "staged_preflight": context["preflight"],
         "findings": findings,
     }
-    if findings:
-        return receipt
-    if not apply:
-        return receipt
 
-    _apply_knowledge_ingest(skill_dir, extraction_root, source_files, eval_routes=eval_routes, manifest=manifest)
-    if run_proof:
-        receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
-        if any(item["status"] != "pass" for item in receipt["proof_results"]):
-            receipt["status"] = "applied_with_failed_proof"
-    return receipt
+
+
+def _copied_file_receipts(repo_root: Path, context: dict[str, Any], *, apply: bool) -> list[dict[str, Any]]:
+    copied = []
+    for source_file in context["source_files"]:
+        relative = source_file.relative_to(context["extraction_root"]).as_posix()
+        copied.append({
+            "source": relative,
+            "target": _repo_relative(repo_root, context["skill_dir"] / relative),
+            "sha256": _sha256(source_file),
+            "bytes": source_file.stat().st_size,
+            "action": "write" if apply else "preview",
+        })
+    return copied
 
 
 def _routing_updates(repo_root: Path, skill_dir: Path, *, apply: bool) -> list[dict[str, str]]:
@@ -159,27 +215,35 @@ def _apply_knowledge_ingest(
     extraction_root: Path,
     source_files: list[Path],
     *,
-    eval_routes: list[dict[str, Any]],
+    eval_routes: dict[str, bool],
     manifest: dict[str, Any],
+    merged_source_context: dict[str, Any],
 ) -> None:
     for source_file in source_files:
         target = _safe_skill_package_path(skill_dir, source_file.relative_to(extraction_root), label="knowledge reference")
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_file, target)
-    _update_knowledge_routing_files(skill_dir, eval_routes=eval_routes, manifest=manifest)
+    _update_knowledge_routing_files(
+        skill_dir,
+        eval_routes=eval_routes,
+        manifest=manifest,
+        merged_source_context=merged_source_context,
+    )
 
 
 def _update_knowledge_routing_files(
     skill_dir: Path,
     *,
-    eval_routes: list[dict[str, Any]],
+    eval_routes: dict[str, bool],
     manifest: dict[str, Any],
+    merged_source_context: dict[str, Any] | None = None,
 ) -> None:
     _update_skill_routing(_safe_skill_package_path(skill_dir, Path("SKILL.md"), label="skill routing"), eval_routes=eval_routes)
     _update_source_context(
         _safe_skill_package_path(skill_dir, Path("references/source-context.yaml"), label="source context"),
         eval_routes=eval_routes,
         manifest=manifest,
+        merged=merged_source_context,
     )
     _update_capsule_routing_index(
         _safe_skill_package_path(
@@ -534,18 +598,32 @@ def _update_source_context(
     *,
     eval_routes: dict[str, bool],
     manifest: dict[str, Any],
+    merged: dict[str, Any] | None = None,
 ) -> None:
+    loaded = merged or _merged_source_context(
+        source_context.parent.parent,
+        eval_routes=eval_routes,
+        manifest=manifest,
+    )
+    source_context.write_text(_yaml_safe_dump_data(loaded), encoding="utf-8")
+
+
+def _merged_source_context(
+    skill_dir: Path,
+    *,
+    eval_routes: dict[str, bool],
+    manifest: dict[str, Any],
+) -> dict[str, Any]:
+    source_context = skill_dir / "references" / "source-context.yaml"
     if source_context.is_file():
         loaded = _load_yaml(source_context, label="references/source-context.yaml")
     else:
-        skill_dir = source_context.parent.parent
         loaded = {
             "schema_version": 1,
             "skill": _skill_name(skill_dir / "SKILL.md"),
             "references": [],
         }
-    merge_knowledge_source_context(loaded, eval_routes=eval_routes, manifest=manifest)
-    source_context.write_text(_yaml_safe_dump_data(loaded), encoding="utf-8")
+    return merge_knowledge_source_context(loaded, eval_routes=eval_routes, manifest=manifest)
 
 
 def _run_proof(repo_root: Path, commands: list[str]) -> list[dict[str, Any]]:

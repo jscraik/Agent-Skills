@@ -81,6 +81,23 @@ class RunSkillEvalsContractTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "package-local regular file"):
                 _render_case_references(skill_dir, ("references/linked.md",))
 
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_render_case_references_rejects_symlinked_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "demo-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            target_dir = skill_dir / "target"
+            target_dir.mkdir()
+            (target_dir / "operational.md").write_text("# Operational\n", encoding="utf-8")
+            try:
+                (references / "linked").symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            with self.assertRaisesRegex(ValueError, "package-local regular file"):
+                _render_case_references(skill_dir, ("references/linked/operational.md",))
+
     def test_render_case_references_reports_unreadable_utf8(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             skill_dir = Path(tmp) / "demo-skill"
