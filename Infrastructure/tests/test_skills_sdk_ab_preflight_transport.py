@@ -4,7 +4,7 @@ import json
 import subprocess
 import unittest
 
-from test_skills_sdk_ab_preflight import (
+from tests.test_skills_sdk_ab_preflight import (
     SkillsSdkAbPreflightFixture,
     _CustomBoundarySignal,
     _HostileEnvelope,
