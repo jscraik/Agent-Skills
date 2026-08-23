@@ -16,6 +16,8 @@ from .evals_core import (
 )
 from .evals_shared import EvalArtifactReadError, _load_json_file
 
+DEFAULT_MACRO_EVAL_OUTPUT_DIR = ".tmp/agent-skills-artifacts/evals/macro"
+
 def _repo_relative_text(repo_root: Path, text: str) -> str:
     if not text:
         return text
@@ -443,7 +445,7 @@ def macro_eval_report(
         if not _append_macro_summary_events(result, events, repo_root, summary_path):
             return result
 
-    target_dir = repo_root / (output_dir or "Infrastructure/artifacts/evals/macro")
+    target_dir = repo_root / (output_dir or DEFAULT_MACRO_EVAL_OUTPUT_DIR)
     events_path = target_dir / "macro-eval-events.jsonl"
     report_path = target_dir / "macro-eval-report.json"
     mdx_path = target_dir / "macro-eval-report.mdx"

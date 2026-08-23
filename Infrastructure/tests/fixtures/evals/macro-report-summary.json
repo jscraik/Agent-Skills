@@ -1,0 +1,72 @@
+{
+  "schema_version": "2.1",
+  "generated_at": "2026-05-25T10:00:00Z",
+  "skill": "demo-skill",
+  "run_id": "run-1",
+  "eval_mode": "release",
+  "runner_mode": "codex",
+  "decision": "fail",
+  "claim_to_evidence": {
+    "passed": true,
+    "blocking_gaps": []
+  },
+  "cases": [
+    {
+      "id": "pricing-exception",
+      "name": "Pricing exception",
+      "category": "pricing",
+      "passed": false,
+      "baseline_type": "neutral_repo_baseline",
+      "baseline_id": "pricing-neutral",
+      "comparison_inputs": {
+        "control": "without-skill"
+      },
+      "baseline_comparisons": {
+        "codex": {
+          "status": "compared",
+          "skill_lift": 1,
+          "is_beneficial": true,
+          "regression": false
+        }
+      },
+      "skill_lift": 1,
+      "is_beneficial": true,
+      "baseline_regression": false,
+      "readiness_state": "comparison_incomplete",
+      "metric_availability": "available",
+      "evidence_surfaces": [
+        "deterministic_checks",
+        "expected_signals"
+      ],
+      "check_evidence": true,
+      "hard_gates": [
+        "no_false_completion"
+      ],
+      "expected_evidence": [
+        "acceptance"
+      ],
+      "tier1_failed": true,
+      "tier1_failures": [
+        "expected margin guardrail evidence"
+      ],
+      "runners": {
+        "codex": {
+          "metrics": {
+            "trace": {
+              "tool_calls": 2
+            },
+            "expected_signals": {
+              "score": 75
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "clean-path",
+      "category": "clean",
+      "passed": true,
+      "runners": {}
+    }
+  ]
+}
