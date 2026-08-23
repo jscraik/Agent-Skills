@@ -128,26 +128,36 @@ def _section_errors(contract: TemplateContract, body: str) -> list[str]:
 def _field_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> list[str]:
     errors: list[str] = []
     for section, expected_fields in contract.fields_by_section.items():
-        block = body_blocks.get(section, "")
-        field_values, field_counts = _field_values(block)
-        expected_counts = Counter(expected_fields)
-        # Command evidence is a list item that looks like a field. It is
-        # validated separately and must not be treated as an unexpected field.
-        actual_fields = [field for field in field_values if field != "Command"]
-        missing_fields = [field for field, count in expected_counts.items() if field_counts.get(field, 0) < count]
-        extra_fields = [field for field in actual_fields if field not in expected_fields]
-        for field, count in field_counts.items():
-            if field == "Command":
-                continue
-            if field in expected_counts and count > expected_counts[field]:
-                errors.append(f"Duplicate field in ## {section}: {field}:")
-        for field in missing_fields:
-            errors.append(f"Missing required field in ## {section}: {field}:")
-        for field in extra_fields:
-            errors.append(f"Unexpected field in ## {section}: {field}:")
-        for field in expected_fields:
-            if field in field_values and field_values[field] == "":
-                errors.append(f"Required field in ## {section} is empty: {field}:")
+        errors.extend(_section_field_errors(section, expected_fields, body_blocks.get(section, "")))
+    return errors
+
+
+def _section_field_errors(section: str, expected_fields: list[str], block: str) -> list[str]:
+    field_values, field_counts = _field_values(block)
+    expected_counts = Counter(expected_fields)
+    # Command evidence is a list item that looks like a field. It is validated
+    # separately and must not be treated as an unexpected or duplicate field.
+    actual_fields = [field for field in field_values if field != "Command"]
+    errors = [
+        f"Duplicate field in ## {section}: {field}:"
+        for field, count in field_counts.items()
+        if field != "Command" and field in expected_counts and count > expected_counts[field]
+    ]
+    errors.extend(
+        f"Missing required field in ## {section}: {field}:"
+        for field, count in expected_counts.items()
+        if field_counts.get(field, 0) < count
+    )
+    errors.extend(
+        f"Unexpected field in ## {section}: {field}:"
+        for field in actual_fields
+        if field not in expected_fields
+    )
+    errors.extend(
+        f"Required field in ## {section} is empty: {field}:"
+        for field in expected_fields
+        if field in field_values and field_values[field] == ""
+    )
     return errors
 
 
