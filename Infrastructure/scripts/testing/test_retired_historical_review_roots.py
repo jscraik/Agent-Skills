@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 RETIRED_ROOTS = (
     "artifacts/reviews/adversarial-reviewer.md",
     "artifacts/reviews/he-spec-plan-gap-hardening",
+    "artifacts/reviews/jsc-364-runtime-proof-plane",
     "artifacts/reviews/pr215-post-review-pass-synthesis.md",
     "artifacts/reviews/skills-sdk-pu-015-review-handoff",
 )
