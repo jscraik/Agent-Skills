@@ -1,1 +1,0 @@
-Which part of `skill-builder` should I work on: the handle stub in `.agents/skills/skill-builder/SKILL.md`, or the canonical skill at `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`?

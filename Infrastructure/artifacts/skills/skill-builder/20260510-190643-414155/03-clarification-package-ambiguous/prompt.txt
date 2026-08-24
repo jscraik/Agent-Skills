@@ -1,3 +1,0 @@
-$skill-builder
-
-The skill package request is ambiguous; ask one clarifying question before editing.
