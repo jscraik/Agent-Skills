@@ -11,4 +11,4 @@
 - blockers: `EVENT_ENVELOPE_ERRORS,WAVE1_NOT_READY,PARITY_empty`
 - blocker_severity: `critical`
 
-Links: [[profile--utilities-codex-sessions-skill-scan]] [[wave--wave-2-co-pilot]]
+Links: [[wave--wave-2-co-pilot]]

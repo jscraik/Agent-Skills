@@ -11,4 +11,4 @@
 - blockers: `WAVE0_NOT_READY,PARITY_empty`
 - blocker_severity: `moderate`
 
-Links: [[profile--utilities-codex-agent-creator]] [[wave--wave-1-manual]]
+Links: [[wave--wave-1-manual]]

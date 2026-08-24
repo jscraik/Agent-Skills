@@ -11,6 +11,6 @@
 - blockers: `EVENT_ENVELOPE_ERRORS,WAVE1_NOT_READY,PARITY_missing_mandatory`
 - blocker_severity: `critical`
 
-Links: [[profile--interview-interview-me]] [[wave--wave-2-co-pilot]]
+Links: [[wave--wave-2-co-pilot]]
 [[run--run-002]]
 [[run--run-001]]

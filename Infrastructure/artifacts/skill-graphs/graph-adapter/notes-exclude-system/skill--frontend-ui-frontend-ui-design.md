@@ -11,5 +11,5 @@
 - blockers: `EVENT_ENVELOPE_ERRORS,WAVE1_NOT_READY,QUEUE_missing_capture_outputs,PARITY_legacy_partial`
 - blocker_severity: `critical`
 
-Links: [[profile--frontend-ui-frontend-ui-design]] [[wave--wave-2-co-pilot]]
+Links: [[wave--wave-2-co-pilot]]
 [[run--run-20260220t150021z-bb9acb]]
