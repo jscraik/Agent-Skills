@@ -75,7 +75,7 @@ def test_codex_eval_calibration_is_source_surface() -> None:
 
     assert finding.classification == "source"
     assert finding.status == "ok"
-    assert finding.code == "source_path"
+    assert finding.code == "authored_source_surface"
     assert finding.blocking is False
 
 
@@ -106,6 +106,15 @@ def test_harness_evidence_trace_blocks_new_tracked_output() -> None:
 
     assert blocked.blocking is True
     assert blocked.code == "new_historical_artifact_debt"
+
+
+def test_tessl_evidence_index_is_a_governed_reference() -> None:
+    finding = MODULE.classify_path(".harness/evidence/tessl/index.jsonl")
+
+    assert finding.classification == "reference"
+    assert finding.status == "ok"
+    assert finding.code == "harness_reference_surface"
+    assert finding.blocking is False
 
 
 def test_generated_agent_review_roots_are_ignored() -> None:

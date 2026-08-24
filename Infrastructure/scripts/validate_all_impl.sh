@@ -661,10 +661,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 fi
 
 projection_manifest="$run_dir/projection-integrity.json"
-recursive_artifacts_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --quiet)
-if [[ "$output_mode" == "ephemeral" ]]; then
-  recursive_artifacts_cmd+=(--manifest "$run_dir/artifact-parity-manifest.json")
-fi
+recursive_artifacts_cmd=(
+  "${python_cmd[@]}"
+  Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py
+  --quiet
+  --manifest "$run_dir/artifact-parity-manifest.json"
+)
 run_initial_warn_checks
 
 skill_family_changed_files_args=()

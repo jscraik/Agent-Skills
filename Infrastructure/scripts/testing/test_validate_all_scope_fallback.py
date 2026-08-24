@@ -23,12 +23,21 @@ def test_changed_files_scope_miss_falls_back_to_required_baseline() -> None:
             row["outcome"] == "pass" for row in required_rows
         ), "expected at least one required check to execute instead of every check being blocked"
 
-        rows = repo.check_results()
-        required_rows = [row for row in rows if row["mode"] == "required"]
-        assert required_rows, "expected required checks to be recorded"
-        assert any(
-            row["outcome"] == "pass" for row in required_rows
-        ), "expected at least one required check to execute instead of every check being blocked"
+
+def test_persistent_validation_keeps_parity_manifest_in_run_directory() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+
+        proc = repo.run("--persistent", "--changed-files", "Infrastructure/scripts/bootstrap-ask.sh")
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        args = repo.recorded_args_for("Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py")
+        assert args is not None
+        manifest_index = args.index("--manifest") + 1
+        manifest_path = args[manifest_index]
+        assert manifest_path.startswith(".tmp/agent-skills-artifacts/validation/")
+        assert manifest_path.endswith("/artifact-parity-manifest.json")
+        assert manifest_path != ".harness/evidence/skill-graphs/pilot/artifact-parity-manifest.json"
 
 
 def test_changed_files_from_scope_miss_falls_back_to_required_baseline() -> None:
