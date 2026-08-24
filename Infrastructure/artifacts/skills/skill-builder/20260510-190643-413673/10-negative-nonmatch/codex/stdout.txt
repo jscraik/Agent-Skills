@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1315-1c89-7d60-b747-8dfcefad86f7"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Clouds drift softly, slow and bright,  \nfolding day into silver light.  \nThey carry rain, then let it go,  \nand leave the fields awake below."}}
-{"type":"turn.completed","usage":{"input_tokens":46164,"cached_input_tokens":45952,"output_tokens":49,"reasoning_output_tokens":8}}

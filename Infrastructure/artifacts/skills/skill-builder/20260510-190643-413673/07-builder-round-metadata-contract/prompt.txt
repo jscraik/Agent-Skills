@@ -1,3 +1,0 @@
-$skill-builder
-
-Define one explicit iteration contract for skill-builder.

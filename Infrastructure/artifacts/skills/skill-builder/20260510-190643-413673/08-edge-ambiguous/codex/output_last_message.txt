@@ -1,1 +1,0 @@
-What kind of improvement do you want most for `skill-builder`: clearer instructions, stronger validation, better routing/handle behavior, or a more opinionated workflow for building skills?
