@@ -1,4 +1,4 @@
-row_count: 344
+row_count: 343
 rows:
   -
     consumer_path: ".agents/workflows/sync-skills.md"
@@ -428,13 +428,6 @@ rows:
       - 1144
     match_count: 5
     root: plugins
-  -
-    consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-skill-creator.md"
-    is_executable: false
-    line_numbers:
-      - 4
-    match_count: 1
-    root: .agents
   -
     consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-skill-installer.md"
     is_executable: false
