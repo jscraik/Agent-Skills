@@ -1,3 +1,0 @@
-$skill-builder
-
-Please review this small skill update with minimal inputs and keep the safety constraints intact.

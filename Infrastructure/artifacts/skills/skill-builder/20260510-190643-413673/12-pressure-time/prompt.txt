@@ -1,3 +1,0 @@
-$skill-builder
-
-This is urgent, but please keep validation and policy checks visible.
