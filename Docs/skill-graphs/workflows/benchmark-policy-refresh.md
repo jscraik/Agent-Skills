@@ -64,31 +64,31 @@ permissions:
 ### Step 1: Build Benchmark Artifact
 
 ```bash
-python3 Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py \
+python3 Plugins/skill-factory/scripts/skill-builder/benchmark_skill_portfolio.py \
   --root . \
-  --config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+  --config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
   --mode off \
   --format json \
-  --output-json Infrastructure/artifacts/industry-benchmark-latest.json
+  --output-json .harness/evidence/industry-benchmark-latest.json
 ```
 
 | FLAG | VALUE | DESCRIPTION |
 |------|-------|-------------|
 | `--mode` | `off` | Benchmark mode off (generation only) |
 | `--format` | `json` | Output format |
-| `--output-json` | `Infrastructure/artifacts/industry-benchmark-latest.json` | Artifact path |
+| `--output-json` | `.harness/evidence/industry-benchmark-latest.json` | Workflow artifact path |
 
 ### Step 2: Refresh Benchmark Policy
 
 ```bash
-python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py \
+python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py \
   --root . \
-  --policy Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
-  --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json \
+  --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+  --benchmark-json .harness/evidence/industry-benchmark-latest.json \
   --schedule-days 7 \
   --require-context7 \
   --apply \
-  --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json \
+  --report-json .harness/evidence/benchmark-policy-refresh-report.json \
   --format text
 ```
 
@@ -97,7 +97,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py 
 | `--schedule-days` | `7` | Refresh schedule window |
 | `--require-context7` | — | Require Context7 API |
 | `--apply` | — | Apply changes to policy |
-| `--report-json` | `Infrastructure/artifacts/benchmark-policy-refresh-report.json` | Report output |
+| `--report-json` | `.harness/evidence/benchmark-policy-refresh-report.json` | Workflow report path |
 
 ### ENV
 
@@ -109,18 +109,18 @@ CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
 
 | NAME | PATHS | CONDITION |
 |------|-------|-----------|
-| `benchmark-policy-refresh` | `Infrastructure/artifacts/industry-benchmark-latest.json`, `Infrastructure/artifacts/benchmark-policy-refresh-report.json` | `always()` |
+| `benchmark-policy-refresh` | `.harness/evidence/industry-benchmark-latest.json`, `.harness/evidence/benchmark-policy-refresh-report.json` | `always()` |
 
 ### Step 4: Create Pull Request
 
 | CONFIG | VALUE |
 |--------|-------|
-| Action | `peter-evans/create-pull-request@v7` |
+| Action | `peter-evans/create-pull-request@v8.1.1` |
 | Branch | `codex/benchmark-policy-refresh` |
 | Delete branch | `true` |
 | Commit message | `chore: refresh benchmark policy baselines` |
 | Title | `chore: refresh benchmark policy baselines` |
-| Changed paths | `Skills/skill-builder/Infrastructure/references/benchmark-policy.json` |
+| Changed paths | `Plugins/skill-factory/references/skill-builder/benchmark-policy.json` |
 
 ---
 
@@ -128,32 +128,32 @@ CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
 
 ```bash
 # Build benchmark artifact
-python3 Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py \
+python3 Plugins/skill-factory/scripts/skill-builder/benchmark_skill_portfolio.py \
   --root . \
-  --config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+  --config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
   --mode off \
   --format json \
-  --output-json Infrastructure/artifacts/industry-benchmark-latest.json
+  --output-json .tmp/agent-skills-artifacts/industry-benchmark-latest.json
 
 # Refresh policy (dry-run)
-python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py \
+python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py \
   --root . \
-  --policy Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
-  --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json \
+  --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+  --benchmark-json .tmp/agent-skills-artifacts/industry-benchmark-latest.json \
   --schedule-days 7 \
   --require-context7 \
-  --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json \
+  --report-json .tmp/agent-skills-artifacts/benchmark-policy-refresh-report.json \
   --format text
 
 # Refresh policy (apply)
-python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py \
+python3 Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py \
   --root . \
-  --policy Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
-  --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json \
+  --policy Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+  --benchmark-json .tmp/agent-skills-artifacts/industry-benchmark-latest.json \
   --schedule-days 7 \
   --require-context7 \
   --apply \
-  --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json \
+  --report-json .tmp/agent-skills-artifacts/benchmark-policy-refresh-report.json \
   --format text
 ```
 
@@ -167,6 +167,6 @@ Workflow: `.github/workflows/benchmark-policy-refresh.yml`
 
 ## RELATED
 
-- [Benchmark policy](/Skills/skill-builder/Infrastructure/references/benchmark-policy.json)
-- [Benchmark script](/Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py)
-- [Refresh script](/Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py)
+- [Benchmark policy](/Plugins/skill-factory/references/skill-builder/benchmark-policy.json)
+- [Benchmark script](/Plugins/skill-factory/scripts/skill-builder/benchmark_skill_portfolio.py)
+- [Refresh script](/Plugins/skill-factory/scripts/skill-builder/refresh_benchmark_policy.py)
