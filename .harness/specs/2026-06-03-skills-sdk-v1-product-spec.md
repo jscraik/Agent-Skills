@@ -38,7 +38,6 @@ apparatus_lens: Infrastructure/references/skills-sdk-apparatus-lens.md
 source_artifacts:
   - artifacts/recommended-skills-sdk-pipeline.html
   - artifacts/skills-sdk-user-lifecycle-one-page.html
-  - artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md
   - Plugins/harness-engineering/skills/he-spec/SKILL.md
   - Plugins/harness-engineering/references/skills/he-spec/spec-artifact-contract.md
   - Plugins/harness-engineering/references/spec-plan-runtime-boundary-contract.md
@@ -204,7 +203,6 @@ Expected result: docs explain capability contracts; the read-only Skill Explorer
 | `Docs/reference/skills-sdk-platform-atlas.html` | Truth-aware atlas for the product-boundary pipeline and current SDK capability truth | Use as operator-facing map, not as evidence that all command or external proof lanes replayed. |
 | `artifacts/recommended-skills-sdk-pipeline.html` | Historical full SDK architecture atlas with lifecycle, OSS, CI, security, knowledge, factories, docs, and explorer lanes | Use as broad vision, not as V1 scope by itself. |
 | `artifacts/skills-sdk-user-lifecycle-one-page.html` | User-facing lifecycle one-page with V1 scope, skill story/use case, CLI facade, install scopes, security adapters, knowledge ingestion, docs, and explorer | Use as product-surface evidence for V1. |
-| `artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md` | Gap-analysis report against current tree | Use as implementation readiness evidence, not as proof all contracts exist. |
 | JSC-375 through JSC-390 | Linear issue set for SDK platformization | Use for traceability and later planning. |
 | `Infrastructure/references/skills-sdk-apparatus-lens.md` | Existing apparatus lens for proof-backed SDK readiness | Use as enforcement lens for receipts, gates, and professional output. |
 | `Plugins/harness-engineering/skills/he-spec/SKILL.md` | Spec creation contract | This artifact follows HE spec shape and validation expectations. |
@@ -1568,7 +1566,6 @@ Proceed with a constrained Skills SDK V1 Product Spec. Do not spec or plan the f
 
 - `artifacts/recommended-skills-sdk-pipeline.html`
 - `artifacts/skills-sdk-user-lifecycle-one-page.html`
-- `artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md`
 - `Infrastructure/references/skills-sdk-apparatus-lens.md`
 - `Plugins/harness-engineering/skills/he-spec/SKILL.md`
 - `Plugins/harness-engineering/references/skills/he-spec/spec-artifact-contract.md`
