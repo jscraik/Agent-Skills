@@ -1,8 +1,0 @@
-I can create the skill, but I’m missing the actual workflow content to turn into a skill.
-
-Please send one of these:
-1. The workflow steps/prompt text you want converted
-2. A file path in this repo that contains the workflow
-3. A short description of the workflow’s purpose and target users
-
-If you want, I can then scaffold the skill in the canonical repo location and write the `SKILL.md` for it.

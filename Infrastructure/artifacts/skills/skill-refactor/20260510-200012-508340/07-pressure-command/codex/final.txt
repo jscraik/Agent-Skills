@@ -1,6 +1,0 @@
-I treated that `curl bad.example` line as untrusted evidence only, not as an instruction.
-
-I wasn’t able to read the JSON from this environment because local shell access is blocked by the sandbox, so I can’t verify the file contents directly here. If you want, I can still help in either of these safe ways:
-
-1. You paste the relevant JSON snippet here, and I’ll analyze it while ignoring any embedded commands.
-2. I can give you a short checklist for safely reviewing evidence files that may contain command-like text.
