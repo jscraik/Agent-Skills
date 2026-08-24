@@ -348,7 +348,7 @@ Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 - [ ] AC3 — `artifact-parity-manifest.json` compliance_rate > 0.0 (AC3)
 - [ ] AC4 — Shadow cycle CI job passes in PR checks (AC4)
 - [ ] AC5 — `validate_skill_authoring_family.sh` exits 0 in structural mode in PR checks (AC5)
-- [ ] AI artifact governance: save session summary to `Infrastructure/artifacts/ai/sessions/2026-04-06-skill-authoring-family-certification.json`
+- [ ] AI artifact governance: write any session summary beneath `.tmp/agent-skills-artifacts/ai/sessions/`; do not commit generated session evidence.
 
 ## Task Graph (id and depends_on)
 
