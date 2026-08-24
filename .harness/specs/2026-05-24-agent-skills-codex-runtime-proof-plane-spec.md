@@ -584,7 +584,4 @@ This section records artifact validation and review evidence run during spec gen
 | <code>python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md</code> | pass | Local JSC-364 traceability table passed; JSC-364 is linked to parent JSC-351. |
 | <code>python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md --json</code> | pass | Command Summary BLUF contract passed. |
 | <code>python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md --kind spec --json</code> | pass | Standard HE spec artifact shape passed. |
-| <code>architecture-strategist review</code> | pass | Final score 97/100, remaining blocker count 0, artifact at artifacts/reviews/2026-05-24-runtime-proof-spec/architecture-strategist.md. |
-| <code>agent-native-reviewer review</code> | pass | Final score 97/100, remaining blocker count 0, artifact at artifacts/reviews/2026-05-24-runtime-proof-spec/agent-native-reviewer.md. |
-| <code>adversarial-reviewer review</code> | pass | Final score 97/100, remaining blocker count 0, artifact at artifacts/reviews/2026-05-24-runtime-proof-spec/adversarial-reviewer.md. |
 | <code>Linear MCP save_issue</code> | pass | Created JSC-364 as a child/follow-up under completed parent JSC-351. |

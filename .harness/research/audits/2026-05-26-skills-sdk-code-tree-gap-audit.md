@@ -1126,13 +1126,8 @@ Rename risks to manage:
 
 ### Reviewer Addendum: Additional Gaps Found
 
-Three independent reviews were run after the audit was updated:
-
-- artifacts/reviews/2026-05-26-skills-sdk-gap-audit-architecture-strategist.md
-- artifacts/reviews/2026-05-26-skills-sdk-gap-audit-agent-native-reviewer.md
-- artifacts/reviews/2026-05-26-skills-sdk-gap-audit-adversarial-reviewer.md
-
-The reviewers agreed with the main direction but found several sharper gaps that should be treated as first-class audit findings.
+Historical independent-review outputs were retired after their findings were
+incorporated below. These findings do not constitute current-head approval.
 
 #### ADD-GAP-001: Owner Manifest Runtime Validation Bypass
 

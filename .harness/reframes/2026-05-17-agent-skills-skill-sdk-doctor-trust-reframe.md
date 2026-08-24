@@ -85,10 +85,8 @@ The pressure is strategic and operational, not just historical. Jamie wants Code
 - [Steering Uptake Ledger](.harness/quality/steering-uptake.md) records the repeated-steering environment refinement with operating failure, blocker, mechanism, proof, validation, and repeat prevention.
 - [validate_steering_uptake.py](Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py:1) makes that uptake executable.
 - [CTF Workflow Evals](Docs/agents/23-ctf-workflow-evals.md) makes flag capture the win condition for workflow skills whose truth lives in UI or app state.
-- Final review artifacts approved the strategy after fixes:
-  - [adversarial reviewer](artifacts/reviews/sdk_north_star_round4d_adversarial_reviewer.md)
-  - [adversarial document reviewer](artifacts/reviews/sdk_north_star_round4_adversarial_document_reviewer.md)
-  - [architecture strategist](artifacts/reviews/sdk_north_star_round4b_architecture_strategist.md)
+- Historical review outputs were retired after their findings were incorporated;
+  current implementation claims require fresh candidate-bound review.
 
 ## Architectural Impact
 

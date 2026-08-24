@@ -69,9 +69,6 @@ The plan must produce implementation steps that prove:
 | .harness/specs/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-spec.md | FR-001 through FR-026, NFR-001 through NFR-006, SA-001 through SA-021. |
 | Infrastructure/references/skills-sdk-apparatus-lens.md | Applies Jamie's mantra to the apparatus model: Thin surface. Strong guardrails. Durable memory. Professional output. |
 | .harness/review/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-spec-technical-review.md | Required fields must be asserted at data.skill_doctor inside the ask robot envelope. |
-| artifacts/reviews/jsc329_round1_adversarial_reviewer.md | Presence-only fields, skipped critical checks, exit semantics, and weak representativeness were blocking faults. |
-| artifacts/reviews/jsc329_round1_adversarial_document_reviewer.md | next_command needed a deterministic selection ladder, contract_schemas needed consumer-usable validity, and representativeness had to be binding. |
-| artifacts/reviews/jsc329_round1_architecture_strategist.md | Required fields needed semantic content, public check names needed mapping discipline, and the second skill needed a distinct representativeness axis. |
 | .harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md | Live Linear issue JSC-329 is the execution handle. |
 | .harness/quality/steering-uptake.md | RF-0 closeout gate and repeated-feedback uptake evidence. |
 | https://github.com/openai/codex commits e7bffc5a2, f0166cadb, 4c8977231, a28024802, and 326e31ab6 | Upstream Python SDK lessons: normalize convenient inputs into typed contracts, return public domain result objects, expose attempt-local setup/login handles, split helper logic away from the facade, and test public exports/signatures. |
