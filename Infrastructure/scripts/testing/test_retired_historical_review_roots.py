@@ -12,6 +12,7 @@ RETIRED_ROOTS = (
     "artifacts/reviews/adversarial-reviewer.md",
     "artifacts/reviews/he-spec-plan-gap-hardening",
     "artifacts/reviews/jsc-364-runtime-proof-plane",
+    "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor",
     "artifacts/reviews/pr215-post-review-pass-synthesis.md",
     "artifacts/reviews/skills-sdk-v1-0-product-implementation",
     "artifacts/reviews/skills-sdk-pu-015-review-handoff",
