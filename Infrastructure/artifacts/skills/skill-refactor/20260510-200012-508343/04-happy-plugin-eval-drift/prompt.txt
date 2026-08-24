@@ -1,1 +1,0 @@
-Plugin Eval says this skill dropped from A to C after recent changes; can you compare the report with session evidence and recommend the smallest repair?
