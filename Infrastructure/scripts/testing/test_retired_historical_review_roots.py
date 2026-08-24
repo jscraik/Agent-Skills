@@ -16,6 +16,17 @@ PRODUCER_ROOTS = (
     REPO_ROOT / "Infrastructure/scripts",
     REPO_ROOT / "scripts",
 )
+VALIDATE_ALL = REPO_ROOT / "Infrastructure/scripts/validate_all_impl.sh"
+
+
+def _is_scannable_producer(path: Path) -> bool:
+    return (
+        path.is_file()
+        and not path.is_symlink()
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
+        and path.resolve() != Path(__file__).resolve()
+    )
 
 
 def _producer_references(retired_root: str) -> list[Path]:
@@ -24,9 +35,7 @@ def _producer_references(retired_root: str) -> list[Path]:
         for root in PRODUCER_ROOTS
         if root.exists()
         for path in root.rglob("*")
-        if path.is_file()
-        and not path.is_symlink()
-        and path.resolve() != Path(__file__).resolve()
+        if _is_scannable_producer(path)
         and retired_root in path.read_text(encoding="utf-8", errors="ignore")
     ]
 
@@ -41,6 +50,11 @@ class RetiredHistoricalReviewRootTests(unittest.TestCase):
         for retired_root in RETIRED_ROOTS:
             with self.subTest(retired_root=retired_root):
                 self.assertEqual(_producer_references(retired_root), [])
+
+    def test_repo_test_scope_schedules_this_contract(self) -> None:
+        validation_source = VALIDATE_ALL.read_text(encoding="utf-8")
+        self.assertIn("test)\n      case \"$slug\" in\n        retired-review-roots|", validation_source)
+        self.assertIn("schedule_check required retired-review-roots", validation_source)
 
 
 if __name__ == "__main__":
