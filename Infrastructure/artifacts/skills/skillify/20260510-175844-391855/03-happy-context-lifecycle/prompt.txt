@@ -1,1 +1,0 @@
-Can you turn this repeatable PR feedback workflow into a skill and include how it will be tested, distributed, observed, and adapted?

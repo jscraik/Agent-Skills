@@ -1,9 +1,0 @@
-I’m blocked by the current sandbox: I can’t read the local workspace files, and the GitHub-backed repo lookup isn’t resolving this repository from here.
-
-To build the skill package from bounded evidence, I need one of these:
-
-1. The contents of `session-collector`’s `skillify-candidates.json` entry
-2. The bounded evidence files or excerpts that entry points to
-3. The target package path you want created or updated
-
-If you paste those, I can turn it into the skill package directly and keep it aligned with the repo’s skill rules.
