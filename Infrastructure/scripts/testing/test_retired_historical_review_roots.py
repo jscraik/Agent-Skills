@@ -9,6 +9,9 @@ import unittest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RETIRED_ROOTS = (
+    ".harness/artifacts/README.md",
+    ".harness/artifacts/brownfield-memory-inventory.md",
+    ".harness/artifacts/sync-receipts.jsonl",
     "artifacts/context-integrity",
     "artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md",
     "artifacts/reviews/2026-05-24-runtime-proof-spec/adversarial-reviewer.md",
@@ -87,6 +90,8 @@ RETIRED_ROOTS = (
 PRODUCER_ROOTS = (
     REPO_ROOT / ".github",
     REPO_ROOT / "Infrastructure/scripts",
+    REPO_ROOT / "Plugins/harness-engineering",
+    REPO_ROOT / "Plugins/synaipse-harness",
     REPO_ROOT / "scripts",
 )
 VALIDATE_ALL = REPO_ROOT / "Infrastructure/scripts/validate_all_impl.sh"
@@ -117,7 +122,7 @@ class RetiredHistoricalReviewRootTests(unittest.TestCase):
     def test_retired_roots_contain_no_files(self) -> None:
         for retired_root in RETIRED_ROOTS:
             with self.subTest(retired_root=retired_root):
-                self.assertFalse(any((REPO_ROOT / retired_root).rglob("*")))
+                self.assertFalse((REPO_ROOT / retired_root).exists())
 
     def test_live_producers_do_not_reference_retired_roots(self) -> None:
         for retired_root in RETIRED_ROOTS:
