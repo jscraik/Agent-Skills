@@ -446,7 +446,7 @@ def _eval_closeout_path(
         return report_dir / "workflow-closeout.json"
     if not (raw_output.strip() or raw_error.strip() or no_case_reason):
         return None
-    closeout_root = repo_root / "Infrastructure" / "artifacts" / "evals" / "closeouts"
+    closeout_root = repo_root / ".tmp" / "agent-skills-artifacts" / "evals" / "closeouts"
     stamp = _utc_now_iso().replace(":", "").replace("-", "")
     return closeout_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.json"
 
