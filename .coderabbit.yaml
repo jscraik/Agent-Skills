@@ -22,9 +22,10 @@ reviews:
       - "renovate[bot]"
       - "github-actions[bot]"
   path_filters:
-    - "artifacts/**"
-    - "!coverage/**"
-    - "!dist/**"
+    - "**"
+    - "!**/coverage/**"
+    - "!**/dist/**"
+    - "!**/node_modules/**"
   path_instructions:
     - path: "**"
       instructions: |

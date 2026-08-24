@@ -16,13 +16,14 @@ def _path_filters() -> list[str]:
     return payload["reviews"]["path_filters"]
 
 
-def test_coderabbit_reviews_artifact_cleanup_changes() -> None:
+def test_coderabbit_reviews_every_tracked_path_by_default() -> None:
     filters = _path_filters()
-    assert "artifacts/**" in filters
+    assert filters[0] == "**"
     assert "!artifacts/**" not in filters
 
 
 def test_coderabbit_keeps_build_output_exclusions() -> None:
     filters = _path_filters()
-    assert "!coverage/**" in filters
-    assert "!dist/**" in filters
+    assert "!**/coverage/**" in filters
+    assert "!**/dist/**" in filters
+    assert "!**/node_modules/**" in filters
