@@ -89,6 +89,13 @@ class RecursiveArtifactRootContractTests(unittest.TestCase):
             with self.subTest(retired_root=retired_root):
                 self.assertFalse((REPO_ROOT / retired_root).exists())
 
+    def test_retained_intervention_queue_has_no_dangling_artifact_pointer(self) -> None:
+        runbook = (
+            REPO_ROOT / "Docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("Machine-readable queue:", runbook)
+        self.assertNotIn("arscontexta-intervention-queue.json", runbook)
+
     def test_live_scripts_do_not_reference_retired_infrastructure_roots(self) -> None:
         scripts_root = REPO_ROOT / "Infrastructure/scripts"
         for retired_root in RETIRED_INFRASTRUCTURE_SKILL_GRAPH_ROOTS:
