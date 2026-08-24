@@ -13,6 +13,7 @@ RETIRED_ROOTS = (
     "artifacts/reviews/he-spec-plan-gap-hardening",
     "artifacts/reviews/jsc-364-runtime-proof-plane",
     "artifacts/reviews/pr215-post-review-pass-synthesis.md",
+    "artifacts/reviews/skills-sdk-v1-0-product-implementation",
     "artifacts/reviews/skills-sdk-pu-015-review-handoff",
 )
 PRODUCER_ROOTS = (
