@@ -59,22 +59,22 @@ flowchart LR
 
 | CHECK    | COMMAND                                                                        |
 | -------- | ------------------------------------------------------------------------------ |
-| Checkout | `actions/checkout@v6` (full)                                                   |
+| Checkout | `actions/checkout@v7.0.1` (full)                                               |
 | Python   | `3.12`                                                                         |
-| GH CLI   | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh`                   |
-| Deps     | `pip install pyyaml`                                                           |
+| GH CLI   | `Infrastructure/scripts/ensure-gh-cli.sh`                                      |
+| Deps     | `pip install pyyaml pytest defusedxml`                                         |
 | Validate | `run_repo_skill_quality.py --root . --baseline-file ... --benchmark-mode warn` |
-| Upload   | `Infrastructure/artifacts/industry-benchmark-latest.json`                      |
+| Upload   | `.harness/evidence/industry-benchmark-latest.json`                             |
 
 ### SG Flags
 
 ```bash
-python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
   --root . \
-  --baseline-file Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json \
+  --baseline-file Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json \
   --benchmark-mode warn \
-  --benchmark-config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
-  --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
+  --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+  --benchmark-output-json .harness/evidence/industry-benchmark-latest.json \
   --format text
 ```
 
@@ -88,22 +88,22 @@ python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
 ### EB Flags
 
 ```bash
-python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
   --root . \
   --run-evals \
   --dual-run \
   --capture-jsonl \
   --tier2-mode "${{ inputs.tier2_mode }}" \
   --benchmark-mode warn \
-  --benchmark-config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
-  --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
+  --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+  --benchmark-output-json .harness/evidence/industry-benchmark-latest.json \
   --format text
 ```
 
 ### Dashboard Build
 
 ```bash
-python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py \
+python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py \
   --reports-root .tmp/agent-skills-artifacts/skills \
   --out-json .tmp/agent-skills-artifacts/skills/dashboard.json \
   --out-md .tmp/agent-skills-artifacts/skills/dashboard.md
@@ -114,7 +114,7 @@ python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py
 | ARTIFACT  | PATH                                                      |
 | --------- | --------------------------------------------------------- |
 | Reports   | `.tmp/agent-skills-artifacts/skills/**`                    |
-| Benchmark | `Infrastructure/artifacts/industry-benchmark-latest.json` |
+| Benchmark | `.harness/evidence/industry-benchmark-latest.json`        |
 
 ---
 
@@ -140,11 +140,11 @@ permissions:
 
 | COMPONENT | SOURCE                                                                       |
 | --------- | ---------------------------------------------------------------------------- |
-| Baseline  | `Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json` |
-| BM Policy | `Skills/skill-builder/Infrastructure/references/benchmark-policy.json`       |
-| Script    | `Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py`      |
-| Dashboard | `Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py`  |
-| Helper    | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh`                 |
+| Baseline  | `Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json` |
+| BM Policy | `Plugins/skill-factory/references/skill-builder/benchmark-policy.json`       |
+| Script    | `Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py`      |
+| Dashboard | `Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py`  |
+| Helper    | `Infrastructure/scripts/ensure-gh-cli.sh`                                    |
 
 ---
 
@@ -152,14 +152,14 @@ permissions:
 
 ```bash
 # Validate structure only (local)
-python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
   --root . \
-  --baseline-file Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json \
+  --baseline-file Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json \
   --benchmark-mode warn \
   --format text
 
-# Run full evals (requires codex/codex auth)
-python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+# Run full evals (requires Codex/Claude auth)
+python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
   --root . \
   --run-evals \
   --dual-run \
@@ -168,7 +168,7 @@ python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
   --format text
 
 # Build dashboard manually
-python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py \
+python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py \
   --reports-root .tmp/agent-skills-artifacts/skills \
   --out-json .tmp/agent-skills-artifacts/skills/dashboard.json \
   --out-md .tmp/agent-skills-artifacts/skills/dashboard.md
@@ -184,6 +184,6 @@ Workflow: `.github/workflows/skill-quality.yml`
 
 ## RELATED
 
-- [Skill builder scripts](/Skills/skill-builder/scripts)
-- [Benchmark policy](/Skills/skill-builder/Infrastructure/references/benchmark-policy.json)
-- [Skill quality baseline](/Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json)
+- [Skill builder scripts](/Plugins/skill-factory/scripts/skill-builder)
+- [Benchmark policy](/Plugins/skill-factory/references/skill-builder/benchmark-policy.json)
+- [Skill quality baseline](/Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json)
