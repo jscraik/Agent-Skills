@@ -1,3 +1,0 @@
-$skill-factory
-
-Please inspect this task that includes tokens, incident logs, and personal data without leaking them.
