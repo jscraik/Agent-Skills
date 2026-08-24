@@ -1,1 +1,0 @@
-I can do this, but I’m missing the workflow itself. Send me either the exact steps you want captured or the file/path that contains the workflow, and I’ll turn it into a skill scaffold with the right name, description, and instructions.
