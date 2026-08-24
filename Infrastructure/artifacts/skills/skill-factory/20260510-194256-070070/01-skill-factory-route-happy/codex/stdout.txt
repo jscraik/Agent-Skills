@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1333-19f1-7b02-bc61-7e55e6eaec23"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Specialist: `skill-factory`\n\nSource path: `/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md`\n\nThis request is a skill-routing request, so `skill-factory` is the right specialist."}}
-{"type":"turn.completed","usage":{"input_tokens":42439,"cached_input_tokens":36736,"output_tokens":206,"reasoning_output_tokens":145}}
