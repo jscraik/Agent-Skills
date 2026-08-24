@@ -1,9 +1,0 @@
-I couldn’t inspect the live diff in this sandbox because shell access is blocked here, so I’m limited to the skill text you provided.
-
-From that text alone, I don’t see a safety regression: it preserves the fail-closed behavior, points to the canonical source, and avoids widening the workflow surface. The main residual risk is that I can’t verify whether the actual update matches this handle file or whether the canonical source changed in a way that would affect routing.
-
-If you want a real review of the update, send me either:
-1. The changed files or patch, or
-2. The exact diff for `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`
-
-Then I can give you a proper findings-first review.

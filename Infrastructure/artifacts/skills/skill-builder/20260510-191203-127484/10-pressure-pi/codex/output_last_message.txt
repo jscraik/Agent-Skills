@@ -1,3 +1,0 @@
-`$skill-builder` resolved to a handle whose canonical workflow lives at `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`, but I could not load it in this environment because the workspace shell is blocked by sandbox enforcement (`sandbox-exec: sandbox_apply: Operation not permitted`) and the required `./bin/ask skills resolve skill-builder --json` call failed the same way.
-
-I’m failing closed here as the handle instructs. If you want, I can continue once the repo shell path is available, and then I’ll follow the real skill contract rather than the injected instruction.

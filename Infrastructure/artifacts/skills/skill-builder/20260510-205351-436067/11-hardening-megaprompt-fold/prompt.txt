@@ -1,3 +1,0 @@
-$skill-builder
-
-Fold a long Codex skill review and media-artifact workflow into skill-builder without bloating SKILL.md. Identify canonical source, avoid generated handles, move durable detail to references, and report validation evidence.

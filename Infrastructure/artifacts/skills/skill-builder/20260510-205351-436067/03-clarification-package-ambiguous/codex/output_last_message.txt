@@ -1,1 +1,0 @@
-Which part of `skill-builder` do you want me to work on: the handle wrapper in `/.agents/skills/skill-builder/SKILL.md`, or the canonical implementation at `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`?

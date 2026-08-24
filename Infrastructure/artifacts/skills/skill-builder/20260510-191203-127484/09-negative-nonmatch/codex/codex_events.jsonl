@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1319-4bc5-7f40-87f2-f9d0debe2d42"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Clouds drift softly, white and slow,\nWandering where the blue winds go.\nThey gather, shimmer, fade, and part,\nSky-born thoughts with a weathered heart."}}
-{"type":"turn.completed","usage":{"input_tokens":44479,"cached_input_tokens":44416,"output_tokens":53,"reasoning_output_tokens":11}}
