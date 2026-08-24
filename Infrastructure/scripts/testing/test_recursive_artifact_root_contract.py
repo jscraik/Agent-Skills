@@ -16,6 +16,12 @@ CONTROLS_ROOT = Path(".harness/evidence/skill-graphs/controls")
 LESSONS_ROOT = Path(".harness/evidence/skill-graphs/lessons")
 RETIRED_PILOT_ROOT = (REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").resolve()
 RETIRED_TRACKED_RUNS_ROOT = (REPO_ROOT / "artifacts/skill-graphs/runs").resolve()
+RETIRED_INFRASTRUCTURE_SKILL_GRAPH_ROOTS = (
+    "Infrastructure/artifacts/skill-graphs/controls",
+    "Infrastructure/artifacts/skill-graphs/lessons",
+    "Infrastructure/artifacts/skill-graphs/onboarding",
+    "Infrastructure/artifacts/skill-graphs/telemetry",
+)
 
 
 def _load_module(name: str, path: Path):
@@ -78,6 +84,24 @@ verifier = _load_module(
 
 
 class RecursiveArtifactRootContractTests(unittest.TestCase):
+    def test_retired_infrastructure_skill_graph_roots_are_absent(self) -> None:
+        for retired_root in RETIRED_INFRASTRUCTURE_SKILL_GRAPH_ROOTS:
+            with self.subTest(retired_root=retired_root):
+                self.assertFalse((REPO_ROOT / retired_root).exists())
+
+    def test_live_scripts_do_not_reference_retired_infrastructure_roots(self) -> None:
+        scripts_root = REPO_ROOT / "Infrastructure/scripts"
+        for retired_root in RETIRED_INFRASTRUCTURE_SKILL_GRAPH_ROOTS:
+            offenders = [
+                path.relative_to(REPO_ROOT)
+                for directory in (scripts_root / "lifecycle-and-sync", scripts_root / "skill-graph")
+                for pattern in ("*.py", "*.sh")
+                for path in directory.rglob(pattern)
+                if retired_root in path.read_text(encoding="utf-8")
+            ]
+            with self.subTest(retired_root=retired_root):
+                self.assertEqual(offenders, [])
+
     def test_retired_tracked_run_root_is_absent(self) -> None:
         self.assertFalse(RETIRED_TRACKED_RUNS_ROOT.exists())
 

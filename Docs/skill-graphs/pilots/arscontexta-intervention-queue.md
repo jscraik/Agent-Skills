@@ -13,7 +13,7 @@ Ars Contexta-backed synthesis layer for recursive skill pilot instability. This 
 
 - Generated: `2026-04-06T13:26:16Z`
 - Window: `2026-03-31..2026-04-06`
-- Machine-readable queue: `/Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json`
+- Machine-readable queue: `/.harness/evidence/skill-graphs/telemetry/arscontexta-intervention-queue.json`
 - Operator use: review the top unstable profile, capture the intervention as a note first, then promote only repeated wins into skill references or hooks.
 
 ## Promotion Rule
