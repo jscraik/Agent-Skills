@@ -1,1 +1,0 @@
-Can you inspect `Docs/qa/account-settings.md`; two brainstorm paths affect different milestones, so ask the one blocking question needed to pick the survivor.

@@ -1,6 +1,0 @@
-I can’t summarize that file yet because the workspace is blocked from reading it in this session. The file access attempt is failing at the sandbox layer, so I don’t have the brainstorm text or the repo evidence needed to make a grounded call on the strongest planning angle.
-
-If you want, paste the contents of `.harness/evals/2026-05-08-he-brainstorm.md` here, or give me a different accessible source for the same material, and I’ll turn it into:
-- a concise summary,
-- the strongest planning angle,
-- and a short “keep / defer / drop” split so we don’t turn every idea into work.

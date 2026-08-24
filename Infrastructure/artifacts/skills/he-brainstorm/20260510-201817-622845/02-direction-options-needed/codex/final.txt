@@ -1,7 +1,0 @@
-I can do that, but I’m blocked from reading `Plugins/harness-engineering/references/stage-context-contract.md` in this environment because direct filesystem reads are failing here.
-
-If you paste either:
-1. the full doc, or
-2. just the three architecture directions plus any acceptance criteria,
-
-I’ll compare them side by side, call out the tradeoffs, and identify the survivor we should carry into the spec.

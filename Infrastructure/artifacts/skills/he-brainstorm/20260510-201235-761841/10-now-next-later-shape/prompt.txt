@@ -1,1 +1,0 @@
-Can you summarize `.harness/brainstorm/2026-05-08-routing-requirements.md` into Now, Next, Later, and Do Not Create without creating backlog noise.
