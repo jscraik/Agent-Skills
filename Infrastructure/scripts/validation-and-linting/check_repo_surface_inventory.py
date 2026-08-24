@@ -142,6 +142,7 @@ POLICY_EXACT_PATHS = {
 HARNESS_REFERENCE_EXACT_PATHS = frozenset({
     ".harness/active-artifacts.md",
     ".harness/artifact-provenance.json",
+    ".harness/evidence/tessl/index.jsonl",
     ".harness/review-log.md",
 })
 
@@ -349,7 +350,18 @@ def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
     )
 
 
+def _is_scorer_calibration_generated_output(normalized: str, suffix: str) -> bool:
+    return (
+        suffix in {".jsonl", ".log"}
+        and _starts_with_any(normalized, ("Skills", "codex/agents/evals"))
+        and "/references/scorer-calibration/" in normalized
+        and not _is_governed_source_artifact(normalized, suffix)
+    )
+
+
 def _classify_governed_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+    if normalized in HARNESS_REFERENCE_EXACT_PATHS:
+        return _finding(normalized, "harness_reference_surface")
     if normalized == "skills-system/AGENTS.md":
         return _finding(normalized, "policy_surface")
     if _starts_with_any(normalized, HARNESS_HISTORICAL_PREFIXES):
@@ -358,15 +370,14 @@ def _classify_governed_generated_surface(normalized: str, suffix: str) -> Surfac
         return _finding(normalized, "generated_evidence_pattern")
     if _starts_with(normalized, ".harness/evidence"):
         return _finding(normalized, "harness_reference_surface")
+    if _is_scorer_calibration_generated_output(normalized, suffix):
+        return _finding(normalized, "generated_evidence_pattern")
     return None
 
 
 def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
     if normalized in POLICY_EXACT_PATHS:
         return _finding(normalized, "policy_surface")
-    governed_finding = _classify_governed_generated_surface(normalized, suffix)
-    if governed_finding is not None:
-        return governed_finding
     if _starts_with(normalized, ".skillsets"):
         return _finding(normalized, "generated_skillset_projection")
     if _starts_with(normalized, "skills-system") and _is_governed_system_skill_surface(normalized):
@@ -428,6 +439,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     suffix = Path(normalized).suffix.lower()
     rules = (
         _classify_violation_surface(normalized, suffix),
+        _classify_governed_generated_surface(normalized, suffix),
         _classify_source_surface(normalized),
         _classify_reference_surface(normalized),
         _classify_policy_surface(normalized),
