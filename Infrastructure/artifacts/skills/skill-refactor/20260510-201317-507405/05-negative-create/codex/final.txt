@@ -1,7 +1,0 @@
-I’m blocked from reading or editing the workspace in this session because the shell is refusing sandbox access, so I can’t safely scaffold the skill yet.
-
-If you want, send me either:
-1. The exact workflow you want turned into a skill, or
-2. The skill name you want plus a one-line description
-
-and I’ll draft the skill structure as soon as the workspace is available.

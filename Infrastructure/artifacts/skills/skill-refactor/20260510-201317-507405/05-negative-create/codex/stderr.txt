@@ -1,1 +1,0 @@
-2026-05-10T19:15:26.995077Z ERROR codex_app_server::bespoke_event_handling: request failed with client error: JSONRPCErrorError { code: -32000, data: None, message: "request_user_input is not supported in exec mode for thread `019e1350-7f06-7473-b247-f90b2ff7828b`" }
