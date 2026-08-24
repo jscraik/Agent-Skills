@@ -1,1 +1,0 @@
-Using .harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-evidence.json and skill-refactor-handoffs.json, rank which skills repeatedly failed, routed incorrectly, or produced weak validation evidence.
