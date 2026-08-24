@@ -15,6 +15,7 @@ RUNS_ROOT = Path(".tmp/agent-skills-artifacts/skill-graphs/runs")
 CONTROLS_ROOT = Path(".harness/evidence/skill-graphs/controls")
 LESSONS_ROOT = Path(".harness/evidence/skill-graphs/lessons")
 RETIRED_PILOT_ROOT = (REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").resolve()
+RETIRED_TRACKED_RUNS_ROOT = (REPO_ROOT / "artifacts/skill-graphs/runs").resolve()
 
 
 def _load_module(name: str, path: Path):
@@ -77,6 +78,9 @@ verifier = _load_module(
 
 
 class RecursiveArtifactRootContractTests(unittest.TestCase):
+    def test_retired_tracked_run_root_is_absent(self) -> None:
+        self.assertFalse(RETIRED_TRACKED_RUNS_ROOT.exists())
+
     def test_retired_tracked_pilot_root_is_absent(self) -> None:
         self.assertFalse((REPO_ROOT / "Infrastructure/artifacts/skill-graphs/pilot").exists())
 
