@@ -17,7 +17,7 @@ bash Skills/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path1,p
 4. Safety guardrails enforced by the initializer:
    - Targets must be existing repo-relative paths.
    - Targets under `Plugins/cache/**` are rejected.
-   - Run output must stay under `artifacts/autoresearch/`.
+   - Run output must stay under `.tmp/agent-skills-artifacts/autoresearch/`.
 
 Fixed-iteration rule:
 - If the user asks for an exact number of loops (for example, "do five loops"), set the stop condition to that exact iteration cap.
@@ -76,7 +76,7 @@ git status --short
 
 Only keep an iteration when changed paths are attributable to:
 - the active target path(s), and
-- `artifacts/autoresearch/<run-tag>-<timestamp>/`.
+- `.tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/`.
 
 If unrelated paths appear, classify the iteration as `blocked` until drift is isolated or explicitly approved.
 

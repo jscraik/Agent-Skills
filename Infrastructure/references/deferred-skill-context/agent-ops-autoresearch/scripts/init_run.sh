@@ -10,7 +10,7 @@ Usage:
 Options:
   --tag       Required run tag (lowercase letters, digits, hyphens)
   --targets   Required comma-separated target paths
-  --out       Optional output root under artifacts/autoresearch (default: artifacts/autoresearch)
+  --out       Optional output root under .tmp/agent-skills-artifacts/autoresearch (default: .tmp/agent-skills-artifacts/autoresearch)
 EOF
 }
 
@@ -23,7 +23,7 @@ trim_ascii_whitespace() {
 
 tag=""
 targets_raw=""
-out_root="artifacts/autoresearch"
+out_root=".tmp/agent-skills-artifacts/autoresearch"
 repo_root="$(git rev-parse --show-toplevel)"
 
 while [[ $# -gt 0 ]]; do
@@ -82,9 +82,9 @@ try:
 except ValueError as exc:
     raise SystemExit("Output root resolves outside repo root.") from exc
 
-allowed_root = (repo_root / "artifacts" / "autoresearch").resolve()
+allowed_root = (repo_root / ".tmp" / "agent-skills-artifacts" / "autoresearch").resolve()
 if out_path != allowed_root and allowed_root not in out_path.parents:
-    raise SystemExit("Output root must stay under artifacts/autoresearch.")
+    raise SystemExit("Output root must stay under .tmp/agent-skills-artifacts/autoresearch.")
 
 print(rel.as_posix())
 ' "$repo_root" "$out_root" 2>&1

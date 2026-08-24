@@ -1,7 +1,0 @@
-iteration	target	decision	score	status	change_summary	validation_evidence
-0	utilities/autoresearch	keep	3.50	pass	baseline before loop edits	quick_validate=pass;skills_audit_strict=pass;security_warns=3;benchmark_warns=0;openclaw_warns=0
-1	utilities/autoresearch	keep	4.00	pass	removed Python bytecode artifact and added scripts/.gitignore guard	quick_validate=pass;skills_audit_strict=pass;security_warns=2;benchmark_warns=0;openclaw_warns=0
-2	utilities/autoresearch	keep	5.00	pass	replaced PNG icon assets with SVG and updated openai interface paths	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0
-3	utilities/autoresearch	keep	5.00	pass	replaced sed-based trimming in init_run.sh with shell-native trim helper	bash_n_init_run=pass;quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0
-4	utilities/autoresearch	keep	5.00	pass	added log_result.py guards for score/iteration validity and decision-status consistency	py_compile_log_result=pass;quick_validate=pass;skills_audit_strict=pass;cleanup_generated_pyc=done;security_warns=0;benchmark_warns=0;openclaw_warns=0
-5	utilities/autoresearch	keep	5.00	pass	required explicit start/end score reporting and independent validator option in SKILL/runbook/evals	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0

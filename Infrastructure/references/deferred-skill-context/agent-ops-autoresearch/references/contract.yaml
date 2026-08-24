@@ -15,11 +15,11 @@ inputs:
   - success_goal
 
 outputs:
-  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv
-  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/journal.md
-  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt
-  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/run.json
-  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/iteration_journal.jsonl
+  - .tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv
+  - .tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/journal.md
+  - .tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt
+  - .tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/run.json
+  - .tmp/agent-skills-artifacts/autoresearch/<run-tag>-<timestamp>/iteration_journal.jsonl
   - final findings summary with validation evidence
 
 observability: >
