@@ -1,1 +1,0 @@
-Can you create a skill from this, validate the right destination, and stop if the category is unclear?

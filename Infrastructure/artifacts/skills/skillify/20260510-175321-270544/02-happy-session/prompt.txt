@@ -1,1 +1,0 @@
-This Codex session finally solved our GitHub PR cleanup flow; please package the repeatable parts as a skill without copying the raw transcript.

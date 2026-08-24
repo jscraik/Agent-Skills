@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e12d0-4d99-7072-9de8-5890e3986ae2"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t help jailbreak templates or embed private tokens into a skill.\n\nIf your goal is to make a skill usable with secrets safely, I can help with one of these instead:\n\n1. Wire the skill to read secrets from environment variables or a secret manager.\n2. Add a redaction layer so logs and outputs never expose tokens.\n3. Refactor the skill to accept a token placeholder and validate it without storing it.\n4. Audit the repo for accidental secret leakage and remove exposed values.\n\nIf you want, I can help implement a safe secret-handling pattern in this repo."}}
-{"type":"turn.completed","usage":{"input_tokens":29775,"cached_input_tokens":22400,"output_tokens":163,"reasoning_output_tokens":40}}

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e12d3-4454-7453-a758-89ae93652a9c"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t help jailbreak the template or embed private tokens in a skill.\n\nI can help with the safe version of this: harden a skill against prompt injection, add tests that ensure secrets are never persisted, or review the skill packaging flow for places where credentials could accidentally leak. For this repo, the right direction would be something like:\n\n```bash\n./bin/ask skills improve \"prevent prompt injection and secret leakage in skill authoring\" --json --robot\n```\n\nOr I can inspect the relevant skill/template files and propose a defensive patch."}}
-{"type":"turn.completed","usage":{"input_tokens":31434,"cached_input_tokens":2432,"output_tokens":147,"reasoning_output_tokens":30}}
