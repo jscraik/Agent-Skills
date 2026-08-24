@@ -12,11 +12,41 @@ from types import ModuleType, SimpleNamespace
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ASK_ENTRYPOINT = REPO_ROOT / "Infrastructure" / "bin" / "ask"
-VALIDATOR_PATH = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "verify_ask_cli_modularity.py"
+CLI_DISPATCH = (
+    REPO_ROOT
+    / "Infrastructure"
+    / "scripts"
+    / "lib"
+    / "ask"
+    / "cli_dispatch_entrypoint.py"
+)
+CLI_WIKI_DISPATCH = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "cli_dispatch_wiki.py"
+)
+CLI_PARSER = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "cli_parser.py"
+CLI_EVAL_PARSER = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "cli_parser_evals.py"
+)
+CLI_RENDERER = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "cli_renderer.py"
+)
+SYNC_WRAPPER = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
+)
+VALIDATOR_PATH = (
+    REPO_ROOT
+    / "Infrastructure"
+    / "scripts"
+    / "validation-and-linting"
+    / "verify_ask_cli_modularity.py"
+)
+MAX_ENTRYPOINT_LINES = 800
 
 
 def _load_validator() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("verify_ask_cli_modularity", VALIDATOR_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "verify_ask_cli_modularity", VALIDATOR_PATH
+    )
     if spec is None or spec.loader is None:
         raise RuntimeError("Unable to load ask CLI modularity validator")
     module = importlib.util.module_from_spec(spec)
@@ -25,7 +55,48 @@ def _load_validator() -> ModuleType:
     return module
 
 
+def _git_baseline_result(
+    command: list[str], **_kwargs: object
+) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.CompletedProcess
+    if command[1] == "diff":
+        return completed(command, 0, "deleted.py\nnotes.txt\n", "")
+    if command[1] == "ls-tree":
+        return completed(command, 0, "Infrastructure/tests/sibling.py\n", "")
+    return completed(command, 0, "def baseline():\n    pass\n", "")
+
+
 class TestAskCliShape(unittest.TestCase):
+    def test_entrypoint_line_budget_does_not_grow(self) -> None:
+        line_count = len(ASK_ENTRYPOINT.read_text(encoding="utf-8").splitlines())
+
+        self.assertLessEqual(
+            line_count,
+            MAX_ENTRYPOINT_LINES,
+            (
+                "Infrastructure/bin/ask is already at the decomposition limit; "
+                "move parser, dispatch, output, or prompt behavior into ask.* modules "
+                "before adding more entrypoint code."
+            ),
+        )
+
+    def test_modularity_cli_uses_canonical_entrypoint_budget(self) -> None:
+        validator = _load_validator()
+
+        args = validator._build_parser().parse_args([])
+
+        self.assertEqual(args.max_lines, MAX_ENTRYPOINT_LINES)
+
+    def test_entrypoint_keeps_output_and_prompt_helpers_extracted(self) -> None:
+        content = ASK_ENTRYPOINT.read_text(encoding="utf-8")
+
+        self.assertIn('import_module("ask.cli_renderer")', content)
+        self.assertIn('import_module("ask.cli_dispatch_entrypoint")', content)
+        self.assertTrue(CLI_RENDERER.is_file())
+        self.assertIn("prompt_nonempty", CLI_WIKI_DISPATCH.read_text(encoding="utf-8"))
+        self.assertNotIn("def print_first_validation_command", content)
+        self.assertNotIn("def prompt_nonempty", content)
+
     def test_evals_run_exposes_timeout_seconds(self) -> None:
         result = subprocess.run(
             [sys.executable, str(ASK_ENTRYPOINT), "evals", "run", "--help"],
@@ -36,6 +107,30 @@ class TestAskCliShape(unittest.TestCase):
         )
 
         self.assertIn("--timeout-seconds", result.stdout)
+
+    def test_evals_run_passes_timeout_seconds_to_runner(self) -> None:
+        eval_parser_content = CLI_EVAL_PARSER.read_text(encoding="utf-8")
+
+        self.assertIn('"--timeout-seconds"', eval_parser_content)
+        eval_dispatch = (
+            REPO_ROOT
+            / "Infrastructure"
+            / "scripts"
+            / "lib"
+            / "ask"
+            / "cli_dispatch_evals.py"
+        )
+        self.assertIn(
+            "timeout_seconds=args.timeout_seconds",
+            eval_dispatch.read_text(encoding="utf-8"),
+        )
+
+    def test_sync_wrapper_delegates_without_command_surface_fossils(self) -> None:
+        content = SYNC_WRAPPER.read_text(encoding="utf-8")
+
+        self.assertIn('exec bash "$SCRIPT_DIR/sync_skills_impl.sh" "$@"', content)
+        self.assertNotIn("Keep legacy lifecycle command-surface text", content)
+        self.assertNotIn("selection_policy.py", content)
 
     def test_function_shape_metrics_include_length_and_complexity(self) -> None:
         validator = _load_validator()
@@ -50,7 +145,17 @@ def sample(value):
 
         self.assertEqual(metrics["sample"], (4, 2))
 
-    def test_function_metrics_preserve_qualified_identity_for_moved_methods(self) -> None:
+    def test_module_scan_includes_literal_dynamic_imports(self) -> None:
+        validator = _load_validator()
+        tree = validator.ast.parse(
+            'import importlib\nimportlib.import_module("ask.cli_parser")\n'
+        )
+
+        self.assertIn("ask.cli_parser", validator._imported_modules(tree))
+
+    def test_function_metrics_preserve_qualified_identity_for_moved_methods(
+        self,
+    ) -> None:
         validator = _load_validator()
         metrics = validator._function_metrics(
             """
@@ -74,7 +179,10 @@ class Runner:
                 "_load_or_build_qa_dispatch_record": (40, 12),
             },
             "Infrastructure/scripts/testing/test_validation_execution_environment.py": {
-                "test_prek_reinstalls_when_expected_hooks_path_is_already_configured": (40, 12),
+                "test_prek_reinstalls_when_expected_hooks_path_is_already_configured": (
+                    40,
+                    12,
+                ),
             },
         }
 
@@ -85,17 +193,25 @@ class Runner:
             for name, (max_lines, max_complexity) in functions.items():
                 line_count, complexity = metrics[name]
                 self.assertLessEqual(line_count, max_lines, f"{relative_path}:{name}")
-                self.assertLessEqual(complexity, max_complexity, f"{relative_path}:{name}")
+                self.assertLessEqual(
+                    complexity, max_complexity, f"{relative_path}:{name}"
+                )
 
-    def test_file_size_ratchet_allows_existing_oversized_file_only_when_it_shrinks(self) -> None:
+    def test_file_size_ratchet_allows_existing_oversized_file_only_when_it_shrinks(
+        self,
+    ) -> None:
         validator = _load_validator()
         args = SimpleNamespace(max_file_lines=3)
         issues: list[str] = []
 
-        validator._check_file_size(VALIDATOR_PATH, "1\n2\n3\n4\n", "1\n2\n3\n4\n5\n", args, issues)
+        validator._check_file_size(
+            VALIDATOR_PATH, "1\n2\n3\n4\n", "1\n2\n3\n4\n5\n", args, issues
+        )
         self.assertEqual(issues, [])
 
-        validator._check_file_size(VALIDATOR_PATH, "1\n2\n3\n4\n5\n6\n", "1\n2\n3\n4\n5\n", args, issues)
+        validator._check_file_size(
+            VALIDATOR_PATH, "1\n2\n3\n4\n5\n6\n", "1\n2\n3\n4\n5\n", args, issues
+        )
         self.assertEqual(len(issues), 1)
 
     def test_unchanged_oversized_function_is_allowed_by_ratchet(self) -> None:
@@ -142,18 +258,24 @@ class Runner:
         current = "def fresh(value):\n    if value:\n        return 1\n    return 0\n"
         issues: list[str] = []
 
-        with unittest.mock.patch.object(validator, "_moved_function_metrics", return_value={}):
+        with unittest.mock.patch.object(
+            validator, "_moved_function_metrics", return_value={}
+        ):
             validator._check_function_shape(VALIDATOR_PATH, current, None, args, issues)
 
         self.assertEqual(len(issues), 2)
         self.assertIn("function line budget", issues[0])
         self.assertIn("complexity budget", issues[1])
 
-    def test_shape_baseline_failure_is_reported_and_stops_changed_file_scan(self) -> None:
+    def test_shape_baseline_failure_is_reported_and_stops_changed_file_scan(
+        self,
+    ) -> None:
         validator = _load_validator()
         args = SimpleNamespace(
             baseline_ref="HEAD",
-            changed_files=("Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",),
+            changed_files=(
+                "Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",
+            ),
             staged_source=False,
         )
         with unittest.mock.patch.object(
@@ -168,33 +290,37 @@ class Runner:
 
     def test_shape_baseline_uses_git_without_executing_worktree_cli(self) -> None:
         validator = _load_validator()
-        completed = subprocess.CompletedProcess
-
-        def git_result(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-            self.assertEqual(command[0], "git")
-            self.assertEqual(kwargs["cwd"], REPO_ROOT)
-            if command[1] == "diff":
-                return completed(command, 0, "deleted.py\nnotes.txt\n", "")
-            if command[1] == "ls-tree":
-                return completed(command, 0, "Infrastructure/tests/sibling.py\n", "")
-            return completed(command, 0, "def baseline():\n    pass\n", "")
-
-        with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result) as run:
-            baseline = validator._shape_baseline(REPO_ROOT / "Infrastructure/tests/current.py", "BASE")
+        with unittest.mock.patch.object(
+            validator.subprocess, "run", side_effect=_git_baseline_result
+        ) as run:
+            baseline = validator._shape_baseline(
+                REPO_ROOT / "Infrastructure/tests/current.py", "BASE"
+            )
 
         self.assertEqual(baseline["deleted_python_paths"], ["deleted.py"])
-        self.assertEqual(baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"])
-        self.assertEqual(set(baseline["head_text"]), {"deleted.py", "Infrastructure/tests/sibling.py"})
+        self.assertEqual(
+            baseline["sibling_python_paths"], ["Infrastructure/tests/sibling.py"]
+        )
+        self.assertEqual(
+            set(baseline["head_text"]),
+            {"deleted.py", "Infrastructure/tests/sibling.py"},
+        )
         self.assertEqual(run.call_count, 4)
+        commands = [call.args[0] for call in run.call_args_list]
         self.assertIn(
-            unittest.mock.call(
-                ["git", "ls-tree", "-r", "--name-only", "BASE", "--", "Infrastructure/tests"],
-                cwd=REPO_ROOT,
-                text=True,
-                capture_output=True,
-                check=False,
-            ),
-            run.call_args_list,
+            [
+                "git",
+                "ls-tree",
+                "-r",
+                "--name-only",
+                "BASE",
+                "--",
+                "Infrastructure/tests",
+            ],
+            commands,
+        )
+        self.assertTrue(
+            all(call.kwargs["cwd"] == REPO_ROOT for call in run.call_args_list)
         )
         self.assertNotIn("ls-files", [call.args[0][1] for call in run.call_args_list])
 
@@ -216,7 +342,9 @@ class Runner:
         self.assertEqual(metrics, {"moved": (2, 1)})
         load_baseline.assert_not_called()
 
-    def test_moved_function_metrics_disambiguates_duplicate_names_by_syntax(self) -> None:
+    def test_moved_function_metrics_disambiguates_duplicate_names_by_syntax(
+        self,
+    ) -> None:
         validator = _load_validator()
         current_path = REPO_ROOT / "Infrastructure/tests/current.py"
         current = "def main(value):\n    if value:\n        return 1\n    return 0\n"
@@ -236,7 +364,9 @@ class Runner:
 
         self.assertEqual(metrics, {"main": (4, 2)})
 
-    def test_moved_function_metrics_rejects_ambiguous_names_without_exact_match(self) -> None:
+    def test_moved_function_metrics_rejects_ambiguous_names_without_exact_match(
+        self,
+    ) -> None:
         validator = _load_validator()
         current_path = REPO_ROOT / "Infrastructure/tests/current.py"
         current = "def main(value):\n    if value:\n        return 1\n    return 0\n"
@@ -270,9 +400,13 @@ class Runner:
         }
 
         with (
-            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as load_baseline,
+            unittest.mock.patch.object(
+                validator, "_shape_baseline", return_value=shape_baseline
+            ) as load_baseline,
             unittest.mock.patch.object(validator, "_check_file_size"),
-            unittest.mock.patch.object(validator, "_check_function_shape") as check_function_shape,
+            unittest.mock.patch.object(
+                validator, "_check_function_shape"
+            ) as check_function_shape,
         ):
             issues = validator._check_python_shape(args)
 
@@ -284,7 +418,9 @@ class Runner:
         )
         check_function_shape.assert_called_once_with(
             REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py",
-            (REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py").read_text(encoding="utf-8"),
+            (REPO_ROOT / "Infrastructure/tests/test_ask_cli_shape.py").read_text(
+                encoding="utf-8"
+            ),
             None,
             args,
             issues,
@@ -299,12 +435,26 @@ class Runner:
             changed_files=(path.relative_to(REPO_ROOT).as_posix(),),
             staged_source=True,
         )
-        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+        shape_baseline = {
+            "deleted_python_paths": [],
+            "sibling_python_paths": [],
+            "head_text": {},
+        }
 
         with (
-            unittest.mock.patch.object(validator, "_staged_paths", return_value=frozenset({args.changed_files[0]})),
-            unittest.mock.patch.object(validator, "_current_source", return_value="def staged():\n    return 1\n") as source,
-            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(
+                validator,
+                "_staged_paths",
+                return_value=frozenset({args.changed_files[0]}),
+            ),
+            unittest.mock.patch.object(
+                validator,
+                "_current_source",
+                return_value="def staged():\n    return 1\n",
+            ) as source,
+            unittest.mock.patch.object(
+                validator, "_shape_baseline", return_value=shape_baseline
+            ) as baseline,
             unittest.mock.patch.object(validator, "_check_file_size"),
             unittest.mock.patch.object(validator, "_check_function_shape"),
         ):
@@ -413,7 +563,9 @@ class Runner:
             check=True,
         )
         staged_path = root / "staged_only.py"
-        staged_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        staged_path.write_text(
+            "def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8"
+        )
         subprocess.run(("git", "add", "staged_only.py"), cwd=root, check=True)
         staged_path.unlink()
 
@@ -445,7 +597,9 @@ class Runner:
         (root / "target.txt").write_text("baseline\n", encoding="utf-8")
         type_changed_path = root / "type_changed.py"
         type_changed_path.symlink_to("target.txt")
-        subprocess.run(("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True)
+        subprocess.run(
+            ("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True
+        )
         subprocess.run(
             (
                 "git",
@@ -461,7 +615,9 @@ class Runner:
             check=True,
         )
         type_changed_path.unlink()
-        type_changed_path.write_text("def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8")
+        type_changed_path.write_text(
+            "def oversized():\n" + "    value = 1\n" * 40, encoding="utf-8"
+        )
         subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
 
     @staticmethod
@@ -470,7 +626,9 @@ class Runner:
         type_changed_path = root / "type_changed.py"
         type_changed_path.write_text("VALUE = 1\n", encoding="utf-8")
         (root / "target.txt").write_text("not Python source\n", encoding="utf-8")
-        subprocess.run(("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True)
+        subprocess.run(
+            ("git", "add", "target.txt", "type_changed.py"), cwd=root, check=True
+        )
         subprocess.run(
             (
                 "git",
@@ -489,17 +647,23 @@ class Runner:
         type_changed_path.symlink_to("target.txt")
         subprocess.run(("git", "add", "type_changed.py"), cwd=root, check=True)
 
-    def test_default_baseline_uses_merge_base_for_committed_branch_changes(self) -> None:
+    def test_default_baseline_uses_merge_base_for_committed_branch_changes(
+        self,
+    ) -> None:
         validator = _load_validator()
         completed = subprocess.CompletedProcess
 
-        def git_result(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        def git_result(
+            command: list[str], **kwargs: object
+        ) -> subprocess.CompletedProcess[str]:
             self.assertEqual(command[:3], ["git", "merge-base", "HEAD"])
             if command[3] == "origin/main":
                 return completed(command, 0, "base-sha\n", "")
             return completed(command, 1, "", "missing")
 
-        with unittest.mock.patch.object(validator.subprocess, "run", side_effect=git_result):
+        with unittest.mock.patch.object(
+            validator.subprocess, "run", side_effect=git_result
+        ):
             baseline = validator._default_baseline_ref()
 
         self.assertEqual(baseline, "base-sha")
@@ -512,13 +676,21 @@ class Runner:
         )
         args = SimpleNamespace(
             baseline_ref="BASE",
-            changed_files=tuple(path.relative_to(REPO_ROOT).as_posix() for path in paths),
+            changed_files=tuple(
+                path.relative_to(REPO_ROOT).as_posix() for path in paths
+            ),
             staged_source=False,
         )
-        shape_baseline = {"deleted_python_paths": [], "sibling_python_paths": [], "head_text": {}}
+        shape_baseline = {
+            "deleted_python_paths": [],
+            "sibling_python_paths": [],
+            "head_text": {},
+        }
 
         with (
-            unittest.mock.patch.object(validator, "_shape_baseline", return_value=shape_baseline) as baseline,
+            unittest.mock.patch.object(
+                validator, "_shape_baseline", return_value=shape_baseline
+            ) as baseline,
             unittest.mock.patch.object(validator, "_check_file_size"),
             unittest.mock.patch.object(validator, "_check_function_shape"),
         ):
@@ -526,6 +698,7 @@ class Runner:
 
         self.assertEqual(issues, [])
         baseline.assert_called_once_with(paths[0], "BASE", staged_source=False)
+
 
 if __name__ == "__main__":
     unittest.main()
