@@ -12,38 +12,72 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-def parse_args() -> argparse.Namespace:
-    """
-    Create and parse command-line arguments for verifying the ask CLI modularity.
-    
-    Adds a `--max-lines` option to control the maximum allowed line count for Infrastructure/bin/ask (default 1900).
-    
-    Returns:
-        argparse.Namespace: Parsed arguments with attribute `max_lines` (int) specifying the maximum allowed line count for Infrastructure/bin/ask.
-    """
-    parser = argparse.ArgumentParser(description="Validate ask CLI modularity constraints.")
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Build the modularity validator command parser."""
+    parser = argparse.ArgumentParser(
+        description="Validate ask CLI modularity constraints."
+    )
     parser.add_argument(
         "--max-lines",
         type=int,
-        default=1900,
+        default=800,
         help="Maximum allowed line count for Infrastructure/bin/ask.",
     )
-    parser.add_argument("--changed-files", nargs="*", default=(), help="Repo-relative changed files to shape-check.")
-    parser.add_argument("--baseline-ref", help="Git revision used as the pre-change shape baseline.")
-    parser.add_argument("--staged-source", action="store_true", help="Read changed Python source from the Git index.")
-    parser.add_argument("--max-file-lines", type=int, default=800, help="Maximum lines for new Python files.")
-    parser.add_argument("--max-function-lines", type=int, default=40, help="Maximum lines for new or worsened functions.")
-    parser.add_argument("--max-complexity", type=int, default=12, help="Maximum cyclomatic complexity for new or worsened functions.")
+    parser.add_argument(
+        "--changed-files",
+        nargs="*",
+        default=(),
+        help="Repo-relative changed files to shape-check.",
+    )
+    parser.add_argument(
+        "--baseline-ref", help="Git revision used as the pre-change shape baseline."
+    )
+    parser.add_argument(
+        "--staged-source",
+        action="store_true",
+        help="Read changed Python source from the Git index.",
+    )
+    _add_shape_limit_arguments(parser)
+    return parser
+
+
+def _add_shape_limit_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add the canonical file, function, and complexity limits."""
+    parser.add_argument(
+        "--max-file-lines",
+        type=int,
+        default=800,
+        help="Maximum lines for new Python files.",
+    )
+    parser.add_argument(
+        "--max-function-lines",
+        type=int,
+        default=40,
+        help="Maximum lines for new or worsened functions.",
+    )
+    parser.add_argument(
+        "--max-complexity",
+        type=int,
+        default=12,
+        help="Maximum cyclomatic complexity for new or worsened functions.",
+    )
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse modularity validator arguments under the canonical limits."""
+    parser = _build_parser()
     return parser.parse_args()
 
 
 def _imported_modules(tree: ast.AST) -> set[str]:
     """
     Collect the module names referenced by import statements in the given AST.
-    
+
     Parameters:
         tree (ast.AST): The parsed AST to analyse.
-    
+
     Returns:
         modules (set[str]): A set of module name strings found in `import` and `from ... import` statements. For `from . import ...` (or other relative imports without a module name) the empty string `""` is included.
     """
@@ -54,23 +88,42 @@ def _imported_modules(tree: ast.AST) -> set[str]:
                 modules.add(alias.name)
         elif isinstance(node, ast.ImportFrom):
             modules.add(node.module or "")
+        elif _is_import_module_call(node):
+            modules.add(node.args[0].value)
     return modules
 
 
-def _command_imports_ok(modules: set[str]) -> bool:
+def _is_import_module_call(node: ast.AST) -> bool:
+    """Return whether a node dynamically imports one literal module name."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "importlib"
+        and node.func.attr == "import_module"
+        and len(node.args) == 1
+        and isinstance(node.args[0], ast.Constant)
+        and isinstance(node.args[0].value, str)
+    )
+
+
+def _entrypoint_imports_ok(modules: set[str]) -> bool:
     """
     Check that the required ask command modules are present in the provided set of imported module names.
-    
+
     Parameters:
         modules (set[str]): Module name strings extracted from the AST of a Python file.
-    
+
     Returns:
         bool: `True` if `ask.commands.skills`, `ask.commands.repo` and `ask.commands.plugins` are all present in `modules`, `False` otherwise.
     """
     required = {
-        "ask.commands.skills",
-        "ask.commands.repo",
-        "ask.commands.plugins",
+        "ask.cli_dispatch_entrypoint",
+        "ask.cli_errors",
+        "ask.cli_exit",
+        "ask.cli_parser",
+        "ask.cli_renderer",
+        "ask.cli_request",
     }
     return all(module in modules for module in required)
 
@@ -78,10 +131,10 @@ def _command_imports_ok(modules: set[str]) -> bool:
 def _forbidden_imports(modules: set[str]) -> list[str]:
     """
     Identify imported module names that match forbidden prefixes (`subprocess`, `requests`).
-    
+
     Parameters:
         modules (set[str]): Set of imported module names extracted from an AST.
-    
+
     Returns:
         list[str]: Sorted list of module names from `modules` that are equal to a forbidden prefix or start with a forbidden prefix followed by a dot.
     """
@@ -101,7 +154,9 @@ def _repo_path(path_text: str) -> Path:
 
 def _git_output(args: list[str]) -> str:
     command = ["git", *args]
-    result = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
+    result = subprocess.run(
+        command, cwd=REPO_ROOT, text=True, capture_output=True, check=False
+    )
     if result.returncode != 0:
         detail = (result.stderr or result.stdout).strip()
         raise RuntimeError(f"git shape-baseline command failed ({detail})")
@@ -113,7 +168,9 @@ def _git_lines(args: list[str]) -> list[str]:
 
 
 def _staged_paths() -> frozenset[str]:
-    candidates = _git_lines(["diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"])
+    candidates = _git_lines(
+        ["diff", "--cached", "--name-only", "--diff-filter=ACMRT", "--"]
+    )
     return frozenset(path for path in candidates if path in _regular_index_paths())
 
 
@@ -153,23 +210,27 @@ def _shape_baseline(
     if staged_source:
         diff_args.append("--cached")
     diff_args.extend(("--name-only", "--diff-filter=D", baseline_ref, "--"))
-    deleted = [
-        item
-        for item in _git_lines(diff_args)
-        if item.endswith(PYTHON_SUFFIX)
-    ]
+    deleted = [item for item in _git_lines(diff_args) if item.endswith(PYTHON_SUFFIX)]
     siblings: list[str] = []
     if path is not None:
         relative = path.relative_to(REPO_ROOT).as_posix()
         parent = Path(relative).parent.as_posix()
         siblings = [
             item
-            for item in _git_lines(["ls-tree", "-r", "--name-only", baseline_ref, "--", parent])
+            for item in _git_lines(
+                ["ls-tree", "-r", "--name-only", baseline_ref, "--", parent]
+            )
             if item.endswith(PYTHON_SUFFIX)
         ]
     baseline_paths = dict.fromkeys([*deleted, *siblings])
-    head_text = {item: _git_output(["show", f"{baseline_ref}:{item}"]) for item in baseline_paths}
-    return {"deleted_python_paths": deleted, "sibling_python_paths": siblings, "head_text": head_text}
+    head_text = {
+        item: _git_output(["show", f"{baseline_ref}:{item}"]) for item in baseline_paths
+    }
+    return {
+        "deleted_python_paths": deleted,
+        "sibling_python_paths": siblings,
+        "head_text": head_text,
+    }
 
 
 def _baseline_head_text(path: Path, baseline: dict[str, object]) -> str | None:
@@ -225,9 +286,13 @@ def _moved_function_metrics(
         text = _baseline_head_text(deleted_path, baseline)
         if text is None:
             continue
-        for name, record in _function_fingerprint_metrics(text, source="baseline").items():
+        for name, record in _function_fingerprint_metrics(
+            text, source="baseline"
+        ).items():
             candidates.setdefault(name, []).append(record)
-    moved = {name: values[0][0] for name, values in candidates.items() if len(values) == 1}
+    moved = {
+        name: values[0][0] for name, values in candidates.items() if len(values) == 1
+    }
     if current is None:
         return moved
     for name, (_, fingerprint) in _function_fingerprint_metrics(current).items():
@@ -243,7 +308,16 @@ def _moved_function_metrics(
 
 def _complexity(node: ast.AST) -> int:
     score = 1
-    decision_nodes = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.ExceptHandler, ast.IfExp, ast.Assert, ast.comprehension)
+    decision_nodes = (
+        ast.If,
+        ast.For,
+        ast.AsyncFor,
+        ast.While,
+        ast.ExceptHandler,
+        ast.IfExp,
+        ast.Assert,
+        ast.comprehension,
+    )
     match_node = getattr(ast, "Match", None)
     for child in ast.walk(node):
         if isinstance(child, decision_nodes):
@@ -337,7 +411,9 @@ def _function_fingerprint_metrics(
     return records
 
 
-def _changed_python_paths(paths: tuple[str, ...], *, staged_source: bool = False) -> list[Path]:
+def _changed_python_paths(
+    paths: tuple[str, ...], *, staged_source: bool = False
+) -> list[Path]:
     staged_paths = _staged_paths() if staged_source else frozenset()
     python_paths: list[Path] = []
     for path_text in paths:
@@ -360,14 +436,22 @@ def _current_source(path: Path, *, staged_source: bool = False) -> str:
     return _git_output(["show", f":{relpath}"])
 
 
-def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
+def _check_file_size(
+    path: Path,
+    current: str,
+    baseline: str | None,
+    args: argparse.Namespace,
+    issues: list[str],
+) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
     line_count = len(current.splitlines())
     baseline_line_count = len(baseline.splitlines()) if baseline is not None else 0
     if line_count <= args.max_file_lines:
         return
     if line_count > baseline_line_count:
-        issues.append(f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})")
+        issues.append(
+            f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})"
+        )
 
 
 def _check_function_shape(
@@ -388,30 +472,42 @@ def _check_function_shape(
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))
         if line_count > args.max_function_lines and line_count > old_lines:
-            issues.append(f"{relpath}:{name} exceeds function line budget ({line_count} > {args.max_function_lines})")
+            issues.append(
+                f"{relpath}:{name} exceeds function line budget ({line_count} > {args.max_function_lines})"
+            )
         if complexity > args.max_complexity and complexity > old_complexity:
-            issues.append(f"{relpath}:{name} exceeds complexity budget ({complexity} > {args.max_complexity})")
+            issues.append(
+                f"{relpath}:{name} exceeds complexity budget ({complexity} > {args.max_complexity})"
+            )
 
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
     staged_source = bool(getattr(args, "staged_source", False))
-    baseline_ref = getattr(args, "baseline_ref", None) or _default_baseline_ref(staged_source=staged_source)
+    baseline_ref = getattr(args, "baseline_ref", None) or _default_baseline_ref(
+        staged_source=staged_source
+    )
     if not baseline_ref:
         return ["shape baseline unavailable: baseline revision could not be determined"]
     baseline_by_parent: dict[Path, dict[str, object]] = {}
-    for path in _changed_python_paths(tuple(args.changed_files), staged_source=staged_source):
+    for path in _changed_python_paths(
+        tuple(args.changed_files), staged_source=staged_source
+    ):
         try:
             current = _current_source(path, staged_source=staged_source)
             shape_baseline = baseline_by_parent.get(path.parent)
             if shape_baseline is None:
-                shape_baseline = _shape_baseline(path, baseline_ref, staged_source=staged_source)
+                shape_baseline = _shape_baseline(
+                    path, baseline_ref, staged_source=staged_source
+                )
                 baseline_by_parent[path.parent] = shape_baseline
             baseline = _baseline_head_text(path, shape_baseline)
             _check_file_size(path, current, baseline, args, issues)
             _check_function_shape(path, current, baseline, args, issues, shape_baseline)
         except RuntimeError as exc:
-            issues.append(f"{path.relative_to(REPO_ROOT).as_posix()} shape baseline unavailable: {exc}")
+            issues.append(
+                f"{path.relative_to(REPO_ROOT).as_posix()} shape baseline unavailable: {exc}"
+            )
             break
     return issues
 
@@ -425,32 +521,42 @@ def _check_ask_entrypoint(args: argparse.Namespace) -> list[str] | None:
     try:
         tree = ast.parse(text, filename=str(ASK_PATH))
     except SyntaxError as exc:
-        print(f"ask_cli_modularity: parse_failed file={ASK_PATH} line={exc.lineno} msg={exc.msg}")
+        print(
+            f"ask_cli_modularity: parse_failed file={ASK_PATH} line={exc.lineno} msg={exc.msg}"
+        )
         return None
     issues = _check_ask_modules(tree, line_count, args)
     print(f"ask_cli_modularity: lines={line_count} max={args.max_lines}")
     return issues
 
 
-def _check_ask_modules(tree: ast.AST, line_count: int, args: argparse.Namespace) -> list[str]:
+def _check_ask_modules(
+    tree: ast.AST, line_count: int, args: argparse.Namespace
+) -> list[str]:
     modules = _imported_modules(tree)
     issues: list[str] = []
     if line_count > max(1, int(args.max_lines)):
-        issues.append(f"Infrastructure/bin/ask exceeds max line budget ({line_count} > {args.max_lines})")
-    if not _command_imports_ok(modules):
-        issues.append("Infrastructure/bin/ask must import ask.commands.skills, ask.commands.repo, and ask.commands.plugins")
+        issues.append(
+            f"Infrastructure/bin/ask exceeds max line budget ({line_count} > {args.max_lines})"
+        )
+    if not _entrypoint_imports_ok(modules):
+        issues.append(
+            "Infrastructure/bin/ask must import its parser, request, dispatch, output, and exit modules"
+        )
     forbidden = _forbidden_imports(modules)
     if forbidden:
-        issues.append(f"Infrastructure/bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}")
+        issues.append(
+            f"Infrastructure/bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}"
+        )
     return issues
 
 
 def main() -> int:
     """
     Verify modularity constraints of the Infrastructure/bin/ask entrypoint and report any violations.
-    
+
     Checks a configurable maximum line count, required command imports, and absence of forbidden direct-execution modules. Prints a summary line and any issues.
-    
+
     Returns:
         int: `0` if all checks pass, `1` if the entrypoint is missing, parsing fails, or any check fails.
     """
