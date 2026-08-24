@@ -297,7 +297,9 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
         result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", tessl_live_private=True, tessl_workspace="jscraik")
     assert result.status == "success" and result.data["local_eval_status"] == "skipped_tessl_live_private"
     assert result.data["eval_closeout"]["status"] == "pass"
-    assert result.data["eval_closeout_path"].startswith("Infrastructure/artifacts/evals/closeouts/")
+    assert result.data["eval_closeout_path"].startswith(
+        ".tmp/agent-skills-artifacts/evals/closeouts/"
+    )
     assert "separately before live scoring" in result.data["tessl_live_private_note"]
     _assert_tessl_stage(_assert_tessl_commands(run))
     _assert_tessl_evidence(tmp_path, result, completed_view)

@@ -708,7 +708,7 @@ def test_run_evals_blocks_success_without_report_directory(tmp_path: Path) -> No
     assert closeout["registry_update_allowed"] is False
     assert closeout["closeout_validation"]["status"] == "pass"
     assert result.data["eval_closeout_path"].startswith(
-        "Infrastructure/artifacts/evals/closeouts/"
+        ".tmp/agent-skills-artifacts/evals/closeouts/"
     )
 
 
