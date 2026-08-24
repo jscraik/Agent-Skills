@@ -2,7 +2,7 @@
 
 Use this reference whenever Harness Engineering work creates, migrates, or validates repo-local memory, artifact, goal, decision, review, or sync surfaces.
 
-## Required Greenfield Surfaces
+## Required Durable Surfaces
 
 A Codex-native harness baseline includes:
 
@@ -10,10 +10,13 @@ A Codex-native harness baseline includes:
 - `.harness/knowledge/**` and `.harness/decisions/**` for Project Brain facts, hypotheses, rules, and accepted decisions.
 - `.harness/review-log.md` for periodic review evidence.
 - `.harness/active-artifacts.md` for active execution-input routing.
-- `.harness/artifacts/README.md` for artifact policy.
-- `.harness/artifacts/sync-receipts.jsonl` for sync receipts.
-- `.harness/artifacts/brownfield-memory-inventory.md` when adopting an existing repository.
 - `Docs/goals/README.md` plus `Docs/goals/<goal-slug>/goal.md`, `state.yaml`, and `receipts.jsonl` for long-running goal boards.
+
+Do not scaffold or track `.harness/artifacts/**` as a default memory surface.
+Keep brownfield discovery notes in the invocation's disposable output until a
+confirmed decision is folded into `.harness/decisions/**`, `.harness/reframes/**`,
+or another governed durable root. Write sync receipts only to the selected
+generated-output root and leave them ignored and untracked.
 
 ## Sync Receipt Shape
 
@@ -46,7 +49,10 @@ Before replacing existing memory, artifact, goal, review, or decision material, 
 - `optional`
 - `blocked`
 
-Resolve canonical and blocked conflicts before replacement. For mirror, legacy, optional, and deferred surfaces, record the mapping or skip reason in the inventory and sync receipt.
+Resolve canonical and blocked conflicts before replacement. For mirror, legacy,
+optional, and deferred surfaces, record the mapping or skip reason in the
+disposable inventory and generated sync receipt. Fold only confirmed durable
+decisions into tracked policy or reference roots.
 
 ## Evidence Boundary
 
