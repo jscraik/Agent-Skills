@@ -1,7 +1,0 @@
-I can create the skill, but I’m blocked on one thing: I can’t read the workspace files from this session because the shell is currently refusing filesystem access.
-
-To move forward, please give me one of these:
-1. The workflow text you want turned into a skill, or
-2. The path to the source doc/file for the workflow, if it already exists.
-
-If you want, I can also draft the skill structure immediately from a pasted workflow and then you can drop it into the repo.
