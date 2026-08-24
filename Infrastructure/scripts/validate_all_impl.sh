@@ -276,7 +276,7 @@ check_matches_validation_scope() {
       ;;
     test)
       case "$slug" in
-        skill-lifecycle-tests|skill-authoring-family|skill-graph-profiles|gotcha-store)
+        retired-review-roots|skill-lifecycle-tests|skill-authoring-family|skill-graph-profiles|gotcha-store)
           return 0
           ;;
       esac
@@ -345,7 +345,7 @@ should_run_check() {
     ci-validation-toolchain|verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|selection-gate-severity)
       [[ "$scope_has_validation_core" -eq 1 ]]
       ;;
-    repo-surface-inventory)
+    repo-surface-inventory|retired-review-roots)
       return 0
       ;;
     ask-cli-modularity|program-design)
@@ -683,6 +683,7 @@ schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..
 schedule_check required ci-validation-toolchain "🧰 Verifying PR validation job toolchains..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_pr_pipeline_toolchain.py --json
 schedule_check required no-command-handles "🧭 Verifying command-handle guidance is retired..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_command_handles.py
 schedule_check required repo-surface-inventory "🧭 Enforcing repo surface ownership..." "${repo_surface_inventory_cmd[@]}"
+schedule_check required retired-review-roots "🧹 Verifying retired historical review roots..." "${python_cmd[@]}" -m pytest Infrastructure/scripts/testing/test_retired_historical_review_roots.py -q
 schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
