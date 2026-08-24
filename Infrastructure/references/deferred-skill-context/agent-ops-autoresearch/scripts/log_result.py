@@ -9,6 +9,8 @@ from pathlib import Path
 HEADER = (
     "iteration\ttarget\tdecision\tscore\tstatus\tchange_summary\tvalidation_evidence\n"
 )
+REPO_ROOT = Path(__file__).resolve().parents[5]
+AUTORESEARCH_ROOT = REPO_ROOT / ".tmp" / "agent-skills-artifacts" / "autoresearch"
 
 
 def _sanitize(value: str) -> str:
@@ -29,7 +31,7 @@ def main() -> int:
     Append a single normalized TSV row to an autoresearch run's results.tsv file.
     
     Parameters:
-        --run-dir (str): Path to the run directory created by init_run.sh; must be under the repository's Infrastructure/artifacts/autoresearch tree.
+        --run-dir (str): Path to the run directory created by init_run.sh; must be under the repository's .tmp/agent-skills-artifacts/autoresearch tree.
         --iteration (int): Iteration number to record.
         --target (str): Target identifier; will be sanitized to remove tabs and collapse line breaks.
         --decision (str): One of "keep", "discard", "blocked".
@@ -42,7 +44,7 @@ def main() -> int:
         int: Exit code 0 on success.
     
     Raises:
-        SystemExit: If run-dir is not under the expected Infrastructure/artifacts/autoresearch root, does not exist, is missing required files (results.tsv, journal.md, targets.txt), or if results.tsv does not begin with the expected header.
+        SystemExit: If run-dir is not under the expected .tmp/agent-skills-artifacts/autoresearch root, does not exist, is missing required files (results.tsv, journal.md, targets.txt), or if results.tsv does not begin with the expected header.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True, help="Run directory from init_run.sh")
@@ -63,8 +65,7 @@ def main() -> int:
     parser.add_argument("--validation-evidence", required=True)
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parents[4]
-    allowed_root = (repo_root / "artifacts" / "autoresearch").resolve()
+    allowed_root = AUTORESEARCH_ROOT.resolve()
     run_dir = Path(args.run_dir).resolve()
     if allowed_root not in run_dir.parents:
         raise SystemExit(

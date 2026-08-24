@@ -1,7 +1,0 @@
-iteration	target	decision	score	status	change_summary	validation_evidence
-0	utilities/codex-agent-creator	keep	3.50	pass	baseline before loop edits	quick_validate=pass;skills_audit_strict=pass;security_warns=2;benchmark_warns=2;openclaw_warns=0
-1	utilities/codex-agent-creator	keep	4.50	pass	raised deterministic coverage and added smoke mode for happy-path evals	quick_validate=pass;skills_audit_strict=pass;security_warns=2;benchmark_warns=0;openclaw_warns=0
-2	utilities/codex-agent-creator	keep	5.00	pass	replaced binary PNG skill icons with SVG assets to clear security-gate binary warnings	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0
-3	utilities/codex-agent-creator	keep	5.00	pass	refreshed upstream alignment snapshot to 2026-04-14 and updated skill references/last_reviewed	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0
-4	utilities/codex-agent-creator	keep	5.00	pass	tightened SKILL upstream-checkpoint language for dated evidence and modern config migration checks	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0
-5	utilities/codex-agent-creator	keep	5.00	pass	hardened CSV token trimming in write_role_config.sh by removing xargs-based parsing	bash_n_write_role_config=pass;quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0

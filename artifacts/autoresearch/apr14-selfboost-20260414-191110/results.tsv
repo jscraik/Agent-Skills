@@ -1,7 +1,0 @@
-iteration	target	decision	score	status	change_summary	validation_evidence
-0	utilities/autoresearch	keep	3.00	pass	baseline (no code changes)	quick_validate=pass;skills_audit_strict=pass
-1	utilities/autoresearch	keep	3.80	pass	prioritized command-contract drift and fixed canonical broad validation command	quick_validate=pass;skills_audit_strict=pass;verify_work=pass
-2	utilities/autoresearch	keep	4.10	pass	added workspace drift guard with pre/post git status attribution rules	quick_validate=pass;skills_audit_strict=pass;yaml_json_ok=pass
-3	utilities/autoresearch	discard	2.20	fail	strengthened plugin lane but used invalid `plugins doctor <plugin-path>` command contract	quick_validate=pass;skills_audit_strict=pass;plugins_doctor_with_path=fail
-4	utilities/autoresearch	keep	4.45	pass	normalized task-profile criterion weights and added loop-efficiency criterion	quick_validate=pass;skills_audit_strict=pass;yaml_json_ok_weights_1=pass
-5	utilities/autoresearch	keep	4.70	pass	made fixed-loop-count requests explicit, added five-loop eval coverage, and corrected plugin doctor command contract	quick_validate=pass;skills_audit_strict=pass;verify_work=pass;plugins_doctor_help=pass

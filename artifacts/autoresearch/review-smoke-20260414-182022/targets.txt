@@ -1,2 +1,0 @@
-utilities/autoresearch
-utilities/autoresearch/SKILL.md
