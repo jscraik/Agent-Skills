@@ -1,4 +1,4 @@
-row_count: 343
+row_count: 340
 rows:
   -
     consumer_path: ".agents/workflows/sync-skills.md"
@@ -312,20 +312,6 @@ rows:
     match_count: 2
     root: runtime
   -
-    consumer_path: "Infrastructure/artifacts/deconflict/profile-cache.json"
-    is_executable: false
-    line_numbers:
-      - 167340
-    match_count: 1
-    root: .agents
-  -
-    consumer_path: "Infrastructure/artifacts/deconflict/profile-cache.json"
-    is_executable: false
-    line_numbers:
-      - 19
-    match_count: 1
-    root: plugins
-  -
     consumer_path: Infrastructure/artifacts/diagrams/analyze.json
     is_executable: false
     line_numbers:
@@ -401,22 +387,6 @@ rows:
       - 3515
     match_count: 70
     root: "skills-codex"
-  -
-    consumer_path: "Infrastructure/artifacts/icon-prompts/chatgpt-skill-plugin-icon-prompts.md"
-    is_executable: false
-    line_numbers:
-      - 2133
-      - 2134
-      - 2150
-      - 2151
-      - 2167
-      - 2168
-      - 2184
-      - 2185
-      - 2201
-      - 2202
-    match_count: 15
-    root: plugins
   -
     consumer_path: ".harness/archive/2026-08-15-artifact-retirement/infrastructure-artifacts/icon-prompts/icon-asset-manifest.json"
     is_executable: false

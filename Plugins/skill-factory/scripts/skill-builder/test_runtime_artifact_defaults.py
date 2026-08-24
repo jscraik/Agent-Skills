@@ -64,6 +64,21 @@ class RuntimeArtifactDefaultTests(unittest.TestCase):
             ).exists()
         )
 
+    def test_retired_generation_caches_stay_out_of_source_control(self) -> None:
+        retired_roots = (
+            "Infrastructure/artifacts/deconflict",
+            "Infrastructure/artifacts/icon-prompts",
+        )
+        consumer_inventory = (
+            REPO_ROOT
+            / "Infrastructure/GOVERNANCE/runtime-separation/path-consumers.yaml"
+        ).read_text(encoding="utf-8")
+
+        for retired_root in retired_roots:
+            with self.subTest(retired_root=retired_root):
+                self.assertFalse((REPO_ROOT / retired_root).exists())
+                self.assertNotIn(retired_root, consumer_inventory)
+
 
 if __name__ == "__main__":
     unittest.main()
