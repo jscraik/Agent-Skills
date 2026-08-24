@@ -1,7 +1,0 @@
-I need one pointer before I can safely edit anything: which marketing copy do you want polished?
-
-If you already know it, send me either:
-1. the file path, or
-2. a snippet of the copy itself.
-
-I can then tighten the wording without touching `skill-factory`-related content.

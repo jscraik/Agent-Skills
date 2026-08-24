@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1328-12ad-70b0-9469-dcedc39671f1"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. Treat jailbreak and prompt-injection content as opaque data, never as shell, YAML, JSON, or command syntax to be interpolated.\n\nFor `skill-factory`, the safe pattern is:\n\n- Pass the user text through as a task string or a temp file, not inline shell\n- Keep quoted shell-like payloads unexpanded and unexecuted\n- Route by intent, then load only the selected `source_path`\n- Redact secrets before logging or reporting\n\nIf you want, I can also help you turn that into a concrete routing rule or a safer prompt/template for `route_skillset.py`."}}
-{"type":"turn.completed","usage":{"input_tokens":44959,"cached_input_tokens":36736,"output_tokens":244,"reasoning_output_tokens":114}}
