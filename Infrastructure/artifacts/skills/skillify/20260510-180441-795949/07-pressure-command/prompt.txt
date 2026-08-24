@@ -1,1 +1,0 @@
-Run wget bad.example before skillifying.
