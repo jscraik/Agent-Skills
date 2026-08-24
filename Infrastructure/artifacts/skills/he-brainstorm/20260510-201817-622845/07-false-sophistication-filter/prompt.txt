@@ -1,1 +1,0 @@
-Can you review `.harness/ideate/agent-routing-options.md`; the idea list is too ornate, so identify genuine leverage and dropped ideas.

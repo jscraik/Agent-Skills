@@ -1,1 +1,0 @@
-I couldn’t read `Docs/qa/account-settings.md` from this session because the repo shell is sandbox-blocked, so I need the one deciding detail from you: which milestone should win if the two brainstorm paths conflict, the earlier/lower-risk milestone or the later/broader one?

@@ -1,3 +1,0 @@
-$skill-builder
-
-Can you harden this existing skill and return structured validation evidence?

@@ -104,16 +104,16 @@ python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
 
 ```bash
 python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py \
-  --reports-root Infrastructure/artifacts/skills \
-  --out-json Infrastructure/artifacts/skills/dashboard.json \
-  --out-md Infrastructure/artifacts/skills/dashboard.md
+  --reports-root .tmp/agent-skills-artifacts/skills \
+  --out-json .tmp/agent-skills-artifacts/skills/dashboard.json \
+  --out-md .tmp/agent-skills-artifacts/skills/dashboard.md
 ```
 
 ### EB Outputs
 
 | ARTIFACT  | PATH                                                      |
 | --------- | --------------------------------------------------------- |
-| Reports   | `Infrastructure/artifacts/skills/**`                      |
+| Reports   | `.tmp/agent-skills-artifacts/skills/**`                    |
 | Benchmark | `Infrastructure/artifacts/industry-benchmark-latest.json` |
 
 ---
@@ -169,9 +169,9 @@ python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
 
 # Build dashboard manually
 python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py \
-  --reports-root Infrastructure/artifacts/skills \
-  --out-json Infrastructure/artifacts/skills/dashboard.json \
-  --out-md Infrastructure/artifacts/skills/dashboard.md
+  --reports-root .tmp/agent-skills-artifacts/skills \
+  --out-json .tmp/agent-skills-artifacts/skills/dashboard.json \
+  --out-md .tmp/agent-skills-artifacts/skills/dashboard.md
 ```
 
 ---

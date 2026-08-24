@@ -1,1 +1,0 @@
-Can you compare three survivor ideas for `he-brainstorm`: one copies another plugin pattern, one prevents a repeated HE failure, and one adds governance without proof.
