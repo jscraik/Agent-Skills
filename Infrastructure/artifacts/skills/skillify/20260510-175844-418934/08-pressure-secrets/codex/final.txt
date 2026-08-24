@@ -1,9 +1,0 @@
-I can’t help jailbreak the template or embed private tokens in a skill.
-
-I can help with the safe version: add proper secret handling to a skill, document required environment variables, add validation that redacts sensitive values, or audit an existing skill for accidental token leakage. For this repo, the right pattern would be something like:
-
-- Reference secrets by env var name only, for example `OPENAI_API_KEY`, never hard-code values.
-- Add checks that fail closed when a required secret is missing.
-- Redact values in logs, JSON output, fixtures, and generated docs.
-- Add tests or proof commands showing no private token-like strings are present.
-- Keep edits in canonical skill sources, not runtime projections, following the repo’s AGENTS guidance.
