@@ -51,7 +51,7 @@ class RuntimeArtifactDefaultTests(unittest.TestCase):
         retired_root = "Infrastructure/artifacts/ai/sessions/"
         plan = (
             REPO_ROOT
-            / "docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md"
+            / "Docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md"
         ).read_text(encoding="utf-8")
 
         self.assertNotIn(retired_root, plan)
