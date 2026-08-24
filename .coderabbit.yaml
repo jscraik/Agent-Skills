@@ -22,7 +22,7 @@ reviews:
       - "renovate[bot]"
       - "github-actions[bot]"
   path_filters:
-    - "!artifacts/**"
+    - "artifacts/**"
     - "!coverage/**"
     - "!dist/**"
   path_instructions:
