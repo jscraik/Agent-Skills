@@ -508,6 +508,61 @@ def git_ls_files(repo_root: Path) -> list[str]:
     return [path for path in paths if (repo_root / path).exists()]
 
 
+def _git_object_size(repo_root: Path, object_name: str) -> int | None:
+    result = subprocess.run(
+        ["git", "cat-file", "-s", object_name],
+        cwd=repo_root,
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        return None
+    return int(result.stdout.strip())
+
+
+def _git_path_differs(repo_root: Path, *args: str) -> bool:
+    result = subprocess.run(
+        ["git", "diff", "--quiet", *args],
+        cwd=repo_root,
+        check=False,
+    )
+    return result.returncode == 1
+
+
+def future_artifact_debt_candidates(
+    repo_root: Path,
+    changed_files: list[str],
+) -> list[str]:
+    """Return changed paths that add to, rather than reduce, artifact debt."""
+    candidates: list[str] = []
+    for path in changed_files:
+        if not (repo_root / path).exists():
+            continue
+
+        if _git_path_differs(repo_root, "--cached", "--", path):
+            baseline = f"HEAD:{path}"
+            current = f":{path}"
+        elif _git_path_differs(repo_root, "--", path):
+            baseline = f"HEAD:{path}"
+            baseline_size = _git_object_size(repo_root, baseline)
+            current_size = (repo_root / path).stat().st_size
+            if baseline_size is None or current_size > baseline_size:
+                candidates.append(path)
+            continue
+        else:
+            baseline = f"HEAD^:{path}"
+            current = f"HEAD:{path}"
+
+        baseline_size = _git_object_size(repo_root, baseline)
+        current_size = _git_object_size(repo_root, current)
+        if current_size is not None and (
+            baseline_size is None or current_size > baseline_size
+        ):
+            candidates.append(path)
+    return candidates
+
+
 def build_report(
     findings: list[SurfaceFinding],
     *,
@@ -612,11 +667,12 @@ def print_human_report(report: dict[str, Any]) -> None:
 def _build_report_for_args(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(args.repo_root or REPO_ROOT).resolve()
     changed_files = _load_changed_files(args, repo_root)
+    debt_candidates = future_artifact_debt_candidates(repo_root, changed_files)
     paths = sorted(
         set(git_ls_files(repo_root))
         | {path for path in changed_files if (repo_root / path).exists()}
     )
-    findings = classify_paths(paths, changed_files=changed_files)
+    findings = classify_paths(paths, changed_files=debt_candidates)
     return build_report(findings, strict=args.strict, changed_files=changed_files)
 
 def _load_changed_files(args: argparse.Namespace, repo_root: Path) -> list[str]:

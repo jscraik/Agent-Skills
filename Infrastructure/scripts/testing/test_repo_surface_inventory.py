@@ -517,6 +517,40 @@ def test_changed_historical_artifact_debt_blocks_future_artifacts() -> None:
     assert report["metadata"]["changed_files_policy"] == "future_artifact_debt_blocking"
 
 
+def test_future_artifact_guard_allows_reduction_but_blocks_growth(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=tmp_path,
+        check=True,
+    )
+    artifact = tmp_path / "artifacts" / "run" / "events.jsonl"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_text("historical payload\n", encoding="utf-8")
+    subprocess.run(["git", "add", str(artifact)], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "-c", "commit.gpgsign=false", "commit", "-qm", "fixture"],
+        cwd=tmp_path,
+        check=True,
+    )
+
+    relative_path = "artifacts/run/events.jsonl"
+    artifact.write_text("smaller\n", encoding="utf-8")
+    subprocess.run(["git", "add", str(artifact)], cwd=tmp_path, check=True)
+    assert MODULE.future_artifact_debt_candidates(tmp_path, [relative_path]) == []
+
+    artifact.write_text("historical payload with additional output\n", encoding="utf-8")
+    subprocess.run(["git", "add", str(artifact)], cwd=tmp_path, check=True)
+    assert MODULE.future_artifact_debt_candidates(tmp_path, [relative_path]) == [
+        relative_path
+    ]
+
+
 def test_changed_generated_harness_evidence_blocks_future_artifacts() -> None:
     for path in (
         ".harness/evidence/runtime-proof/events.jsonl",
