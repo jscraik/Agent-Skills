@@ -1,3 +1,0 @@
-$skill-factory
-
-Can you route this request to the right specialist and give me the source path?

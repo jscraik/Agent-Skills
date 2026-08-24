@@ -1,6 +1,0 @@
-`skill-factory` is the right specialist for this request.
-
-Source path:
-`/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md`
-
-If you want, I can also help interpret the routing result and tell you which latent module it should hand off to next.

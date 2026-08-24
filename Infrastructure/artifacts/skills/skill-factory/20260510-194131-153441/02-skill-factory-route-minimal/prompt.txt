@@ -1,3 +1,0 @@
-$skill-factory
-
-Please inspect this ambiguous task and choose the safest next step.
