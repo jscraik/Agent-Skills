@@ -15,8 +15,9 @@ A Codex-native harness baseline includes:
 Do not scaffold or track `.harness/artifacts/**` as a default memory surface.
 Keep brownfield discovery notes in the invocation's disposable output until a
 confirmed decision is folded into `.harness/decisions/**`, `.harness/reframes/**`,
-or another governed durable root. Write sync receipts only to the selected
-generated-output root and leave them ignored and untracked.
+or another governed durable root. Write generated sync receipts only to
+`.tmp/agent-skills-artifacts/harness-sync/sync-receipts.jsonl`. This disposable
+path is ignored by Git and must remain untracked.
 
 ## Sync Receipt Shape
 

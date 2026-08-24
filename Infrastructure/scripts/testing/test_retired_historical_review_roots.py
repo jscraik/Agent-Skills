@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 import unittest
 
 
@@ -95,6 +96,12 @@ PRODUCER_ROOTS = (
     REPO_ROOT / "scripts",
 )
 VALIDATE_ALL = REPO_ROOT / "Infrastructure/scripts/validate_all_impl.sh"
+MEMORY_BASELINES = (
+    REPO_ROOT / "Plugins/harness-engineering/references/codex-native-memory-baseline.md",
+    REPO_ROOT
+    / "Plugins/synaipse-harness/references/upstream/harness-engineering/codex-native-memory-baseline.md",
+)
+SYNC_RECEIPT_PATH = ".tmp/agent-skills-artifacts/harness-sync/sync-receipts.jsonl"
 
 
 def _is_scannable_producer(path: Path) -> bool:
@@ -128,6 +135,18 @@ class RetiredHistoricalReviewRootTests(unittest.TestCase):
         for retired_root in RETIRED_ROOTS:
             with self.subTest(retired_root=retired_root):
                 self.assertEqual(_producer_references(retired_root), [])
+
+    def test_sync_receipts_use_one_ignored_generated_output(self) -> None:
+        for baseline in MEMORY_BASELINES:
+            with self.subTest(baseline=baseline.relative_to(REPO_ROOT)):
+                self.assertIn(SYNC_RECEIPT_PATH, baseline.read_text(encoding="utf-8"))
+
+        result = subprocess.run(
+            ["git", "check-ignore", "--quiet", "--no-index", SYNC_RECEIPT_PATH],
+            cwd=REPO_ROOT,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0)
 
     def test_repo_test_scope_schedules_this_contract(self) -> None:
         validation_source = VALIDATE_ALL.read_text(encoding="utf-8")
