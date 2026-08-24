@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prevent skill-quality tooling from regenerating tracked reports."""
+"""Prevent skill-quality tooling and plans from regenerating tracked reports."""
 
 from __future__ import annotations
 
@@ -46,6 +46,23 @@ class RuntimeArtifactDefaultTests(unittest.TestCase):
             with self.subTest(guide=guide.name):
                 for retired_path in retired_paths:
                     self.assertNotIn(retired_path, source)
+
+    def test_authoring_plan_keeps_ai_session_evidence_untracked(self) -> None:
+        retired_root = "Infrastructure/artifacts/ai/sessions/"
+        plan = (
+            REPO_ROOT
+            / "docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertNotIn(retired_root, plan)
+        self.assertIn(".tmp/agent-skills-artifacts/ai/sessions/", plan)
+        self.assertFalse(
+            (
+                REPO_ROOT
+                / retired_root
+                / "2026-04-06-skill-authoring-family-certification.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":
