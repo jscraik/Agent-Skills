@@ -1,3 +1,0 @@
-$skill-factory
-
-Help me decide which module should handle this without loading extra skills.
