@@ -249,7 +249,7 @@ cases:
   why_realistic: A previously passing consumer receipt becomes stale when its referenced feed changes, even if its downstream command passed earlier.
   unit: improve-agent-native consumer receipt binding
   given: A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.
-  should: Reject the stale receipt and require the feed to be rebuilt or revalidated before using it as consumer proof.
+  should: Reject the stale receipt, validate the current feed digest, and require the feed to be rebuilt or revalidated before using it as consumer proof.
   actual_artifact: staged-artifacts/skills/improve-agent-native/latest/eval.knowledge-os.consumer-receipt-stale-digest/final.json
   expected_artifact: references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md
   reproduce: ./bin/ask evals run Skills/agent-ops/improve-agent-native --mode smoke --runner codex --case eval.knowledge-os.consumer-receipt-stale-digest --skip-tessl --no-dashboard --json --robot
