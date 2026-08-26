@@ -22,7 +22,9 @@ MIGRATION_EVAL_CASES = (
 MACHINE_PATH = re.compile(
     r"(?:(?<![A-Za-z0-9_/-])/(?!/)[^/\s]+(?:/[^/\s]*)*"
     r"|(?i:[A-Z]:[\\/][^\\/\s]+(?:[\\/][^\\/\s]*)*)"
-    r"|\\\\[^\\/\s]+[\\/][^\\/\s]+)"
+    r"|\\\\[^\\/\s]+[\\/][^\\/\s]+"
+    r"|(?i:file://(?:localhost)?/[^/\s]+(?:/[^/\s]*)*)"
+    r"|(?i:file://[^/\s]+/[^/\s]+(?:/[^/\s]*)*))"
 )
 
 
@@ -42,6 +44,9 @@ def test_machine_path_pattern_covers_common_absolute_forms() -> None:
         r"D:\dev\repo",
         r"C:\repo",
         r"\\build-host\workspace\fixture",
+        "file:///Users/jamie/project",
+        "file://localhost/tmp/fixture",
+        "file://build-host/workspace/fixture",
     )
 
     assert all(MACHINE_PATH.search(path) for path in machine_paths)
