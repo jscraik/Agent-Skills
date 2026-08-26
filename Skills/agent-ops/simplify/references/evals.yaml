@@ -92,7 +92,7 @@ cases:
   smoke_mode: discovery-round-one
   should_trigger: true
   prepend_skill: true
-  prompt: Use $simplify to inspect /Users/jamiecraik/dev/agent-skills before making changes; ask the smallest useful discovery question first.
+  prompt: Use $simplify to inspect the current repository before making changes; ask the smallest useful discovery question first.
   deterministic_checks:
     forbidden_commands:
     - curl
