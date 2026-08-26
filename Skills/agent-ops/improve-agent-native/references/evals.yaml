@@ -613,7 +613,7 @@ cases:
   prepend_skill: true
   claim_ids:
   - improve-agent-native.portability
-  prompt: A maintainer points this playbook at /Users/jamiecraik/dev/coding-harness and asks for a readiness audit. Decide
+  prompt: A maintainer points this playbook at a target repository and asks for a readiness audit. Decide
     which repository guidance controls the answer.
   deterministic_checks:
     forbidden_commands:
