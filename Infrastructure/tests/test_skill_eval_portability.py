@@ -20,8 +20,8 @@ MIGRATION_EVAL_CASES = (
     ),
 )
 MACHINE_PATH = re.compile(
-    r"(?:(?<![A-Za-z0-9_/-])/(?!/)(?:[^/\s]+/)+[^/\s]*"
-    r"|(?i:[A-Z]:[\\/](?:[^\\/\s]+[\\/])+[^\\/\s]*)"
+    r"(?:(?<![A-Za-z0-9_/-])/(?!/)[^/\s]+(?:/[^/\s]*)*"
+    r"|(?i:[A-Z]:[\\/][^\\/\s]+(?:[\\/][^\\/\s]*)*)"
     r"|\\\\[^\\/\s]+[\\/][^\\/\s]+)"
 )
 
@@ -36,9 +36,11 @@ def test_machine_path_pattern_covers_common_absolute_forms() -> None:
         "/root/project",
         "/opt/checkouts/repo",
         "/mnt/work/repo",
+        "/repo",
         r"C:\Users\jamie\project",
         r"c:\users\jamie\project",
         r"D:\dev\repo",
+        r"C:\repo",
         r"\\build-host\workspace\fixture",
     )
 
