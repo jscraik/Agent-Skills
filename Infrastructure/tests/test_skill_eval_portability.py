@@ -23,7 +23,7 @@ MACHINE_PATH = re.compile(
     r"(?:(?<![A-Za-z0-9_/-])/(?!/)[^/\s]+(?:/[^/\s]*)*"
     r"|(?i:[A-Z]:[\\/][^\\/\s]+(?:[\\/][^\\/\s]*)*)"
     r"|\\\\[^\\/\s]+[\\/][^\\/\s]+"
-    r"|(?<![A-Za-z0-9_:/-])//[^/\s]+/[^/\s]+(?:/[^/\s]*)*"
+    r"|(?<![A-Za-z0-9_:/-])/{2,}[^/\s]+(?:/[^/\s]*)*"
     r"|(?i:file://(?:localhost)?/[^/\s]+(?:/[^/\s]*)*)"
     r"|(?i:file://[^/\s]+/[^/\s]+(?:/[^/\s]*)*))"
 )
@@ -40,6 +40,8 @@ def test_machine_path_pattern_covers_common_absolute_forms() -> None:
         "/opt/checkouts/repo",
         "/mnt/work/repo",
         "/repo",
+        "//repo",
+        "///repo",
         r"C:\Users\jamie\project",
         r"c:\users\jamie\project",
         r"D:\dev\repo",
