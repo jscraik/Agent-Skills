@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from ask.skills_sdk.contracts import read_skill_frontmatter_fields
+from ask.skills_sdk.contracts import FRONTMATTER_FIELD_KEYS, read_skill_frontmatter_fields
 from ask.skills_sdk.package_contracts import (
     normalized_list,
     package_field_values,
@@ -15,6 +15,13 @@ from ask.skills_sdk.package_contracts import (
     sdk_package_contract,
     skill_package_contract,
 )
+from ask.skills_sdk.portable_adapter import (
+    PortableAdapterBlocker,
+    PortableAdapterSuccess,
+    run_portable_validation,
+)
+from skills_sdk.models.validation import SkillPackageValidation, ValidationSeverity
+from skills_sdk.validation import SkillValidationPolicy
 
 
 PACKAGE_VERIFY_SCHEMA_VERSION = "skill-package-verify.v1"
@@ -38,6 +45,9 @@ RUNTIME_MUTATION_SENTINELS = (
     ".codex",
     "Plugins/cache",
     "runtime",
+)
+PORTABLE_FRONTMATTER_FIELDS = frozenset(
+    (*FRONTMATTER_FIELD_KEYS, "license", "compatibility", "allowed-tools", "triggers")
 )
 
 
@@ -486,23 +496,111 @@ def verify_skill_directory(
         values,
         trusted_sources,
     )
+    portable_validation = _extend_portable_blockers(blockers, repo_root, skill_md)
     provenance_values = normalized_list(values.get("provenance"))
-    provenance_trusted = any(
-        _provenance_value_trusted(value, trusted_sources) for value in provenance_values
+    provenance_trusted = any(_provenance_value_trusted(value, trusted_sources) for value in provenance_values)
+    checks = _skill_directory_checks(
+        repo_root, skill_md, frontmatter, missing, quality, provenance_values, provenance_trusted, trusted_sources
     )
+    checks.append(_portable_validation_check(portable_validation))
     return _skill_directory_receipt(
-        repo_root=repo_root,
-        skill_md=skill_md,
-        query=query,
-        frontmatter=frontmatter,
-        contract=contract,
-        sdk_contract=sdk_contract,
-        missing=missing,
-        quality=quality,
-        provenance_values=provenance_values,
-        provenance_trusted=provenance_trusted,
-        trusted_sources=trusted_sources,
-        blockers=blockers,
+        repo_root,
+        skill_md,
+        query,
+        contract,
+        sdk_contract,
+        checks,
+        blockers,
+        portable_validation,
+        _provenance_identity(provenance_trusted, provenance_values, trusted_sources),
+    )
+
+
+def _portable_sdk_validation(repo_root: Path, skill_md: Path) -> dict[str, Any]:
+    """Map portable SDK validation into host evidence without replacing it."""
+
+    policy = SkillValidationPolicy(allowed_frontmatter=PORTABLE_FRONTMATTER_FIELDS)
+    result = run_portable_validation(
+        skill_md,
+        operation="validate",
+        expected_owner_root=repo_root,
+        policy=policy,
+    )
+    if isinstance(result, PortableAdapterBlocker):
+        return _portable_blocker_validation(result, repo_root, skill_md)
+    assert isinstance(result, PortableAdapterSuccess)
+    assert isinstance(result.payload, SkillPackageValidation)
+    return _portable_success_validation(result)
+
+
+def _extend_portable_blockers(
+    blockers: list[dict[str, Any]],
+    repo_root: Path,
+    skill_md: Path,
+) -> dict[str, Any]:
+    portable_validation = _portable_sdk_validation(repo_root, skill_md)
+    blockers.extend(portable_validation["blockers"])
+    return portable_validation
+
+
+def _portable_blocker_validation(
+    result: PortableAdapterBlocker,
+    repo_root: Path,
+    skill_md: Path,
+) -> dict[str, Any]:
+    not_run = result.code == "source_not_git"
+    blockers = [] if not_run else [
+        _blocker(
+            f"portable_sdk_{result.code}",
+            result.message,
+            path=repo_relative_path(repo_root, skill_md.parent) or skill_md.parent.as_posix(),
+        )
+    ]
+    return {
+        "status": "not_run" if not_run else "blocked",
+        "reason": result.message,
+        "source": None,
+        "result": None,
+        "blockers": blockers,
+    }
+
+
+def _portable_success_validation(result: PortableAdapterSuccess) -> dict[str, Any]:
+    assert isinstance(result.payload, SkillPackageValidation)
+    blockers = [
+        _blocker(
+            f"portable_sdk_{finding.code}",
+            str(finding.message),
+            evidence={"evidence_refs": list(finding.evidence_refs)},
+        )
+        for finding in result.payload.findings
+        if finding.severity is ValidationSeverity.BLOCKER
+    ]
+    return {
+        "status": "blocked" if blockers else "pass",
+        "reason": None,
+        "source": {
+            "owner_root": result.source.owner_root.as_posix(),
+            "package_root": result.source.package_root.as_posix(),
+            "source_revision": result.source.source_revision,
+            "dirty": result.source.dirty,
+        },
+        "result": result.payload.model_dump(mode="json"),
+        "blockers": blockers,
+    }
+
+
+def _portable_validation_check(portable_validation: dict[str, Any]) -> dict[str, Any]:
+    status = {"pass": "pass", "blocked": "fail", "not_run": "not_run"}[
+        portable_validation["status"]
+    ]
+    return _check(
+        "portable_sdk_validation",
+        status,
+        {
+            "status": portable_validation["status"],
+            "reason": portable_validation["reason"],
+        },
     )
 
 
@@ -593,40 +691,34 @@ def _quality_blocker(
 
 
 def _skill_directory_receipt(
-    *,
     repo_root: Path,
     skill_md: Path,
     query: str,
-    frontmatter: dict[str, Any],
     contract: dict[str, Any],
     sdk_contract: dict[str, Any],
-    missing: list[str],
-    quality: dict[str, dict[str, Any]],
-    provenance_values: list[str],
-    provenance_trusted: bool,
-    trusted_sources: set[str],
+    checks: list[dict[str, Any]],
     blockers: list[dict[str, Any]],
+    portable_validation: dict[str, Any],
+    provenance_identity: dict[str, Any],
 ) -> dict[str, Any]:
-    receipt = {
+    return {
         "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
         "target_kind": "skill_directory",
         "query": query,
         "target_path": repo_relative_path(repo_root, skill_md) or skill_md.as_posix(),
         "archive_identity": None,
-        "provenance_identity": _provenance_identity(provenance_trusted, provenance_values, trusted_sources),
+        "provenance_identity": provenance_identity,
         "contract": contract,
         "sdk_contract": sdk_contract,
-        "checks": _skill_directory_checks(
-            repo_root, skill_md, frontmatter, missing, quality, provenance_values, provenance_trusted, trusted_sources
-        ),
+        "portable_sdk_validation": portable_validation,
+        "checks": checks,
         "blockers": blockers,
         "rule_results": blockers,
         "status": "blocked" if blockers else "pass",
         "agent_summary": _skill_directory_summary(query, blockers),
         "validation_commands": ["./bin/ask skills package verify <archive-or-skill> --json --robot"],
+        **_directory_read_only_mutation_receipt(),
     }
-    receipt.update(_directory_read_only_mutation_receipt())
-    return receipt
 
 
 def _skill_directory_summary(query: str, blockers: list[dict[str, Any]]) -> str:

@@ -1,0 +1,47 @@
+{
+  "schema_version": "skills-sdk-portable-validation-adapter/v1",
+  "source_owner": {
+    "repository": "jscraik/skills-sdk",
+    "revision": "373c2cc0f39980004d42848d5d1082e02440cdd1",
+    "public_api": [
+      "skills_sdk.validation.SkillValidationPolicy",
+      "skills_sdk.validation.validate_skill_package",
+      "skills_sdk.packaging.build_skill_package"
+    ]
+  },
+  "host_owner": {
+    "repository": "jscraik/Agent-Skills",
+    "adapter": "Infrastructure/scripts/lib/ask/skills_sdk/portable_adapter.py",
+    "integration": "Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py"
+  },
+  "dependency_direction": "Agent-Skills host adapter -> Skills SDK public API",
+  "current_callers": [
+    "ask.skills_sdk.package_verify.verify_skill_directory"
+  ],
+  "retained_host_surfaces": [
+    "directory metadata and authoring checks",
+    "trusted provenance policy",
+    "archive traversal and symlink safety",
+    "rollback journal verification",
+    "runtime mutation sentinels",
+    "legacy package digest receipt compatibility"
+  ],
+  "migration_order": [
+    "lock the immutable Skills SDK dependency",
+    "run portable directory validation as explicit sidecar evidence",
+    "prove legacy directory-envelope compatibility",
+    "migrate package-build consumers after digest parity proof",
+    "migrate archive consumers only after portable archive contracts exist",
+    "remove the adapter after all named callers use Skills SDK directly"
+  ],
+  "rollback": "Remove the sidecar call and dependency while retaining the unchanged host verifier.",
+  "temporary_adapter": true,
+  "retirement_condition": "No Agent-Skills caller requires host translation for portable directory validation and every migrated caller imports the installed skills-sdk package directly.",
+  "scope_exclusions": [
+    "archive verification",
+    "legacy package digest replacement",
+    "provider execution",
+    "Tessl publication",
+    "runtime installation"
+  ]
+}
