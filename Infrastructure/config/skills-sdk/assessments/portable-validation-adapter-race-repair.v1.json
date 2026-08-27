@@ -1,0 +1,78 @@
+{
+  "schema_version": "sdk-tranche-mantra-assessment/v1",
+  "tranche_id": "portable-validation-adapter-race-repair",
+  "digest_algorithm": "git-archive-tar-sha256",
+  "assessed_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/portable_adapter.py",
+    "Infrastructure/tests/test_skills_sdk_portable_adapter.py"
+  ],
+  "mantra": {
+    "source_revision": "254086cf2bc0488d048968e02930b6b04c25f410",
+    "content_sha256": "f1726fc176eedf4d0ddf5af50cd553e8ef59ff5efab1025ba1c65daaea2056e7",
+    "taste": {
+      "status": "pass",
+      "evidence": [
+        "user-confirmed architecture direction: portable package behavior belongs to Skills SDK",
+        "operator proof: ./bin/ask skills package verify Skills/agent-ops/simplify --json --robot"
+      ]
+    },
+    "thin_surfaces": {
+      "status": "pass",
+      "evidence": [
+        "reuses Skills SDK validation results instead of adding host filesystem traversal",
+        "reuses source_changed_during_validation instead of adding a blocker code"
+      ]
+    },
+    "strong_guardrails": {
+      "status": "pass",
+      "evidence": [
+        "clean-to-dirty, dirty-to-dirty, build, validate, untracked-file, final-status, and final-revision race regressions",
+        "current package state, final source status, and final repository revision are checked before candidate evidence is returned"
+      ]
+    },
+    "simplicity": {
+      "status": "pass",
+      "evidence": [
+        "one SDK-owned comparison helper plus bounded provenance and cleanliness guards",
+        "no new schema, traversal algorithm, compatibility layer, or waiver"
+      ]
+    },
+    "progressive_disclosure": {
+      "status": "pass",
+      "evidence": [
+        "existing operator command and response shape remain unchanged",
+        "typed blocker exposes the race only when the package changes"
+      ]
+    },
+    "durable_memory": {
+      "status": "pass",
+      "evidence": [
+        "Infrastructure/tests/test_skills_sdk_portable_adapter.py",
+        "candidate-bound assessment records the exact repair revision and digest"
+      ]
+    },
+    "valuemaxxing": {
+      "status": "pass",
+      "evidence": [
+        "prevents stale candidate receipts without a new public API",
+        "preserves the existing validation and build routes"
+      ]
+    },
+    "self_improvement": {
+      "status": "pass",
+      "evidence": [
+        "post-merge PR 502 and PR 503 review findings became focused race regressions",
+        "function-budget feedback produced smaller orchestration helpers"
+      ]
+    },
+    "professional_output": {
+      "status": "pass",
+      "evidence": [
+        "focused proof: 33 adapter and package-verification tests",
+        "aggregate proof: 0 required failures and 0 warning-only issues",
+        "signed implementation commit: 254086cf2bc0488d048968e02930b6b04c25f410"
+      ]
+    },
+    "overall": "pass"
+  }
+}

@@ -162,6 +162,88 @@ def resolve_portable_source(
     return PortableSource(package_root, owner_root, revision, dirty)
 
 
+def _package_state_changed(
+    before: SkillPackageValidation,
+    after: SkillPackageValidation,
+) -> bool:
+    """Compare two SDK-owned filesystem captures without host traversal."""
+
+    return (
+        before.status != after.status
+        or before.candidate != after.candidate
+        or before.identity != after.identity
+        or before.files != after.files
+        or before.findings != after.findings
+    )
+
+
+def _delegate_operation(
+    source: PortableSource,
+    operation: PortableOperation,
+    captured: SkillPackageValidation,
+    policy: SkillValidationPolicy | None,
+) -> SkillPackageValidation | PackageReceipt:
+    if operation == "validate":
+        return captured
+    return build_skill_package(
+        source.package_root,
+        source_revision=source.source_revision,
+        policy=policy,
+    )
+
+
+def _source_status_blocker(
+    source: PortableSource,
+) -> PortableAdapterBlocker | None:
+    dirty = _is_dirty(source.owner_root, source.package_root)
+    if dirty is None:
+        return PortableAdapterBlocker(
+            "source_status_unavailable",
+            "package source status could not be determined",
+        )
+    if dirty != source.dirty:
+        return PortableAdapterBlocker(
+            "source_changed_during_validation",
+            "package source content changed during SDK delegation",
+        )
+    return None
+
+
+def _delegation_change_blocker(
+    source: PortableSource,
+    operation: PortableOperation,
+    captured: SkillPackageValidation,
+    payload: SkillPackageValidation | PackageReceipt,
+    policy: SkillValidationPolicy | None,
+) -> PortableAdapterBlocker | None:
+    current = validate_skill_package(
+        source.package_root,
+        source_revision=source.source_revision,
+        policy=policy,
+    )
+    current_revision = _git_output(source.owner_root, "rev-parse", "HEAD")
+    if current_revision != source.source_revision:
+        return PortableAdapterBlocker(
+            "source_changed_during_validation",
+            "package source revision changed during SDK delegation",
+        )
+    status_blocker = _source_status_blocker(source)
+    if status_blocker is not None:
+        return status_blocker
+    content_changed = _package_state_changed(captured, current)
+    build_candidate_changed = (
+        operation == "build"
+        and payload.candidate is not None
+        and payload.candidate != captured.candidate
+    )
+    if content_changed or build_candidate_changed:
+        return PortableAdapterBlocker(
+            "source_changed_during_validation",
+            "package source content changed during SDK delegation",
+        )
+    return None
+
+
 def run_portable_validation(
     source_path: Path,
     *,
@@ -182,24 +264,21 @@ def run_portable_validation(
         return PortableAdapterBlocker(
             "source_not_immutable", "package build requires a clean Git-owned source"
         )
-    if operation == "validate":
-        payload = validate_skill_package(
-            source.package_root,
-            source_revision=source.source_revision,
-            policy=policy,
-        )
-    else:
-        payload = build_skill_package(
-            source.package_root,
-            source_revision=source.source_revision,
-            policy=policy,
-        )
-    current_revision = _git_output(source.owner_root, "rev-parse", "HEAD")
-    if current_revision != source.source_revision:
-        return PortableAdapterBlocker(
-            "source_changed_during_validation",
-            "package source revision changed during SDK delegation",
-        )
+    captured = validate_skill_package(
+        source.package_root,
+        source_revision=source.source_revision,
+        policy=policy,
+    )
+    payload = _delegate_operation(source, operation, captured, policy)
+    blocker = _delegation_change_blocker(
+        source,
+        operation,
+        captured,
+        payload,
+        policy,
+    )
+    if blocker is not None:
+        return blocker
     return PortableAdapterSuccess(operation, source, payload)
 
 
