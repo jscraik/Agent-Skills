@@ -7,8 +7,8 @@
     "Infrastructure/tests/test_skills_sdk_portable_adapter.py"
   ],
   "mantra": {
-    "source_revision": "43df29be3af36d0679ab75acc0258355bfaa8263",
-    "content_sha256": "f397cb596cedf2e4a8360ab081172fa5c5cd892154388a06934ffd8238dd07ff",
+    "source_revision": "f6c24b55e7a6a108cac91765e0830e84dc083b13",
+    "content_sha256": "90f881c4b4e1b036f99ea4650f339e135f350d757b6190838cfd01d194224d5d",
     "taste": {
       "status": "pass",
       "evidence": [
@@ -26,14 +26,14 @@
     "strong_guardrails": {
       "status": "pass",
       "evidence": [
-        "clean-to-dirty, dirty-to-dirty, build, and untracked-file race regressions",
-        "current package state is compared before candidate evidence is returned"
+        "clean-to-dirty, dirty-to-dirty, build, untracked-file, final-status, and final-revision race regressions",
+        "current package state, build cleanliness, and final repository revision are checked before candidate evidence is returned"
       ]
     },
     "simplicity": {
       "status": "pass",
       "evidence": [
-        "one SDK-owned comparison helper and one delegation guard",
+        "one SDK-owned comparison helper plus bounded provenance and cleanliness guards",
         "no new schema, traversal algorithm, compatibility layer, or waiver"
       ]
     },
@@ -61,16 +61,16 @@
     "self_improvement": {
       "status": "pass",
       "evidence": [
-        "post-merge PR 502 review finding became a focused race regression",
+        "post-merge PR 502 and PR 503 review findings became focused race regressions",
         "function-budget feedback produced smaller orchestration helpers"
       ]
     },
     "professional_output": {
       "status": "pass",
       "evidence": [
-        "focused proof: 29 tests",
+        "focused proof: 32 adapter and package-verification tests",
         "aggregate proof: 0 required failures and 0 warning-only issues",
-        "signed implementation commit: 43df29be3af36d0679ab75acc0258355bfaa8263"
+        "signed implementation commit: f6c24b55e7a6a108cac91765e0830e84dc083b13"
       ]
     },
     "overall": "pass"
