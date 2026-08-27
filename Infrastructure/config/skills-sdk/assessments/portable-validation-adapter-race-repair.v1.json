@@ -1,0 +1,78 @@
+{
+  "schema_version": "sdk-tranche-mantra-assessment/v1",
+  "tranche_id": "portable-validation-adapter-race-repair",
+  "digest_algorithm": "git-archive-tar-sha256",
+  "assessed_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/portable_adapter.py",
+    "Infrastructure/tests/test_skills_sdk_portable_adapter.py"
+  ],
+  "mantra": {
+    "source_revision": "43df29be3af36d0679ab75acc0258355bfaa8263",
+    "content_sha256": "f397cb596cedf2e4a8360ab081172fa5c5cd892154388a06934ffd8238dd07ff",
+    "taste": {
+      "status": "pass",
+      "evidence": [
+        "user-confirmed architecture direction: portable package behavior belongs to Skills SDK",
+        "operator proof: ./bin/ask skills package verify Skills/agent-ops/simplify --json --robot"
+      ]
+    },
+    "thin_surfaces": {
+      "status": "pass",
+      "evidence": [
+        "reuses Skills SDK validation results instead of adding host filesystem traversal",
+        "reuses source_changed_during_validation instead of adding a blocker code"
+      ]
+    },
+    "strong_guardrails": {
+      "status": "pass",
+      "evidence": [
+        "clean-to-dirty, dirty-to-dirty, build, and untracked-file race regressions",
+        "current package state is compared before candidate evidence is returned"
+      ]
+    },
+    "simplicity": {
+      "status": "pass",
+      "evidence": [
+        "one SDK-owned comparison helper and one delegation guard",
+        "no new schema, traversal algorithm, compatibility layer, or waiver"
+      ]
+    },
+    "progressive_disclosure": {
+      "status": "pass",
+      "evidence": [
+        "existing operator command and response shape remain unchanged",
+        "typed blocker exposes the race only when the package changes"
+      ]
+    },
+    "durable_memory": {
+      "status": "pass",
+      "evidence": [
+        "Infrastructure/tests/test_skills_sdk_portable_adapter.py",
+        "candidate-bound assessment records the exact repair revision and digest"
+      ]
+    },
+    "valuemaxxing": {
+      "status": "pass",
+      "evidence": [
+        "prevents stale candidate receipts without a new public API",
+        "preserves the existing validation and build routes"
+      ]
+    },
+    "self_improvement": {
+      "status": "pass",
+      "evidence": [
+        "post-merge PR 502 review finding became a focused race regression",
+        "function-budget feedback produced smaller orchestration helpers"
+      ]
+    },
+    "professional_output": {
+      "status": "pass",
+      "evidence": [
+        "focused proof: 29 tests",
+        "aggregate proof: 0 required failures and 0 warning-only issues",
+        "signed implementation commit: 43df29be3af36d0679ab75acc0258355bfaa8263"
+      ]
+    },
+    "overall": "pass"
+  }
+}
