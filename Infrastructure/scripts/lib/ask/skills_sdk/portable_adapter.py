@@ -192,6 +192,26 @@ def _delegate_operation(
     )
 
 
+def _build_cleanliness_blocker(
+    source: PortableSource,
+    operation: PortableOperation,
+) -> PortableAdapterBlocker | None:
+    if operation != "build":
+        return None
+    dirty = _is_dirty(source.owner_root, source.package_root)
+    if dirty is None:
+        return PortableAdapterBlocker(
+            "source_status_unavailable",
+            "package source status could not be determined",
+        )
+    if dirty:
+        return PortableAdapterBlocker(
+            "source_changed_during_validation",
+            "package source content changed during SDK delegation",
+        )
+    return None
+
+
 def _delegation_change_blocker(
     source: PortableSource,
     operation: PortableOperation,
@@ -199,17 +219,20 @@ def _delegation_change_blocker(
     payload: SkillPackageValidation | PackageReceipt,
     policy: SkillValidationPolicy | None,
 ) -> PortableAdapterBlocker | None:
+    current = validate_skill_package(
+        source.package_root,
+        source_revision=source.source_revision,
+        policy=policy,
+    )
     current_revision = _git_output(source.owner_root, "rev-parse", "HEAD")
     if current_revision != source.source_revision:
         return PortableAdapterBlocker(
             "source_changed_during_validation",
             "package source revision changed during SDK delegation",
         )
-    current = validate_skill_package(
-        source.package_root,
-        source_revision=source.source_revision,
-        policy=policy,
-    )
+    cleanliness_blocker = _build_cleanliness_blocker(source, operation)
+    if cleanliness_blocker is not None:
+        return cleanliness_blocker
     content_changed = _package_state_changed(captured, current)
     build_candidate_changed = (
         operation == "build"

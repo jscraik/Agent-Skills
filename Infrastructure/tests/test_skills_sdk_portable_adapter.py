@@ -86,6 +86,37 @@ def _mutate_after_first_validation(
     monkeypatch.setattr(portable_adapter, "validate_skill_package", mutate_after_capture)
 
 
+def _change_revision_after_final_validation(monkeypatch: pytest.MonkeyPatch) -> None:
+    from ask.skills_sdk import portable_adapter
+
+    real_validate = portable_adapter.validate_skill_package
+    real_git_output = portable_adapter._git_output
+    state = {"calls": 0, "final_scan_complete": False}
+
+    def final_validation(
+        package_root: Path,
+        *,
+        source_revision: str,
+        policy: SkillValidationPolicy | None = None,
+    ) -> SkillPackageValidation:
+        state["calls"] += 1
+        result = real_validate(
+            package_root,
+            source_revision=source_revision,
+            policy=policy,
+        )
+        state["final_scan_complete"] = state["calls"] == 2
+        return result
+
+    def revision_after_scan(directory: Path, *arguments: str) -> str | None:
+        if arguments == ("rev-parse", "HEAD") and state["final_scan_complete"]:
+            return "f" * 40
+        return real_git_output(directory, *arguments)
+
+    monkeypatch.setattr(portable_adapter, "validate_skill_package", final_validation)
+    monkeypatch.setattr(portable_adapter, "_git_output", revision_after_scan)
+
+
 def test_resolves_the_source_owners_revision(tmp_path: Path) -> None:
     skill_root, revision = _skill_repository(tmp_path)
 
@@ -218,6 +249,60 @@ def test_build_blocks_ignored_package_content(tmp_path: Path) -> None:
     )
 
 
+def test_build_rechecks_cleanliness_after_source_resolution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    from ask.skills_sdk import portable_adapter
+
+    real_resolve = portable_adapter.resolve_portable_source
+
+    def mutate_after_resolution(
+        source_path: Path,
+        *,
+        expected_owner_root: Path | None = None,
+    ) -> PortableSource | PortableAdapterBlocker:
+        source = real_resolve(
+            source_path,
+            expected_owner_root=expected_owner_root,
+        )
+        assert isinstance(source, PortableSource)
+        (skill_root / "SKILL.md").write_text(
+            "---\nname: example-skill\ndescription: Changed after resolution.\n---\n",
+            encoding="utf-8",
+        )
+        return source
+
+    monkeypatch.setattr(portable_adapter, "resolve_portable_source", mutate_after_resolution)
+
+    result = run_portable_validation(skill_root, operation="build")
+
+    assert _git(skill_root, "rev-parse", "HEAD") == revision
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source content changed during SDK delegation",
+    )
+
+
+def test_build_blocks_when_the_final_status_probe_is_unavailable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, _revision = _skill_repository(tmp_path)
+    from ask.skills_sdk import portable_adapter
+
+    statuses: Iterator[bool | None] = iter([False, None])
+    monkeypatch.setattr(portable_adapter, "_is_dirty", lambda _root, _path: next(statuses))
+
+    result = run_portable_validation(skill_root, operation="build")
+
+    assert result == PortableAdapterBlocker(
+        "source_status_unavailable",
+        "package source status could not be determined",
+    )
+
+
 @pytest.mark.parametrize("operation", ["validate", "build"])
 def test_delegation_rejects_a_revision_change(
     tmp_path: Path,
@@ -239,6 +324,22 @@ def test_delegation_rejects_a_revision_change(
 
     result = run_portable_validation(skill_root, operation=operation)  # type: ignore[arg-type]
 
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source revision changed during SDK delegation",
+    )
+
+
+def test_delegation_rechecks_revision_after_the_final_validation_scan(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    _change_revision_after_final_validation(monkeypatch)
+
+    result = run_portable_validation(skill_root, operation="validate")
+
+    assert revision == _git(skill_root, "rev-parse", "HEAD")
     assert result == PortableAdapterBlocker(
         "source_changed_during_validation",
         "package source revision changed during SDK delegation",
