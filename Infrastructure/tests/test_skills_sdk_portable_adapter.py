@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -15,6 +15,7 @@ from ask.skills_sdk.portable_adapter import (  # noqa: E402
     PortableAdapterBlocker,
     PortableAdapterSuccess,
     PortableSource,
+    SkillValidationPolicy,
     resolve_portable_source,
     run_portable_validation,
 )
@@ -54,6 +55,35 @@ def _tree_snapshot(root: Path) -> dict[str, tuple[bytes, int, int]]:
         for path in sorted(root.rglob("*"))
         if path.is_file()
     }
+
+
+def _mutate_after_first_validation(
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: Callable[[], None],
+) -> None:
+    from ask.skills_sdk import portable_adapter
+
+    real_validate = portable_adapter.validate_skill_package
+    calls = 0
+
+    def mutate_after_capture(
+        package_root: Path,
+        *,
+        source_revision: str,
+        policy: SkillValidationPolicy | None = None,
+    ) -> SkillPackageValidation:
+        nonlocal calls
+        result = real_validate(
+            package_root,
+            source_revision=source_revision,
+            policy=policy,
+        )
+        calls += 1
+        if calls == 1:
+            mutation()
+        return result
+
+    monkeypatch.setattr(portable_adapter, "validate_skill_package", mutate_after_capture)
 
 
 def test_resolves_the_source_owners_revision(tmp_path: Path) -> None:
@@ -212,6 +242,70 @@ def test_delegation_rejects_a_revision_change(
     assert result == PortableAdapterBlocker(
         "source_changed_during_validation",
         "package source revision changed during SDK delegation",
+    )
+
+
+@pytest.mark.parametrize("operation", ["validate", "build"])
+def test_delegation_rejects_an_uncommitted_content_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    operation: str,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    _mutate_after_first_validation(
+        monkeypatch,
+        lambda: (skill_root / "SKILL.md").write_text(
+            "---\nname: example-skill\ndescription: Changed after capture.\n---\n\n# Changed\n",
+            encoding="utf-8",
+        ),
+    )
+
+    result = run_portable_validation(skill_root, operation=operation)  # type: ignore[arg-type]
+
+    assert _git(skill_root, "rev-parse", "HEAD") == revision
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source content changed during SDK delegation",
+    )
+
+
+def test_validation_rejects_a_dirty_to_dirty_content_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    changed = skill_root / "README.md"
+    changed.write_text("first dirty state\n", encoding="utf-8")
+    _mutate_after_first_validation(
+        monkeypatch,
+        lambda: changed.write_text("second dirty state\n", encoding="utf-8"),
+    )
+
+    result = run_portable_validation(skill_root, operation="validate")
+
+    assert _git(skill_root, "rev-parse", "HEAD") == revision
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source content changed during SDK delegation",
+    )
+
+
+def test_validation_rejects_an_untracked_file_added_during_delegation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    _mutate_after_first_validation(
+        monkeypatch,
+        lambda: (skill_root / "generated.txt").write_text("untracked\n", encoding="utf-8"),
+    )
+
+    result = run_portable_validation(skill_root, operation="validate")
+
+    assert _git(skill_root, "rev-parse", "HEAD") == revision
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source content changed during SDK delegation",
     )
 
 
