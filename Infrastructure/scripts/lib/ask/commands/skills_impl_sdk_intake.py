@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from ask.skills_sdk.package_build_compat import build_package_projection
+
 from .skills_impl_doctor_intake import *  # noqa: F403
+
 
 def skills_sdk_intake_review(
     repo_root: Path,
@@ -187,28 +190,23 @@ def skills_sdk_package_build(
         }
         return result
 
-    receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
-    payload = {
-        "schema_version": "skills-sdk-package-build.v0",
-        "query": query,
-        "status": receipt["status"],
-        "canonical_source_path": source_path_value,
-        "facade_command": "skills-sdk package build",
-        "package_id": receipt["package_id"],
-        "version": receipt["version"],
-        "source_digest": receipt["source_digest"],
-        "manifest_digest": receipt["manifest_digest"],
-        "package_digest": receipt["package_digest"],
-        "included_files": receipt["included_files"],
-        "excluded_files": receipt["excluded_files"],
-        "receipt": receipt,
-        "mutation_performed": False,
-        "validation_commands": [
-            _ask_validation_command("sdk", "package", "build", query),
-        ],
-        "agent_summary": f"skills-sdk package build produced digest identity for {query} without writes.",
-    }
-    result.data["skills_sdk_package_build"] = payload
+    validation_command = _ask_validation_command("sdk", "package", "build", query)
+    projection = build_package_projection(
+        source_path,
+        query=query,
+        canonical_source_path=str(source_path_value),
+        validation_command=validation_command,
+    )
+    result.data["skills_sdk_package_build"] = projection.payload
+    if projection.error_message:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=projection.error_message,
+                fix_suggestion="Inspect data.skills_sdk_package_build for the typed blocker before rebuilding.",
+            )
+        )
     return result
 
 
