@@ -192,19 +192,16 @@ def _delegate_operation(
     )
 
 
-def _build_cleanliness_blocker(
+def _source_status_blocker(
     source: PortableSource,
-    operation: PortableOperation,
 ) -> PortableAdapterBlocker | None:
-    if operation != "build":
-        return None
     dirty = _is_dirty(source.owner_root, source.package_root)
     if dirty is None:
         return PortableAdapterBlocker(
             "source_status_unavailable",
             "package source status could not be determined",
         )
-    if dirty:
+    if dirty != source.dirty:
         return PortableAdapterBlocker(
             "source_changed_during_validation",
             "package source content changed during SDK delegation",
@@ -230,9 +227,9 @@ def _delegation_change_blocker(
             "source_changed_during_validation",
             "package source revision changed during SDK delegation",
         )
-    cleanliness_blocker = _build_cleanliness_blocker(source, operation)
-    if cleanliness_blocker is not None:
-        return cleanliness_blocker
+    status_blocker = _source_status_blocker(source)
+    if status_blocker is not None:
+        return status_blocker
     content_changed = _package_state_changed(captured, current)
     build_candidate_changed = (
         operation == "build"

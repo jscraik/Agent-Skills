@@ -285,6 +285,36 @@ def test_build_rechecks_cleanliness_after_source_resolution(
     )
 
 
+def test_validation_rechecks_status_after_source_resolution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    skill_root, revision = _skill_repository(tmp_path)
+    from ask.skills_sdk import portable_adapter
+
+    real_resolve = portable_adapter.resolve_portable_source
+
+    def mutate_after_resolution(
+        source_path: Path,
+        *,
+        expected_owner_root: Path | None = None,
+    ) -> PortableSource | PortableAdapterBlocker:
+        source = real_resolve(source_path, expected_owner_root=expected_owner_root)
+        assert isinstance(source, PortableSource)
+        (skill_root / "README.md").write_text("dirty after resolution\n", encoding="utf-8")
+        return source
+
+    monkeypatch.setattr(portable_adapter, "resolve_portable_source", mutate_after_resolution)
+
+    result = run_portable_validation(skill_root, operation="validate")
+
+    assert _git(skill_root, "rev-parse", "HEAD") == revision
+    assert result == PortableAdapterBlocker(
+        "source_changed_during_validation",
+        "package source content changed during SDK delegation",
+    )
+
+
 def test_build_blocks_when_the_final_status_probe_is_unavailable(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
