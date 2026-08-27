@@ -83,6 +83,31 @@ def _package_verify_claims_boundary(mutation_status: object) -> str:
     )
 
 
+def _compact_portable_sdk_validation(value: object) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    result = value.get("result")
+    compact_result = None
+    if isinstance(result, dict):
+        compact_result = {
+            key: result.get(key)
+            for key in (
+                "schema_version",
+                "candidate",
+                "status",
+                "findings",
+                "mutation_performed",
+            )
+        }
+    source = value.get("source")
+    return {
+        "status": value.get("status"),
+        "reason": value.get("reason"),
+        "source": source if isinstance(source, dict) else None,
+        "result": compact_result,
+    }
+
+
 def compact_package_verify_payload(data: dict[str, Any]) -> None:
     """Keep stable package verification decision-sized by default."""
     verification = data.get("skill_package_verification")
@@ -98,6 +123,7 @@ def compact_package_verify_payload(data: dict[str, Any]) -> None:
             "target_identity",
             "archive_identity",
             "provenance_identity",
+            "checks",
             "blockers",
             "mutation_status",
             "rollback_hint",
@@ -110,6 +136,11 @@ def compact_package_verify_payload(data: dict[str, Any]) -> None:
     strict_readiness = _compact_strict_package_readiness(verification.get("strict_package_readiness"))
     if strict_readiness:
         compact["strict_package_readiness"] = strict_readiness
+    portable_validation = _compact_portable_sdk_validation(
+        verification.get("portable_sdk_validation")
+    )
+    if portable_validation:
+        compact["portable_sdk_validation"] = portable_validation
     data["skill_package_verification"] = compact
     compact["claims_boundary"] = _package_verify_claims_boundary(compact.get("mutation_status"))
 

@@ -2,11 +2,12 @@
 name = "agent-skills-infrastructure"
 version = "0.1.0"
 description = "Infrastructure-only Python dependency environment for Agent Skills Kit validation and SDK contracts."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
   "jsonschema>=4.25,<5",
   "pydantic>=2.13,<3",
   "PyYAML>=6.0.2,<7",
+  "skills-sdk @ git+https://github.com/jscraik/skills-sdk.git@373c2cc0f39980004d42848d5d1082e02440cdd1",
 ]
 
 [dependency-groups]
