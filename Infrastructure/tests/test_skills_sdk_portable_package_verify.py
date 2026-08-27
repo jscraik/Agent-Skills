@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import subprocess
 import sys
-import json
 from pathlib import Path
 
 
@@ -15,6 +16,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 )
 from ask.skills_sdk.portable_adapter import PortableAdapterBlocker  # noqa: E402
 from ask.cli_output import compact_package_verify_payload  # noqa: E402
+from skills_sdk.models import MantraAssessment  # noqa: E402
 
 
 def _git(directory: Path, *arguments: str) -> str:
@@ -193,6 +195,38 @@ def test_ownership_language_keeps_agent_skills_transitional() -> None:
     assert "transitional `agent-skills` repository" in language
     assert "**Skills SDK** supplies the portable lifecycle implementation" in language
     assert "Preserve `agent-skills` as the Skills SDK implementation" not in language
+
+
+def test_adapter_mantra_assessment_binds_exact_implementation_candidate() -> None:
+    assessment_path = (
+        REPO_ROOT
+        / "Infrastructure"
+        / "config"
+        / "skills-sdk"
+        / "assessments"
+        / "portable-validation-adapter.v1.json"
+    )
+    assessment = json.loads(assessment_path.read_text(encoding="utf-8"))
+    mantra = MantraAssessment.model_validate(assessment["mantra"])
+    archive = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPO_ROOT),
+            "archive",
+            "--format=tar",
+            mantra.source_revision,
+            "--",
+            *assessment["assessed_paths"],
+        ],
+        check=True,
+        capture_output=True,
+    ).stdout
+
+    assert assessment["schema_version"] == "sdk-tranche-mantra-assessment/v1"
+    assert assessment["digest_algorithm"] == "git-archive-tar-sha256"
+    assert hashlib.sha256(archive).hexdigest() == mantra.content_sha256
+    assert mantra.overall.value == "pass"
 
 
 def test_host_adapter_blocker_uses_repo_relative_path(tmp_path: Path) -> None:

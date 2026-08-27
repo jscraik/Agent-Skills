@@ -1,0 +1,85 @@
+{
+  "schema_version": "sdk-tranche-mantra-assessment/v1",
+  "tranche_id": "portable-validation-adapter",
+  "digest_algorithm": "git-archive-tar-sha256",
+  "assessed_paths": [
+    "UBIQUITOUS_LANGUAGE.md",
+    "Infrastructure/pyproject.toml",
+    "Infrastructure/uv.lock",
+    "Infrastructure/config/skills-sdk/portable-validation-adapter.v1.json",
+    "Infrastructure/scripts/lib/ask/cli_output.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/portable_adapter.py",
+    "Infrastructure/tests/test_skills_sdk_portable_adapter.py",
+    "Infrastructure/tests/test_skills_sdk_portable_package_verify.py"
+  ],
+  "mantra": {
+    "source_revision": "1bb08cc3de2b136d181848b7bd316b6572d0edb9",
+    "content_sha256": "2077a230ac794a484eaa4bbf26f501c84f6f3120964063c84c7fdd1825706bed",
+    "taste": {
+      "status": "pass",
+      "evidence": [
+        "user-confirmed architecture direction: Foundry source -> Skills SDK -> Tessl -> runtime",
+        "operator proof: ./bin/ask skills package verify Skills/agent-ops/simplify --json --robot"
+      ]
+    },
+    "thin_surfaces": {
+      "status": "pass",
+      "evidence": [
+        "Infrastructure/config/skills-sdk/portable-validation-adapter.v1.json",
+        "single production caller: ask.skills_sdk.package_verify.verify_skill_directory"
+      ]
+    },
+    "strong_guardrails": {
+      "status": "pass",
+      "evidence": [
+        "Infrastructure/tests/test_skills_sdk_portable_adapter.py",
+        "Infrastructure/tests/test_skills_sdk_portable_package_verify.py"
+      ]
+    },
+    "simplicity": {
+      "status": "pass",
+      "evidence": [
+        "one-way adapter delegates to Skills SDK public APIs",
+        "archive and digest migration excluded until their parity contracts exist"
+      ]
+    },
+    "progressive_disclosure": {
+      "status": "pass",
+      "evidence": [
+        "default CLI output retains decision-sized portable validation evidence",
+        "full SDK result remains available in JSON output"
+      ]
+    },
+    "durable_memory": {
+      "status": "pass",
+      "evidence": [
+        "Infrastructure/config/skills-sdk/portable-validation-adapter.v1.json",
+        "UBIQUITOUS_LANGUAGE.md"
+      ]
+    },
+    "valuemaxxing": {
+      "status": "pass",
+      "evidence": [
+        "existing operator route preserved while duplicate portable validation ownership is reduced",
+        "standalone SDK revision is immutable in Infrastructure/uv.lock"
+      ]
+    },
+    "self_improvement": {
+      "status": "pass",
+      "evidence": [
+        "cross-repository symlink owner-boundary regression",
+        "ownership-language regression prevents permanent Agent-Skills framing"
+      ]
+    },
+    "professional_output": {
+      "status": "pass",
+      "evidence": [
+        "focused proof: 63 tests and 12 subtests",
+        "aggregate proof: 0 required failures and 0 warning-only issues",
+        "signed implementation commit: 1bb08cc3de2b136d181848b7bd316b6572d0edb9"
+      ]
+    },
+    "overall": "pass"
+  }
+}
