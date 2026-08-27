@@ -7,8 +7,8 @@
     "Infrastructure/tests/test_skills_sdk_portable_adapter.py"
   ],
   "mantra": {
-    "source_revision": "f6c24b55e7a6a108cac91765e0830e84dc083b13",
-    "content_sha256": "90f881c4b4e1b036f99ea4650f339e135f350d757b6190838cfd01d194224d5d",
+    "source_revision": "254086cf2bc0488d048968e02930b6b04c25f410",
+    "content_sha256": "f1726fc176eedf4d0ddf5af50cd553e8ef59ff5efab1025ba1c65daaea2056e7",
     "taste": {
       "status": "pass",
       "evidence": [
@@ -26,8 +26,8 @@
     "strong_guardrails": {
       "status": "pass",
       "evidence": [
-        "clean-to-dirty, dirty-to-dirty, build, untracked-file, final-status, and final-revision race regressions",
-        "current package state, build cleanliness, and final repository revision are checked before candidate evidence is returned"
+        "clean-to-dirty, dirty-to-dirty, build, validate, untracked-file, final-status, and final-revision race regressions",
+        "current package state, final source status, and final repository revision are checked before candidate evidence is returned"
       ]
     },
     "simplicity": {
@@ -68,9 +68,9 @@
     "professional_output": {
       "status": "pass",
       "evidence": [
-        "focused proof: 32 adapter and package-verification tests",
+        "focused proof: 33 adapter and package-verification tests",
         "aggregate proof: 0 required failures and 0 warning-only issues",
-        "signed implementation commit: f6c24b55e7a6a108cac91765e0830e84dc083b13"
+        "signed implementation commit: 254086cf2bc0488d048968e02930b6b04c25f410"
       ]
     },
     "overall": "pass"
