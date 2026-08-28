@@ -125,6 +125,7 @@ Do not hand-edit runtime projections.
 - `deep-interview` — Analyze, deepen, and validate an existing doc or topic through a structured interview. Use when refining PRDs, Linear tickets, notes, or draft specs before planning or execution.
 - `devrel-hack-coach` — Plan AI-native hackathon scope, demo pitch, and judge Q&A. Use when the user needs 1-hour pitch prep, 24-hour build scoping, AI Native DevCon-style track choice, idea pressure tests, or a spec-led hack plan. Do not use for code generation, implementation support, or non-hackathon DevRel content.
 - `interview-me` — Analyze underspecified requests with a short decision interview. Use this skill when guessing would risk the wrong plan.
+- `telos` — Read or safely update private personal TELOS, or analyze project documentation for goals, dependencies, bottlenecks, narratives, reports, and dashboards. Use for life-goal and strategy updates or source-grounded project TELOS work; keep personal and project lanes separate.
 
 ## Skills — Security Ops
 
