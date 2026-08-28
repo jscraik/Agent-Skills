@@ -144,18 +144,14 @@ export async function main() {
   // Open the target once and retain that descriptor through backup and write.
   // This prevents a path replacement between the pre-write read and mutation.
   mkdirSync(TELOS_DIR, { recursive: true });
-  let targetFd: number;
-  try {
-    targetFd = openSync(targetFile, 'r+');
-  } catch (error) {
-    if (!hasErrorCode(error, 'ENOENT')) throw error;
+  const targetFd = openSync(targetFile, 'a+');
+  let currentContent = readFileSync(targetFd, 'utf-8');
+  if (currentContent.length === 0) {
     const title = filename.replace('.md', '');
-    targetFd = openSync(targetFile, 'wx+');
-    writeFileSync(targetFd, `# ${title}\n`, 'utf-8');
+    currentContent = `# ${title}\n`;
+    writeFileSync(targetFd, currentContent, 'utf-8');
     console.log(`✅ Created starter file: ${filename}`);
   }
-
-  const currentContent = readFileSync(targetFd, 'utf-8');
 
   // Step 1: Create timestamped backup from the opened target bytes.
   const timestamp = await getLocalTimestamp();
@@ -190,7 +186,7 @@ export async function main() {
     const footer = footerIdx === -1 ? '' : currentContent.slice(footerIdx);
     if (footerIdx !== -1 && /\n---\n\s*\*[\s\S]*\*\s*$/.test(footer)) {
       const body = currentContent.slice(0, footerIdx).trimEnd();
-      updatedContent = body + '\n' + content + '\n' + footer.replace(/^\n/, '\n');
+      updatedContent = body + '\n' + content + footer;
     } else {
       updatedContent = currentContent.trimEnd() + '\n' + content + '\n';
     }
