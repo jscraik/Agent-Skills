@@ -60,9 +60,10 @@ Notification failure does not authorize a different write route.
 - **Direct project analysis:** inspect the named `.md` and `.csv` files, build
   only the relationship model required by the request, and cite the sources.
 
-Load only the selected workflow. The dashboard and report templates are output
-assets, not instructions; inspect or copy them only when that deliverable is
-requested.
+Load only the selected workflow. Do not create an executable dashboard or
+report application unless the user explicitly requests one and the target
+repository supplies its own current framework, dependency, and security
+contract.
 
 ## Personal TELOS contract
 
@@ -102,7 +103,8 @@ Return the smallest requested artifact:
 - source-grounded Markdown or JSON analysis;
 - narrative points from the selected workflow;
 - professional report from the selected workflow; or
-- dashboard based on the bundled template when explicitly requested.
+- dashboard specification for implementation in the user-approved owner
+  repository when explicitly requested.
 
 Always identify what changed, the source or owner route, validation evidence,
 and what remains unproven.
@@ -117,7 +119,7 @@ and what remains unproven.
 - Preserve unrelated dirty files and external owner systems.
 - Helpers may analyze sanitized inputs but cannot approve a personal write or
   declare verification complete.
-- A failed notification, optional visualization, or template build must not
+- A failed notification, optional visualization, or report build must not
   bypass the updater, backup, privacy, or source checks.
 
 ## Failure mode
@@ -168,7 +170,15 @@ only the live-runtime claim; it does not negate source or projection evidence.
 - Runtime projection: `.agents/skills/telos`.
 - Personal backup: `<userDir>/TELOS/Backups/<FILE>-<timestamp>.md`.
 - Personal changelog: existing `updates.md` or `Updates.md`.
-- Derived reports or dashboards: the user-approved project output directory.
+- Derived reports or dashboards: the user-approved project output directory;
+  this package intentionally carries no executable web-app template.
 
 Keep generated runtime-proof evidence, caches, private TELOS data, and local
 build output out of the canonical package.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[interview-me]] | Run conversational constitutional review and structured extraction before a personal TELOS update |
+| [[architecture-interview]] | Analyze project relationships without treating mutable project truth as personal TELOS |

@@ -34,7 +34,16 @@
  * - WRONG.md - Things I was wrong about
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
+import {
+  closeSync,
+  ftruncateSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'fs';
 import { join, resolve } from 'path';
 import { pathToFileURL } from 'url';
 
@@ -52,12 +61,21 @@ const BACKUPS_DIR = join(TELOS_DIR, 'Backups');
 // 'Updates.md'; the docs and scaffold use 'updates.md'), so case-sensitive
 // filesystems never fork the changelog into two files (public issue #1452).
 // When neither exists it is created lazily as lowercase 'updates.md'.
-function resolveUpdatesFile(): string {
+function hasErrorCode(error: unknown, code: string): boolean {
+  return typeof error === 'object' && error !== null && Reflect.get(error, 'code') === code;
+}
+
+function openUpdatesFile(): { fd: number; path: string } {
   const lower = join(TELOS_DIR, 'updates.md');
   const upper = join(TELOS_DIR, 'Updates.md');
-  if (existsSync(lower)) return lower;
-  if (existsSync(upper)) return upper;
-  return lower;
+  for (const path of [lower, upper]) {
+    try {
+      return { fd: openSync(path, 'r+'), path };
+    } catch (error) {
+      if (!hasErrorCode(error, 'ENOENT')) throw error;
+    }
+  }
+  return { fd: openSync(lower, 'wx+'), path: lower };
 }
 
 // Valid TELOS files
@@ -123,24 +141,30 @@ export async function main() {
 
   const targetFile = join(TELOS_DIR, filename);
 
-  // A valid file that isn't scaffolded yet is created as a minimal starter
-  // instead of hard-failing — the scaffold ships only a subset of VALID_FILES,
-  // and this tool is the sole sanctioned write path (public issue #1452).
-  if (!existsSync(targetFile)) {
+  // Open the target once and retain that descriptor through backup and write.
+  // This prevents a path replacement between the pre-write read and mutation.
+  mkdirSync(TELOS_DIR, { recursive: true });
+  let targetFd: number;
+  try {
+    targetFd = openSync(targetFile, 'r+');
+  } catch (error) {
+    if (!hasErrorCode(error, 'ENOENT')) throw error;
     const title = filename.replace('.md', '');
-    mkdirSync(TELOS_DIR, { recursive: true });
-    writeFileSync(targetFile, `# ${title}\n`, 'utf-8');
+    targetFd = openSync(targetFile, 'wx+');
+    writeFileSync(targetFd, `# ${title}\n`, 'utf-8');
     console.log(`✅ Created starter file: ${filename}`);
   }
 
-  // Step 1: Create timestamped backup
+  const currentContent = readFileSync(targetFd, 'utf-8');
+
+  // Step 1: Create timestamped backup from the opened target bytes.
   const timestamp = await getLocalTimestamp();
   const backupFilename = filename.replace('.md', `-${timestamp}.md`);
   const backupPath = join(BACKUPS_DIR, backupFilename);
 
   try {
     mkdirSync(BACKUPS_DIR, { recursive: true });
-    copyFileSync(targetFile, backupPath);
+    writeFileSync(backupPath, currentContent, { encoding: 'utf-8', flag: 'wx' });
     console.log(`✅ Backup created: ${backupFilename}`);
     // Rolling window: keep the 3 newest backups per file. Git is the durable
     // history; these only cover the gap before the next repo sync (79 stale
@@ -161,7 +185,6 @@ export async function main() {
   // that footer, not after it (public issue #1452). Files without the footer
   // shape keep the plain EOF append.
   try {
-    const currentContent = readFileSync(targetFile, 'utf-8');
     let updatedContent: string;
     const footerIdx = currentContent.lastIndexOf('\n---\n');
     const footer = footerIdx === -1 ? '' : currentContent.slice(footerIdx);
@@ -171,7 +194,9 @@ export async function main() {
     } else {
       updatedContent = currentContent.trimEnd() + '\n' + content + '\n';
     }
-    writeFileSync(targetFile, updatedContent, 'utf-8');
+    ftruncateSync(targetFd, 0);
+    writeFileSync(targetFd, updatedContent, { encoding: 'utf-8', flag: 'r+' });
+    closeSync(targetFd);
     console.log(`✅ Updated: ${filename}`);
   } catch (error) {
     console.error(`❌ Failed to update file: ${error}`);
@@ -191,12 +216,11 @@ export async function main() {
 
 `;
 
-    const updatesFile = resolveUpdatesFile();
-    // Create-instead-of-throw: fresh installs ship no changelog file (#1452).
-    if (!existsSync(updatesFile)) {
-      writeFileSync(updatesFile, '# TELOS Updates\n\nChangelog of TELOS file updates, newest first.\n', 'utf-8');
+    const updatesFile = openUpdatesFile();
+    let updatesContent = readFileSync(updatesFile.fd, 'utf-8');
+    if (updatesContent.length === 0) {
+      updatesContent = '# TELOS Updates\n\nChangelog of TELOS file updates, newest first.\n';
     }
-    const updatesContent = readFileSync(updatesFile, 'utf-8');
 
     // Insert the new entry after "## Future Changes" section
     const futureChangesMarker = '## Future Changes';
@@ -212,12 +236,16 @@ export async function main() {
       const changesList = afterMarker.substring(nextLineBreak + 1);
 
       const updatedUpdates = beforeMarker + headerSection + logEntry + changesList;
-      writeFileSync(updatesFile, updatedUpdates, 'utf-8');
+      ftruncateSync(updatesFile.fd, 0);
+      writeFileSync(updatesFile.fd, updatedUpdates, { encoding: 'utf-8', flag: 'r+' });
+      closeSync(updatesFile.fd);
       console.log(`✅ Change logged in updates.md`);
     } else {
       // Fallback: just append
       const updatedUpdates = updatesContent.trimEnd() + '\n' + logEntry;
-      writeFileSync(updatesFile, updatedUpdates, 'utf-8');
+      ftruncateSync(updatesFile.fd, 0);
+      writeFileSync(updatesFile.fd, updatedUpdates, { encoding: 'utf-8', flag: 'r+' });
+      closeSync(updatesFile.fd);
       console.log(`✅ Change logged in updates.md (appended)`);
     }
   } catch (error) {
