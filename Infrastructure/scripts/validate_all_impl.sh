@@ -387,15 +387,40 @@ is_program_design_scanned_path() {
 
 source_has_python_shebang() {
   local changed_file="$1"
+  local matcher_index
+  local probe_index
+  local -a probe_status
   if [[ "$staged_source_mode" -eq 1 ]]; then
+    git cat-file -e ":$changed_file" 2>/dev/null || return 1
     git show ":$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ "$head_source_mode" -eq 1 ]]; then
+    git cat-file -e "HEAD:$changed_file" 2>/dev/null || return 1
     git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ -f "$changed_file" ]]; then
     LC_ALL=C head -n 1 "$changed_file" 2>/dev/null | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+  elif [[ -e "$changed_file" ]]; then
+    printf 'error: changed source is not a regular file: %s\n' "$changed_file" >&2
+    return 2
   else
     return 1
   fi
+
+  probe_status=("${PIPESTATUS[@]}")
+  matcher_index=$((${#probe_status[@]} - 1))
+  for ((probe_index = 0; probe_index < matcher_index; probe_index++)); do
+    if [[ "${probe_status[probe_index]}" -ne 0 ]]; then
+      printf 'error: failed to read changed source for shebang classification: %s\n' "$changed_file" >&2
+      return 2
+    fi
+  done
+  case "${probe_status[matcher_index]}" in
+    0) return 0 ;;
+    1) return 1 ;;
+    *)
+      printf 'error: failed to classify changed source shebang: %s\n' "$changed_file" >&2
+      return 2
+      ;;
+  esac
 }
 
 # run_check prints a label, executes the check and records pass/fail outcomes.
@@ -640,9 +665,15 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     esac
 
     if is_program_design_scanned_path "$changed_file"; then
-      if [[ "$changed_file" == *.py || "$changed_file" == *.pyw ]] || \
-        source_has_python_shebang "$changed_file"; then
+      if [[ "$changed_file" == *.py || "$changed_file" == *.pyw ]]; then
         scope_has_python_quality=1
+      elif source_has_python_shebang "$changed_file"; then
+        scope_has_python_quality=1
+      else
+        python_shebang_status=$?
+        if [[ "$python_shebang_status" -gt 1 ]]; then
+          exit 1
+        fi
       fi
     fi
 

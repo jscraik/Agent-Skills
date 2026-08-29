@@ -174,6 +174,7 @@ def test_blob_sources_keep_large_python_shebang_matches() -> None:
             cwd=repo.root,
             check=True,
         )
+        entrypoint.write_text("not a Python entrypoint\n", encoding="utf-8")
 
         for source_mode in ("--staged-source", "--head-source"):
             proc = repo.run("--persistent", "--scope", "lint", source_mode, "--changed-files", changed_file)
@@ -195,6 +196,18 @@ def test_lint_changed_binary_file_emits_no_null_byte_warning() -> None:
 
         assert proc.returncode == 0, proc.stdout + proc.stderr
         assert "ignored null byte in input" not in proc.stderr
+
+
+def test_changed_non_regular_source_fails_closed() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run"
+        (repo.root / changed_file).mkdir(parents=True)
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode != 0
+        assert f"changed source is not a regular file: {changed_file}" in proc.stderr
 
 
 def test_lint_changed_unscanned_python_wrapper_falls_back_to_required_baseline() -> None:
