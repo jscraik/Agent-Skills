@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -157,6 +158,29 @@ def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
         assert args is not None
         assert "--changed-files" in args
         assert changed_file in args
+
+
+def test_blob_sources_keep_large_python_shebang_matches() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_bytes(b"#!/usr/bin/env python3\n" + b"x" * (8 * 1024 * 1024))
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(["git", "add", changed_file], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "probe"],
+            cwd=repo.root,
+            check=True,
+        )
+
+        for source_mode in ("--staged-source", "--head-source"):
+            proc = repo.run("--persistent", "--scope", "lint", source_mode, "--changed-files", changed_file)
+            assert proc.returncode == 0, proc.stdout + proc.stderr
+            assert repo.recorded_args_for(
+                "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
+            ) is not None
 
 
 def test_lint_changed_binary_file_emits_no_null_byte_warning() -> None:
