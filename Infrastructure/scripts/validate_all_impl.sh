@@ -389,15 +389,16 @@ source_has_python_shebang() {
   local changed_file="$1"
   local matcher_index
   local probe_index
+  local shebang_probe_bytes=4096
   local -a probe_status
   if [[ "$staged_source_mode" -eq 1 ]]; then
     git cat-file -e ":$changed_file" 2>/dev/null || return 1
-    git show ":$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+    git show ":$changed_file" 2>/dev/null | LC_ALL=C head -c "$shebang_probe_bytes" | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ "$head_source_mode" -eq 1 ]]; then
     git cat-file -e "HEAD:$changed_file" 2>/dev/null || return 1
-    git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+    git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C head -c "$shebang_probe_bytes" | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ -f "$changed_file" ]]; then
-    LC_ALL=C head -n 1 "$changed_file" 2>/dev/null | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+    LC_ALL=C head -c "$shebang_probe_bytes" "$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ -e "$changed_file" ]]; then
     printf 'error: changed source is not a regular file: %s\n' "$changed_file" >&2
     return 2
@@ -408,6 +409,13 @@ source_has_python_shebang() {
   probe_status=("${PIPESTATUS[@]}")
   matcher_index=$((${#probe_status[@]} - 1))
   for ((probe_index = 0; probe_index < matcher_index; probe_index++)); do
+    if [[ "${probe_status[probe_index]}" -eq 0 ]]; then
+      continue
+    fi
+    if [[ "$probe_index" -eq 0 && "${probe_status[probe_index]}" -eq 141 && \
+      ("$staged_source_mode" -eq 1 || "$head_source_mode" -eq 1) ]]; then
+      continue
+    fi
     if [[ "${probe_status[probe_index]}" -ne 0 ]]; then
       printf 'error: failed to read changed source for shebang classification: %s\n' "$changed_file" >&2
       return 2
