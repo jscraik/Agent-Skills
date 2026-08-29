@@ -94,7 +94,9 @@ jobs:
 
       - name: Run Vale
         run: |
-          mise exec -- vale --config .vale.ini sync
+          if grep -Eq '^[[:space:]]*Packages[[:space:]]*=' .vale.ini; then
+            mise exec -- vale --config .vale.ini sync
+          fi
           mise exec -- vale --config .vale.ini --minAlertLevel=error README.md SKILL.md
 
       - name: Publish lint summary
