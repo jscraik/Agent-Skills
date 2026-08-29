@@ -95,9 +95,9 @@ jobs:
       - name: Run Vale
         run: |
           if grep -Eq '^[[:space:]]*Packages[[:space:]]*=' .vale.ini; then
-            mise exec -- vale --config .vale.ini sync
+            vale --config .vale.ini sync
           fi
-          mise exec -- vale --config .vale.ini --minAlertLevel=error README.md SKILL.md
+          vale --config .vale.ini --minAlertLevel=error README.md SKILL.md
 
       - name: Publish lint summary
         if: always()
