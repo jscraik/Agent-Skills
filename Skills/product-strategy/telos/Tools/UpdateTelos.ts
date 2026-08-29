@@ -110,13 +110,13 @@ function openNoFollow(path: string, flags: number): number {
     throw new Error('This platform does not support no-follow file opens');
   }
   try {
-    if (lstatSync(path).isSymbolicLink()) {
+    return openSync(path, flags | constants.O_NOFOLLOW, 0o600);
+  } catch (error) {
+    if (hasErrorCode(error, 'ELOOP')) {
       throw new Error(`Refusing to open symlink: ${path}`);
     }
-  } catch (error) {
-    if (!hasErrorCode(error, 'ENOENT')) throw error;
+    throw error;
   }
-  return openSync(path, flags | constants.O_NOFOLLOW, 0o600);
 }
 
 function validateUpdatesPaths(): void {
