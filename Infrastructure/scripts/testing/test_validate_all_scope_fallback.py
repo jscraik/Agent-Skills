@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -159,6 +160,57 @@ def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
         assert changed_file in args
 
 
+def test_blob_sources_keep_large_python_shebang_matches() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run"
+        entrypoint = repo.root / changed_file
+        entrypoint.parent.mkdir(parents=True, exist_ok=True)
+        entrypoint.write_bytes(b"#!/usr/bin/env python3\n" + b"x" * (8 * 1024 * 1024))
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(["git", "add", changed_file], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "probe"],
+            cwd=repo.root,
+            check=True,
+        )
+        entrypoint.write_text("not a Python entrypoint\n", encoding="utf-8")
+
+        for source_mode in ("--staged-source", "--head-source"):
+            proc = repo.run("--persistent", "--scope", "lint", source_mode, "--changed-files", changed_file)
+            assert proc.returncode == 0, proc.stdout + proc.stderr
+            assert "Changed-files scope classification missed all known buckets" not in proc.stdout
+            assert repo.recorded_args_for(
+                "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
+            ) is not None
+
+
+def test_lint_changed_binary_file_emits_no_null_byte_warning() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Skills/example/assets/font.woff2"
+        binary = repo.root / changed_file
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b"wOF2\x00binary-font-data")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "ignored null byte in input" not in proc.stderr
+
+
+def test_changed_non_regular_source_fails_closed() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts/run"
+        (repo.root / changed_file).mkdir(parents=True)
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode != 0
+        assert f"changed source is not a regular file: {changed_file}" in proc.stderr
+
+
 def test_lint_changed_unscanned_python_wrapper_falls_back_to_required_baseline() -> None:
     with TemporaryDirectory() as tmpdir:
         repo = FakeRepo(Path(tmpdir))
@@ -178,3 +230,53 @@ def test_head_source_probes_extensionless_shebang_from_head() -> None:
         repo = FakeRepo(Path(tmpdir))
         impl_text = (repo.root / "Infrastructure/scripts/validate_all_impl.sh").read_text(encoding="utf-8")
         assert 'git show "HEAD:$changed_file"' in impl_text
+
+
+def test_head_source_rejects_tree_path() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts"
+        tracked_file = repo.root / changed_file / "run"
+        tracked_file.parent.mkdir(parents=True, exist_ok=True)
+        tracked_file.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(["git", "add", changed_file], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "probe"],
+            cwd=repo.root,
+            check=True,
+        )
+
+        proc = repo.run("--persistent", "--scope", "lint", "--head-source", "--changed-files", changed_file)
+
+        assert proc.returncode != 0
+        assert f"changed HEAD source is a tree: {changed_file}" in proc.stderr
+
+
+def test_head_source_treats_gitlink_as_non_shebang() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example"
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-qm", "base"],
+            cwd=repo.root,
+            check=True,
+        )
+        commit_oid = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo.root, text=True).strip()
+        subprocess.run(
+            ["git", "update-index", "--add", "--cacheinfo", f"160000,{commit_oid},{changed_file}"],
+            cwd=repo.root,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "gitlink"],
+            cwd=repo.root,
+            check=True,
+        )
+
+        proc = repo.run("--persistent", "--scope", "lint", "--head-source", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "Changed-files scope classification missed all known buckets" in proc.stdout
+        assert "unsupported HEAD source object type" not in proc.stderr
