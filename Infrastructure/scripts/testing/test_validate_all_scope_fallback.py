@@ -250,4 +250,33 @@ def test_head_source_rejects_tree_path() -> None:
         proc = repo.run("--persistent", "--scope", "lint", "--head-source", "--changed-files", changed_file)
 
         assert proc.returncode != 0
-        assert f"changed HEAD source is not a blob: {changed_file}" in proc.stderr
+        assert f"changed HEAD source is a tree: {changed_file}" in proc.stderr
+
+
+def test_head_source_treats_gitlink_as_non_shebang() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example"
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-qm", "base"],
+            cwd=repo.root,
+            check=True,
+        )
+        commit_oid = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo.root, text=True).strip()
+        subprocess.run(
+            ["git", "update-index", "--add", "--cacheinfo", f"160000,{commit_oid},{changed_file}"],
+            cwd=repo.root,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "gitlink"],
+            cwd=repo.root,
+            check=True,
+        )
+
+        proc = repo.run("--persistent", "--scope", "lint", "--head-source", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "Changed-files scope classification missed all known buckets" in proc.stdout
+        assert "unsupported HEAD source object type" not in proc.stderr

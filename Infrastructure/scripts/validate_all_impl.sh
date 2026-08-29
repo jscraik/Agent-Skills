@@ -399,10 +399,18 @@ source_has_python_shebang() {
     if ! source_object_type=$(git cat-file -t "HEAD:$changed_file" 2>/dev/null); then
       return 1
     fi
-    if [[ "$source_object_type" != "blob" ]]; then
-      printf 'error: changed HEAD source is not a blob: %s\n' "$changed_file" >&2
-      return 2
-    fi
+    case "$source_object_type" in
+      blob) ;;
+      commit) return 1 ;;
+      tree)
+        printf 'error: changed HEAD source is a tree: %s\n' "$changed_file" >&2
+        return 2
+        ;;
+      *)
+        printf 'error: unsupported HEAD source object type %s: %s\n' "$source_object_type" "$changed_file" >&2
+        return 2
+        ;;
+    esac
     git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C head -c "$shebang_probe_bytes" | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ -f "$changed_file" ]]; then
     LC_ALL=C head -c "$shebang_probe_bytes" "$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
