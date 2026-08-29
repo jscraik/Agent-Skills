@@ -390,12 +390,19 @@ source_has_python_shebang() {
   local matcher_index
   local probe_index
   local shebang_probe_bytes=4096
+  local source_object_type
   local -a probe_status
   if [[ "$staged_source_mode" -eq 1 ]]; then
     git cat-file -e ":$changed_file" 2>/dev/null || return 1
     git show ":$changed_file" 2>/dev/null | LC_ALL=C head -c "$shebang_probe_bytes" | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ "$head_source_mode" -eq 1 ]]; then
-    git cat-file -e "HEAD:$changed_file" 2>/dev/null || return 1
+    if ! source_object_type=$(git cat-file -t "HEAD:$changed_file" 2>/dev/null); then
+      return 1
+    fi
+    if [[ "$source_object_type" != "blob" ]]; then
+      printf 'error: changed HEAD source is not a blob: %s\n' "$changed_file" >&2
+      return 2
+    fi
     git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C head -c "$shebang_probe_bytes" | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
   elif [[ -f "$changed_file" ]]; then
     LC_ALL=C head -c "$shebang_probe_bytes" "$changed_file" 2>/dev/null | LC_ALL=C sed -n '1p' | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null

@@ -230,3 +230,24 @@ def test_head_source_probes_extensionless_shebang_from_head() -> None:
         repo = FakeRepo(Path(tmpdir))
         impl_text = (repo.root / "Infrastructure/scripts/validate_all_impl.sh").read_text(encoding="utf-8")
         assert 'git show "HEAD:$changed_file"' in impl_text
+
+
+def test_head_source_rejects_tree_path() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Plugins/example/scripts"
+        tracked_file = repo.root / changed_file / "run"
+        tracked_file.parent.mkdir(parents=True, exist_ok=True)
+        tracked_file.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+        subprocess.run(["git", "init", "-q"], cwd=repo.root, check=True)
+        subprocess.run(["git", "add", changed_file], cwd=repo.root, check=True)
+        subprocess.run(
+            ["git", "-c", "user.name=Probe", "-c", "user.email=probe@example.com", "-c", "commit.gpgsign=false", "commit", "-qm", "probe"],
+            cwd=repo.root,
+            check=True,
+        )
+
+        proc = repo.run("--persistent", "--scope", "lint", "--head-source", "--changed-files", changed_file)
+
+        assert proc.returncode != 0
+        assert f"changed HEAD source is not a blob: {changed_file}" in proc.stderr
