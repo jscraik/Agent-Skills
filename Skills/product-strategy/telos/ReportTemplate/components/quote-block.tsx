@@ -1,9 +1,16 @@
-interface QuoteBlockProps {
+export interface QuoteBlockProps {
   quote: string
   attribution: string
   role?: string
 }
 
+/**
+ * Renders a quoted observation with attribution.
+ *
+ * `quote` and `attribution` are required and rendered verbatim. `role` is
+ * optional; when supplied it is appended after the attribution, and when
+ * omitted no role punctuation or placeholder is rendered.
+ */
 export function QuoteBlock({ quote, attribution, role }: QuoteBlockProps) {
   return (
     <div className="quote-block">

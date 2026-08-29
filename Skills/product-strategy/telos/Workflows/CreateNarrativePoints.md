@@ -8,7 +8,7 @@ This is NOT a bullet-point list. This is a STORY with emotional arc, tension, an
 
 ## The Narrative Arc
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │  1. OPENING     2. BAD NEWS     3. EVIDENCE     4. STAKES           │
 │  "You asked"    "Yes, it's      "Here are      "You might not      │
@@ -32,6 +32,7 @@ This is NOT a bullet-point list. This is a STORY with emotional arc, tension, an
 | `source` | Yes | - | TELOS directory, analysis output, or context to analyze |
 | `client_ask` | Yes | - | What the client originally asked for (in their words) |
 | `vision` | No | - | The solution architecture/vision (if already defined) |
+| `artifact_dir` | For `WriteReport` | - | New caller-owned output directory for the complete five-file report artifact set |
 
 ---
 
@@ -57,19 +58,20 @@ This is NOT a bullet-point list. This is a STORY with emotional arc, tension, an
 
 ### Section 2: The Bad News (Deliver the Truth)
 
-**Purpose:** Rip off the band-aid. No softening. Direct hit.
+**Purpose:** Deliver the material conclusion directly without overstating the evidence.
 
 **Template:**
 > "The unfortunate news is yes, [CONFIRM THEIR FEARS]. And it's actually worse. [ESCALATE TO EXISTENTIAL]. Based on what we found, [STARK CONSEQUENCE]."
 
 **Key Elements:**
-- Confirm what they suspected (validates their instincts)
-- Escalate beyond their expectations ("it's actually worse")
-- State the existential consequence plainly
-- No hedge words, no qualifiers, no softening
+- Cite the exact source for every observation used in the conclusion.
+- Label each material statement as an **observation**, **inference**, or **unknown** before drafting the prose.
+- Preserve source qualifiers such as estimates, reported beliefs, time bounds, and disputes.
+- State supported consequences plainly, but use calibrated qualifiers when evidence is incomplete, stale, or disputed.
+- Never present an inference as an observed fact or fill an unknown with a plausible claim.
 
 **Example:**
-> "The unfortunate news is yes, they are actually that bad. And it's actually worse. Basically, you might not have a company in five years based on the problems we found."
+> "The current evidence shows three recurring delivery failures [observation; sources: operations review and two role-based interviews]. If that pattern continues, the five-year growth target is unlikely to be met [inference]. The available sources do not establish the churn impact [unknown]."
 
 ---
 
@@ -271,7 +273,7 @@ Write each of the 8 sections in order:
 
 **Checklist:**
 - [ ] Opening references their exact words/ask
-- [ ] Bad news is direct, no hedging
+- [ ] Bad news is direct while preserving every material source qualifier
 - [ ] Evidence is specific and sourced
 - [ ] Stakes are existential, not incremental
 - [ ] Pivot provides genuine hope
@@ -295,13 +297,13 @@ Write each of the 8 sections in order:
 
 **DO:**
 - Use "you" and "your" - this is personal
-- State hard truths without softening
+- State supported hard truths without erasing uncertainty or source qualifiers
 - Back up claims with evidence
 - Paint a compelling future
 - End with their agency
 
 **DON'T:**
-- Hedge with "maybe," "perhaps," "consider"
+- Add unsupported uncertainty language or remove uncertainty present in the source
 - Use corporate buzzwords
 - Be negative without offering a path forward
 - Overwhelm with too many problems (8-12 max)
@@ -316,87 +318,112 @@ Write each of the 8 sections in order:
 
 ### Opening
 
-Look, you asked us to come in and assess whether you can scale from 200 to 2,000
-customers in the next few years - which is something the Board is basically asking
-you to do based on the money that was raised. And you wanted to know how bad the
-problems really were and if they were going to stop you from doing that.
+You asked us to assess whether the current operating model can support the growth
+target recorded in the engagement brief [observation; source: client ask]. The
+available material does not establish whether the board has approved that target
+[unknown].
 
 ### The Bad News
 
-The unfortunate news is yes, they are actually that bad. And it's actually worse.
-Basically, you might not have a company in five years based on the problems we found.
+The reviewed sources consistently describe recurring delivery failures
+[observation; sources: operations review and role-based interviews]. If that
+pattern continues, the growth target is unlikely to be met [inference; qualifier:
+no independently verified forecast was supplied]. The sources do not establish
+the five-year survival outcome [unknown].
 
 ### The Evidence
 
-Here are the problems:
+Here is the classified evidence:
 
-1. Three acquisitions created three cultures that still fight each other instead of collaborating
-2. You're spending £3.5M/year on platform development that's completely orthogonal to your services team
-3. Customer satisfaction is declining despite 99.98% SLA performance - you can't communicate value
-4. Kivu is converting zero percent of IR cases to managed services vs your 75% historical target
-5. Your data is fragmented across eight systems with no unified view of any customer
-6. Teams don't know what the priority is because it changes every few weeks
-7. You're building ticketing systems instead of actual competitive differentiation
-8. Nobody owns the customer journey, customer experience, or customer narrative
-9. Microsoft is about to commoditize your core MDR offering with free E5 bundles
+1. Role-based interviews report unresolved coordination problems across acquired teams [observation; qualifier: interview evidence, not an organization-wide survey].
+2. The supplied finance extract records material platform expenditure [observation; qualifier: unaudited management data].
+3. The supplied customer series trends downward during the measured period [observation; qualifier: the period and sample are limited to the supplied dataset].
+4. Fragmented customer records may delay cross-team decisions [inference; qualifier: causal impact has not been measured].
+5. The current sources do not identify an accountable owner for the end-to-end customer journey [unknown].
 
 ### The Stakes
 
-Because of the Microsoft commoditization threat, because of the severity of these
-problems, and because they are getting worse - not better - the odds of you being
-around in five years are not good.
+If the observed delivery pattern continues while the reported market pressure
+materializes, the transformation target is at risk [inference]. The probability
+and timing of that market pressure remain unverified [unknown].
 
 ### The Pivot
 
-The good news is there is a solution. But it will require extraordinary courage
-from all leaders and full belief that it's not possible to do this partially -
-it has to be done all the way.
+The evidence supports testing a coordinated operating-model change
+[recommendation]. Whether that change will produce the target outcomes remains
+unknown until the team defines and measures a bounded pilot.
 
 ### The Requirements
 
-Here's what "all the way" means:
+The proposed pilot requires these owner decisions:
 
-- Collapse the three cultures into one team with one priority
-- Stop the priority whiplash - commit to 3 things for 6 months minimum
-- Integrate platform and services teams - they build together or not at all
-- Fix Kivu leadership before your panel access rots away
-- Accept that building differentiation matters more than building features
+- Name one accountable owner and one measured outcome.
+- Select a bounded team and time period using supplied constraints.
+- Record which initiatives pause during the pilot.
+- Define rollback criteria before implementation begins.
 
 ### The Vision
 
-Here's what the solution looks like:
-
-Capture SOPs and context for every business unit and department. Create AI agents
-that are experts in those areas - agents that can answer any question from another
-agent or from a human about those business areas.
-
-And what's even more powerful - you can have a top-level internal agent that can
-ask any of those sub-agents to get current state for anything in the company.
-"What's our customer satisfaction trend?" - synthesized answer in seconds.
-
-Not only that, but you can do the same thing for all your customers - a high-level
-customer agent able to ask questions and have them answered for your entire customer
-base. "Which customers need attention right now?" - prioritized list with reasons.
-
-This is how you deliver on "you know my company better than I do" - not through
-UI duct tape and PowerPoint archaeology, but through intelligent synthesis.
+The proposed target state captures approved procedures and evidence in one
+governed retrieval path [recommendation]. This may reduce time spent locating
+current information [inference; qualifier: no runtime benchmark has been run].
+Coverage, answer quality, and customer-level use remain unknown until the pilot
+defines its corpus, access policy, evaluation set, and acceptance threshold.
 
 ### The Close
 
-This is an extraordinary architecture. It is the perfect time to implement it.
-If you do it, you will not just survive - you will thrive and crush your competition.
-You will be able to scale from 200 to 2,000 customers with this architecture.
-
-But it's going to require extraordinary courage to pull it off.
+The evidence justifies a decision on the bounded pilot [inference]. It does not
+establish that the proposed architecture guarantees scale, survival, or a
+competitive outcome [unknown]. Leadership must decide whether the measured
+upside, cost, and rollback boundary warrant proceeding.
 ```
 
 ---
 
 ## Integration Notes
 
+### Report artifact producer contract
+
+When `WriteReport` is selected, this workflow is the producer for the five JSON
+artifacts consumed by that report. Write them together to the caller-provided
+`{artifact_dir}` only after the complete source review:
+
+- `findings.json`: sourced findings. Preserve an `epistemicStatus` of
+  `observation`, `inference`, or `unknown` and any material `qualifiers` on each
+  finding; do not promote unknowns into findings.
+- `recommendations.json`: source-grounded recommendations whose rationale is
+  traceable to the findings.
+- `roadmap.json`: phases supported by supplied decisions and dependencies; do
+  not invent owners, dates, or durations.
+- `methodology.json`: only observed interview counts and role categories.
+- `narrative.json`: the eight-section narrative fields, including the exact
+  report date and risk matrix.
+
+If any required field cannot be sourced truthfully, return a missing-evidence
+blocker and write none of the five files. The workflow must first write its
+source-grounded JSON payloads to a new sibling
+staging directory `{draft_dir}`. Materialize that
+draft with the repository producer below; it copies the exact bytes, validates
+all five files, and exclusively reserves `{artifact_dir}` before population.
+It writes a deterministic completion marker last, after validation. Readers
+must require and validate that marker before treating the directory as
+published; source and draft validation remains separate and does not require
+the marker. The producer never invents content, merges evidence, or overwrites
+an existing directory.
+
+```bash
+python3 "{REPO_ROOT}/Skills/product-strategy/telos/Tools/validate_report_artifacts.py" \
+  --produce "{draft_dir}" "{artifact_dir}"
+```
+
+A validation, collision, reservation, or completion-marker failure blocks
+`WriteReport`. A failed producer empties only its still-owned reservation but
+retains that empty incomplete directory because this platform has no safe
+unlink-directory-by-handle primitive. The directory has no completion marker,
+so published readers reject it as non-consumable.
+
 **Works with:**
 - `InterviewExtraction` workflow output (provides evidence)
-- `AnalyzeProjectWithGemini3` workflow output (provides analysis)
 - Direct TELOS directory analysis
 - Any structured consulting context
 

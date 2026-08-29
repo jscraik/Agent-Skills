@@ -44,14 +44,16 @@ Extract standardized insights from interviews and notes into categorized output 
    - Identify any naming patterns that indicate speaker/source
 
 2. **Report File Inventory**
-   ```
+
+   ```text
    Found X interview files across Y directories:
    - [list files with paths]
    ```
 
 ### Phase 2: Deep Analysis (Ultrathink)
 
-**MANDATORY: Activate Ultrathink (be-creative skill) for extraction quality**
+Use the repository's documented reasoning and evidence standards for extraction
+quality. This workflow has no dependency on another skill or runtime plugin.
 
 For each file:
 
@@ -162,7 +164,29 @@ For each file:
 
 ### Phase 4: Output Generation
 
-Generate 13 output files at the **top level** of the target directory.
+Generate 13 output files in a caller-supplied `{OUTPUT_DIR}` only after explicit
+user approval of that exact destination. Approval must name the source directory,
+the output directory, and the extraction operation. The output directory must be
+outside the recursively scanned target directory, must not already exist, and
+must not be scanned as an input on a later run.
+
+Before scanning, resolve both paths and fail closed when the output is nested under
+the input or is a fixed-name reuse. Exclude `{OUTPUT_DIR}` from discovery and write
+only to that directory. A missing approval, an existing destination, or a path
+collision is a blocker; do not delete or merge an existing output.
+
+```bash
+source_real="$(cd -- "{TARGET_DIR}" && pwd -P)"
+output_real="$(cd -- "$(dirname -- "{OUTPUT_DIR}")" && pwd -P)/$(basename -- "{OUTPUT_DIR}")"
+case "$output_real/" in
+  "$source_real/"*) echo "OUTPUT_DIR must be outside TARGET_DIR" >&2; exit 2 ;;
+esac
+if [ -e "{OUTPUT_DIR}" ] || [ -L "{OUTPUT_DIR}" ]; then
+  echo "OUTPUT_DIR must be a new directory" >&2
+  exit 2
+fi
+mkdir "{OUTPUT_DIR}"
+```
 
 **Output File Template:**
 
@@ -244,7 +268,7 @@ After generating all files, output a summary:
 
 ## Example Usage
 
-```
+```text
 User: "Extract content from /path/to/interviews"
 
 {DA_IDENTITY.NAME}:
@@ -252,7 +276,7 @@ User: "Extract content from /path/to/interviews"
 2. Activates Ultrathink for deep analysis
 3. Processes each file, extracting to 13 categories
 4. Consolidates and deduplicates
-5. Generates 13 output files at /path/to/interviews/
+5. After approval, generates 13 output files at /tmp/telos-extraction-output/
 6. Reports summary with counts and patterns
 ```
 

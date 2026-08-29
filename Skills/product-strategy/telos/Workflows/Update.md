@@ -11,7 +11,10 @@ When {PRINCIPAL.NAME} wants to update TELOS, you guide him through the process c
 
 # CONTEXT
 
-TELOS is {PRINCIPAL.NAME}'s life framework stored in `${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}/USER/TELOS/`. It contains:
+TELOS is {PRINCIPAL.NAME}'s life framework stored under the explicit
+`LIFEOS_DIR` or `CODEX_LIFEOS_DIR` root. The canonical TELOS directory is
+`LifeosConfig.paths.userDir/TELOS`; never reconstruct it as `<root>/USER/TELOS`.
+It contains:
 
 **Core Philosophy:**
 - TELOS.md - Main framework document
@@ -41,7 +44,7 @@ TELOS is {PRINCIPAL.NAME}'s life framework stored in `${LIFEOS_DIR:-${CODEX_LIFE
 
 **Change Tracking:**
 - updates.md - Comprehensive change log
-- backups/ - Timestamped backups of all changes
+- Backups/ - Timestamped backups of all changes
 
 ## When to Use This Command
 
@@ -67,18 +70,19 @@ When {PRINCIPAL.NAME} wants to update TELOS:
 
 1. **Understand the update**: What is he adding? Which file(s) need updating?
 2. **Confirm the details**: Verify the content and which file to update
-3. **Execute the update**: Use the update-telos script with proper parameters
+3. **Execute the update**: Use the update-telos script with JSON on stdin
 4. **Confirm success**: Let {PRINCIPAL.NAME} know the update was recorded and backed up
 
 # COMMANDS
 
 ## Update TELOS File (Guided)
-This is the main command you'll use. It takes three parameters:
+This is the main command you'll use. It takes the file name as its only
+argument and reads a JSON object from stdin. Keep personal content and
+descriptions out of command arguments and shell history:
 - File name (e.g., BOOKS.md, BELIEFS.md)
-- Content to add (the actual text)
-- Description of the change (for the changelog)
+- JSON stdin: `{"content":"...", "changeDescription":"..."}`
 
-!`FILE="$1"; CONTENT="$2"; DESCRIPTION="$3"; LIFEOS_DIR="${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}" bun "${CODEX_HOME:-$HOME/.codex}/skills/Telos/Tools/UpdateTelos.ts" "$FILE" "$CONTENT" "$DESCRIPTION"`
+!`FILE="$1"; : "${LIFEOS_DIR:=${CODEX_LIFEOS_DIR:?Set LIFEOS_DIR or CODEX_LIFEOS_DIR explicitly}}"; jq -ce 'if ((.content | type) == "string" and (.content | length) > 0 and (.changeDescription | type) == "string" and (.changeDescription | length) > 0) then . else error("content and changeDescription must be non-empty strings") end' | LIFEOS_DIR="$LIFEOS_DIR" bun "${CODEX_HOME:-$HOME/.codex}/skills/telos/Tools/UpdateTelos.ts" "$FILE"`
 
 ## List Valid TELOS Files
 !`echo "Valid TELOS files:
@@ -102,10 +106,10 @@ This is the main command you'll use. It takes three parameters:
 - WRONG.md - Things I was wrong about"`
 
 ## View Recent TELOS Updates
-!`head -50 ${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}/USER/TELOS/updates.md`
+!`: "${LIFEOS_DIR:=${CODEX_LIFEOS_DIR:?Set LIFEOS_DIR or CODEX_LIFEOS_DIR explicitly}}"; LIFEOS_DIR="$LIFEOS_DIR" bun -e 'const module = await import(`${process.env.CODEX_HOME ?? `${process.env.HOME}/.codex`}/skills/telos/Tools/UpdateTelos.ts`); const lower = `${module.TELOS_DIR}/updates.md`; const upper = `${module.TELOS_DIR}/Updates.md`; const path = await Bun.file(lower).exists() ? lower : upper; const text = await Bun.file(path).text(); process.stdout.write(text.split(/(?<=\n)/).slice(0, 50).join(""));'`
 
 ## View Specific TELOS File
-!`FILE="$1"; cat ${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}/USER/TELOS/"$FILE"`
+!`FILE="$1"; : "${LIFEOS_DIR:=${CODEX_LIFEOS_DIR:?Set LIFEOS_DIR or CODEX_LIFEOS_DIR explicitly}}"; LIFEOS_DIR="$LIFEOS_DIR" FILE="$FILE" bun -e 'const module = await import(`${process.env.CODEX_HOME ?? `${process.env.HOME}/.codex`}/skills/telos/Tools/UpdateTelos.ts`); process.stdout.write(await Bun.file(`${module.TELOS_DIR}/${process.env.FILE}`).text());'`
 
 # PROCESSING INSTRUCTIONS
 
@@ -135,12 +139,13 @@ Create a clear change description:
 
 Use the update-telos command with:
 1. **Filename** (e.g., "BOOKS.md")
-2. **Content** (the formatted text to add)
-3. **Description** (the change log message)
+2. **JSON on stdin** containing `content` and `changeDescription`
 
 Example:
 ```bash
-LIFEOS_DIR="${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}" bun "${CODEX_HOME:-$HOME/.codex}/skills/Telos/Tools/UpdateTelos.ts" "BOOKS.md" "- *Project Hail Mary* by Andy Weir" "Added favorite book: Project Hail Mary"
+: "${LIFEOS_DIR:=${CODEX_LIFEOS_DIR:?Set LIFEOS_DIR or CODEX_LIFEOS_DIR explicitly}}"
+# Supply the private JSON through the approved standard-input channel.
+LIFEOS_DIR="$LIFEOS_DIR" bun "${CODEX_HOME:-$HOME/.codex}/skills/telos/Tools/UpdateTelos.ts" "BOOKS.md"
 ```
 
 ## Step 4: Confirm and Engage
@@ -234,8 +239,8 @@ You're capturing some foundational sci-fi there. Are these recent reads or longt
 **Response:** "I need the exact filename. It's BOOKS.md (plural). Let me add that for you with the correct name."
 
 ### Missing Content
-**Error:** `❌ Usage: update-telos <file> "<content>" "<change-description>"`
-**Fix:** Provide all three parameters
+**Error:** `❌ Usage: update-telos <file>`
+**Fix:** Provide one filename and JSON on stdin with non-empty `content` and `changeDescription`
 **Response:** "I need to know what content to add. Could you tell me what you'd like to add to [FILE]?"
 
 ### File Doesn't Exist
@@ -270,10 +275,10 @@ Before executing update:
 ## Backup System
 
 The update-telos script automatically:
-1. Creates timestamped backup in `backups/` directory
+1. Creates a timestamped backup in the `Backups/` directory
 2. Logs change to `updates.md` with full context
 3. Preserves complete version history
-4. Uses Pacific Time for all timestamps
+4. Uses the configured principal timezone for all timestamps
 
 ---
 
@@ -284,10 +289,23 @@ The TypeScript implementation handles:
 - Automatic timestamped backups
 - Change logging in updates.md
 - Content appending (preserves existing content)
-- Pacific Time timezone for consistency
+- Configured principal timezone for consistency
 
-The script is at: `~/.claude/skills/Telos/Tools/UpdateTelos.ts`
+The runtime script is at:
+`${CODEX_HOME:-$HOME/.codex}/skills/telos/Tools/UpdateTelos.ts`.
 
-All backups are stored in: `${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}/USER/TELOS/Backups/`
+All backups are stored under the configured
+`LifeosConfig.paths.userDir/TELOS/Backups/` directory and are retained as the
+durable pre-change history. Do not prune them implicitly.
 
-All changes are logged in the `## Changelog` section at the bottom of `${LIFEOS_DIR:-${CODEX_LIFEOS_DIR:-$HOME/.codex/LIFEOS}}/USER/TELOS/TELOS.md`.
+All changes are logged in `updates.md` (or the existing legacy-cased
+`Updates.md`) under the configured `LifeosConfig.paths.userDir/TELOS/`
+directory.
+
+## Changelog Lock Recovery
+
+Updates are serialized by an atomic `.updates.lock` directory. If another
+update is active, the script waits briefly and then fails closed with a
+timeout diagnostic. Do not delete the lock while an updater may be running;
+confirm that no updater owns it before any manual recovery, and never use an
+automatic expiry or forced deletion.

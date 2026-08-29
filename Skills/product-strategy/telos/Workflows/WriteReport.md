@@ -1,12 +1,12 @@
 # WriteReport Workflow
 
-**Purpose:** Generate a McKinsey-style professional consulting report from TELOS analysis content, rendered as a dark-themed web-based document with custom Practical Typography fonts and automatic light-mode print support.
+**Purpose:** Generate a source-grounded professional consulting report from TELOS analysis content. The default output is non-executable Markdown; an explicitly requested web mode may use the dark-themed template with light-mode print support.
 
 ---
 
 ## Workflow Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │  1. ANALYZE        2. NARRATIVE       3. STRUCTURE      4. RENDER  │
 │  Run TELOS         Generate story     Map to McKinsey   Output as  │
@@ -23,21 +23,25 @@
 |-----------|----------|---------|-------------|
 | `source` | Yes | - | TELOS directory or analysis context |
 | `client_name` | Yes | - | Client/project name for the report title |
-| `output_dir` | No | `{source}/report` | Where to generate the report |
+| `organization_name` | Yes | - | Verified organization preparing the report |
+| `artifact_dir` | Yes | - | Directory produced by `CreateNarrativePoints` containing exactly the five validated JSON inputs |
+| `output_root` | Yes | - | Parent directory outside `source` for exclusive per-run output directories |
+| `output_dir` | No | `{output_root}/{run_id}` | Exclusive per-run directory derived from `output_root`; never place it inside `source` |
+| `render_mode` | No | `markdown` | `markdown` returns a non-executable report; `web` requires an explicit executable-app request and owner repository contract |
 
 ---
 
 ## Artifact-Based Pipeline
 
-**CRITICAL: This workflow consumes artifacts produced by the assessment workflow.**
+**CRITICAL: This workflow consumes artifacts produced by `CreateNarrativePoints`.**
 
 ### Source → Assessment → Report Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  SOURCE FILES (you edit)         ARTIFACTS (generated)    REPORT (output)  │
 │                                                                             │
-│  {source}/                       {source}/artifacts/      {source}/report/ │
+│  {source}/                       {artifact_dir}/         {output_root}/{run_id}/ │
 │  ├── FINDINGS.md            →    ├── findings.json   →   lib/report-data.ts│
 │  ├── CRITICAL_ISSUES.md          ├── narrative.json                        │
 │  ├── BLOCKERS.md                 ├── recommendations.json                  │
@@ -50,6 +54,7 @@
 ### Artifact Schema
 
 **findings.json:**
+
 ```json
 {
   "findings": [
@@ -59,13 +64,16 @@
       "description": "Description of the finding",
       "evidence": "Evidence supporting this finding",
       "source": "Role-based source (not names)",
-      "severity": "critical|high|medium|low"
+      "severity": "critical|high|medium|low",
+      "epistemicStatus": "observation|inference|unknown",
+      "qualifiers": ["Material estimate, time bound, dispute, or other source qualifier"]
     }
   ]
 }
 ```
 
 **recommendations.json:**
+
 ```json
 {
   "recommendations": [
@@ -80,6 +88,7 @@
 ```
 
 **roadmap.json:**
+
 ```json
 {
   "phases": [
@@ -94,6 +103,7 @@
 ```
 
 **methodology.json:**
+
 ```json
 {
   "interviewCount": 12,
@@ -102,8 +112,10 @@
 ```
 
 **narrative.json:**
+
 ```json
 {
+  "reportDate": "2026-08-29",
   "context": "Executive summary context",
   "clientAsk": "What the client asked for",
   "currentState": "Current state description",
@@ -111,6 +123,14 @@
   "existentialRisks": ["Risk 1", "Risk 2"],
   "competitiveThreats": ["Threat 1", "Threat 2"],
   "timelinePressures": "Timeline pressure description",
+  "riskMatrix": [
+    {
+      "risk": "Risk 1",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Mitigation for Risk 1"
+    }
+  ],
   "goodNews": "The pivot - the solution exists",
   "requirements": ["Requirement 1", "Requirement 2"],
   "targetStateDescription": "Vision description",
@@ -126,11 +146,13 @@
 
 When you edit source files and say "regenerate the report":
 
-1. **Assessment Workflow** reads source files → produces `artifacts/*.json`
-2. **Report Workflow** reads `artifacts/*.json` → generates `report/lib/report-data.ts`
-3. **Dev server** hot-reloads → updated report visible
+1. **CreateNarrativePoints** reads source files, writes source-grounded drafts,
+   and invokes the repository producer to atomically publish the five JSON
+   artifacts in `{artifact_dir}`.
+2. **Report Workflow** validates `{artifact_dir}/*.json` and generates the requested report artifact in `{output_root}/{run_id}`.
+3. **Optional web preview** is handed off only after an explicit executable-app request and owner-repository approval.
 
-**The artifacts/ directory is the contract between assessment and report workflows.**
+**The caller-provided artifact directory is the contract between the two workflows.**
 
 ---
 
@@ -138,42 +160,96 @@ When you edit source files and say "regenerate the report":
 
 ### Step 1: Verify Artifacts Exist
 
-Check that the assessment workflow has produced artifacts:
+Run `CreateNarrativePoints` with the same `source`, the exact client ask, and
+`artifact_dir`. It must either write all five artifacts or return a
+missing-evidence blocker without partial output. Then validate the complete set:
 
 ```bash
-ls {source}/artifacts/
-# Should contain: findings.json, recommendations.json, roadmap.json, methodology.json, narrative.json
+python3 "{REPO_ROOT}/Skills/product-strategy/telos/Tools/validate_report_artifacts.py" \
+  "{artifact_dir}"
+# Requires: findings.json, recommendations.json, roadmap.json, methodology.json, narrative.json
 ```
 
-If artifacts don't exist, run the assessment workflow first (CreateNarrativePoints or AnalyzeProjectWithGemini3).
-
-### Step 2: Copy Report Template
+The producer input is a new sibling `{draft_dir}` containing only the five
+source-grounded JSON files. It is materialized with:
 
 ```bash
-# Copy template to output directory (if not already done)
-cp -r ~/.claude/skills/_TELOS/report-template/* {output_dir}/
-
-# Install dependencies
-cd {output_dir} && bun install
+python3 "{REPO_ROOT}/Skills/product-strategy/telos/Tools/validate_report_artifacts.py" \
+  --produce "{draft_dir}" "{artifact_dir}"
 ```
 
-### Step 3: Generate report-data.ts from Artifacts
+This command exclusively reserves the new `{artifact_dir}`, copies exact
+caller-supplied bytes into that reservation, and validates all five files before
+writing its deterministic completion marker last. Published readers require
+and validate that marker; source/draft validation is a separate unmarked mode.
+It rejects an existing destination, preserves an external reservation race
+winner, and does not synthesize missing values.
+
+Missing, empty, malformed, or structurally invalid artifacts are a missing-producer
+blocker. An empty incomplete reservation without the completion marker is also
+rejected. Repair the assessment producer before continuing; do not invent report data.
+
+The caller must supply `output_root`, a directory outside `source`. Resolve both
+paths before writing, reject an `output_root` nested under `source`, create the root,
+and create a fresh exclusive `{output_dir}` named from `run_id`:
+
+```bash
+source_real="$(cd -- "{source}" && pwd -P)"
+if [ -L "{output_root}" ]; then
+  echo "output_root must not be a symlink" >&2
+  exit 2
+elif [ -e "{output_root}" ]; then
+  output_root_real="$(cd -- "{output_root}" && pwd -P)"
+else
+  output_parent_real="$(cd -- "$(dirname -- "{output_root}")" && pwd -P)"
+  output_root_real="$output_parent_real/$(basename -- "{output_root}")"
+fi
+case "$output_root_real/" in
+  "$source_real/"*) echo "output_root must be outside source" >&2; exit 2 ;;
+esac
+mkdir -p "{output_root}"
+mkdir "{output_dir}"
+```
+
+### Step 2: Select the output mode
+
+For the default `markdown` mode, assemble a source-grounded `report.md` from the
+validated artifacts and stop. Do not copy an application template, install
+dependencies, or start a server.
+
+Continue with the web-template steps only when the user explicitly requested an
+executable report application and named an owner repository with a current
+framework, package-manager, lockfile, and security contract.
+
+### Step 3: Copy Report Template for approved web mode
+
+```bash
+# Copy the canonical template to the exclusive per-run output directory
+cp -R "{REPO_ROOT}/Skills/product-strategy/telos/ReportTemplate/." "{output_dir}/"
+```
+
+Copying the template does not authorize dependency installation, build, or
+preview. Return the copied candidate and the owner repository's documented
+commands for a separately approved execution step.
+
+### Step 4: Generate report-data.ts from Artifacts
 
 Read each artifact file and assemble into the ReportData structure:
 
 ```typescript
 // Read artifacts
-const findings = JSON.parse(fs.readFileSync('{source}/artifacts/findings.json'))
-const recommendations = JSON.parse(fs.readFileSync('{source}/artifacts/recommendations.json'))
-const roadmap = JSON.parse(fs.readFileSync('{source}/artifacts/roadmap.json'))
-const methodology = JSON.parse(fs.readFileSync('{source}/artifacts/methodology.json'))
-const narrative = JSON.parse(fs.readFileSync('{source}/artifacts/narrative.json'))
+const findings = JSON.parse(fs.readFileSync('{artifact_dir}/findings.json'))
+const recommendations = JSON.parse(fs.readFileSync('{artifact_dir}/recommendations.json'))
+const roadmap = JSON.parse(fs.readFileSync('{artifact_dir}/roadmap.json'))
+const methodology = JSON.parse(fs.readFileSync('{artifact_dir}/methodology.json'))
+const narrative = JSON.parse(fs.readFileSync('{artifact_dir}/narrative.json'))
 
 // Assemble ReportData
 const reportData = {
   clientName: "{client_name}",
+  organizationName: "{organization_name}",
   reportTitle: "Strategic Assessment & Transformation Roadmap",
-  reportDate: "December 2025",
+  reportDate: narrative.reportDate,
   classification: "CONFIDENTIAL",
   executiveSummary: {
     context: narrative.context,
@@ -191,7 +267,8 @@ const reportData = {
   riskAnalysis: {
     existentialRisks: narrative.existentialRisks,
     competitiveThreats: narrative.competitiveThreats,
-    timelinePressures: narrative.timelinePressures
+    timelinePressures: narrative.timelinePressures,
+    matrix: narrative.riskMatrix
   },
   strategicOpportunity: {
     goodNews: narrative.goodNews,
@@ -214,21 +291,14 @@ const reportData = {
 
 Write the assembled data to `{output_dir}/lib/report-data.ts`.
 
-### Step 4: Start Dev Server
-
-```bash
-cd {output_dir} && bun dev
-```
-
-The report will hot-reload as you regenerate.
-
 ### Regeneration Shortcut
 
 When {PRINCIPAL.NAME} edits source files and says "regenerate the report":
 
-1. Run assessment workflow to update artifacts
-2. Re-run Step 3 to regenerate report-data.ts
-3. Dev server hot-reloads automatically
+1. Re-run `CreateNarrativePoints` to replace the complete artifact set.
+2. Re-run validation and regenerate the selected output.
+3. If an approved owner-repository preview is already active, use that owner's
+   documented refresh behavior; this workflow does not start it.
 
 ---
 
@@ -237,11 +307,12 @@ When {PRINCIPAL.NAME} edits source files and says "regenerate the report":
 ### 1. Cover Page
 - Confidential classification at top (Heliotrope Caps, red)
 - **Centered content block:**
-  - **UL logo** (125x125, left-justified with -ml-4) - `/ul-icon.png`
+  - No logo or external image asset is required by the canonical template.
   - **"TELOS Assessment"** label (Heliotrope Caps, primary blue, tracking-[0.25em])
   - Report title (Advocate Wide font)
   - "Prepared for {Client Name}" - **CUSTOMIZE per engagement**
-- Footer: Date + "<ORG_NAME> Consulting"
+- Footer: validated report date + the caller-supplied engagement organization
+  name; never invent an organization name
 
 ### 2. Executive Summary (1 page)
 - **Methodology exhibit** - Interview count and roles interviewed (by role, not by name)
@@ -321,16 +392,14 @@ The report-template includes these fonts in `public/fonts/`. The font stack is:
 | Labels/badges | Heliotrope Caps | 400 | "EXHIBIT 1", "KEY TAKEAWAY", "CRITICAL" |
 | UI elements | Concourse | 400/700 | Dates, metadata, badges |
 
-**Branding Assets Required:**
+**Branding Assets:**
 
-```
-public/
-├── ul-icon.png                    # UL connected nodes logo (blue)
-```
+The canonical template does not require a logo or external image asset. Do not add
+placeholder branding, hard-coded absolute asset paths, or synthetic report content.
 
 **Font Files Required:**
 
-```
+```text
 public/fonts/
 ├── advocate_34_narr_reg.woff2      # Advocate (narrow)
 ├── advocate_54_wide_reg.woff2      # Advocate Wide (display)
@@ -406,9 +475,9 @@ The report uses a professional super-dark blue background with brightened accent
 
 ## Output Files
 
-The workflow generates a complete Next.js app:
+Approved web mode copies this complete Next.js template:
 
-```
+```text
 {output_dir}/
 ├── public/
 │   └── fonts/              # Practical Typography fonts (11 woff2 files)
@@ -432,7 +501,7 @@ The workflow generates a complete Next.js app:
 ├── package.json
 ├── tailwind.config.ts      # Font family definitions
 ├── tsconfig.json
-└── postcss.config.js
+└── postcss.config.mjs
 ```
 
 ---
@@ -442,28 +511,21 @@ The workflow generates a complete Next.js app:
 ```bash
 # User: "Create a TELOS report for Acme Corp"
 
-# Step 1: {DA_IDENTITY.NAME} runs TELOS analysis on source directory
-# Step 2: {DA_IDENTITY.NAME} executes CreateNarrativePoints workflow
-# Step 3: {DA_IDENTITY.NAME} copies report-template to output directory
-# Step 4: {DA_IDENTITY.NAME} generates report-data.ts with content
-# Step 5: {DA_IDENTITY.NAME} runs bun install && bun dev
-
-# To view:
-cd {output_dir} && bun dev
-# Opens at http://localhost:3000
-
-# To print:
-# Use browser print (Cmd+P) - print styles are included
+# Step 1: analyze the named source without inventing missing facts
+# Step 2: run CreateNarrativePoints to write all five JSON files to {artifact_dir}
+# Step 3: validate the artifact set
+# Step 4: generate report.md by default
+# Step 5: copy and populate the web template only after an explicit executable request
 ```
 
 ---
 
 ## Template Location
 
-**CRITICAL: The report template lives at:**
+**CRITICAL: The canonical report template lives at:**
 
-```
-~/.claude/skills/_TELOS/report-template/
+```text
+{REPO_ROOT}/Skills/product-strategy/telos/ReportTemplate/
 ```
 
 This template includes:
@@ -471,14 +533,14 @@ This template includes:
 - Pre-configured globals.css with @font-face declarations
 - Tailwind config with font family definitions
 - All McKinsey-style components
-- Placeholder report-data.ts
+- Empty, typed report-data.ts contract awaiting validated artifacts
 
 When generating a report:
-1. Copy the entire template to the output directory
+1. Copy the entire template to the exclusive output directory
 2. Generate `lib/report-data.ts` with client-specific content:
    - `clientName`: The customer name (e.g., "Acme Corp", "Initech")
    - `reportTitle`: The engagement title
-   - `reportDate`: Current month/year
+   - `reportDate`: The validated `narrative.json` report date
    - All findings, recommendations, roadmap from TELOS analysis
 3. Update `app/layout.tsx` metadata with client name
 
@@ -487,7 +549,7 @@ When generating a report:
 ## Integration Notes
 
 **Prerequisite Workflow:**
-- CreateNarrativePoints MUST run first to generate narrative content
+- `CreateNarrativePoints` MUST generate and validate all five required artifacts
 
 **Font Source:**
 - Fonts should be sourced from Practical Typography or your project's font directory
@@ -495,7 +557,6 @@ When generating a report:
 
 **Works with:**
 - InterviewExtraction output (provides evidence quotes)
-- AnalyzeProjectWithGemini3 output (provides deep analysis)
 - Direct TELOS directory analysis
 
 **Output designed for:**
@@ -511,7 +572,6 @@ When generating a report:
 
 Before finalizing the report:
 
-- [ ] UL logo displays correctly (125x125, left-justified)
 - [ ] "TELOS Assessment" label visible above title
 - [ ] Cover page has correct client name and date
 - [ ] Cover title uses Advocate Wide font
@@ -537,11 +597,11 @@ Before finalizing the report:
 
 **This is McKinsey-style professional consulting:**
 
-- Direct, confident assertions
+- Direct, source-calibrated assertions
 - Evidence-backed claims
 - Strategic framing
 - Executive-appropriate language
-- No hedging or waffling
+- Preserve material source qualifiers and distinguish observations, inferences, and unknowns
 - Clear recommendations
 - Actionable insights
 
@@ -579,7 +639,8 @@ The Executive Summary MUST include:
 - **Roles interviewed** - List by role category, not by name
 
 Example:
-```
+
+```text
 Interviews Conducted: 12
 Roles Interviewed:
 - Chief Executive Officer
@@ -607,12 +668,13 @@ Before board presentation:
 ## Maintenance
 
 **To update fonts:**
+
 ```bash
 # Copy latest fonts from ULSite
-cp ~/Projects/[your-site]/public/fonts/*.woff2 ~/.claude/skills/Telos/ReportTemplate/public/fonts/
+cp ~/Projects/[your-site]/public/fonts/*.woff2 {REPO_ROOT}/Skills/product-strategy/telos/ReportTemplate/public/fonts/
 ```
 
 **To update template components:**
-Edit files in `~/.claude/skills/_TELOS/report-template/components/`
+Edit files in `{REPO_ROOT}/Skills/product-strategy/telos/ReportTemplate/components/`
 
 **To change color scheme:**

@@ -3,6 +3,7 @@ interface CalloutProps {
   children: React.ReactNode
 }
 
+/** Renders a highlighted takeaway with an optional label. */
 export function Callout({ label = "Key Takeaway", children }: CalloutProps) {
   return (
     <div className="callout">

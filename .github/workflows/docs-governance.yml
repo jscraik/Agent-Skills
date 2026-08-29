@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "Docs/**"
+      - "README.md"
       - "CONTRIBUTING.md"
       - "SKILL.md"
       - "Infrastructure/docs-policy.json"
@@ -15,6 +16,7 @@ on:
       - main
     paths:
       - "Docs/**"
+      - "README.md"
       - "CONTRIBUTING.md"
       - "SKILL.md"
       - "Infrastructure/docs-policy.json"
@@ -40,6 +42,10 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          install: true
 
       - name: Resolve lint mode
         id: mode
@@ -84,6 +90,11 @@ jobs:
             --mode "${{ steps.mode.outputs.mode }}" \
             --report-json /tmp/docs-lint-report.json \
             $CHANGED_ONLY
+
+      - name: Run Vale
+        run: |
+          mise exec -- vale --config .vale.ini sync
+          mise exec -- vale --config .vale.ini --minAlertLevel=error README.md SKILL.md
 
       - name: Publish lint summary
         if: always()

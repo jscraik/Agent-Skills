@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils.js"
 
 type Severity = "critical" | "high" | "medium" | "low"
 
-interface SeverityBadgeProps {
+export interface SeverityBadgeProps {
   severity: Severity
 }
 
@@ -13,6 +13,13 @@ const severityConfig: Record<Severity, { label: string; className: string }> = {
   low: { label: "Low", className: "severity-low" },
 }
 
+/**
+ * Renders the severity label for a finding.
+ *
+ * `severity` accepts `critical`, `high`, `medium`, or `low` and maps to the
+ * visible labels `Critical`, `High`, `Medium`, or `Low` and their matching
+ * severity CSS class.
+ */
 export function SeverityBadge({ severity }: SeverityBadgeProps) {
   const config = severityConfig[severity]
   return (

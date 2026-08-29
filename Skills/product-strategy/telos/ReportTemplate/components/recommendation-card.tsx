@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils"
-import type { Recommendation } from "@/lib/report-data"
+import { cn } from "@/lib/utils.js"
+import type { Recommendation } from "@/lib/report-data.js"
 import { ArrowRight, Clock, Zap } from "lucide-react"
 
-interface RecommendationCardProps {
+export interface RecommendationCardProps {
   recommendation: Recommendation
   index: number
 }
@@ -25,6 +25,14 @@ const priorityConfig = {
   },
 }
 
+/**
+ * Renders one prioritized recommendation.
+ *
+ * `recommendation` supplies the title, description, and priority. `index` is
+ * zero-based and is displayed as a one-based recommendation number. Priority
+ * maps to `Immediate` (red), `Short-term` (amber), or `Long-term` (blue), with
+ * a matching icon and badge styling.
+ */
 export function RecommendationCard({
   recommendation,
   index,
@@ -37,7 +45,7 @@ export function RecommendationCard({
       <div className="finding-header">
         <div className="flex items-start gap-3">
           <span className="text-primary font-bold text-lg">{index + 1}</span>
-          <span className="finding-title">{recommendation.title}</span>
+          <h3 className="finding-title">{recommendation.title}</h3>
         </div>
         <span
           className={cn(

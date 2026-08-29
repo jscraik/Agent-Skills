@@ -1,9 +1,10 @@
-import type { TimelinePhase } from "@/lib/report-data"
+import type { TimelinePhase } from "@/lib/report-data.js"
 
 interface TimelineProps {
   phases: TimelinePhase[]
 }
 
+/** Renders ordered roadmap phases. */
 export function Timeline({ phases }: TimelineProps) {
   return (
     <div className="timeline">

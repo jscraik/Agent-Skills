@@ -1,21 +1,34 @@
-import { CoverPage } from "@/components/cover-page"
-import { Section } from "@/components/section"
-import { Callout } from "@/components/callout"
-import { Exhibit } from "@/components/exhibit"
-import { FindingCard } from "@/components/finding-card"
-import { RecommendationCard } from "@/components/recommendation-card"
-import { Timeline } from "@/components/timeline"
-import { reportData } from "@/lib/report-data"
+import { CoverPage } from "@/components/cover-page.js"
+import { Section } from "@/components/section.js"
+import { Callout } from "@/components/callout.js"
+import { Exhibit } from "@/components/exhibit.js"
+import { FindingCard } from "@/components/finding-card.js"
+import { RecommendationCard } from "@/components/recommendation-card.js"
+import { Timeline } from "@/components/timeline.js"
+import { reportData } from "@/lib/report-data.js"
 import { AlertTriangle, Target, Lightbulb, CheckCircle2 } from "lucide-react"
 
 export default function ReportPage() {
   const data = reportData
+
+  if (!data) {
+    return (
+      <main className="report-container">
+        <h1>Report unavailable</h1>
+        <p className="text-muted">
+          Generate the report from a complete, validated artifact set before
+          opening this template.
+        </p>
+      </main>
+    )
+  }
 
   return (
     <div>
       {/* Cover Page */}
       <CoverPage
         clientName={data.clientName}
+        organizationName={data.organizationName}
         reportTitle={data.reportTitle}
         reportDate={data.reportDate}
         classification={data.classification}
@@ -142,6 +155,20 @@ export default function ReportPage() {
                 {data.riskAnalysis.timelinePressures}
               </p>
             </div>
+
+            <Exhibit number={5} title="Risk Matrix">
+              <div className="grid gap-4 md:grid-cols-2">
+                {data.riskAnalysis.matrix.map((entry) => (
+                  <article key={entry.risk} className="risk-matrix-entry">
+                    <h3 className="text-lg font-semibold">{entry.risk}</h3>
+                    <p className="text-sm text-muted">
+                      Probability: {entry.probability}; impact: {entry.impact}
+                    </p>
+                    <p className="text-foreground">{entry.mitigation}</p>
+                  </article>
+                ))}
+              </div>
+            </Exhibit>
           </div>
         </Section>
 
@@ -190,7 +217,7 @@ export default function ReportPage() {
         <Section title="Target State Vision">
           <p className="text-lg mb-6">{data.targetState.description}</p>
 
-          <Exhibit number={5} title="Key Capabilities Enabled">
+          <Exhibit number={6} title="Key Capabilities Enabled">
             <div className="grid md:grid-cols-3 gap-4">
               {data.targetState.keyCapabilities.map((capability, i) => (
                 <div
@@ -222,7 +249,7 @@ export default function ReportPage() {
             milestones and decision points.
           </p>
 
-          <Exhibit number={6} title="Phased Implementation Plan">
+          <Exhibit number={7} title="Phased Implementation Plan">
             <Timeline phases={data.roadmap} />
           </Exhibit>
         </Section>

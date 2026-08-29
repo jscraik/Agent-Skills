@@ -5,17 +5,18 @@ interface ExhibitProps {
   children: React.ReactNode
 }
 
+/** Renders a numbered report figure and its optional source attribution. */
 export function Exhibit({ number, title, source, children }: ExhibitProps) {
   return (
-    <div className="exhibit">
-      <div className="exhibit-header">
+    <figure className="exhibit">
+      <figcaption className="exhibit-header">
         <div>
           <span className="exhibit-number">Exhibit {number}</span>
           <span className="exhibit-title ml-3">{title}</span>
         </div>
         {source && <span className="exhibit-source">Source: {source}</span>}
-      </div>
+      </figcaption>
       <div className="exhibit-content">{children}</div>
-    </div>
+    </figure>
   )
 }

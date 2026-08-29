@@ -63,7 +63,8 @@ Notification failure does not authorize a different write route.
 Load only the selected workflow. Do not create an executable dashboard or
 report application unless the user explicitly requests one and the target
 repository supplies its own current framework, dependency, and security
-contract.
+contract. This package retains `ReportTemplate` as the canonical source for an
+explicitly approved web report, but it does not ship a dashboard application.
 
 ## Personal TELOS contract
 
@@ -147,11 +148,19 @@ For package and projection changes, run:
 - `./bin/ask skills audit Skills/product-strategy/telos --level compat --json --robot`
 - `./bin/ask skills resolve telos --json --robot`
 - `./bin/ask skills proof telos --runtime-target codex --json --robot`
-- `git diff --check -- Skills/product-strategy/telos`
+- `./bin/ask skills proof telos --runtime-target agents --json --robot`
+- `git diff --check -- Skills/product-strategy/telos` (approved read-only
+  exception for changed-scope whitespace proof)
 
 Acceptance requires updater tests, package audit, unique canonical resolution,
-and structural runtime gates to pass. Missing live invocation telemetry blocks
-only the live-runtime claim; it does not negate source or projection evidence.
+and both runtime-target proof commands to pass. The `codex` proof must resolve
+`~/.codex/skills/telos`, and the `agents` proof must resolve
+`~/.agents/skills/telos`; each receipt must expose `telos` from the workspace
+projection. Proof for one path does not establish the other.
+`./bin/ask repo validate --scope=check` is a
+broader repository check and is not an exact replacement for the changed-scope
+`git diff --check` command. Missing live invocation telemetry blocks only the
+live-runtime claim; it does not negate source or projection evidence.
 
 ## Gotchas
 
@@ -171,7 +180,8 @@ only the live-runtime claim; it does not negate source or projection evidence.
 - Personal backup: `<userDir>/TELOS/Backups/<FILE>-<timestamp>.md`.
 - Personal changelog: existing `updates.md` or `Updates.md`.
 - Derived reports or dashboards: the user-approved project output directory;
-  this package intentionally carries no executable web-app template.
+  `ReportTemplate` remains a canonical source, while this package carries no
+  dashboard application.
 
 Keep generated runtime-proof evidence, caches, private TELOS data, and local
 build output out of the canonical package.
