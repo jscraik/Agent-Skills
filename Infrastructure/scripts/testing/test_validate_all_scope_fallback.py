@@ -159,6 +159,20 @@ def test_lint_changed_python_shebang_entrypoint_runs_program_design() -> None:
         assert changed_file in args
 
 
+def test_lint_changed_binary_file_emits_no_null_byte_warning() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_file = "Skills/example/assets/font.woff2"
+        binary = repo.root / changed_file
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_bytes(b"wOF2\x00binary-font-data")
+
+        proc = repo.run("--persistent", "--scope", "lint", "--changed-files", changed_file)
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "ignored null byte in input" not in proc.stderr
+
+
 def test_lint_changed_unscanned_python_wrapper_falls_back_to_required_baseline() -> None:
     with TemporaryDirectory() as tmpdir:
         repo = FakeRepo(Path(tmpdir))

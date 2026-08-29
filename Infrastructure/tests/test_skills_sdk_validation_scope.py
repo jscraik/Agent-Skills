@@ -46,7 +46,8 @@ class TestSkillsSdkValidationScope(unittest.TestCase):
     def test_staged_source_scope_reads_extensionless_shebang_from_index(self) -> None:
         self.assertIn('if [[ "$staged_source_mode" -eq 1 ]]; then', self.impl_text)
         self.assertIn('git show ":$changed_file"', self.impl_text)
-        self.assertIn('[[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]', self.impl_text)
+        self.assertIn('source_has_python_shebang "$changed_file"', self.impl_text)
+        self.assertNotIn('staged_source_line="$(', self.impl_text)
 
     def test_head_source_scope_reads_extensionless_shebang_from_head(self) -> None:
         self.assertIn('elif [[ "$head_source_mode" -eq 1 ]]; then', self.impl_text)

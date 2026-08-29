@@ -385,6 +385,19 @@ is_program_design_scanned_path() {
   esac
 }
 
+source_has_python_shebang() {
+  local changed_file="$1"
+  if [[ "$staged_source_mode" -eq 1 ]]; then
+    git show ":$changed_file" 2>/dev/null | LC_ALL=C head -n 1 | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+  elif [[ "$head_source_mode" -eq 1 ]]; then
+    git show "HEAD:$changed_file" 2>/dev/null | LC_ALL=C head -n 1 | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+  elif [[ -f "$changed_file" ]]; then
+    LC_ALL=C head -n 1 "$changed_file" 2>/dev/null | LC_ALL=C grep -aE '^#!.*[Pp]ython' >/dev/null
+  else
+    return 1
+  fi
+}
+
 # run_check prints a label, executes the check and records pass/fail outcomes.
 run_check() {
   local mode="$1"
@@ -626,17 +639,9 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
 
-    staged_source_line=""
-    if [[ "$staged_source_mode" -eq 1 ]]; then
-      staged_source_line="$(git show ":$changed_file" 2>/dev/null | head -n 1 || true)"
-    elif [[ "$head_source_mode" -eq 1 ]]; then
-      staged_source_line="$(git show "HEAD:$changed_file" 2>/dev/null | head -n 1 || true)"
-    elif [[ -f "$changed_file" ]]; then
-      staged_source_line="$(head -n 1 "$changed_file" || true)"
-    fi
     if is_program_design_scanned_path "$changed_file"; then
       if [[ "$changed_file" == *.py || "$changed_file" == *.pyw ]] || \
-        [[ "$staged_source_line" =~ ^#!.*[Pp]ython ]]; then
+        source_has_python_shebang "$changed_file"; then
         scope_has_python_quality=1
       fi
     fi
