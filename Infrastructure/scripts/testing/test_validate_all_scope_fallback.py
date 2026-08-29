@@ -179,6 +179,7 @@ def test_blob_sources_keep_large_python_shebang_matches() -> None:
         for source_mode in ("--staged-source", "--head-source"):
             proc = repo.run("--persistent", "--scope", "lint", source_mode, "--changed-files", changed_file)
             assert proc.returncode == 0, proc.stdout + proc.stderr
+            assert "Changed-files scope classification missed all known buckets" not in proc.stdout
             assert repo.recorded_args_for(
                 "Infrastructure/scripts/validation-and-linting/verify_program_design.py"
             ) is not None
