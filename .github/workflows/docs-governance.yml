@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c
         with:
           install: true
           install_args: vale
