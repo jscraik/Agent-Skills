@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from skills_sdk.models.packaging import PackageReceipt
+from skills_sdk.models.packaging import PackageReceiptV2
 from skills_sdk.models.validation import SkillPackageValidation
 from skills_sdk.packaging import build_skill_package
 from skills_sdk.validation import SkillValidationPolicy, validate_skill_package
@@ -60,7 +60,7 @@ class PortableAdapterSuccess:
 
     operation: PortableOperation
     source: PortableSource
-    payload: SkillPackageValidation | PackageReceipt
+    payload: SkillPackageValidation | PackageReceiptV2
 
 
 PortableResult = PortableAdapterSuccess | PortableAdapterBlocker
@@ -182,7 +182,7 @@ def _delegate_operation(
     operation: PortableOperation,
     captured: SkillPackageValidation,
     policy: SkillValidationPolicy | None,
-) -> SkillPackageValidation | PackageReceipt:
+) -> SkillPackageValidation | PackageReceiptV2:
     if operation == "validate":
         return captured
     return build_skill_package(
@@ -213,7 +213,7 @@ def _delegation_change_blocker(
     source: PortableSource,
     operation: PortableOperation,
     captured: SkillPackageValidation,
-    payload: SkillPackageValidation | PackageReceipt,
+    payload: SkillPackageValidation | PackageReceiptV2,
     policy: SkillValidationPolicy | None,
 ) -> PortableAdapterBlocker | None:
     current = validate_skill_package(

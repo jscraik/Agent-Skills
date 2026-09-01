@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from skills_sdk.models.packaging import PackageReceipt
+from skills_sdk.models.packaging import PackageReceiptV2
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
@@ -168,12 +168,12 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout or completed.stderr)
         envelope = validate_robot_envelope(json.loads(completed.stdout))
         payload = envelope.data["skills_sdk_package_build"]
-        receipt = PackageReceipt.model_validate(payload["receipt"])
+        receipt = PackageReceiptV2.model_validate(payload["receipt"])
 
         self.assertEqual(payload["status"], "built")
         self.assertEqual(receipt.candidate.package_id, "x-content-writer")
         self.assertEqual(receipt.candidate.source_revision, source_revision)
-        self.assertEqual(receipt.schema_version, "package-receipt/v1")
+        self.assertEqual(receipt.schema_version, "package-receipt/v2")
         self.assertEqual(payload["included_files"], ["SKILL.md"])
         self.assertEqual(
             Path(str(payload["canonical_source_path"])).resolve(),
@@ -212,7 +212,7 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
         envelope = validate_robot_envelope(json.loads(completed.stdout))
         payload = envelope.data["skills_sdk_package_build"]
         self.assertIsInstance(payload, dict)
-        receipt = PackageReceipt.model_validate(payload["receipt"])
+        receipt = PackageReceiptV2.model_validate(payload["receipt"])
 
         self.assertEqual(payload["status"], "built")
         self.assertEqual(payload["package_digest"], receipt.package_digest)
@@ -224,7 +224,7 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
                 "SKILL.md",
             ],
         )
-        self.assertEqual(receipt.schema_version, "package-receipt/v1")
+        self.assertEqual(receipt.schema_version, "package-receipt/v2")
         self.assertFalse(payload["mutation_performed"])
         self.assertIn("./bin/ask sdk package build", payload["validation_commands"][0])
 
