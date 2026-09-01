@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk-portable-validation-adapter/v1",
   "source_owner": {
     "repository": "jscraik/skills-sdk",
-    "revision": "373c2cc0f39980004d42848d5d1082e02440cdd1",
+    "revision": "5f38e978b93465a142a45a8773e05c808e3df81b",
     "public_api": [
       "skills_sdk.validation.SkillValidationPolicy",
       "skills_sdk.validation.validate_skill_package",

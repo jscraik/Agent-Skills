@@ -137,6 +137,23 @@ def test_adapter_dependency_direction_points_only_into_standalone_sdk() -> None:
     assert "ask.skills_sdk.package_build" not in adapter
 
 
+def test_v2_build_compatibility_change_does_not_change_verify_host_policy() -> None:
+    verifier = (
+        REPO_ROOT
+        / "Infrastructure"
+        / "scripts"
+        / "lib"
+        / "ask"
+        / "skills_sdk"
+        / "package_verify.py"
+    ).read_text(encoding="utf-8")
+
+    assert "package_build_compat" not in verifier
+    assert "PackageReceiptV2" not in verifier
+    assert "TRUSTED_PROVENANCE_SOURCES" in verifier
+    assert "RUNTIME_MUTATION_SENTINELS" in verifier
+
+
 def test_default_cli_payload_keeps_decision_sized_portable_evidence(
     tmp_path: Path,
 ) -> None:
@@ -177,7 +194,7 @@ def test_adapter_contract_names_owner_direction_and_retirement() -> None:
 
     assert contract["source_owner"]["repository"] == "jscraik/skills-sdk"
     assert contract["source_owner"]["revision"] == (
-        "373c2cc0f39980004d42848d5d1082e02440cdd1"
+        "5f38e978b93465a142a45a8773e05c808e3df81b"
     )
     assert contract["dependency_direction"] == (
         "Agent-Skills host adapter -> Skills SDK public API"

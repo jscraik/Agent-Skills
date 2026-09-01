@@ -19,7 +19,7 @@ from ask.skills_sdk.portable_adapter import (  # noqa: E402
     resolve_portable_source,
     run_portable_validation,
 )
-from skills_sdk.models.packaging import PackageReceipt  # noqa: E402
+from skills_sdk.models.packaging import PackageReceiptV2  # noqa: E402
 from skills_sdk.models.validation import SkillPackageValidation  # noqa: E402
 
 
@@ -228,8 +228,12 @@ def test_build_returns_candidate_bound_sdk_receipt(tmp_path: Path) -> None:
     result = run_portable_validation(skill_root, operation="build")
 
     assert isinstance(result, PortableAdapterSuccess)
-    assert isinstance(result.payload, PackageReceipt)
+    assert isinstance(result.payload, PackageReceiptV2)
+    assert result.payload.schema_version == "package-receipt/v2"
     assert result.payload.candidate.source_revision == revision
+    assert result.payload.manifest is not None
+    assert result.payload.manifest.candidate == result.payload.candidate
+    assert result.payload.package_digest is not None
     assert result.payload.status == "built"
     assert result.payload.mutation_performed is False
 

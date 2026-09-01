@@ -7,7 +7,7 @@ dependencies = [
   "jsonschema>=4.25,<5",
   "pydantic>=2.13,<3",
   "PyYAML>=6.0.2,<7",
-  "skills-sdk @ git+https://github.com/jscraik/skills-sdk.git@373c2cc0f39980004d42848d5d1082e02440cdd1",
+  "skills-sdk @ git+https://github.com/jscraik/skills-sdk.git@5f38e978b93465a142a45a8773e05c808e3df81b",
 ]
 
 [dependency-groups]

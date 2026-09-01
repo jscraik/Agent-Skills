@@ -5,9 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from skills_sdk.models.packaging import PackageReceiptV2
+
 from ask.skills_sdk.portable_adapter import (
     PortableAdapterBlocker,
-    PortableAdapterSuccess,
     run_portable_validation,
 )
 
@@ -43,9 +44,8 @@ def _receipt_payload(
     query: str,
     source_path: str,
     validation_command: str,
-    delegated: PortableAdapterSuccess,
+    receipt: PackageReceiptV2,
 ) -> PackageBuildProjection:
-    receipt = delegated.payload
     candidate = receipt.candidate
     manifest = receipt.manifest
     blocker_message = receipt.blocker.message if receipt.blocker else None
@@ -94,11 +94,15 @@ def build_package_projection(
             ),
             error_message=delegated.message,
         )
+    if delegated.operation != "build" or not isinstance(
+        delegated.payload, PackageReceiptV2
+    ):
+        raise TypeError("portable build delegation returned an unexpected payload")
     return _receipt_payload(
         query,
         canonical_source_path,
         validation_command,
-        delegated,
+        delegated.payload,
     )
 
 
