@@ -1,6 +1,16 @@
 # Eval Enforcement Contract
 
-Use this when hardening skill-factory output or explaining why a skill run is blocked.
+Use this for explicitly selected SDK/Tessl promotion or handoff work, or when
+explaining a blocker in that selected lane.
+
+## Scope And Authority
+
+The complete ladder is not the acceptance contract for read-only audits or
+routine source-only corrections. Those use the owning local checks and focused
+behavioral proof; report unselected runtime, cloud, Tessl, registry, and
+publication lanes as not selected. Missing promotion evidence blocks only
+promotion claims. A proof requirement does not authorize external execution,
+uploads, runtime mutation, or publication.
 
 ## Required Ladder
 

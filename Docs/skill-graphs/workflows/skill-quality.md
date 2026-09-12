@@ -111,10 +111,10 @@ python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py
 
 ### EB Outputs
 
-| ARTIFACT  | PATH                                                      |
-| --------- | --------------------------------------------------------- |
-| Reports   | `.tmp/agent-skills-artifacts/skills/**`                    |
-| Benchmark | `.harness/evidence/industry-benchmark-latest.json`        |
+| ARTIFACT  | PATH                                               |
+| --------- | -------------------------------------------------- |
+| Reports   | `.tmp/agent-skills-artifacts/skills/**`            |
+| Benchmark | `.harness/evidence/industry-benchmark-latest.json` |
 
 ---
 

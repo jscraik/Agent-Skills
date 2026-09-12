@@ -48,7 +48,59 @@ from run_skill_evals import (  # noqa: E402
 
 
 
+def _write_discovery_fixture(root: Path, variant: str) -> tuple[Path, Path]:
+    skill_dir = root / "skill"
+    refs = skill_dir / "references"
+    refs.mkdir(parents=True)
+    skill_md = skill_dir / "SKILL.md"
+    pointer = "" if variant == "unlinked" else "Read `references/discovery-interview.md` when underspecified."
+    skill_md.write_text(
+        "# Example skill\nAsk one plain-language question at a time.\n" + pointer,
+        encoding="utf-8",
+    )
+    reference = refs / "discovery-interview.md"
+    content = (
+        "# Discovery interview\nAsk one round at a time; do not dump the full plan.\n"
+        "## Request user input mini-templates\nWhat should this skill help you do?\n"
+        "Why this matters: choose the correct scope.\n## Copy paste payload examples\n"
+    )
+    if variant == "escaped":
+        outside = root / "outside.md"
+        outside.write_text(content, encoding="utf-8")
+        reference.symlink_to(outside)
+    elif variant != "missing":
+        reference.write_text("# Incomplete\n" if variant == "incomplete" else content, encoding="utf-8")
+    return skill_dir, skill_md
+
+
 class RunSkillEvalsDiscoveryTests(unittest.TestCase):
+    def test_discovery_smoke_follows_only_explicit_local_reference(self) -> None:
+        for variant in ("linked", "unlinked", "missing", "escaped", "incomplete"):
+            with self.subTest(variant=variant), tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                skill_dir, skill_md = _write_discovery_fixture(root, variant)
+                output = root / "response.md"
+                exit_code, response, stderr, _warnings = run_discovery_smoke(
+                    skill_md_path=skill_md,
+                    skill_dir=skill_dir,
+                    case=EvalCase(
+                        id="routed-discovery",
+                        name="routed discovery",
+                        prompt="Help choose a target.",
+                        smoke_mode="discovery-round-one",
+                        should_trigger=True,
+                        acceptance=[],
+                    ),
+                    output_last_message_path=output,
+                )
+                self.assertEqual(0 if variant == "linked" else 2, exit_code, stderr)
+                self.assertEqual(response, output.read_text(encoding="utf-8"))
+                if variant == "linked":
+                    self.assertIn("What should this skill help you do?", response)
+                    self.assertEqual("", stderr)
+                else:
+                    self.assertIn("discovery-smoke contract gaps", stderr)
+
     def test_default_reports_directory_is_runtime_owned(self) -> None:
         args = build_arg_parser().parse_args(["Skills/agent-ops/demo"])
 

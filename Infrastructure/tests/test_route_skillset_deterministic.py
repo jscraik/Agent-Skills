@@ -230,6 +230,21 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "skill-builder")
         self.assertIn("improve-skill-sdk-pipeline", payload["candidates"][0]["reason"])
 
+    def test_skill_factory_known_audit_and_benchmark_work_bypasses_router(self) -> None:
+        """A known quality lane must reach its owner instead of a routing stop."""
+        for task in ("audit a skill", "benchmark this skill", "validate this skill package"):
+            with self.subTest(task=task):
+                payload = self._route(
+                    "skill-factory",
+                    task,
+                    [
+                        _row("skill-factory-router", "Route ambiguous skill work."),
+                        _row("skill-builder", "Audit and benchmark existing skills."),
+                        _row("skill-refactor", "Fold duplicate skill evidence."),
+                    ],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-builder")
+
     def test_skill_factory_external_install_routes_to_installer_not_builder(self) -> None:
         payload = self._route(
             "skill-factory",

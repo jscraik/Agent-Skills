@@ -107,19 +107,13 @@ _FACTORY_RULES = MappingProxyType({
         (
             "skill-builder",
             "improve-skill-sdk-pipeline",
-            frozenset({"improve", "harden", "fix", "repair", "review", "score", "eval", "evals", "tessl", "sdk"}),
+            frozenset({"improve", "harden", "fix", "repair", "review", "score", "eval", "evals", "tessl", "sdk", "audit", "validate", "benchmark", "release", "package"}),
             frozenset({"skill", "skills"}),
         ),
         (
             "skill-refactor",
             "refactor-skill",
             frozenset({"refactor", "simplify", "merge", "fold", "prune", "coverage", "session"}),
-            frozenset({"skill", "skills"}),
-        ),
-        (
-            "skill-factory-router",
-            "harden-skill",
-            frozenset({"harden", "validate", "audit", "release", "package", "eval", "benchmark"}),
             frozenset({"skill", "skills"}),
         ),
     ),

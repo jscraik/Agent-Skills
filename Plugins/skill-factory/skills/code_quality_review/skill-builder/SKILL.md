@@ -44,14 +44,17 @@ improvement, reference quality fixes, and plugin-skill readiness work.
   evidence, copied artifacts, and review notes.
 - For unsafe requests, return Safety Verdict: safety constraints intact;
   refusing unsafe request.
-- If the target, failing gate, score, or edit authority is missing, ask Round 1
-  question: Which canonical target should I patch? If canonical and .agents/**
-  paths both exist, confirm the source before edits.
+- Classify the request as audit, repair, validation-only, or promotion before
+  requesting inputs. Audit requires a target or bounded collection, not a
+  failing score or edit authority. Ask only for information needed by the
+  selected mode. Confirm canonical ownership before edits.
 
 ## Outputs
 
 - Exact validation commands and pass, fail, or blocked outcomes.
 - Changed files, rollback path, and evidence artifact locations.
+- For audit, report findings, source references, coverage gaps, and proposed
+  edits. Changed files and rollback evidence are not applicable without edits.
 - For blocked release-eval cases, the failed repair-policy item in
   blocker_notes.
 - Lane-separated readiness summary covering SDK, OSS, Tessl, runtime, registry,
@@ -61,11 +64,14 @@ improvement, reference quality fixes, and plugin-skill readiness work.
 
 ## Workflow
 
-1. Find the canonical source and confirm edits are allowed.
-2. Read references/repair-policy.md for first-principles gate, repair map,
-   Tessl policy, and scenario policy.
-3. For review, handoff, rollback, or validation-only work, return the Outputs
-   contract and stop.
+1. Identify the requested mode, target, canonical owner, and authority.
+2. For audit, inspect the source and relevant references before returning
+   evidence-backed findings and coverage gaps without edits. For validation-only
+   work, run only authorized checks and report their results. Stop after the
+   requested deliverable is satisfied, not merely after selecting its mode.
+3. For repair, read references/repair-policy.md. Load the full promotion ladder
+   only when promotion or SDK/Tessl handoff is explicitly selected. Handoff and
+   rollback requests authorize only their named actions, not a fresh repair.
 4. Run the focused gate; record baseline score, artifact path, and first
    blocker.
 5. Apply one Repair Map change from references/repair-policy.md, then rerun the
@@ -77,11 +83,11 @@ improvement, reference quality fixes, and plugin-skill readiness work.
 
 Command: ./bin/ask skills external-review <target> --audit-level compat --json --robot
 
-Pass only on parsed fields: ask audit, package, and release status == success;
-external-review lint ok plus score >= 90 with 95+ target; Tessl live-private
-usage >= max(0.90, baseline) only when the workspace/project link is available.
-On failure, patch the first errors[] item or blocker. Exit code alone never
-passes.
+Parse the result fields required by the selected local check; exit code alone
+does not prove acceptance. In repair mode, fix the first in-scope error and
+rerun. Release acceptance additionally requires the evidence in
+references/eval-enforcement-contract.md; a workspace link does not select or
+authorize that lane.
 
 ## Failure Mode
 
@@ -90,6 +96,10 @@ blocker_notes with the failed gate, artifact path, and next smallest patch.
 
 ## Validation
 
+- Source-only corrections use the owning local checks and focused behavioral
+  proof. Runtime, cloud, Tessl, registry, and publication lanes remain not
+  selected unless explicitly requested. Missing promotion evidence blocks only
+  promotion claims, not independent local work.
 - Fail fast: stop at the first failed gate, do not proceed to later gates, and
   parse JSON fields instead of exit code alone.
 - Rerun the exact failed gate after each repair before widening scope.
