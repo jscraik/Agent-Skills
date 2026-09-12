@@ -23,24 +23,13 @@ If the exact production path cannot be run because it requires unavailable crede
 
 ## Repeated Error Protocol
 
-Do not fight repeated errors. If the same command, validator, tool call, or
-implementation attempt hits the same error twice, stop the retry loop.
-
-Required behavior:
-
-1. Capture the exact repeated error text and the command or action that caused
-   it.
-2. Research 3-5 plausible fixes. Use web research when network access is
-   available and appropriate; if network is blocked, use repo-local docs,
-   official cached docs, code search, and existing solution notes, and state the
-   blocker.
-3. Compare the options for safety, scope, validation cost, and likelihood.
-4. Choose the most efficient safe option.
-5. Implement the chosen fix and validate it against the original failing path.
-
-Do not keep making local edits against the same failure without this option
-search. If the most efficient option requires user approval, credentials, or
-external access, report that as the blocker instead of inventing a workaround.
+After two equivalent failures, stop unchanged retries. Preserve the error and
+command, then change one relevant diagnostic, input, environment condition, or
+implementation hypothesis. Consult repository evidence first; compare
+alternatives or use external research when the cause remains uncertain and
+that access is authorized. Resume after new evidence justifies the next step.
+Escalate only when progress requires new authority, credentials, or an owner
+decision. Validate an authorized repair against the original failing path.
 
 ## Shell Scripting
 
@@ -82,6 +71,9 @@ the entire repository directory. Set `npm_config_cache` only when npm is
 in scope. Retain the operator-authenticated `gh` configuration; set
 `GH_CONFIG_DIR` only when an explicitly supplied configuration is already
 authenticated. Cache or state write warnings are not API connectivity evidence.
+Before invoking a tool, verify each resolved cache or state path is inside the
+approved scratch directory and writable. Trust paths are separate controls,
+not cache directories or permission grants.
 
 Do not keep retrying the same failing command. After two equivalent failures,
 change the environment, permission profile, command shape, or diagnostic path,
@@ -175,29 +167,3 @@ When refactoring interfaces that affect multiple files, first update the interfa
 ## Documentation
 
 Always format markdown plan files cleanly before writing - avoid stray backticks, inconsistent heading levels, or mixed quote styles. Use `prettier --write` or equivalent for markdown files.
-
-## Repeated Steering and Environment Refinement
-
-The selected-route criteria and refinement loop above govern repeated steering.
-Repeated feedback, review findings, approval failures, and live-state mismatches
-do not stop routine work by themselves. After two equivalent failures of the
-same command, change the command, environment, permission profile, or
-diagnostic path before retrying, then record the changed evidence.
-
-For sandboxed Codex runs, live PR and CI operations are networked operations.
-Run GitHub, CodeRabbit, CircleCI, Snyk, package-registry, and external API
-commands with explicit network permission before diagnosing an outage,
-credential issue, or platform regression. If the command may invoke `gh`,
-`mise`, `uv`, or npm, apply the sandbox-state environment contract above before
-the shell starts. `GH_CONFIG_DIR` selects GitHub CLI configuration, not
-`XDG_STATE_HOME`; do not point it at an empty scratch directory. Set it only
-when the operation is given an explicitly supplied, authenticated configuration.
-Before invoking a tool, verify each resolved cache or state path is inside the
-approved scratch directory and writable. Treat `MISE_TRUSTED_CONFIG_PATHS` as
-a separate trust control: set it to the explicitly approved root
-`$(git rev-parse --show-toplevel)/.mise.toml` file, never to writable state,
-a current subdirectory, or the entire repository directory.
-
-After two equivalent failures, change the environment, permission request,
-command shape, or repo contract before trying again. Do not keep rotating
-through the same failing command and call that progress.

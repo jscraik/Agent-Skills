@@ -13,8 +13,9 @@
 
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Run shell commands through `zsh -lc`; invoke Bash scripts explicitly with
-  `bash`.
+- Use the tool's configured non-login shell; invoke Bash scripts explicitly
+  with `bash`. Use a login shell only for an authorized, bounded investigation
+  of shell startup behavior.
 
 ## Command preflight
 

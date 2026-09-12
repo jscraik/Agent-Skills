@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import importlib.util
+import contextlib
+import io
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -45,7 +50,7 @@ def _profile_selection() -> dict[str, str]:
     return {
         "requested_role": "QA Disproof",
         "selected_profile_role": "correctness-reviewer",
-        "profile_source": "/Users/jamiecraik/.codex/agents/manifest.json",
+        "profile_source": "collaboration.spawn_agent",
         "reason_selected": "Behavioral disproof needs a correctness-specialist profile.",
     }
 
@@ -83,7 +88,53 @@ class TestThreadReportDispatchGuards(unittest.TestCase):
         cls.validator = _load_validator_module()
 
     def finding_paths(self, report: dict[str, Any]) -> set[str]:
-        return {finding["path"] for finding in self.validator.validate_thread_report(report)}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ledger = root / ".harness/memory/LEARNINGS.md"
+            ledger.parent.mkdir(parents=True)
+            ledger.write_text("Fixture learning.\n", encoding="utf-8")
+            with patch.object(self.validator, "ROOT", root):
+                return {finding["path"] for finding in self.validator.validate_thread_report(report)}
+
+    def test_valid_selection_never_consults_home_registry(self) -> None:
+        with patch.object(Path, "home", side_effect=AssertionError("ambient home lookup")):
+            self.assertEqual(set(), self.finding_paths(_base_report()))
+
+    def test_selection_fields_reject_missing_or_malformed_values(self) -> None:
+        for key in _profile_selection():
+            for value in (None, False, 1, [], {}, "", " ", "<placeholder>"):
+                with self.subTest(key=key, value=value):
+                    report = _base_report()
+                    report["agent_profile_selection"][key] = value
+                    self.assertIn(f"agent_profile_selection.{key}", self.finding_paths(report))
+            report = _base_report()
+            del report["agent_profile_selection"][key]
+            self.assertIn("agent_profile_selection", self.finding_paths(report))
+
+    def test_optional_fallback_is_validated_when_present(self) -> None:
+        report = _base_report()
+        report["agent_profile_selection"]["fallback_reason"] = "Explicitly selected general reviewer."
+        self.assertEqual(set(), self.finding_paths(report))
+        report["agent_profile_selection"]["fallback_reason"] = False
+        self.assertIn("agent_profile_selection.fallback_reason", self.finding_paths(report))
+
+    def test_cli_accepts_valid_selection_and_rejects_missing_selection(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ledger = root / ".harness/memory/LEARNINGS.md"
+            ledger.parent.mkdir(parents=True)
+            ledger.write_text("Fixture learning.\n", encoding="utf-8")
+            path = root / "report.json"
+            for missing in (False, True):
+                report = _base_report()
+                if missing:
+                    report.pop("agent_profile_selection")
+                path.write_text(json.dumps(report), encoding="utf-8")
+                output = io.StringIO()
+                with patch.object(self.validator, "ROOT", root), contextlib.redirect_stdout(output):
+                    result = self.validator.main([str(path), "--json"])
+                self.assertEqual(1 if missing else 0, result)
+                self.assertEqual("fail" if missing else "pass", json.loads(output.getvalue())["status"])
 
     def test_thread_report_requires_agent_profile_selection(self) -> None:
         report = _base_report()

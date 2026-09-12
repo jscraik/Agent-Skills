@@ -21,9 +21,9 @@ Every PM-to-execution instruction should name:
 
 - source PM thread id.
 - target execution thread id.
-- selected agent profile from `/Users/jamiecraik/.codex/agents/manifest.json`,
-  including requested role, selected profile role, profile output path or
-  source, reason selected, and fallback reason when no profile fits.
+- requested responsibility, selected capability, active dispatch tool, and
+  reason selected. Dispatch through the available tool; do not consult or
+  recreate the retired `~/.codex/agents/manifest.json` role registry.
 - repository path and expected head, or a command to rediscover head.
 - current gate and explicitly blocked next gates.
 - authoritative artifacts to inspect.
@@ -63,13 +63,20 @@ carry-forward target, deterministic guardrail, recorded location, and validation
 evidence. A repair report that only says what changed, without naming what the
 SDK should learn, is not a valid PM decision input.
 
-Every Worker, QA, Integration, or specialist execution report must include
-`agent_profile_selection`. Generic `worker` is a fallback, not the default
-when a specialist profile fits. Use `testing-reviewer` for test proof,
-`correctness-reviewer` for behavioral disproof, `security-reviewer` or
-`security-sentinel` for security lanes, `git-project-triage` for
-branch/worktree state, `circleci` for CircleCI lanes, `coderabbit` for
-CodeRabbit follow-up, and `agent-native-reviewer` for agent-workflow quality.
+Every execution report must retain the `thread-report/v1`
+`agent_profile_selection` object. These fields describe the actual selection,
+not membership in a role registry:
+
+- `requested_role`: the responsibility requested by the coordinator.
+- `selected_profile_role`: the capability or responsibility assigned.
+- `profile_source`: the active dispatch tool or explicitly supplied source.
+- `reason_selected`: why this selection serves the bounded task.
+
+Each value must be a non-empty final string. `fallback_reason` is optional;
+when supplied, it must also be a non-empty final string. The validator checks
+the report itself without reading a home-directory or repository role registry.
+Existing v1 reports retain their field names; a historical profile path is
+provenance text, not current registry membership or dispatch proof.
 
 A report with an awaiting, authorization-required, or waiting state must also
 include `outbound_escalation`, `follow_up_triggered`, or
