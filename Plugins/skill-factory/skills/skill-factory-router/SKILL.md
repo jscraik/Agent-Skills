@@ -1,6 +1,6 @@
 ---
 name: skill-factory-router
-description: "Analyzes Codex skill-management requests, selects the workflow lane, and returns selected_lane, mode, next_step, and blockers. Use when the user says create a skill, add/update/fix/review a skill, install/sync/list skills, choose a workflow, or merge/retire a skill."
+description: "Review Codex skill-management intent to select its downstream owner. Use when the owner is ambiguous or the user explicitly asks for routing, not when a downstream lane is already clear."
 metadata:
   version: "1.0.0"
   skill-type: team_automation
@@ -22,7 +22,7 @@ Select the smallest durable Skill Factory workflow for a Codex skill-management 
 
 ## When To Use
 
-- The user asks to create, capture, improve, audit, refactor, install, sync, list, prove, or route a Codex skill.
+- The user explicitly asks which lane owns a Codex skill-management request.
 - The request names skill work but the correct Skill Factory lane is not already certain.
 - The request depends on Tessl, Plugin Eval, validation, runtime, installation, package visibility, or session evidence and needs the correct owner lane before action.
 
@@ -42,14 +42,17 @@ Start with the smallest package boundary that can answer the routing question. I
 - Current authority boundary: read-only routing, approved edit, install or sync, eval execution, package publication, or review-only.
 - Available evidence handle when routing depends on Tessl, Plugin Eval, validation, runtime, review, or session artifacts.
 
-If target, lane, write authority, or validation requirement is missing, ask one plain-language question. Load references/discovery-interview.md only when that ambiguity cannot be resolved from the user request.
+Ask one plain-language question only when missing information prevents lane
+selection. Read-only routing does not require edit authority or a validation
+command. Load references/discovery-interview.md only for unresolved routing
+ambiguity; do not turn a clear downstream request into an interview.
 
 ## Outputs
 
 Return one YAML handoff:
 
     schema_version: 1
-    selected_lane: .system/skill-creator|skillify|skill-factory-router|skill-refactor|.system/skill-installer
+    selected_lane: .system/skill-creator|skillify|skill-builder|skill-refactor|.system/skill-installer
     mode: create|capture|harden|analyze|install
     rationale: <one sentence tied to the request shape>
     next_step: <specific skill or system lane to load next>
@@ -65,8 +68,8 @@ Expected artifacts: no source edits from this router. Downstream lanes own revie
 1. Match the request to this routing table. Explicit lane names win unless the user names multiple lanes or asks for an unsafe action.
 2. For create, draft, or new SKILL.md requests, select .system/skill-creator with mode create.
 3. For skillify, save this process as a skill, or make reusable guidance requests, select skillify with mode capture.
-4. For fix, improve, raise Tessl score, repair evals, or reduce token cost requests, select the Skill Factory hardening workflow with mode harden.
-5. For failing-skill, duplicate comparison, merge, or retire requests, select skill-refactor with mode analyze.
+4. For fix, improve, raise Tessl score, repair evals, or reduce token cost requests, select skill-builder with mode harden. For audit-only requests, select skill-builder with mode analyze.
+5. For evidence folding, duplicate comparison, merge, or retire requests, select skill-refactor with mode analyze. A known failing gate needing repair belongs to skill-builder.
 6. For install, list, sync, or prove Codex can see a skill requests, select .system/skill-installer with mode install.
 7. For copy or fork the system skill creator or installer requests, block the fork and route to the matching system lane.
 8. For major new-skill or broad-rewrite requests, decide whether the durable answer is a skill, docs, script, hook, validator, rule, or direct answer.

@@ -13,7 +13,7 @@ quality_targets:
   branch_delete_without_merge_proof: blocked
 claims:
 - id: require-heartbeat-before-rotation
-  statement: The skill creates, reuses, or blocks on exactly one heartbeat before until-green PR rotation.
+  statement: The skill creates, reuses, or blocks on exactly one heartbeat before scheduled until-green continuation; a blocked heartbeat does not stop authorized foreground repairs.
   source: SKILL.md#Execution Boundaries
   claim_type: execution
   evidence_required:
@@ -105,6 +105,20 @@ claims:
   covered_by:
   - edge-blocked-snyk-dirty-pr-continues
   - eval.pr-green-sweep.blocked-external-ci-keeps-independent-lanes-visible
+- id: confirmed-review-findings-before-repair
+  statement: Collect all finding sources, confirm current-code defects, preserve active ownership, and separate local repair from hosted resolution.
+  source: references/review-findings.md
+  claim_type: execution
+  evidence_required:
+  - finding ledger with source links and dispositions
+  - current head and active writer
+  - exact local proof and hosted reconciliation status
+  covered_by:
+  - happy-foreground-confirmed-findings
+  - edge-head-changed-active-writer
+  - edge-local-pass-unpublished-fix
+  - edge-named-integration-unavailable
+  - edge-blocked-monitor-foreground-continues
 cases:
 - id: happy-open-pr-sweep
   name: open PR sweep
@@ -121,7 +135,7 @@ cases:
     CodeRabbit, CircleCI, merge, and prune evidence.
   anti_overfit_notes: Do not rely on the skill name; trigger from the until-green PR remediation workflow.
   prepend_skill: false
-  prompt: I am tired of pasting the big PR rescue prompt. Inspect this repo's open PRs, fix CodeRabbit and CI blockers, validate
+  prompt: I am tired of pasting the big PR rescue prompt. Monitor this repo's open PRs, fix CodeRabbit and CI blockers, validate
     the green ones for merge, and clean up branches after.
   acceptance:
   - type: skill_selected
@@ -154,7 +168,7 @@ cases:
   anti_overfit_notes: The explicit invocation should still enforce heartbeat and latest-head proof rather than skipping to
     cleanup.
   prepend_skill: true
-  prompt: 'Please use this on agent-skills: inspect every open PR, fix review and CI blockers until they are actually green
+  prompt: 'Please use this on agent-skills: monitor every open PR, fix review and CI blockers until they are actually green
     and merged, then put me back on main with stale worktrees gone.'
   acceptance:
   - type: skill_selected
@@ -729,10 +743,10 @@ cases:
   why_realistic: KnowledgeOS capsule scenario covering until-green rotation requests that must gate on heartbeat status before
     PR mutation.
   expected_behavior: Select pr-green-sweep, report heartbeat_status first, reuse/update/create exactly one heartbeat or block
-    before editing, and include the stop rule.
+    scheduled continuation, and include the stop rule while continuing authorized foreground repairs.
   anti_overfit_notes: The task does not name the skill; pass requires heartbeat gating before action queue or mutation.
   prepend_skill: false
-  prompt: Review this repo's open PRs until they are green, reviewed, merged, and cleaned up.
+  prompt: Monitor this repo's open PRs until they are green, reviewed, merged, and cleaned up.
   knowledge_pack:
     scenario_id: eval.pr-green-sweep.rotation-without-heartbeat
     fixture: references/evals/eval.pr-green-sweep.rotation-without-heartbeat.md
@@ -756,8 +770,7 @@ cases:
   unit: knowledge capsule rotation without heartbeat
   given: KnowledgeOS capsule scenario covering until-green rotation requests that must gate on heartbeat status before PR
     mutation.
-  should: Select pr-green-sweep, report heartbeat_status first, reuse/update/create exactly one heartbeat or block before
-    editing, and include the stop rule.
+  should: Select pr-green-sweep, report heartbeat_status first, reuse/update/create exactly one heartbeat or block scheduled continuation, and include the stop rule while continuing authorized foreground repairs.
 - id: eval.pr-green-sweep.status-summary-without-queue
   name: knowledge capsule status summary without queue
   category: edge
@@ -1123,7 +1136,107 @@ cases:
   unit: cross-worktree receipt context remains explicit
   given: A worker can produce a valid repair and focused test in an authorized linked worktree while a parent validator cannot resolve the artifact path.
   should: Keep the receipt context explicit and avoid claiming closeout from an inaccessible artifact.
+- id: happy-foreground-confirmed-findings
+  name: happy-foreground-confirmed-findings
+  category: happy
+  eval_modes: [smoke, release]
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: "Tests the recorded multi-PR review workflow and its evidence boundaries."
+  expected_behavior: "Collect every page and source including Codex, deduplicate by proven cause while retaining thread links, disposition the non-actionable suggestion with a reason, patch the confirmed issue with focused proof, and report heartbeat_status not_requested without publishing or merging."
+  anti_overfit_notes: "PR numbers and test counts are illustrative; assess the evidence and authority decisions."
+  prepend_skill: true
+  prompt: "Fix review findings in PR #41 and #42 using GitHub, CodeRabbit, and CircleCI. Collect both bots and human comments. An inline correctness issue appears again in a top-level CodeRabbit comment and in CI; another suggestion does not apply to current code. Fix confirmed issues locally; no monitoring or publication is requested."
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: expected_signal
+    value: "Collect every page and source including Codex, deduplicate by proven cause while retaining thread links, disposition the non-actionable suggestion with a reason, patch the confirmed issue with focused proof, and report heartbeat_status not_requested without publishing or merging."
+  unit: review finding reconciliation
+  given: "Fix review findings in PR #41 and #42 using GitHub, CodeRabbit, and CircleCI. Collect both bots and human comments. An inline correctness issue appears again in a top-level CodeRabbit comment and in CI; another suggestion does not apply to current code. Fix confirmed issues locally; no monitoring or publication is requested."
+  should: "Collect every page and source including Codex, deduplicate by proven cause while retaining thread links, disposition the non-actionable suggestion with a reason, patch the confirmed issue with focused proof, and report heartbeat_status not_requested without publishing or merging."
+- id: edge-head-changed-active-writer
+  name: edge-head-changed-active-writer
+  category: edge
+  eval_modes: [smoke, release]
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: "Tests the recorded multi-PR review workflow and its evidence boundaries."
+  expected_behavior: "Preserve the uncommitted work, identify the existing writer, compare intervening changes and recollect current-head findings without competing writes or reset/rebase; tests for A do not prove B. Continue independent PR repairs."
+  anti_overfit_notes: "PR numbers and test counts are illustrative; assess the evidence and authority decisions."
+  prepend_skill: true
+  prompt: "PR #42 now points to head B; the existing checkout and passing tests are for head A and contain uncommitted fixes. Another task owns writes to B. Continue the review-finding sweep."
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: expected_signal
+    value: "Preserve the uncommitted work, identify the existing writer, compare intervening changes and recollect current-head findings without competing writes or reset/rebase; tests for A do not prove B. Continue independent PR repairs."
+  unit: review finding reconciliation
+  given: "PR #42 now points to head B; the existing checkout and passing tests are for head A and contain uncommitted fixes. Another task owns writes to B. Continue the review-finding sweep."
+  should: "Preserve the uncommitted work, identify the existing writer, compare intervening changes and recollect current-head findings without competing writes or reset/rebase; tests for A do not prove B. Continue independent PR repairs."
+- id: edge-local-pass-unpublished-fix
+  name: edge-local-pass-unpublished-fix
+  category: edge
+  eval_modes: [smoke, release]
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: "Tests the recorded multi-PR review workflow and its evidence boundaries."
+  expected_behavior: "Keep hosted threads unresolved because the fix is unpublished and current-head proof and applicable receipt are missing; finish local validation and report each pending lane. Do not treat local tests or old green CI as resolution evidence."
+  anti_overfit_notes: "PR numbers and test counts are illustrative; assess the evidence and authority decisions."
+  prepend_skill: true
+  prompt: "The reported bug is fixed locally and 63 focused tests pass. The fix is not pushed, independent review and the full gate are pending, and CircleCI is green on the old head. Resolve all CodeRabbit and Codex threads now."
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: expected_signal
+    value: "Keep hosted threads unresolved because the fix is unpublished and current-head proof and applicable receipt are missing; finish local validation and report each pending lane. Do not treat local tests or old green CI as resolution evidence."
+  unit: review finding reconciliation
+  given: "The reported bug is fixed locally and 63 focused tests pass. The fix is not pushed, independent review and the full gate are pending, and CircleCI is green on the old head. Resolve all CodeRabbit and Codex threads now."
+  should: "Keep hosted threads unresolved because the fix is unpublished and current-head proof and applicable receipt are missing; finish local validation and report each pending lane. Do not treat local tests or old green CI as resolution evidence."
+- id: edge-named-integration-unavailable
+  name: edge-named-integration-unavailable
+  category: edge
+  eval_modes: [smoke, release]
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: "Tests the recorded multi-PR review workflow and its evidence boundaries."
+  expected_behavior: "Name the unavailable CircleCI log capability and block that evidence lane without substituting gh or assuming there are no findings; continue independently confirmed review repairs with their own evidence."
+  anti_overfit_notes: "PR numbers and test counts are illustrative; assess the evidence and authority decisions."
+  prepend_skill: true
+  prompt: "Use only the named CircleCI integration for the failed-job evidence in these PRs. That integration has no callable log tool. GitHub shows a failed check and gh is available. Continue what you can."
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: expected_signal
+    value: "Name the unavailable CircleCI log capability and block that evidence lane without substituting gh or assuming there are no findings; continue independently confirmed review repairs with their own evidence."
+  unit: review finding reconciliation
+  given: "Use only the named CircleCI integration for the failed-job evidence in these PRs. That integration has no callable log tool. GitHub shows a failed check and gh is available. Continue what you can."
+  should: "Name the unavailable CircleCI log capability and block that evidence lane without substituting gh or assuming there are no findings; continue independently confirmed review repairs with their own evidence."
+- id: edge-blocked-monitor-foreground-continues
+  name: edge-blocked-monitor-foreground-continues
+  category: edge
+  eval_modes: [smoke, release]
+  timeout_sec: 180
+  should_trigger: true
+  realistic: true
+  why_realistic: "Tests the recorded multi-PR review workflow and its evidence boundaries."
+  expected_behavior: "Report blocked_heartbeat for scheduled continuation and continue authorized foreground repairs from the action queue. Do not require duplicate authorization or claim monitoring was created."
+  anti_overfit_notes: "PR numbers and test counts are illustrative; assess the evidence and authority decisions."
+  prepend_skill: true
+  prompt: "Monitor these two PRs and fix their confirmed review issues. The heartbeat tool is unavailable, but local writes and foreground repairs are already authorized."
+  acceptance:
+  - type: skill_selected
+    expected_skill: pr-green-sweep
+  - type: expected_signal
+    value: "Report blocked_heartbeat for scheduled continuation and continue authorized foreground repairs from the action queue. Do not require duplicate authorization or claim monitoring was created."
+  unit: review finding reconciliation
+  given: "Monitor these two PRs and fix their confirmed review issues. The heartbeat tool is unavailable, but local writes and foreground repairs are already authorized."
+  should: "Report blocked_heartbeat for scheduled continuation and continue authorized foreground repairs from the action queue. Do not require duplicate authorization or claim monitoring was created."
 metadata:
-  last_updated: '2026-06-30'
+  last_updated: '2026-09-06'
   author: Agent Ops Team
   review_status: active

@@ -14,11 +14,6 @@ VALID_STATUSES = {"pass", "blocked", "failed"}
 VALID_OUTCOMES = {"pass", "fail", "blocked"}
 BLOCKED_OSS_LOCAL_GATES = {"oss-cloud", "tessl-dry-run", "tessl-live"}
 LEARNING_LEDGER_PATH = ".harness/memory/LEARNINGS.md"
-REPO_ROOT = Path(__file__).resolve().parents[3]
-AGENT_PROFILE_MANIFEST_PATHS = (
-    Path.home() / ".codex" / "agents" / "manifest.json",
-    REPO_ROOT / ".codex" / "agents" / "manifest.json",
-)
 WAITING_STATE_PATTERN = re.compile(
     r"(awaiting|authorization_required|ready_for_authorization|waiting|needs_(pm|chief|operator|worker|qa|integration))",
     re.IGNORECASE,
@@ -80,20 +75,6 @@ def _repo_path_exists(value: str) -> bool:
     return True
 
 
-def _load_agent_profile_roles() -> set[str]:
-    for manifest_path in AGENT_PROFILE_MANIFEST_PATHS:
-        try:
-            raw = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if not isinstance(raw, list):
-            continue
-        roles = {item.get("role") for item in raw if isinstance(item, dict) and isinstance(item.get("role"), str)}
-        if roles:
-            return roles
-    return set()
-
-
 def _looks_waiting(value: Any) -> bool:
     if isinstance(value, str):
         return bool(WAITING_STATE_PATTERN.search(value))
@@ -143,7 +124,7 @@ def _validate_agent_profile_selection(payload: dict[str, Any]) -> list[dict[str,
     findings: list[dict[str, str]] = []
     selection = payload.get("agent_profile_selection")
     if not isinstance(selection, dict):
-        return [_finding("agent_profile_selection", "must be an object naming the selected agent profile or fallback reason")]
+        return [_finding("agent_profile_selection", "must be an object describing the actual task and capability selection")]
     required = {"requested_role", "selected_profile_role", "profile_source", "reason_selected"}
     missing = sorted(required - set(selection))
     if missing:
@@ -151,18 +132,8 @@ def _validate_agent_profile_selection(payload: dict[str, Any]) -> list[dict[str,
     for key in required:
         if key in selection and not _non_empty_string(selection.get(key)):
             findings.append(_finding(f"agent_profile_selection.{key}", "must be a non-empty final string"))
-    selected = selection.get("selected_profile_role")
-    fallback_reason = selection.get("fallback_reason")
-    roles = _load_agent_profile_roles()
-    if roles and isinstance(selected, str) and selected not in roles and not _non_empty_string(fallback_reason):
-        findings.append(
-            _finding(
-                "agent_profile_selection.selected_profile_role",
-                "must match a role in the agent profile manifest or provide fallback_reason",
-            )
-        )
-    if not roles and not _non_empty_string(fallback_reason):
-        findings.append(_finding("agent_profile_selection.fallback_reason", "must explain fallback when no agent profile manifest is available"))
+    if "fallback_reason" in selection and not _non_empty_string(selection["fallback_reason"]):
+        findings.append(_finding("agent_profile_selection.fallback_reason", "must be a non-empty final string when supplied"))
     return findings
 
 

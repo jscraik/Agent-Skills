@@ -152,16 +152,21 @@ an explicit coordinator-owned contract.
 
 Minimum behavior:
 
-- Use subagents only for independent lanes, specialist review, or bounded
-  parallel investigation.
+- Follow the active repository's delegation admission rule. Once admitted,
+  use subagents for independent lanes, specialist review, or bounded parallel
+  investigation; useful parallel work alone does not override admission.
 - The coordinator keeps responsibility for scope, evidence, synthesis,
   validation, and closeout.
-- Before delegation, verify path-dependent inputs, prefer absolute paths, create
-  coordinator-owned artifact parent directories, and keep prompts narrow.
-- For broad swarms or uncertain runtime health, run one probe subagent first and
-  verify that its artifact exists and is non-empty before launching the larger
-  swarm.
-- Artifact-producing subagents must end with
+- Before delegation, verify path-dependent inputs, prefer absolute paths, and
+  keep prompts narrow. Create coordinator-owned artifact parent directories
+  only when an artifact deliverable is explicitly assigned.
+- Ordinary reviews may return candidate-bound mailbox completion with verdict,
+  evidence, blocker, and claims boundary. Require durable artifacts only when
+  the selected repository contract names their path, owner, and validator.
+- Run a probe before a large swarm only when runtime health is uncertain or
+  the selected artifact contract requires it. Verify the assigned probe output;
+  check file existence and non-empty content when that output is an artifact.
+- Under an artifact-required contract, artifact-producing subagents end with
   `WROTE: /absolute/path/to/artifact.md`.
 - Mailbox or status text is not completion evidence when artifacts were
   requested.
@@ -173,25 +178,24 @@ Minimum behavior:
   remediation as introduced by current patch, pre-existing, unrelated dirty
   worktree, environment/tooling failure, or user-owned config drift requiring
   explicit approval.
-- Coordinator closeout records agents requested, agents completed, agents
+- For artifact-required routes, closeout records agents requested, agents completed, agents
   blocked, agents failed artifact verification, agents closed, and validation
   run with exact pass/fail/blocked outcomes.
 - Close consumed agents when they are no longer needed.
 
-Use the full contract for higher-risk or control-plane repositories, including
-configs, coding-harness, agent-skills, CI/security surfaces, and repos that
-regularly run review swarms. Use the compact version in ordinary application
-repositories where the behavior guardrails matter but a long governance section
-would dominate the AGENTS file.
+Preserve the applicable repository contract through a verified Context Pointer.
+Repository type or risk alone does not select artifact-writing work. Keep the
+compact coordination rules in AGENTS and route artifact-specific procedures to
+the reference required by the selected workflow.
 
 Portable snippet:
 
 ````md
 ## Subagent Contract
 
-Before spawning subagents, verify path-dependent inputs, use narrow prompts, and create expected artifact parent directories when the coordinator owns the output path. For broad swarms or uncertain runtime health, run one probe subagent first and verify its artifact exists before continuing.
+Follow the active delegation admission rule. Before spawning subagents, verify path-dependent inputs and use narrow prompts. Run a probe before a large swarm only when runtime health is uncertain or the selected artifact contract requires it, and verify its assigned output. Create artifact parent directories only for explicitly assigned deliverables when the coordinator owns the path.
 
-Subagents must produce durable evidence. Artifact-producing tasks must end with `WROTE: /absolute/path/to/artifact.md`; the coordinator must verify every expected artifact exists and is non-empty before synthesis. Missing artifacts get one narrow retry; remaining misses are recorded as failed coverage, not replaced with mailbox/status text.
+Mailbox completion is sufficient unless the selected repository contract explicitly requires a durable artifact. Artifact-producing tasks must end with `WROTE: /absolute/path/to/artifact.md`; the coordinator must verify every expected artifact exists and is non-empty before synthesis. Missing artifacts get one narrow retry; remaining misses are recorded as failed coverage, not replaced with mailbox/status text.
 
 Blocked subagents must use:
 
@@ -216,9 +220,10 @@ Verify the local instruction scope or discovery path first:
 
 - If a local `CODESTYLE.md` exists, point agents to that file.
 - If no local `CODESTYLE.md` exists, AGENTS must say to use the global Codex
-  CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE` instead and to
+  CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE.md` instead and to
   report the verified absolute path before relying on it.
-- If `~/dev/configs/codex/instructions/CODESTYLE` cannot be found or read,
+- Verify that the fallback resolves to a readable file, not just a directory.
+- If `~/dev/configs/codex/instructions/CODESTYLE.md` cannot be found or read,
   mark style guidance as blocked rather than inventing local style rules.
 
 Portable fallback snippet:
@@ -226,7 +231,7 @@ Portable fallback snippet:
 ```md
 ## Codestyle
 
-For technical work, read this repo's `CODESTYLE.md` before editing. If this repo does not have a local `CODESTYLE.md`, use the global Codex CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE` instead and report the verified absolute path. If neither local CODESTYLE nor `~/dev/configs/codex/instructions/CODESTYLE` can be read, mark codestyle guidance as blocked and continue only with the repo's discovered AGENTS instructions and explicit user directions.
+For technical work, read this repo's `CODESTYLE.md` before editing. If this repo does not have a local `CODESTYLE.md`, use the global Codex CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE.md` instead and report the verified absolute path. If neither local CODESTYLE nor `~/dev/configs/codex/instructions/CODESTYLE.md` can be read, mark codestyle guidance as blocked and continue only with the repo's discovered AGENTS instructions and explicit user directions.
 ```
 
 ## Validation Checklist

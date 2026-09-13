@@ -10,4 +10,7 @@
 - Agent-specific run instructions go in the active skill prompt/`SKILL.md` when present.
 
 ## Escalation rule
-- Stop and ask if any instruction requires changing `AGENTS.md` semantics (for example, policy overrides, mandatory artifact paths, or AI governance).
+- Implement explicitly requested instruction changes within their authorized
+  scope. Resolve authority and subtree precedence before treating a difference
+  as a conflict. Ask only when a remaining decision changes scope, risk, or
+  authority; an already authorized policy edit needs no duplicate confirmation.

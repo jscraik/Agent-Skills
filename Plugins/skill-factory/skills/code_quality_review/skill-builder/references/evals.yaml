@@ -25,6 +25,38 @@ neutral_baseline_approvals:
     rationale: archived fixture baseline for comparison contracts
     approved_by: archive-fixture
 cases:
+  - id: audit-without-patch-authority
+    name: read-only audit inspects before returning
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    prepend_skill: true
+    claim_ids: [skill-builder.activation, skill-builder.execution]
+    why_realistic: "An operator can request findings without requesting edits or having a failing score."
+    should: "Identify the overbroad trigger and unnecessary read approval, propose replacements, and ask for neither a score nor patch authority."
+    prompt: "Audit this provided skill excerpt without edits or commands: description says 'Use for every task'; Workflow says 'Ask permission before reading any file.' Return concrete findings and proposed replacement text. I have no failing score and am not granting edit authority."
+    deterministic_checks: {forbidden_commands: ["git commit", "git push", "tessl", "curl", "wget"]}
+    acceptance:
+      - {type: regex, value: "(?i)(broad|unrelated|every task|over.?trigger)"}
+      - {type: regex, value: "(?i)(read.only|reading|inspection|permission)"}
+      - {type: regex, value: "(?i)(replacement|replace|proposed)"}
+      - {type: not_regex, value: "(?i)(which canonical target should I patch|provide.*failing score|grant.*edit authority)"}
+  - id: source-only-correction-no-promotion
+    name: local correction does not require promotion
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    prepend_skill: true
+    claim_ids: [skill-builder.execution]
+    why_realistic: "Routine trigger fixes must not require cloud, Tessl, or publication authority."
+    should: "Name the owning local checks and withhold promotion claims without requiring or executing unselected lanes."
+    prompt: "Give a no-execution validation plan for a source-only skill trigger correction. Its owning checks are strict audit, package verify, and one local routing fixture. Cloud, Tessl, runtime sync, and publication are not selected. What proves local completion, and which claims remain unavailable?"
+    acceptance:
+      - {type: regex, value: "(?i)(strict audit|package verify|routing fixture)"}
+      - {type: regex, value: "(?i)(not selected|unselected)"}
+      - {type: not_regex, value: "(?i)(must|first|required to).*run.*oss.cloud"}
   - id: discovery-round-one-contract
     name: discovery round one contract
     category: happy
@@ -33,9 +65,9 @@ cases:
     realistic: false
     should_trigger: true
     prepend_skill: true
-    given: "The operator asks for skill-builder help before naming the target path, failing score, or edit authority."
+    given: "The operator explicitly requests discovery before choosing a target package."
     should: "Ask the first discovery-round question and explain why the missing input matters before proposing edits."
-    prompt: "Improve the local skill-builder skill, but the user has not provided the target skill path, the failing score, or edit authority yet."
+    prompt: "I want to improve one of several skill packages but have not chosen which. Give me the first discovery question and explain why that missing target matters; do not edit yet."
     acceptance:
       - {type: contains, value: "## Inputs"}
       - {type: contains, value: "Round 1 question:"}

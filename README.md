@@ -76,12 +76,12 @@ This path answers:
 
 ## Pick the right path
 
-| Goal | Command | What it proves |
-| --- | --- | --- |
-| Find the next action | `./bin/ask sdk start <skill> --json --robot` | Resolves the target and reports its current local state. |
-| Inspect structure | `./bin/ask sdk check <skill> --json --robot` | Summarizes structural evidence and any actionable follow-up. |
-| Verify packaging | `./bin/ask skills package verify <skill> --strict --json --robot` | Checks target-bound package readiness without installing it or changing runtime state. |
-| Prove behavior | `./bin/ask skills prove <skill> --json --robot` | Reports structural, behavioral, and runtime evidence as separate claims. |
+| Goal                 | Command                                                           | What it proves                                                                         |
+| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Find the next action | `./bin/ask sdk start <skill> --json --robot`                      | Resolves the target and reports its current local state.                               |
+| Inspect structure    | `./bin/ask sdk check <skill> --json --robot`                      | Summarizes structural evidence and any actionable follow-up.                           |
+| Verify packaging     | `./bin/ask skills package verify <skill> --strict --json --robot` | Checks target-bound package readiness without installing it or changing runtime state. |
+| Prove behavior       | `./bin/ask skills prove <skill> --json --robot`                   | Reports structural, behavioral, and runtime evidence as separate claims.               |
 
 Use `--robot` when an agent is driving the CLI. Combine it with `--json` for a
 stable machine-readable envelope, including errors and suggested next steps.
@@ -128,14 +128,14 @@ above; use them only when a command result or owning runbook directs you here.
 
 This repo separates source, generated projections, and live runtime visibility.
 
-| Surface                               | Purpose                                                 | Edit policy            |
-| ------------------------------------- | ------------------------------------------------------- | ---------------------- |
-| `Skills/<topic>/<skill>/SKILL.md`     | Active SDK candidate source owned by this repository    | Edit only when selected |
-| `Plugins/<plugin>/skills/**/SKILL.md` | Active SDK plugin candidate source owned by this repo   | Edit only when selected |
-| `~/dev/skills-foundry/**`             | Source-only retained package, provenance, and licences  | Copy-first admission    |
-| `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes | Regenerate only        |
-| `~/.agents/skills`, `~/.codex/skills` | Curated or accepted user runtime skill availability     | Refresh with user sync |
-| `~/.agents/plugins`, `~/.codex/plugins` | Curated or accepted user runtime plugin availability  | Refresh with plugin sync |
+| Surface                                 | Purpose                                                 | Edit policy              |
+| --------------------------------------- | ------------------------------------------------------- | ------------------------ |
+| `Skills/<topic>/<skill>/SKILL.md`       | Active SDK candidate source owned by this repository    | Edit only when selected  |
+| `Plugins/<plugin>/skills/**/SKILL.md`   | Active SDK plugin candidate source owned by this repo   | Edit only when selected  |
+| `~/dev/skills-foundry/**`               | Source-only retained package, provenance, and licences  | Copy-first admission     |
+| `.agents/skills/**`                     | Runtime projection consumed by Codex and agent runtimes | Regenerate only          |
+| `~/.agents/skills`, `~/.codex/skills`   | Curated or accepted user runtime skill availability     | Refresh with user sync   |
+| `~/.agents/plugins`, `~/.codex/plugins` | Curated or accepted user runtime plugin availability    | Refresh with plugin sync |
 
 An explicit owner decision chooses between Skills Foundry retention and an
 active SDK candidate in this repository. SDK-flat metadata is generated only

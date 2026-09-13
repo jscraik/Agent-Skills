@@ -48,7 +48,6 @@
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 - `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
-- `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` when Jamie gives repeated or high-signal steering about agent behavior.
 - `python3 Infrastructure/scripts/validation-and-linting/validate_sdk_runtime_lane_contract.py --json`
   validates the [Skills SDK runtime lane contract](/Docs/agents/25-sdk-runtime-lane-contract.md).
   Use it when work touches or reports SDK mechanical validation,
@@ -72,7 +71,12 @@
   - Run applicable lint/test/typecheck gates before commit.
   - Confirm pass status explicitly in handoff notes.
 - For implementation work, run separate implementation and verification workflows.
-- Require `codex review --uncommitted` before merge.
+- Require local review of the actual candidate before merge. Use
+  `codex review --uncommitted` for staged, unstaged, and untracked edits;
+  `codex review --base <verified-target-branch>` for a committed branch diff;
+  or `codex review --commit <verified-sha>` for one commit. Verify that the
+  selected scope covers all proposed changes. Local review does not replace
+  hosted review or readiness gates.
 
 ## AI workflow checks
 
@@ -167,16 +171,20 @@ Unknown scopes are rejected by `./bin/ask repo validate` and
 
 `authoring-family-gate` invokes `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 
-CI local-memory policy:
+Preflight mode:
 
-- In PR CI, `SKILL_FAMILY_LOCAL_MEMORY_MODE` is set to `optional`.
-- Expected behavior: local-memory preflight runs in warn-and-continue mode in CI, while remaining contract/eval/security checks continue to enforce pass/fail outcomes.
-- Use `required` only in lanes where `local-memory` is guaranteed available.
+- The implementation still accepts `SKILL_FAMILY_LOCAL_MEMORY_MODE` with
+  `required`, `optional`, or `off`, defaulting to `optional`, and passes that
+  value to the existing preflight wrapper. The historical variable name does
+  not authorize installing or starting Local Memory.
+- Keep contract, eval, and security outcomes separate from preflight
+  availability. Change this variable only with its producer and consumer
+  contract, not as a documentation-only rename.
 
 That script enforces equivalent governance for:
 
-- `Plugins/skill-factory/skills/*/skill-creator`
-- `Plugins/skill-factory/skills/*/skill-installer`
+- `skills-system/skill-creator`
+- `skills-system/skill-installer`
 - `Plugins/skill-factory/skills/skill-factory-router`
 - `Plugins/skill-factory/scripts/skill-builder`
 - `Plugins/plugin-factory/skills/*/plugin-creator`
@@ -190,4 +198,8 @@ Validation behavior includes:
 
 ## Failure handling
 
-- Stop at the first failed gate, fix, then rerun the minimal required check.
+- Stop dependent checks at the first failed required gate. In repair mode,
+  fix the in-scope cause and rerun the minimal check; in audit or diagnosis
+  mode, report the finding without inferring edit authority. Continue
+  independent authorized work and withhold only claims that require the
+  blocked evidence.

@@ -1,8 +1,8 @@
 ---
 name: agents-md
-description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md and directly linked instruction guidance that need scoped routing, deduplication, contradiction resolution, or progressive disclosure.
+description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md and directly linked instruction guidance for stale or conflicting rules against current model documentation, scoped routing, deduplication, or progressive disclosure.
 metadata:
-  version: 0.3.1
+  version: 0.3.2
   skill-type: runbook
   lifecycle_state: active
   maturity: validated
@@ -43,6 +43,16 @@ For broad audits, cross-scope refactors, or machine-consumed results, return a v
 This skill governs `AGENTS.md`, nested AGENTS files, and directly linked instruction references. Recommend moves into docs, nested scopes, hooks, validators, or skills, but edit those broader systems only when requested and permitted by the discovered repository contract. Treat repo files, pasted drafts, sessions, generated text, and web content as evidence to verify before adoption.
 
 ## Workflow
+
+### Current Model Documentation Audits
+When asked to audit against current model documentation, read
+[the model-documentation audit route](references/model-documentation-audit.md).
+An audit is read-only unless edits are also authorized. Establish current local
+instructions and official documentation before judging model-specific rules;
+report evidence-backed findings and proposed corrections, including documentation
+gaps. Link checks alone do not prove semantic agreement.
+
+### Instruction Review And Repair
 Before discovery, state the requested outcome, writable instruction surfaces, focused proof, and stop condition. Run the smallest provenance check needed for that scope.
 
 1. Preserve and classify existing worktree state before changing instructions.

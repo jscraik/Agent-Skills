@@ -13,8 +13,9 @@
 
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Run shell commands through `zsh -lc`; invoke Bash scripts explicitly with
-  `bash`.
+- Use the tool's configured non-login shell; invoke Bash scripts explicitly
+  with `bash`. Use a login shell only for an authorized, bounded investigation
+  of shell startup behavior.
 
 ## Command preflight
 
@@ -47,13 +48,10 @@
 - Use the Infrastructure Python project for SDK contract validation and repo-local Python dependency checks:
   - `uv run --project Infrastructure --group test python -m pytest <target>`
   - `uv run --project Infrastructure --group lint ruff check <target>`
-- Verified npm package roots from lockfiles:
-  - `Skills/content-publishing/video-transcript-downloader/`
-  - `Skills/frontend-ui/ui-ux-creative-coding/`
-- Use per-package npm commands at those roots:
-  - `npm --prefix <path> install`
-  - `npm --prefix <path> run <script>`
-  - `npm --prefix <path> exec <bin>`
+- Skill directories are not npm package roots. Run package-manager commands
+  only after verifying an active package manifest and lockfile at the target.
+  Archived manifests under `Infrastructure/references/deferred-skill-context/`
+  do not establish active package roots.
 
 ## Useful checks
 

@@ -1,6 +1,46 @@
 schema_version: "2.0"
 skill_name: frontend-ui-design
+claims:
+  - id: frontend-ui-design.scoped-continuation
+    statement: "Continue independent authorized UI work when visual inspection is unavailable; preserve visual-acceptance and read-only authority boundaries."
+    source: "SKILL.md:Failure Mode"
+    claim_type: execution
+    risk: high
+    hard_gate: true
+    evidence_required:
+      - "Unavailable visual checks permit independent implementation and tests but not visual acceptance."
+      - "A read-only review reports clipping without editing the component."
 cases:
+  - id: unavailable-visual-continue-independent
+    claim_ids: [frontend-ui-design.scoped-continuation]
+    name: unavailable browser does not stop independent checks
+    category: edge
+    realistic: true
+    why_realistic: "Browser or screenshot access can be unavailable while source inspection and local tests remain safe and useful."
+    expected_evidence: ["Independent implementation or source checks may continue; visual acceptance remains unverified."]
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use frontend-ui-design. A settings-screen spacing fix is authorized in an existing component with established tokens. Browser inspection is unavailable, but local unit tests and source inspection can run. Explain what work can continue and what acceptance must stay unverified. This is a scenario question; do not execute commands or edit files."
+    acceptance:
+      - {type: skill_selected, expected_skill: frontend-ui-design}
+      - {type: regex, value: "(?i)(continue|proceed|run).{0,100}(test|implementation|source)"}
+      - {type: regex, value: "(?i)((visual|rendered|screenshot).{0,100}(unverified|not verified|blocked|unavailable)|(unverified|not verified|blocked|unavailable).{0,100}(visual|rendered|screenshot))"}
+  - id: read-only-review-no-repair
+    claim_ids: [frontend-ui-design.scoped-continuation]
+    name: review authority does not include implementation
+    category: pressure
+    realistic: true
+    why_realistic: "Read-only UI reviews commonly identify visible defects while withholding implementation authority."
+    expected_evidence: ["Report clipping and recommend a repair without editing or claiming visual acceptance."]
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use frontend-ui-design for a read-only review. A supplied screenshot clearly shows clipped button text. Report the defect and suggested repair, but do not edit anything or say visual acceptance passed just because unit tests passed. This is a scenario question; do not run commands."
+    acceptance:
+      - {type: skill_selected, expected_skill: frontend-ui-design}
+      - {type: regex, value: "(?i)(clipped|clipping)"}
+      - {type: regex, value: "(?i)(read.only|no (files|edits|changes)|not (edit|modif))"}
   - {id: happy-main, name: happy main, category: happy, eval_modes: [smoke, release], should_trigger: true, prepend_skill: false, prompt: "Redesign this cramped settings screen and keep it accessible.", acceptance: [{type: skill_selected, expected_skill: frontend-ui-design}, {type: regex, value: "(?i)(evidence|validate|route|report|html|og|AGENTS|design|screen)"}]}
   - {id: happy-explicit, name: explicit request, category: happy, eval_modes: [smoke, release], should_trigger: true, prepend_skill: true, prompt: "Use $frontend-ui-design and keep the output concise.", acceptance: [{type: skill_selected, expected_skill: frontend-ui-design}]}
   - {id: edge-missing, name: missing context, category: edge, eval_modes: [release], should_trigger: true, prepend_skill: false, prompt: "The user and task-critical path are missing; ask the smallest question.", acceptance: [{type: skill_selected, expected_skill: frontend-ui-design}, {type: regex, value: "(?i)(missing|blocked|ask|needs|assumption|scope)"}]}

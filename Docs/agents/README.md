@@ -13,7 +13,9 @@
    `bash scripts/bootstrap-ask.sh --json`, then verify the fallback with
    `python3 bin/ask repo status --json`.
 3. Use this folder for detailed policy only.
-4. If two docs conflict, escalate before proceeding.
+4. Resolve conflicts through instruction authority, scope, and canonical
+   ownership first. Ask only when applicable live rules still conflict; pause
+   the affected action and continue independent authorized work.
 
 ## Instruction files
 
