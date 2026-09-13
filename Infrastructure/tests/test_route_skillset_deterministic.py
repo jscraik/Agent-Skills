@@ -333,6 +333,19 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skill-creator")
 
+    def test_skill_factory_creation_routing_is_linear_for_repeated_actions(self) -> None:
+        task = "create" + " and eval" * 5_000 + " a new skill"
+        payload = self._route(
+            "skill-factory",
+            task,
+            [
+                _row("skill-builder", "Audit and validate existing skills."),
+                _row("skill-creator", "Create new skill packages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-creator")
+
     def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
         payload = self._route(
             "skill-factory",

@@ -343,15 +343,26 @@ def _has_affirmative_skill_creation(task: str) -> bool:
         + r"(?:(?!\b(?:but|and then)\b)[^.;!?])*",
         "", creation_text,
     )
-    return re.search(
-        r"\b(?:create|scaffold|generate|make|draft)"
-        r"(?:(?:\s*,?\s*(?:and|then)\s+|\s*,\s*)"
-        r"(?:validate|audit|benchmark|release|package|review|eval(?:uate)?|test|score|harden|improve))*"
-        r"\s+(?:(?:a|an|the|new|reusable|custom|codex)\s+)*"
-        r"(?:(?:package|bundle)\s+for\s+)?"
-        r"(?:(?:a|an|the|new|reusable|custom|codex)\s+)*skills?\b",
-        creation_text,
-    ) is not None
+    creation_words = {"create", "scaffold", "generate", "make", "draft"}
+    skill_words = {"skill", "skills"}
+    creation_fillers = {
+        "a", "an", "the", "new", "reusable", "custom", "codex",
+        "and", "then", "validate", "audit", "benchmark", "release",
+        "package", "review", "eval", "evaluate", "test", "score",
+        "harden", "improve", "bundle", "for",
+    }
+    for clause in re.split(r"[.;!?]|\bbut\b", creation_text):
+        words = re.findall(r"[a-z]+", clause)
+        for index, word in enumerate(words):
+            if word not in creation_words:
+                continue
+            for candidate_index in range(index + 1, len(words)):
+                candidate = words[candidate_index]
+                if candidate in skill_words:
+                    return True
+                if candidate not in creation_fillers:
+                    break
+    return False
 
 
 def _preferred_factory_match(
