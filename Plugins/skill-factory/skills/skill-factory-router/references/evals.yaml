@@ -72,6 +72,32 @@ claims:
     hard_gate: true
     evidence_required: ["untrusted input handling"]
 cases:
+  - id: negative-known-downstream-owner
+    name: known owner bypasses router
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    realistic: true
+    given: "The operator already selected skill-builder and audit mode."
+    should: "Leave the known downstream request with skill-builder rather than selecting the router."
+    prompt: "Use skill-builder to audit the named existing skill package without edits. The owner and mode are already selected."
+    acceptance:
+      - {type: skill_not_selected, expected_skill: skill-factory-router}
+  - id: audit-routing-no-edit-authority
+    name: audit routing requires no patch permission
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    given: "The operator asks only which lane owns an audit, with no execution requested."
+    should: "Select skill-builder in analyze mode without asking for edit authority or a score."
+    prompt: "Which lane owns a read-only audit of SKILL.md trigger wording? Choose the downstream selected_lane and mode only. No edits, failing score, or validation execution are requested."
+    acceptance:
+      - {type: regex, value: "(?is)selected_lane.*skill-builder"}
+      - {type: regex, value: "(?is)mode.*analyze"}
+      - {type: not_regex, value: "(?i)(grant.*edit authority|which canonical target should I patch)"}
   - id: smoke-discovery
     name: discovery interview contract
     category: happy

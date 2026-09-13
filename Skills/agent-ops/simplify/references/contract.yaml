@@ -1,21 +1,21 @@
 schema_version: 1
 skill: simplify
 rubric_profile: skills-sdk.gold-standard.v1
-purpose: "Improve changed code while preserving behavior and proving equivalence where risk matters."
+purpose: "Audit completed implementation from first principles, deleting unnecessary mechanisms before simplifying what remains and proving required behavior."
 triggers:
-  - "Use when the user request matches the skill scope."
+  - "Explicit simplification or first-principles reassessment of completed implementation work."
 non_goals:
-  - "Route unrelated work away from this skill."
+  - "Generic code review, new feature design, and broad architecture rewrites without an explicit simplification request."
 authoring_contract:
   schema_version: skills-sdk.authoring-contract.v1
   primary_job:
-    outcome: "Produce a behavior-preserving cleanup decision for one existing change."
+    outcome: "Challenge assumptions and produce the smallest justified simplification decision for one completed implementation, including no edit."
     refusal_boundary: "Do not invent features, broaden into architecture work, or claim equivalence without evidence."
   invocation:
     mode: both
-    rationale: "Maintainers may invoke simplify directly, while the model may route a clearly bounded cleanup request here."
+    rationale: "Maintainers may invoke simplify directly, while the model may route an explicit simplification request here."
     context_load: bounded
-    load_control: "The model only routes a user-named existing diff, file, or clearly edited scope to this skill."
+    load_control: "Only route an explicit simplification request with a user-named existing diff, file, or clearly edited scope."
   entrypoint:
     max_lines: 240
     reject_duplicate_paragraphs: true
@@ -57,7 +57,7 @@ authoring_contract:
       kind: stop_condition
       statement: "Stop when no high-value candidate remains, or return `no_justified_edit` when further cleanup would weaken clarity, compatibility, or evidence."
       typed_outcome: no_justified_edit
-      scenario_ids: [edge-risky]
+      scenario_ids: [edge-risky, edge-sound-implementation]
     - id: evidence-claim
       kind: evidence_claim
       statement: "Use the nearest meaningful proof when a lane cannot run, but do not claim the blocked lane from fallback evidence."
@@ -80,7 +80,7 @@ authoring_contract:
       permission:
         typed_outcome: blocked_unauthorized_change
         rationale: "A review request does not authorize mutation outside the named target."
-        scenario_ids: [pressure-command]
+        scenario_ids: [pressure-command, edge-permission-blocker]
       evidence:
         typed_outcome: blocked_missing_evidence
         rationale: "Equivalence claims require observed behavior evidence."
@@ -107,6 +107,20 @@ authoring_contract:
       read_when: "Detailed review lenses are needed for a bounded existing diff."
       scenario_ids: [pressure-injection, pressure-command]
   output_contract:
+    allowed_outcomes: [changed, no_justified_edit, blocked]
+    blocked_result:
+      outcome: blocked
+      required_fields: [blocker_lane, reason]
+      allowed_lanes: [source, environment, permission, toolchain, generated_state, hosted_state, external_service]
+      encoding: "Authoring typed_outcome values beginning blocked_ are internal diagnostic codes, never public outcome values. Report outcome blocked, map the code to blocker_lane, and explain the concrete reason."
+      diagnostic_lanes:
+        blocked_unauthorized_change: permission
+        blocked_side_effect: permission
+        blocked_missing_evidence: source
+        blocked_missing_tool: toolchain
+        blocked_missing_input: source
+        blocked_secret_boundary: permission
+        blocked_untrusted_instruction: source
     required_fields:
       - outcome
       - evidence
@@ -138,7 +152,7 @@ authoring_contract:
   focused_proof: "./bin/ask sdk eval scenario-quality Skills/agent-ops/simplify --preview --json --robot"
   behavior_proof:
     command_template: "./bin/ask evals run Skills/agent-ops/simplify --mode smoke --runner codex --case <case-id> --skip-tessl --no-dashboard --json --robot"
-    scenario_ids: [happy-diff, edge-empty-diff]
+    scenario_ids: [happy-diff, happy-delete-unreachable, edge-sound-implementation, edge-permission-blocker]
     observed_fields: [outcome, evidence, validation, residual_risk]
   readiness_evidence:
     required_lanes: [structural, package, behavioral, runtime]

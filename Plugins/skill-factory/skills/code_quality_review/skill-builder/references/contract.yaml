@@ -16,12 +16,12 @@ outputs:
   - "media artifact evidence or blocked status when image generation is requested"
 quality_criteria:
   sdk_pipeline_entry:
-    purpose: "Measures whether hardening work enters the shared SDK lifecycle before downstream claims."
+    purpose: "Measures whether selected SDK promotion work enters the shared lifecycle before downstream claims; audits and source-only corrections do not require promotion."
     why_it_matters: "A single front door prevents create, update, install, refactor, and skillify lanes from drifting apart."
-    observable_evidence: "Output names the sdk start receipt or reports the blocker that prevented running it."
+    observable_evidence: "For selected promotion, output names the sdk start receipt or blocker. For audit or source-only correction, output identifies the local evidence and marks promotion not selected."
     scoring:
-      5: "Routes through sdk start, names the current lane, and blocks every unproven downstream claim."
-      4: "Routes through sdk start and blocks downstream claims with minor reporting gaps."
+      5: "Names the selected mode, uses its required evidence, and blocks every unproven downstream claim without starting unselected lanes."
+      4: "Uses the selected mode's evidence and blocks downstream claims with minor reporting gaps."
       3: "Mentions SDK gates but leaves the current lane or blocked lanes partly implicit."
       2: "Uses ad hoc validation language instead of the shared SDK start receipt."
       1: "Claims Tessl, registry, release, or runtime readiness without SDK lifecycle entry."
@@ -64,7 +64,7 @@ evidence_requirements:
   - "Exact command evidence for every readiness or eval claim."
   - "Strict audit and package verify, or an explicit blocker for the gate that could not run, before Tessl or registry claims."
   - "Scenario, scorer, OSS, Tessl, and handoff receipts kept as separate proof lanes."
-  - "Steering uptake ledger row and validator evidence when a repeated failure pattern is repaired."
+  - "Steering uptake ledger row and validator evidence when the system-improvement route is selected under repository guidance."
 permission_profile:
   filesystem:
     read:

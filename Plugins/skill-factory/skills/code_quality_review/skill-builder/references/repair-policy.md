@@ -3,6 +3,11 @@
 Use this reference when a skill-builder run needs deeper repair doctrine after
 the entrypoint has selected the package and failing gate.
 
+For routine source-only correction, use the owning local checks and focused
+behavioral proof. The SDK/Tessl promotion ladder below applies only when that
+lane is explicitly selected. Audit does not require edit authority, a baseline
+score, or release evidence; inspect first and return findings without repairs.
+
 ## Philosophy
 
 Prefer one evidence-backed repair over broad rewriting. A score is useful only

@@ -230,6 +230,71 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "skill-builder")
         self.assertIn("improve-skill-sdk-pipeline", payload["candidates"][0]["reason"])
 
+    def test_skill_factory_known_audit_and_benchmark_work_bypasses_router(self) -> None:
+        """A known quality lane must reach its owner instead of a routing stop."""
+        for task in (
+            "audit a skill", "benchmark this skill", "validate this skill package",
+            "validate this existing skill; do not create a new skill",
+            "audit this skill package without creating a new skill",
+            "audit this skill package; no new skill creation",
+            "validate this skill, not create a new skill",
+            "audit this skill; do not scaffold or create a new skill",
+            "audit this existing skill; do not scaffold, create, or generate a new skill",
+            "validate this existing skill without needing to create a new skill",
+            "there is no need to create a new skill; validate the existing skill",
+            "validate this skill, not to create a new skill",
+            "audit this skill; do not try to create a new skill",
+            "validate this skill without any need to create a new skill",
+            "validate this existing skill; cannot create a new skill",
+            "validate this existing skill; won't create a new skill",
+            "validate this existing skill; shouldn't create a new skill",
+            "create tests and validate this existing skill",
+            "make documentation and audit this skill",
+            "draft a report and benchmark this skill",
+            "not allowed to create a new skill; validate the existing skill",
+            "do not under any circumstances create a new skill; audit this skill",
+        ):
+            with self.subTest(task=task):
+                payload = self._route(
+                    "skill-factory",
+                    task,
+                    [
+                        _row("skill-factory-router", "Route ambiguous skill work."),
+                        _row("skill-builder", "Audit and benchmark existing skills."),
+                        _row("skill-refactor", "Fold duplicate skill evidence."),
+                    ],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-builder")
+
+    def test_skill_factory_creation_precedes_quality_followups(self) -> None:
+        """Quality follow-ups must not turn a new-package task into repair."""
+        for action in ("validate", "audit", "benchmark", "release", "package", "review", "eval"):
+            with self.subTest(action=action):
+                payload = self._route(
+                    "skill-factory",
+                    f"create and {action} a new skill without scaffolding it or using cloud execution",
+                    [
+                        _row("skill-factory-router", "Route ambiguous skill work."),
+                        _row("skill-builder", "Audit and benchmark existing skills."),
+                    ],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-creator")
+                self.assertEqual(payload["selected"]["source_path"], "skills-system/skill-creator/SKILL.md")
+
+    def test_skill_factory_creation_after_unrelated_constraint(self) -> None:
+        """An earlier deployment constraint does not negate later creation."""
+        for task in (
+            "validate without cloud execution and then create a new skill",
+            "without cloud execution create and validate a new skill",
+            "without scaffolding, create and validate a new skill",
+        ):
+            with self.subTest(task=task):
+                payload = self._route(
+                    "skill-factory", task,
+                    [_row("skill-builder", "Audit existing skills.")],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-creator")
+
     def test_skill_factory_external_install_routes_to_installer_not_builder(self) -> None:
         payload = self._route(
             "skill-factory",
@@ -243,6 +308,30 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skill-installer")
         self.assertNotEqual(payload["selected"]["id"], "skill-builder")
+
+    def test_skill_factory_install_precedes_followup_validation(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install and validate this skill",
+            [
+                _row("skill-builder", "Audit and validate existing skills."),
+                _row("skill-installer", "Install validated skills with provenance and rollback safety."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+
+    def test_skill_factory_creation_allows_package_wording(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a package for a new skill and validate it",
+            [
+                _row("skill-builder", "Audit and validate existing skills."),
+                _row("skill-creator", "Create new skill packages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-creator")
 
     def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
         payload = self._route(
