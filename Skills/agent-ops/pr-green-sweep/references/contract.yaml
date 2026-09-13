@@ -1,7 +1,9 @@
 schema_version: 1
 skill: pr-green-sweep
-purpose: "Run an until-green PR remediation loop that composes GitHub, CodeRabbit, autofix, CircleCI, heartbeat, and branch/worktree cleanup."
+purpose: "Collect GitHub, CodeRabbit, Codex, and CI findings across scoped PRs, fix confirmed issues, and prove each outcome; monitor, merge, and clean up only when requested."
 triggers:
+  - "fix review threads in these PRs using GitHub, CodeRabbit, and CircleCI"
+  - "collect PR findings and fix confirmed issues"
   - "monitor open PRs until green"
   - "set a heartbeat for PR checks and review fixes"
   - "clear CodeRabbit review comments before merge"
@@ -19,13 +21,22 @@ inputs:
   - capability
   - target_project_path
   - open_prs_or_discovery_permission
-  - heartbeat_or_cron_cadence
+  - selected_mode
   - required_check_policy
-  - merge_strategy
   - approval_posture
   - cli_auth_context
-  - heartbeat_target_identity
+conditional_inputs:
+  monitoring: [heartbeat_or_cron_cadence, heartbeat_target_identity]
+  merge: [merge_strategy, target_base]
+execution_modes:
+  default: review-fix
+  monitoring: monitor-closeout
+  foreground_requires_heartbeat: false
+  monitoring_requires_explicit_request: true
+  merge_and_cleanup_require_explicit_scope: true
 outputs:
+  - selected_mode
+  - finding_ledger
   - schema_version
   - capability
   - heartbeat_status_first
@@ -153,7 +164,11 @@ safety:
   untrusted_inputs: true
   redact_secrets: true
   heartbeat_required_for_monitoring: true
-  heartbeat_block_stops_rotation: true
+  heartbeat_block_stops_scheduled_continuation_only: true
+  foreground_repairs_continue_when_monitor_blocked: true
+  confirmed_findings_only: true
+  published_fix_and_current_head_proof_before_thread_resolution: true
+  preserve_existing_authorization: true
   duplicate_heartbeat_guard: true
   admin_merge_requires_explicit_approval: true
   destructive_cleanup_requires_merge_proof: true
@@ -191,8 +206,10 @@ current_state_contract:
   - artifact_receipt_producer_validator_context
   - worktree_upstream_and_unique_commit_evidence_before_cleanup
 capability_selection:
-  default_entrypoint: closeout-commander
+  default_entrypoint: review-findings
   selectors:
+    - trigger: collect_review_findings_or_fix_named_prs
+      use: references/review-findings.md
     - trigger: heartbeat_or_monitoring
       use: references/knowledge-capsules/pr-green-sweep-heartbeat-and-scope.md
     - trigger: live_pr_or_check_truth
@@ -291,3 +308,14 @@ validation:
   - strict_skill_audit_for_skill_changes
 observability: "Report exact commands, tool outcomes, PR numbers, head SHAs, check names, thread status, blockers, and cleanup decisions."
 rollback_procedure: "Stop heartbeat or cron, revert only the scoped PR fix commits when safe, reopen unresolved threads if mistakenly resolved, and restore skipped branches/worktrees from recorded cleanup ledger."
+
+review_finding_contract:
+  sources: [review_threads, inline_comments, top_level_reviews, issue_comments, check_runs, failed_job_logs]
+  pagination_required: true
+  fields: [source_url_or_id, author, observed_head, path, disposition, reason, fix, proof]
+  dispositions: [confirmed, already_fixed, stale, duplicate, not_actionable, blocked]
+  head_change: preserve_owned_work_then_recollect_and_revalidate
+  mutation_owner: one_owner_per_pr
+  local_pass_is_not_hosted_resolution: true
+  unresolved_or_outdated_is_not_automatic_resolution: true
+  resolution_requires: [authority, published_fix_or_current_code_evidence, current_head_proof, applicable_receipt, exact_thread_id, live_readback]
