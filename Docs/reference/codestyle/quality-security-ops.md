@@ -5,19 +5,18 @@ for the actual toolchain; unrelated technology sections do not add checks.
 
 ## 15. Quality Gates: Coverage, Mutation, TDD
 
-PR merge gate MUST pass:
-
-* Branch coverage >= 65% (env override allowed)
-* Mutation score >= 75% (env override allowed)
-
-Repo MAY enforce higher thresholds per workflow.
+The PR workflow runs the repository's typecheck, test, audit, and check scopes.
+It does not enforce branch-coverage or mutation-score thresholds or consume
+environment overrides for those scores. Do not report either as a passing
+merge gate without an executable check and its recorded result.
 
 ### Program-design enforcement
 
-The repository's `program-design` gate is the executable ratchet for the
-Python rules above. In changed-files mode it compares the patch with `HEAD`
-and fails only on new or worsened public-interface, boolean-flag, broad-error,
-or mutable-global findings. Existing debt remains visible for a bounded
+The repository's `program-design` gate ratchets oversized public interfaces,
+boolean default arguments, broad exception handlers, explicit `global`
+statements, and module-level mutable state. In changed-files mode it compares
+the patch with `HEAD` and fails only on new or worsened findings in those
+categories. It does not measure coverage or mutation scores. Existing debt remains visible for a bounded
 refactoring slice rather than making unrelated changes fail. This is a
 low-noise baseline, not a claim that static analysis can decide every
 abstraction or responsibility boundary.
