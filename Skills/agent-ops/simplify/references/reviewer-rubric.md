@@ -12,6 +12,10 @@ Use this rubric when the simplify workflow dispatches reviewer agents. Keep find
 
 ## Code Reuse Reviewer
 
+First ask whether the mechanism is necessary for the intended outcome. Prefer
+deletion before deduplication. Keep separate code when sharing it would add
+indirection, dependencies, or obscure meaningful behavioral differences.
+
 Search for existing utilities, helpers, and adjacent patterns that can replace new or changed code.
 
 Flag:
@@ -30,7 +34,7 @@ Flag:
 
 - Redundant state: cached values that can be derived, observers or effects that could be direct calls, or state that duplicates a source of truth.
 - Parameter sprawl: new parameters that reveal the function should be generalized, split, or passed a cohesive object already used nearby.
-- Copy-paste with slight variation: near-duplicate branches or helper bodies that should share a small local abstraction.
+- Copy-paste with slight variation: near-duplicate branches or helper bodies where sharing reduces total complexity after accounting for callers and behavior.
 - Leaky abstractions: exposed internal details, caller knowledge of private structure, or boundary violations.
 - Stringly typed code: raw strings where constants, enums, string unions, branded types, or local registries already exist.
 - Framework-gated wrapper noise: in React, JSX, Vue, Svelte, SwiftUI, Jetpack Compose, or similar component trees, wrapper containers that add no layout or semantic value. Skip this rule outside component-tree UI code.

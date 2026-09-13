@@ -36,7 +36,7 @@
         "knowledge_claim": "Until-green PR sweeps require a heartbeat gate before rotation.",
         "behavior_under_test": "Heartbeat creation, reuse, update, or blocked reporting before PR mutation.",
         "failure_mode": "The agent starts PR rotation without a heartbeat status and stop rule.",
-        "expected_agent_move": "Report heartbeat_status first with a heartbeat id or blocker and stop before edits when heartbeat setup is blocked.",
+        "expected_agent_move": "Report heartbeat_status first with a heartbeat id or blocker and block scheduled continuation when heartbeat setup is blocked; continue authorized foreground repairs.",
         "proof_route": "references/evals.yaml",
         "fixture_path": "references/evals/eval.pr-green-sweep.rotation-without-heartbeat.md",
         "promotion_status": "candidate",
@@ -52,7 +52,7 @@
         ],
         "good_answer_pattern": [
           "The agent reports heartbeat_status as created, updated, reused, or blocked before rotation.",
-          "The agent stops before edits when heartbeat creation or reuse cannot be attempted."
+          "The agent blocks scheduled continuation when heartbeat creation or reuse cannot be attempted, while continuing authorized foreground repairs."
         ],
         "weak_eval_flags": [],
         "proposed_evals_yaml_case": {
@@ -100,7 +100,7 @@
       "knowledge_claim": "Until-green PR sweeps require a heartbeat gate before rotation.",
       "behavior_under_test": "Heartbeat creation, reuse, update, or blocked reporting before PR mutation.",
       "failure_mode": "The agent starts PR rotation without a heartbeat status and stop rule.",
-      "expected_agent_move": "Report heartbeat_status first with a heartbeat id or blocker and stop before edits when heartbeat setup is blocked.",
+      "expected_agent_move": "Report heartbeat_status first with a heartbeat id or blocker and block scheduled continuation when heartbeat setup is blocked; continue authorized foreground repairs.",
       "proof_route": "references/evals.yaml",
       "fixture_path": "references/evals/eval.pr-green-sweep.rotation-without-heartbeat.md",
       "promotion_status": "candidate",
@@ -116,7 +116,7 @@
       ],
       "good_answer_pattern": [
         "The agent reports heartbeat_status as created, updated, reused, or blocked before rotation.",
-        "The agent stops before edits when heartbeat creation or reuse cannot be attempted."
+        "The agent blocks scheduled continuation when heartbeat creation or reuse cannot be attempted, while continuing authorized foreground repairs."
       ],
       "weak_eval_flags": [],
       "proposed_evals_yaml_case": {

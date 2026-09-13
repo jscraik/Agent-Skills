@@ -291,3 +291,29 @@ Repo-specific agent knowledge base. Append-only.
 **2026-08-22 [Codex]:** Bash command 'ask' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2645054146)
 
 **2026-08-22 [Codex]:** Bash command 'ask' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2185740195)
+
+**2026-08-27 [Codex]:** Bash command 'python3' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1423432959)
+
+**2026-09-01 [Codex]:** Bash command 'redacted-command' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1450813153)
+
+**2026-09-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:736189858)
+
+**2026-09-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2344948520)
+
+**2026-09-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:32436765)
+
+**2026-09-01 [Codex]:** Bash command 'python' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3972012520)
+
+**2026-09-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2997735920)
+
+**2026-09-01 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:281328160)
+
+**2026-09-01 [Codex]:** Bash command 'bash' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:653127522)
+
+**2026-09-01 [Codex]:** Bash command 'python' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3515125567)
+
+**2026-09-02 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:325284859)
+
+**2026-09-02 [Codex]:** Bash command 'bash' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2847946023)
+
+**2026-09-02 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1354312930)

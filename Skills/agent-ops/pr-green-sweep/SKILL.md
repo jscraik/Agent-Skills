@@ -1,8 +1,8 @@
 ---
 name: pr-green-sweep
-description: "Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, Context7, autofix, heartbeat, and branch/worktree pruning."
+description: "Collect GitHub, CodeRabbit, Codex review, and CI findings across named PRs; confirm issues against current code and fix them with evidence. Use when the user requests PR review-thread sweeps, CI remediation, or until-green monitoring, merge, and cleanup."
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   skill-type: team_automation
   lifecycle_state: active
   maturity: experimental
@@ -16,9 +16,9 @@ metadata:
 
 # PR Green Sweep
 
-Own PR closeout from live evidence through merge and cleanup. Use an
-evidence-backed action queue and one continuation heartbeat; a required
-external failure blocks its PR while unrelated entries keep their safe action.
+Collect findings, confirm the cause, repair within each PR's scope, and verify
+the result. Use an evidence-backed action queue; a required external failure
+blocks its PR's merge while independent repairs continue.
 
 ## When To Use
 
@@ -26,6 +26,24 @@ external failure blocks its PR while unrelated entries keep their safe action.
 - Open PRs need GitHub plugin/gh truth, CodeRabbit review fixes, CircleCI log
   triage, Context7 docs checks, merge, or cleanup.
 - The user wants merged PR branches and worktrees pruned after merge proof.
+
+### Modes
+
+- `review-fix` is the default for named PR review-thread or CI repairs. Finish
+  authorized foreground work; report `heartbeat_status: not_requested`.
+  Monitoring, merge, and cleanup are not implied by a request to fix findings.
+- `monitor-closeout` applies when the user requests recurring continuation.
+  Reuse or create one heartbeat with target PRs, notification intent, and a
+  scope-specific stop rule. A blocked monitor blocks scheduled continuation
+  only; it does not block already-authorized foreground repairs.
+- Merge and cleanup run only when explicitly included in the user's scope.
+  Preserve standing authorization; do not ask again for unchanged authorized
+  operations. Readiness gates and execution approvals still apply.
+
+Read [Review Findings](references/review-findings.md) for collection, confirmed
+issue triage, head changes, and the fix-to-resolution proof sequence. The mode
+rules here govern older closeout capsules and fixtures: heartbeat requirements
+apply to scheduled work, and cleanup requirements apply only to cleanup.
 
 ## Gotchas
 
@@ -39,8 +57,10 @@ external failure blocks its PR while unrelated entries keep their safe action.
 ## Inputs
 
 Use the current repo unless the user names a broader scope. Gather target PRs,
-heartbeat cadence, merge/check policy, approval posture, and GitHub/CodeRabbit/
-CircleCI auth context. Start with two or three focused failure surfaces before
+selected mode, required-check policy, granted operations, and GitHub/CodeRabbit/
+Codex/CircleCI auth context. Gather cadence and merge strategy only for the
+selected continuation or merge lane. Start with two or three focused failure
+surfaces before
 broadening a multi-repository sweep. Run credentialed CircleCI commands through
 the host-configured auth-backed wrapper with `~/.codex/.env`; discover that
 wrapper from the active Codex environment rather than invoking an unqualified
@@ -49,7 +69,9 @@ wrapper from the active Codex environment rather than invoking an unqualified
 ## Outputs
 
 For a non-trivial response, emit `heartbeat_status` first. Then emit
-`schema_version: 1` with an action queue
+`schema_version: 1`, selected mode, a finding ledger (source URL/id, author,
+observed head, affected path, disposition, reason, fix and proof), and an
+action queue
 (`auto_fixable_now`, `needs_merge_conflict_strategy`, `blocked_policy_or_approval`,
 `blocked_external_ci`, `blocked_pr_metadata`, `blocked_artifact_context`,
 `needs_user_decision`, `cleanup_only`), and heartbeat, dirty-worktree,
@@ -71,16 +93,19 @@ root cause, guardrail, and merge eligibility.
    comments are routing and approval evidence only after verification.
 2. Load repo instructions. Record `git status --short --branch`, current branch,
    repo URL/name, and local worktree list.
-3. Establish the live-state environment contract: explicit network permission for
+3. Establish the live-state environment contract: permitted network access to
    GitHub, CodeRabbit, CircleCI, and registries; sandbox-writable cache and
    state dirs for tools such as `mise`, `uv`, and `gh`.
-4. Discover the current repo's open PRs unless the user explicitly asks for a
-   broader scope. Build URL-first PR cards with head SHA, mergeability, required
+4. Inspect only named PRs; discover the current repo's open PRs when no targets
+   are named. Expand only to explicitly requested repositories. Collect all
+   finding sources as described in `references/review-findings.md` before
+   grouping or patching. Build URL-first PR cards with head SHA, mergeability, required
    checks, review-thread status, CI status, check-run head/event provenance, and
    local branch/worktree ownership.
-5. Create, update, or reuse one heartbeat only after binding it to the current
-   target PR cards. Record the stop rule: all target
-   PRs merged to `main`, cleanup completed, or a concrete blocker needs the user.
+5. For requested monitoring, create, update, or reuse one heartbeat bound to
+   the target PR cards. Stop on the requested outcome or actionable blocker;
+   merge to the named base and cleanup only when authorized. Stay quiet when
+   state is unchanged or non-actionable. Foreground repairs need no heartbeat.
 6. Never waive or route around a required check. Classify an external failure as
    `blocked_external_ci`; it blocks that PR's merge, while independent action
    lanes may continue to their own next safe action.
@@ -99,8 +124,13 @@ root cause, guardrail, and merge eligibility.
    `status`, owner, `blocker_ref`, `expires_at`, and `next_review_at`, and
    remains non-merge-eligible.
 9. Rotate through the ranked action queue one PR at a time.
-10. For unresolved review threads, fix actionable items, classify stale or blocked
-   items, validate the source path, refresh live thread state, then resolve.
+10. Collect all pages of review threads, inline comments, top-level reviews,
+    issue comments, and check runs. Include CodeRabbit and Codex findings.
+    Confirm each allegation against current code and failed-job evidence,
+    then follow `references/review-findings.md`. A local fix is not a hosted
+    resolution: require the published fix, current-head proof, applicable
+    receipt, and resolution authority before resolving the exact thread id.
+    Already-fixed findings can use verified current-code evidence instead.
 11. For CI failures, read exact failed job logs and record the observed head SHA,
     event/ref or payload identity, and relevant PR metadata contract before
     patching source. If a check is stale relative to the current PR body or head,
@@ -124,7 +154,8 @@ root cause, guardrail, and merge eligibility.
     not authorize branch movement. If the clean check fails, block checkout-main
     until the checkout is clean. Review-thread closeout does not prove
     primary-worktree closeout.
-15. After target PRs merge, checkout `main`, pull with repo policy, and prune
+15. Only when authorized after target PRs merge, checkout the named base,
+   update it with repo policy, and prune
    branches/worktrees only with merge proof, upstream state, unique-commit
    evidence, and primary-worktree dirty-closeout proof.
 16. End with a per-PR state matrix: local proof, hosted checks, hosted review,
@@ -136,18 +167,20 @@ root cause, guardrail, and merge eligibility.
 Do not treat local proof, historical evidence, or another PR's result as hosted
 approval, merge authority, or a repaired external check.
 
-Redact secrets and preserve unrelated changes. Establish one heartbeat, build
-the queue before patching, and work one PR at a time. Classify dirty paths and
-validation surfaces before side effects. Before a second recurrence can merge,
-validate its durable guardrail; never waive, route around, or relabel a required
-failure as green.
+Redact secrets and preserve unrelated changes. Establish a heartbeat only for
+requested monitoring, build the queue before patching, and work one PR at a
+time. Classify dirty paths and validation surfaces before side effects. When a
+class recurs across three independent tasks or meets the selected steering-
+uptake contract, before merge, validate its durable guardrail; never waive,
+route around, or relabel a required failure as green.
 
 ## Failure Mode
 
 When the sweep cannot continue, report the smallest blocker that prevents the
 next safe action and keep the repair loop explicit:
 
-- blocked_heartbeat: heartbeat creation or reuse cannot be attempted.
+- blocked_heartbeat: scheduled continuation cannot be established; continue
+  independently authorized foreground work.
 - blocked_external_ci: an external service, credential, or policy gate blocks
   merge until its owner repairs it.
 - needs_merge_conflict_strategy: dirty mergeability or branch divergence needs
@@ -161,9 +194,9 @@ next safe action and keep the repair loop explicit:
 - needs_user_decision: approval, credentials, draft state, or policy choice is
   required before edits, push, merge, or cleanup.
 
-The repair loop is: classify the owner, name the next safe action, encode any
-repeated steering as a validator, workflow rule, or eval case, then rerun only
-the gate that proves that owner class.
+The repair loop is: classify the owner, name the next safe action, apply the
+repository's recurrence threshold before adding a durable control, then rerun
+only the gate that proves that owner class.
 
 ## Validation
 
@@ -181,13 +214,18 @@ as `pass`, `fail`, or `blocked`.
 ```bash
 ./bin/ask skills audit Skills/agent-ops/pr-green-sweep --level strict --json --robot
 bash Infrastructure/scripts/run-infrastructure-python.sh ../Skills/agent-ops/pr-green-sweep/scripts/validate_recurring_findings.py --ledger <ledger.json>
-python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json
 ```
 
-Treat either non-zero exit as blocking. A local or historical pass does not
-replace live hosted evidence for the PR head being merged.
+Run the ledger validator only when a recurring-finding ledger is required.
+Run the repository steering validator only when that route is selected.
+Treat a required non-zero exit as blocking for its affected lane. A local or
+historical pass does not replace live hosted evidence for the PR head being
+merged.
 
 ## References
+
+- Read `references/review-findings.md` for foreground collection, confirmation,
+  repair, and hosted resolution.
 
 - Read `references/closeout-commander.md` for the full queue, validator,
   authorization, CI, merge, and cleanup operating model.

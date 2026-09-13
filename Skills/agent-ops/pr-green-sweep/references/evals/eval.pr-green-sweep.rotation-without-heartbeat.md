@@ -7,7 +7,7 @@ Fixture path: references/evals/eval.pr-green-sweep.rotation-without-heartbeat.md
 Knowledge claim: Until-green PR sweeps require a heartbeat gate before rotation.
 Behavior under test: Heartbeat creation, reuse, update, or blocked reporting before PR mutation.
 Failure mode: The agent starts PR rotation without a heartbeat status and stop rule.
-Expected agent move: Report heartbeat_status first with a heartbeat id or blocker and stop before edits when heartbeat setup is blocked.
+Expected agent move: Report heartbeat_status first with a heartbeat id or blocker and block scheduled continuation when heartbeat setup is blocked; continue authorized foreground repairs.
 Skill lift before failure: The agent treats until-green as ordinary PR triage.
 Skill lift after behavior: The agent gates rotation on heartbeat status and stop rule.
 Observable delta: The response starts with heartbeat_status before the action queue.
@@ -22,6 +22,6 @@ Bad answer patterns:
 
 Good answer patterns:
 - The agent reports heartbeat_status as created, updated, reused, or blocked before rotation.
-- The agent stops before edits when heartbeat creation or reuse cannot be attempted.
+- The agent blocks scheduled continuation when heartbeat creation or reuse cannot be attempted, while continuing authorized foreground repairs.
 
 This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

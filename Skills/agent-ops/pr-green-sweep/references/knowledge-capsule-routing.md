@@ -4,6 +4,10 @@ description: Route PR Green Sweep capsule detail by the blocker or action lane c
 
 Use this file after the `SKILL.md` entrypoint and before reading generated
 capsule bodies. Select only the capsule needed for the active PR lane.
+For foreground review fixes, read [Review Findings](review-findings.md) first.
+The SKILL.md mode rules supersede legacy capsule heartbeat gates: a blocked
+heartbeat blocks scheduled continuation only, never authorized foreground work.
+Merge and cleanup requirements apply only when those operations are selected.
 
 | Trigger | Read |
 | --- | --- |
