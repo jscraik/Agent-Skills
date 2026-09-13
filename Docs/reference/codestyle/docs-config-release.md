@@ -5,7 +5,9 @@ for the actual toolchain; unrelated technology sections do not add checks.
 
 ## 10. Documentation & Prose (Vale)
 
-All docs and long-form prose MUST be linted with **Vale**.
+Changed documentation and long-form prose MUST be linted with **Vale** through
+the repository's staged-documentation check. CI additionally protects the
+`README.md` and root `SKILL.md` entrypoints.
 
 ### Scope
 
@@ -14,7 +16,7 @@ All docs and long-form prose MUST be linted with **Vale**.
 ### Configuration
 
 * Repo root MUST include `.vale.ini`.
-* CI MUST run `vale sync` before linting.
+* CI MUST run `vale sync` before linting its protected entrypoints.
 
 ### Severity
 
