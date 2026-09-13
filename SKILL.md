@@ -10,7 +10,6 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#agents--skills--system)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
@@ -19,6 +18,7 @@ Do not hand-edit runtime projections.
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
+- [Skills System](#skills-system)
 
 ## Summary
 - `total_skills`: 85
@@ -28,15 +28,10 @@ Do not hand-edit runtime projections.
 
 ## Catalog
 
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only.
-
 ## Skills — Agent Ops
 
-- `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md and directly linked instruction guidance that need scoped routing, deduplication, contradiction resolution, or progressive disclosure.
-- `alignment-checkpoint` — Create, review, and validate an alignment checkpoint. Use when a request is ambiguous, high-stakes, multi-step, or requires explicit approval before tool use.
+- `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md and directly linked instruction guidance for stale or conflicting rules against current model documentation, scoped routing, deduplication, or progressive disclosure.
+- `alignment-checkpoint` — Create or review an explicit pre-action alignment checkpoint. Use when the user requests a checkpoint or an unresolved decision materially changes scope, risk, or authority; ordinary bounded implementation does not require a checkpoint.
 - `autofix` — Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
 - `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when automated research is requested or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
 - `autoreview` — Run structured AI code review as an advisory closeout gate for local diffs, PR branches, or commits when the user asks for autoreview, Codex review, second-model review, or pre-ship validation.
@@ -66,14 +61,14 @@ Do not hand-edit runtime projections.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
 - `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
 - `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
-- `pr-green-sweep` — Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, Context7, autofix, heartbeat, and branch/worktree pruning.
+- `pr-green-sweep` — Collect GitHub, CodeRabbit, Codex review, and CI findings across named PRs; confirm issues against current code and fix them with evidence. Use when the user requests PR review-thread sweeps, CI remediation, or until-green monitoring, merge, and cleanup.
 - `prek-pro` — Review, configure, and troubleshoot prek hooks when users need prek.toml edits, shim installs, hook validation, or pre-commit migration help.
 - `production-deployment` — Plan, execute, and validate production deployments when rollout safety, health checks, observability, rollback, or production-parity verification is required.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
 - `rust-pro` — Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
 - `sdk-scenario-generator` — Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, writing skill tests, adding eval cases, importing KnowledgeOS or Tessl suggestions, checking scenario drift, or hardening evals that are too easy.
 - `session-workflow-miner` — Analyze recent Codex session evidence for repeated manual workflows and route them to skills, subagents, validators, or no artifact when Jamie asks what he keeps doing manually.
-- `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
+- `simplify` — Audit completed implementation work from first principles for unnecessary complexity while preserving required behavior. Use when the user explicitly requests a simplification pass or first-principles reassessment before calling implementation done.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, projection sync, strict audit, reviewer evidence, commit, push, and PR status.
 - `technical-writer` — Audit, rewrite, and validate README, runbook, code-doc, config-doc, package-evidence, and public trust-surface documentation against live repository evidence. Use when documentation needs proof-backed correction, reader-focused review, generated-document ownership, public-access checks, or legacy docs-expert routing.
 - `testing` — Validate and choose proportionate test proof for tests, CI, coverage, evals, and closeout evidence: map changed files to repo-native commands, place checks at commit, push, and pull-request gates, classify pass/fail/blocked ownership, and preserve trace/regression artifacts. Use when users ask what tests or gates to run, how to design coverage, why validation failed, or what proof supports a claim.
@@ -139,3 +134,8 @@ Do not hand-edit runtime projections.
 - `create-auth` — Create, migrate, or validate Better Auth implementation work. Use when the user wants Better Auth added or changed in code, including OAuth, passkeys, 2FA, magic links, or org flows.
 - `recon-workbench` — Run, audit, and design authorized Recon Workbench workflows when scoped target interrogation needs evidence artifacts, redaction, validation, and safe reporting.
 - `security-ownership-map` — Analyze git-history security ownership when sensitive files, CODEOWNERS coverage, bus factor, contributor concentration, and remediation evidence need mapping.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.

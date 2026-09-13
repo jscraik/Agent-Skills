@@ -29,8 +29,11 @@ corrections; it does not establish permanent ownership or prove migration.
 - [ ] Open layer 2 PR: execution approval rejects the body-file command for
   lacking a template flag, although its body preserves the template and
   GitHub CLI rejects combining that flag with a body file.
-- [ ] Layer 3: skill guidance, eval contracts, and reconciled source records;
-  branch `codex/stack-skill-package-guidance`, intended base is layer 2.
+- [x] Layer 3 source commit: `f1f40365d` on
+  `codex/stack-skill-package-guidance`, intended base is layer 2.
+- [ ] Publish layer 3: its first push failed on missing worktree projection;
+  workspace sync and the strict agents-md audit now pass. The generated index
+  refresh accompanies this correction; PR creation remains a separate gate.
 - [ ] Hosted checks and independent reviews: not completed by local proof.
 
 ## Local evidence boundary
@@ -45,8 +48,11 @@ Ruff, modularity, and normal commit hooks passed afterward. Forty pre/post
 discovery comparisons returned identical results. Both factory package
 verifications and the route, archive-link, and system-overlay checks passed.
 
-All six layer 3 source audits passed, using source-only mode for agents-md
-because the clean delivery worktree has no materialized runtime projection.
+All six layer 3 source audits passed, initially using source-only mode for
+agents-md. The pre-push diagnostic then required its worktree projection.
+`./bin/ask skills sync --scope workspace --projection flat --json --robot`
+passed and materialized that projection without changing home links;
+the strict agents-md audit passed afterward without source-only mode.
 Package verification passed for agents-md, alignment-checkpoint,
 pr-green-sweep, and simplify. Both frontend packages remain blocked for
 package admission by rubric, provenance, and writing-shape gaps; their
@@ -69,6 +75,10 @@ remain in the original checkout. They contain local session identifiers or
 machine paths and are not published as fresh review or runtime evidence.
 This summary accounts for them without copying private provenance.
 
-Compatibility manifests and the runtime-separation summary are regenerated
+The full repository validation and the layer 3 commit hooks passed with zero
+required failures and zero warnings. That source result does not waive the
+separate package-admission or Plugin Eval failures recorded above.
+
+Compatibility manifests, the root index, and the runtime-separation summary are regenerated
 from the delivery tree rather than copied over newer main-branch state.
 No home runtime links, installations, releases, merges, or cleanup are selected.
