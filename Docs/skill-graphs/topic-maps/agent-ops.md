@@ -17,6 +17,7 @@ covers:
 > Skills for building, operating, and evolving the Agent-Skills system: skill authoring, agent configs, automations, plugin packaging, and Codex-native primitives.
 
 ## Table of Contents
+
 - [Skill & Agent Authoring](#skill--agent-authoring)
 - [Codex Tooling & Home](#codex-tooling--home)
 - [Debugging & Verification](#debugging--verification)

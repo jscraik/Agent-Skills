@@ -1,15 +1,15 @@
 schema_version: 1
 skill: skill-factory-router
-purpose: Route skill lifecycle requests to exactly one skill-factory lane before execution.
-triggers: [skill_creation, skill_hardening, skill_installation, skill_refactor, skillify]
+purpose: Route ambiguous skill lifecycle requests or explicit routing questions to exactly one downstream lane.
+triggers: [ambiguous_skill_lifecycle_request, explicit_skill_routing_question]
 non_goals: [ordinary_product_work, plugin_packaging, broad_repo_maintenance]
 inputs: [user_request, optional_repo_path, optional_skill_path, optional_evidence]
-outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
+outputs: [selected_lane, mode, rationale, next_step, first_principles_check, blocked_by]
 quality_criteria:
   routing_lane_choice:
     purpose: "Measures whether the router maps lifecycle requests to the intended Skill Factory lane."
     why_it_matters: "Lane choice determines which skill owns mutation, validation, evidence folding, or reusable workflow capture."
-    observable_evidence: "Routing table maps creation to skill-creator or skill-builder, hardening to skill-builder, installation to skill-installer, refactor to skill-refactor, and raw workflow capture to skillify."
+    observable_evidence: "Routing table maps creation to .system/skill-creator, hardening to skill-builder, installation to .system/skill-installer, refactor to skill-refactor, and raw workflow capture to skillify."
     scoring:
       5: "Maps every supported lifecycle intent to the correct lane and rejects out-of-scope product work."
       4: "Maps supported lifecycle intents correctly with minor ambiguity in edge wording."
@@ -50,10 +50,10 @@ automatic_failure_conditions:
   - "Selects multiple conflicting lanes for one request without asking for missing target authority."
   - "Routes hardening, Tessl, or SDK pipeline work away from skill-builder."
   - "Claims downstream validation, mutation, Tessl, registry, or runtime proof from the router lane."
-  - "Guesses a missing target path instead of reporting blocked_missing_input."
+  - "Guesses a required missing target path instead of reporting blocked_by."
 evidence_requirements:
   - Selected lane must be justified by user request facts or declared target paths.
-  - Missing inputs must be reported as blocked_missing_input instead of guessed.
+  - Required missing inputs must be reported as blocked_by instead of guessed.
   - Router output must not claim downstream validation, mutation, or Tessl proof.
 commands:
   - "bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh"

@@ -30,12 +30,12 @@ schema_version: 1
 - Skill templates: `Infrastructure/templates/**`.
 
 Route skill work through the Skill Factory lanes: use
-`skill-factory:skill-creator` for first usable package shape,
+the Codex `.system/skill-creator` with attached Skill Factory references for first usable package shape,
 `skill-factory:skillify` for repeatable-workflow capture,
 `skill-factory:skill-builder` for audit and hardening,
 `skill-factory:skill-refactor` for evidence-based keep/merge/split/retire
-decisions, and `skill-factory:skill-installer` for install, sync, and runtime
-visibility. Use `skill-factory:skill-factory-router` when the request needs
+decisions, and the Codex `.system/skill-installer` with attached Skill Factory
+references for install, sync, and runtime visibility. Use `skill-factory:skill-factory-router` when the request needs
 classification before one of those lanes.
 
 ## Validation

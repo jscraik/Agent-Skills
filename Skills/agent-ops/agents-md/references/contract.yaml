@@ -1,6 +1,6 @@
 schema_version: 1
 skill: agents-md
-purpose: "Use when reviewing, creating, shrinking, or refactoring AGENTS.md instruction surfaces that need scoped routing, dedupe, contradiction fixes, or progressive disclosure."
+purpose: "Use when reviewing, creating, shrinking, or refactoring AGENTS.md and linked guidance for stale or conflicting rules against current model documentation, scoped routing, dedupe, or progressive disclosure."
 triggers: ["Use when the user request matches the skill scope."]
 non_goals: ["Route unrelated work away from this skill."]
 inputs: [user_request, target_context, evidence]
@@ -9,4 +9,43 @@ risks: [over_triggering, untrusted_input, validation_drift, context_loss, preced
 safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
 validation: [plugin_eval_b_plus_or_better_zero_failures, strict_skill_audit, smoke_eval_when_available, release_eval_when_behavior_changes]
 observability: "Report validation commands and outcomes."
+quality_criteria:
+  instruction_authority:
+    purpose: Resolve conflicts without duplicating inherited rules or weakening binding contracts.
+    why_it_matters: Incorrect precedence can authorize unintended edits or remove required safeguards.
+    observable_evidence: Findings identify the governing source, affected scope, consumer, and correction or no_justified_edit decision.
+    scoring:
+      5: All conflicts are source-bound and resolved by authority with necessary contracts preserved.
+      4: Correct decisions with one nonessential locator omitted.
+      3: Correct scope but one unresolved contradiction lacks a clear next decision.
+      2: Uses copied guidance without verifying its authority.
+      1: Edits outside scope or deletes a binding contract without replacement.
+  semantic_evidence:
+    purpose: Verify instruction meaning, command side effects, and fallback types against current evidence.
+    why_it_matters: Resolving links alone cannot prove safe or current instruction behavior.
+    observable_evidence: Findings cite current local evidence and dated official sources for model claims; unknowns remain explicit.
+    scoring:
+      5: Checks meaning, side effects, coverage, and file types while separating model-specific gaps.
+      4: Correct findings with one nonessential source detail omitted.
+      3: Local findings are supported but model evidence limits are unclear.
+      2: Treats link existence or historical status as semantic proof.
+      1: Invents model claims or executes unauthorized mutating audit commands.
+  validation_closeout:
+    purpose: Report focused proof and remaining blockers without overstating readiness.
+    why_it_matters: Static package checks cannot establish model behavior or hosted readiness.
+    observable_evidence: Exact executed commands, outcomes, candidate scope, and unverified lanes accompany the handoff.
+    scoring:
+      5: All selected checks have truthful outcomes and explicit evidence boundaries.
+      4: Correct outcomes with one nonessential evidence locator missing.
+      3: Some required checks remain pending and are explicitly identified.
+      2: Reports generic validation without exact executed commands.
+      1: Claims completion from failed, blocked, or unexecuted checks.
+evidence_requirements:
+  - Current instruction chain and verified Context Pointer targets.
+  - Case-specific expected behavior and observed outputs for affected evals.
+  - Exact validation commands and separate source, model, runtime, and hosted outcomes.
+automatic_failure_conditions:
+  - Unauthorized writes or disclosure of hidden configuration.
+  - Removal of binding contracts without verified replacements.
+  - Fabricated source claims or validation success.
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

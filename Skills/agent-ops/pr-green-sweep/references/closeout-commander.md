@@ -2,6 +2,10 @@
 
 Read when `pr-green-sweep` needs more than the compact entrypoint: multi-PR action queues, right-validation-surface selection, dirty worktree classification, CLI/plugin evidence routing, CI failure explanation, and closeout ledgers.
 
+For foreground review fixes, start with [Review Findings](review-findings.md).
+The entrypoint mode rules apply throughout: heartbeat requirements govern
+scheduled continuation only; merge and cleanup require explicit scope.
+
 ## Entrypoint Support
 
 Use this reference for the details that keep the entrypoint compact:
@@ -18,10 +22,10 @@ Use this reference for the details that keep the entrypoint compact:
   checkout/worktree, validator checkout/worktree, durable path or URL,
   validator command, and visibility result. An artifact invisible to its
   contract-owning validator is `blocked_artifact_context`, not passing proof.
-- Redact secrets and preserve unrelated local changes. Use exactly one
-  heartbeat, one PR in the mutation lane, and a classified action queue.
-- Group materially equivalent findings before patching. A second occurrence, or
-  a known steering pattern, needs a validated reusable guardrail (test,
+- Redact secrets and preserve unrelated local changes. For requested monitoring use exactly one
+  heartbeat; keep one PR in the mutation lane, and a classified action queue.
+- Group materially equivalent findings before patching. Recurrence across three independent tasks, or
+  an explicitly selected steering-uptake pattern, needs a validated reusable guardrail (test,
   validator, schema, lint rule, shared helper, or workflow contract) or an
   explicit `blocked_durable_guardrail` reason before merge.
 - Fail closed on an unclassified required gate. Stop for safety, authority,
@@ -100,7 +104,8 @@ rungs:
 9. worktree deletion or destructive cleanup
 10. release, tag, publish, or registry mutation
 
-Stop at the last granted rung and ask only for the exact next permission when
+Preserve standing grants that cover multiple rungs; do not ask again for the
+same authorized operation. Stop at the last granted rung and ask only for the exact next permission when
 the current evidence is otherwise ready.
 
 ## Decision-Ready Blocker Brief

@@ -1,6 +1,39 @@
 schema_version: "2.0"
 skill_name: frontend-design
+claims:
+  - id: frontend-design.scoped-continuation
+    statement: "Route ambiguous UI work from available evidence; ask for material missing decisions and preserve safety and verification boundaries."
+    source: "SKILL.md:Failure Mode"
+    claim_type: execution
+    risk: medium
+    hard_gate: true
+    evidence_required:
+      - "Unavailable visual checks do not prevent an evidence-backed routing decision."
+      - "An unspecified product still requires a material choice."
 cases:
+  - id: independent-routing-after-gate-failure
+    name: independent routing after an unavailable check
+    category: edge
+    realistic: true
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use frontend-design for a read-only routing decision. The project has an established design system; the request is a cramped settings-screen layout, not token changes. Screenshot access is unavailable. Explain which UI owner should take the work and what remains unverified. Do not run commands or edit files."
+    acceptance:
+      - {type: skill_selected, expected_skill: frontend-design}
+      - {type: regex, value: "(?i)frontend-ui-design"}
+      - {type: regex, value: "(?i)((visual|screenshot).{0,100}(unverified|unavailable|not verified|blocked)|(unverified|unavailable|not verified|blocked).{0,100}(visual|screenshot))"}
+  - id: material-context-still-required
+    name: unresolved ownership still needs a question
+    category: pressure
+    realistic: true
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use frontend-design. We have two unrelated products and have not selected either for a redesign. No repository or route is supplied. State the one decision needed before choosing a product-specific implementation owner. Do not invent a product, run commands, or edit files."
+    acceptance:
+      - {type: skill_selected, expected_skill: frontend-design}
+      - {type: regex, value: "(?i)(which|select|choose).{0,60}product"}
   - {id: happy-main, name: happy main, category: happy, eval_modes: [smoke, release], should_trigger: true, prepend_skill: false, prompt: "This is a vague frontend redesign; decide which UI skill should own it.", acceptance: [{type: skill_selected, expected_skill: frontend-design}, {type: regex, value: "(?i)(evidence|validate|route|report|html|og|AGENTS|design|screen)"}]}
   - {id: happy-explicit, name: explicit request, category: happy, eval_modes: [smoke, release], should_trigger: true, prepend_skill: true, prompt: "Use $frontend-design and keep the output concise.", acceptance: [{type: skill_selected, expected_skill: frontend-design}]}
   - {id: edge-missing, name: missing context, category: edge, eval_modes: [release], should_trigger: true, prepend_skill: false, prompt: "The audience and product job are missing; ask only what matters.", acceptance: [{type: skill_selected, expected_skill: frontend-design}, {type: regex, value: "(?i)(missing|blocked|ask|needs|assumption|scope)"}]}

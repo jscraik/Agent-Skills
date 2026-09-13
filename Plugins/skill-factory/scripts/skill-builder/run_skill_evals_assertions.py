@@ -1,4 +1,28 @@
-from run_skill_evals_assertions_core import *  # noqa: F403
+import json
+import re
+from typing import Any, Dict, List, Optional
+
+import run_skill_evals_assertions_core as _assertions_core
+from run_skill_evals_assertions_core import (
+    Assertion,
+    EXPECTED_SIGNAL_COMPOSITE_KEY,
+    EXPECTED_SIGNAL_FLOW_KEY,
+    EXPECTED_SIGNAL_FORBIDDEN_DIMENSIONS,
+    EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY,
+    EXPECTED_SIGNAL_METRIC_KEY,
+    EXPECTED_SIGNAL_MISSING_KEY,
+    EXPECTED_SIGNAL_REQUIRED_DIMENSIONS,
+    EXPECTED_SIGNAL_RISK_FACTORS_KEY,
+    _EXPECTED_SIGNAL_STOPWORDS,
+    _contains_text,
+    _evaluate_json_text_field_assertion,
+    _evaluate_text_field_assertion,
+    _json_get_path,
+    _normalize_assert,
+    _to_text_blob,
+    evaluate_semantic_requirements,
+    expected_signal_items,
+)
 
 def _expected_signal_terms(value: Any) -> List[str]:
     text = _to_text_blob(value).casefold()
@@ -319,6 +343,66 @@ def summarize_expected_signal_results(cases: List[Dict[str, Any]]) -> Dict[str, 
     }
 
 
+def _explicit_selection_signal(skill_l: str, final_low: str) -> Optional[bool]:
+    explicit_negative_patterns = [
+        rf"\b{re.escape(skill_l)}\b\s+is\s+overkill\b",
+        rf"\boverkill\b[^\n]{{0,32}}\b{re.escape(skill_l)}\b",
+        rf"\b(?:do not|don't|did not|didn't|not)\b[^\n]{{0,32}}\b(?:use|using|apply|applying|trigger|select|invoke)\b[^\n]{{0,48}}\b{re.escape(skill_l)}\b",
+    ]
+    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_negative_patterns):
+        return False
+
+    explicit_positive_patterns = [
+        rf"\${re.escape(skill_l)}(?![\w/\\-])",
+        rf"\b(?:using|used|applying|applied|invoked|selected|triggered|routed to)\b[^\n]{{0,48}}\$?{re.escape(skill_l)}(?![\w/\\-])",
+    ]
+    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_positive_patterns):
+        return True
+
+    return None
+
+
+def _assistant_selection_text(events: List[Dict[str, Any]]) -> str:
+    blobs = []
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+        item = event.get("item")
+        if isinstance(item, dict) and item.get("type") == "agent_message":
+            message = item.get("text")
+            if isinstance(message, str):
+                blobs.append(message)
+    return "\n".join(blobs).lower()
+
+
+def _language_selection_signals(skill_l: str, low: str) -> tuple[bool, bool]:
+    positive_patterns = [
+        rf"\${re.escape(skill_l)}(?![\w/\\-])",
+        rf"\b(?:using|used|applying|applied|invoke(?:d)?|select(?:ed)?|trigger(?:ed)?|route(?:d)?)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}(?![\w/\\-])",
+    ]
+
+    negative_patterns = [
+        rf"\b(?:did not|didn't|not|failed to|unable to)\b[^\n]{{0,50}}\b(?:use|using|apply|applying|trigger|select|invoke)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}\b",
+        rf"\b(?:not selected|not triggered)\b[^\n]{{0,40}}\$?{re.escape(skill_l)}\b",
+    ]
+
+    pos = any(re.search(p, low, flags=re.IGNORECASE) for p in positive_patterns)
+    neg = any(re.search(p, low, flags=re.IGNORECASE) for p in negative_patterns)
+
+    return pos, neg
+
+
+def _structured_selection_signal(skill_l: str, event: Dict[str, Any]) -> bool:
+    values = [event.get(key) for key in ("skill", "skill_name", "selected_skill", "selected", "tool_name")]
+    metadata = event.get("metadata")
+    if isinstance(metadata, dict):
+        values.append(metadata.get("skill") if "skill" in metadata else metadata.get("selected_skill"))
+    tool = event.get("tool")
+    if isinstance(tool, dict):
+        values.append(tool.get("name"))
+    return any(isinstance(value, str) and value.strip().lower() == skill_l for value in values)
+
+
 def detect_skill_selected(
     *,
     skill_name: str,
@@ -327,89 +411,22 @@ def detect_skill_selected(
     stderr_text: str,
     events: Optional[List[Dict[str, Any]]],
 ) -> Optional[bool]:
-    """
-    Best-effort skill-selection detection from runner artifacts.
-
-    Returns True/False when signals are present, or None when unknown.
-    """
-
+    """Return explicit selection truth, or None when evidence is unavailable."""
     skill_l = skill_name.lower().strip()
     if not skill_l:
         return None
-
-    final_text = output_text or ""
-    final_low = final_text.lower()
-
-    explicit_negative_patterns = [
-        rf"\b{re.escape(skill_l)}\b\s+is\s+overkill\b",
-        rf"\boverkill\b[^\n]{{0,32}}\b{re.escape(skill_l)}\b",
-        rf"\b(?:do not|don't|did not|didn't|not)\b[^\n]{{0,32}}\b(?:use|trigger|select|invoke)\b[^\n]{{0,48}}\b{re.escape(skill_l)}\b",
-    ]
-    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_negative_patterns):
-        return False
-
-    explicit_positive_patterns = [
-        rf"\${re.escape(skill_l)}\b",
-        rf"\b(?:using|used|invoked|selected|triggered|routed to)\b[^\n]{{0,48}}\$?{re.escape(skill_l)}\b",
-    ]
-    if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_positive_patterns):
+    final_low = (output_text or "").lower()
+    explicit = _explicit_selection_signal(skill_l, final_low)
+    if explicit is not None:
+        return explicit
+    # Tool output and serialized prompts are not activation evidence.
+    event_list = events or []
+    low = final_low + "\n" + _assistant_selection_text(event_list)
+    pos, neg = _language_selection_signals(skill_l, low)
+    if pos or neg:
+        return pos if pos != neg else None
+    if any(_structured_selection_signal(skill_l, event) for event in event_list if isinstance(event, dict)):
         return True
-
-    blobs = [final_text, stdout_text or "", stderr_text or ""]
-    if events:
-        event_blob = json.dumps(events, ensure_ascii=False, sort_keys=True)
-        blobs.append(event_blob)
-    blob = "\n".join(blobs)
-    low = blob.lower()
-
-    positive_patterns = [
-        rf"\${re.escape(skill_l)}\b",
-        rf"\b(?:using|used|invoke(?:d)?|select(?:ed)?|trigger(?:ed)?|route(?:d)?)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}\b",
-        rf"\bskill(?:_name| name)?\b[^\n]{{0,40}}{re.escape(skill_l)}\b",
-        rf"\b{re.escape(skill_l)}\b[^\n]{{0,30}}\bskill\b",
-    ]
-
-    negative_patterns = [
-        rf"\b(?:did not|didn't|not|failed to|unable to)\b[^\n]{{0,50}}\b(?:trigger|select|invoke)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}\b",
-        rf"\b(?:not selected|not triggered)\b[^\n]{{0,40}}\$?{re.escape(skill_l)}\b",
-    ]
-
-    pos = any(re.search(p, low, flags=re.IGNORECASE) for p in positive_patterns)
-    neg = any(re.search(p, low, flags=re.IGNORECASE) for p in negative_patterns)
-
-    if pos and not neg:
-        return True
-    if neg and not pos:
-        return False
-    if pos and neg:
-        # conflicting signal; unknown
-        return None
-
-    for event in events or []:
-        if not isinstance(event, dict):
-            continue
-
-        for key in ("skill", "skill_name", "selected_skill", "selected", "tool_name"):
-            value = event.get(key)
-            if isinstance(value, str) and skill_l in value.lower():
-                event_value = value.strip().lower()
-                if key in {"selected", "selected_skill"}:
-                    return event_value == skill_l
-                if key in {"skill", "skill_name", "tool_name"}:
-                    return True
-
-        metadata = event.get("metadata")
-        if isinstance(metadata, dict):
-            meta_skill = metadata.get("skill") if "skill" in metadata else metadata.get("selected_skill")
-            if isinstance(meta_skill, str) and skill_l in meta_skill.lower():
-                return True
-
-        tool = event.get("tool")
-        if isinstance(tool, dict):
-            tool_name = tool.get("name")
-            if isinstance(tool_name, str) and skill_l in tool_name.lower():
-                return True
-
     return None
 
 
@@ -498,4 +515,14 @@ def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str
         return None
     return "skipped acceptance assertions because the runner exited non-zero and produced no final output"
 
-__all__ = [name for name in globals() if not name.startswith("__")]
+def __getattr__(name: str) -> Any:
+    """Preserve the existing runner re-export interface without implicit imports."""
+    if name in _assertions_core.__all__:
+        return getattr(_assertions_core, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+__all__ = list(dict.fromkeys([
+    *_assertions_core.__all__,
+    *(name for name in globals() if not name.startswith("__") and name != "_assertions_core"),
+]))
