@@ -323,7 +323,47 @@ def _factory_direct_override(skill_set: str, task: str, rows: list[dict[str, Any
     return None
 
 
-def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> tuple[str, str] | None:
+def _has_affirmative_skill_creation(task: str) -> bool:
+    """Remove negative creation clauses while preserving method constraints."""
+    creation_verb = r"(?:creat(?:e|ing)|scaffold(?:ing)?|generat(?:e|ing)|mak(?:e|ing)|draft(?:ing)?)\b"
+    action = (
+        r"(?:(?:any|a|the|ever|to|actually|need(?:ing)?|hav(?:e|ing)|want(?:ing)?|"
+        r"intent(?:ion)?|intend(?:ing)?|try(?:ing)?|attempt(?:ing)?|plan(?:ning)?|"
+        r"wish(?:ing)?|desir(?:e|ing)|permission|reason|going|being|allowed|permitted|"
+        r"required|expected|supposed|authorized|authorised|forced|obliged)\s+)*"
+        + creation_verb
+    )
+    creation_text = re.sub(
+        r"\bwithout\s+" + action + r"[^,.;!?]*",
+        "", task.lower(),
+    )
+    creation_text = re.sub(
+        r"\b(?:no|not(?!\s+(?:only|just)\b)|cannot|[a-z]+n['’]t|never|avoid)\b"
+        + r"(?:(?!\b(?:but|and then)\b)[^,.;!?])*?\b" + creation_verb
+        + r"(?:(?!\b(?:but|and then)\b)[^.;!?])*",
+        "", creation_text,
+    )
+    return re.search(
+        r"\b(?:create|scaffold|generate|make|draft)"
+        r"(?:(?:\s*,?\s*(?:and|then)\s+|\s*,\s*)"
+        r"(?:validate|audit|benchmark|release|package|review|eval(?:uate)?|test|score|harden|improve))*"
+        r"\s+(?:(?:a|an|the|new|reusable|custom|codex)\s+)*skills?\b",
+        creation_text,
+    ) is not None
+
+
+def _preferred_factory_match(
+    skill_set: str, matched: list[tuple[str, str]], task: str
+) -> tuple[str, str] | None:
+    """Keep new-package quality follow-ups from overriding creation intent."""
+    if (
+        skill_set == "skill-factory"
+        and ("skill-creator", "create-skill") in matched
+        and ("skill-builder", "improve-skill-sdk-pipeline") in matched
+        and _has_affirmative_skill_creation(task)
+        and ("skill-refactor", "refactor-skill") not in matched
+    ):
+        return ("skill-creator", "create-skill")
     if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
         return ("skill-builder", "improve-skill-sdk-pipeline")
     if skill_set == "skill-factory" and ("skill-refactor", "refactor-skill") in matched:
@@ -331,7 +371,8 @@ def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> 
     return None
 
 
-def _factory_rule_override(skill_set: str, task_tokens: set[str], rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+def _factory_rule_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    task_tokens = tokenize(task)
     row_ids = {str(row.get("id")) for row in rows}
     matched = [
         (route_id, rule_name)
@@ -344,7 +385,7 @@ def _factory_rule_override(skill_set: str, task_tokens: set[str], rows: list[dic
         if row:
             return {"row": row, "confidence": 0.95, "reason": f"matched deterministic {skill_set} rule '{rule_name}'"}
     if len(matched) > 1:
-        preferred = _preferred_factory_match(skill_set, matched)
+        preferred = _preferred_factory_match(skill_set, matched, task)
         if preferred is not None:
             route_id, rule_name = preferred
             row = row_by_id(rows, route_id)
@@ -365,4 +406,4 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     direct = _factory_direct_override(skill_set, task, rows)
     if direct:
         return direct
-    return _factory_rule_override(skill_set, task_tokens, rows)
+    return _factory_rule_override(skill_set, task, rows)
