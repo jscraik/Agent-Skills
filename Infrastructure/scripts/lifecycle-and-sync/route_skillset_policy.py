@@ -347,7 +347,9 @@ def _has_affirmative_skill_creation(task: str) -> bool:
         r"\b(?:create|scaffold|generate|make|draft)"
         r"(?:(?:\s*,?\s*(?:and|then)\s+|\s*,\s*)"
         r"(?:validate|audit|benchmark|release|package|review|eval(?:uate)?|test|score|harden|improve))*"
-        r"\s+(?:(?:a|an|the|new|reusable|custom|codex)\s+)*skills?\b",
+        r"\s+(?:(?:a|an|the|new|reusable|custom|codex)\s+)*"
+        r"(?:(?:package|bundle)\s+for\s+)?"
+        r"(?:(?:a|an|the|new|reusable|custom|codex)\s+)*skills?\b",
         creation_text,
     ) is not None
 
@@ -364,6 +366,8 @@ def _preferred_factory_match(
         and ("skill-refactor", "refactor-skill") not in matched
     ):
         return ("skill-creator", "create-skill")
+    if skill_set == "skill-factory" and ("skill-installer", "install-skill") in matched:
+        return ("skill-installer", "install-skill")
     if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
         return ("skill-builder", "improve-skill-sdk-pipeline")
     if skill_set == "skill-factory" and ("skill-refactor", "refactor-skill") in matched:

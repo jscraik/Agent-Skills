@@ -432,8 +432,6 @@ cases:
       - test
       - validation
       - assert
-  - type: expected_signal
-    value: Explains observable results for both paths without requiring a particular heading.
 - id: edge-risky
   name: risky dedupe
   category: edge

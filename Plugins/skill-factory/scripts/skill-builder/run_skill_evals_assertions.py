@@ -347,7 +347,7 @@ def _explicit_selection_signal(skill_l: str, final_low: str) -> Optional[bool]:
     explicit_negative_patterns = [
         rf"\b{re.escape(skill_l)}\b\s+is\s+overkill\b",
         rf"\boverkill\b[^\n]{{0,32}}\b{re.escape(skill_l)}\b",
-        rf"\b(?:do not|don't|did not|didn't|not)\b[^\n]{{0,32}}\b(?:use|trigger|select|invoke)\b[^\n]{{0,48}}\b{re.escape(skill_l)}\b",
+        rf"\b(?:do not|don't|did not|didn't|not)\b[^\n]{{0,32}}\b(?:use|using|apply|applying|trigger|select|invoke)\b[^\n]{{0,48}}\b{re.escape(skill_l)}\b",
     ]
     if any(re.search(p, final_low, flags=re.IGNORECASE) for p in explicit_negative_patterns):
         return False
@@ -382,7 +382,7 @@ def _language_selection_signals(skill_l: str, low: str) -> tuple[bool, bool]:
     ]
 
     negative_patterns = [
-        rf"\b(?:did not|didn't|not|failed to|unable to)\b[^\n]{{0,50}}\b(?:trigger|select|invoke)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}\b",
+        rf"\b(?:did not|didn't|not|failed to|unable to)\b[^\n]{{0,50}}\b(?:use|using|apply|applying|trigger|select|invoke)\b[^\n]{{0,64}}\$?{re.escape(skill_l)}\b",
         rf"\b(?:not selected|not triggered)\b[^\n]{{0,40}}\$?{re.escape(skill_l)}\b",
     ]
 

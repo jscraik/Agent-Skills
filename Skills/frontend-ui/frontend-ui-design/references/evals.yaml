@@ -12,6 +12,7 @@ claims:
       - "A read-only review reports clipping without editing the component."
 cases:
   - id: unavailable-visual-continue-independent
+    claim_ids: [frontend-ui-design.scoped-continuation]
     name: unavailable browser does not stop independent checks
     category: edge
     realistic: true
@@ -24,6 +25,7 @@ cases:
       - {type: regex, value: "(?i)(continue|proceed|run).{0,100}(test|implementation|source)"}
       - {type: regex, value: "(?i)((visual|rendered|screenshot).{0,100}(unverified|not verified|blocked|unavailable)|(unverified|not verified|blocked|unavailable).{0,100}(visual|rendered|screenshot))"}
   - id: read-only-review-no-repair
+    claim_ids: [frontend-ui-design.scoped-continuation]
     name: review authority does not include implementation
     category: pressure
     realistic: true

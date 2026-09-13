@@ -54,6 +54,8 @@ def _write_discovery_fixture(root: Path, variant: str) -> tuple[Path, Path]:
     refs.mkdir(parents=True)
     skill_md = skill_dir / "SKILL.md"
     pointer = "" if variant == "unlinked" else "Read `references/discovery-interview.md` when underspecified."
+    if variant == "dot-relative":
+        pointer = "Read `./references/discovery-interview.md` when underspecified."
     skill_md.write_text(
         "# Example skill\nAsk one plain-language question at a time.\n" + pointer,
         encoding="utf-8",
@@ -68,6 +70,8 @@ def _write_discovery_fixture(root: Path, variant: str) -> tuple[Path, Path]:
         outside = root / "outside.md"
         outside.write_text(content, encoding="utf-8")
         reference.symlink_to(outside)
+    elif variant == "cyclic":
+        reference.symlink_to(reference)
     elif variant != "missing":
         reference.write_text("# Incomplete\n" if variant == "incomplete" else content, encoding="utf-8")
     return skill_dir, skill_md
@@ -75,7 +79,7 @@ def _write_discovery_fixture(root: Path, variant: str) -> tuple[Path, Path]:
 
 class RunSkillEvalsDiscoveryTests(unittest.TestCase):
     def test_discovery_smoke_follows_only_explicit_local_reference(self) -> None:
-        for variant in ("linked", "unlinked", "missing", "escaped", "incomplete"):
+        for variant in ("linked", "dot-relative", "unlinked", "missing", "escaped", "cyclic", "incomplete"):
             with self.subTest(variant=variant), tempfile.TemporaryDirectory() as tmpdir:
                 root = Path(tmpdir)
                 skill_dir, skill_md = _write_discovery_fixture(root, variant)
@@ -93,9 +97,9 @@ class RunSkillEvalsDiscoveryTests(unittest.TestCase):
                     ),
                     output_last_message_path=output,
                 )
-                self.assertEqual(0 if variant == "linked" else 2, exit_code, stderr)
+                self.assertEqual(0 if variant in {"linked", "dot-relative"} else 2, exit_code, stderr)
                 self.assertEqual(response, output.read_text(encoding="utf-8"))
-                if variant == "linked":
+                if variant in {"linked", "dot-relative"}:
                     self.assertIn("What should this skill help you do?", response)
                     self.assertEqual("", stderr)
                 else:

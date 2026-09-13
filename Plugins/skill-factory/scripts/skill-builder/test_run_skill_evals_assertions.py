@@ -70,6 +70,7 @@ class RunSkillEvalsAssertionTests(unittest.TestCase):
         for output, events, expected in [
             ("I am using alignment-checkpoint for this decision.", [], True),
             ("I'm applying the supplied alignment-checkpoint skill directly.", [], True),
+            ("I am not applying alignment-checkpoint to this task.", [], False),
             ("I did not use alignment-checkpoint.", [], False),
             ("I used rg to inspect alignment-checkpoint/SKILL.md.", [], None),
             ("I am using alignment-checkpoint-extra.", [], None),

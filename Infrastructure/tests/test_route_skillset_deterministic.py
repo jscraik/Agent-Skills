@@ -309,6 +309,30 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "skill-installer")
         self.assertNotEqual(payload["selected"]["id"], "skill-builder")
 
+    def test_skill_factory_install_precedes_followup_validation(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install and validate this skill",
+            [
+                _row("skill-builder", "Audit and validate existing skills."),
+                _row("skill-installer", "Install validated skills with provenance and rollback safety."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+
+    def test_skill_factory_creation_allows_package_wording(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a package for a new skill and validate it",
+            [
+                _row("skill-builder", "Audit and validate existing skills."),
+                _row("skill-creator", "Create new skill packages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-creator")
+
     def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
         payload = self._route(
             "skill-factory",

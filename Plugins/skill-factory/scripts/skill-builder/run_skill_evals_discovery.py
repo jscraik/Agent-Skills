@@ -40,14 +40,17 @@ def _baseline_discovery_response() -> str:
 
 def _discovery_reference_text(skill_dir: Path) -> str:
     reference = skill_dir / "references" / "discovery-interview.md"
-    if reference.resolve().is_relative_to(skill_dir.resolve()) and reference.is_file():
-        return _read_text(reference)
+    try:
+        if reference.resolve().is_relative_to(skill_dir.resolve()) and reference.is_file():
+            return _read_text(reference)
+    except (OSError, RuntimeError):
+        pass
     return ""
 
 
 def _discovery_contract_gaps(skill_text: str, discovery_text: str) -> List[str]:
     linked = bool(re.search(
-        r"(?<![\w/.-])references/discovery-interview\.md(?![\w/.-])", skill_text
+        r"(?<![\w/.-])(?:\./)?references/discovery-interview\.md(?![\w/.-])", skill_text
     ))
     contract = skill_text + "\n" + discovery_text if linked else skill_text
     missing = []
