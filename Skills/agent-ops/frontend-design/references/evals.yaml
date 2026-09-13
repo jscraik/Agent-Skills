@@ -12,9 +12,12 @@ claims:
       - "An unspecified product still requires a material choice."
 cases:
   - id: independent-routing-after-gate-failure
+    claim_ids: [frontend-design.scoped-continuation]
     name: independent routing after an unavailable check
     category: edge
     realistic: true
+    why_realistic: "Visual inspection can be unavailable while a routing decision still needs to preserve the unverified acceptance lane."
+    expected_evidence: ["Route to the UI owner and keep visual acceptance explicitly unverified."]
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
@@ -24,9 +27,12 @@ cases:
       - {type: regex, value: "(?i)frontend-ui-design"}
       - {type: regex, value: "(?i)((visual|screenshot).{0,100}(unverified|unavailable|not verified|blocked)|(unverified|unavailable|not verified|blocked).{0,100}(visual|screenshot))"}
   - id: material-context-still-required
+    claim_ids: [frontend-design.scoped-continuation]
     name: unresolved ownership still needs a question
     category: pressure
     realistic: true
+    why_realistic: "Multi-product design requests often omit the product choice required before selecting an implementation owner."
+    expected_evidence: ["Ask for the product choice without inventing context or starting implementation."]
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true

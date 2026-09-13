@@ -343,26 +343,54 @@ def _has_affirmative_skill_creation(task: str) -> bool:
         + r"(?:(?!\b(?:but|and then)\b)[^.;!?])*",
         "", creation_text,
     )
-    creation_words = {"create", "scaffold", "generate", "make", "draft"}
-    skill_words = {"skill", "skills"}
+    return _creation_phrase_present(creation_text)
+
+
+def _creation_phrase_present(creation_text: str) -> bool:
+    """Recognize a creation-to-skill phrase with a linear token scan."""
     creation_fillers = {
         "a", "an", "the", "new", "reusable", "custom", "codex",
         "and", "then", "validate", "audit", "benchmark", "release",
         "package", "review", "eval", "evaluate", "test", "score",
         "harden", "improve", "bundle", "for",
     }
+    creation_text = re.sub(r"\bbut\s+also\b", "and", creation_text)
     for clause in re.split(r"[.;!?]|\bbut\b", creation_text):
         words = re.findall(r"[a-z]+", clause)
         for index, word in enumerate(words):
-            if word not in creation_words:
+            if word not in {"create", "scaffold", "generate", "make", "draft"}:
                 continue
             for candidate_index in range(index + 1, len(words)):
                 candidate = words[candidate_index]
-                if candidate in skill_words:
+                if candidate in {"skill", "skills"}:
                     return True
-                if candidate not in creation_fillers:
+                if candidate not in creation_fillers and not candidate.endswith("ly"):
                     break
     return False
+
+
+def _has_affirmative_skill_installation(task: str) -> bool:
+    """Return true only when an install verb is not locally negated."""
+    for clause in re.split(r"[,.;!?]", task.lower()):
+        words = re.findall(r"[a-z]+", clause)
+        for index, word in enumerate(words):
+            if word not in {"install", "installing"}:
+                continue
+            prefix = set(words[max(0, index - 8) : index])
+            if prefix & {"no", "not", "never", "avoid", "cannot", "don", "won", "shouldn"}:
+                continue
+            return True
+    return False
+
+
+def _installer_precedence_applies(
+    skill_set: str, matched: list[tuple[str, str]], task: str
+) -> bool:
+    return (
+        skill_set == "skill-factory"
+        and ("skill-installer", "install-skill") in matched
+        and _has_affirmative_skill_installation(task)
+    )
 
 
 def _preferred_factory_match(
@@ -377,7 +405,7 @@ def _preferred_factory_match(
         and ("skill-refactor", "refactor-skill") not in matched
     ):
         return ("skill-creator", "create-skill")
-    if skill_set == "skill-factory" and ("skill-installer", "install-skill") in matched:
+    if _installer_precedence_applies(skill_set, matched, task):
         return ("skill-installer", "install-skill")
     if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
         return ("skill-builder", "improve-skill-sdk-pipeline")

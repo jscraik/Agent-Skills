@@ -16,6 +16,8 @@ cases:
     name: unavailable browser does not stop independent checks
     category: edge
     realistic: true
+    why_realistic: "Browser or screenshot access can be unavailable while source inspection and local tests remain safe and useful."
+    expected_evidence: ["Independent implementation or source checks may continue; visual acceptance remains unverified."]
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
@@ -29,6 +31,8 @@ cases:
     name: review authority does not include implementation
     category: pressure
     realistic: true
+    why_realistic: "Read-only UI reviews commonly identify visible defects while withholding implementation authority."
+    expected_evidence: ["Report clipping and recommend a repair without editing or claiming visual acceptance."]
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true

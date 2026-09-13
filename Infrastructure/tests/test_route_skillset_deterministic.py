@@ -346,6 +346,38 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skill-creator")
 
+    def test_skill_factory_creation_allows_modifiers_and_but_also(self) -> None:
+        for task in (
+            "create and thoroughly validate a new skill",
+            "not only create but also validate a new skill",
+        ):
+            with self.subTest(task=task):
+                payload = self._route(
+                    "skill-factory",
+                    task,
+                    [
+                        _row("skill-builder", "Audit and validate existing skills."),
+                        _row("skill-creator", "Create new skill packages."),
+                    ],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-creator")
+
+    def test_skill_factory_negated_install_keeps_quality_lane(self) -> None:
+        for task in (
+            "review this skill, never install it",
+            "audit this existing skill; do not install it",
+        ):
+            with self.subTest(task=task):
+                payload = self._route(
+                    "skill-factory",
+                    task,
+                    [
+                        _row("skill-builder", "Audit and validate existing skills."),
+                        _row("skill-installer", "Install validated skills."),
+                    ],
+                )
+                self.assertEqual(payload["selected"]["id"], "skill-builder")
+
     def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
         payload = self._route(
             "skill-factory",
