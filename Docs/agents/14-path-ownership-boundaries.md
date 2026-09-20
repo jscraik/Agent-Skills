@@ -81,14 +81,22 @@ destination, disposition, rights, and consumers. Preserve unresolved and
 rights-blocked entries; neither runtime availability nor a copy grants admission.
 For a retained package still awaiting transfer:
 
-1. Copy it into `/Users/jamiecraik/dev/skills-foundry` before changing an
-   existing source or runtime surface.
-2. Preserve the origin path or repository, licence, revision when known, and
+1. Verify that recorded rights authorize the source copy. If rights are
+   unresolved or blocked, retain only permitted inventory and provenance
+   metadata; do not read or copy protected content. Retention intent is not
+   transfer permission.
+2. When rights and the selected transfer scope permit, copy the package into
+   `/Users/jamiecraik/dev/skills-foundry` without changing the existing source
+   or runtime surface. The copy alone is not canonical.
+3. Preserve the origin path or repository, licence, revision when known, and
    direct consumer notes with that Foundry copy.
-3. Do not install, enable, publish, project, delete, or relink it as a side
+4. Do not install, enable, publish, project, delete, or relink it as a side
    effect of the copy.
-4. Record canonical source transfer and consumer cutover separately. SDK tooling
-   may process the selected candidate without taking package source ownership.
+5. Record canonical source transfer before switching the repair location to
+   Foundry. Until then, authorized repairs stay in the explicit owner's
+   canonical source; reconcile any changed source before accepting the copy.
+   Record consumer cutover separately. SDK tooling may process the selected
+   candidate without taking package source ownership.
 
 The same named package can appear in Foundry, `agent-skills`, Tessl, and a
 home runtime at once. Those locations describe different lanes; they do not
@@ -139,8 +147,10 @@ Workout and telemetry surfaces:
 
 - Edit product content only in the canonical source path named by the explicit
   owner decision.
-- Repair retained Foundry source in Foundry; an SDK handoff selects tooling work,
-  not a new canonical package copy in Agent-Skills or SDK.
+- After recorded canonical source transfer, repair retained source in Foundry.
+  Before transfer, repair only the explicit owner's canonical source within
+  the authorized scope and rights. An SDK handoff selects tooling work, not a
+  new canonical package copy in Agent-Skills or SDK.
 - Do not copy an external or runtime package into `agent-skills` merely to make
   it visible; preserve its provenance in Skills Foundry first.
 - Do not hand-edit runtime/projection surfaces.
