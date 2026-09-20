@@ -1,7 +1,53 @@
 # PM Thread Coordination
 
-Use this contract when Jamie designates one Codex thread as the Skills SDK PM
-decision thread and other Codex threads as execution lanes.
+Use this contract for controller-to-owner coordination. The separation-first
+contract below replaces the legacy mandatory report workflow for this programme.
+
+## Separation-first master controller
+
+Jamie designated task `01a025cc-c335-71b2-89ba-e32d7b0bf848` as the sole master
+controller on 2026-09-14. It assigns work to OC - Skills SDK
+(`01a0400d-f821-7f80-992d-885474f721d4`) and OC - Foundry
+(`01a04479-ed0a-7310-a934-41477c0f6175`). Jamie retains scope and escalation
+authority. Each OC owns technical implementation in its own repository.
+
+Complete repository separation before product refinement. SDK owns reusable
+tooling; Foundry owns retained editable packages and their reference content.
+Agent-Skills is transitional, not a permanent implementation or source owner.
+Earlier guidance to preserve that permanent role is incorrect and retired.
+
+The controller selects work only when it names a retained consumer or inventory
+item, the dependency being removed, and required behavior. It gives each owner
+one bounded mutable unit, allowed paths, proof commands, delivery scope, and stop
+conditions. Keep concurrent writers on disjoint paths. OCs return cross-owner
+dependencies to the controller rather than starting another programme lane.
+
+After dispatch, end the controller turn unless independent authorized work is
+available. Do not poll owners, repeat unchanged checks, or create periodic status
+heartbeats. Owners send one completion or actionable-blocker message to the
+controller using `send_message_to_thread`. Include candidate identity, changed
+paths, exact command outcomes, existing durable evidence and review links,
+delivery state, remaining dependency, and proposed next action. No reply is
+needed merely to acknowledge receipt.
+
+Existing destination-owned evidence plus successful message delivery supports
+ordinary local coordination. The controller verifies the relevant proof before
+acceptance. Do not require the Agent-Skills legacy report validators, duplicate
+receipts, rendered boards, or a learning entry for every message. Explicit
+hosted, admission, rights, runtime, and retirement gates retain their required
+evidence; a message or local test does not prove those gates.
+
+Reuse unchanged proof and existing inventories. Keep a compact current queue,
+not an append-only status transcript. Product expansion, optional package polish,
+and unrelated worktree cleanup are deferred until separation is accepted and
+Jamie selects subsequent work. Preserve unique work and all effective permissions.
+
+## Legacy structured reports: explicitly selected workflows only
+
+The remainder documents the existing `thread-report/v1` protocol for workflows
+that explicitly select it. It is not the separation programme default and must
+not be imported as an implicit migration gate. Existing historical reports remain
+evidence; no schema or validator is changed by this coordination amendment.
 
 ## Authority
 

@@ -2,6 +2,18 @@
 
 Date: 2026-06-30
 
+## Historical Only — Superseded
+
+The in-repository target layout below is superseded by the approved independent
+repository separation. Skills SDK owns reusable tooling in
+`/Users/jamiecraik/dev/skills-sdk`; Skills Foundry owns retained editable packages
+in `/Users/jamiecraik/dev/skills-foundry`. Agent-Skills is transitional only.
+Do not execute this plan's physical moves or use its phases as current gates.
+Keep its caller inventory as historical evidence to reconcile, not proof of
+current consumer cutover. Current direction is in
+[Ubiquitous Language](../../../UBIQUITOUS_LANGUAGE.md#separation-first-direction)
+and [PM Thread Coordination](../../../Docs/agents/26-pm-thread-coordination.md).
+
 ## Purpose
 
 Move the repository toward the accepted foundry/ and skills-sdk/ target layout
