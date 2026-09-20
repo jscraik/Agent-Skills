@@ -4,8 +4,9 @@ schema_version: 1
 
 # agent-skills Agent Guide
 
-Agent Skills Kit is the canonical control plane for authoring, validating,
-discovering, and syncing Codex skills, operator docs, and agent workflows.
+Agent-Skills is a transitional migration repository. Skills SDK owns reusable
+tooling; Skills Foundry owns retained editable skill and plugin packages.
+Complete those separation boundaries before refining either product.
 
 ## Root Essentials
 
@@ -31,8 +32,9 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   product-direction docs, use the product-boundary terms in
   [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md):
   `/Users/jamiecraik/dev/skills-foundry` is the source-only Foundry for
-  retained packages; `agent-skills` implements and dogfoods the Skills SDK and
-  owns active SDK candidates; Tessl is distribution and external proof; and
+  retained packages; `/Users/jamiecraik/dev/skills-sdk` owns reusable lifecycle
+  tooling; `agent-skills` retains only temporary migration responsibilities;
+  Tessl is distribution and external proof; and
   local runtime truth is a separate installed-behavior lane. A package's
   explicit owner decision—not a runtime path—decides its canonical source.
 - For a package selecting `skills-sdk.gold-standard.v1`, read
@@ -56,8 +58,11 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   operations serially for that handle. See
   [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md#runtime-handle-safety)
   for recovery rules.
-- Skills SDK PM thread coordination: when Jamie designates one thread as the
-  Skills SDK PM decision surface, use
+- Separation coordination: task `01a025cc-c335-71b2-89ba-e32d7b0bf848` is the
+  master controller for OC - Skills SDK and OC - Foundry. It assigns bounded
+  migration units and accepts their evidence; owners do not start product
+  refinement or redefine programme completion. Use completion messages, not
+  polling or periodic status loops. Follow
   [PM Thread Coordination](./Docs/agents/26-pm-thread-coordination.md).
 - Keep local, runtime, cloud, Tessl, and release proof separate. Use
   [Tessl Live Skill Eval Workflow](./Docs/agents/24-tessl-live-skill-eval-workflow.md)

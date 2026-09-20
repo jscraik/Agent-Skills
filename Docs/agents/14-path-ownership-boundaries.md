@@ -15,23 +15,30 @@ Separate skill and plugin product content from factory mechanics and runtime pro
 
 ## Four-plane model
 
-1. Foundry retention plane (`what is preserved but not active`)
+1. Foundry source plane (`retained editable packages`)
 
 - Curated skill and plugin packages held in `/Users/jamiecraik/dev/skills-foundry`.
-- Holds package source, provenance, licences, documentation, and reference assets.
+- Owns retained editable package source, repairs, package-specific scripts,
+  evaluation data, provenance, licences, documentation, and reference assets.
 - Admission is copy-first. A Foundry admission does not install, enable, publish,
   promote, or transfer runtime authority.
 
-2. Active SDK product plane (`what the SDK currently shapes`)
+2. SDK tooling plane (`reusable lifecycle behavior`)
 
-- Selected candidate skills and plugin capability content in this repository.
-- Author and review only when the explicit owner decision selects
-  `agent-skills` as the active SDK workspace for the bounded task.
+- `/Users/jamiecraik/dev/skills-sdk` owns reusable creation, repair, validation,
+  evaluation, judging, review, packaging, and handoff tooling.
+- SDK inspection or transformation of a package does not transfer its canonical
+  source from Foundry. Test fixtures and scratch candidates are not source owners.
 
-3. Factory plane (`how content is built`)
+3. Transitional migration plane (`remaining Agent-Skills dependencies`)
 
-- Sync, projection, graph, validation, and install mechanics.
-- Change only when improving repo tooling behavior.
+- Existing source, callers, and mechanics remain here only until their recorded
+  transfer and consumer cutover. Agent-Skills is not a permanent third owner.
+- Migrate necessary reusable behavior to SDK and package-specific content to
+  Foundry. Keep host policy and credentials with their explicitly accepted owner.
+- Retire old surfaces only after independent destination behavior, caller and
+  recovery proof, and matching mutation authority. Complete separation before
+  product refinement.
 
 4. Runtime plane (`derived views and projections`)
 
@@ -48,10 +55,10 @@ provenance, and the replacement path have been verified.
 Skills Foundry retained source:
 
 - `/Users/jamiecraik/dev/skills-foundry/**`
-- Source-only package retention outside the active authoring and runtime
-  surface.
+- Source-only means separate from runtime installation and publication, not
+  read-only archival storage. Retained package authoring and repairs belong here.
 
-Active SDK candidate source in this repository:
+Transitional package source paths in this repository:
 
 - `Skills/agent-ops/**`
 - `Skills/frontend-ui/**`
@@ -61,7 +68,7 @@ Active SDK candidate source in this repository:
 - `Skills/content-publishing/**`
 - `Skills/mobile-native/**`
 
-Active SDK plugin-owned source in this repository:
+Transitional plugin source paths in this repository:
 
 - `Plugins/<plugin>/skills/**`
 - `Plugins/<plugin>/.codex-plugin/**`
@@ -69,25 +76,33 @@ Active SDK plugin-owned source in this repository:
 
 ### Bulk-admission rule
 
-Before admitting packages in bulk, classify each package independently as one
-of: retained Foundry source, explicitly selected active SDK candidate, or
-runtime-only availability. For a package that is not already owned by the
-active SDK workspace:
+Before admitting packages in bulk, record each package's explicit owner,
+destination, disposition, rights, and consumers. Preserve unresolved and
+rights-blocked entries; neither runtime availability nor a copy grants admission.
+For a retained package still awaiting transfer:
 
-1. Copy it into `/Users/jamiecraik/dev/skills-foundry` before changing an
-   existing source or runtime surface.
-2. Preserve the origin path or repository, licence, revision when known, and
+1. Verify that recorded rights authorize the source copy. If rights are
+   unresolved or blocked, retain only permitted inventory and provenance
+   metadata; do not read or copy protected content. Retention intent is not
+   transfer permission.
+2. When rights and the selected transfer scope permit, copy the package into
+   `/Users/jamiecraik/dev/skills-foundry` without changing the existing source
+   or runtime surface. The copy alone is not canonical.
+3. Preserve the origin path or repository, licence, revision when known, and
    direct consumer notes with that Foundry copy.
-3. Do not install, enable, publish, project, delete, or relink it as a side
+4. Do not install, enable, publish, project, delete, or relink it as a side
    effect of the copy.
-4. Move into active SDK work only when an explicit owner decision names the
-   candidate source, bounded task, and the source that remains authoritative.
+5. Record canonical source transfer before switching the repair location to
+   Foundry. Until then, authorized repairs stay in the explicit owner's
+   canonical source; reconcile any changed source before accepting the copy.
+   Record consumer cutover separately. SDK tooling may process the selected
+   candidate without taking package source ownership.
 
 The same named package can appear in Foundry, `agent-skills`, Tessl, and a
 home runtime at once. Those locations describe different lanes; they do not
 transfer ownership by proximity or by name.
 
-Factory and governance mechanics:
+Transitional factory and repository governance locations:
 
 - `Infrastructure/scripts/**`
 - `Docs/agents/**`
@@ -95,13 +110,20 @@ Factory and governance mechanics:
 - `.codex/environments/environment.toml`
 - `harness.contract.json`
 
+These paths describe current locations, not permanent destination ownership.
+Classify reusable behavior, package-specific content, host policy, and temporary
+migration evidence by their actual consumers before moving or retiring them.
+
 ## Derived and runtime surfaces
 
 Runtime/projection surfaces (non-canonical):
 
 - `.agents/skills/**`
 - `.agents/plugins-runtime/cache/**`
-- `.skillsets/**` (generated rooted manifest rows; source of truth stays in `Skills/**`, `Plugins/**`, and generator code)
+- `.skillsets/**` (generated rooted manifest rows; current transitional inputs
+  are `Skills/**`, `Plugins/**`, and generator code until recorded transfer.
+  After transfer, use the package's accepted canonical owner and the generator's
+  tooling owner, not the old Agent-Skills paths.)
 - `skills-codex/**`
 - `Plugins/cache/**`
 - `runtime/**` (whenever introduced by migration phases)
@@ -125,8 +147,10 @@ Workout and telemetry surfaces:
 
 - Edit product content only in the canonical source path named by the explicit
   owner decision.
-- Do not treat a package in Skills Foundry as active SDK source until an
-  explicit selected-candidate handoff names the source copy and bounded task.
+- After recorded canonical source transfer, repair retained source in Foundry.
+  Before transfer, repair only the explicit owner's canonical source within
+  the authorized scope and rights. An SDK handoff selects tooling work, not a
+  new canonical package copy in Agent-Skills or SDK.
 - Do not copy an external or runtime package into `agent-skills` merely to make
   it visible; preserve its provenance in Skills Foundry first.
 - Do not hand-edit runtime/projection surfaces.

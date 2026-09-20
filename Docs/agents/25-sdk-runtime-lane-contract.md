@@ -17,6 +17,17 @@ explicitly accepts a blocker. If a command from one lane blocks, report that
 lane as blocked. Do not replace it with a different lane and call the original
 proof complete.
 
+Package ownership follows the recorded canonical source transfer in
+[Path Ownership Boundaries](/Docs/agents/14-path-ownership-boundaries.md).
+Skills Foundry owns retained editable packages after transfer; Skills SDK owns
+reusable tooling. Before transfer, authorized repairs remain in the explicit
+owner's source. Copying requires cleared rights and matching authority; staged
+or scratch candidates do not become canonical sources. The Agent-Skills command
+shapes below describe transitional execution dependencies, not permanent SDK
+ownership or proof of standalone consumer cutover. If a command cannot process
+the selected canonical source, report that migration gap; do not create a new
+canonical Agent-Skills copy to satisfy the command.
+
 Use the
 [Skills SDK Gold Standard Rubric](/Docs/reference/skills-sdk-gold-standard-rubric.md)
 as the top-level scoring standard before Tessl live eval or registry release
@@ -216,11 +227,17 @@ For each lane, report:
 The Tessl external lane is a projection from a selected canonical package into
 a durable private Tessl package:
 
-- `/Users/jamiecraik/dev/skills-foundry` retains source-only packages,
-  provenance, and licences outside active authoring.
-- `agent-skills` implements the Skills SDK and may hold the selected active
-  candidate for the bounded lifecycle task; its copy does not change source
-  ownership without an explicit authority decision.
+- `/Users/jamiecraik/dev/skills-foundry` owns retained editable package source,
+  repairs, provenance, and licences after recorded canonical source transfer.
+  Source-only separates authoring from runtime installation and publication.
+- `/Users/jamiecraik/dev/skills-sdk` owns reusable lifecycle tooling. Agent-Skills
+  holds only remaining transitional sources and execution dependencies until
+  their verified transfer and cutover; it is not the permanent SDK implementation.
+- Select the candidate from its current canonical owner record. Until transfer,
+  repair that owner's source; after transfer, repair Foundry source. An SDK or
+  Tessl staging copy is candidate-bound evidence, not a new authoring location.
+  Unresolved or blocked rights prohibit protected-source copying; retain only
+  permitted inventory and provenance metadata until rights are cleared.
 - `jscraik` is the single intended Tessl workspace for Skills SDK project
   creation, scenario generation, internal review, eval iteration, private
   registry retention, and later public registry publication decisions.
