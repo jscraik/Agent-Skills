@@ -24,8 +24,13 @@ dependencies to the controller rather than starting another programme lane.
 
 After dispatch, end the controller turn unless independent authorized work is
 available. Do not poll owners, repeat unchanged checks, or create periodic status
-heartbeats. Owners send one completion or actionable-blocker message to the
-controller using `send_message_to_thread`. Include candidate identity, changed
+heartbeats. Owners send one completion or actionable-blocker message through the
+available messaging operation that targets and wakes the controller task.
+Discover the registered tool before delivery: Codex Desktop provides
+`send_message_to_thread`; subagent `send_message` and `followup_task` operations
+apply only to their supported agent targets, not arbitrary desktop task IDs.
+If no supported operation can reach the controller, report that capability gap;
+do not substitute polling or claim delivery. Include candidate identity, changed
 paths, exact command outcomes, existing durable evidence and review links,
 delivery state, remaining dependency, and proposed next action. No reply is
 needed merely to acknowledge receipt.
