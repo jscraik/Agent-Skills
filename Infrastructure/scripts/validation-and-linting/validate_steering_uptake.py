@@ -118,7 +118,8 @@ REQUIRED_DOC_PHRASES = (
     "Required Evidence",
     "validate_steering_uptake.py",
     "After any fabricated runtime handle is attempted",
-    "immediately preceding tool result",
+    "latest valid handle returned for",
+    "that operation",
 )
 STEERING_DOC_LINK_RE = re.compile(
     r"\[[^\]]+\]\((?:/)?Docs/agents/19-high-signal-steering-feedback\.md\)"

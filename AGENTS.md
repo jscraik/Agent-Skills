@@ -53,8 +53,9 @@ Complete those separation boundaries before refining either product.
   ledger entry or new process artifact. When that route is selected, opening and reading it in the current turn is required; record the result in
   `.harness/quality/steering-uptake.md` and run
   `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
-- Keep runtime handles candidate-bound: wait, poll, or resume only the active
-  handle returned by the immediately preceding tool result, and perform those
+- Keep runtime handles operation-bound: wait, poll, or resume only the latest
+  valid handle returned for that operation, following the tool's lifecycle
+  rules. Unrelated tool calls do not invalidate a live handle. Perform these
   operations serially for that handle. See
   [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md#runtime-handle-safety)
   for recovery rules.

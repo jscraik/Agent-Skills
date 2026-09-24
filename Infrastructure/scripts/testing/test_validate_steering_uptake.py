@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+import pytest
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "validation-and-linting" / "validate_steering_uptake.py"
@@ -46,7 +47,7 @@ _VALID_DOC = (
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
     "After any fabricated runtime handle is attempted\n"
-    "immediately preceding tool result\n"
+    "latest valid handle returned for that operation\n"
 )
 _VALID_LEDGER = (
     "# Steering Uptake Ledger\n\n"
@@ -101,6 +102,17 @@ def _make_valid_root(tmp_path: Path) -> Path:
 def test_validate_current_repo_surfaces() -> None:
     findings = validate_steering_uptake.validate()
     assert findings == []
+
+
+@pytest.mark.parametrize("obsolete", [False, True])
+def test_operation_bound_handle_guidance(tmp_path: Path, obsolete: bool) -> None:
+    root = _make_valid_root(tmp_path)
+    doc = _VALID_DOC
+    if obsolete:
+        doc = doc.replace("latest valid handle returned for that operation", "immediately preceding tool result")
+    write(root / "Docs/agents/19-high-signal-steering-feedback.md", doc)
+    findings = validate_steering_uptake.validate(root)
+    assert [finding.code for finding in findings] == (["STEERING_DOC_INCOMPLETE", "STEERING_DOC_INCOMPLETE"] if obsolete else [])
 
 
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:

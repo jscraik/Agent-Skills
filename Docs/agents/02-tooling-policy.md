@@ -56,7 +56,9 @@
 ## Useful checks
 
 - `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
-- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- Projection refresh is a mutation, not a check. Use
+  [the authorized refresh lane](/Docs/agents/04-validation.md#authorized-projection-refresh-only)
+  only when that action and scope are explicitly selected.
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `python3 Infrastructure/scripts/skill-graph/plan_graph_lint.py .agents/PLANS.md`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper preferred over `~/.codex` version)

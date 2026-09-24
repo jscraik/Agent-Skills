@@ -34,9 +34,10 @@ cloud challenge cases must come from the local pool. Changes to release case
 ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
-Keep the model families independent across proof lanes: `oss-local` uses
+Keep local and cloud model-family evidence distinct: `oss-local` uses
 `qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:0731-cloud`, and Tessl external uses
-`deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
+`deepseek-v4-flash`. Cloud and Tessl share the named DeepSeek family; separate
+execution lanes do not establish independent model families. Every eval receipt must carry the declared execution model,
 family, provider, and identity source. A model change starts a new baseline for
 that lane. Do not average scores across model families; compare each lane to its
 own prior baseline and use cross-lane agreement or disagreement as portability
@@ -338,8 +339,10 @@ Skill Factory skill entries.
 
 Tessl plugin evals attach to a Tessl project using that same
 `<workspace>/<plugin-name>` identity. The wrapper must check that staged project
-link before running live evals, relink an existing project first, and create the
-project only when the relink path proves it does not already exist:
+link receipt before running live evals. A missing or stale receipt blocks
+scoring; the evaluator must not mutate project state. With separate setup
+authority, use the project-setup wrapper to relink an existing project or create
+one only after its lookup establishes that the project does not exist:
 
     ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot
 

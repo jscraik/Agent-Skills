@@ -32,8 +32,11 @@
 - `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/skills/**`, `.agents/plugins-runtime/cache/**`, `Plugins/cache/**`, and `runtime/**`)
   - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
   - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
-- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+  checks configured documentation paths, not root `AGENTS.md`. For root
+  instruction changes, also check its local links and headings, compare command
+  claims with their implementations, and run Vale on `AGENTS.md`. A clean docs
+  lint result alone does not prove command safety or instruction agreement.
 - `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`
   validates the steering uptake ledger when agent operating rules, review
   feedback uptake, or high-signal steering surfaces change. It also rejects
@@ -56,6 +59,17 @@
   `--tessl-live-private` external Tessl proof.
 - Scope policy reference: [hook-governance-scope-defaults.md](/Docs/guides/hook-governance-scope-defaults.md).
 - Path ownership policy: [14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md).
+
+### Authorized projection refresh only
+
+`bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` regenerates
+skill/plugin symlinks and the root index. It is a mutation, not an ordinary
+validation check. Run it only when projection refresh is explicitly authorized
+for the selected workspace or user scope; source or documentation edits alone
+do not authorize it. The script supports `--dry-run` for preview, but preview
+does not prove that an installed runtime works. Follow
+[Path Ownership Boundaries](/Docs/agents/14-path-ownership-boundaries.md)
+before any refresh and retain separate runtime proof.
 
 ### Managed asset lifecycle baseline
 
@@ -109,8 +123,17 @@
 
 ## Skill quality ladder
 
+For a routine source-only correction, start with
+`./bin/ask skills audit <skill-path> --level strict --source-only --json --robot`
+and the applicable package and focused behavioral checks. The `--source-only`
+flag keeps generated runtime reachability out of the static audit; it does not
+prove behavior or remove required behavioral validation. If that proof needs
+unavailable runtime authority, report only that lane as blocked.
+
 For skill hardening, do not rediscover local evals, Plugin Eval, or Tessl ad hoc.
-Run and report the ladder in this order, stopping at the first failed gate unless
+Use the following runtime-dependent ladder only when that lane is selected and
+its execution is authorized. Source edits alone do not authorize model calls,
+runtime mutation, or external services. Run and report the ladder in this order, stopping at the first failed gate unless
 the user explicitly asks for a full matrix:
 
 ```bash
