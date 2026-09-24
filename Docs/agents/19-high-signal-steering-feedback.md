@@ -92,8 +92,10 @@ does not make routine work wait for one.
 ## Runtime-Handle Safety
 
 Runtime-handle safety is a direct command-safety invariant, independent of the
-selected route. Wait, poll, or resume only a live handle returned by the
-immediately preceding tool result. Never probe a guessed, fabricated, stale,
+selected route. Wait, poll, or resume only the latest valid handle returned for
+that operation, following the tool's lifecycle rules. An unrelated tool call
+does not invalidate a live handle; completion or an explicit replacement does.
+Never probe a guessed, fabricated, stale,
 or placeholder identifier. When there is no live handle, rediscover state with
 a direct repository command. After invalid-handle use, continue with direct
 commands until a new asynchronous call returns a live handle.
