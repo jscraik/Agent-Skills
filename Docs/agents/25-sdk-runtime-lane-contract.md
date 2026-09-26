@@ -267,6 +267,9 @@ a durable private Tessl package:
   `<workspace>/<project-slug>`.
 - The separately authorized `evals prepare-tessl-scenarios --execute` setup
   command owns project repair, linking, or creation for that private identity.
+  Its `_ensure_tessl_project_link` helper must create a project only after an
+  explicit not-found result; other lookup or relink failures must return a
+  blocked result.
   The live evaluator only validates the resulting candidate-bound project-link
   receipt; missing or stale evidence blocks scoring without project mutation.
 - The receipt must record the staged package digest and the private package id

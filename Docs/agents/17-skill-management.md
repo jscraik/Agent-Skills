@@ -21,11 +21,14 @@ After an authorized repair, prove visibility for each affected skill with:
 ```bash
 ./bin/ask skills load-preview --json --robot
 ./bin/ask skills proof <affected-skill-handle> --runtime-target codex --json --robot
+./bin/ask skills proof <affected-skill-handle> --runtime-target agents --json --robot
 find -L ~/.agents/skills -maxdepth 4 -name SKILL.md
 find -L ~/.codex/skills -maxdepth 4 -name SKILL.md
 ```
 
-Use the plugin status/readiness route for affected plugins as well; one skill
+Run the target-specific proof for each affected runtime; Codex readiness does
+not validate the Agents runtime. Use the plugin status/readiness route for
+affected plugins as well; one skill
 does not represent every consumer. Treat a dangling runtime link as a runtime outage even when the git cleanup was
 otherwise correct. The repo is clean only in the git lane; picker readiness is a
 separate runtime-projection lane.

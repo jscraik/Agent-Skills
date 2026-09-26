@@ -104,15 +104,26 @@ def test_validate_current_repo_surfaces() -> None:
     assert findings == []
 
 
-@pytest.mark.parametrize("obsolete", [False, True])
-def test_operation_bound_handle_guidance(tmp_path: Path, obsolete: bool) -> None:
+@pytest.mark.parametrize(
+    ("guidance", "valid"),
+    [
+        ("latest valid handle returned for that operation", True),
+        ("latest valid handle returned for\nthat operation", True),
+        ("latest\nvalid  handle\treturned for that operation", True),
+        ("immediately preceding tool result", False),
+        (
+            "latest valid handle returned for a different operation; "
+            "that operation need not match the one being resumed",
+            False,
+        ),
+    ],
+)
+def test_operation_bound_handle_guidance(tmp_path: Path, guidance: str, valid: bool) -> None:
     root = _make_valid_root(tmp_path)
-    doc = _VALID_DOC
-    if obsolete:
-        doc = doc.replace("latest valid handle returned for that operation", "immediately preceding tool result")
+    doc = _VALID_DOC.replace("latest valid handle returned for that operation", guidance)
     write(root / "Docs/agents/19-high-signal-steering-feedback.md", doc)
     findings = validate_steering_uptake.validate(root)
-    assert [finding.code for finding in findings] == (["STEERING_DOC_INCOMPLETE", "STEERING_DOC_INCOMPLETE"] if obsolete else [])
+    assert [finding.code for finding in findings] == ([] if valid else ["STEERING_DOC_INCOMPLETE"])
 
 
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:

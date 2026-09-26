@@ -128,9 +128,11 @@ mutation disguised as validation:
 ```bash
 ./bin/ask skills load-preview --json --robot
 ./bin/ask skills proof <affected-skill-handle> --runtime-target codex --json --robot
+./bin/ask skills proof <affected-skill-handle> --runtime-target agents --json --robot
 ```
 
-Run the proof for every affected skill; check affected plugins through their
+Run the target-specific proof for every affected skill in each affected runtime.
+Codex readiness does not validate the Agents runtime. Check affected plugins through their
 own status/readiness route. A single skill's visibility does not prove all
 consumers or their recovery behavior. Do not report cleanup as complete when it leaves dangling user runtime
 links or makes skills disappear from the modeled Codex loader roots.
