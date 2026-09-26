@@ -292,6 +292,7 @@ def _tag_values(text: str, label: str) -> set[str]:
 
 
 def _validate_doc(root: Path) -> list[Finding]:
+    """Report missing steering guidance, ignoring whitespace-only wrapping."""
     findings: list[Finding] = []
     doc_path = root / DOC_REL_PATH
     if not doc_path.exists():
@@ -381,6 +382,7 @@ def _validate_readme(root: Path) -> list[Finding]:
 
 
 def _validate_agents(root: Path) -> list[Finding]:
+    """Check root routing and operation-bound handle guidance across line wraps."""
     findings: list[Finding] = []
     agents_path = root / AGENTS_REL_PATH
     if not agents_path.exists():

@@ -81,10 +81,7 @@ def _make_valid_root(tmp_path: Path) -> Path:
     """
     Create and populate a temporary repository root containing the valid steering-uptake surfaces.
 
-    Writes three files into the given directory:
-    - Docs/agents/19-high-signal-steering-feedback.md with predefined steering document content.
-    - .harness/quality/steering-uptake.md with a valid ledger table.
-    - Docs/agents/README.md with an index link to the steering document.
+    Writes the steering document, ledger, index link, and root agent guide.
 
     Parameters:
         tmp_path (Path): Directory path to populate.
@@ -100,6 +97,7 @@ def _make_valid_root(tmp_path: Path) -> Path:
 
 
 def test_validate_current_repo_surfaces() -> None:
+    """Require the checked-out repository's steering surfaces to validate."""
     findings = validate_steering_uptake.validate()
     assert findings == []
 
@@ -107,6 +105,7 @@ def test_validate_current_repo_surfaces() -> None:
 @pytest.mark.parametrize("surface", ["AGENTS.md", "Docs/agents/19-high-signal-steering-feedback.md"])
 @pytest.mark.parametrize("replacement", ["latest valid handle returned for\nthat operation", "immediately preceding tool result", "latest valid handle returned for a different operation; that operation"])
 def test_operation_bound_handle_guidance(tmp_path: Path, surface: str, replacement: str) -> None:
+    """Accept wrapped guidance but reject obsolete and wrong-operation wording."""
     root = _make_valid_root(tmp_path)
     doc = _VALID_AGENTS if surface == "AGENTS.md" else _VALID_DOC
     write(root / surface, doc.replace("latest valid handle returned for that operation", replacement))
