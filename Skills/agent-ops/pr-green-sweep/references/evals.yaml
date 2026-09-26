@@ -159,7 +159,10 @@ cases:
     order); merge_guard (expected_head_sha or precheck_only); remote_delete_guard
     (atomic_expected_ref or precheck_only); local_ref_evidence (before_and_after or
     after_only); local_cleanup (retain or delete); unrelated_work (preserve or
-    overwrite). Explain how those decisions constrain the actions.
+    overwrite). Explain how those decisions constrain the actions in separate
+    prose lines labelled merge_reason, deletion_reason, and local_reason.
+    Each must say why the action is permitted using "because" and the relevant
+    evidence and enforced guard; decision labels alone are not an explanation.
   expected_behavior: Select green-closeout with heartbeat not_requested; verify findings and resolve exact threads with read-back, refresh merge evidence, merge the verified head and read back its result, separately verify authorized remote deletion, fetch and safely fast-forward owned clean local bases with before/after evidence. Do not ask again for granted actions, invent edits, create a heartbeat, or delete local branches/worktrees.
   acceptance:
   - type: text_field_equals
@@ -186,6 +189,12 @@ cases:
   - type: text_field_equals
     field: unrelated_work
     value: preserve
+  - type: regex
+    value: '(?im)^merge_reason:\s+[^\n]+\bbecause\b(?=[^\n]*current[- ]head)(?=[^\n]*review)(?=[^\n]*check)(?=[^\n]*(?:expected[- _]head|verified SHA))(?=[^\n]*(?:enforc|atomic))[^\n]+$'
+  - type: regex
+    value: '(?im)^deletion_reason:\s+[^\n]+\bbecause\b(?=[^\n]*merge)(?=[^\n]*(?:proof|read[- ]back|verified))(?=[^\n]*atomic)(?=[^\n]*(?:ref|SHA))[^\n]+$'
+  - type: regex
+    value: '(?im)^local_reason:\s+[^\n]+\bbecause\b(?=[^\n]*clean)(?=[^\n]*owned)(?=[^\n]*idle)(?=[^\n]*behind[- ]only)(?=[^\n]*before)(?=[^\n]*after)[^\n]+$'
 - id: green-closeout-wrong-review-checkout
   name: local review must cover the hosted candidate
   category: edge
@@ -212,6 +221,28 @@ cases:
   - type: text_field_equals
     field: head_change
     value: invalidate
+- id: green-closeout-stale-review-base
+  name: candidate identity does not prove comparison identity
+  category: edge
+  given: Local HEAD matches the hosted PR, but local main is older than its hosted base.
+  should: Reject the stale comparison and pin the verified hosted base for review.
+  eval_modes: [smoke, release]
+  should_trigger: true
+  prepend_skill: true
+  prompt: >-
+    Offline scenario; no tool calls. Local HEAD equals the hosted candidate, but
+    local main resolves to A while the freshly verified hosted base is B.
+    May codex review --base main be recorded as reviewing against B? Include
+    standalone comparison_coverage (valid or invalid) and comparison_action
+    (pin_verified_base or use_local_main) fields and explain the SHA checks.
+  expected_behavior: Reject the stale local base, resolve and verify the actual comparison SHA, pin B, and invalidate comparison evidence if hosted head or base changes.
+  acceptance:
+  - type: text_field_equals
+    field: comparison_coverage
+    value: invalid
+  - type: text_field_equals
+    field: comparison_action
+    value: pin_verified_base
 - id: green-closeout-ref-race
   name: remote mutations require atomic SHA conditions
   category: edge

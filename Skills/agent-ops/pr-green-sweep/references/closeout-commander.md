@@ -248,10 +248,13 @@ addresses a finding.
 
 For a committed PR diff, materialize the latest hosted head in an owned checkout
 (isolate it if needed; preserve unrelated work). Assert local `HEAD` equals that
-exact SHA before running `codex review --base <verified-target-branch>` there.
-Record the checkout, candidate SHA, verified base SHA, and review output.
-`--base` selects the comparison base, not the candidate. Recheck the hosted head
-afterward; changes invalidate candidate-bound evidence. An empty diff from main,
+exact SHA. Resolve the comparison ref and assert it equals the freshly verified
+hosted base SHA; a stale local target branch is not sufficient. Pin that resolved
+commit for `codex review --base <verified-base-sha>` and verify the comparison
+matches the hosted PR diff. Record the checkout, candidate SHA, actual comparison
+SHA, and review output together. `--base` selects the comparison base, not the
+candidate. Recheck both hosted head and base afterward; changes invalidate
+comparison-bound evidence. An empty diff from main,
 another checkout, or an empty uncommitted diff does not prove PR review coverage.
 
 ## Local Branch Reconciliation
