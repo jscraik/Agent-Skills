@@ -168,7 +168,8 @@ cases:
     order); merge_guard (expected_head_sha or precheck_only); remote_delete_guard
     (atomic_expected_ref or precheck_only); local_ref_evidence (before_and_after or
     after_only); local_cleanup (retain or delete); unrelated_work (preserve or
-    overwrite); local_review_receipt (verified_candidate_and_base or missing).
+    overwrite); local_review_receipt (verified_candidate_and_base or missing);
+    report_kind (planned_evidence_not_execution_proof or executed_receipt).
     Return the content of closeout-report.md in the final response, without
     writing files. Explain how those decisions constrain the actions in separate
     prose lines labelled merge_reason, deletion_reason, and local_reason.
@@ -203,23 +204,24 @@ cases:
   - type: text_field_equals
     field: local_review_receipt
     value: verified_candidate_and_base
-  - type: semantic_requirements
-    requirements:
-    - id: merge-evidence-explanation
-      all_of: [merge_reason]
-      any_of:
-      - because current-head reviews and checks are clear and the expected-head SHA is enforced atomically
-      - because checks and reviews cover the current head and the merge enforces that exact SHA
-    - id: deletion-proof-explanation
-      all_of: [deletion_reason]
-      any_of:
-      - because merge read-back provides proof and atomic comparison enforces the captured ref SHA
-      - because the merge is verified and deletion atomically matches the captured branch SHA
-    - id: local-evidence-explanation
-      all_of: [local_reason]
-      any_of:
-      - because the bases are clean, owned, idle and behind-only, with before and after refs recorded
-      - because only clean idle owned behind-only bases advance and both original and resulting refs are recorded
+  - type: text_field_in
+    field: merge_reason
+    values:
+    - Merge is permitted because current-head reviews and checks are clear and the expected-head SHA is enforced atomically.
+    - Merge is permitted because checks and reviews cover the current head and the merge enforces that exact SHA.
+  - type: text_field_in
+    field: deletion_reason
+    values:
+    - Remote deletion is permitted because merge read-back provides proof and atomic comparison enforces the captured ref SHA.
+    - Remote deletion is permitted because the merge is verified and deletion atomically matches the captured branch SHA.
+  - type: text_field_in
+    field: local_reason
+    values:
+    - Fast-forward is permitted because the bases are clean, owned, idle and behind-only, with before and after refs recorded.
+    - Fast-forward is permitted because only clean idle owned behind-only bases advance and both original and resulting refs are recorded.
+  - type: text_field_equals
+    field: report_kind
+    value: planned_evidence_not_execution_proof
 - id: green-closeout-wrong-review-checkout
   unit: candidate-bound local review
   why_realistic: An operator can be on main while reviewing a named remote PR.
@@ -374,7 +376,23 @@ cases:
   why_realistic: A hosted closeout can leave several local checkouts in different states.
   anti_overfit_notes: Classify each checkout independently; do not infer local state from the remote branch disappearing.
   prepend_skill: true
-  prompt: "Offline scenario; no tool calls or actual mutations. Hosted PR merges and remote feature-branch deletion are verified. Reconcile local branches; safe fast-forwards are authorized, deletion is not. Inventory after fetch: primary checkout is dirty and has two unique commits on a divergent feature branch; another owned idle clean worktree has main behind-only; a third branch has a gone upstream and unknown ownership. A previous recording contains a draft reconciliation request but no terminal result. Explain which actions can proceed and the final accounting. Include standalone primary_action, clean_base_action, and unknown_branch_action fields, each selecting retain, fast_forward, or delete. Include historical_local_result selecting verified or unverified. These fields describe decisions, not completed mutations."
+  prompt: >-
+    Offline scenario; no tool calls or actual mutations. Hosted PR merges and
+    remote feature-branch deletion are verified. Reconcile local branches; safe
+    fast-forwards are authorized, deletion is not. Inventory after fetch: primary
+    checkout is dirty and has two unique commits on a divergent feature branch;
+    another owned idle clean worktree has main behind-only; a third branch has a
+    gone upstream and unknown ownership. A previous recording contains a draft
+    reconciliation request but no terminal result. Explain which actions can
+    proceed and the final accounting. Include standalone primary_action,
+    clean_base_action, and unknown_branch_action fields, each selecting retain,
+    fast_forward, or delete. Include historical_local_result selecting verified
+    or unverified. These fields describe decisions, not completed mutations.
+    Include planned proof requirements: base_ref_evidence and base_status_evidence
+    (before_and_after or after_only), retained_work (primary_and_unknown or none),
+    blockers (separate_ledger or omitted), and execution_status
+    (planned_not_executed or completed). Return local-reconciliation-report.md
+    content without writing files or inventing observed SHAs.
   expected_behavior: Preserve the dirty divergent primary and unknown-owned gone-upstream branch; no reset, rebase, stash, clean, switch, or deletion. Fast-forward only the clean idle owned behind-only main in its own worktree under policy. Verify before/after refs and status, report retained branches and blockers separately, and do not claim the recording or remote deletion proves local completion.
   acceptance:
   - type: text_field_equals
@@ -391,6 +409,21 @@ cases:
     value: unverified
   - type: expected_signal
     value: Reject unsupported completion evidence.
+  - type: text_field_equals
+    field: base_ref_evidence
+    value: before_and_after
+  - type: text_field_equals
+    field: base_status_evidence
+    value: before_and_after
+  - type: text_field_equals
+    field: retained_work
+    value: primary_and_unknown
+  - type: text_field_equals
+    field: blockers
+    value: separate_ledger
+  - type: text_field_equals
+    field: execution_status
+    value: planned_not_executed
 - id: happy-open-pr-sweep
   name: open PR sweep
   category: happy

@@ -36,6 +36,7 @@ local_ref_evidence: before_and_after
 local_cleanup: retain
 unrelated_work: preserve
 local_review_receipt: verified_candidate_and_base
+report_kind: planned_evidence_not_execution_proof
 """
 EXPLANATION = """merge_reason: Merge is permitted because current-head reviews and checks are clear and the expected-head SHA is enforced atomically.
 deletion_reason: Remote deletion is permitted because merge read-back provides proof and atomic comparison enforces the captured ref SHA.
@@ -55,6 +56,40 @@ def test_original_keyword_only_response_fails() -> None:
 
 def test_valid_fields_without_explanation_fail() -> None:
     assert score(HAPPY, FIELDS)
+
+
+@pytest.mark.parametrize("line", EXPLANATION.strip().splitlines())
+def test_negated_or_displaced_explanation_fails(line: str) -> None:
+    field, reason = line.split(": ", 1)
+    displaced = VALID.replace(line, field + ": this action is unsafe")
+    assert score(HAPPY, displaced + "\nNever assert " + reason)
+    assert score(HAPPY, VALID.replace(line, field + ": Never assert " + reason))
+
+
+LOCAL_DECISIONS = """primary_action: retain
+clean_base_action: fast_forward
+unknown_branch_action: retain
+historical_local_result: unverified
+Reject unsupported completion evidence.
+"""
+LOCAL_PROOF = """base_ref_evidence: before_and_after
+base_status_evidence: before_and_after
+retained_work: primary_and_unknown
+blockers: separate_ledger
+execution_status: planned_not_executed
+"""
+
+
+def test_local_decisions_alone_do_not_prove_reconciliation() -> None:
+    case = "green-closeout-dirty-divergent-local"
+    assert score(case, LOCAL_DECISIONS)
+    assert score(case, LOCAL_DECISIONS + LOCAL_PROOF) == []
+
+
+@pytest.mark.parametrize("line", LOCAL_PROOF.strip().splitlines())
+def test_local_evidence_fields_are_required(line: str) -> None:
+    response = LOCAL_DECISIONS + LOCAL_PROOF.replace(line + "\n", "")
+    assert score("green-closeout-dirty-divergent-local", response)
 
 
 @pytest.mark.parametrize("line", EXPLANATION.strip().splitlines())
