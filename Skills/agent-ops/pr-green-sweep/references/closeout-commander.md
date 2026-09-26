@@ -211,3 +211,87 @@ End every non-trivial sweep with:
 - dirty paths included or excluded
 - branches/worktrees pruned or intentionally skipped
 - blockers requiring Jamie decision
+
+## Green PR Closeout
+
+Use `green-closeout` for "review green pull requests, resolve review threads,
+merge them, and reconcile the local branches." This is foreground work unless
+the user also requests scheduled continuation. Preserve the named authority
+through all applicable gates; ask only for a missing action class or material
+scope decision. Do not manufacture code edits when current evidence already
+addresses a finding.
+
+1. Build the scoped PR queue from fresh hosted state. Treat displayed green
+   counts as candidates for review, not merge clearance or a fixed check quota.
+2. Read the current diff and all review sources. Confirm each finding and
+   reconcile exact thread ids using `review-findings.md`, including live
+   read-back. A bot task marked ready or delivery-blocked does not prove its
+   fix reached the PR; check published commits and avoid competing writers.
+3. Verify current-head required checks, qualifying independent reviews under
+   repo policy, no unresolved threads, no conflicts, and the applicable receipt.
+   If the head changes, refresh affected evidence before proceeding.
+4. Merge only the verified head using the authorized strategy and the owning
+   repository's guarded command. Where supported, bind the operation to the
+   expected head SHA. Read back the merged state, merge commit, and target base;
+   a clicked confirmation or a submitted request is not a successful merge.
+5. Delete the remote feature branch only when that action is authorized and
+   its current ref matches the merged candidate. Confirm the deletion, then
+   complete the separate local reconciliation below.
+
+## Local Branch Reconciliation
+
+Reconciliation starts with accounting and safe synchronization. Branch or
+worktree deletion requires matching cleanup authority and proof.
+
+1. Inventory each scoped repository's status, branches, upstreams, worktrees,
+   active writers, and unique commits. Record current refs before mutation.
+   Fetch current remote refs through the permitted repo workflow; a missing
+   upstream alone does not prove a branch is disposable.
+2. Compare each local branch with its current upstream and classify it as
+   equal, behind-only, ahead-only, divergent, gone, or unknown. Preserve dirty,
+   active, ahead-only, divergent, and unknown-owned checkouts. Do not reset,
+   rebase, stash, clean, or switch them merely because remote `main` advanced.
+3. Fast-forward a clean, owned, behind-only checkout only within granted scope
+   and repo policy. For a branch checked out elsewhere, use its owning
+   worktree and verify it is idle and clean first; do not move its ref from
+   another checkout. A dirty primary checkout can remain untouched while an
+   independent clean checkout is safely updated.
+4. Before deleting a local branch or worktree, require verified merge or
+   abandonment, exact branch ownership, no unique work needing retention,
+   no dirty changes or active writer, and no runtime links into a removed
+   worktree. Squash or rebase merges need content-equivalence proof when
+   ancestry alone does not establish containment; ambiguous cases are kept.
+5. Re-read status, refs, upstream comparison, and worktree inventory after each
+   change. Report before/after SHAs and `updated`, `already_current`, `retained`,
+   or `blocked` with a reason. Report remote deletion separately from local
+   branch/worktree deletion. A retained divergent branch is accounted for,
+   not synchronized; leave its next decision visible.
+
+### Recorded Workflow Basis
+
+The September 13, 2026 recording shows Websites PR #41 and Skills Foundry
+PRs #23 and #24 reaching hosted merged states. Displayed check totals were
+19, 7, and 7; they are historical observations, not policy thresholds.
+Review-conversation activity preceded the final Foundry merge. The supplied
+summary records remote branch removal, while the event stream also contains
+task commentary and draft reconciliation text. Neither commentary nor a draft
+proves local branch updates. The reconciliation procedure above requires fresh
+Git evidence; it is not a claim that those historical local updates completed.
+Private event streams and unrelated task content are not packaged.
+
+## Output Contract
+
+For a non-trivial response, emit `heartbeat_status` first. Then emit
+`schema_version: 1`, selected mode, a finding ledger (source URL/id, author,
+observed head, affected path, disposition, reason, fix and proof), and an
+action queue
+(`auto_fixable_now`, `needs_merge_conflict_strategy`, `blocked_policy_or_approval`,
+`blocked_external_ci`, `blocked_pr_metadata`, `blocked_artifact_context`,
+`needs_user_decision`, `cleanup_only`), and heartbeat, dirty-worktree,
+validation, receipt, merge, cleanup, and blocker ledgers. Group repeats in
+`recurring_finding_classes` with
+`finding_class_id`, `fingerprint_sha256`, `normalized_invariant`, occurrences,
+root cause, guardrail, and merge eligibility.
+
+Include `local_branch_reconciliation_ledger` for the selected reconciliation
+lane, with before/after refs, classification, action, result, and retained work.

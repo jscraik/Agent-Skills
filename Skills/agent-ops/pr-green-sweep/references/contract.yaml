@@ -1,7 +1,8 @@
 schema_version: 1
 skill: pr-green-sweep
-purpose: "Collect GitHub, CodeRabbit, Codex, and CI findings across scoped PRs, fix confirmed issues, and prove each outcome; monitor, merge, and clean up only when requested."
+purpose: "Review green PRs, resolve evidenced review threads, merge authorized PRs, and reconcile local branches; also repair confirmed findings or monitor when requested."
 triggers:
+  - "Help me review green pull requests, resolve review threads, merge them, and reconcile the local branches."
   - "fix review threads in these PRs using GitHub, CodeRabbit, and CircleCI"
   - "collect PR findings and fix confirmed issues"
   - "monitor open PRs until green"
@@ -30,6 +31,7 @@ conditional_inputs:
   merge: [merge_strategy, target_base]
 execution_modes:
   default: review-fix
+  foreground_closeout: green-closeout
   monitoring: monitor-closeout
   foreground_requires_heartbeat: false
   monitoring_requires_explicit_request: true
@@ -56,6 +58,7 @@ outputs:
   - cleanup_ledger
   - decision_ready_blockers
   - primary_worktree_dirty_closeout_proof
+  - local_branch_reconciliation_ledger
 quality_criteria:
   current_state_before_action:
     purpose: Ensure PR action uses live GitHub and local worktree evidence.
@@ -128,6 +131,9 @@ quality_criteria:
       "2": Similar findings are fixed independently without a recurrence decision.
       "1": The same finding class reaches merge review repeatedly with no durable prevention.
 automatic_failure_conditions:
+  - Treats green checks or resolved conversations alone as qualifying current-head reviewer approval.
+  - Treats hosted merge or remote branch deletion as proof that local branches were reconciled.
+  - Resets, rebases, stashes, cleans, or deletes unrelated local work to match an advanced remote base.
   - Claims blocked external CI as green.
   - Treats a required external check as merge-ready without repaired evidence.
   - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
@@ -161,6 +167,9 @@ risks:
   - policy_override_without_approval
   - repeated_point_fixes_without_prevention
 safety:
+  foreground_closeout_requires_no_heartbeat: true
+  reconciliation_does_not_imply_deletion: true
+  verify_hosted_merge_before_local_reconciliation: true
   untrusted_inputs: true
   redact_secrets: true
   heartbeat_required_for_monitoring: true
@@ -300,7 +309,7 @@ validation:
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck
-  - uncommitted_local_review_before_merge
+  - candidate_covering_local_review_before_merge
   - heartbeat_target_refreshed_before_rotation
   - current_head_and_metadata_provenance_before_source_patch
   - artifact_receipt_context_checked_before_closeout_claim
