@@ -155,9 +155,11 @@ This repo separates source, generated projections, and live runtime visibility.
 An explicit owner decision records source authority and transfer; selecting a
 package for SDK tooling does not move its editable source. Rights-cleared copies
 alone do not complete transfer or authorize runtime installation. Flat metadata
-is generated from the accepted source inputs. Obsolete rooted
-manifests and command-surface files are not SDK inputs and should not be used as
-operator handles.
+is generated from the accepted source inputs. Rooted manifests and legacy
+command-surface files are not inputs to the flat runtime resolver and should not
+be used as operator handles. However, `ask sdk explorer static --preview` still
+reads `.skillsets/*/manifest.jsonl`; preserve those manifests until that consumer
+has migrated. Flat discovery does not prove all legacy consumers are retired.
 
 Resolve canonical skill handles with:
 

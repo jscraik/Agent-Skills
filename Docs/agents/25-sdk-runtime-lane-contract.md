@@ -269,6 +269,10 @@ a durable private Tessl package:
   command owns project repair, linking, or creation for that private identity.
   The live evaluator only validates the resulting candidate-bound project-link
   receipt; missing or stale evidence blocks scoring without project mutation.
+  Setup currently may attempt creation after an unsuccessful relink without
+  explicit not-found proof. Repair-only authority is insufficient for this
+  route; block setup unless creation is also authorized. See the
+  [setup limitation](/Docs/agents/24-tessl-live-skill-eval-workflow.md).
 - The receipt must record the staged package digest and the private package id
   so a future run can prove which foundry source produced which Tessl package.
 - The private Tessl package can be persistent; the staged `/tmp/ask-tessl-*`

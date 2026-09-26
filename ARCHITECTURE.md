@@ -100,7 +100,9 @@ other clients can discover skills.
 
 - `.agents/skills/**`: generated runtime projection; other `.agents` paths have
   separate ownership.
-- `.skillsets/**`: historical rooted metadata, not an active SDK routing input.
+- `.skillsets/**`: historical rooted metadata, unused by the flat runtime
+  resolver but still read by the static explorer. Do not remove its manifests
+  until that consumer has migrated.
 - `Plugins/cache/**`: copied or cached plugin runtime mirrors.
 - root `SKILL.md`: generated root skill index.
 
@@ -266,7 +268,8 @@ Mixed ownership and historical routing surfaces.
 **Architecture Invariant:** `.agents/skills/**` is generated, while tracked
 `.agents/workflows/**` and `.agents/PLANS.md` are authored guidance. Do not
 overwrite the latter during projection cleanup. `.skillsets/**` retains
-historical metadata, not an active rooted routing contract. Check path ownership
+historical metadata still consumed by the static explorer, not the flat runtime
+resolver. Preserve it until consumer cutover. Check path ownership
 before editing or removing any of these surfaces.
 
 ### `.workouts/` and `.skill-telemetry/`

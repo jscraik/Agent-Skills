@@ -126,8 +126,8 @@ before any refresh and retain separate runtime proof.
 For a routine source-only correction, start with
 `./bin/ask skills audit <skill-path> --level strict --source-only --json --robot`
 and the applicable package and focused behavioral checks. The `--source-only`
-flag keeps generated runtime reachability out of the static audit; it does not
-prove behavior or remove required behavioral validation. If that proof needs
+flag makes the generated workspace projection optional; it does not skip all
+runtime-surface checks, prove behavior, or remove required behavioral validation. If that proof needs
 unavailable runtime authority, report only that lane as blocked.
 
 For skill hardening, do not rediscover local evals, Plugin Eval, or Tessl ad hoc.

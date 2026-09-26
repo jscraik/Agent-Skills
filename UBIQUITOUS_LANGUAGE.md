@@ -210,7 +210,7 @@ master controller and completion-driven owner workflow.
 - "Use it" can mean **Canonical Source Inspection** or **Runtime Skill Activation**. Recommendation: keep them separate; source inspection is allowed for repair/review, but a blocked runtime proof means the skill was not used.
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
 - "Make it visible" can mean adding files to source control, refreshing runtime projection, or enabling the plugin runtime root. Recommendation: verify with `./bin/ask skills list --json` and `./bin/ask skills load-preview --json`, not only `find`.
-- "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable metadata routes and reserve "stub" for test doubles or temporary executable placeholders.
+- "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable flat-registry skill-name handles and reserve "stub" for test doubles or temporary executable placeholders.
 - "Auto-review" is overloaded. Recommendation: use **Approval Routing** for the configured reviewer and **Commit Authorization Boundary** for the user's explicit mutation authority; never use `auto_review` as a synonym for “approve every commit or publication.”
 - "Config" is overloaded. Recommendation: use **Tracked Policy Source** for the reviewed repo file, **Runtime Config Copy** for the mutable home file, and **Projection Reconciler** for the scheduled mechanism that materializes the map.
 

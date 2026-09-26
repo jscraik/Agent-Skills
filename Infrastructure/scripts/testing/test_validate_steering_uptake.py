@@ -61,7 +61,7 @@ _VALID_AGENTS = (
     "by opening and reading it in the current turn before continuing ordinary implementation or PR work. "
     "Record uptake in `.harness/quality/steering-uptake.md`; validate with "
     "`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`. "
-    "Run stateful runtime-handle operations serially for that handle.\n"
+    "Use the latest valid handle returned for that operation; run serially for that handle.\n"
 )
 
 
@@ -104,15 +104,15 @@ def test_validate_current_repo_surfaces() -> None:
     assert findings == []
 
 
-@pytest.mark.parametrize("obsolete", [False, True])
-def test_operation_bound_handle_guidance(tmp_path: Path, obsolete: bool) -> None:
+@pytest.mark.parametrize("surface", ["AGENTS.md", "Docs/agents/19-high-signal-steering-feedback.md"])
+@pytest.mark.parametrize("replacement", ["latest valid handle returned for\nthat operation", "immediately preceding tool result", "latest valid handle returned for a different operation; that operation"])
+def test_operation_bound_handle_guidance(tmp_path: Path, surface: str, replacement: str) -> None:
     root = _make_valid_root(tmp_path)
-    doc = _VALID_DOC
-    if obsolete:
-        doc = doc.replace("latest valid handle returned for that operation", "immediately preceding tool result")
-    write(root / "Docs/agents/19-high-signal-steering-feedback.md", doc)
+    doc = _VALID_AGENTS if surface == "AGENTS.md" else _VALID_DOC
+    write(root / surface, doc.replace("latest valid handle returned for that operation", replacement))
     findings = validate_steering_uptake.validate(root)
-    assert [finding.code for finding in findings] == (["STEERING_DOC_INCOMPLETE", "STEERING_DOC_INCOMPLETE"] if obsolete else [])
+    code = "AGENTS_STEERING_ROUTING_WEAK" if surface == "AGENTS.md" else "STEERING_DOC_INCOMPLETE"
+    assert [finding.code for finding in findings] == ([] if "for\nthat operation" in replacement else [code])
 
 
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:

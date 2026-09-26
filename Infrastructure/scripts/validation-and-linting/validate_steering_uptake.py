@@ -118,8 +118,7 @@ REQUIRED_DOC_PHRASES = (
     "Required Evidence",
     "validate_steering_uptake.py",
     "After any fabricated runtime handle is attempted",
-    "latest valid handle returned for",
-    "that operation",
+    "latest valid handle returned for that operation",
 )
 STEERING_DOC_LINK_RE = re.compile(
     r"\[[^\]]+\]\((?:/)?Docs/agents/19-high-signal-steering-feedback\.md\)"
@@ -130,6 +129,7 @@ REQUIRED_AGENTS_STEERING_PHRASES = (
     ".harness/quality/steering-uptake.md",
     "validate_steering_uptake.py --json",
     "serially for that handle",
+    "latest valid handle returned for that operation",
 )
 
 
@@ -298,7 +298,7 @@ def _validate_doc(root: Path) -> list[Finding]:
         findings.append(Finding("STEERING_DOC_MISSING", "High-signal steering feedback doc is missing.", _relative(doc_path, root)))
         return findings
 
-    doc = _read(doc_path)
+    doc = " ".join(_read(doc_path).split())
     for phrase in REQUIRED_DOC_PHRASES:
         if phrase not in doc:
             findings.append(Finding("STEERING_DOC_INCOMPLETE", f"Missing required phrase: {phrase}", _relative(doc_path, root)))
@@ -385,7 +385,7 @@ def _validate_agents(root: Path) -> list[Finding]:
     agents_path = root / AGENTS_REL_PATH
     if not agents_path.exists():
         return [Finding("AGENTS_STEERING_ROUTING_MISSING", "Root AGENTS.md is missing.", _relative(agents_path, root))]
-    agents = _read(agents_path)
+    agents = " ".join(_read(agents_path).split())
     for phrase in REQUIRED_AGENTS_STEERING_PHRASES:
         if phrase not in agents:
             findings.append(Finding("AGENTS_STEERING_ROUTING_WEAK", f"Root AGENTS.md must require steering uptake routing phrase: {phrase}", _relative(agents_path, root)))
