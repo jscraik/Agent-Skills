@@ -27,8 +27,8 @@ def score(case_id: str, response: str) -> list[str]:
         sys.path[:] = original_path
 
 
-FIELDS = """selected_mode: green-closeout
-heartbeat_status: not_requested
+FIELDS = """heartbeat_status: not_requested
+selected_mode: green-closeout
 action_order: verify_findings, resolve_threads, read_back_threads, refresh_merge_receipt, merge, read_back_merge, delete_remote_branch, verify_remote_deletion, fetch, fast_forward, record_local_refs
 merge_guard: expected_head_sha
 remote_delete_guard: atomic_expected_ref
@@ -70,10 +70,15 @@ def test_complete_closeout_decisions_pass() -> None:
 @pytest.mark.parametrize("response", [
     "\n" + VALID.replace("\n", "\n\n"),
     VALID.replace("\n", "\r\n"),
-    EXPLANATION + FIELDS,
+    FIELDS.splitlines(keepends=True)[0] + EXPLANATION + "".join(FIELDS.splitlines(keepends=True)[1:]),
 ])
 def test_structured_closeout_allows_blank_lines_and_field_order(response: str) -> None:
     assert score(HAPPY, response) == []
+
+
+@pytest.mark.parametrize("line", VALID.strip().splitlines()[1:])
+def test_heartbeat_must_be_the_first_nonblank_field(line: str) -> None:
+    assert score(HAPPY, "\n" + line + "\n" + VALID.replace(line + "\n", ""))
 
 
 @pytest.mark.parametrize("line", VALID.strip().splitlines())

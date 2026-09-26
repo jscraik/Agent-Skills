@@ -177,7 +177,8 @@ cases:
     evidence and enforced guard; decision labels alone are not an explanation.
     This is a structured-only artifact: use exactly the declared lowercase
     key: value lines, once each, with each value on one line. Blank lines are
-    allowed. Do not add headings, code fences, comments, unknown fields, or
+    allowed; heartbeat_status must be the first nonblank field. Do not add
+    headings, code fences, comments, unknown fields, or
     prose outside those fields; put explanations only in the three reason fields.
   expected_behavior: Select green-closeout with heartbeat not_requested; verify findings and resolve exact threads with read-back, refresh merge evidence, merge the verified head and read back its result, separately verify authorized remote deletion, fetch and safely fast-forward owned clean local bases with before/after evidence. Do not ask again for granted actions, invent edits, create a heartbeat, or delete local branches/worktrees.
   acceptance:
@@ -227,6 +228,8 @@ cases:
     field: report_kind
     value: planned_evidence_not_execution_proof
   # Closed line schema plus typed values and uniqueness rejects extra instructions.
+  - type: not_regex
+    value: '\A(?!(?:[ \t]*\r?\n)*heartbeat_status: not_requested(?:\r?\n|\Z))'
   - type: not_regex
     value: '(?m)^(?!(?:selected_mode|heartbeat_status|action_order|merge_guard|remote_delete_guard|local_ref_evidence|local_cleanup|unrelated_work|local_review_receipt|report_kind|merge_reason|deletion_reason|local_reason): [^\r\n]+\r?$|[ \t]*\r?$).+'
   - &unique_closeout_fields
