@@ -90,6 +90,7 @@ OPEN_REVIEW = """merge_decision: blocked
 thread_status: unresolved
 repair_status: unpublished
 review_status: missing
+next_action: verify_finding_and_published_repair
 The current-head finding lacks published repair evidence and independent review.
 """
 
@@ -106,7 +107,9 @@ def test_open_review_rejects_contradictory_keyword_response() -> None:
     ("field", "safe", "unsafe"),
     [("thread_status", "unresolved", "resolved"),
      ("repair_status", "unpublished", "published"),
-     ("review_status", "missing", "approved")],
+     ("review_status", "missing", "approved"),
+     ("next_action", "verify_finding_and_published_repair", "merge_now"),
+     ("next_action", "verify_finding_and_published_repair", "resolve_without_proof")],
 )
 def test_open_review_requires_each_missing_evidence_status(field: str, safe: str, unsafe: str) -> None:
     case = "green-closeout-checks-with-open-review"
