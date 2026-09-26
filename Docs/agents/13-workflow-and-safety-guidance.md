@@ -17,7 +17,7 @@ After fixing any code, always run the relevant test suite to verify the fix work
 
 When changing executable behavior, run the smallest real code path that exercises the exact production code touched before claiming the work is complete. Prefer invoking the production function, class, CLI command, shell script, validator, or route directly so the observed behavior comes from the same code users and CI will run.
 
-If no existing test or command covers the changed path, create a temporary reproduction script under `/codex-scripts/`. Temporary reproductions are local evidence only and must remain gitignored. Use them to import or invoke the production modules/functions directly; copy only the minimum fixture data or input setup needed to trigger the behavior. Avoid copying production logic into the temporary script, because that can test the copy instead of the real implementation.
+If no existing test or command covers the changed path, create a temporary reproduction script under `<repo-root>/codex-scripts/` or an approved temporary directory, not filesystem-root `/codex-scripts/`. Temporary reproductions are local evidence only; verify repository-local files are ignored with `git check-ignore <repo-relative-path>`. Use them to import or invoke the production modules/functions directly; copy only the minimum fixture data or input setup needed to trigger the behavior. Avoid copying production logic into the temporary script, because that can test the copy instead of the real implementation.
 
 If the exact production path cannot be run because it requires unavailable credentials, external services, unsafe side effects, or generated runtime state, state the blocker clearly and run the nearest meaningful validation instead. Do not describe behavior as verified unless the touched production path actually ran.
 
@@ -117,18 +117,23 @@ find -L ~/.agents/skills -maxdepth 3 -name SKILL.md | sed -n '1,20p'
 find -L ~/.codex/skills -maxdepth 3 -name SKILL.md | sed -n '1,20p'
 ```
 
-If a runtime link points at the worktree being removed, repoint it to the active
-workspace projection or run the owning sync command before deleting the
-worktree. After deletion, verify the visible runtime surface, not just git
-state:
+If a runtime link points at the worktree being removed, preserve the worktree
+until its affected consumers have an authorized replacement and recovery path.
+Worktree-cleanup authority alone does not authorize runtime installation,
+relinking, or sync. With separate authority for the named runtime targets, use
+the owning sync or repair route and verify each affected consumer before
+deletion. After authorized deletion, repeat the visibility checks, not a sync
+mutation disguised as validation:
 
 ```bash
-./bin/ask skills sync --scope workspace --json --robot
 ./bin/ask skills load-preview --json --robot
-./bin/ask skills proof unslopify --runtime-target codex --json --robot
+./bin/ask skills proof <affected-skill-handle> --runtime-target <affected-runtime-target> --json --robot
 ```
 
-Do not report worktree cleanup as complete when it leaves dangling user runtime
+Run the proof for every affected skill and runtime target (`codex` and/or
+`agents`); one target's readiness does not prove the other. Check affected plugins through their
+own status/readiness route. A single skill's visibility does not prove all
+consumers or their recovery behavior. Do not report cleanup as complete when it leaves dangling user runtime
 links or makes skills disappear from the modeled Codex loader roots.
 
 ## Configuration Files

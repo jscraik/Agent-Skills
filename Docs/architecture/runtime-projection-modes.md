@@ -11,7 +11,11 @@ Agent Skills Kit supports one active runtime projection mode: `flat`.
 - keeps hidden/system bridge skills out of first-level runtime discovery;
 - treats canonical `Skills/**/SKILL.md` and `Plugins/*/skills/**/SKILL.md` as the source of truth.
 
-Generated rooted manifests and command-surface metadata are obsolete. They are not SDK inputs, not runtime handles, and not a compatibility mode operators should select.
+Generated rooted manifests and legacy command-surface metadata are not inputs
+to the flat runtime resolver, runtime handles, or an alternate runtime mode.
+The static explorer still reads `.skillsets/*/manifest.jsonl`; preserve those
+manifests until its consumer cutover is proved. Resolver migration alone does
+not authorize deleting metadata required by other consumers.
 
 ## Scope
 

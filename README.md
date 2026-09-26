@@ -1,24 +1,37 @@
 # Agent Skills Kit
 
-Agent Skills Kit is the governed workspace for authoring, validating, and
-projecting skills and plugins for Codex and compatible AI coding agents. Its
-public command surface is `./bin/ask`: use it to find a skill, check its source,
-prove the relevant behavior, and refresh generated runtime views.
+Agent Skills Kit is the transitional `agent-skills` repository being separated
+into Skills SDK and Skills Foundry. Complete the separation before refining
+either product:
+
+- **Skills SDK** owns reusable Python tooling for creation, repair, validation,
+  evaluation, judging, review, packaging, and handoff.
+- **Skills Foundry** owns retained editable skill and plugin packages, including
+  package-specific scripts, eval data, references, assets, provenance, and rights.
+- **Agent-Skills** retains existing source, commands, and compatibility surfaces
+  only until their replacements and consumer cutovers are proved.
+
+`./bin/ask` remains this repository's transitional command surface, not the
+permanent Skills SDK implementation. Host credentials, installed runtime
+configuration, and third-party services retain their explicit owners.
 
 The short version:
 
-- Active SDK candidate source may live in `Skills/**` or
-  `Plugins/*/skills/**`. Retained package source lives in Skills Foundry. An
-  explicit owner decision determines which source is canonical.
-- Generated runtime surfaces live in `.agents/**`.
+- Existing package source may remain in `Skills/**` or `Plugins/*/skills/**`
+  until recorded transfer. A tooling candidate does not change source ownership.
+- `.agents/skills/**` is generated runtime projection; tracked
+  `.agents/workflows/**` and `.agents/PLANS.md` are authored guidance.
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
   trusting a README number.
 - Catalog parity marker: **85 canonical skills**. Regenerate this marker with
   the repo skill sync when catalog membership changes.
 
-For the product framing and proof boundary, read
-[the Skills SDK local journey](Docs/product/agent-capability-control-plane.md).
+For current ownership and cutover rules, read
+[Path Ownership Boundaries](Docs/agents/14-path-ownership-boundaries.md).
+[The Skills SDK local journey](Docs/product/agent-capability-control-plane.md)
+describes the existing transitional CLI journey, not proof that separation or
+the destination product backlog is complete.
 
 ## Contents
 
@@ -56,7 +69,7 @@ reachability, including `sdk check`, will remain blocked there until the
 reported workspace-sync action is deliberately run or the check is repeated in
 the materialized checkout.
 
-For a local skill journey, replace `<skill>` with a handle such as
+For the existing Agent-Skills local skill journey, replace `<skill>` with a handle such as
 `technical-writer`. Run the commands in order, and stop if a result reports a
 blocker or no further action:
 
@@ -81,7 +94,7 @@ This path answers:
 | Find the next action | `./bin/ask sdk start <skill> --json --robot`                      | Resolves the target and reports its current local state.                               |
 | Inspect structure    | `./bin/ask sdk check <skill> --json --robot`                      | Summarizes structural evidence and any actionable follow-up.                           |
 | Verify packaging     | `./bin/ask skills package verify <skill> --strict --json --robot` | Checks target-bound package readiness without installing it or changing runtime state. |
-| Prove behavior       | `./bin/ask skills prove <skill> --json --robot`                   | Reports structural, behavioral, and runtime evidence as separate claims.               |
+| Inspect proof        | `./bin/ask skills prove <skill> --json --robot`                   | Reports structural, behavioral, and runtime evidence as separate claims.               |
 
 Use `--robot` when an agent is driving the CLI. Combine it with `--json` for a
 stable machine-readable envelope, including errors and suggested next steps.
@@ -130,18 +143,23 @@ This repo separates source, generated projections, and live runtime visibility.
 
 | Surface                                 | Purpose                                                 | Edit policy              |
 | --------------------------------------- | ------------------------------------------------------- | ------------------------ |
-| `Skills/<topic>/<skill>/SKILL.md`       | Active SDK candidate source owned by this repository    | Edit only when selected  |
-| `Plugins/<plugin>/skills/**/SKILL.md`   | Active SDK plugin candidate source owned by this repo   | Edit only when selected  |
-| `~/dev/skills-foundry/**`               | Source-only retained package, provenance, and licences  | Copy-first admission     |
+| `Skills/<topic>/<skill>/SKILL.md`       | Transitional source pending recorded transfer | Follow explicit owner and rights |
+| `Plugins/<plugin>/skills/**/SKILL.md`   | Transitional plugin source pending recorded transfer | Follow explicit owner and rights |
+| `~/dev/skills-foundry/**`               | Retained editable packages after source transfer | Rights-cleared admission and repairs |
+| `~/dev/skills-sdk/**`                   | Reusable Python lifecycle tooling | Follow SDK repository guidance |
 | `.agents/skills/**`                     | Runtime projection consumed by Codex and agent runtimes | Regenerate only          |
+| `.agents/workflows/**`, `.agents/PLANS.md` | Authored workflow and planning guidance | Edit in its applicable scope |
 | `~/.agents/skills`, `~/.codex/skills`   | Curated or accepted user runtime skill availability     | Refresh with user sync   |
 | `~/.agents/plugins`, `~/.codex/plugins` | Curated or accepted user runtime plugin availability    | Refresh with plugin sync |
 
-An explicit owner decision chooses between Skills Foundry retention and an
-active SDK candidate in this repository. SDK-flat metadata is generated only
-from the selected canonical skill source. Obsolete rooted
-manifests and command-surface files are not SDK inputs and should not be used as
-operator handles.
+An explicit owner decision records source authority and transfer; selecting a
+package for SDK tooling does not move its editable source. Rights-cleared copies
+alone do not complete transfer or authorize runtime installation. Flat metadata
+is generated from the accepted source inputs. Rooted manifests and legacy
+command-surface files are not inputs to the flat runtime resolver and should not
+be used as operator handles. However, `ask sdk explorer static --preview` still
+reads `.skillsets/*/manifest.jsonl`; preserve those manifests until that consumer
+has migrated. Flat discovery does not prove all legacy consumers are retired.
 
 Resolve canonical skill handles with:
 
@@ -177,18 +195,25 @@ Keep evidence lanes separate when reporting readiness:
 - PR, CI, review-thread, tracker, and merge-readiness truth require current
   external checks before they can be claimed.
 
-For one skill, use the quality ladder from
-[Validation and Checks](Docs/agents/04-validation.md):
+For a source-only correction, start with static source admission and the
+applicable package and focused behavioral checks:
 
 ```bash
-./bin/ask skills audit <skill-path> --level strict --json --robot
-./bin/ask evals run <skill-path> --mode smoke --json --robot
-./bin/plugin-eval analyze <skill-path> --format json
-./bin/ask skills external-review <skill-path> --json --robot
+./bin/ask skills audit <skill-path> --level strict --source-only --json --robot
+./bin/ask skills package verify <skill-path> --json --robot
 ```
 
-Stop at the first failed gate unless you are deliberately collecting a full
-matrix. Report the exact command, status, blocker class, and next diagnostic.
+These commands do not prove behavior or installed runtime readiness. Run the
+declared focused behavioral proof when required and authorized. Use the runtime
+or promotion ladder in [Validation and Checks](Docs/agents/04-validation.md)
+only when that lane is selected. Source edits alone do not authorize runtime
+sync, model calls, or external services. Stop dependent checks at the first
+failed required gate; report the exact command, status, and next diagnostic.
+
+Separation requires delivered destination replacements, every retained consumer's
+success/failure/recovery proof without Agent-Skills dependencies, and authorized
+retirement of old operational surfaces. Merged PRs or one successful pilot do
+not prove the whole separation complete.
 
 ## Repository layout
 
@@ -196,9 +221,9 @@ matrix. Report the exact command, status, blocker class, and next diagnostic.
 agent-skills/
 |-- bin/ask                   # Stable public wrapper entrypoint
 |-- scripts/                  # Stable wrapper entrypoints
-|-- Skills/                   # Canonical first-party skills
-|-- Plugins/                  # Canonical plugin packages and plugin-owned skills
-|-- Infrastructure/           # CLI implementation, validators, sync, governance
+|-- Skills/                   # Transitional skill sources pending transfer
+|-- Plugins/                  # Transitional plugin sources and separate caches
+|-- Infrastructure/           # Existing CLI/mechanics pending extraction or retirement
 |-- Docs/                     # Agent guidance, architecture, specs, and product docs
 |-- Wiki/                     # Skill Ops Wiki notes, playbooks, and learnings
 |-- .agents/skills/           # Runtime projection; regenerate only

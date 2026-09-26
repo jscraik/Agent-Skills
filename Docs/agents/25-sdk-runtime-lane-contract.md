@@ -2,9 +2,18 @@
 
 ## Purpose
 
-Use this contract whenever Skills SDK work needs runtime, judge, or Tessl proof.
-It encodes the promotion pipeline for skill changes and separates lanes that
-must not be substituted for one another:
+This is an explicitly selected promotion contract, not a repository-separation
+prerequisite. During separation, prove existing required consumer behavior;
+do not add cloud, Tessl, or new runtime journeys merely to move source ownership.
+The command examples describe transitional Agent-Skills implementations, not
+permanent destination ownership or proof that SDK replacements already exist.
+
+Use this contract only for explicitly selected runtime, judge, or Tessl lanes.
+Migration-required runtime proof selects the named existing consumer's applicable
+lane, not the complete promotion pipeline. It does not authorize progression to
+cloud, Tessl, or another runtime destination. Select the full numbered pipeline
+only for an explicitly authorized promotion journey. Its proof lanes remain
+distinct and must not be substituted for one another:
 
 - SDK mechanical validation
 - oss-local flow
@@ -256,8 +265,14 @@ a durable private Tessl package:
 - `tessl_private_package_id` identifies the private Tessl registry/workspace
   package and must match the project marker, normally
   `<workspace>/<project-slug>`.
-- The CLI must repair, link, or create the Tessl project for that private
-  package identity before running external evals.
+- The separately authorized `evals prepare-tessl-scenarios --execute` setup
+  command owns project repair, linking, or creation for that private identity.
+  The live evaluator only validates the resulting candidate-bound project-link
+  receipt; missing or stale evidence blocks scoring without project mutation.
+  Setup currently may attempt creation after an unsuccessful relink without
+  explicit not-found proof. Repair-only authority is insufficient for this
+  route; block setup unless creation is also authorized. See the
+  [setup limitation](/Docs/agents/24-tessl-live-skill-eval-workflow.md).
 - The receipt must record the staged package digest and the private package id
   so a future run can prove which foundry source produced which Tessl package.
 - The private Tessl package can be persistent; the staged `/tmp/ask-tessl-*`

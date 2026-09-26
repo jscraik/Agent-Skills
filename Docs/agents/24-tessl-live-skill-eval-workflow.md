@@ -34,13 +34,18 @@ cloud challenge cases must come from the local pool. Changes to release case
 ids, criteria, rubric, scorer version, or package identity create a new
 baseline version; do not report that score as uplift against the prior set.
 
-Keep the model families independent across proof lanes: `oss-local` uses
+Keep local and cloud model-family evidence distinct: `oss-local` uses
 `qwen3.5:9b-mlx`, `oss-cloud` uses `deepseek-v4-flash:0731-cloud`, and Tessl external uses
-`deepseek-v4-flash`. Every eval receipt must carry the declared execution model,
+`deepseek-v4-flash`. Cloud and Tessl share the named DeepSeek family; separate
+execution lanes do not establish independent model families. Eval shard aggregate
+receipts used for model-lane claims must carry the declared execution model,
 family, provider, and identity source. A model change starts a new baseline for
 that lane. Do not average scores across model families; compare each lane to its
 own prior baseline and use cross-lane agreement or disagreement as portability
 evidence. Configuration identity alone is not provider-invocation proof.
+
+Deterministic eval-run receipts may omit model identity and do not prove a
+model-backed execution lane.
 
 Use `evals-router` for scenario quality review. The route must verify the
 assertion contract before changing the skill: each scenario needs a realistic
@@ -338,10 +343,16 @@ Skill Factory skill entries.
 
 Tessl plugin evals attach to a Tessl project using that same
 `<workspace>/<plugin-name>` identity. The wrapper must check that staged project
-link before running live evals, relink an existing project first, and create the
-project only when the relink path proves it does not already exist:
+link receipt before running live evals. A missing or stale receipt blocks
+scoring; the evaluator must not mutate project state. With separate setup
+authority, the project-setup wrapper can relink or create a project:
 
     ./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --execute --json --robot
+
+Current limitation: the setup implementation can fall through from an
+unsuccessful relink to creation without proving an explicit not-found result.
+Do not use this route for repair-only authority. If creation is not authorized,
+report the setup lane blocked pending a fail-closed implementation repair.
 
 The raw Tessl project commands are vendor-reference material only. Do not run
 them directly from a live-eval lane: the wrapper's project-setup receipt is the

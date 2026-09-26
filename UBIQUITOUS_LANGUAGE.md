@@ -4,7 +4,7 @@
 
 - Scope: `agent-skills` repository operations, Skills SDK product direction, skill authoring, skill sync, and runtime visibility.
 - Sources: `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, `Skills/agent-ops/ubiquitous-language/SKILL.md`, and `.harness/quality/steering-uptake.md`.
-- Last updated: 2026-07-17
+- Last updated: 2026-09-24
 
 ## Separation-first direction
 
@@ -22,10 +22,10 @@ master controller and completion-driven owner workflow.
 
 | Term | Definition | Aliases to avoid | Confidence |
 | --- | --- | --- | --- |
-| **Agent Skills Kit** | The transitional `agent-skills` repository and CLI used to extract and dogfood Skills SDK capabilities while existing callers migrate. Its compatibility adapters and duplicate lifecycle mechanics are retired after their named consumers move to Skills SDK or Skills Foundry. | permanent SDK host, skills repo, agent-skills stuff | High |
-| **Skills Foundry** | The canonical editable repository at `/Users/jamiecraik/dev/skills-foundry` for retained skill and plugin packages, including repairs, package-specific scripts, evaluation data, references, assets, provenance, and licences. Admission does not itself install, enable, publish, or transfer runtime authority. | agent-skills Foundry, runtime cache, registry, plugin directory | High |
+| **Agent Skills Kit** | The transitional `agent-skills` repository and its existing CLI. Retain only migration responsibilities until required tooling and package consumers use Skills SDK and Skills Foundry independently. | skills repo, agent-skills stuff | High |
+| **Skills Foundry** | The canonical editable repository at `/Users/jamiecraik/dev/skills-foundry` for retained skill and plugin packages after recorded source transfer, including repairs, package-specific scripts, evaluation data, references, assets, provenance, and licences. Before transfer, the explicit source owner and rights govern repairs. Admission does not itself install, enable, publish, or transfer runtime authority. | agent-skills Foundry, runtime cache, registry, plugin directory | High |
 | **Active SDK Candidate** | An exact package candidate selected for SDK tooling to inspect or transform. Retained editable source stays Foundry-owned; temporary SDK test inputs or build copies do not transfer canonical ownership. | all skills in agent-skills, runtime copy, admitted package | High |
-| **Skills SDK** | The standalone portable implementation and professional lifecycle contract for shaping, guarding, proving, packaging, and handing off skills as software-like knowledge packages. | agent-skills repo, marketplace, Tessl, skill folder | High |
+| **Skills SDK** | The independently maintained reusable tooling implementation at `/Users/jamiecraik/dev/skills-sdk` for creation, repair, validation, evaluation, judging, review, packaging, and handoff. Required existing workflows migrate first; broader product features follow separation. | agent-skills repo, marketplace, Tessl, skill folder | High |
 | **Professional Lifecycle Contract** | The Skills SDK promise that a skill can move through source shape, package identity, guardrails, eval/proof, distribution handoff, and runtime verification with receipts. | platform vision, dashboard, lifecycle vibes | High |
 | **Professional Output** | A skill package or receipt-backed handoff whose thin surface, guardrails, durable memory, improvement loop, proof, and runtime boundaries are clear enough for another agent or operator to trust and replay. | polished prose, nice docs, pretty atlas | High |
 | **Thin Surface** | The product posture that keeps the default SDK interface small and author-facing while moving heavy detail into receipts, references, schemas, and progressive-disclosure docs. | minimal product, less functionality | High |
@@ -74,7 +74,7 @@ master controller and completion-driven owner workflow.
 | **Manifest-Declared Project Skill Source** | A project-local skill root such as `.agents/skills/` or `.codex/skills/` that the owner repo's `skills-sdk.json` classifies as `canonical_project_source`. | copied local skill, generated projection | High |
 | **Project Skill Lifecycle Gate** | The Skills SDK create/install/update gate that writes a project-local skill to the owner repo, runs the configured eval suite there, and records a promote, rollback, or blocked decision. | file write, sync, manual install | High |
 | **Owner Repo Skill Evidence** | Eval outputs, lifecycle events, traces, and promotion decisions saved under the owner repo's `.harness/` evidence paths for a project-local skill. | central SDK evidence, copied proof | High |
-| **Command Surface Handle** | A metadata row in `.skillsets/command-surface.json` that makes a skill addressable by a stable `$<handle>` and resolves to a canonical `SKILL.md` source. It is not a generated wrapper file and must not be treated as canonical source. | command stub, runtime stub, generated skill | High |
+| **Command Surface Handle** | A skill name resolved by the current flat skill registry; the CLI retains `command_surface` as a compatibility response alias, not a source of ownership. Historical `.skillsets/command-surface.json` rows are obsolete routing metadata, not active runtime inputs. | command stub, runtime stub, generated skill | High |
 | **User Runtime Links** | The home-directory skills and plugin links or directories under `~/.agents/**` and `~/.codex/**` that expose accepted or curated runtime availability. They are never source ownership or package-admission evidence. | user sync, installed skills, source of truth | High |
 | **Plugin Runtime Mirror** | A real copied plugin tree, such as `~/plugins` or a Codex profile `Plugins/`, refreshed from the package's explicit canonical source so marketplace paths resolve without aliasing repo source. Retained plugin source migrates to Skills Foundry. | plugin symlink, canonical plugin root | High |
 | **Workspace Sync** | The operation `./bin/ask skills sync --scope workspace` that refreshes repo-local runtime projections and the generated root `SKILL.md` index. | sync the repo, update links | High |
@@ -100,7 +100,7 @@ master controller and completion-driven owner workflow.
 | **Generalized Feedback Rule** | The transferable principle implied by a local feedback example, stated without the incidental function, command, test, doc section, line, error, or file name. | local fix, review nit | High |
 | **Similar-Case Disposition** | The classification of equivalent cases found during a pattern sweep: fixed now, different semantics, deferred with reason, or not applicable. | sweep done, grep result | High |
 | **Repeated Error Research Gate** | After two equivalent failures, stop unchanged retries, preserve the error and command, and change one diagnostic, input, environment condition, or implementation hypothesis. Consult repository evidence first and research alternatives when the cause remains uncertain. No fixed option count or new steering artifact is required. | keep trying, fight the error | High |
-| **Repo-Local Prek Home** | The repository-owned `.cache/prek` directory used by generated git hook shims through `PREK_HOME`, preventing Codex sandboxed commit/push hooks from writing `~/.cache/prek/prek.log`. | home prek cache, local workaround | High |
+| **Repo-Local Prek Home** | The hook cache selected by the repository installer: `PREK_HOME="${CODEX_HOOK_CACHE_ROOT}/prek"`, using a writable temporary root by default, not repository `.cache/prek` or `~/.cache/prek`. The installer validates the selected paths before wiring generated hooks. | home prek cache, local workaround | High |
 | **Durable Surface** | The canonical repo file or generated-source owner that should carry a steering rule so future agents inherit it. | note, reminder, chat context | High |
 | **Horizontal OODA Context** | Awareness of adjacent organizational activity that may change how an agent should orient before acting. | background noise, extra context | Medium |
 | **Vertical OODA Context** | Awareness that an agent is acting across stacked trajectories, not only the current turn or current patch. | thread memory, task history | Medium |
@@ -150,7 +150,7 @@ master controller and completion-driven owner workflow.
 - A **Canonical Skill Source** may produce one **Runtime Projection** entry after **Workspace Sync**.
 - A tracked policy source may produce a **Runtime Config Copy** when the **Runtime Projection Strategy** is `copy-runtime`; the **Projection Reconciler** must preserve that regular file rather than restore a symlink.
 - **Approval Routing** may auto-review an eligible tool request, but only the **Commit Authorization Boundary** authorizes a new commit scope; a **Duplicate Commit Authorization Prompt** signals that the agent has confused those concepts.
-- **Skills Foundry** owns retained editable packages, including active repairs and references. **Skills SDK** owns reusable lifecycle implementation. **agent-skills** is transitional until consumers cut over; none of these ownership claims alone proves registry or runtime state.
+- **Skills Foundry** owns retained editable packages, including repairs and references, after recorded canonical source transfer. Before transfer, authorized repairs stay with the explicit source owner under the applicable rights. **Skills SDK** owns reusable lifecycle implementation. **agent-skills** is transitional until consumers cut over; none of these ownership claims alone proves registry or runtime state.
 - **Skills SDK** professionalizes an explicitly selected source from the current owner through the **Professional Lifecycle Contract** before any **Tessl Distribution Stage** or **Local Runtime Truth Stage** claim is made.
 - The **Canonical Skills SDK Pipeline** is the shared route for roadmap, atlas, route-map, and capability language. Backlog cards should name one of the ten ordered steps and the entry, early, middle, pre-release, or runtime cycle before they become implementation slices.
 - A qualifying downstream signal may enter an **Upstream Feedback Loop** through a **Selected System Improvement**; it is not complete if the change only patches the current live Tessl result.
@@ -162,7 +162,7 @@ master controller and completion-driven owner workflow.
 - In this repository, `.agents/skills/**` is a **Runtime Projection** for generated root skill sets and system bridges. In another owner repo, `.agents/skills/**` or `.codex/skills/**` is editable source only when a project-local `skills-sdk.json` declares that root as **Manifest-Declared Project Skill Source**.
 - Project-local skill source is saved in the owner repo at `<declared-root>/<skill-handle>/`. Its portable eval suite lives with the skill at `<declared-root>/<skill-handle>/evals/evals.json`; SDK evidence and lifecycle events live under the owner repo's `.harness/` paths.
 - **Agent Skills Standard** compatibility means preserving `SKILL.md` package shape, progressive disclosure, optional `scripts/`/`references/`/`assets/`, and portable evals. It does not by itself decide whether a local path is canonical or generated.
-- A **Command Surface Projection** is generated review/route metadata. It must not preserve retired skill handles or pretend a deleted package is still available. Directly loading canonical SKILL.md source is Canonical Source Inspection only. It can support repair, audit, or authoring, but it is not Runtime Skill Activation and must not be reported as using the skill when runtime proof is blocked.
+- Historical command-surface projections are obsolete routing metadata, not active inputs to the flat registry. The current resolver must not pretend a deleted package is available. Directly loading canonical SKILL.md source can support source inspection, repair, audit, or authoring; it does not prove runtime installation or activation.
 - **Runtime Skill Activation** requires the active runtime projection and user runtime links to pass their proof gates. If proof is blocked, stop and repair/sync the runtime surface or explicitly reframe the work as source inspection with no skill-use claim.
 - `~/.agents/plugins` is the user-facing **Personal Plugin Marketplace Root** and must be a real directory on each macOS host, not a symlink to a repo or worktree. The marketplace may contain per-plugin aliases to the active profile mirror, while **Plugin Runtime Mirrors** such as `~/.codex/plugins` are real copied directories and must be refreshed after plugin source or marketplace changes.
 - First-party canonical skills under `Skills/**` are part of the **Visible Runtime Surface** unless they are explicitly hidden by selection policy.
@@ -210,7 +210,7 @@ master controller and completion-driven owner workflow.
 - "Use it" can mean **Canonical Source Inspection** or **Runtime Skill Activation**. Recommendation: keep them separate; source inspection is allowed for repair/review, but a blocked runtime proof means the skill was not used.
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
 - "Make it visible" can mean adding files to source control, refreshing runtime projection, or enabling the plugin runtime root. Recommendation: verify with `./bin/ask skills list --json` and `./bin/ask skills load-preview --json`, not only `find`.
-- "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable metadata routes and reserve "stub" for test doubles or temporary executable placeholders.
+- "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable flat-registry skill-name handles and reserve "stub" for test doubles or temporary executable placeholders.
 - "Auto-review" is overloaded. Recommendation: use **Approval Routing** for the configured reviewer and **Commit Authorization Boundary** for the user's explicit mutation authority; never use `auto_review` as a synonym for “approve every commit or publication.”
 - "Config" is overloaded. Recommendation: use **Tracked Policy Source** for the reviewed repo file, **Runtime Config Copy** for the mutable home file, and **Projection Reconciler** for the scheduled mechanism that materializes the map.
 
@@ -222,9 +222,9 @@ master controller and completion-driven owner workflow.
 
 ## Decisions
 
+- This glossary is maintained repository guidance linked from `AGENTS.md`.
 - First-party skill picker eligibility is deterministic from canonical source ownership and hidden policy. `prek-pro`, `ubiquitous-language`, and other first-party `Skills/**` entries must not need per-skill allowlist edits.
 
 ## Open Questions
 
-- Should this glossary become a maintained repository contract linked from `AGENTS.md`, or remain an operator aid until the vocabulary stabilizes?
 - Should the repo add a dedicated validation check that flags a canonical skill copied into `Skills/**` but absent from the generated runtime projection after sync?

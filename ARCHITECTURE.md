@@ -25,25 +25,37 @@ change. It should not change for every local implementation detail.
 
 ## Bird's Eye View
 
-Agent Skills Kit is the governed control plane for authoring, validating,
-discovering, packaging, projecting, and proving Codex-compatible skills and
-agent workflows.
+Agent Skills Kit is a transitional migration repository, not the permanent
+authoring or tooling home. Complete the separation before refining either
+destination product:
+
+| Destination | Ownership |
+| --- | --- |
+| Skills SDK (`../skills-sdk`) | Reusable Python lifecycle tooling for creation, repair, validation, evaluation, judging, review, packaging, and handoff. |
+| Skills Foundry (`../skills-foundry`) | Retained editable skill and plugin packages, including package-specific scripts, references, assets, eval data, and provenance. |
+| Agent-Skills (this repository) | Temporary source and compatibility responsibilities until each recorded transfer and consumer replacement is proved. |
+
+Host credentials, installed runtime configuration, and external services retain
+their explicit owners; they do not become SDK core merely because tooling uses
+them. A copied package is not an ownership transfer or runtime activation.
 
 The repository has three kinds of state:
 
 - Ground state: canonical source and policy authored by humans and agents. This
   includes `Skills/**`, `Plugins/**`, `Infrastructure/**`, `Docs/**`, and
-  governed `.harness/**` documents.
+  governed `.harness/**` documents and authored `.agents/workflows/**` and
+  `.agents/PLANS.md`, subject to each package's recorded owner decision.
 - Derived state: projections and generated views produced from ground state.
-  This includes `.agents/**`, `.skillsets/**`, generated catalog/index content,
+  This includes `.agents/skills/**`, generated catalog/index content,
   plugin cache mirrors, and validation artifacts.
-- Runtime truth: observed behavior from `./bin/ask`, Codex skill loading,
-  validation commands, PR checks, review threads, Linear state, and goal-board
-  receipts.
+- Evidence: local command and validation results, installed-runtime observations,
+  and hosted CI, review, tracker, and delivery records. Each proves only its own
+  lane; none grants authority to change an owner or mutate a runtime.
 
-**Architecture Invariant:** Runtime truth outranks documentation. When docs,
-plans, generated files, or assumptions disagree with executable evidence, stop
-and repair the source of truth before continuing.
+**Architecture Invariant:** Check claims against current implementation and
+lane-specific evidence. Resolve conflicting instructions by authority and scope.
+Pause only the affected action or claim; repair within authorized scope and
+continue independent work.
 
 ## Repository Planes
 
@@ -56,19 +68,21 @@ agents consume.
 - `Plugins/<plugin>/skills/**`: plugin-owned skill source.
 - `skills-system/**`: governed system-skill bridge pinned by repository policy.
 
-**Architecture Invariant:** Canonical skill source lives in `Skills/**` and
-`Plugins/<plugin>/skills/**`. Runtime projections are pointers or generated
-views, not editable skill source.
+**Architecture Invariant:** These paths describe remaining local source, not
+permanent destination ownership. Keep the recorded source authoritative until a
+rights-cleared transfer establishes the Foundry owner. Runtime projections are
+not editable skill source. See [path ownership](Docs/agents/14-path-ownership-boundaries.md).
 
 ### Factory Plane
 
-The factory plane builds, validates, syncs, packages, and proves the product
-plane.
+The transitional factory plane contains the existing local implementation.
+Reusable lifecycle tooling belongs in Skills SDK; package-specific behavior
+belongs with its package in Foundry. Do not expand this plane into a competing SDK.
 
 - `Infrastructure/bin/ask`: implementation target for the public `./bin/ask`
   wrapper.
 - `Infrastructure/scripts/lib/ask/**`: Python implementation of the ask CLI and
-  SDK-like services.
+  transitional services.
 - `Infrastructure/scripts/lifecycle-and-sync/**`: sync, projection, discovery,
   catalog, and lifecycle mechanics.
 - `Infrastructure/scripts/validation-and-linting/**`: validators and lint gates.
@@ -84,14 +98,18 @@ schema-backed and regression-tested.
 The runtime projection plane is generated from canonical source so Codex and
 other clients can discover skills.
 
-- `.agents/**`: generated runtime projection.
-- `.skillsets/**`: generated rooted manifests and command-surface projections.
+- `.agents/skills/**`: generated runtime projection; other `.agents` paths have
+  separate ownership.
+- `.skillsets/**`: historical rooted metadata, unused by the flat runtime
+  resolver but still read by the static explorer. Do not remove its manifests
+  until that consumer has migrated.
 - `Plugins/cache/**`: copied or cached plugin runtime mirrors.
 - root `SKILL.md`: generated root skill index.
 
 **Architecture Invariant:** Generated projections must be reproducible from
 canonical source plus repository tooling. Do not hand-edit projection files to
-fix behavior; repair the generator or canonical source and regenerate.
+fix behavior; repair the owning generator or canonical source. Regeneration
+that mutates an installed runtime requires a separately authorized lane.
 
 ### Governance Plane
 
@@ -131,21 +149,20 @@ governance surfaces.
 
 | Deep module | Where to look | What it owns |
 | --- | --- | --- |
-| Agent operations | `Skills/agent-ops`, `.skillsets/agent-ops` | Repo operations, validation, review, goal governance, runtime proof, docs, testing, automation, and delivery closeout. |
+| Agent operations | `Skills/agent-ops` | Remaining local packages for repo operations, validation, review, docs, and delivery closeout, pending their recorded transfers. |
 | First-party capability clusters | `Skills/backend-platform`, `Skills/frontend-ui`, `Skills/product-strategy`, `Skills/security-ops`, `Skills/content-publishing`, `Skills/mobile-native` | Bounded skill clusters that route broad user intent into smaller latent modules. |
 | Skill Factory | `Plugins/skill-factory` | Skill creation, hardening, refactoring, evaluation, installation, and proof workflows. |
 | Plugin Factory | `Plugins/plugin-factory` | Plugin creation, validation, packaging, installation, and lifecycle workflows. |
 | Harness Engineering | `Plugins/harness-engineering` | Brainstorm, spec, plan, work, review, eval, reinforce, reconcile, and closeout lifecycle. |
-| Ask CLI | `Infrastructure/scripts/lib/ask` | Public command contracts behind `./bin/ask` and the reusable services that power them. |
-| Projection and routing | `Infrastructure/scripts/lifecycle-and-sync`, `.skillsets`, `.agents` | Rooted manifests, command-surface metadata, sync mechanics, picker visibility, and runtime discovery. |
+| Ask CLI | `Infrastructure/scripts/lib/ask` | Transitional command contracts behind `./bin/ask`; reusable tooling transfers to Skills SDK. |
+| Projection and routing | `Infrastructure/scripts/lifecycle-and-sync`, `.agents/skills` | Flat-registry discovery, sync mechanics, and runtime projection checks. Historical rooted metadata is not an active routing contract. |
 | Validation and tests | `Infrastructure/scripts/validation-and-linting`, `Infrastructure/tests`, `Infrastructure/scripts/testing` | Deterministic guardrails for source, projections, docs, skills, governance, and runtime parity. |
 | Governance memory | `.harness`, `Docs/goals`, `Wiki` | Specs, plans, implementation notes, receipts, quality ledgers, and operational memory. |
 
-Deep module levels appear in rooted manifests as `router`, `atom`,
-`molecule`, and `compound`. The level describes loading and routing shape,
-not importance. Root skill sets route into latent modules, while
-command-surface handles make selected modules mentionable without loading the
-full workflow into runtime context.
+Historical rooted manifests used `router`, `atom`, `molecule`, and `compound`
+levels. The current resolver uses a flat registry and canonical skill names;
+those historical levels do not select active runtime routing. See
+[runtime projection modes](Docs/architecture/runtime-projection-modes.md).
 
 **Architecture Invariant:** Deep modules should have explicit ownership, narrow
 entrypoints, and local proof. A change that crosses deep modules should update
@@ -159,8 +176,9 @@ instead of relying on conversational memory.
 First-party skill packages. Each skill should follow the local skill package
 contract and progressive disclosure expectations.
 
-**Architecture Invariant:** Product skill edits belong here unless a plugin owns
-the capability.
+**Architecture Invariant:** Edit the recorded canonical package owner. A package
+still awaiting transfer remains repairable here; a transferred package belongs
+in Foundry, not in a new competing copy here.
 
 ### `Plugins/`
 
@@ -181,16 +199,18 @@ but generated output does not become the source of truth for the generator.
 
 ### `Infrastructure/scripts/lib/ask/`
 
-The Python ask CLI implementation. This is where stable SDK primitives should
-move as they become proven enough to sit behind `ask`.
+The transitional Python ask CLI implementation. Reusable lifecycle primitives
+belong in the separate Skills SDK repository, not permanently in this directory.
+Keep remaining compatibility responsibilities explicit until consumers migrate.
 
 **API Boundary:** Public command output is the contract. Prefer schema-backed
 JSON and focused command tests before changing output shape.
 
 ### `Infrastructure/scripts/lifecycle-and-sync/`
 
-Skill discovery, command-surface generation, rooted projection, sync, plugin
-cache refresh, and lifecycle mechanics.
+Skill discovery, flat-registry projection, sync, plugin cache refresh, and
+remaining lifecycle mechanics. Historical rooted artifacts do not establish an
+active projection mode.
 
 **Architecture Invariant:** Sync code must prove source identity and projection
 freshness. Projection success alone is not runtime parity proof.
@@ -200,8 +220,10 @@ freshness. Projection success alone is not runtime parity proof.
 Deterministic checks for repo policy, path ownership, skill contracts, runtime
 budget, docs, steering uptake, and other guardrails.
 
-**Architecture Invariant:** Repeated human steering should become a validator,
-runtime check, workflow rule, or other durable guardrail when feasible.
+**Architecture Invariant:** Feedback is diagnostic input, not automatic authority
+to add process. Prefer the smallest existing check or local repair. Select new
+durable controls only under the named conditions in
+[high-signal steering feedback](Docs/agents/19-high-signal-steering-feedback.md).
 
 ### `Infrastructure/tests/` and `Infrastructure/scripts/testing/`
 
@@ -241,10 +263,14 @@ ownership rules before committing generated evidence.
 
 ### `.agents/` and `.skillsets/`
 
-Generated runtime and rooted projection surfaces.
+Mixed ownership and historical routing surfaces.
 
-**Architecture Invariant:** `.agents/**` and `.skillsets/**` are generated in
-this repository. Edit canonical source or projection code instead.
+**Architecture Invariant:** `.agents/skills/**` is generated, while tracked
+`.agents/workflows/**` and `.agents/PLANS.md` are authored guidance. Do not
+overwrite the latter during projection cleanup. `.skillsets/**` retains
+historical metadata still consumed by the static explorer, not the flat runtime
+resolver. Preserve it until consumer cutover. Check path ownership
+before editing or removing any of these surfaces.
 
 ### `.workouts/` and `.skill-telemetry/`
 
@@ -273,7 +299,7 @@ The root is a front door and contract boundary. Root files should be one of:
 - repository contracts and vocabulary: `SKILL.md`, `UBIQUITOUS_LANGUAGE.md`,
   `CONTEXT.md`, `WORKFLOW.md`.
 - package/tool entrypoints and config: `Makefile`, `justfile`,
-  `harness.contract.json`, `memory.json`, `package-lock.json`, and dotfile
+  `harness.contract.json`, `memory.json`, and dotfile
   tool configuration.
 - first-class source directories: `Infrastructure/`, `Skills/`, `Plugins/`,
   `Docs/`, `Wiki/`, `bin/`, `skills-sdk/brand/`, and
@@ -284,7 +310,7 @@ stale proposal documents, or generated runtime output.
 
 ## Main Flow
 
-The dominant path through the repository is:
+For remaining local consumers, the transitional runtime path is:
 
 ```text
 canonical source -> factory tooling -> generated projection -> runtime proof
@@ -293,15 +319,19 @@ canonical source -> factory tooling -> generated projection -> runtime proof
         +------------- governance evidence and fixes ----------+
 ```
 
-Canonical source starts in `Skills/**`, plugin-owned paths under `Plugins/**`,
-or factory code under `Infrastructure/**`. Factory tooling validates and projects
-that source into `.skillsets/**`, `.agents/**`, plugin mirrors, and generated
-indexes. Runtime proof comes from `./bin/ask`, tests, scorecards, dashboards,
-receipts, Browser previews, CI, review state, and tracker truth.
+Source comes from the recorded canonical owner. Existing local source may remain
+under `Skills/**`, `Plugins/**`, or `Infrastructure/**` pending transfer. Selected
+tooling can validate source or, in an authorized runtime lane, project it into
+`.agents/skills/**`, plugin mirrors, and generated indexes. Source-only validation
+does not require runtime mutation. Tests, installed-runtime observations, and
+hosted delivery records remain separate evidence lanes.
 
 Treat each step as a separate proof. Source existence does not prove projection;
 projection does not prove runtime visibility; runtime visibility does not prove
-the work is ready to close.
+the work is ready to close. Retire Agent-Skills only after destination replacements
+are delivered and retained consumers demonstrate success, failure, and recovery
+without this repository, with matching retirement authority. One pilot or merged
+PR does not prove programme completion.
 
 ## Cross-Cutting Concerns
 
@@ -312,14 +342,15 @@ are compatibility surfaces. They must have a generator and a freshness check.
 
 ### Context Budget
 
-The runtime surface is deliberately smaller than the source tree. Root skill
-sets and latent manifests keep high-level routing visible while
-command-surface metadata resolves selected large workflows only when needed.
+Use progressive disclosure within packages to keep entrypoints small. Current
+discovery uses flat-registry skill names; do not rely on historical rooted or
+latent manifests to provide active context-budget enforcement.
 
 ### Validation
 
-Prefer deterministic checks over process memory. If a root-surface rule,
-projection rule, or package contract matters, encode it in validation.
+Prefer existing deterministic checks over process memory. Add enforcement only
+when the authorized change and risk justify it; a documentation correction does
+not automatically require new validation machinery.
 
 ### Error Handling and Recovery
 
@@ -337,7 +368,8 @@ runtime state they observed.
 
 Governed goal work is complete only when implementation, validation, review
 state, PR/CI truth, tracker state, and receipts agree. Do not continue to the
-next slice when merge safety or runtime truth is stale.
+dependent delivery action when its required evidence is stale. Missing hosted
+or runtime proof blocks that claim, not independent authorized local repairs.
 
 ## See Also
 

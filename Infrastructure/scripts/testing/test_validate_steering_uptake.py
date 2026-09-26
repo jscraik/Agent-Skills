@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+import pytest
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "validation-and-linting" / "validate_steering_uptake.py"
@@ -46,7 +47,7 @@ _VALID_DOC = (
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
     "After any fabricated runtime handle is attempted\n"
-    "immediately preceding tool result\n"
+    "latest valid handle returned for that operation\n"
 )
 _VALID_LEDGER = (
     "# Steering Uptake Ledger\n\n"
@@ -60,7 +61,7 @@ _VALID_AGENTS = (
     "by opening and reading it in the current turn before continuing ordinary implementation or PR work. "
     "Record uptake in `.harness/quality/steering-uptake.md`; validate with "
     "`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`. "
-    "Run stateful runtime-handle operations serially for that handle.\n"
+    "Use the latest valid handle returned for that operation; run serially for that handle.\n"
 )
 
 
@@ -80,10 +81,7 @@ def _make_valid_root(tmp_path: Path) -> Path:
     """
     Create and populate a temporary repository root containing the valid steering-uptake surfaces.
 
-    Writes three files into the given directory:
-    - Docs/agents/19-high-signal-steering-feedback.md with predefined steering document content.
-    - .harness/quality/steering-uptake.md with a valid ledger table.
-    - Docs/agents/README.md with an index link to the steering document.
+    Writes the steering document, ledger, index link, and root agent guide.
 
     Parameters:
         tmp_path (Path): Directory path to populate.
@@ -99,8 +97,21 @@ def _make_valid_root(tmp_path: Path) -> Path:
 
 
 def test_validate_current_repo_surfaces() -> None:
+    """Require the checked-out repository's steering surfaces to validate."""
     findings = validate_steering_uptake.validate()
     assert findings == []
+
+
+@pytest.mark.parametrize("surface", ["AGENTS.md", "Docs/agents/19-high-signal-steering-feedback.md"])
+@pytest.mark.parametrize("replacement", ["latest valid handle returned for\nthat operation", "immediately preceding tool result", "latest valid handle returned for a different operation; that operation"])
+def test_operation_bound_handle_guidance(tmp_path: Path, surface: str, replacement: str) -> None:
+    """Accept wrapped guidance but reject obsolete and wrong-operation wording."""
+    root = _make_valid_root(tmp_path)
+    doc = _VALID_AGENTS if surface == "AGENTS.md" else _VALID_DOC
+    write(root / surface, doc.replace("latest valid handle returned for that operation", replacement))
+    findings = validate_steering_uptake.validate(root)
+    code = "AGENTS_STEERING_ROUTING_WEAK" if surface == "AGENTS.md" else "STEERING_DOC_INCOMPLETE"
+    assert [finding.code for finding in findings] == ([] if "for\nthat operation" in replacement else [code])
 
 
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:

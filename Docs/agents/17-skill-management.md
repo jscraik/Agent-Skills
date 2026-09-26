@@ -13,17 +13,21 @@ read [UBIQUITOUS_LANGUAGE.md](/UBIQUITOUS_LANGUAGE.md).
 Home-directory skill links are live runtime surfaces, not disposable local
 shortcuts. Before deleting a worktree, pruning a branch checkout, or moving a
 projection directory, verify that `~/.agents/skills` and `~/.codex/skills` do
-not point into the removed tree. If they do, repair the link or run the owning
-sync command first, then prove visibility with:
+not point into the removed tree. If they do, preserve the tree until the named
+runtime targets have separately authorized replacement and recovery proof.
+Cleanup authority does not grant runtime installation, relinking, or sync.
+After an authorized repair, prove visibility for each affected skill with:
 
 ```bash
 ./bin/ask skills load-preview --json --robot
-./bin/ask skills proof unslopify --runtime-target codex --json --robot
+./bin/ask skills proof <affected-skill-handle> --runtime-target <affected-runtime-target> --json --robot
 find -L ~/.agents/skills -maxdepth 4 -name SKILL.md
 find -L ~/.codex/skills -maxdepth 4 -name SKILL.md
 ```
 
-Treat a dangling runtime link as a runtime outage even when the git cleanup was
+Repeat for every affected target (`codex` and/or `agents`); their readiness gates
+are distinct. Use the plugin status/readiness route for affected plugins as well; one skill
+does not represent every consumer. Treat a dangling runtime link as a runtime outage even when the git cleanup was
 otherwise correct. The repo is clean only in the git lane; picker readiness is a
 separate runtime-projection lane.
 
@@ -32,8 +36,11 @@ separate runtime-projection lane.
 `~/.codex/skills`, `~/.codex/plugins`, and their `~/.agents` counterparts may
 temporarily expose a curated transition set while packages await SDK admission.
 That availability is neither a source-of-truth decision nor an admission into
-the active SDK workspace. Preserve an unmanaged package copy-first in
-`/Users/jamiecraik/dev/skills-foundry`, retain its provenance there, and start
+the active SDK workspace. Follow the rights and pre-transfer repair rules in
+[Path Ownership Boundaries](/Docs/agents/14-path-ownership-boundaries.md#bulk-admission-rule).
+Copy an unmanaged package into `/Users/jamiecraik/dev/skills-foundry` only when
+recorded rights and transfer scope authorize it; otherwise retain only permitted
+inventory and provenance metadata without reading or copying protected content. Start
 active SDK work only after an explicit owner decision names the candidate source
 and bounded task. Do not remove, relink, install, publish, or promote a runtime
 package merely because its source is being retained or reviewed.
@@ -163,8 +170,13 @@ the clean state is stable before closeout:
 
 ## Folding Strategy
 
-If `./bin/ask skills fold source target --robot` returns confidence `>= 0.2`, fold
-rather than duplicate unless the user explicitly wants a separate skill.
+`./bin/ask skills fold source target --robot` reports `data.overlap_score` from
+description similarity. At the default threshold of `0.2`, high overlap returns
+`ERR_REDUNDANCY` and a folding recommendation; the command does not merge files.
+Treat this as triage, not authorization or proof that the skills are equivalent.
+Compare behavior, rights, source ownership, references, and affected consumers
+before proposing a fold. Consolidate only within the authorized scope and prove
+the retained behavior; preserve distinct skills when the evidence requires it.
 
 ## Line Budget
 
