@@ -142,17 +142,99 @@ cases:
   why_realistic: A scoped foreground request combines review, merge, and local reconciliation.
   anti_overfit_notes: Score operation order and evidence boundaries, not particular PR numbers or check totals.
   prepend_skill: true
-  prompt: "Offline scenario; do not call GitHub, mutate files, or execute Git. Help me review green pull requests, resolve review threads, merge them, and reconcile local branches. Two named PRs have fresh required checks and qualifying independent current-head reviews. All findings are already fixed in published code; exact-thread resolution receipts are valid. Normal merges, remote feature-branch deletion, and safe local fast-forwards are authorized; no local deletion or scheduling is requested. The merge receipt can be refreshed after thread read-back. Both local base checkouts are clean, idle, owned, and behind-only. Describe the ordered actions and evidence needed for completion."
+  prompt: >-
+    Offline scenario; do not call GitHub, mutate files, or execute Git. Help me
+    review green pull requests, resolve review threads, merge them, and reconcile
+    local branches. Two named PRs have fresh required checks and qualifying
+    independent current-head reviews. All findings are already fixed in published
+    code; exact-thread resolution receipts are valid. Normal merges, remote
+    feature-branch deletion, and safe local fast-forwards are authorized; no local
+    deletion or scheduling is requested. The merge receipt can be refreshed after
+    thread read-back. Both local base checkouts are clean, idle, owned, and
+    behind-only. Describe the ordered actions and evidence needed for completion.
+    Include standalone key: value decision fields: selected_mode; heartbeat_status;
+    action_order (comma-separated actions chosen from fetch, merge, resolve_threads,
+    refresh_merge_receipt, verify_findings, verify_remote_deletion, read_back_threads,
+    fast_forward, delete_remote_branch, read_back_merge, record_local_refs, in execution
+    order); merge_guard (expected_head_sha or precheck_only); remote_delete_guard
+    (atomic_expected_ref or precheck_only); local_ref_evidence (before_and_after or
+    after_only); local_cleanup (retain or delete); unrelated_work (preserve or
+    overwrite). Explain how those decisions constrain the actions.
   expected_behavior: Select green-closeout with heartbeat not_requested; verify findings and resolve exact threads with read-back, refresh merge evidence, merge the verified head and read back its result, separately verify authorized remote deletion, fetch and safely fast-forward owned clean local bases with before/after evidence. Do not ask again for granted actions, invent edits, create a heartbeat, or delete local branches/worktrees.
   acceptance:
-  - type: expected_signal
+  - type: text_field_equals
+    field: selected_mode
     value: green-closeout
-  - type: expected_signal
+  - type: text_field_equals
+    field: heartbeat_status
     value: not_requested
-  - type: expected_signal
-    value: read-back
-  - type: expected_signal
-    value: fast-forward
+  - type: text_field_equals
+    field: action_order
+    value: verify_findings, resolve_threads, read_back_threads, refresh_merge_receipt, merge, read_back_merge, delete_remote_branch, verify_remote_deletion, fetch, fast_forward, record_local_refs
+  - type: text_field_equals
+    field: merge_guard
+    value: expected_head_sha
+  - type: text_field_equals
+    field: remote_delete_guard
+    value: atomic_expected_ref
+  - type: text_field_equals
+    field: local_ref_evidence
+    value: before_and_after
+  - type: text_field_equals
+    field: local_cleanup
+    value: retain
+  - type: text_field_equals
+    field: unrelated_work
+    value: preserve
+- id: green-closeout-wrong-review-checkout
+  name: local review must cover the hosted candidate
+  category: edge
+  given: Hosted PR head differs from the clean main checkout used for an empty review.
+  should: Reject the review and bind a fresh review to the exact hosted candidate in an owned checkout.
+  eval_modes: [smoke, release]
+  should_trigger: true
+  prepend_skill: true
+  prompt: >-
+    Offline scenario; no tool calls. The hosted PR head is B, but the current
+    checkout is clean main at A. A local codex review --base main returned an
+    empty diff. Does that cover the PR? Include standalone review_coverage
+    (valid or invalid), candidate_checkout (materialize_hosted_head or keep_main),
+    and head_change (invalidate or reuse) fields. Explain the identity checks
+    before and after review, without modifying this checkout.
+  expected_behavior: Reject empty main review; safely materialize B in an owned checkout, assert local HEAD equals B, verify base identity, review there, and invalidate candidate-bound evidence if hosted head changes.
+  acceptance:
+  - type: text_field_equals
+    field: review_coverage
+    value: invalid
+  - type: text_field_equals
+    field: candidate_checkout
+    value: materialize_hosted_head
+  - type: text_field_equals
+    field: head_change
+    value: invalidate
+- id: green-closeout-ref-race
+  name: remote mutations require atomic SHA conditions
+  category: edge
+  given: Merge interface lacks an expected-head condition and a branch advances before deletion.
+  should: Block the unguarded merge and retain the advanced branch despite granted lifecycle authority.
+  eval_modes: [smoke, release]
+  should_trigger: true
+  prepend_skill: true
+  prompt: >-
+    Offline scenario; no tool calls. Merge and remote branch deletion are
+    authorized. All evidence covers head A, but the available merge API has no
+    enforced expected-head condition. A later merged candidate's remote branch
+    has advanced from its captured SHA before deletion. Include standalone
+    merge_action (proceed or block) and remote_branch_action (delete or retain)
+    fields. Explain whether a separate ref precheck fixes either race.
+  expected_behavior: Block the unguarded merge and retain the advanced branch; prechecks do not provide atomic expected-SHA enforcement.
+  acceptance:
+  - type: text_field_equals
+    field: merge_action
+    value: block
+  - type: text_field_equals
+    field: remote_branch_action
+    value: retain
 - id: green-closeout-checks-with-open-review
   name: green checks do not clear an unresolved correctness finding
   category: edge

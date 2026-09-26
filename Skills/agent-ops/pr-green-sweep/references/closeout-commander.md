@@ -231,12 +231,28 @@ addresses a finding.
    repo policy, no unresolved threads, no conflicts, and the applicable receipt.
    If the head changes, refresh affected evidence before proceeding.
 4. Merge only the verified head using the authorized strategy and the owning
-   repository's guarded command. Where supported, bind the operation to the
-   expected head SHA. Read back the merged state, merge commit, and target base;
+   repository's guarded command with an enforced expected-head SHA condition.
+   A separate precheck is not atomic protection: if the merge interface cannot
+   enforce the verified SHA, block the merge. Read back the merged state, merge
+   commit, and target base;
    a clicked confirmation or a submitted request is not a successful merge.
 5. Delete the remote feature branch only when that action is authorized and
-   its current ref matches the merged candidate. Confirm the deletion, then
-   complete the separate local reconciliation below.
+   an atomic compare-and-delete enforces the captured, verified branch SHA for
+   the merged candidate. Never follow a ref precheck with an unconditional
+   delete: a writer could advance it between those operations. If the ref moves
+   or the interface cannot enforce that condition, retain the branch and report
+   why. Confirm the deletion, then complete the separate local reconciliation
+   below.
+
+## Candidate-Bound Local Review
+
+For a committed PR diff, materialize the latest hosted head in an owned checkout
+(isolate it if needed; preserve unrelated work). Assert local `HEAD` equals that
+exact SHA before running `codex review --base <verified-target-branch>` there.
+Record the checkout, candidate SHA, verified base SHA, and review output.
+`--base` selects the comparison base, not the candidate. Recheck the hosted head
+afterward; changes invalidate candidate-bound evidence. An empty diff from main,
+another checkout, or an empty uncommitted diff does not prove PR review coverage.
 
 ## Local Branch Reconciliation
 
