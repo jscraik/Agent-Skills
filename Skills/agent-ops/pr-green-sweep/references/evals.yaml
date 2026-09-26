@@ -222,6 +222,9 @@ cases:
   - type: text_field_equals
     field: report_kind
     value: planned_evidence_not_execution_proof
+  - &unique_closeout_fields
+    type: not_regex
+    value: '(?im)(?:^[^a-z0-9:\n]*selected[^a-z0-9:\n]+mode[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*selected[^a-z0-9:\n]+mode[^a-z0-9:\n]*:|^[^a-z0-9:\n]*heartbeat[^a-z0-9:\n]+status[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*heartbeat[^a-z0-9:\n]+status[^a-z0-9:\n]*:|^[^a-z0-9:\n]*action[^a-z0-9:\n]+order[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*action[^a-z0-9:\n]+order[^a-z0-9:\n]*:|^[^a-z0-9:\n]*merge[^a-z0-9:\n]+guard[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*merge[^a-z0-9:\n]+guard[^a-z0-9:\n]*:|^[^a-z0-9:\n]*remote[^a-z0-9:\n]+delete[^a-z0-9:\n]+guard[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*remote[^a-z0-9:\n]+delete[^a-z0-9:\n]+guard[^a-z0-9:\n]*:|^[^a-z0-9:\n]*local[^a-z0-9:\n]+ref[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*local[^a-z0-9:\n]+ref[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:|^[^a-z0-9:\n]*local[^a-z0-9:\n]+cleanup[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*local[^a-z0-9:\n]+cleanup[^a-z0-9:\n]*:|^[^a-z0-9:\n]*unrelated[^a-z0-9:\n]+work[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*unrelated[^a-z0-9:\n]+work[^a-z0-9:\n]*:|^[^a-z0-9:\n]*local[^a-z0-9:\n]+review[^a-z0-9:\n]+receipt[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*local[^a-z0-9:\n]+review[^a-z0-9:\n]+receipt[^a-z0-9:\n]*:|^[^a-z0-9:\n]*merge[^a-z0-9:\n]+reason[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*merge[^a-z0-9:\n]+reason[^a-z0-9:\n]*:|^[^a-z0-9:\n]*deletion[^a-z0-9:\n]+reason[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*deletion[^a-z0-9:\n]+reason[^a-z0-9:\n]*:|^[^a-z0-9:\n]*local[^a-z0-9:\n]+reason[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*local[^a-z0-9:\n]+reason[^a-z0-9:\n]*:|^[^a-z0-9:\n]*report[^a-z0-9:\n]+kind[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*report[^a-z0-9:\n]+kind[^a-z0-9:\n]*:|^[^a-z0-9:\n]*review[^a-z0-9:\n]+coverage[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*review[^a-z0-9:\n]+coverage[^a-z0-9:\n]*:|^[^a-z0-9:\n]*candidate[^a-z0-9:\n]+checkout[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*candidate[^a-z0-9:\n]+checkout[^a-z0-9:\n]*:|^[^a-z0-9:\n]*head[^a-z0-9:\n]+change[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*head[^a-z0-9:\n]+change[^a-z0-9:\n]*:|^[^a-z0-9:\n]*base[^a-z0-9:\n]+verification[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*base[^a-z0-9:\n]+verification[^a-z0-9:\n]*:|^[^a-z0-9:\n]*comparison[^a-z0-9:\n]+coverage[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*comparison[^a-z0-9:\n]+coverage[^a-z0-9:\n]*:|^[^a-z0-9:\n]*comparison[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*comparison[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*merge[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*merge[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*remote[^a-z0-9:\n]+branch[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*remote[^a-z0-9:\n]+branch[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*merge[^a-z0-9:\n]+decision[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*merge[^a-z0-9:\n]+decision[^a-z0-9:\n]*:|^[^a-z0-9:\n]*thread[^a-z0-9:\n]+status[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*thread[^a-z0-9:\n]+status[^a-z0-9:\n]*:|^[^a-z0-9:\n]*repair[^a-z0-9:\n]+status[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*repair[^a-z0-9:\n]+status[^a-z0-9:\n]*:|^[^a-z0-9:\n]*review[^a-z0-9:\n]+status[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*review[^a-z0-9:\n]+status[^a-z0-9:\n]*:|^[^a-z0-9:\n]*next[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*next[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*primary[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*primary[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*clean[^a-z0-9:\n]+base[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*clean[^a-z0-9:\n]+base[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*unknown[^a-z0-9:\n]+branch[^a-z0-9:\n]+action[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*unknown[^a-z0-9:\n]+branch[^a-z0-9:\n]+action[^a-z0-9:\n]*:|^[^a-z0-9:\n]*historical[^a-z0-9:\n]+local[^a-z0-9:\n]+result[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*historical[^a-z0-9:\n]+local[^a-z0-9:\n]+result[^a-z0-9:\n]*:|^[^a-z0-9:\n]*base[^a-z0-9:\n]+ref[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*base[^a-z0-9:\n]+ref[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:|^[^a-z0-9:\n]*base[^a-z0-9:\n]+status[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*base[^a-z0-9:\n]+status[^a-z0-9:\n]+evidence[^a-z0-9:\n]*:|^[^a-z0-9:\n]*retained[^a-z0-9:\n]+work[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*retained[^a-z0-9:\n]+work[^a-z0-9:\n]*:|^[^a-z0-9:\n]*blockers[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*blockers[^a-z0-9:\n]*:|^[^a-z0-9:\n]*execution[^a-z0-9:\n]+status[^a-z0-9:\n]*:[^\n]*\n[\s\S]*?^[^a-z0-9:\n]*execution[^a-z0-9:\n]+status[^a-z0-9:\n]*:)'
 - id: green-closeout-wrong-review-checkout
   unit: candidate-bound local review
   why_realistic: An operator can be on main while reviewing a named remote PR.
@@ -263,6 +266,7 @@ cases:
     value: verified_hosted_base
   - type: expected_signal
     value: Reject unsupported review evidence.
+  - *unique_closeout_fields
 - id: green-closeout-stale-review-base
   unit: comparison-bound local review
   why_realistic: Local main can lag the hosted PR base even when the candidate is current.
@@ -295,6 +299,7 @@ cases:
     value: pin_verified_base
   - type: expected_signal
     value: Reject the stale comparison evidence and pin the verified hosted base SHA before review.
+  - *unique_closeout_fields
 - id: green-closeout-ref-race
   unit: atomic lifecycle mutation guards
   why_realistic: Concurrent pushes can advance a ref between precheck and mutation.
@@ -328,6 +333,7 @@ cases:
     value: retain
   - type: expected_signal
     value: Block mutation without atomic SHA enforcement; precheck evidence does not prevent a concurrent ref change.
+  - *unique_closeout_fields
 - id: green-closeout-checks-with-open-review
   unit: hosted review clearance
   given: Checks pass but a correctness thread and independent review remain unresolved.
@@ -381,6 +387,7 @@ cases:
   - type: text_field_equals
     field: next_action
     value: verify_finding_and_published_repair
+  - *unique_closeout_fields
 - id: green-closeout-dirty-divergent-local
   unit: non-destructive local reconciliation
   given: Hosted merge is complete but local checkouts have mixed dirty, divergent and unknown ownership states.
@@ -447,6 +454,7 @@ cases:
   - type: text_field_equals
     field: execution_status
     value: planned_not_executed
+  - *unique_closeout_fields
 - id: happy-open-pr-sweep
   name: open PR sweep
   category: happy

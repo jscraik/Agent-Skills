@@ -58,6 +58,24 @@ def test_valid_fields_without_explanation_fail() -> None:
     assert score(HAPPY, FIELDS)
 
 
+@pytest.mark.parametrize("line", (FIELDS + EXPLANATION).strip().splitlines())
+@pytest.mark.parametrize("decoration", ["plain", "markdown", "normalised"])
+def test_duplicate_closeout_fields_are_rejected(line: str, decoration: str) -> None:
+    key = line.split(":", 1)[0]
+    if decoration == "markdown":
+        key = f"**`{key.upper()}`**"
+    elif decoration == "normalised":
+        key = key.replace("_", "-")
+    duplicate = f"{key}: unsafe_or_conflicting\n"
+    assert score(HAPPY, duplicate + VALID)
+    assert score(HAPPY, VALID + duplicate)
+
+
+def test_duplicate_blocker_fields_are_rejected() -> None:
+    assert score("green-closeout-checks-with-open-review", "thread_status: resolved\n" + OPEN_REVIEW)
+    assert score("green-closeout-dirty-divergent-local", "primary_action: delete\n" + LOCAL_DECISIONS + LOCAL_PROOF)
+
+
 @pytest.mark.parametrize("line", EXPLANATION.strip().splitlines())
 def test_negated_or_displaced_explanation_fails(line: str) -> None:
     field, reason = line.split(": ", 1)

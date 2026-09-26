@@ -148,7 +148,7 @@ cleanup, and blocker ledgers. Use the field definitions in
     Green CI and resolved conversations alone are not reviewer clearance.
     Select local review to cover the candidate: `codex review --uncommitted`
     for local edits. For committed changes, follow the mandatory
-    [candidate-bound review](references/closeout-commander.md#Candidate-Bound-Local-Review)
+    [candidate-bound review](references/closeout-commander.md#candidate-bound-local-review)
     procedure: local HEAD must equal the latest hosted SHA before base review.
     Require the applicable current-head receipt; empty diffs are not coverage.
 14. Before claiming the parent PR/worktree lane is closed, or before switching
