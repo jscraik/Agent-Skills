@@ -133,6 +133,15 @@ claims:
   - edge-blocked-monitor-foreground-continues
 cases:
 - id: green-closeout-authorized-sequence
+  unit: foreground closeout evidence
+  given: Two PRs have hosted approvals and published repairs, but local candidate review must still be verified.
+  should: Require local candidate review proof, exact-thread read-back and SHA guards before authorized actions.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: closeout-report.md containing the captured final response; not an existing execution receipt.
+  expected_artifact: closeout-report.md with ordered decisions and evidence explanations.
+  reproduce: Run this case through the skill eval runner in release mode and inspect its captured final response.
+  deterministic_checks: &offline_closeout_safety
+    forbidden_commands: [gh, git, curl, wget, rm, bash, sh, python, python3]
   name: foreground green closeout with complete authority
   category: happy
   eval_modes: [smoke, release]
@@ -159,7 +168,9 @@ cases:
     order); merge_guard (expected_head_sha or precheck_only); remote_delete_guard
     (atomic_expected_ref or precheck_only); local_ref_evidence (before_and_after or
     after_only); local_cleanup (retain or delete); unrelated_work (preserve or
-    overwrite). Explain how those decisions constrain the actions in separate
+    overwrite); local_review_receipt (verified_candidate_and_base or missing).
+    Return the content of closeout-report.md in the final response, without
+    writing files. Explain how those decisions constrain the actions in separate
     prose lines labelled merge_reason, deletion_reason, and local_reason.
     Each must say why the action is permitted using "because" and the relevant
     evidence and enforced guard; decision labels alone are not an explanation.
@@ -189,13 +200,34 @@ cases:
   - type: text_field_equals
     field: unrelated_work
     value: preserve
-  - type: regex
-    value: '(?im)^merge_reason:\s+[^\n]+\bbecause\b(?=[^\n]*current[- ]head)(?=[^\n]*review)(?=[^\n]*check)(?=[^\n]*(?:expected[- _]head|verified SHA))(?=[^\n]*(?:enforc|atomic))[^\n]+$'
-  - type: regex
-    value: '(?im)^deletion_reason:\s+[^\n]+\bbecause\b(?=[^\n]*merge)(?=[^\n]*(?:proof|read[- ]back|verified))(?=[^\n]*atomic)(?=[^\n]*(?:ref|SHA))[^\n]+$'
-  - type: regex
-    value: '(?im)^local_reason:\s+[^\n]+\bbecause\b(?=[^\n]*clean)(?=[^\n]*owned)(?=[^\n]*idle)(?=[^\n]*behind[- ]only)(?=[^\n]*before)(?=[^\n]*after)[^\n]+$'
+  - type: text_field_equals
+    field: local_review_receipt
+    value: verified_candidate_and_base
+  - type: semantic_requirements
+    requirements:
+    - id: merge-evidence-explanation
+      all_of: [merge_reason]
+      any_of:
+      - because current-head reviews and checks are clear and the expected-head SHA is enforced atomically
+      - because checks and reviews cover the current head and the merge enforces that exact SHA
+    - id: deletion-proof-explanation
+      all_of: [deletion_reason]
+      any_of:
+      - because merge read-back provides proof and atomic comparison enforces the captured ref SHA
+      - because the merge is verified and deletion atomically matches the captured branch SHA
+    - id: local-evidence-explanation
+      all_of: [local_reason]
+      any_of:
+      - because the bases are clean, owned, idle and behind-only, with before and after refs recorded
+      - because only clean idle owned behind-only bases advance and both original and resulting refs are recorded
 - id: green-closeout-wrong-review-checkout
+  unit: candidate-bound local review
+  why_realistic: An operator can be on main while reviewing a named remote PR.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: review-checkout-report.md containing the captured final response.
+  expected_artifact: review-checkout-report.md rejecting the wrong checkout and verifying both comparison identities.
+  reproduce: Run this offline case in release mode and inspect the captured review-checkout-report.md response.
+  deterministic_checks: *offline_closeout_safety
   name: local review must cover the hosted candidate
   category: edge
   given: Hosted PR head differs from the clean main checkout used for an empty review.
@@ -208,8 +240,11 @@ cases:
     checkout is clean main at A. A local codex review --base main returned an
     empty diff. Does that cover the PR? Include standalone review_coverage
     (valid or invalid), candidate_checkout (materialize_hosted_head or keep_main),
-    and head_change (invalidate or reuse) fields. Explain the identity checks
-    before and after review, without modifying this checkout.
+    head_change (invalidate or reuse), and base_verification (verified_hosted_base
+    or unverified_local_branch) fields. Return the content of review-checkout-report.md
+    as the final response, without writing files. Explain the identity checks
+    before and after review, without modifying this checkout; state why the
+    existing review evidence must be rejected.
   expected_behavior: Reject empty main review; safely materialize B in an owned checkout, assert local HEAD equals B, verify base identity, review there, and invalidate candidate-bound evidence if hosted head changes.
   acceptance:
   - type: text_field_equals
@@ -221,7 +256,19 @@ cases:
   - type: text_field_equals
     field: head_change
     value: invalidate
+  - type: text_field_equals
+    field: base_verification
+    value: verified_hosted_base
+  - type: expected_signal
+    value: Reject unsupported review evidence.
 - id: green-closeout-stale-review-base
+  unit: comparison-bound local review
+  why_realistic: Local main can lag the hosted PR base even when the candidate is current.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: review-base-report.md containing the captured final response.
+  expected_artifact: review-base-report.md rejecting a stale comparison and selecting the verified base.
+  reproduce: Run this offline case in release mode and inspect the captured review-base-report.md response.
+  deterministic_checks: *offline_closeout_safety
   name: candidate identity does not prove comparison identity
   category: edge
   given: Local HEAD matches the hosted PR, but local main is older than its hosted base.
@@ -235,6 +282,7 @@ cases:
     May codex review --base main be recorded as reviewing against B? Include
     standalone comparison_coverage (valid or invalid) and comparison_action
     (pin_verified_base or use_local_main) fields and explain the SHA checks.
+    Return review-base-report.md content in the final response without writing files.
   expected_behavior: Reject the stale local base, resolve and verify the actual comparison SHA, pin B, and invalidate comparison evidence if hosted head or base changes.
   acceptance:
   - type: text_field_equals
@@ -243,7 +291,16 @@ cases:
   - type: text_field_equals
     field: comparison_action
     value: pin_verified_base
+  - type: expected_signal
+    value: Reject the stale comparison evidence and pin the verified hosted base SHA before review.
 - id: green-closeout-ref-race
+  unit: atomic lifecycle mutation guards
+  why_realistic: Concurrent pushes can advance a ref between precheck and mutation.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: ref-race-report.md containing the captured final response.
+  expected_artifact: ref-race-report.md blocking unguarded merge and retaining advanced work.
+  reproduce: Run this offline case in release mode and inspect the captured ref-race-report.md response.
+  deterministic_checks: *offline_closeout_safety
   name: remote mutations require atomic SHA conditions
   category: edge
   given: Merge interface lacks an expected-head condition and a branch advances before deletion.
@@ -258,6 +315,7 @@ cases:
     has advanced from its captured SHA before deletion. Include standalone
     merge_action (proceed or block) and remote_branch_action (delete or retain)
     fields. Explain whether a separate ref precheck fixes either race.
+    Return ref-race-report.md content in the final response without writing files.
   expected_behavior: Block the unguarded merge and retain the advanced branch; prechecks do not provide atomic expected-SHA enforcement.
   acceptance:
   - type: text_field_equals
@@ -266,7 +324,17 @@ cases:
   - type: text_field_equals
     field: remote_branch_action
     value: retain
+  - type: expected_signal
+    value: Block mutation without atomic SHA enforcement; precheck evidence does not prevent a concurrent ref change.
 - id: green-closeout-checks-with-open-review
+  unit: hosted review clearance
+  given: Checks pass but a correctness thread and independent review remain unresolved.
+  should: Block merging until published repair evidence and qualifying review are verified.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: blocked-review-report.md containing the captured final response.
+  expected_artifact: blocked-review-report.md naming missing evidence and a blocked merge decision.
+  reproduce: Run this offline case in release mode and inspect the captured blocked-review-report.md response.
+  deterministic_checks: *offline_closeout_safety
   name: green checks do not clear an unresolved correctness finding
   category: edge
   eval_modes: [smoke, release]
@@ -283,10 +351,20 @@ cases:
     value: unresolved
   - type: expected_signal
     value: current-head
+  - type: expected_signal
+    value: Published repair evidence and independent review are required before merging.
   - type: text_field_equals
     field: merge_decision
     value: blocked
 - id: green-closeout-dirty-divergent-local
+  unit: non-destructive local reconciliation
+  given: Hosted merge is complete but local checkouts have mixed dirty, divergent and unknown ownership states.
+  should: Preserve unsafe checkouts and fast-forward only the clean idle owned behind-only base with before and after proof.
+  claim_ids: [foreground-green-closeout-and-local-reconciliation]
+  actual_artifact: local-reconciliation-report.md containing the captured final response.
+  expected_artifact: local-reconciliation-report.md preserving unrelated work and separating hosted merge from local proof.
+  reproduce: Run this offline case in release mode and inspect the captured local-reconciliation-report.md response.
+  deterministic_checks: *offline_closeout_safety
   name: hosted merge does not reconcile dirty or divergent local branches
   category: edge
   eval_modes: [smoke, release]
@@ -311,6 +389,8 @@ cases:
   - type: text_field_equals
     field: historical_local_result
     value: unverified
+  - type: expected_signal
+    value: Reject unsupported completion evidence.
 - id: happy-open-pr-sweep
   name: open PR sweep
   category: happy
