@@ -2,8 +2,8 @@
 title: Skill scaffold false-green prevention
 asset_family: canonical skills and plugin packages
 owner: Agent Skills Team
-source_artifact: Skills/skill-builder/Infrastructure/scripts/init_skill.py
-freshness_reviewed_on: 2026-06-23
+source_artifact: skills-system/skill-creator/scripts/init_skill.py
+freshness_reviewed_on: 2026-09-26
 review_after_days: 90
 ---
 
@@ -21,11 +21,19 @@ New skill and plugin scaffolds were producing outputs that looked mature enough 
 
 ## Resolution
 
-Require lifecycle metadata at scaffold time, include an initial review timestamp, and keep the generated copy explicitly incubating rather than silently production-shaped. Also include `## Gotchas` and `## See Also` by default so new skills participate in the local skill graph instead of starting as isolated stubs.
+Require lifecycle metadata at scaffold time and include an initial review
+timestamp. The current skill scaffold declares `lifecycle_state: active` with
+`maturity: experimental`; the plugin scaffold declares `incubating` with
+`experimental` maturity. Neither label proves release readiness.
+
+The skill scaffold uses the compact SDK heading contract, including `## Gotchas`
+and `## References`, rather than the historical `## See Also` heading. It also
+creates adjacent contract, eval, task-profile, source-context, and agent files.
+Validate the resulting package and its behavior before making readiness claims.
 
 ## Evidence
 
-- [init_skill.py](/Skills/skill-builder/Infrastructure/scripts/init_skill.py)
-- [create_basic_plugin.py](/Skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py)
+- [init_skill.py](/skills-system/skill-creator/scripts/init_skill.py)
+- [create_basic_plugin.py](/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py)
 - [test_skill_creator_lifecycle_scaffold.py](/Infrastructure/scripts/testing/test_skill_creator_lifecycle_scaffold.py)
 - [test_plugin_creator_lifecycle_scaffold.py](/Infrastructure/scripts/testing/test_plugin_creator_lifecycle_scaffold.py)

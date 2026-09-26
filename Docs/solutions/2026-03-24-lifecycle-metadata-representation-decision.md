@@ -2,8 +2,8 @@
 title: Lifecycle metadata representation decision
 asset_family: phase-one managed assets
 owner: Agent Skills Team
-source_artifact: docs/reference/managed-asset-lifecycle.md
-freshness_reviewed_on: 2026-06-23
+source_artifact: Docs/reference/managed-asset-lifecycle.md
+freshness_reviewed_on: 2026-09-26
 review_after_days: 90
 ---
 
@@ -25,6 +25,11 @@ Keep lifecycle metadata in-file on the canonical asset, use frontmatter for Mark
 
 ## Evidence
 
-- [managed-asset-lifecycle.md](/Users/jamiecraik/dev/Agent-Skills/docs/reference/managed-asset-lifecycle.md)
-- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md](/Users/jamiecraik/dev/Agent-Skills/Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md)
-- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md](/Users/jamiecraik/dev/Agent-Skills/Docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md)
+- [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md)
+- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md](/Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md)
+- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md](/Docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md)
+
+Reviewed against the current lifecycle reference and lifecycle validation tests
+on 2026-09-26. These representation rules do not assign permanent ownership to
+Agent-Skills: retained package source transfers to Skills Foundry, while reusable
+lifecycle tooling belongs in Skills SDK.

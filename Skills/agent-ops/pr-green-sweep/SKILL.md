@@ -1,8 +1,8 @@
 ---
 name: pr-green-sweep
-description: "Collect GitHub, CodeRabbit, Codex review, and CI findings across named PRs; confirm issues against current code and fix them with evidence. Use when the user requests PR review-thread sweeps, CI remediation, or until-green monitoring, merge, and cleanup."
+description: "Review green pull requests, resolve review threads with current-head evidence, merge authorized PRs, and reconcile local branches. Use when the user requests PR closeout, scoped GitHub, CodeRabbit, Codex, or CI finding repairs, or until-green monitoring."
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
   skill-type: team_automation
   lifecycle_state: active
   maturity: experimental
@@ -26,12 +26,19 @@ blocks its PR's merge while independent repairs continue.
 - Open PRs need GitHub plugin/gh truth, CodeRabbit review fixes, CircleCI log
   triage, Context7 docs checks, merge, or cleanup.
 - The user wants merged PR branches and worktrees pruned after merge proof.
+- The user asks to review green PRs, resolve threads, merge them, and reconcile
+  local branches in one foreground closeout.
 
 ### Modes
 
 - `review-fix` is the default for named PR review-thread or CI repairs. Finish
   authorized foreground work; report `heartbeat_status: not_requested`.
   Monitoring, merge, and cleanup are not implied by a request to fix findings.
+- `green-closeout` applies to requested foreground review, thread resolution,
+  merge, and local reconciliation. Carry the named operations through their
+  evidence gates without duplicate confirmation; report `heartbeat_status:
+  not_requested`. A request to reconcile branches authorizes inspection and
+  safe updates, not blanket branch or worktree deletion.
 - `monitor-closeout` applies when the user requests recurring continuation.
   Reuse or create one heartbeat with target PRs, notification intent, and a
   scope-specific stop rule. A blocked monitor blocks scheduled continuation
@@ -68,17 +75,10 @@ wrapper from the active Codex environment rather than invoking an unqualified
 
 ## Outputs
 
-For a non-trivial response, emit `heartbeat_status` first. Then emit
-`schema_version: 1`, selected mode, a finding ledger (source URL/id, author,
-observed head, affected path, disposition, reason, fix and proof), and an
-action queue
-(`auto_fixable_now`, `needs_merge_conflict_strategy`, `blocked_policy_or_approval`,
-`blocked_external_ci`, `blocked_pr_metadata`, `blocked_artifact_context`,
-`needs_user_decision`, `cleanup_only`), and heartbeat, dirty-worktree,
-validation, receipt, merge, cleanup, and blocker ledgers. Group repeats in
-`recurring_finding_classes` with
-`finding_class_id`, `fingerprint_sha256`, `normalized_invariant`, occurrences,
-root cause, guardrail, and merge eligibility.
+Report `heartbeat_status` first, then `schema_version: 1`, selected mode, the
+finding and action queues, and separate proof, merge, local reconciliation,
+cleanup, and blocker ledgers. Use the field definitions in
+[Closeout Commander](references/closeout-commander.md), under Output Contract.
 
 ## Workflow
 
@@ -142,10 +142,15 @@ root cause, guardrail, and merge eligibility.
     validator command, and visibility result. If the validator cannot resolve the
     producer artifact, classify `blocked_artifact_context`; do not relabel it as
     passing proof.
-13. Before merge, verify latest-head required checks, unresolved threads, branch
-   protection, and mergeability from live GitHub state. Run
-   `codex review --uncommitted` and record the outcome as pre-merge evidence;
-   merge readiness includes this local review.
+13. Before merge, verify latest-head required checks, qualifying human and
+    external review under repo policy, answered review threads with none
+    unresolved, branch protection, and mergeability from live GitHub state.
+    Green CI and resolved conversations alone are not reviewer clearance.
+    Select local review to cover the candidate: `codex review --uncommitted`
+    for local edits. For committed changes, follow the mandatory
+    [candidate-bound review](references/closeout-commander.md#candidate-bound-local-review)
+    procedure: local HEAD must equal the latest hosted SHA before base review.
+    Require the applicable current-head receipt; empty diffs are not coverage.
 14. Before claiming the parent PR/worktree lane is closed, or before switching
     the primary checkout to `main`, run
     `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json --require-clean`
@@ -158,6 +163,9 @@ root cause, guardrail, and merge eligibility.
    update it with repo policy, and prune
    branches/worktrees only with merge proof, upstream state, unique-commit
    evidence, and primary-worktree dirty-closeout proof.
+    Follow `references/closeout-commander.md#local-branch-reconciliation`:
+    refresh refs, preserve dirty or divergent checkouts, and verify each safe
+    update. Hosted merge and remote branch deletion do not prove local cleanup.
 16. End with a per-PR state matrix: local proof, hosted checks, hosted review,
     artifact receipts, merge authority, cleanup authority, blockers, and exact
     validation evidence. A passing lane never infers another lane.
