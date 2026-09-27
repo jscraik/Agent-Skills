@@ -2,7 +2,7 @@
 schema_version: 1
 title: Context-Budgeted Skill Trees
 type: feat
-status: draft
+status: superseded
 date: 2026-04-24
 origin: harness-engineering he-spec
 risk: medium-high
@@ -11,6 +11,12 @@ ui_required: false
 ---
 
 # Context-Budgeted Skill Trees
+
+Superseded on 2026-09-27. This historical design does not authorise new rooted
+projection work, direct-source installation or home-runtime mutation. Rooted
+runtime projection is retired. Follow the [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+and [current recovery runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md);
+retain the design below only as historical context.
 
 ## Table of Contents
 

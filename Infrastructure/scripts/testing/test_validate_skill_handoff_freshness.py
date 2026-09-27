@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -125,4 +126,35 @@ def test_freshness_blocks_stale_atlas_head(tmp_path: Path) -> None:
         atlas_html=atlas_html,
     )
 
+    assert [finding.code for finding in findings] == ["atlas_generated_head_stale"]
+
+
+def test_retired_atlas_is_excluded_without_waiving_stale_handoff(tmp_path: Path) -> None:
+    module = _load_module()
+    status, tracker, atlas = _write_artifacts(tmp_path, status_head="stale", tracker_head="abc1234", atlas_head="stale")
+    atlas.write_text('<meta name="skills-sdk-document-status" content="retired">', encoding="utf-8")
+    findings = module.validate_freshness("abc1234", status_json=status, tracker_json=tracker, atlas_html=atlas)
+    assert [finding.code for finding in findings] == ["status_json_head_stale"]
+
+
+def test_retired_atlas_cli_reports_exclusion_not_freshness(tmp_path: Path) -> None:
+    module = _load_module()
+    head = module.current_git_head()
+    status, tracker, atlas = _write_artifacts(tmp_path, status_head=head, tracker_head=head, atlas_head="stale")
+    atlas.write_text('<meta name="skills-sdk-document-status" content="retired">', encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--status-json", str(status), "--tracker-json", str(tracker), "--atlas-html", str(atlas), "--json"],
+        capture_output=True, text=True, check=False, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert str(atlas) not in payload["checked_paths"]
+    assert payload["excluded_paths"] == [{"path": str(atlas), "reason": "retired_artifact_not_current_evidence"}]
+
+
+def test_missing_atlas_still_blocks_freshness(tmp_path: Path) -> None:
+    module = _load_module()
+    status, tracker, atlas = _write_artifacts(tmp_path, status_head="abc1234", tracker_head="abc1234", atlas_head="abc1234")
+    atlas.unlink()
+    findings = module.validate_freshness("abc1234", status_json=status, tracker_json=tracker, atlas_html=atlas)
     assert [finding.code for finding in findings] == ["atlas_generated_head_stale"]

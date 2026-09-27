@@ -70,16 +70,19 @@ Enforcement: schema constraint plus parser-contract regression test
 Input: "What does 'make it available' mean in this repository?"
 
 ```md
-**Runtime Projection**:
-The generated skill surface visible to the active agent runtime.
-_Avoid_: installed skill, copied source
+**Installed Runtime Copy**:
+The selected checked package version installed through the authorised runtime route.
+_Avoid_: copied source, approval inferred from a holding directory
 
 ## Prompt Translations
 
 | User phrase | Canonical action |
 | --- | --- |
-| "make it available" | Run `./bin/ask skills sync --scope workspace --json`, then `./bin/ask skills sync --scope user --json`, and verify the runtime links. |
+| "make it available" | Resolve the active repository's installation policy and authority. For this lifecycle, select the SDK-checked private Tessl version or verified OpenAI-provider exemption, then prove installed identity and discovery. Report a missing route rather than defaulting to workspace or user sync. |
 ```
+
+This is a translation, not authority to install, relink or change runtime files.
+Recheck the active repository's glossary before reusing an example elsewhere.
 
 ## Domain Grill Mode
 

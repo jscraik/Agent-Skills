@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Purpose](#purpose)
+- [Approved lifecycle](#approved-lifecycle)
 - [Four-plane model](#four-plane-model)
 - [Canonical sources](#canonical-sources)
 - [Derived and runtime surfaces](#derived-and-runtime-surfaces)
@@ -13,50 +14,91 @@
 
 Separate skill and plugin product content from factory mechanics and runtime projections so ownership is unambiguous.
 
+## Approved lifecycle
+
+Jamie approved these six rules on 2026-09-27. They supersede earlier guidance
+that made Foundry the mandatory permanent source destination, stopped SDK
+responsibility at handoff, or excluded registry/runtime proof from separation.
+
+1. **Foundry holds candidates.** Skills Foundry stores permitted skills and
+   plugins awaiting SDK processing, including blocked or rejected candidates
+   with reasons. Holding is not SDK approval, distribution or installation.
+   Preserve source history; processing does not authorise deletion or require
+   permanent post-processing storage in Foundry.
+2. **SDK owns the workflow.** Skills SDK owns the agent-facing `SKILL.md`,
+   references and eval workflow plus executable create, update, external-intake,
+   check and installation tooling. Required Tessl/Codex adapters belong to SDK;
+   keep its Python core portable without disclaiming end-to-end integration.
+3. **Tessl stores checked versions privately.** The `jscraik` private workspace
+   is the distribution source for managed installations. Bind checks and
+   registry readback to exact package identity and private visibility. Only
+   Jamie decides which specific versions become public; passing checks is not
+   publication authority.
+4. **Codex runtimes contain installed copies.** Non-exempt managed packages in
+   `~/.codex/skills` and `~/.codex/plugins` install from checked Tessl versions,
+   not directly from Foundry or Agent-Skills. Updates require newly checked
+   versions. Prove identity, discovery, required behaviour and recovery; do not
+   silently author in installed copies.
+5. **OpenAI-provided plugins are exempt.** Use their intended provider-managed
+   route. Verify origin; a name, directory or compatible manifest is not proof.
+6. **OpenAI system skills are exempt.** Preserve their provider-managed route
+   and files during SDK discovery, migration and installation.
+
+These are required outcomes, not claims that the destination implementation
+already exists. Local source work does not authorise uploads, credentials,
+provider spending or live runtime mutation. Select those actions explicitly
+and retain missing proof as incomplete, not out of scope. Do not discard required
+plugin hooks, assets or MCP components to make a skills-only journey pass.
+Project-local skill proof alone does not prove home-level native plugin support.
+
 ## Four-plane model
 
-1. Foundry source plane (`retained editable packages`)
+1. Foundry holding plane (`candidates awaiting processing`)
 
 - Curated skill and plugin packages held in `/Users/jamiecraik/dev/skills-foundry`.
-- Owns retained editable package source, repairs, package-specific scripts,
-  evaluation data, provenance, licences, documentation, and reference assets.
-- Admission is copy-first. A Foundry admission does not install, enable, publish,
-  promote, or transfer runtime authority.
+- Preserves complete candidate packages, provenance and rights information.
+- A permitted holding copy or local catalog admission is not SDK clearance and
+  does not install, enable, publish, promote or transfer source authority.
 
 2. SDK tooling plane (`reusable lifecycle behavior`)
 
-- `/Users/jamiecraik/dev/skills-sdk` owns reusable creation, repair, validation,
-  evaluation, judging, review, packaging, and handoff tooling.
-- SDK inspection or transformation of a package does not transfer its canonical
-  source from Foundry. Test fixtures and scratch candidates are not source owners.
+- `/Users/jamiecraik/dev/skills-sdk` owns the complete workflow in rule 2,
+  including checked private-registry delivery and supported runtime adapters.
+- Checking binds a selected candidate, not ownership of all editable source.
+  Test fixtures and scratch candidates are not source owners.
 
 3. Transitional migration plane (`remaining Agent-Skills dependencies`)
 
 - Existing source, callers, and mechanics remain here only until their recorded
   transfer and consumer cutover. Agent-Skills is not a permanent third owner.
-- Migrate necessary reusable behavior to SDK and package-specific content to
-  Foundry. Keep host policy and credentials with their explicitly accepted owner.
+- Migrate necessary reusable behavior to SDK and permitted unprocessed packages
+  to Foundry. Keep host policy and credentials with their explicit owner;
+  SDK-owned adapters integrate with those owners.
 - Retire old surfaces only after independent destination behavior, caller and
   recovery proof, and matching mutation authority. Complete separation before
   product refinement.
 
-4. Runtime plane (`derived views and projections`)
+4. Runtime plane (`installed copies and transitional projections`)
 
-- Flat/runtime projections and mirrored cache surfaces.
-- Never hand-edit.
+- Target managed installations come from the checked private Tessl version;
+  verified provider exemptions retain their intended loading route.
+- Existing flat projections and mirrors are transitional dependencies. Preserve
+  working consumers until authorised replacement; never hand-edit runtime output.
 
 ## Canonical sources
 
 Every package has one canonical source determined by an explicit owner
-decision. A runtime path is never canonical source. Foundry admission is a
-copy-first retention step; move source authority only after direct consumers,
-provenance, and the replacement path have been verified.
+decision. A runtime path is never canonical editable source. A Foundry holding
+copy does not change that decision; move source authority only after direct
+consumers, provenance and the replacement path have been verified. Tessl owns
+the checked distribution version, not an inferred editable-source transfer.
 
-Skills Foundry retained source:
+Skills Foundry holding and retained provenance:
 
 - `/Users/jamiecraik/dev/skills-foundry/**`
-- Source-only means separate from runtime installation and publication, not
-  read-only archival storage. Retained package authoring and repairs belong here.
+- Holding is separate from SDK approval and installation. Retained editable
+  material may support updates where its explicit owner permits; Foundry is
+  not a mandatory permanent post-processing authoring destination.
 
 Transitional package source paths in this repository:
 
@@ -78,7 +120,8 @@ Transitional plugin source paths in this repository:
 
 Before admitting packages in bulk, record each package's explicit owner,
 destination, disposition, rights, and consumers. Preserve unresolved and
-rights-blocked entries; neither runtime availability nor a copy grants admission.
+rights-blocked entries; neither runtime availability nor a holding copy grants
+SDK approval. Full SDK review is not a prerequisite for permitted holding.
 For a retained package still awaiting transfer:
 
 1. Verify that recorded rights authorize the source copy. If rights are
@@ -147,18 +190,17 @@ Workout and telemetry surfaces:
 
 - Edit product content only in the canonical source path named by the explicit
   owner decision.
-- After recorded canonical source transfer, repair retained source in Foundry.
-  Before transfer, repair only the explicit owner's canonical source within
-  the authorized scope and rights. An SDK handoff selects tooling work, not a
-  new canonical package copy in Agent-Skills or SDK.
+- Repair the recorded editable source within authorised scope and rights;
+  a permitted holding copy does not transfer ownership. Process updates through
+  SDK checks before private registry delivery and runtime installation.
 - Do not copy an external or runtime package into `agent-skills` merely to make
-  it visible; preserve its provenance in Skills Foundry first.
+  it visible. Record provenance and permitted holding/intake before processing.
 - Do not hand-edit runtime/projection surfaces.
 - Edit tracked `.agents/workflows/**` docs directly when the workflow itself changes.
 - Do not hand-edit .skillsets/**; refresh current runtime projections with python3 bin/ask skills sync --scope workspace --projection flat and use the manifest generator only for legacy .skillsets/** compatibility metadata.
 - Treat `Plugins/cache/**` as mirrored output. Edits are blocked by default and allowed only in explicit projection-refresh lanes.
 - For explicit projection-refresh lanes, set `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1` and ensure matching canonical source or projection mechanics updates.
-- Regenerate projections with repository wrappers (`python3 bin/ask skills sync`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) rather than editing projections directly.
+- Where a transitional projection refresh is explicitly selected, use repository wrappers (`python3 bin/ask skills sync`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) rather than hand edits. These legacy routes are not the target Tessl installation path or proof of lifecycle completion.
 - Guard scope defaults:
   - local runs: staged diff only;
   - CI runs: base-ref diff (`origin/$GITHUB_BASE_REF...HEAD`);

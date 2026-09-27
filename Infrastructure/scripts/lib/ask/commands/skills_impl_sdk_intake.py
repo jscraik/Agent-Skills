@@ -3,6 +3,20 @@ from __future__ import annotations
 from ask.skills_sdk.package_build_compat import build_package_projection
 
 from .skills_impl_doctor_intake import *  # noqa: F403
+from .skills_impl_core import (
+    CallResult,
+    ErrorObject,
+    Path,
+    _SandboxProfileError,
+    _ask_validation_command,
+    _build_package_digest_receipt,
+    _build_package_hardening_receipt,
+    _build_sandbox_profile_receipt,
+    _build_skill_intake_review_receipt,
+    _build_skill_ir,
+    _verify_capability_docs_projection,
+)
+from .skills_impl_capabilities import _resolve_doctor_target
 
 
 def skills_sdk_intake_review(
@@ -150,7 +164,7 @@ def skills_sdk_docs_verify(
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
-                fix_suggestion="Regenerate or patch the capability projection from Infrastructure/config/skills-sdk/capability-matrix.v1.json.",
+                fix_suggestion="Verify the active default projection with sdk docs verify. Repair current matrix drift only in active artifacts; do not update retired history to match live capabilities.",
             )
         )
     return result

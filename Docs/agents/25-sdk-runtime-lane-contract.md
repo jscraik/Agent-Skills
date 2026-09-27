@@ -2,18 +2,22 @@
 
 ## Purpose
 
-This is an explicitly selected promotion contract, not a repository-separation
-prerequisite. During separation, prove existing required consumer behavior;
-do not add cloud, Tessl, or new runtime journeys merely to move source ownership.
+The approved separation outcome requires checked private Tessl versions and
+their installation into the selected Codex home runtimes, preserving verified
+OpenAI-provider exemptions. See the
+[approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle).
+Registry delivery, installed behaviour and repository independence need separate
+proof; none is optional programme polish.
 The command examples describe transitional Agent-Skills implementations, not
 permanent destination ownership or proof that SDK replacements already exist.
 
-Use this contract only for explicitly selected runtime, judge, or Tessl lanes.
-Migration-required runtime proof selects the named existing consumer's applicable
-lane, not the complete promotion pipeline. It does not authorize progression to
-cloud, Tessl, or another runtime destination. Select the full numbered pipeline
-only for an explicitly authorized promotion journey. Its proof lanes remain
-distinct and must not be substituted for one another:
+Select the applicable runtime, judge or Tessl action with its matching authority.
+A required programme outcome does not itself authorise credentials, provider
+spending, private upload, public publication or live runtime mutation. Missing
+authority blocks that action and its completion claim, not independent local
+work. The numbered pipeline below is the existing promotion command contract;
+it does not impose every model lane on a source-only edit. Keep its proof lanes
+distinct and do not substitute one for another:
 
 - SDK mechanical validation
 - oss-local flow
@@ -21,16 +25,17 @@ distinct and must not be substituted for one another:
 - Tessl local flow
 - Tessl external flow
 
-A skill moves forward only when the current lane passes or when the operator
-explicitly accepts a blocker. If a command from one lane blocks, report that
+A skill moves forward only when its required current lane passes. An accepted
+blocker remains incomplete evidence, not permission to promote a failed candidate.
+If a command from one lane blocks, report that
 lane as blocked. Do not replace it with a different lane and call the original
 proof complete.
 
 Package ownership follows the recorded canonical source transfer in
 [Path Ownership Boundaries](/Docs/agents/14-path-ownership-boundaries.md).
-Skills Foundry owns retained editable packages after transfer; Skills SDK owns
-reusable tooling. Before transfer, authorized repairs remain in the explicit
-owner's source. Copying requires cleared rights and matching authority; staged
+Skills Foundry holds permitted candidates awaiting processing; Skills SDK owns
+the workflow, reusable tooling and required adapters. Authorised repairs follow
+the recorded editable-source owner. Copying requires cleared rights and matching authority; staged
 or scratch candidates do not become canonical sources. The Agent-Skills command
 shapes below describe transitional execution dependencies, not permanent SDK
 ownership or proof of standalone consumer cutover. If a command cannot process
@@ -44,6 +49,13 @@ claims. Numeric scores from Plugin Eval or Tessl do not replace the rubric's
 automatic failure conditions, lane separation, or command-evidence requirements.
 
 ## Promotion Pipeline
+
+For a required complete plugin journey, omitted hooks, assets, MCP configuration
+or other required components block completion. The projection rules below do
+not authorise dropping required behaviour. An unsupported mapping is a gap to
+resolve or escalate, not permission to declare a reduced skills-only package
+equivalent. Temporary file installs and project-local discovery do not prove
+registry readback or home-level native plugin installation.
 
 1. SDK mechanical validation: prove the canonical source package shape,
    gold-standard rubric floor, scenario metadata, scorer metadata, scorer
@@ -236,14 +248,15 @@ For each lane, report:
 The Tessl external lane is a projection from a selected canonical package into
 a durable private Tessl package:
 
-- `/Users/jamiecraik/dev/skills-foundry` owns retained editable package source,
-  repairs, provenance, and licences after recorded canonical source transfer.
-  Source-only separates authoring from runtime installation and publication.
-- `/Users/jamiecraik/dev/skills-sdk` owns reusable lifecycle tooling. Agent-Skills
+- `/Users/jamiecraik/dev/skills-foundry` holds permitted candidates and their
+  provenance and licences while they await processing; holding is not clearance
+  or mandatory permanent editable-source ownership.
+- `/Users/jamiecraik/dev/skills-sdk` owns the workflow, reusable lifecycle
+  tooling and required registry/runtime adapters. Agent-Skills
   holds only remaining transitional sources and execution dependencies until
   their verified transfer and cutover; it is not the permanent SDK implementation.
-- Select the candidate from its current canonical owner record. Until transfer,
-  repair that owner's source; after transfer, repair Foundry source. An SDK or
+- Select and repair the candidate using its current editable-source owner record;
+  checking or holding alone does not transfer that authority. An SDK or
   Tessl staging copy is candidate-bound evidence, not a new authoring location.
   Unresolved or blocked rights prohibit protected-source copying; retain only
   permitted inventory and provenance metadata until rights are cleared.

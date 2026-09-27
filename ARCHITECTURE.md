@@ -31,13 +31,23 @@ destination product:
 
 | Destination | Ownership |
 | --- | --- |
-| Skills SDK (`../skills-sdk`) | Reusable Python lifecycle tooling for creation, repair, validation, evaluation, judging, review, packaging, and handoff. |
-| Skills Foundry (`../skills-foundry`) | Retained editable skill and plugin packages, including package-specific scripts, references, assets, eval data, and provenance. |
+| Skills SDK (`../skills-sdk`) | Agent-facing creation, update, external-intake, check and install workflow; reusable Python tooling and supported Tessl/Codex adapters. |
+| Skills Foundry (`../skills-foundry`) | Holding for permitted skills and plugins awaiting SDK processing, with complete contents and provenance; not implied approval or permanent post-processing ownership. |
+| Tessl (`jscraik` private workspace) | Checked version registry and distribution source for managed installations; public release belongs to Jamie. |
+| Codex home runtime | Installed copies under `~/.codex/skills` and `~/.codex/plugins`; verified OpenAI plugins and system skills retain provider-managed routes. |
 | Agent-Skills (this repository) | Temporary source and compatibility responsibilities until each recorded transfer and consumer replacement is proved. |
 
 Host credentials, installed runtime configuration, and external services retain
 their explicit owners; they do not become SDK core merely because tooling uses
-them. A copied package is not an ownership transfer or runtime activation.
+them. SDK owns integration adapters, not those owners' policy or credentials.
+A copied package is not an ownership transfer or runtime activation. The table
+states the approved target, not proof that those integrations already work.
+See the [six lifecycle rules](Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle).
+
+`Infrastructure/config/repo-layout.v1.json` enforces separate destinations:
+in-repository `foundry/` and new `skills-sdk/` children are not migration targets.
+The existing `skills-sdk/brand` directory is retained compatibility content only;
+its presence does not authorise moving implementation or packages beneath it.
 
 The repository has three kinds of state:
 
@@ -70,14 +80,16 @@ agents consume.
 
 **Architecture Invariant:** These paths describe remaining local source, not
 permanent destination ownership. Keep the recorded source authoritative until a
-rights-cleared transfer establishes the Foundry owner. Runtime projections are
+rights-cleared, explicit source transfer is recorded. Foundry holding alone is
+not that transfer; subsequent updates still require SDK checks. Runtime copies are
 not editable skill source. See [path ownership](Docs/agents/14-path-ownership-boundaries.md).
 
 ### Factory Plane
 
 The transitional factory plane contains the existing local implementation.
-Reusable lifecycle tooling belongs in Skills SDK; package-specific behavior
-belongs with its package in Foundry. Do not expand this plane into a competing SDK.
+Reusable lifecycle tooling and required integration adapters belong in Skills SDK;
+package-specific behaviour stays with its complete candidate and recorded source.
+Do not expand this plane into a competing SDK.
 
 - `Infrastructure/bin/ask`: implementation target for the public `./bin/ask`
   wrapper.
@@ -95,8 +107,9 @@ schema-backed and regression-tested.
 
 ### Runtime Projection Plane
 
-The runtime projection plane is generated from canonical source so Codex and
-other clients can discover skills.
+This existing transitional runtime projection plane is generated from canonical
+source so Codex and other clients can discover skills. It is not the target
+registry-installation route. Preserve consumers until authorised SDK/Tessl cutover.
 
 - `.agents/skills/**`: generated runtime projection; other `.agents` paths have
   separate ownership.
@@ -177,8 +190,8 @@ First-party skill packages. Each skill should follow the local skill package
 contract and progressive disclosure expectations.
 
 **Architecture Invariant:** Edit the recorded canonical package owner. A package
-still awaiting transfer remains repairable here; a transferred package belongs
-in Foundry, not in a new competing copy here.
+still awaiting transfer remains repairable here within its rights and scope;
+after transfer, follow the recorded source owner, not a competing copy here.
 
 ### `Plugins/`
 

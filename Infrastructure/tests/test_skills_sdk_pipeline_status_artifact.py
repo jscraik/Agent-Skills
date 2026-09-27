@@ -62,28 +62,6 @@ class CapabilityStatusParser(HTMLParser):
             self._current_cells = []
 
 
-class SimpleAtlasStatParser(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__()
-        self.counts: dict[str, int] = {}
-        self._current_status: str | None = None
-        self._in_count = False
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        attributes = {key: value or "" for key, value in attrs}
-        classes = set(attributes.get("class", "").split())
-        if tag == "div" and "stat" in classes and attributes.get("data-status"):
-            self._current_status = attributes["data-status"]
-        elif tag == "b" and self._current_status:
-            self._in_count = True
-
-    def handle_data(self, data: str) -> None:
-        if self._in_count and self._current_status:
-            self.counts[self._current_status] = int(data.strip())
-            self._current_status = None
-            self._in_count = False
-
-
 class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -217,26 +195,14 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         self.assertFalse(static_docs["mutation_performed"])
         self.assertIn("projection-only", self.rows["static_docs"]["text"].lower())
 
-    def test_lifecycle_one_page_does_not_contradict_live_completed_capabilities(self) -> None:
-        implemented_titles = {
-            capability["title"]
-            for capability in self.runtime_status["capabilities"]
-            if capability["status"] == "implemented"
-        }
-        deferred_titles = {
-            capability["title"]
-            for capability in self.runtime_status["capabilities"]
-            if capability["status"] in {"deferred", "placeholder_blocked", "blocked_missing_adapter", "out_of_scope"}
-        }
-
-        for title in implemented_titles:
-            if title in self.lifecycle_html:
-                self.assertIn(title, self.lifecycle_html)
-        for title in deferred_titles:
-            if title in self.lifecycle_html:
-                title_index = self.lifecycle_html.index(title)
-                nearby = self.lifecycle_html[max(0, title_index - 300): title_index + 300].lower()
-                self.assertNotIn("completed", nearby)
+    def test_lifecycle_one_page_is_frozen_history_with_current_replacement(self) -> None:
+        self.assertIn('<meta name="skills-sdk-document-status" content="retired">', self.lifecycle_html)
+        self.assertIn('<details id="retired-lifecycle">', self.lifecycle_html)
+        self.assertNotIn('<details id="retired-lifecycle" open', self.lifecycle_html)
+        active = self.lifecycle_html.split('<details id="retired-lifecycle">', 1)[0]
+        for text in ("approved six-rule lifecycle", "private Tessl workspace jscraik", "Only Jamie", "OpenAI system skills"):
+            self.assertIn(text, active)
+        self.assertIn("Historical lifecycle exploration (retired)", self.html)
 
     def test_every_pipeline_section_is_represented_in_html(self) -> None:
         matrix_sections = {
@@ -280,53 +246,31 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
                 for pattern in overclaim_patterns:
                     self.assertIsNone(re.search(pattern, text), pattern)
 
-    def test_simple_atlas_summary_matches_current_matrix_buckets(self) -> None:
-        bucket_by_status = {
-            "implemented": "implemented",
-            "preview_only": "preview",
-            "placeholder_optional": "placeholder",
-            "placeholder_blocked": "blocked",
-            "blocked_missing_adapter": "blocked",
-            "deferred": "deferred",
-            "out_of_scope": "out",
-        }
-        expected_counts = {
-            "implemented": 0,
-            "preview": 0,
-            "placeholder": 0,
-            "blocked": 0,
-            "deferred": 0,
-            "out": 0,
-        }
-        for capability in self.matrix["capabilities"]:
-            expected_counts[bucket_by_status[capability["status"]]] += 1
+    def test_retired_atlas_is_marked_historical_not_live_matrix_projection(self) -> None:
+        self.assertIn('<meta name="skills-sdk-document-status" content="retired">', self.simple_atlas_html)
+        self.assertIn("retired, not current instructions or completion evidence", self.simple_atlas_html)
 
-        parser = SimpleAtlasStatParser()
-        parser.feed(self.simple_atlas_html)
-        observed_counts = parser.counts
+    def test_active_pipeline_states_required_route_and_exemptions(self) -> None:
+        active = self.html.split('<details id="retired-design-map">', 1)[0]
+        for required in (
+            'data-lifecycle-contract="skills-lifecycle.v4"',
+            'data-pipeline-step="private_tessl"',
+            "workspace jscraik", "~/.codex/skills", "~/.codex/plugins",
+            "Verified OpenAI plugins", "OpenAI system skills", "only Jamie",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, active)
+        self.assertNotIn("Tessl is not SDK core", active)
+        self.assertNotIn("Optional third-party confirmation", active)
+        self.assertIn("not the destination SDK or approved programme scope", active)
 
-        self.assertEqual(observed_counts, expected_counts)
-
-    def test_simple_atlas_key_landed_sdk_spine_claims_match_matrix(self) -> None:
-        status_by_id = {
-            capability["id"]: capability["status"]
-            for capability in self.matrix["capabilities"]
-        }
-
-        self.assertEqual(status_by_id["skill_ir"], "implemented")
-        self.assertEqual(status_by_id["evals"], "implemented")
-        self.assertEqual(status_by_id["package_hardening"], "implemented")
-        self.assertIn("Tiny SkillIR.v0", self.simple_atlas_html)
-        self.assertIn("Deterministic Eval Runner", self.simple_atlas_html)
-        self.assertIn("target-bound receipts carry package identity", self.simple_atlas_html)
-        self.assertIn("Read-only package hardening blocks forbidden", self.simple_atlas_html)
-        self.assertNotIn("Next missing author step: deterministic local evals", self.simple_atlas_html)
-        self.assertNotIn('<strong>Eval run</strong><span>Next missing author step', self.simple_atlas_html)
-
-    def test_simple_atlas_names_capability_evidence_verifier(self) -> None:
-        self.assertIn("Evidence Refs Need Verification", self.simple_atlas_html)
-        self.assertIn("Capability Evidence Verifier", self.simple_atlas_html)
-        self.assertIn("file, command, schema, receipt, or external lane", self.simple_atlas_html)
+    def test_retired_design_is_folded_and_not_current_instructions(self) -> None:
+        self.assertIn('<details id="retired-design-map">', self.html)
+        self.assertNotIn('<details id="retired-design-map" open', self.html)
+        historical = self.html.split('<details id="retired-design-map">', 1)[1]
+        self.assertIn("not current instructions or acceptance evidence", historical)
+        self.assertIn("Tessl is not SDK core", historical)
+        self.assertIn("Out of scope: hosted product surfaces", historical)
 
 
 if __name__ == "__main__":

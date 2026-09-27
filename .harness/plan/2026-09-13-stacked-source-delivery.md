@@ -1,11 +1,17 @@
 ---
 schema_version: 1
 plan_id: stacked-source-delivery-20260913
-status: in_progress
+status: superseded
 owner: agent-skills
 ---
 
 # Stacked source delivery
+
+Superseded on 2026-09-27 by the approved six-rule lifecycle. This plan is a
+historical record, not an active queue or programme completion contract. Its
+unchecked stack items describe that earlier snapshot; do not resume them from
+this document. Follow [current ownership and acceptance boundaries](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+and the [master controller](/Docs/agents/26-pm-thread-coordination.md).
 
 Consumer: Jamie and the reviewers of the September source-maintenance stack.
 Scope: the 70 dirty entries inventoried on `codex/telos-runtime-owner`.
@@ -13,14 +19,17 @@ The original checkout is preserved. Delivery starts from current `main`
 at `f1f2f212f56b9155b1a80d0cde78305490439204`; it does not replay the older
 Telos commits already superseded by merged PR #505.
 
-## Final ownership boundary
+## Historical ownership boundary — superseded
 
 Skills SDK owns creation, repair, evaluation, judging, review, and handoff
 tooling. Skills Foundry retains skill packages. Agent-Skills retires after
-both destinations work independently. This stack preserves transitional
-corrections; it does not establish permanent ownership or prove migration.
+both destinations work independently. That former two-destination completion
+rule is retired: current acceptance also requires checked private Tessl delivery,
+installed runtime identity/behaviour/recovery, preserved provider exemptions,
+required consumer cutover and authorised Agent-Skills retirement. The historical
+stack evidence below cannot satisfy those requirements by itself.
 
-## Stack and checklist
+## Historical stack and checklist — not an active queue
 
 - [x] Layer 1: shared guidance and PM validation; signed `10aa689a6`, pushed
   as `codex/stack-guidance-foundations`, PR #510 targets `main`.

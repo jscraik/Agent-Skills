@@ -4,9 +4,10 @@ schema_version: 1
 
 # agent-skills Agent Guide
 
-Agent-Skills is a transitional migration repository. Skills SDK owns reusable
-tooling; Skills Foundry owns retained editable skill and plugin packages.
-Complete those separation boundaries before refining either product.
+Agent-Skills is a transitional migration repository. The approved lifecycle is
+Foundry holding -> SDK checking and preparation -> private Tessl registry ->
+Codex runtime installation, with verified OpenAI-provider exemptions. Complete
+that lifecycle and repository independence before refining either product.
 
 ## Root Essentials
 
@@ -31,12 +32,14 @@ Complete those separation boundaries before refining either product.
 - Before changing Skills SDK plans, specs, atlas visuals, capability claims, or
   product-direction docs, use the product-boundary terms in
   [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md):
-  `/Users/jamiecraik/dev/skills-foundry` is the source-only Foundry for
-  retained packages; `/Users/jamiecraik/dev/skills-sdk` owns reusable lifecycle
-  tooling; `agent-skills` retains only temporary migration responsibilities;
-  Tessl is distribution and external proof; and
-  local runtime truth is a separate installed-behavior lane. A package's
-  explicit owner decision—not a runtime path—decides its canonical source.
+  Foundry holds candidates awaiting SDK processing; SDK owns the agent-facing
+  workflow, reusable tooling and required registry/runtime adapters. Tessl holds
+  checked versions privately; only Jamie decides public release. Codex home
+  runtimes consume those versions. OpenAI plugins and system skills are exempt
+  by verified origin. Follow the six rules in
+  [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle).
+  An explicit owner decision—not holding, checking or installation—decides
+  editable source authority.
 - For a package selecting `skills-sdk.gold-standard.v1`, read
   [Skills SDK Authoring Contract](./Docs/reference/skills-sdk-authoring-contract.md),
   update `references/contract.yaml: authoring_contract` with the skill, and run
@@ -68,7 +71,8 @@ Complete those separation boundaries before refining either product.
 - Keep local, runtime, cloud, Tessl, and release proof separate. Use
   [Tessl Live Skill Eval Workflow](./Docs/agents/24-tessl-live-skill-eval-workflow.md)
   and [Skills SDK Runtime Lane Contract](./Docs/agents/25-sdk-runtime-lane-contract.md)
-  only when those lanes are selected.
+  for the applicable selected actions. Registry and runtime proof remain required
+  programme outcomes; a local task does not authorise live side effects.
 
 ## Project-specific correction boundary
 

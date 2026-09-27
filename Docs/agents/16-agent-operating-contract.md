@@ -26,11 +26,27 @@ All agents should use `./bin/ask` for repo operations.
 | Full validation | `./bin/ask repo validate`                          |
 | List skills     | `./bin/ask skills list --category <topic>`         |
 | Audit skill     | `./bin/ask skills audit <path> --level strict`     |
-| Install skill   | `./bin/ask skills install <url> --remediate`       |
+| Install managed skill | SDK checks → checked private Tessl version → authorised runtime installation; see [Skill Management](/Docs/agents/17-skill-management.md#transitional-install-failure-recovery). |
 | Find related    | `./bin/ask graph related <skill> --depth 2`        |
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward
 into `Infrastructure/**`; keep them as real files/directories, not symlinks.
+
+If the managed installation route is unavailable, report the capability gap.
+The legacy `skills install` command is only for explicitly authorised recovery
+of an existing transitional consumer under the linked recovery contract, not a
+substitute for SDK admission or registry delivery. Verified OpenAI plugins and
+system skills retain their provider-managed exemptions.
+
+`./bin/ask sdk docs verify --json --robot` checks the active capability table
+in `artifacts/recommended-skills-sdk-pipeline.html` against this transitional
+checkout. Its required lifecycle route does not prove destination delivery or
+registry/runtime readiness. The old reference atlas is frozen history: selecting
+it with `--artifact` returns `retired_projection_artifact` and a non-zero exit.
+Do not refresh historical atlas counts or stage order to satisfy live checks.
+The handoff freshness validator likewise lists marked retired HTML under
+`excluded_paths`, not `checked_paths`. That exclusion proves no current artifact
+freshness and does not waive status/tracker HEAD checks or active-HTML checks.
 
 For AI coding agents, start with the compact doctor command before deeper repo
 inspection:

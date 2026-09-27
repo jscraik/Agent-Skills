@@ -128,8 +128,8 @@ def _legacy_layout_finding(name: str, entry: dict[str, Any]) -> Finding:
         severity="info",
         path=name,
         message=(
-            "Legacy path is allowed until the foundry/skills-sdk migration "
-            "moves it."
+            "Legacy path is retained pending verified separate-repository "
+            "disposition; it is not a new migration destination."
         ),
         classification=entry["section"],
         owner="repo-layout.v1",
@@ -168,6 +168,26 @@ def _validate_top_level(root: Path, config: dict[str, Any]) -> list[Finding]:
                 findings.append(_legacy_layout_finding(name, entry))
             continue
         findings.append(_unknown_top_level_finding(name))
+    return findings
+
+
+def _validate_restricted_roots(root: Path, config: dict[str, Any]) -> list[Finding]:
+    """Reject retired nested destinations, retaining only named compatibility children."""
+    findings: list[Finding] = []
+    for name, allowed_children in config.get("restricted_roots", {}).items():
+        path = root / name
+        if not path.exists() and not path.is_symlink():
+            continue
+        if not allowed_children or path.is_symlink() or not path.is_dir():
+            rejected = [path]
+        else:
+            rejected = [child for child in path.iterdir() if child.name not in allowed_children]
+        for child in sorted(rejected):
+            findings.append(Finding(
+                code="retired_nested_destination", status="violation", severity="error",
+                path=_rel(child, root), classification="retired_topology", owner="repo-layout.v1",
+                message="Use the separate skills-foundry or skills-sdk repository; this nested destination is retired.",
+            ))
     return findings
 
 
@@ -251,6 +271,7 @@ def validate_repo_layout(root: Path, config_path: Path) -> dict[str, Any]:
 
     findings = [
         *_validate_top_level(root, config),
+        *_validate_restricted_roots(root, config),
         *_validate_symlinks(root, config),
     ]
     blocking_findings = [finding for finding in findings if finding.blocking]

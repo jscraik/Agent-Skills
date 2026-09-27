@@ -11,15 +11,20 @@ controller on 2026-09-14. It assigns work to OC - Skills SDK
 (`01a04479-ed0a-7310-a934-41477c0f6175`). Jamie retains scope and escalation
 authority. Each OC owns technical implementation in its own repository.
 
-Complete repository separation before product refinement. SDK owns reusable
-tooling; Foundry owns retained editable packages and their reference content.
-Agent-Skills is transitional, not a permanent implementation or source owner.
-Earlier guidance to preserve that permanent role is incorrect and retired.
+Jamie amended the outcome on 2026-09-27: complete the
+[six-rule lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+and repository independence before product refinement. Foundry holding feeds
+SDK checking and preparation, private Tessl distribution and Codex home runtime
+installation, with verified OpenAI-provider exemptions. Agent-Skills is
+transitional. Earlier source-only completion and mandatory permanent Foundry
+ownership guidance is superseded, not an alternative route.
 
 The controller selects work only when it names a retained consumer or inventory
-item, the dependency being removed, and required behavior. It gives each owner
-one bounded mutable unit, allowed paths, proof commands, delivery scope, and stop
-conditions. Keep concurrent writers on disjoint paths. OCs return cross-owner
+item, the lifecycle requirement or dependency being addressed, and required
+behaviour. It gives each owner one bounded implementation unit, allowed paths,
+proof commands, delivery scope and stop conditions. A review-waiting PR may
+coexist with one disjoint controller-approved unit only with explicit isolation,
+integration order and review follow-up. Keep concurrent writers on disjoint paths. OCs return cross-owner
 dependencies to the controller rather than starting another programme lane.
 
 After dispatch, end the controller turn unless independent authorized work is
@@ -46,6 +51,19 @@ Reuse unchanged proof and existing inventories. Keep a compact current queue,
 not an append-only status transcript. Product expansion, optional package polish,
 and unrelated worktree cleanup are deferred until separation is accepted and
 Jamie selects subsequent work. Preserve unique work and all effective permissions.
+
+Use Jamie's four lenses throughout assigned work: testing for accepted, rejected
+and recovery cases at the real entrypoint; improve-agent-native for discovery,
+actionable errors and verifiable completion; improve-codebase-architecture for
+ownership, callers, adapters and dependency direction; simplify for a cohesive
+diff without duplicated policy or unnecessary machinery. These are lenses, not
+four mandatory reports or authority to copy protected packages.
+
+Accept programme completion only after aligned instructions and complete inventory,
+the working SDK workflow, private registry readback, installed-runtime proof,
+reviewed destination delivery without Agent-Skills dependencies, authorised
+retirement and independent outcome audit. Held, blocked or exempt inventory rows
+remain accounted for; they cannot silently shrink required consumer coverage.
 
 ## Legacy structured reports: explicitly selected workflows only
 

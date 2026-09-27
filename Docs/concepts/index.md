@@ -41,6 +41,11 @@ Skills/<topic>/<skill-name>/
 
 ## Runtime Projection
 
+The following describes transitional Agent-Skills consumers. New managed
+installations follow the [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle),
+using SDK-checked private Tessl versions. Verified OpenAI plugins and system
+skills retain their provider-managed routes.
+
 The `.agents/skills/` directory is a generated runtime projection consumed by
 Codex and other agent runtimes. In the current flat projection it contains
 runtime links for visible skills, while command-visible handles are resolved by
@@ -66,6 +71,13 @@ python3 bin/ask reviewers resolve skillinspector --json
 repo-local projection files. `python3 bin/ask skills sync --scope user
 --projection flat` refreshes user runtime links and profile-local plugin
 mirrors.
+
+These are mutations, not routine validation or managed installation commands.
+Select the existing consumer, approved source, exact targets and explicit
+transitional recovery authority first. Workspace refresh does not authorise
+home-runtime changes. If the SDK/Tessl route is unavailable, report the gap
+without substituting checkout relinking. Follow the [recovery runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md)
+for preservation and consumer-specific proof.
 
 ## Deprecations and Aliases
 

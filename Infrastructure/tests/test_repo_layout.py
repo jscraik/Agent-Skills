@@ -109,22 +109,33 @@ def test_capitalized_browser_use_runtime_link_is_allowed(tmp_path: Path) -> None
     assert browser_findings[0]["classification"] == "external_runtime_link"
 
 
-def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> None:
+def test_nested_foundry_destination_is_rejected(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "foundry" / "skills").mkdir(parents=True)
-
-    report = validate_repo_layout.validate_repo_layout(
-        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
-    )
-
-    assert report["status"] == "pass"
-    assert not any(
-        finding["code"] == "top_level_unclassified" and finding["path"] == "foundry"
-        for finding in report["findings"]
-    )
+    report = validate_repo_layout.validate_repo_layout(root, root / validate_repo_layout.DEFAULT_CONFIG)
+    assert report["status"] == "fail"
+    assert any(row["path"] == "foundry" and row["blocking"] for row in report["findings"])
 
 
-def test_future_nested_skills_sdk_brand_path_classifies_top_level_root(tmp_path: Path) -> None:
+def test_nested_sdk_destination_is_rejected_with_legacy_brand_present(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "skills-sdk" / "brand").mkdir(parents=True)
+    (root / "skills-sdk" / "Infrastructure").mkdir()
+    report = validate_repo_layout.validate_repo_layout(root, root / validate_repo_layout.DEFAULT_CONFIG)
+    assert report["status"] == "fail"
+    assert any(row["path"] == "skills-sdk/Infrastructure" and row["blocking"] for row in report["findings"])
+
+
+def test_nested_future_destination_symlink_is_rejected(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / ".agents" / "skills").mkdir(parents=True)
+    os.symlink("../../foundry/skills/testing", root / ".agents" / "skills" / "testing")
+    report = validate_repo_layout.validate_repo_layout(root, root / validate_repo_layout.DEFAULT_CONFIG)
+    assert report["status"] == "fail"
+    assert any(row["code"] == "unknown_symlink" for row in report["findings"])
+
+
+def test_existing_nested_brand_is_retained_as_compatibility_only(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "skills-sdk" / "brand").mkdir(parents=True)
 

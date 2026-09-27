@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.docs_projection import (  # noqa: E402
-    CANONICAL_ATLAS_PIPELINE_STEPS,
+    CANONICAL_PIPELINE_STEPS,
     verify_capability_docs_projection,
 )
 from ask.skills_sdk.typed_contracts import validate_robot_envelope  # noqa: E402
@@ -67,7 +67,7 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["artifact_path"], "artifacts/recommended-skills-sdk-pipeline.html")
 
-    def test_public_cli_verifies_reference_atlas_projection(self) -> None:
+    def test_public_cli_rejects_retired_atlas_projection(self) -> None:
         completed = subprocess.run(
             [
                 sys.executable,
@@ -88,13 +88,14 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
             check=False,
         )
 
-        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertNotEqual(completed.returncode, 0)
         envelope = validate_robot_envelope(json.loads(completed.stdout))
         payload = envelope.data["skills_sdk_docs_verify"]
 
         self.assertIsInstance(payload, dict)
-        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["status"], "blocked")
         self.assertEqual(payload["artifact_path"], "Docs/reference/skills-sdk-platform-atlas.html")
+        self.assertEqual(payload["blockers"][0]["code"], "retired_projection_artifact")
 
     def test_verifier_blocks_status_drift(self) -> None:
         source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
@@ -132,69 +133,56 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         self.assertIn("duplicate_capability_rows", blocker_codes)
 
     def test_verifier_blocks_visible_summary_count_drift(self) -> None:
-        source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
+        source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
         with tempfile.TemporaryDirectory() as tmpdir:
             drifted = Path(tmpdir) / "drifted-summary.html"
-            source_text = source.read_text(encoding="utf-8")
-            expected = 'data-capability-summary-statuses="preview_only" data-count="18"'
-            self.assertIn(expected, source_text, "Atlas summary fixture assumption is stale.")
             drifted.write_text(
-                source_text.replace(
-                    expected,
-                    'data-capability-summary-statuses="preview_only" data-count="17"',
-                    1,
-                ),
+                source.read_text(encoding="utf-8")
+                + '<b data-capability-summary-statuses="preview_only" data-count="-1"></b>',
                 encoding="utf-8",
             )
-
             payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
 
         self.assertEqual(payload["status"], "blocked")
-        summary_blocker = next(
-            blocker for blocker in payload["blockers"] if blocker["code"] == "summary_count_mismatch"
-        )
-        self.assertEqual(summary_blocker["expected"], 18)
-        self.assertEqual(summary_blocker["actual"], 17)
+        self.assertIn("summary_count_mismatch", {row["code"] for row in payload["blockers"]})
 
-    def test_verifier_enforces_canonical_atlas_pipeline_order(self) -> None:
-        source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
+    def test_verifier_enforces_active_pipeline_order(self) -> None:
+        source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
         with tempfile.TemporaryDirectory() as tmpdir:
             drifted = Path(tmpdir) / "drifted-pipeline.html"
             source_text = source.read_text(encoding="utf-8")
-            expected = 'data-pipeline-step="proof_oss_local"'
-            self.assertIn(expected, source_text, "Atlas pipeline fixture assumption is stale.")
-            drifted.write_text(
-                source_text.replace(
-                    expected,
-                    'data-pipeline-step="proof_oss_cloud"',
-                    1,
-                ),
-                encoding="utf-8",
-            )
-
+            expected = 'data-pipeline-step="private_tessl"'
+            self.assertIn(expected, source_text)
+            drifted.write_text(source_text.replace(expected, 'data-pipeline-step="direct_source"', 1), encoding="utf-8")
             payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
 
-        self.assertEqual(payload["status"], "blocked")
-        order_blocker = next(
-            blocker for blocker in payload["blockers"] if blocker["code"] == "pipeline_step_order_mismatch"
-        )
-        self.assertEqual(order_blocker["expected"], list(CANONICAL_ATLAS_PIPELINE_STEPS))
-        self.assertNotEqual(order_blocker["actual"], order_blocker["expected"])
+        order_blocker = next(row for row in payload["blockers"] if row["code"] == "pipeline_step_order_mismatch")
+        self.assertEqual(order_blocker["expected"], list(CANONICAL_PIPELINE_STEPS))
 
-    def test_atlas_verifier_blocks_missing_projection_metadata(self) -> None:
+    def test_default_artifact_cannot_omit_required_route(self) -> None:
+        source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            drifted = Path(tmpdir) / source.name
+            drifted.write_text("<html></html>", encoding="utf-8")
+            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
+        self.assertIn("pipeline_step_order_mismatch", {row["code"] for row in payload["blockers"]})
+
+    def test_retired_atlas_never_compares_historical_rows_with_live_matrix(self) -> None:
+        source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
+        with patch("ask.skills_sdk.docs_projection.load_capability_matrix", side_effect=AssertionError("live matrix read")):
+            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=source)
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(payload["blockers"][0]["code"], "retired_projection_artifact")
+
+    def test_renamed_retired_artifact_cannot_claim_current_verification(self) -> None:
         source = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
         with tempfile.TemporaryDirectory() as tmpdir:
-            drifted = Path(tmpdir) / "skills-sdk-platform-atlas.html"
-            source_text = source.read_text(encoding="utf-8")
-            source_text = re.sub(r'\sdata-pipeline-step="[^"]+"', "", source_text)
-            source_text = re.sub(r'\sdata-capability-summary-statuses="[^"]+"', "", source_text)
-            drifted.write_text(source_text, encoding="utf-8")
-
-            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
-
-        blocker_codes = {blocker["code"] for blocker in payload["blockers"]}
-        self.assertIn("missing_summary_counts", blocker_codes)
-        self.assertIn("pipeline_step_order_mismatch", blocker_codes)
+            copied = Path(tmpdir) / "renamed.html"
+            copied.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+            with patch("ask.skills_sdk.docs_projection.load_capability_matrix", side_effect=AssertionError("live matrix read")):
+                payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=copied)
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(payload["blockers"][0]["code"], "retired_projection_artifact")
 
     def test_verifier_returns_blocked_receipt_for_parse_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
