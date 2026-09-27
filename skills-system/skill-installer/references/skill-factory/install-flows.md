@@ -21,7 +21,8 @@ Skills from {repo}:
 Which ones would you like installed?
 ```
 
-After installing a skill, tell the user: `Restart Codex to pick up new skills.`
+After an authorised installation, tell the user the skill is available on the
+next turn, subject to discovery verification. Do not claim discovery from copying.
 
 ## Flow behavior and options
 
@@ -51,6 +52,32 @@ This is a local Skill Factory policy extension, not an upstream system-skill
 patch. Maintain it here during bridge refreshes; leave the upstream installer
 and provider-managed system files unchanged. Retire the temporary exception only
 after the required SDK workflows and integrations have been proved.
+
+For destination-aware verification, inspect the selected directory and use the
+installed Codex app-server `skills/list` request with the target working directory
+and `forceReload: true`. Require every selected package's returned path to resolve
+under `~/.agents/skills`, `enabled: true`, and no load errors. Preserve explicit-only
+invocation policy: an absent automatic prompt listing does not mean the package
+is undiscoverable. Test invocation and required behaviour separately. Do not use
+the upstream list helper's default installed annotations for this verification.
+
+### Bridge provenance and refresh
+
+This extension is repository-owned policy, not a copied upstream patch. Its
+upstream interface is OpenAI's `skill-installer` bundled with the installed Codex
+distribution. The 2026-09-27 isolated probe used CLI 0.158.0-alpha.2.1 from the
+host-signature-verified app; freshly emitted system content matched the loaded
+system tree byte-for-byte. The repository lock's creator/installer bridge entries
+check existence, not an upstream content revision, so they do not prove this
+identity by themselves.
+
+No upstream refresh was used because the change implements Jamie's local
+transitional destination policy. During a provider refresh, preserve this additive
+reference, compare the new install/list interfaces and revalidate its assumptions;
+never merge it into provider-managed source. The additive-overlay and archive-link
+checks passed. An isolated home discovery probe returned all nine selected custom
+skills enabled at the selected destination with no errors; no real-home cutover,
+skill execution or full workflow independence was proved.
 
 ### External intake and managed promotion
 

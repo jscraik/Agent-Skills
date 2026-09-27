@@ -9,6 +9,12 @@ Foundry holding -> SDK checking and preparation -> private Tessl registry ->
 Codex runtime installation, with verified OpenAI-provider exemptions. Complete
 that lifecycle and repository independence before refining either product.
 
+Jamie approved a bounded transitional exception on 2026-09-27: the selected
+existing custom skills may run from `~/.agents/skills` without prior SDK/Tessl
+processing until SDK supports the required workflows. They remain unchecked,
+not SDK-cleared. This does not cover plugins or new external intake. Follow the
+[selected-set and preservation rules](./Docs/agents/14-path-ownership-boundaries.md#transitional-selected-skills).
+
 ## Root Essentials
 
 - On a fresh checkout, run `bash scripts/bootstrap-ask.sh --json` before

@@ -134,23 +134,20 @@ Pass criteria should require evidence classification, stop behavior, and source/
 ### Skill Hardening
 
 1. Use `Use-Case Flow Designer` to identify actor, goal, success state, and extensions.
-2. Use `Deep Module Examiner` to simplify the visible skill contract.
-3. Use `Pragmatic Delivery Partner` to map validation and durable evidence.
-4. Use `XP Feedback Coach` to add one focused eval before widening.
+2. Use `Pragmatic Delivery Partner` to map validation and durable evidence.
+3. Use `XP Feedback Coach` to add one focused eval before widening.
 
 ### Architecture Review
 
 1. Use `Deep Module Examiner` to name complexity symptoms.
 2. Use `Architectural Pattern Cartographer` to compare structural options.
-3. Use `Pattern Catalog Skeptic` to reject decorative abstraction.
-4. Use `Pragmatic Delivery Partner` to record the reversible first move.
+3. Use `Pragmatic Delivery Partner` to record the reversible first move.
 
 ### Eval Design
 
-1. Use `Story Slicer` to turn broad claims into user-visible scenarios.
-2. Use `Use-Case Flow Designer` to add happy path, extensions, and stop states.
-3. Use `XP Feedback Coach` to keep the first run small.
-4. Use `Pragmatic Delivery Partner` to make results durable and repeatable.
+1. Use `Use-Case Flow Designer` to add happy path, extensions, and stop states.
+2. Use `XP Feedback Coach` to keep the first run small.
+3. Use `Pragmatic Delivery Partner` to make results durable and repeatable.
 
 ## Eval Probes
 
