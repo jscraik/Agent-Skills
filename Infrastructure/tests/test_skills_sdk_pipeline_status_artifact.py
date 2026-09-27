@@ -195,26 +195,14 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         self.assertFalse(static_docs["mutation_performed"])
         self.assertIn("projection-only", self.rows["static_docs"]["text"].lower())
 
-    def test_lifecycle_one_page_does_not_contradict_live_completed_capabilities(self) -> None:
-        implemented_titles = {
-            capability["title"]
-            for capability in self.runtime_status["capabilities"]
-            if capability["status"] == "implemented"
-        }
-        deferred_titles = {
-            capability["title"]
-            for capability in self.runtime_status["capabilities"]
-            if capability["status"] in {"deferred", "placeholder_blocked", "blocked_missing_adapter", "out_of_scope"}
-        }
-
-        for title in implemented_titles:
-            if title in self.lifecycle_html:
-                self.assertIn(title, self.lifecycle_html)
-        for title in deferred_titles:
-            if title in self.lifecycle_html:
-                title_index = self.lifecycle_html.index(title)
-                nearby = self.lifecycle_html[max(0, title_index - 300): title_index + 300].lower()
-                self.assertNotIn("completed", nearby)
+    def test_lifecycle_one_page_is_frozen_history_with_current_replacement(self) -> None:
+        self.assertIn('<meta name="skills-sdk-document-status" content="retired">', self.lifecycle_html)
+        self.assertIn('<details id="retired-lifecycle">', self.lifecycle_html)
+        self.assertNotIn('<details id="retired-lifecycle" open', self.lifecycle_html)
+        active = self.lifecycle_html.split('<details id="retired-lifecycle">', 1)[0]
+        for text in ("approved six-rule lifecycle", "private Tessl workspace jscraik", "Only Jamie", "OpenAI system skills"):
+            self.assertIn(text, active)
+        self.assertIn("Historical lifecycle exploration (retired)", self.html)
 
     def test_every_pipeline_section_is_represented_in_html(self) -> None:
         matrix_sections = {

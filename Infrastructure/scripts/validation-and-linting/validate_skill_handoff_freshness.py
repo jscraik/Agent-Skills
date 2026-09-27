@@ -8,6 +8,7 @@ import json
 import re
 import subprocess
 from dataclasses import asdict, dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
@@ -65,13 +66,28 @@ def _nested_repo_head(payload: dict[str, Any] | None) -> str | None:
     return None
 
 
-def _atlas_generated_head(path: Path) -> str | None:
+class _AtlasMetadata(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.head: str | None = None
+        self.retired = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if self.head is None and "data-generated-head" in attributes:
+            self.head = attributes["data-generated-head"]
+        if tag == "meta" and attributes.get("name") == "skills-sdk-document-status":
+            self.retired = self.retired or attributes.get("content") == "retired"
+
+
+def _atlas_metadata(path: Path) -> _AtlasMetadata | None:
     try:
         text = path.read_text(encoding="utf-8")
-    except OSError:
+    except (OSError, UnicodeDecodeError):
         return None
-    match = re.search(r"\bdata-generated-head=[\"']([^\"']+)[\"']", text)
-    return match.group(1) if match else None
+    metadata = _AtlasMetadata()
+    metadata.feed(text)
+    return metadata
 
 
 def _finding(code: str, path: Path, expected: str, actual: str | None) -> FreshnessFinding:
@@ -84,6 +100,24 @@ def _finding(code: str, path: Path, expected: str, actual: str | None) -> Freshn
     )
 
 
+def _freshness_checks(
+    status_json: Path, tracker_json: Path, atlas_html: Path,
+) -> tuple[list[tuple[str, Path, str | None]], list[dict[str, str]]]:
+    checks = [
+        ("status_json_head_stale", status_json, _nested_repo_head(_load_json(status_json))),
+        ("tracker_json_head_stale", tracker_json, _nested_repo_head(_load_json(tracker_json))),
+    ]
+    metadata = _atlas_metadata(atlas_html)
+    if metadata is not None and metadata.retired:
+        return checks, [{"path": _repo_relative(atlas_html), "reason": "retired_artifact_not_current_evidence"}]
+    checks.append(("atlas_generated_head_stale", atlas_html, metadata.head if metadata else None))
+    return checks, []
+
+
+def _stale_findings(current_head: str, checks: list[tuple[str, Path, str | None]]) -> list[FreshnessFinding]:
+    return [_finding(code, path, current_head, actual) for code, path, actual in checks if not _heads_match(current_head, actual)]
+
+
 def validate_freshness(
     current_head: str,
     *,
@@ -91,12 +125,8 @@ def validate_freshness(
     tracker_json: Path = DEFAULT_TRACKER_JSON,
     atlas_html: Path = DEFAULT_ATLAS_HTML,
 ) -> list[FreshnessFinding]:
-    checks = [
-        ("status_json_head_stale", status_json, _nested_repo_head(_load_json(status_json))),
-        ("tracker_json_head_stale", tracker_json, _nested_repo_head(_load_json(tracker_json))),
-        ("atlas_generated_head_stale", atlas_html, _atlas_generated_head(atlas_html)),
-    ]
-    return [_finding(code, path, current_head, actual) for code, path, actual in checks if not _heads_match(current_head, actual)]
+    checks, _ = _freshness_checks(status_json, tracker_json, atlas_html)
+    return _stale_findings(current_head, checks)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -111,21 +141,14 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = _parser().parse_args()
     head = current_git_head()
-    findings = validate_freshness(
-        head,
-        status_json=args.status_json,
-        tracker_json=args.tracker_json,
-        atlas_html=args.atlas_html,
-    )
+    checks, excluded = _freshness_checks(args.status_json, args.tracker_json, args.atlas_html)
+    findings = _stale_findings(head, checks)
     payload = {
         "schema_version": "skill-handoff-freshness.v1",
         "status": "fail" if findings else "pass",
         "current_head": head,
-        "checked_paths": [
-            _repo_relative(args.status_json),
-            _repo_relative(args.tracker_json),
-            _repo_relative(args.atlas_html),
-        ],
+        "checked_paths": [_repo_relative(path) for _, path, _ in checks],
+        "excluded_paths": excluded,
         "findings": [asdict(finding) for finding in findings],
     }
     if args.json:

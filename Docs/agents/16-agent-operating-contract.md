@@ -44,6 +44,9 @@ checkout. Its required lifecycle route does not prove destination delivery or
 registry/runtime readiness. The old reference atlas is frozen history: selecting
 it with `--artifact` returns `retired_projection_artifact` and a non-zero exit.
 Do not refresh historical atlas counts or stage order to satisfy live checks.
+The handoff freshness validator likewise lists marked retired HTML under
+`excluded_paths`, not `checked_paths`. That exclusion proves no current artifact
+freshness and does not waive status/tracker HEAD checks or active-HTML checks.
 
 For AI coding agents, start with the compact doctor command before deeper repo
 inspection:

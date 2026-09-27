@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta name="skills-sdk-document-status" content="retired">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Skills SDK User Lifecycle</title>
+  <title>Retired Skills SDK Lifecycle Exploration</title>
   <style>
     :root {
       --ink: #17202a;
@@ -738,6 +739,14 @@
 </head>
 <body>
   <main>
+    <section aria-label="Retired lifecycle and replacement direction">
+      <h1>Retired lifecycle exploration — not current instructions</h1>
+      <p>This historical proposal is superseded by the <a href="../Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle">approved six-rule lifecycle</a> and <a href="./recommended-skills-sdk-pipeline.html">active lifecycle projection</a>.</p>
+      <p>Foundry holds candidates awaiting SDK processing. SDK owns creation, update, intake, checks, evals and Tessl/Codex adapters. Checked exact versions are stored in private Tessl workspace jscraik and supply non-exempt ~/.codex/skills and ~/.codex/plugins installations. Only Jamie selects public release. Verified OpenAI plugins and OpenAI system skills remain provider-managed and exempt.</p>
+      <p>The optional-Tessl assumptions, direct-install proposals and status claims below are frozen history, not completion evidence or authority to mutate registry/runtime state. Do not update them to track current capabilities.</p>
+    </section>
+    <details id="retired-lifecycle">
+      <summary>Expand the historical proposal, not the current workflow</summary>
     <header>
       <div>
         <p class="eyebrow">Skills SDK user lifecycle</p>
@@ -1102,6 +1111,7 @@
         </div>
       </article>
     </section>
+    </details>
   </main>
 </body>
 </html>
