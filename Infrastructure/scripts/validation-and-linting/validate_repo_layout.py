@@ -171,17 +171,27 @@ def _validate_top_level(root: Path, config: dict[str, Any]) -> list[Finding]:
     return findings
 
 
+def _is_retained_entry(path: Path, root: Path, allowed_files: list[str]) -> bool:
+    """Allow regular compatibility files and only their containing directories."""
+    relative = path.relative_to(root).as_posix()
+    if path.is_symlink():
+        return False
+    if path.is_file():
+        return relative in allowed_files
+    return path.is_dir() and any(name.startswith(relative + "/") for name in allowed_files)
+
+
 def _validate_restricted_roots(root: Path, config: dict[str, Any]) -> list[Finding]:
-    """Reject retired nested destinations, retaining only named compatibility children."""
+    """Reject retired nested destinations, retaining only named compatibility files."""
     findings: list[Finding] = []
-    for name, allowed_children in config.get("restricted_roots", {}).items():
+    for name, allowed_files in config.get("restricted_roots", {}).items():
         path = root / name
         if not path.exists() and not path.is_symlink():
             continue
-        if not allowed_children or path.is_symlink() or not path.is_dir():
+        if not allowed_files or path.is_symlink() or not path.is_dir():
             rejected = [path]
         else:
-            rejected = [child for child in path.iterdir() if child.name not in allowed_children]
+            rejected = [child for child in path.rglob("*") if not _is_retained_entry(child, path, allowed_files)]
         for child in sorted(rejected):
             findings.append(Finding(
                 code="retired_nested_destination", status="violation", severity="error",

@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
 
 VALIDATOR_DIR = Path(__file__).resolve().parents[1] / "scripts" / "validation-and-linting"
 if str(VALIDATOR_DIR) not in sys.path:
@@ -138,6 +139,8 @@ def test_nested_future_destination_symlink_is_rejected(tmp_path: Path) -> None:
 def test_existing_nested_brand_is_retained_as_compatibility_only(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "skills-sdk" / "brand").mkdir(parents=True)
+    for name in ("AGENTS.md", "README.md", "brand-mark.png", "brand-mark.webp", "brand-mark@2x.png", "brand-mark@2x.webp"):
+        (root / "skills-sdk" / "brand" / name).write_text("retained brand fixture\n", encoding="utf-8")
 
     report = validate_repo_layout.validate_repo_layout(
         root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
@@ -148,6 +151,26 @@ def test_existing_nested_brand_is_retained_as_compatibility_only(tmp_path: Path)
         finding["code"] == "top_level_unclassified" and finding["path"] == "skills-sdk"
         for finding in report["findings"]
     )
+
+
+@pytest.mark.parametrize("relative", ["brand/Infrastructure", "brand/new-package", "brand/README.md"])
+def test_brand_compatibility_cannot_hide_new_directories(tmp_path: Path, relative: str) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "skills-sdk" / relative).mkdir(parents=True)
+    report = validate_repo_layout.validate_repo_layout(root, root / validate_repo_layout.DEFAULT_CONFIG)
+    assert report["status"] == "fail"
+    assert any(row["code"] == "retired_nested_destination" and row["path"] == f"skills-sdk/{relative}" for row in report["findings"])
+
+
+def test_brand_compatibility_rejects_unlisted_files_and_allowlisted_symlinks(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    brand = root / "skills-sdk" / "brand"
+    brand.mkdir(parents=True)
+    (brand / "new-module.py").write_text("pass\n", encoding="utf-8")
+    (brand / "README.md").symlink_to(root / "README.md")
+    report = validate_repo_layout.validate_repo_layout(root, root / validate_repo_layout.DEFAULT_CONFIG)
+    rejected = {row["path"] for row in report["findings"] if row["code"] == "retired_nested_destination"}
+    assert rejected == {"skills-sdk/brand/new-module.py", "skills-sdk/brand/README.md"}
 
 
 def test_root_infrastructure_alias_is_deprecated_warning(tmp_path: Path) -> None:
