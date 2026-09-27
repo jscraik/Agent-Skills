@@ -20,6 +20,9 @@ See the [six rules](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecy
 Legacy model-specific stage terms below describe existing selected proof lanes,
 not mandatory calls for every local task or substitutes for registry/runtime proof.
 Historical plans in Scope and Sources are provenance, not current scope authority.
+The [platform atlas](/Docs/reference/skills-sdk-platform-atlas.html) is explicitly
+retired as of 2026-09-27. Its preserved diagrams, status labels and next actions
+are historical evidence, not active product direction or implementation proof.
 See [PM Thread Coordination](/Docs/agents/26-pm-thread-coordination.md) for the
 master controller and completion-driven owner workflow.
 
