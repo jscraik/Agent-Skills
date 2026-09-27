@@ -35,7 +35,9 @@ into `Infrastructure/**`; keep them as real files/directories, not symlinks.
 If the managed installation route is unavailable, report the capability gap.
 The legacy `skills install` command is only for explicitly authorised recovery
 of an existing transitional consumer under the linked recovery contract, not a
-substitute for SDK admission or registry delivery. Verified OpenAI plugins and
+substitute for SDK admission or registry delivery. CLI argument-recovery examples
+offer help and read-only diagnostics, not direct-source installation or automatic
+workspace/home sync. Verified OpenAI plugins and
 system skills retain their provider-managed exemptions.
 
 `./bin/ask sdk docs verify --json --robot` checks the active capability table

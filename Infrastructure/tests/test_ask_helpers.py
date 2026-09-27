@@ -567,6 +567,22 @@ class TestParseArgsWithCapture(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 class TestExampleCommands(unittest.TestCase):
+    def test_install_argument_recovery_does_not_propose_direct_source_write(self):
+        result = build_argument_error("skills", "install", ["skills", "install", "--invalid"])
+        self.assertEqual(result.data["candidate_commands"], ["ask skills install --help", "ask repo status --json"])
+        self.assertNotIn("--remediate", result.errors[0].message)
+        self.assertNotIn("https://github.com/", result.errors[0].message)
+
+    def test_proof_argument_recovery_uses_supported_read_only_diagnostics(self):
+        result = build_argument_error("skills", "proof", ["skills", "proof", "--invalid"])
+        self.assertEqual(result.data["candidate_commands"], [
+            "ask skills proof Skills/agent-ops/autofix --json",
+            "ask skills list --json",
+            "ask skills load-preview --json",
+        ])
+        self.assertNotIn("--projection rooted", result.errors[0].message)
+        self.assertNotIn("skills sync", result.errors[0].message)
+
     def test_returns_list(self):
         result = _example_commands("skills", "list")
         self.assertIsInstance(result, list)

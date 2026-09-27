@@ -48,6 +48,8 @@ See the [six lifecycle rules](Docs/agents/14-path-ownership-boundaries.md#approv
 in-repository `foundry/` and new `skills-sdk/` children are not migration targets.
 The existing `skills-sdk/brand` directory is retained compatibility content only;
 its presence does not authorise moving implementation or packages beneath it.
+The layout policy admits only its six named regular brand files and their parent
+directory; unlisted descendants, symlinks and directories posing as files fail.
 
 The repository has three kinds of state:
 

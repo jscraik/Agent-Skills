@@ -176,8 +176,8 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "proof"): [
         "ask skills proof Skills/agent-ops/autofix --json",
-        "ask skills sync --scope workspace --projection rooted --json",
-        "ask skills sync --scope user --projection rooted --json",
+        "ask skills list --json",
+        "ask skills load-preview --json",
     ],
     ("skills", "prove"): [
         "ask skills prove Skills/agent-ops/simplify --json --robot",
@@ -383,7 +383,8 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills route \"debug flaky tests\"",
     ],
     ("skills", "install"): [
-        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --remediate",
+        "ask skills install --help",
+        "ask repo status --json",
     ],
     ("wiki", "add-asset"): [
         "ask wiki add-asset ./tmp/screenshot.png --title \"Checkout\" --summary \"Reference layout\"",

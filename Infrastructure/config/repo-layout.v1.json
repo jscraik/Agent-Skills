@@ -267,7 +267,12 @@
   "restricted_roots": {
     "foundry": [],
     "skills-sdk": [
-      "brand"
+      "brand/AGENTS.md",
+      "brand/README.md",
+      "brand/brand-mark.png",
+      "brand/brand-mark.webp",
+      "brand/brand-mark@2x.png",
+      "brand/brand-mark@2x.webp"
     ]
   }
 }
