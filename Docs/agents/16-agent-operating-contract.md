@@ -38,6 +38,13 @@ of an existing transitional consumer under the linked recovery contract, not a
 substitute for SDK admission or registry delivery. Verified OpenAI plugins and
 system skills retain their provider-managed exemptions.
 
+`./bin/ask sdk docs verify --json --robot` checks the active capability table
+in `artifacts/recommended-skills-sdk-pipeline.html` against this transitional
+checkout. Its required lifecycle route does not prove destination delivery or
+registry/runtime readiness. The old reference atlas is frozen history: selecting
+it with `--artifact` returns `retired_projection_artifact` and a non-zero exit.
+Do not refresh historical atlas counts or stage order to satisfy live checks.
+
 For AI coding agents, start with the compact doctor command before deeper repo
 inspection:
 

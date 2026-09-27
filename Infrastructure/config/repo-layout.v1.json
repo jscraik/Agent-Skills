@@ -1,8 +1,8 @@
 {
   "schema_version": "repo-layout.v1",
-  "status": "compatibility_target",
+  "status": "transitional_separation",
   "owner": "Agent Skills Kit",
-  "purpose": "Classify repository layout surfaces before migrating toward foundry/ and skills-sdk/ roots.",
+  "purpose": "Classify retained Agent-Skills paths during extraction into separate skills-foundry and skills-sdk repositories; nested product destinations are retired.",
   "target_layout": {
     "root_governance": {
       "purpose": "Repo bootstrap, governance, contribution, security, and instruction entrypoints.",
@@ -28,16 +28,14 @@
         "justfile",
         "bin",
         "memory.json",
-        "prek.toml"
+        "prek.toml",
+        "codestyle",
+        "coding-policy.json",
+        "contracts"
       ]
     },
     "foundry": {
-      "purpose": "Future canonical source home for skills, plugins, and system-skill overlays.",
-      "future_paths": [
-        "foundry/skills",
-        "foundry/plugins",
-        "foundry/system-skills"
-      ],
+      "purpose": "Legacy package sources pending explicit disposition to the separate skills-foundry holding repository.",
       "legacy_paths": [
         "Skills",
         "Plugins",
@@ -46,13 +44,7 @@
       ]
     },
     "skills_sdk": {
-      "purpose": "Future canonical home for Skills SDK lifecycle implementation, validators, schemas, docs, artifacts, and brand.",
-      "future_paths": [
-        "skills-sdk/Infrastructure",
-        "skills-sdk/docs",
-        "skills-sdk/artifacts",
-        "skills-sdk/brand"
-      ],
+      "purpose": "Legacy lifecycle implementation and reference surfaces pending extraction to the separate skills-sdk repository.",
       "legacy_paths": [
         "Infrastructure",
         "Docs",
@@ -64,7 +56,8 @@
       "paths": [
         ".harness",
         "logs",
-        "Prototypes"
+        "Prototypes",
+        "codex"
       ]
     },
     "runtime_projection": {
@@ -105,7 +98,8 @@
       "purpose": "Repository reference libraries and local knowledge surfaces that are neither SDK implementation nor skill source.",
       "paths": [
         "Wiki",
-        ".obsidian"
+        ".obsidian",
+        "AI"
       ]
     },
     "compatibility_aliases": {
@@ -127,6 +121,12 @@
         "node_modules",
         "npython3"
       ]
+    },
+    "historical_brand": {
+      "purpose": "Retained brand files only; not a destination for SDK extraction or new product roots.",
+      "legacy_paths": [
+        "skills-sdk/brand"
+      ]
     }
   },
   "symlink_policy": {
@@ -140,11 +140,10 @@
           ".agents/skills/*"
         ],
         "target_patterns": [
-          "../../Skills/*",
-          "../../foundry/skills/*"
+          "../../Skills/*"
         ],
         "owner": "skills projection sync",
-        "reason": ".agents/skills exposes canonical skill source to the local runtime without becoming editable source."
+        "reason": "Classifies existing repository-local compatibility links only; it does not authorise home-runtime installation or prove SDK admission."
       },
       {
         "id": "runtime_plugin_projection",
@@ -156,8 +155,7 @@
         ],
         "target_patterns": [
           "../../plugins*",
-          "*/agent-skills/plugins*",
-          "../../foundry/plugins/*"
+          "*/agent-skills/plugins*"
         ],
         "owner": "plugin runtime sync",
         "reason": "Plugin runtime links are runtime-facing projection or compatibility surfaces."
@@ -206,7 +204,7 @@
           "*"
         ],
         "owner": "plugin compatibility surface",
-        "reason": "Plugin-internal aliases preserve legacy skill or fixture entrypoints until foundry/plugin migration classifies them."
+        "reason": "Plugin-internal aliases preserve existing fixture or skill entrypoints until their separate-repository disposition is proved."
       },
       {
         "id": "plugin_cache_runtime_links",
@@ -230,11 +228,10 @@
           "skills-system/plugin-creator"
         ],
         "target_patterns": [
-          "../Plugins/plugin-factory/skills/*",
-          "../foundry/plugins/plugin-factory/skills/*"
+          "../Plugins/plugin-factory/skills/*"
         ],
         "owner": "system skill overlays",
-        "reason": "Legacy system-skill entrypoints remain compatibility aliases until foundry/system-skills migration."
+        "reason": "Existing overlay aliases are retained for migration compatibility, not a nested Foundry destination."
       },
       {
         "id": "root_infrastructure_aliases",
@@ -246,8 +243,7 @@
           "docs-policy.json"
         ],
         "target_patterns": [
-          "Infrastructure/*",
-          "skills-sdk/Infrastructure/*"
+          "Infrastructure/*"
         ],
         "owner": "Skills SDK layout migration",
         "reason": "Root aliases preserve older command paths but should be retired or converted to explicit wrappers during layout migration."
@@ -266,6 +262,12 @@
         "owner": "dependency managers",
         "reason": "Package managers and virtualenvs own these links; they do not define repository architecture."
       }
+    ]
+  },
+  "restricted_roots": {
+    "foundry": [],
+    "skills-sdk": [
+      "brand"
     ]
   }
 }

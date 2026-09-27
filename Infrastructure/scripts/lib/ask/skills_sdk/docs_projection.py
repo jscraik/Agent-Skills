@@ -8,17 +8,11 @@ from ask.skills_sdk.capability_status import load_capability_matrix
 
 
 DEFAULT_CAPABILITY_HTML = Path("artifacts/recommended-skills-sdk-pipeline.html")
-CANONICAL_ATLAS_PIPELINE_STEPS = (
+CANONICAL_PIPELINE_STEPS = (
     "foundry",
-    "sdk_entry_lifecycle",
-    "guardrails_oss_security",
-    "sdk_early_lifecycle",
-    "proof_oss_local",
-    "sdk_middle_lifecycle",
-    "proof_oss_cloud",
-    "sdk_prerelease_lifecycle",
-    "tessl_distribution",
-    "local_runtime",
+    "sdk_check",
+    "private_tessl",
+    "codex_runtime",
 )
 DOCS_PROJECTION_CHECKED_FIELDS = (
     "id",
@@ -35,9 +29,12 @@ class _CapabilityTableParser(HTMLParser):
         self.rows: list[dict[str, Any]] = []
         self.summary_counts: list[dict[str, Any]] = []
         self.pipeline_steps: list[str] = []
+        self.retired = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = {key: value or "" for key, value in attrs}
+        if tag == "meta" and attributes.get("name") == "skills-sdk-document-status":
+            self.retired = self.retired or attributes.get("content") == "retired"
         summary_statuses = attributes.get("data-capability-summary-statuses", "").strip()
         if summary_statuses:
             self.summary_counts.append(
@@ -71,6 +68,8 @@ class _CapabilityTableParser(HTMLParser):
 def _load_projection_rows(
     path: Path,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str], dict[str, Any] | None]:
+    if not path.is_file():
+        return [], [], [], None
     parser = _CapabilityTableParser()
     try:
         parser.feed(path.read_text(encoding="utf-8"))
@@ -79,6 +78,12 @@ def _load_projection_rows(
             "code": "projection_parse_failed",
             "path": path.as_posix(),
             "message": str(exc),
+        }
+    if parser.retired or path.name == "skills-sdk-platform-atlas.html":
+        return [], [], [], {
+            "code": "retired_projection_artifact",
+            "path": path.as_posix(),
+            "replacement": DEFAULT_CAPABILITY_HTML.as_posix(),
         }
     return parser.rows, parser.summary_counts, parser.pipeline_steps, None
 
@@ -110,12 +115,12 @@ def _summary_count_blockers(
 
 
 def _pipeline_step_blockers(pipeline_steps: list[str]) -> list[dict[str, Any]]:
-    if tuple(pipeline_steps) == CANONICAL_ATLAS_PIPELINE_STEPS:
+    if tuple(pipeline_steps) == CANONICAL_PIPELINE_STEPS:
         return []
     return [
         {
             "code": "pipeline_step_order_mismatch",
-            "expected": list(CANONICAL_ATLAS_PIPELINE_STEPS),
+            "expected": list(CANONICAL_PIPELINE_STEPS),
             "actual": pipeline_steps,
         }
     ]
@@ -128,10 +133,9 @@ def _metadata_blockers(
     expected_status_counts: dict[str, int],
 ) -> list[dict[str, Any]]:
     blockers: list[dict[str, Any]] = []
-    enforces_atlas_metadata = html_path.name == "skills-sdk-platform-atlas.html"
-    if enforces_atlas_metadata or summary_counts:
+    if summary_counts:
         blockers.extend(_summary_count_blockers(summary_counts, expected_status_counts))
-    if enforces_atlas_metadata or pipeline_steps:
+    if html_path.name == DEFAULT_CAPABILITY_HTML.name or pipeline_steps:
         blockers.extend(_pipeline_step_blockers(pipeline_steps))
     return blockers
 
@@ -195,6 +199,21 @@ def _artifact_label(repo_root: Path, html_path: Path) -> str:
     return html_path.as_posix()
 
 
+def _retired_projection_receipt(repo_root: Path, html_path: Path, blocker: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk.docs-projection-verify.v0",
+        "status": "blocked",
+        "artifact_path": _artifact_label(repo_root, html_path),
+        "matrix_path": None,
+        "capability_count": 0,
+        "projection_row_count": 0,
+        "checked_fields": ["document_status"],
+        "blockers": [blocker],
+        "mutation_performed": False,
+        "agent_summary": "Retired historical artifact cannot prove current capability agreement. Verify the active default projection instead; do not refresh the frozen atlas.",
+    }
+
+
 def verify_capability_docs_projection(
     repo_root: Path,
     *,
@@ -203,12 +222,12 @@ def verify_capability_docs_projection(
     """Verify the static capability table mirrors the SDK capability matrix."""
     relative_artifact = artifact_path or DEFAULT_CAPABILITY_HTML
     html_path = relative_artifact if relative_artifact.is_absolute() else repo_root / relative_artifact
+    rows, summary_counts, pipeline_steps, parse_blocker = _load_projection_rows(html_path)
+    if parse_blocker and parse_blocker["code"] == "retired_projection_artifact":
+        return _retired_projection_receipt(repo_root, html_path, parse_blocker)
     matrix = load_capability_matrix(repo_root)
     capabilities = matrix["capabilities"]
     expected_by_id = {row["id"]: row for row in capabilities}
-    rows, summary_counts, pipeline_steps, parse_blocker = (
-        _load_projection_rows(html_path) if html_path.is_file() else ([], [], [], None)
-    )
     actual_by_id = {row["id"]: row for row in rows}
     blockers = _blockers(html_path, expected_by_id, actual_by_id, _duplicate_ids(rows), parse_blocker)
     expected_status_counts = {

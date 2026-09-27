@@ -44,6 +44,11 @@ A copied package is not an ownership transfer or runtime activation. The table
 states the approved target, not proof that those integrations already work.
 See the [six lifecycle rules](Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle).
 
+`Infrastructure/config/repo-layout.v1.json` enforces separate destinations:
+in-repository `foundry/` and new `skills-sdk/` children are not migration targets.
+The existing `skills-sdk/brand` directory is retained compatibility content only;
+its presence does not authorise moving implementation or packages beneath it.
+
 The repository has three kinds of state:
 
 - Ground state: canonical source and policy authored by humans and agents. This

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Skills SDK Pipeline Design Map</title>
+  <title>Skills SDK Lifecycle and Transitional Capability Projection</title>
   <style>
     :root {
       --ink: #18212a;
@@ -2202,78 +2202,32 @@
   <main>
     <header>
       <div>
-        <h1>Skills SDK Pipeline Design Map</h1>
+        <h1>Skills SDK Lifecycle and Transitional Capability Projection</h1>
         <p class="subtitle">Skills are the new code. Treat them as executable knowledge packages whose sources, context, instructions, scripts, state, tool use, delegation, approvals, network access, and trust boundaries are reviewed before runtime use.</p>
       </div>
       <aside class="mission">
         <strong>Mission</strong>
-        Thin surface. Strong guardrails. Durable memory. Professional output. A Skills SDK turns markdown artifacts into agent-native knowledge packages governed across acquisition, authoring, delegation, execution, review, evidence, signatures, rollback, and release gates.
+        Approved direction: Foundry holding, SDK processing, private Tessl distribution, and selected Codex runtime installation. Verifying this page does not prove those integrations are complete.
         <a class="artifact-link" href="./skills-sdk-user-lifecycle-one-page.html">Open user lifecycle one-page</a>
       </aside>
     </header>
 
-    <nav class="atlas-controls" aria-label="Architecture atlas filters">
-      <div class="atlas-tabs" aria-label="Architecture lanes">
-        <button class="atlas-tab" type="button" aria-pressed="true" data-lane-filter="all">All</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="agent">Agent Native</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="package">Package</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="runtime">Runtime</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="security">Security</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="oss">OSS Stack</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="ci">CI and Review</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="testing">Testing</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="evalops">Eval Ops</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="knowledge">Knowledge</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="plugin">Plugin Host</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="governance">Readiness</button>
-      </div>
-      <div class="atlas-modes" aria-label="Design map view modes">
-        <button class="atlas-mode" type="button" aria-pressed="true" data-view-mode="all">Full Map</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="overview">Overview</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="lifecycle">Lifecycle</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="sdk">SDK Surface</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="knowledge">Knowledge</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="evalops">Eval Ops</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="runtime">Runtime/Security</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="oss">OSS Requirements</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="ci">CI and Adoption</button>
-        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="outputs">Outputs</button>
-      </div>
-      <div class="atlas-status" aria-live="polite">Showing the full platform architecture atlas.</div>
-    </nav>
+    <section aria-label="Approved managed lifecycle" data-lifecycle-contract="skills-lifecycle.v4">
+      <h2>Approved lifecycle — required outcome, not a completion claim</h2>
+      <p>Follow <a href="../Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle">the six-rule lifecycle</a>. The repositories are separate siblings; Agent-Skills is transitional.</p>
+      <ol>
+        <li data-pipeline-step="foundry"><strong>Skills Foundry:</strong> holds permitted skill and plugin candidates awaiting SDK processing. Holding is not approval; rejected or blocked candidates may remain. Processing does not require permanent post-processing storage or authorise deletion.</li>
+        <li data-pipeline-step="sdk_check"><strong>Skills SDK:</strong> owns SKILL.md, references, evals, creation, update, external intake, checking and installation workflows, including Tessl and Codex adapters. Portable Python does not exclude those required integrations.</li>
+        <li data-pipeline-step="private_tessl"><strong>Private Tessl workspace jscraik:</strong> stores the exact SDK-checked versions and supplies managed installations. Verify privacy; only Jamie selects public release.</li>
+        <li data-pipeline-step="codex_runtime"><strong>Codex home runtime:</strong> non-exempt copies in ~/.codex/skills and ~/.codex/plugins come from those checked Tessl versions, never direct Foundry or Agent-Skills copies. Prove full plugin components, identity, discovery, behaviour, update, rejection and recovery.</li>
+      </ol>
+      <p>Verified OpenAI plugins and OpenAI system skills are exempt and remain provider-managed through their intended routes. Origin evidence, not package naming, establishes the exception.</p>
+      <p>Missing adapters, credentials, private-registry or runtime proof block the applicable completion claim, not the required stages. This page grants no upload, runtime-mutation, spending or publication authority.</p>
+    </section>
 
     <section class="capability-status" aria-label="Skills SDK capability status truth" data-capability-status="skills-sdk.capability-status.v1" data-source-command="./bin/ask sdk status --json --robot" data-projection-source="Infrastructure/config/skills-sdk/capability-matrix.v1.json">
       <h2>Capability Truth</h2>
-      <p>This table is a visual projection of <code>./bin/ask sdk status --json --robot</code>. The command and capability matrix own current executable truth; this static HTML must not introduce capability, next-slice, hosted-docs, registry, PR, CI, review-thread, or merge-readiness claims.</p>
-      <div class="slice-proof" aria-label="Current proof points">
-        <span>Receipt-proven rollback and uninstall are implemented through project cleanup receipts.</span>
-        <span>Project conformance is implemented as a read-only adoption gate for marked project roots.</span>
-        <span>SDK lenses are implemented as deterministic read-only review selection receipts.</span>
-        <span>Lens-routed review plans are implemented as read-only review plan receipts.</span>
-        <span>Review handoff receipts define reviewer roles, required artifacts, and not-proven lanes without proving reviewer completion.</span>
-        <span>Governed review execution materializes required local review artifacts from handoff receipts and keeps external readiness unproven.</span>
-        <span>Determinism audit is implemented as an advisory read-only candidate report.</span>
-        <span>Bootstrap now proves the active worktree path and shim identity before closeout.</span>
-        <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
-        <span>Steering uptake is recorded and validator-backed before continuing implementation.</span>
-        <span>Codex desktop plugin readiness is split into package, marketplace, cache, config, skills, and hook trust proof lanes.</span>
-        <span>Command-surface files are metadata only; canonical SKILL.md source and plugin manifests remain the runtime truth.</span>
-        <span>Legacy Skill Graph Diff comments are retired and are not Skills SDK evidence.</span>
-      </div>
-      <div class="next-slice-proof" aria-label="PU-020 route-truth declutter">
-        <div>
-          <strong>PU-018 sync point</strong>
-          <span><code>review_execution</code> is implemented, and the local governed stage shape contract now uses compact <code>SKILL.md</code> authoring, structured governance in companion files, and bounded source-context reference metadata.</span>
-        </div>
-        <div>
-          <strong>PU-018 shape correction</strong>
-          <span>The SDK stage validator, scaffold, and migrated SynAIpse stage packages now enforce the agreed product shape: thin operator instructions in <code>SKILL.md</code>, contracts and provenance in <code>references/*.yaml</code>/<code>agents/openai.yaml</code>, and focused Markdown references. KnowledgeOS ingestion remains a later portable-pack slice, not a runtime dependency.</span>
-        </div>
-        <div>
-          <strong>Current slice: PU-031</strong>
-          <span>Promote security adapter discovery to a preview-only SDK lane: detect local configured scanner adapter surfaces while keeping scanner execution, credentials, network, and mutation explicitly false.</span>
-        </div>
-      </div>
+      <p>This table is a visual projection of <code>./bin/ask sdk status --json --robot</code>. It describes this transitional checkout, not the destination SDK or approved programme scope. The legacy registry out_of_scope label records an implementation gap: private Tessl distribution and SDK adapters remain required outcomes. Matrix agreement does not prove runtime, registry, hosted or programme readiness; next-slice text is legacy implementation context, not a controller assignment.</p>
       <table class="status-grid">
         <thead>
           <tr><th>Capability</th><th>Status</th><th>Owner surface</th><th>Next slice</th></tr>
@@ -2303,14 +2257,14 @@
         <tr data-capability-id="trust_store" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"><td><strong>Local trust ledger</strong><br><span>trust_store</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/trust_ledger.py</td><td>Connect trust decisions to release-mode policy only after revocation, expiry, and owner workflows have stronger evidence.</td></tr>
         <tr data-capability-id="observability_feedback" data-status="implemented" data-pipeline-sections="eval_ops,knowledge_engineering,agent_execution_control_plane"><td><strong>Redacted observability feedback preview</strong><br><span>observability_feedback</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py and Infrastructure/scripts/lib/ask/skills_sdk/observability_promotion.py</td><td>Connect promoted feedback candidates to scenario-quality screening and generated eval-case drafts without mutating source scenarios.</td></tr>
         <tr data-capability-id="refs_ingestion" data-status="implemented" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"><td><strong>Reference ingestion / knowledge capsules</strong><br><span>refs_ingestion</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/knowledge_ingest.py</td><td>After the route-truth declutter slice, add no-network fixture coverage and runtime projection proof for vendored capsule discoverability.</td></tr>
-        <tr data-capability-id="evals" data-status="implemented" data-pipeline-sections="eval_ops,full_skill_lifecycle,knowledge_engineering"><td><strong>Eval execution</strong><br><span>evals</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_runner.py</td><td>Run a bounded minimax-m2.7:cloud canary through codex exec --profile oss-cloud, then refresh the 10-case cloud challenge receipts before Tessl dry-run.</td></tr>
+        <tr data-capability-id="evals" data-status="implemented" data-pipeline-sections="eval_ops,full_skill_lifecycle,knowledge_engineering"><td><strong>Eval execution</strong><br><span>evals</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_runner.py</td><td>Run a bounded deepseek-v4-flash:0731-cloud canary through the Configs-owned authenticated wrapper and Codex oss-cloud profile, then refresh the current cloud challenge receipts before Tessl dry-run.</td></tr>
         <tr data-capability-id="eval_profiles" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Eval runner and judge profiles</strong><br><span>eval_profiles</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py</td><td>Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.</td></tr>
-        <tr data-capability-id="ab_rubric" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Canonical A/B scoring rubric</strong><br><span>ab_rubric</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py</td><td>Use this rubric digest for Codex oss-local judge execution before adding Codex oss-cloud MiniMax and Tessl DeepSeek confirmation receipts.</td></tr>
+        <tr data-capability-id="ab_rubric" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Canonical A/B scoring rubric</strong><br><span>ab_rubric</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py</td><td>Use this rubric digest for Codex oss-local judge execution before adding current oss-cloud and Tessl confirmation receipts.</td></tr>
         <tr data-capability-id="ab_preview" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Codex-backed A/B eval preview</strong><br><span>ab_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_preview.py</td><td>Use completed A/B run receipts to drive sanitized judge input preview only after evidence directory and redaction contracts stay schema-verified.</td></tr>
         <tr data-capability-id="ab_plan" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Codex-backed A/B eval execution plan</strong><br><span>ab_plan</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_plan.py</td><td>Invoke codex exec only after command-plan receipts, evidence root handling, and prompt redaction are verified against real runner output.</td></tr>
-        <tr data-capability-id="ab_run" data-status="implemented" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Codex-backed A/B eval execution</strong><br><span>ab_run</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_run.py</td><td>Use completed A/B run receipts to feed local advisory judge scoring before adding cloud MiniMax and Tessl DeepSeek confirmation receipts.</td></tr>
+        <tr data-capability-id="ab_run" data-status="implemented" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Codex-backed A/B eval execution</strong><br><span>ab_run</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_run.py</td><td>Use completed A/B run receipts to feed local advisory judge scoring before adding cloud and Tessl confirmation receipts.</td></tr>
         <tr data-capability-id="ab_judge_preview" data-status="preview_only" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Codex-backed A/B judge input preview</strong><br><span>ab_judge_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py</td><td>Use this sanitized input as the only payload sent to local advisory judge scoring.</td></tr>
-        <tr data-capability-id="ab_judge_score" data-status="implemented" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Local A/B judge scoring</strong><br><span>ab_judge_score</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py</td><td>Add Codex oss-cloud MiniMax confirmation only after local qwen3.5:9b-mlx scoring receipts are calibrated against expected labels.</td></tr>
+        <tr data-capability-id="ab_judge_score" data-status="implemented" data-pipeline-sections="eval_ops,agent_execution_control_plane,release_decision_matrix"><td><strong>Local A/B judge scoring</strong><br><span>ab_judge_score</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py</td><td>Add Codex oss-cloud confirmation only after local qwen3.5:9b-mlx scoring receipts are calibrated against expected labels.</td></tr>
         <tr data-capability-id="scenario_quality_gate" data-status="preview_only" data-pipeline-sections="eval_ops,knowledge_engineering,ci_and_adoption"><td><strong>Scenario quality gate</strong><br><span>scenario_quality_gate</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py</td><td>Connect generated or observed eval candidates to this gate before promotion into release-mode eval runs.</td></tr>
         <tr data-capability-id="package_verify" data-status="implemented" data-pipeline-sections="author_golden_path,compiler_emitter_discipline,package_hardening"><td><strong>Package verification</strong><br><span>package_verify</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py</td><td>Connect package verification to signed publish only after signing is approved.</td></tr>
         <tr data-capability-id="signing" data-status="implemented" data-pipeline-sections="release_decision_matrix,full_skill_lifecycle,package_hardening"><td><strong>Package signing intent</strong><br><span>signing</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/signing_intent.py</td><td>Approve real signing adapter, key ownership, archive emission, and redaction authority before producing signatures.</td></tr>
@@ -2335,6 +2289,67 @@
       </table>
     </section>
 
+    <details id="retired-design-map">
+      <summary>Retired design exploration — historical context only</summary>
+      <div class="slice-proof" aria-label="Current proof points">
+        <span>Receipt-proven rollback and uninstall are implemented through project cleanup receipts.</span>
+        <span>Project conformance is implemented as a read-only adoption gate for marked project roots.</span>
+        <span>SDK lenses are implemented as deterministic read-only review selection receipts.</span>
+        <span>Lens-routed review plans are implemented as read-only review plan receipts.</span>
+        <span>Review handoff receipts define reviewer roles, required artifacts, and not-proven lanes without proving reviewer completion.</span>
+        <span>Governed review execution materializes required local review artifacts from handoff receipts and keeps external readiness unproven.</span>
+        <span>Determinism audit is implemented as an advisory read-only candidate report.</span>
+        <span>Bootstrap now proves the active worktree path and shim identity before closeout.</span>
+        <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
+        <span>Steering uptake is recorded and validator-backed before continuing implementation.</span>
+        <span>Codex desktop plugin readiness is split into package, marketplace, cache, config, skills, and hook trust proof lanes.</span>
+        <span>Command-surface files are metadata only; canonical SKILL.md source and plugin manifests remain the runtime truth.</span>
+        <span>Legacy Skill Graph Diff comments are retired and are not Skills SDK evidence.</span>
+      </div>
+      <div class="next-slice-proof" aria-label="PU-020 route-truth declutter">
+        <div>
+          <strong>PU-018 sync point</strong>
+          <span><code>review_execution</code> is implemented, and the local governed stage shape contract now uses compact <code>SKILL.md</code> authoring, structured governance in companion files, and bounded source-context reference metadata.</span>
+        </div>
+        <div>
+          <strong>PU-018 shape correction</strong>
+          <span>The SDK stage validator, scaffold, and migrated SynAIpse stage packages now enforce the agreed product shape: thin operator instructions in <code>SKILL.md</code>, contracts and provenance in <code>references/*.yaml</code>/<code>agents/openai.yaml</code>, and focused Markdown references. KnowledgeOS ingestion remains a later portable-pack slice, not a runtime dependency.</span>
+        </div>
+        <div>
+          <strong>Current slice: PU-031</strong>
+          <span>Promote security adapter discovery to a preview-only SDK lane: detect local configured scanner adapter surfaces while keeping scanner execution, credentials, network, and mutation explicitly false.</span>
+        </div>
+      </div>
+      <p>The proposals, optional-Tessl assumptions, status claims, commands and next actions below predate the approved lifecycle. They are not current instructions or acceptance evidence. Do not execute them as migration steps; use the current lifecycle above.</p>
+    <nav class="atlas-controls" aria-label="Architecture atlas filters">
+      <div class="atlas-tabs" aria-label="Architecture lanes">
+        <button class="atlas-tab" type="button" aria-pressed="true" data-lane-filter="all">All</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="agent">Agent Native</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="package">Package</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="runtime">Runtime</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="security">Security</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="oss">OSS Stack</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="ci">CI and Review</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="testing">Testing</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="evalops">Eval Ops</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="knowledge">Knowledge</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="plugin">Plugin Host</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="governance">Readiness</button>
+      </div>
+      <div class="atlas-modes" aria-label="Design map view modes">
+        <button class="atlas-mode" type="button" aria-pressed="true" data-view-mode="all">Full Map</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="overview">Overview</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="lifecycle">Lifecycle</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="sdk">SDK Surface</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="knowledge">Knowledge</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="evalops">Eval Ops</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="runtime">Runtime/Security</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="oss">OSS Requirements</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="ci">CI and Adoption</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="outputs">Outputs</button>
+      </div>
+      <div class="atlas-status" aria-live="polite">Showing the full platform architecture atlas.</div>
+    </nav>
     <section class="author-path" aria-label="Author golden path and skill check surface" data-collapsible data-lanes="agent package security testing ci governance" data-views="overview sdk ci">
       <div class="author-path-head">
         <div>
@@ -3698,6 +3713,7 @@
       <span><i class="key oss-key"></i>OSS implementation</span>
       <span><i class="key ci-key"></i>CI and review</span>
     </div>
+    </details>
   </main>
   <script>
     const laneLabels = {
