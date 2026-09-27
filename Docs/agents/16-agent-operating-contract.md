@@ -26,11 +26,17 @@ All agents should use `./bin/ask` for repo operations.
 | Full validation | `./bin/ask repo validate`                          |
 | List skills     | `./bin/ask skills list --category <topic>`         |
 | Audit skill     | `./bin/ask skills audit <path> --level strict`     |
-| Install skill   | `./bin/ask skills install <url> --remediate`       |
+| Install managed skill | SDK checks → checked private Tessl version → authorised runtime installation; see [Skill Management](/Docs/agents/17-skill-management.md#transitional-install-failure-recovery). |
 | Find related    | `./bin/ask graph related <skill> --depth 2`        |
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward
 into `Infrastructure/**`; keep them as real files/directories, not symlinks.
+
+If the managed installation route is unavailable, report the capability gap.
+The legacy `skills install` command is only for explicitly authorised recovery
+of an existing transitional consumer under the linked recovery contract, not a
+substitute for SDK admission or registry delivery. Verified OpenAI plugins and
+system skills retain their provider-managed exemptions.
 
 For AI coding agents, start with the compact doctor command before deeper repo
 inspection:
