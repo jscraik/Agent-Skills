@@ -3,17 +3,34 @@
 ## Status
 
 Rooted runtime projection mode is retired. Do not run `--projection rooted`.
-The current supported projection modes are `flat` and `hybrid`; use `flat`
-for normal workspace and user sync unless a current SDK command explicitly asks
-for `hybrid`.
+The supported SDK projection mode is `flat`. Projection maintenance is a
+transitional recovery operation, not the managed installation route. Follow the
+[approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle):
+new managed installations use SDK-checked private Tessl versions; verified OpenAI
+plugins and system skills retain their provider-managed routes. If that route is
+unavailable, report the capability gap without relinking home runtime paths.
 
-## Current Commands
+## Authorised Transitional Recovery
+
+Name the existing consumer, approved source and exact targets before mutation.
+Only an explicitly authorised workspace refresh permits:
 
 ```bash
 python3 bin/ask skills sync --scope workspace --projection flat --json
-python3 bin/ask skills sync --scope user --projection flat --json
 python3 bin/ask skills handles --check --json
 ```
+
+User sync is a separate home-runtime mutation. Run it only when recovery
+authority selects those home targets and this checkout as their replacement
+source; workspace refresh does not grant that authority:
+
+```bash
+python3 bin/ask skills sync --scope user --projection flat --json
+```
+
+Preserve prior working state and verify the selected consumer's discovery and
+behaviour after recovery. Do not require every home link to target this checkout.
+See [consumer-specific recovery proof](/Docs/agents/17-skill-management.md#user-runtime-links).
 
 ## Legacy Metadata
 

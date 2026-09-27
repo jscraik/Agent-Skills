@@ -2,7 +2,10 @@
 
 ## Current Mode
 
-Agent Skills Kit supports one active runtime projection mode: `flat`.
+The transitional Agent-Skills resolver supports one active projection mode:
+`flat`. This describes the existing implementation, not the target managed
+installation route. Follow the [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+for SDK-checked private Tessl versions and provider-managed OpenAI exemptions.
 
 `flat`:
 
@@ -21,7 +24,10 @@ not authorize deleting metadata required by other consumers.
 
 `ask skills sync --scope workspace` mutates repository runtime projection surfaces.
 
-`ask skills sync --scope user` relinks user-facing runtime paths after the repository projection is prepared.
+`ask skills sync --scope user` relinks user-facing runtime paths. It is not an
+automatic follow-up to workspace sync: it requires explicitly authorised
+transitional recovery for named existing consumers, home targets and an approved
+replacement source. Neither operation substitutes for a managed installation.
 
 The legacy shell flag `sync_skills.sh --project-local` maps to the canonical workspace scope.
 
@@ -58,8 +64,12 @@ CLI arguments win over environment variables.
 
 ## Recovery
 
-Use flat mode as the recovery path:
+Only for an explicitly authorised transitional workspace refresh, use flat mode:
 
 ```bash
 ./bin/ask skills sync --scope workspace --projection flat --json --robot
 ```
+
+Follow the [recovery runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md)
+for target selection and preservation. A missing managed route is a capability
+gap, not authority to recover by relinking home directories to this checkout.

@@ -3,7 +3,7 @@ schema_version: 1
 plan_id: ASK-CONTEXT-TREES-20260424
 title: "feat: Context-Budgeted Skill Trees Implementation Plan"
 type: feat
-status: implementation-in-review
+status: superseded
 date: 2026-04-24
 origin: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 spec: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
@@ -13,6 +13,12 @@ current_phase: pre-implementation-review
 ---
 
 # feat: Context-Budgeted Skill Trees Implementation Plan
+
+Superseded on 2026-09-27. Rooted runtime projection is retired; the commands,
+phase claims and unchecked tasks below are historical, not a live work queue.
+Do not resume this plan or its home-runtime mutation instructions. Follow the
+[approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+and the [current recovery runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md).
 
 ## Table of Contents
 

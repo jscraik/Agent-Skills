@@ -13,7 +13,9 @@ review_after_days: 90
 
 Rooted runtime projection mode is retired. This entry preserves the historical
 ownership failure and its lesson; it is not a current operator runbook. Use
-`flat` for normal workspace and user sync. Generate `.skillsets/**`
+the [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+for managed installation. Flat sync is limited to explicitly authorised
+transitional recovery, not ordinary home-runtime installation. Generate `.skillsets/**`
 compatibility manifests with the dedicated manifest generator rather than the
 removed rooted sync mode.
 
@@ -52,13 +54,10 @@ Those behaviors are historical evidence only. Current operators must not run
 
 ### Current Resolution
 
-Use flat projection sync for normal workspace and user runtime materialization:
-
-```bash
-./bin/ask skills sync --scope workspace --projection flat --json
-./bin/ask skills sync --scope user --projection flat --json
-./bin/ask skills handles --check --json
-```
+Follow the [transitional recovery runbook](/Docs/runbooks/migrate-flat-projection-to-rooted.md)
+to select the existing consumer, source, targets and mutation authority. It
+separates workspace refresh from home-runtime relinking. Preserve prior working
+state; do not substitute source relinking for an unavailable SDK/Tessl route.
 
 Maintain legacy `.skillsets/**` compatibility metadata separately:
 
@@ -70,7 +69,7 @@ python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --
 ## Evidence
 
 - `Docs/runbooks/migrate-flat-projection-to-rooted.md` records the retirement,
-  the supported `flat` mode, the deferred `hybrid` mode, and the current
+  the supported `flat` mode, explicit recovery authority, and the current
   compatibility commands.
 - `Infrastructure/scripts/lib/ask/commands/skills_impl.py` returns
   `ERR_INVALID_PROJECTION_MODE` for removed projection modes and directs SDK
