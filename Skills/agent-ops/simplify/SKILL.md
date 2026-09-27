@@ -220,13 +220,16 @@ or release ready.
 - Local contract, evals, task profile, discovery prompts, and reviewer rubric:
   `references/`
 - Behavior-preserving refactor planning and batch-mode guardrails:
-  `Infrastructure/references/deferred-skill-context/agent-ops-simplify/references/refactor-playbook.md`
+  `references/refactor-playbook.md`
 - Software-literature simplification lenses:
-  `Infrastructure/references/software-literature-expert-lens-pack.md` and the
+  `references/literature/software-literature-expert-lens-pack.md` and the
   Simplify row in
-  `Infrastructure/references/software-literature-skill-expertise-map.md`
+  `references/literature/software-literature-skill-expertise-map.md`
 - Archived long-form playbooks and examples:
-  `Infrastructure/references/deferred-skill-context/agent-ops-simplify/`
+  `references/archive/` (historical material, not active policy or extra evals)
+
+Resolve resources from this skill directory. Use the target repository's checks;
+historical maintenance commands and archived guidance do not override this skill.
 
 ## Execution Boundaries
 

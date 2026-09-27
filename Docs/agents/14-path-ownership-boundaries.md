@@ -4,6 +4,7 @@
 
 - [Purpose](#purpose)
 - [Approved lifecycle](#approved-lifecycle)
+- [Transitional selected skills](#transitional-selected-skills)
 - [Four-plane model](#four-plane-model)
 - [Canonical sources](#canonical-sources)
 - [Derived and runtime surfaces](#derived-and-runtime-surfaces)
@@ -35,7 +36,7 @@ responsibility at handoff, or excluded registry/runtime proof from separation.
    Jamie decides which specific versions become public; passing checks is not
    publication authority.
 4. **Codex runtimes contain installed copies.** Non-exempt managed packages in
-   `~/.codex/skills` and `~/.codex/plugins` install from checked Tessl versions,
+   `~/.agents/skills` and `~/.codex/plugins` install from checked Tessl versions,
    not directly from Foundry or Agent-Skills. Updates require newly checked
    versions. Prove identity, discovery, required behaviour and recovery; do not
    silently author in installed copies.
@@ -50,6 +51,28 @@ provider spending or live runtime mutation. Select those actions explicitly
 and retain missing proof as incomplete, not out of scope. Do not discard required
 plugin hooks, assets or MCP components to make a skills-only journey pass.
 Project-local skill proof alone does not prove home-level native plugin support.
+
+## Transitional selected skills
+
+Jamie's later decision on 2026-09-27 temporarily permits these existing custom
+skills to run without prior SDK or Tessl processing: testing, evals-router,
+sdk-scenario-generator, technical-writer, agents-md, simplify, unslopify,
+improve-agent-native and improve-codebase-architecture. Keep complete resources,
+provenance and recovery. Classify these copies as unchecked transitional skills,
+not approved releases. This exception supersedes conflicting immediate admission
+requirements for this set only; it does not cover new external intake or plugins.
+
+Use `~/.agents/skills` as the sole user-managed custom skill collection; preserve
+provider-managed system content and plugin locations. Reconcile existing aliases
+before a separately authorised live cutover. Do not expose Foundry holding for
+discovery or retain an operational dependency on Agent-Skills.
+
+Move other permitted custom skills to Foundry holding with inventory and recovery,
+not deletion. Preserve verified OpenAI system skills, including imagegen,
+skill-creator and skill-installer. An explicit origin check, not a name, grants
+the provider exemption. Retire the temporary exception only after SDK demonstrates
+all required workflows and integrations, including accepted, rejected and recovery
+behaviour. The eventual six-rule lifecycle remains the destination.
 
 ## Four-plane model
 
