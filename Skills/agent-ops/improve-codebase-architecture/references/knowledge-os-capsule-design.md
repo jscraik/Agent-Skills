@@ -342,7 +342,7 @@ Reproduction: not supplied by this reference; use the declared active skill eval
 - Overclaiming: producer validation is reported as Skills SDK, Jamie Brain, CI, release, or public-readiness proof.
 - Source blending: book, article, doc, and skill evidence collapse into one digest without source model or claim lineage.
 
-## Eval Scenarios
+## Eval Design Guidance
 
 - Given a capsule-design reference lacks source model, relationship map, downstream integration, failure modes, or eval scenarios, the validator should reject it with capsule-design-missing-sections.
 - Given a generated capsule changes skill behavior, the consumer should add or update an eval case that proves the changed decision, output, recovery path, or validation behavior.
