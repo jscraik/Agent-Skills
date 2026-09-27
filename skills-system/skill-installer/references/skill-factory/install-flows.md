@@ -21,9 +21,68 @@ Skills from {repo}:
 Which ones would you like installed?
 ```
 
-After installing a skill, tell the user: `Restart Codex to pick up new skills.`
+After an authorised installation, tell the user the skill is available on the
+next turn, subject to discovery verification. Do not claim discovery from copying.
 
 ## Flow behavior and options
+
+### Approved transitional runtime installation
+
+Jamie approved a temporary cutover on 2026-09-27: install only the explicitly
+selected existing custom skills into `~/.agents/skills`, without requiring prior
+Skills SDK processing or Tessl delivery until SDK can run its required workflows.
+Keep them classified as unchecked transitional installations, not SDK-cleared
+or release-ready packages. This exception does not apply to new external intake
+or implicitly extend to plugins.
+
+Preserve complete packages, supporting resources, provenance and recovery.
+Check external file and command dependencies separately from discovery; a copied
+folder does not prove an independent working workflow. Keep remaining custom
+skills in Foundry holding outside active discovery. Preserve provider-managed
+system skills and plugin state. Do not expose the entire holding collection or
+retain a second custom collection through `~/.codex/skills`.
+
+For a selected GitHub-backed runtime install, pass `--dest "$HOME/.agents/skills"`
+explicitly to the upstream installer. Its default destination and installed-list
+annotations may still refer to `$CODEX_HOME/skills`; do not use that default or
+those annotations as proof of the selected destination. Inspect existing aliases
+before writing, preserve recovery, and verify discovery after installation.
+
+This is a local Skill Factory policy extension, not an upstream system-skill
+patch. Maintain it here during bridge refreshes; leave the upstream installer
+and provider-managed system files unchanged. Retire the temporary exception only
+after the required SDK workflows and integrations have been proved.
+
+For destination-aware verification, inspect the selected directory and use the
+installed Codex app-server `skills/list` request with the target working directory
+and `forceReload: true`. Require every selected package's returned path to resolve
+under `~/.agents/skills`, `enabled: true`, and no load errors. Preserve explicit-only
+invocation policy: an absent automatic prompt listing does not mean the package
+is undiscoverable. Test invocation and required behaviour separately. Do not use
+the upstream list helper's default installed annotations for this verification.
+
+### Bridge provenance and refresh
+
+This extension is repository-owned policy, not a copied upstream patch. Its
+upstream interface is OpenAI's `skill-installer` bundled with the installed Codex
+distribution. The 2026-09-27 isolated probe used CLI 0.158.0-alpha.2.1 from the
+host-signature-verified app; freshly emitted system content matched the loaded
+system tree byte-for-byte. The repository lock's creator/installer bridge entries
+check existence, not an upstream content revision, so they do not prove this
+identity by themselves.
+
+No upstream refresh was used because the change implements Jamie's local
+transitional destination policy. During a provider refresh, preserve this additive
+reference, compare the new install/list interfaces and revalidate its assumptions;
+never merge it into provider-managed source. The additive-overlay and archive-link
+checks passed. An isolated home discovery probe returned all nine selected custom
+skills enabled at the selected destination with no errors; no real-home cutover,
+skill execution or full workflow independence was proved.
+
+### External intake and managed promotion
+
+The following intake and hardening procedures apply to their selected lanes;
+they do not reinstate SDK/Tessl prerequisites for the temporary cutover above.
 
 - Treat install as **External Skill Intake**, not a copy operation.
 - Before writing, inspect local candidates with `./bin/ask skills list --advanced --json` and targeted searches over `Skills/**`, `Plugins/**/skills/**`, and `skills-system/**`.
@@ -41,7 +100,7 @@ After installing a skill, tell the user: `Restart Codex to pick up new skills.`
 - Aborts if the destination skill directory already exists.
 - Installs into repo-canonical `<category>/<skill-name>` under the canonical git source tree.
 - In Agent Skills Kit, use `./bin/ask skills install <github-url> --json --robot`; this preserves upstream `.system` routing while writing to canonical source.
-- Use the raw `scripts/install-skill-from-github.py` helper only for explicit runtime-only installs into `$CODEX_HOME/skills` or when outside the Agent Skills Kit repo.
+- Use the raw `scripts/install-skill-from-github.py` helper for an explicitly selected runtime-only install with `--dest "$HOME/.agents/skills"`; do not rely on its legacy destination default.
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
 
@@ -110,6 +169,11 @@ Canonical installs must not stop at copied source. Before promoting a command ha
 
 ## Command examples
 
+The raw helper examples below require an explicitly authorised runtime install;
+they do not bypass intake or SDK checks outside the transitional exception.
+Listing annotations describe the helper's default location, not verified
+installation in `~/.agents/skills`.
+
 ```bash
 # Agent Skills Kit canonical install
 ./bin/ask skills install "https://github.com/<owner>/<repo>/tree/<ref>/<path>" --json --robot
@@ -120,9 +184,9 @@ python3 skills-system/skill-installer/scripts/list-skills.py
 # List experimental skills
 python3 skills-system/skill-installer/scripts/list-skills.py --path skills/.experimental
 
-# Install one curated skill
-python3 skills-system/skill-installer/scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name>
+# Explicit runtime destination for an authorised curated install
+python3 skills-system/skill-installer/scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name> --dest "$HOME/.agents/skills"
 
-# Install from GitHub URL
-python3 skills-system/skill-installer/scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>
+# Explicit runtime destination for an authorised GitHub install
+python3 skills-system/skill-installer/scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path> --dest "$HOME/.agents/skills"
 ```

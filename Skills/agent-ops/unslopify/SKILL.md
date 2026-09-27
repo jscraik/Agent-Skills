@@ -133,8 +133,11 @@ If gates fail, cleanup scope is unclear, reference evidence is missing, or valid
 Do not drop required context for brevity; move it into references.
 
 - Local contract, evals, interview, and task profile: `references/`
-- Cleanup lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
-- Archived full workflow: `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`
+- Cleanup lenses: `references/literature/software-literature-expert-lens-pack.md`, `references/literature/software-literature-skill-expertise-map.md`
+- Historical workflow and fixtures: `references/archive/`; not active policy or extra evals.
+
+Resolve resources from this skill directory. Archived commands do not authorise
+sync or runtime changes; use the active target repository's documented checks.
 
 ## Validation
 
