@@ -1,46 +1,52 @@
 ---
-description: Sync Agent Skills Kit projections and repair Codex skill discovery
+description: Select the authorised skill installation or transitional recovery route
 ---
 
 # /sync-skills
 
-Rebuilds the Agent Skills Kit workspace projection and refreshes Codex runtime links when skills are missing or stale.
+Resolve the intended package, consumer and authority before changing projections
+or runtime links. Missing discovery does not authorise relinking to this checkout.
 
 ## When to use
 
-- Skills are missing from Codex runtime discovery
-- You added a new skill and want it live without restarting
-- `~/.agents/skills` or `~/.codex/skills` points at a stale projection
-- You want to verify the workspace and user sync chain is healthy
+- Classify a request to sync skills or make a skill available.
+- Diagnose missing discovery or a possibly stale runtime link.
+- Recover an existing transitional consumer within explicit mutation scope.
 
 ---
 
 ## Steps
 
-// turbo
-1. Refresh the workspace projection from the repo root:
+1. Read the [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle).
+   New managed installations require SDK checks and a checked private Tessl
+   version. Verified OpenAI plugins and system skills use their provider-managed
+   routes. If the required route is unavailable, report the gap; do not use
+   direct-source installation or checkout relinking as a substitute.
+2. For transitional recovery, name the existing consumer, approved source,
+   exact workspace/home targets and recovery authority. Preserve its working
+   state. A link into another checkout is not inherently a failure.
+3. Only when workspace projection refresh is explicitly authorised, run:
 
 ```bash
 ./bin/ask skills sync --scope workspace --json --robot
 ```
 
-// turbo
-2. Refresh user runtime links:
+4. User sync is a separate mutation, not the next automatic step. Run it only
+   when the authorised recovery explicitly selects the home targets and this
+   checkout as their replacement source; otherwise skip it:
 
 ```bash
 ./bin/ask skills sync --scope user --json --robot
 ```
 
-// turbo
-3. Verify projected runtime discovery:
+5. Inspect discovery for the selected consumer:
 
 ```bash
 ./bin/ask skills list --json --robot
 ./bin/ask skills load-preview --json --robot
 ```
 
-// turbo
-4. Verify the user links resolve into this checkout:
+6. For affected home links, inspect their actual destinations:
 
 ```bash
 ls -la ~/.agents/skills ~/.codex/skills
@@ -49,10 +55,11 @@ ls -la ~/.agents/skills ~/.codex/skills
 ## Checks
 
 1. Confirm expected results:
-   - Workspace sync reports success
-   - User sync reports success
-   - Runtime links resolve to the current checkout projection
-   - No `WARN` or `REFUSED` lines in sync output
+   - Only authorised, selected mutations ran; skipped mutations are not failures.
+   - Any recovery link matches its approved target, not necessarily this checkout.
+   - Managed installation proves the selected checked registry identity,
+     discovery and required behaviour; listing files alone is not readiness.
+   - Preserve and report any `WARN` or `REFUSED` result; do not bypass its gate.
 
 2. If skill count is 0 or a link is missing, run diagnostics:
 
@@ -61,21 +68,24 @@ ls -la ~/.agents/skills ~/.codex/skills
 ./bin/ask repo closeout --changed --json --robot
 ```
 
-3. Restart the Codex session if runtime discovery still shows a stale skill list after sync and diagnostics pass.
+3. Follow [consumer-specific recovery proof](/Docs/agents/17-skill-management.md#user-runtime-links).
+   Report any discovery or behaviour gap without widening mutation authority.
 
 ---
 
 ## Invariants (do not break)
 
-- Edit canonical skill sources under `Skills/**` or `Plugins/**/skills/**`, not generated runtime projections.
+- Edit the recorded canonical source, not generated runtime projections.
 - `.agents/skills/**` is a generated runtime projection in this repo.
-- `~/.agents/skills` and `~/.codex/skills` must resolve to the current approved projection.
+- Home runtime targets follow the approved installed-version or provider route.
+  Do not force them to resolve into the active checkout.
 
 ## Error codes
 
 | Symptom | Error | Fix |
 |---------|-------|-----|
-| Runtime link points at another checkout | `POLICY_FAIL` | Re-run user sync from the intended checkout |
+| Runtime link points at another checkout | Diagnose ownership first | Compare with the approved target; do not relink automatically |
+| Managed install route unavailable | Capability gap | Preserve runtime state and report the missing SDK/Tessl capability |
 | Skill list is stale after sync | `VALIDATION_ERROR` | Run repo doctor and inspect runtime link output |
 | `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json`, then `python3 bin/ask repo status --json` |
 | Sync output includes `REFUSED` | `POLICY_FAIL` | Stop and fix the named ownership or projection blocker |
