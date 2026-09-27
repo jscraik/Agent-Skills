@@ -8,6 +8,12 @@ instructions while preserving the commands agents need when working on skills.
 Before changing skills, sync policy, runtime projections, or agent-facing docs,
 read [UBIQUITOUS_LANGUAGE.md](/UBIQUITOUS_LANGUAGE.md).
 
+The [approved lifecycle](/Docs/agents/14-path-ownership-boundaries.md#approved-lifecycle)
+governs the target: permitted holding -> SDK checks -> private Tessl version ->
+Codex home installation. Verified OpenAI plugins and system skills remain
+provider-managed and exempt from SDK processing. Commands below document
+existing transitional implementations, not proof of the target route.
+
 ## User Runtime Links
 
 Home-directory skill links are live runtime surfaces, not disposable local
@@ -34,7 +40,9 @@ separate runtime-projection lane.
 ### Curated transition set
 
 `~/.codex/skills`, `~/.codex/plugins`, and their `~/.agents` counterparts may
-temporarily expose a curated transition set while packages await SDK admission.
+already expose a curated transition set while packages await SDK admission.
+This describes legacy state to preserve until safe cutover, not permission to
+install new unchecked packages or bypass the checked Tessl route.
 That availability is neither a source-of-truth decision nor an admission into
 the active SDK workspace. Follow the rights and pre-transfer repair rules in
 [Path Ownership Boundaries](/Docs/agents/14-path-ownership-boundaries.md#bulk-admission-rule).
@@ -129,15 +137,20 @@ marketplace root is the repo root. Plugin runtime/package caches must preserve
 manifest-declared skill content; duplicate suppression belongs in
 picker/projection surfaces, not in the loader package cache.
 
-For one-command install flows, prefer:
+New managed installs use SDK checks and the private Tessl version, not a URL
+copied directly into the runtime. If that replacement cannot yet perform the
+required install, report the gap; do not substitute the following legacy route.
+
+For explicitly authorised recovery of an existing transitional consumer only,
+the legacy one-command install is:
 
 ```bash
 ./bin/ask plugins install <url> --path <plugin-path> --sync-profile --require-desktop-loadable --json --robot
 ```
 
-If this command is blocked by profile write permissions, report the blocker and
-rerun the profile sync with explicit write access rather than claiming the
-plugin is installed for Desktop:
+Within that existing-consumer recovery scope, if profile writes are blocked,
+report the blocker. Rerun sync only with matching runtime authority; filesystem
+write access alone does not establish package clearance or registry provenance:
 
 ```bash
 ./bin/ask plugins sync-local-runtime --json --robot

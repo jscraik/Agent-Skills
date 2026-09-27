@@ -4,10 +4,14 @@ Agent Skills Kit is the transitional `agent-skills` repository being separated
 into Skills SDK and Skills Foundry. Complete the separation before refining
 either product:
 
-- **Skills SDK** owns reusable Python tooling for creation, repair, validation,
-  evaluation, judging, review, packaging, and handoff.
-- **Skills Foundry** owns retained editable skill and plugin packages, including
-  package-specific scripts, eval data, references, assets, provenance, and rights.
+- **Skills Foundry** holds permitted skills and plugins awaiting SDK processing;
+  holding is not approval or installation.
+- **Skills SDK** owns the agent-facing workflow and reusable tooling for
+  creation, update, external intake, checking and installation, including the
+  required registry and runtime adapters.
+- **Tessl** holds checked versions privately in `jscraik`; these versions are
+  the distribution source for managed Codex installations. Only Jamie chooses
+  public release. Verified OpenAI plugins and system skills remain exempt.
 - **Agent-Skills** retains existing source, commands, and compatibility surfaces
   only until their replacements and consumer cutovers are proved.
 
@@ -140,17 +144,20 @@ above; use them only when a command result or owning runbook directs you here.
 ## Runtime surfaces
 
 This repo separates source, generated projections, and live runtime visibility.
+The table distinguishes existing transitional surfaces from the approved target;
+it does not claim the new installation route is implemented or verified.
 
 | Surface                                 | Purpose                                                 | Edit policy              |
 | --------------------------------------- | ------------------------------------------------------- | ------------------------ |
 | `Skills/<topic>/<skill>/SKILL.md`       | Transitional source pending recorded transfer | Follow explicit owner and rights |
 | `Plugins/<plugin>/skills/**/SKILL.md`   | Transitional plugin source pending recorded transfer | Follow explicit owner and rights |
-| `~/dev/skills-foundry/**`               | Retained editable packages after source transfer | Rights-cleared admission and repairs |
-| `~/dev/skills-sdk/**`                   | Reusable Python lifecycle tooling | Follow SDK repository guidance |
+| `~/dev/skills-foundry/**`               | Permitted candidates awaiting SDK processing | Holding does not grant SDK clearance |
+| `~/dev/skills-sdk/**`                   | Agent-facing workflow, reusable tooling and registry/runtime adapters | Follow SDK repository guidance |
+| Private Tessl workspace `jscraik`      | Exact SDK-checked distribution versions | Verify private visibility; public release is Jamie's decision |
 | `.agents/skills/**`                     | Runtime projection consumed by Codex and agent runtimes | Regenerate only          |
 | `.agents/workflows/**`, `.agents/PLANS.md` | Authored workflow and planning guidance | Edit in its applicable scope |
-| `~/.agents/skills`, `~/.codex/skills`   | Curated or accepted user runtime skill availability     | Refresh with user sync   |
-| `~/.agents/plugins`, `~/.codex/plugins` | Curated or accepted user runtime plugin availability    | Refresh with plugin sync |
+| `~/.codex/skills`, `~/.codex/plugins`  | Target installed copies from checked Tessl versions | SDK-managed installation; preserve verified OpenAI exemptions |
+| `~/.agents/skills`, `~/.agents/plugins` | Existing transitional discovery/marketplace surfaces | Preserve consumers until authorised cutover; not a new bypass route |
 
 An explicit owner decision records source authority and transfer; selecting a
 package for SDK tooling does not move its editable source. Rights-cleared copies
@@ -210,10 +217,11 @@ only when that lane is selected. Source edits alone do not authorize runtime
 sync, model calls, or external services. Stop dependent checks at the first
 failed required gate; report the exact command, status, and next diagnostic.
 
-Separation requires delivered destination replacements, every retained consumer's
-success/failure/recovery proof without Agent-Skills dependencies, and authorized
-retirement of old operational surfaces. Merged PRs or one successful pilot do
-not prove the whole separation complete.
+Separation requires the checked private-registry-to-runtime lifecycle, delivered
+destination replacements, every retained consumer's success/failure/recovery
+proof without Agent-Skills dependencies, and authorised retirement of old
+operational surfaces. Preserve complete plugin behaviour and provider exemptions.
+Merged PRs, a dry run or one successful pilot do not prove the whole outcome.
 
 ## Repository layout
 
