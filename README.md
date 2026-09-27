@@ -134,8 +134,13 @@ above; use them only when a command result or owning runbook directs you here.
 
 ### Manage skill lifecycle
 
+New managed installations use SDK checks and checked private Tessl versions.
+Report a missing capability instead of substituting a direct-source install.
+The commands below maintain existing transitional consumers within their
+authorised scope. For install failures, follow the bounded
+[transitional recovery guidance](/Docs/agents/17-skill-management.md#transitional-install-failure-recovery).
+
 ```bash
-./bin/ask skills install https://github.com/owner/repo --remediate
 ./bin/ask skills fold source-skill target-skill
 ./bin/ask skills init my-skill --category backend --description "Does X when Y"
 ./bin/ask plugins init my-plugin --with-marketplace

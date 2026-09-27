@@ -66,15 +66,26 @@ Do not apply the skill procedure as if the runtime invocation succeeded, and
 do not claim the skill was used until the runtime surface is repaired and
 proved.
 
-## Install Failure Recovery
+## Transitional Install Failure Recovery
+
+New managed installations require SDK checks and a checked private Tessl version.
+If that route cannot perform the required installation, report the capability
+gap; do not substitute the legacy command below.
+
+Use this command only for explicitly authorised recovery of an existing
+transitional consumer. It writes repository source and refreshes workspace
+projections; both effects must be within the recovery scope.
 
 ```bash
 ./bin/ask skills install <url> --remediate --robot
 ./bin/ask skills audit <path> --level strict --robot
 ```
 
-Use `--remediate` to scaffold missing files during install recovery, then run a
-strict audit before treating the skill as ready.
+Within that recovery scope, `--remediate` scaffolds missing files. The strict
+audit supplies evidence for the checks it actually runs, not SDK admission,
+registry provenance or permission to use the runtime. Prove the affected
+consumer separately before claiming recovery; new managed installations still
+require the approved SDK/Tessl route.
 
 Skill setup must follow the [Zero-Setup Agent Workspace](/Docs/agents/21-zero-setup-agent-workspace.md)
 product rule. A skill is not professionally ready if it requires the customer
