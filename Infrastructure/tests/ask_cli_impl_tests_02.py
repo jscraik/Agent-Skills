@@ -70,7 +70,7 @@ class TestAskCLI(_AskCliTestBase):
                 source.parent.mkdir(parents=True)
                 source.write_text('---\nname: demo\n---\n', encoding='utf-8')
                 blocked = CallResult(status='error')
-                blocked.data['proof'] = {'status': 'fail', 'handle': 'demo', 'resolution': {'status': 'ok', 'handle': 'demo', 'source_path': source.relative_to(repo_root).as_posix()}, 'runtime_diagnostics': {'recovery_commands': [{'kind': 'preview_user_runtime_sync', 'command': './bin/ask skills sync --scope user --projection flat --dry-run --json --robot'}]}}
+                blocked.data['proof'] = {'status': 'fail', 'handle': 'demo', 'resolution': {'status': 'ok', 'handle': 'demo', 'source_path': source.relative_to(repo_root).as_posix()}, 'runtime_diagnostics': {'recovery_commands': [{'kind': 'refresh_workspace_projection', 'command': './bin/ask skills sync --scope workspace --projection flat --json --robot'}]}}
                 outcome_proof = {'status': 'pass', 'evidence_class': 'oss_local_release_aggregate', 'evidence_ref': 'Infrastructure/artifacts/skills/demo/proof/aggregate.json', 'evidence_digest': 'sha256:current', 'scenario_set': 'demo-release-8-v1', 'case_count': 8}
                 with mock.patch.object(skills_commands, 'skills_proof', return_value=blocked), mock.patch.object(skills_commands, 'audit_skill', return_value=CallResult()) as audit_mock, mock.patch.object(skills_commands, 'skill_invocation_analytics', return_value={'status': 'unavailable_or_legacy'}), mock.patch.object(skills_commands, '_skill_workout_candidates', return_value=[]), mock.patch.object(skills_commands._impl, '_eval_shard_outcome_proof', return_value=outcome_proof):
                     result = skills_commands.skills_prove(repo_root, 'demo')
@@ -83,7 +83,7 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(proof['outcome_proof']['workout_candidates'], [])
         for key, value in outcome_proof.items():
             self.assertEqual(proof['outcome_proof'][key], value)
-        self.assertEqual(proof['next_command'], './bin/ask skills sync --scope user --projection flat --dry-run --json --robot')
+        self.assertEqual(proof['next_command'], './bin/ask skills sync --scope workspace --projection flat --json --robot')
         audit_mock.assert_called_once_with(repo_root, 'Skills/agent-ops/demo', level='compat', validation_scope='source')
 
     def test_skills_prove_rejects_stale_shard_aggregate_package_digest(self):

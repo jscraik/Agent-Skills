@@ -277,7 +277,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                     item.get("command")
                     for item in recovery_commands
                     if isinstance(item, dict)
-                    and item.get("kind") == "preview_user_runtime_sync"
+                    and item.get("kind") == "refresh_workspace_projection"
                     and isinstance(item.get("command"), str)
                 ),
                 None,

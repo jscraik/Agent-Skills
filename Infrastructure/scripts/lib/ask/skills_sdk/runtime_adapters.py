@@ -1334,28 +1334,11 @@ def build_sdk_skill_proof(
             "runtime_visibility": runtime_visibility,
         },
         "recovery_risk": (
-            "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
+            "Agent-Skills user relinking is retired. Preserve selected physical packages in ~/.agents/skills. "
+            "Managed home installation requires the approved Skills SDK lane; workspace sync does not install home packages. "
+            "This legacy workspace-link proof does not establish SDK clearance of physical installations."
         ),
         "recovery_commands": [
-            {
-                "kind": "preview_user_runtime_sync",
-                "command": skills_validation_command(
-                    "sync",
-                    "--scope",
-                    "user",
-                    "--projection",
-                    recovery_projection_mode,
-                    "--dry-run",
-                ),
-                "preconditions": [f"Workspace {recovery_projection_mode} projection validates cleanly."],
-                "permission_profile": {
-                    "filesystem": "read workspace and user runtime links",
-                    "network": "not required",
-                },
-                "expected_outcome": (
-                    "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation."
-                ),
-            },
             {
                 "kind": "refresh_workspace_projection",
                 "command": skills_validation_command(
@@ -1373,25 +1356,9 @@ def build_sdk_skill_proof(
                 "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
             {
-                "kind": "apply_user_runtime_sync",
-                "command": skills_validation_command(
-                    "sync",
-                    "--scope",
-                    "user",
-                    "--projection",
-                    recovery_projection_mode,
-                ),
-                "preconditions": ["Dry-run output is acceptable to the operator."],
-                "permission_profile": {
-                    "filesystem": "write home-directory runtime links",
-                    "network": "not required",
-                },
-                "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
-            },
-            {
                 "kind": "rerun_runtime_proof",
                 "command": skills_validation_command("proof", *validation_args),
-                "preconditions": ["User runtime link now points at the workspace projection."],
+                "preconditions": ["Inspect existing legacy workspace-link evidence only; physical home installations need SDK proof."],
                 "permission_profile": {
                     "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
                     "network": "not required",
@@ -1455,8 +1422,10 @@ def build_sdk_skill_proof(
     }
     if proof["status"] != "pass":
         recovery_guidance = (
-            f"Preview with ./bin/ask skills sync --scope user --projection {recovery_projection_mode} --dry-run, "
-            "then run workspace/user sync only if the user-runtime relink plan is acceptable."
+            f"Repository projections only: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. "
+            "Agent-Skills user relinking is retired. Preserve approved physical packages in ~/.agents/skills "
+            "and use the Skills SDK installation/proof lane for managed home packages. "
+            "Workspace sync repairs repository projections only; legacy link proof is not physical-installation clearance."
         )
         proof["runtime_failure"] = runtime_failure_payload(
             command="skills proof",

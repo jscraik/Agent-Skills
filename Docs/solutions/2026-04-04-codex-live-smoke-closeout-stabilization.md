@@ -3,12 +3,22 @@ title: Codex live smoke closeout stabilization
 asset_family: skill authoring family live smoke evaluation
 owner: Agent Skills Team
 source_artifact: Docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md
-freshness_reviewed_on: 2026-07-04
-last_updated: 2026-07-04
+freshness_reviewed_on: 2026-10-04
+last_updated: 2026-10-04
 review_after_days: 90
 ---
 
 # Codex Live Smoke Closeout Stabilization
+
+This is historical April 2026 troubleshooting evidence, not a current runner
+contract or Skills SDK readiness receipt. The commands and absolute links below
+record the original layout; do not execute them as current instructions.
+Skill Factory now retains the runner under
+`Plugins/skill-factory/scripts/skill-builder/` and the skill package under
+`Plugins/skill-factory/skills/code_quality_review/skill-builder/`.
+Discover the maintained entrypoint and its current prerequisites before use.
+This review did not rerun authenticated live smoke, inspect today's rule pack,
+or prove destination SDK, private registry or installed runtime behaviour.
 
 ## Table of Contents
 
@@ -82,6 +92,14 @@ Validated on 2026-04-04 with:
 
 ## Freshness review
 
+- 2026-10-04: Reviewed the retained entry against the current repository layout.
+  Both linked rollout plans remain present. The old `Skills/skill-builder/`
+  paths are historical, not runnable current entrypoints; the retained runner,
+  regression module and package now live under the Plugin paths named above.
+  Preserved the original dated commands and observations without treating them
+  as fresh execution evidence. The diagnostic order remains a historical lesson;
+  actual prerequisites and behaviour must be checked through the selected
+  maintained route. No live provider, runtime or rule-pack validation ran.
 - 2026-07-04: Reviewed during coding-harness canary PR validation. The solution remains retained as historical troubleshooting guidance for Codex live smoke closeout stabilization.
 
 ## Follow-up

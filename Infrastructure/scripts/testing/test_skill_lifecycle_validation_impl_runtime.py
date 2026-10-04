@@ -193,17 +193,12 @@ class SkillLifecycleRuntimeValidationTests(unittest.TestCase):
         self.assertIn("Skipping home skills sync because flat runtime skill projection was not rebuilt.", content)
         self.assertIn("Skipping profile cache publication because runtime cache rebuild was not fresh.", content)
 
-    def test_sync_script_relinks_both_home_skill_roots(self) -> None:
-        """
-        Ensure user sync updates both interoperable and Codex-native home skill roots.
-
-        Codex can read from ~/.agents/skills and ~/.codex/skills. Both must
-        point at the same regenerated projection so stale links cannot make
-        skills appear in one project/profile but disappear in another.
-        """
+    def test_sync_script_retires_user_scope_before_home_relinking(self) -> None:
+        """Reject retired user sync before any legacy home projection code."""
         content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
-        self.assertIn('sync_user_skills "$skills_dir" "$HOME/.agents/skills"', content)
-        self.assertIn('sync_user_skills "$skills_dir" "$HOME/.codex/skills"', content)
+        guard = content.index("ERR_RETIRED_USER_SYNC")
+        self.assertLess(guard, content.index("acquire_sync_lock()"))
+        self.assertLess(guard, content.index('sync_user_skills "$skills_dir" "$HOME/.agents/skills"'))
 
     def test_user_runtime_relink_postcondition_rejects_case_drift(self) -> None:
         """

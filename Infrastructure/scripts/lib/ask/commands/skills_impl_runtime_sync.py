@@ -59,8 +59,8 @@ def _verify_user_runtime_relinks(
                     code="ERR_RUNTIME",
                     message=f"User runtime link {link} does not point at the active workspace projection.",
                     fix_suggestion=(
-                        "Run ./bin/ask skills sync --scope user --projection flat --json --robot "
-                        "from the intended checkout and verify the link target casing matches exactly."
+                        "User relinking is retired. Preserve selected physical packages in ~/.agents/skills; "
+                        "use the approved Skills SDK installation lane for managed replacements."
                     ),
                 )
             )
@@ -299,7 +299,8 @@ def sync_skills(
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
 
-    For scope="workspace" this prunes stale first-level symlinks under .agents/skills, recreates symlinks for repository-owned skills, preserves a .system bridge when present, and refreshes catalog projections (SKILL.md and README.md). For scope="user" this creates user-facing symlinks from the repo workspace.
+    Workspace sync refreshes repository projections. User sync is retired and
+    returns an error before mutation to preserve independently installed skills.
 
     Parameters:
         repo_root (Path): Root path of the repository containing skills directories.
@@ -320,10 +321,23 @@ def sync_skills(
           - policy_identity: identity info from get_policy_identity().
         On error, the result will have status "error" and one or more ErrorObject entries:
           - ERR_INVALID_SCOPE when `scope` is not "workspace" or "user".
+          - ERR_RETIRED_USER_SYNC when the historical user scope is requested.
           - ERR_VALIDATION when inputs contain disallowed symlinks or other validation failures.
           - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
     """
     result = CallResult()
+    if scope == "user":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_RETIRED_USER_SYNC",
+            message="User sync is retired: Agent-Skills no longer owns home skill installation or relinking.",
+            fix_suggestion=(
+                "Keep physical selected packages in ~/.agents/skills. "
+                "Use --scope workspace for repository projections; "
+                "use Skills SDK for the managed installation workflow."
+            ),
+        ))
+        return result
     sync_options = (
         plugin_cache_refresh
         if isinstance(plugin_cache_refresh, SkillSyncOptions)
@@ -540,106 +554,6 @@ def sync_skills(
             cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         if cache_error:
             result.errors.append(cache_error)
-            return _finalize_skill_sync_result(
-                result,
-                plan,
-                logs,
-                projection_decision,
-                scope=scope,
-                dry_run=dry_run,
-                status="error",
-                plugin_cache_refresh=plugin_cache_refresh,
-            )
-    elif scope == "user":
-        try:
-            rooted_entries = _generated_root_skill_dir_names(skills_dir)
-            if rooted_entries:
-                plan["validation_status"] = "fail"
-                plan["warnings"].append("ROOTED_WORKSPACE_RESIDUE")
-                plan["rooted_workspace_entries"] = rooted_entries
-                result.errors.append(
-                    ErrorObject(
-                        code="ERR_VALIDATION",
-                        message=(
-                            "Workspace runtime still contains generated rooted skill-set entries: "
-                            + ", ".join(rooted_entries)
-                        ),
-                        fix_suggestion=(
-                            "Run ./bin/ask skills sync --scope workspace --projection flat --json --robot "
-                            "before relinking user runtime skills."
-                        ),
-                    )
-                )
-                return _finalize_skill_sync_result(
-                    result,
-                    plan,
-                    logs,
-                    projection_decision,
-                    scope=scope,
-                    dry_run=dry_run,
-                    status="error",
-                    plugin_cache_refresh=plugin_cache_refresh,
-                )
-            home = Path.home()
-            if user_sync_mode == "links-only":
-                preflight_errors = _preflight_user_runtime_relinks(plan, repo_root, skills_dir, home)
-                if preflight_errors:
-                    plan["validation_status"] = "fail"
-                    plan["warnings"].append("USER_RUNTIME_LINK_PREFLIGHT_FAILED")
-                    result.errors.extend(preflight_errors)
-                    return _finalize_skill_sync_result(
-                        result,
-                        plan,
-                        logs,
-                        projection_decision,
-                        scope=scope,
-                        dry_run=dry_run,
-                        status="error",
-                        plugin_cache_refresh=plugin_cache_refresh,
-                    )
-            _append_user_runtime_relinks(
-                plan,
-                logs,
-                repo_root,
-                skills_dir,
-                dry_run=dry_run,
-                include_plugin_mirrors=user_sync_mode == "full",
-                replace_runtime_links=user_sync_mode == "full",
-            )
-            relink_errors = _verify_user_runtime_relinks(
-                plan,
-                repo_root,
-                home,
-                skills_dir,
-                dry_run=dry_run,
-            )
-            if relink_errors:
-                plan["validation_status"] = "fail"
-                plan["warnings"].append("USER_RUNTIME_LINK_POSTCONDITION_FAILED")
-                result.errors.extend(relink_errors)
-                return _finalize_skill_sync_result(
-                    result,
-                    plan,
-                    logs,
-                    projection_decision,
-                    scope=scope,
-                    dry_run=dry_run,
-                    status="error",
-                    plugin_cache_refresh=plugin_cache_refresh,
-                )
-        except OSError as exc:
-            plan["validation_status"] = "fail"
-            plan["warnings"].append("USER_RUNTIME_LINK_SYNC_FAILED")
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_RUNTIME",
-                    message=f"User runtime link sync failed: {exc}",
-                    fix_suggestion=(
-                        "Grant write access to ~/.agents and ~/.codex, then rerun "
-                        "./bin/ask skills sync --scope user --json --robot."
-                    ),
-                )
-            )
             return _finalize_skill_sync_result(
                 result,
                 plan,

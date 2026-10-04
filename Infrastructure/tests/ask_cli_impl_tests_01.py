@@ -361,7 +361,7 @@ class TestAskCLI(_AskCliTestBase):
         output = json.loads(result.stdout)
         skill_proof = output['data']['skill_proof']
         self.assertEqual(skill_proof['proof_status'], 'blocked_reachability')
-        self.assertEqual(skill_proof['next_command'], './bin/ask skills sync --scope user --projection flat --dry-run --json --robot')
+        self.assertEqual(skill_proof['next_command'], './bin/ask skills sync --scope workspace --projection flat --json --robot')
 
     def test_skills_prove_human_output(self):
         """Verify ask skills prove renders the scorecard in non-JSON mode."""
@@ -377,7 +377,7 @@ class TestAskCLI(_AskCliTestBase):
             self.assertIn('Next:', result.stdout)
         else:
             self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-            self.assertIn('skills sync --scope user --projection flat --dry-run', result.stdout)
+            self.assertIn('skills sync --scope workspace --projection flat', result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_current_target(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -569,7 +569,7 @@ class TestAskCLI(_AskCliTestBase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'skills prove output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-        self.assertIn('skills sync --scope user --projection flat --dry-run', result.stdout)
+        self.assertIn('skills sync --scope workspace --projection flat', result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""

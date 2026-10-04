@@ -76,6 +76,15 @@ behaviour. The eventual six-rule lifecycle remains the destination.
 
 ## Four-plane model
 
+Agent-Skills user sync is retired. Both `./bin/ask skills sync --scope user`
+and the shell sync's `--user` mode reject the operation before mutation,
+including links-only and dry-run requests. Use workspace sync only for
+repository projections. Preserve selected physical packages in
+`~/.agents/skills` and provider-managed system skills; do not recreate a
+`~/.codex/skills` alias. Jamie's temporary SDK/Tessl exception remains valid
+for the selected custom skills until the required SDK workflows are ready.
+This guard does not retire Configs' separate projection or plugin routes.
+
 1. Foundry holding plane (`candidates awaiting processing`)
 
 - Curated skill and plugin packages held in `/Users/jamiecraik/dev/skills-foundry`.

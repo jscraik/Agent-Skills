@@ -495,33 +495,31 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('symlinks', output['data']['plan'])
         self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills sync --dry-run --json --robot'])
 
-    def test_skills_user_sync_defaults_to_links_only(self):
-        """User sync must not refresh plugin mirrors without an explicit full mode."""
+    def test_retired_user_sync_rejects_default_mode(self):
+        """Retired user sync rejects even a dry run without creating runtime roots."""
         cmd = [sys.executable, 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'user', '--dry-run', '--json', '--robot']
         with tempfile.TemporaryDirectory() as home:
             result = _run_cli(cmd, env={**os.environ, 'HOME': home})
             self.assertFalse((Path(home) / '.agents').exists())
             self.assertFalse((Path(home) / '.codex').exists())
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.returncode, 2, result.stderr)
         output = json.loads(result.stdout)
-        plan = output['data']['plan']
-        self.assertEqual(plan['user_sync_mode'], 'links-only')
-        self.assertNotIn('runtime_plugin_mirrors', plan)
-        self.assertEqual(plan['mutation_counts']['writes'], 0)
-        self.assertEqual(plan['mutation_counts']['deletes'], 0)
-        self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills sync --scope user --dry-run --user-sync-mode links-only --json --robot'])
+        self.assertEqual(output['status'], 'error')
+        self.assertEqual(output['errors'][0]['code'], 'ERR_RETIRED_USER_SYNC')
+        self.assertIn('User sync is retired', output['errors'][0]['message'])
 
-    def test_skills_user_sync_full_mode_keeps_plugin_mirror_route_explicit(self):
-        """The legacy plugin-mirror route remains available only with explicit full mode."""
+    def test_retired_user_sync_rejects_full_mode(self):
+        """Explicit full mode cannot reactivate the retired home-sync route."""
         cmd = [sys.executable, 'Infrastructure/bin/ask', 'skills', 'sync', '--scope', 'user', '--user-sync-mode', 'full', '--dry-run', '--json', '--robot']
         with tempfile.TemporaryDirectory() as home:
             result = _run_cli(cmd, env={**os.environ, 'HOME': home})
-        self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((Path(home) / '.agents').exists())
+            self.assertFalse((Path(home) / '.codex').exists())
+        self.assertEqual(result.returncode, 2, result.stderr)
         output = json.loads(result.stdout)
-        plan = output['data']['plan']
-        self.assertEqual(plan['user_sync_mode'], 'full')
-        self.assertIn('runtime_plugin_mirrors', plan)
-        self.assertEqual(output['data']['validation_commands'], ['./bin/ask skills sync --scope user --dry-run --user-sync-mode full --json --robot'])
+        self.assertEqual(output['status'], 'error')
+        self.assertEqual(output['errors'][0]['code'], 'ERR_RETIRED_USER_SYNC')
+        self.assertIn('User sync is retired', output['errors'][0]['message'])
 
     def test_skills_workspace_sync_preserves_full_sync_contract(self):
         """Workspace sync must not inherit the user-only links-only default."""

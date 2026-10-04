@@ -686,31 +686,19 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
                 "foreign_or_unmanaged_root",
             )
-            self.assertIn("dry-run", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("user relinking is retired", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("~/.agents/skills", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("Skills SDK", proof["runtime_failure"]["recovery_guidance"])
             recovery_kinds = {entry["kind"] for entry in proof["runtime_diagnostics"]["recovery_commands"]}
-            self.assertTrue(
-                {
-                    "preview_user_runtime_sync",
-                    "refresh_workspace_projection",
-                    "apply_user_runtime_sync",
-                    "rerun_runtime_proof",
-                }.issubset(recovery_kinds)
-            )
+            self.assertEqual(recovery_kinds, {"refresh_workspace_projection", "rerun_runtime_proof"})
             recovery_commands = {
                 entry["kind"]: entry["command"]
                 for entry in proof["runtime_diagnostics"]["recovery_commands"]
             }
-            self.assertEqual(
-                recovery_commands["preview_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-            )
+            self.assertTrue(all("sync --scope user" not in command for command in recovery_commands.values()))
             self.assertEqual(
                 recovery_commands["refresh_workspace_projection"],
                 "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-            )
-            self.assertEqual(
-                recovery_commands["apply_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --json --robot",
             )
 
 if __name__ == "__main__":

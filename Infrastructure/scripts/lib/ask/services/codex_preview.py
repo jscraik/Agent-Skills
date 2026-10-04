@@ -571,7 +571,7 @@ def _append_first_party_projection_blocker(
         "missing_count": len(missing),
         "missing_skills": missing,
         "status": "pass" if not missing else "blocked",
-        "fix_suggestion": "./bin/ask skills sync --scope workspace --json --robot && ./bin/ask skills sync --scope user --json --robot",
+        "fix_suggestion": "Home relinking is retired; preserve ~/.agents/skills. Workspace sync repairs repo projections only; use SDK for home installs.",
     }
     if missing:
         payload["blocked_checks"].append(
