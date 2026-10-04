@@ -103,7 +103,7 @@ case "$sync_scope" in
 esac
 
 if [[ "$sync_scope" == "user" ]]; then
-  echo "ERR_RETIRED_USER_SYNC: Agent-Skills no longer owns home skill installation or relinking. Keep physical selected packages in ~/.agents/skills; use --workspace for repository projections." >&2
+  echo "ERR_RETIRED_USER_SYNC: Agent-Skills no longer owns home skill installation or relinking. Keep physical selected packages in ~/.agents/skills; use --workspace for repository projections; use Skills SDK for the managed installation workflow." >&2
   exit 2
 fi
 

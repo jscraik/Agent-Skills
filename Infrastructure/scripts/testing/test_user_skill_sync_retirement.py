@@ -47,14 +47,23 @@ class UserSkillSyncRetirementTests(unittest.TestCase):
     def test_shell_user_scope_rejects_before_lock_or_projection(self) -> None:
         for arguments, scope in ((["--user"], "workspace"), ([], "user")):
             with self.subTest(arguments=arguments), tempfile.TemporaryDirectory() as temporary:
-                environment = dict(os.environ, SYNC_SKILLS_SCOPE=scope, TMPDIR=temporary)
+                root = Path(temporary)
+                temporary_home = root / "home"
+                temporary_tmpdir = root / "tmp"
+                temporary_home.mkdir()
+                temporary_tmpdir.mkdir()
+                environment = dict(
+                    os.environ, SYNC_SKILLS_SCOPE=scope,
+                    HOME=str(temporary_home), TMPDIR=str(temporary_tmpdir),
+                )
                 result = subprocess.run(
                     ["bash", str(SYNC_IMPL_SCRIPT), *arguments],
                     env=environment, text=True, capture_output=True, check=False,
                 )
                 self.assertEqual(result.returncode, 2)
                 self.assertIn("ERR_RETIRED_USER_SYNC", result.stderr)
-                self.assertEqual(list(Path(temporary).iterdir()), [])
+                self.assertEqual(list(temporary_home.iterdir()), [])
+                self.assertEqual(list(temporary_tmpdir.iterdir()), [])
 
 
 if __name__ == "__main__":

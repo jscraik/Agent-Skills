@@ -549,8 +549,9 @@ def _append_first_party_projection_blocker(
 
     This protects the SDK projection contract: every visible first-party skill
     under Skills/** must be reachable through the modeled Codex loader roots
-    after workspace and user sync. Plugin-scoped skills are handled separately
-    by the runtime plugin root lane.
+    after repairing workspace projections. Use Skills SDK for managed home
+    installs. Plugin-scoped skills are handled separately by the runtime plugin
+    root lane.
     """
     expected = _first_party_skill_inventory(repo_root)
     if not expected:
@@ -580,8 +581,8 @@ def _append_first_party_projection_blocker(
                 "status": "blocked",
                 "reason": (
                     "Canonical first-party skills under Skills/** are not all reachable "
-                    "through the modeled Codex loader roots; refresh workspace and user "
-                    "runtime projections before claiming picker coverage."
+                    "through the modeled Codex loader roots; repair workspace projections "
+                    "before claiming picker coverage. Use Skills SDK for managed home installs."
                 ),
                 "source_files": [
                     "Infrastructure/scripts/lib/ask/services/codex_preview.py",
