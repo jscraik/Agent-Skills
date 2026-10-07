@@ -57,10 +57,25 @@ Project-local skill proof alone does not prove home-level native plugin support.
 Jamie's later decision on 2026-09-27 temporarily permits these existing custom
 skills to run without prior SDK or Tessl processing: testing, evals-router,
 sdk-scenario-generator, technical-writer, agents-md, simplify, unslopify,
-improve-agent-native and improve-codebase-architecture. Keep complete resources,
+improve-agent-native and improve-codebase-architecture. Jamie subsequently added
+pr-green-sweep and explicitly exempted the database-design portable draft.
+Keep complete resources,
 provenance and recovery. Classify these copies as unchecked transitional skills,
 not approved releases. This exception supersedes conflicting immediate admission
 requirements for this set only; it does not cover new external intake or plugins.
+
+The tracked [transitional identity record](/Infrastructure/GOVERNANCE/runtime-separation/transitional-installs.json)
+binds those selected copies to independently preserved source identities, including
+every bundled file and executable mode. `./bin/ask skills proof <handle>` checks
+physical `~/.agents/skills/<handle>` copies read-only. A matching copy can pass
+installation identity without requiring a checkout projection; checkout aliases,
+runtime-local manifests, unknown packages, changed or missing resources, and links
+cannot grant that proof. Update the record only from an explicitly approved source
+revision, never by blessing current runtime contents. These remain unchecked
+transitional skills: identity does not confer SDK clearance, discovery or live
+invocation proof. Runtime evidence emitted by this transitional path stays partial;
+use the separate SDK and invocation lanes for stronger clearance. No installer or
+runtime mutation is introduced.
 
 Use `~/.agents/skills` as the sole user-managed custom skill collection; preserve
 provider-managed system content and plugin locations. Reconcile existing aliases

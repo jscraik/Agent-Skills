@@ -1,0 +1,18 @@
+{
+  "schema_version": "approved-transitional-installs/v1",
+  "purpose": "Read-only complete-package identity for Jamie-approved temporary SDK exemptions. Not SDK admission, registry provenance, discovery or live invocation proof. Never populate from runtime contents.",
+  "digest_algorithm": "foundry-mode-sensitive-length-prefixed-sha256",
+  "packages": {
+    "testing": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/testing", "sha256": "0ae6b1a8b411a72cb620ca97221684a3967c770de2ed7f9b86d9754a598e0abf", "file_count": 24},
+    "evals-router": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/evals-router", "sha256": "3d97f310235e3427e5bbf51e8cb41b82ccb1ffbe191e926c6335c7f7c0ebfc68", "file_count": 48},
+    "sdk-scenario-generator": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/sdk-scenario-generator", "sha256": "d98651752fb98d8a48cb7b1ad4c0ca4f14922722390ecc0a37182ddf4ad95b3f", "file_count": 48},
+    "technical-writer": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/technical-writer", "sha256": "aa6a1f5c8d323d607f4353def0ef869e6f6b141f5dc594c94a01615fbf2c4d63", "file_count": 67},
+    "agents-md": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/agents-md", "sha256": "46a3a8fc552b4446e01cc8834feaceb0182ba557a28127fd9020c7ad2a6ae348", "file_count": 8},
+    "simplify": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/simplify", "sha256": "20e3b8a594b9566fd2686fb6e6f2f463537dc9f64aa660e587d6f024abb6ef1f", "file_count": 33},
+    "unslopify": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/unslopify", "sha256": "cdbbab24b0e54e8fa2cabf4bed00a9122bc3841ce991050ec5809da3744725d5", "file_count": 14},
+    "improve-agent-native": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/improve-agent-native", "sha256": "e33b45eadde7804b1ab1eadd45dc6a2ebfdf7802bdf1ef189db6c515dd534627", "file_count": 73},
+    "improve-codebase-architecture": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@0c01b2e674ebbd0329e8fbf06ce517cd4c61f6ac:Skills/agent-ops/improve-codebase-architecture", "sha256": "ea766617dd3a5ced2cf74094ecdbab722e1fc706cf8286978d3789136ca6159f", "file_count": 37},
+    "pr-green-sweep": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Agent-Skills@4881756ca806d2bf33a2aff1f1a172c5c4b613c0:Skills/agent-ops/pr-green-sweep; explicitly added to Jamie's runtime selection", "sha256": "05a7b4a53cca82b514b9dc477d009c663b1b0e534c235c6c61d1d2167ba929da", "file_count": 27},
+    "database-design": {"approval": "jamie-temporary-sdk-exemption", "source_ref": "Jamie-approved eight-file portable draft and installation, 2026-10-02; independently preserved recovery digest", "sha256": "247e1c24087a0d5f369e90d73234dd0e1446872c676f1d01e2f3dd9fe9fa258a", "file_count": 8}
+  }
+}

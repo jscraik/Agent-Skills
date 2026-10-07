@@ -310,8 +310,9 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('user_runtime_ready', proof['gate_policy']['required'])
         self.assertEqual(
             proof['gate_policy']['required_semantics'],
-            'Home readiness requires Skills SDK installation proof; '
-            'checkout aliases and physical package existence do not establish clearance.',
+            'Home readiness in this command requires approved complete-package transitional identity proof; '
+            'managed SDK installations need separate SDK proof. Checkout aliases and physical package '
+            'existence alone do not establish clearance.',
         )
         self.assertIn('codex_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertIn('agents_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
@@ -506,7 +507,7 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn(skill_proof['proof_status'], ('blocked_goal_resolution', 'blocked_reachability', 'reachable_without_outcome_proof'))
         self.assertIn('goal_resolution', skill_proof)
         self.assertIn('recommended_capability', skill_proof['goal_resolution'])
-        self.assertEqual(skill_proof['validation_commands'], [skill_proof['next_command']])
+        self.assertEqual(skill_proof['validation_commands'], [skill_proof['next_command']] if skill_proof['next_command'] else [])
 
     def test_skills_prove_single_token_goal_uses_improve_fallback(self):
         """Verify one-word goals use the same improvement route as phrase goals."""
@@ -567,7 +568,8 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(result.status, 'error')
         self.assertEqual(result.data['skill_proof']['handle'], 'autofix')
         self.assertEqual(result.data['skill_proof']['proof_status'], 'blocked_reachability')
-        self.assertEqual(result.data['skill_proof']['validation_commands'], [result.data['skill_proof']['next_command']])
+        self.assertIsNone(result.data['skill_proof']['next_command'])
+        self.assertEqual(result.data['skill_proof']['validation_commands'], [])
 
     def test_skills_prove_human_output_exposes_validation(self):
         """Verify ask skills prove renders its scorecard validation command."""
