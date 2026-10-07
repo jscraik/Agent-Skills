@@ -85,7 +85,8 @@ def _hash_resource(digest: object, directory: int, relative: str, expected: tupl
         size = expected[2]
         if not stat.S_ISREG(before.st_mode) or _fingerprint(before) != expected or size > MAX_FILE_BYTES:
             raise ValueError("Invalid, changed, or oversized resource")
-        mode = b"100755" if before.st_mode & stat.S_IXUSR else b"100644"
+        execute_bits = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+        mode = b"100755" if before.st_mode & execute_bits else b"100644"
         for value in (mode, b"blob", relative.encode("utf-8")):
             digest.update(len(value).to_bytes(8, "big"))
             digest.update(value)

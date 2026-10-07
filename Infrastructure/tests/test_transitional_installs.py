@@ -79,6 +79,15 @@ class TestTransitionalInstalls(unittest.TestCase):
             with self.subTest(handle=handle):
                 self.assertEqual(self.verify(handle)["status"], "fail")
 
+    def test_group_or_other_execute_permissions_change_identity(self) -> None:
+        resource = self.package / "references/guide.md"
+        for mode in (0o654, 0o645, 0o655):
+            with self.subTest(mode=oct(mode)):
+                resource.chmod(mode)
+                self.assertEqual(self.verify()["status"], "fail")
+        resource.chmod(0o644)
+        self.assertEqual(self.verify()["status"], "pass")
+
     def test_package_and_resource_symlinks_fail(self) -> None:
         resource = self.package / "references/guide.md"
         outside = self.root / "outside.md"
