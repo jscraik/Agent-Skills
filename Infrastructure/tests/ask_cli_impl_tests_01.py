@@ -350,8 +350,8 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('claims_boundary', skill_proof)
         self.assertNotIn('sdk_skill_proof', output['data'])
 
-    def test_skills_prove_reachability_blocker_names_a_non_repeating_preview(self):
-        """Verify a blocked proof points to the prerequisite instead of itself."""
+    def test_skills_prove_home_blocker_has_no_noop_workspace_recovery(self):
+        """A ready workspace cannot fix missing SDK home-installation proof."""
         cmd = [sys.executable, 'Infrastructure/bin/ask', 'skills', 'prove', 'simplify', '--json', '--robot']
         with tempfile.TemporaryDirectory() as temp_dir:
             env = os.environ.copy()
@@ -361,7 +361,9 @@ class TestAskCLI(_AskCliTestBase):
         output = json.loads(result.stdout)
         skill_proof = output['data']['skill_proof']
         self.assertEqual(skill_proof['proof_status'], 'blocked_reachability')
-        self.assertEqual(skill_proof['next_command'], './bin/ask skills sync --scope workspace --projection flat --json --robot')
+        self.assertIsNone(skill_proof['next_command'])
+        self.assertEqual(skill_proof['validation_commands'], [])
+        self.assertIn('Skills SDK', output['errors'][0]['fix_suggestion'])
 
     def test_skills_prove_human_output(self):
         """Verify ask skills prove renders the scorecard in non-JSON mode."""
@@ -377,7 +379,7 @@ class TestAskCLI(_AskCliTestBase):
             self.assertIn('Next:', result.stdout)
         else:
             self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-            self.assertIn('skills sync --scope workspace --projection flat', result.stdout)
+            self.assertIn('Skills SDK installation/proof lane', result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_current_target(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -569,7 +571,7 @@ class TestAskCLI(_AskCliTestBase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'skills prove output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-        self.assertIn('skills sync --scope workspace --projection flat', result.stdout)
+        self.assertIn('Skills SDK installation/proof lane', result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""

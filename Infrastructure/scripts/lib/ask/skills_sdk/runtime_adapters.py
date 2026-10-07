@@ -232,7 +232,7 @@ def _path_is_under(path: Path, parent: Path) -> bool:
 
 def _runtime_mode(link: dict[str, object]) -> str:
     if bool(link.get("points_to_workspace_runtime")):
-        return "root_symlink"
+        return "legacy_workspace_alias_unproved"
     if bool(link.get("exists")):
         return "foreign_or_unmanaged_root"
     return "missing_root"
@@ -1186,7 +1186,7 @@ def build_sdk_skill_proof(
     home_path: Path,
 ) -> dict[str, Any]:
     """
-    Build a runtime reachability proof for an SDK-flat skill handle.
+    Inspect legacy runtime reachability; managed home clearance is retired here.
     
     Parameters:
         repo_root (Path): Repository root used to resolve workspace paths.
@@ -1196,7 +1196,7 @@ def build_sdk_skill_proof(
         home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
     
     Returns:
-        proof (dict[str, Any]): A proof payload describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
+        proof (dict[str, Any]): Legacy diagnostics and blocked home readiness with recovery guidance. Neither checkout aliases nor physical package existence establish SDK installation identity or live invocation clearance.
     """
     runtime_target = normalize_runtime_target(runtime_target)
     normalized = handle.strip().lstrip("$") or handle
@@ -1274,8 +1274,10 @@ def build_sdk_skill_proof(
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
     }
-    codex_runtime_ready = bool(codex_link["points_to_workspace_runtime"])
-    agents_runtime_ready = bool(agents_link["points_to_workspace_runtime"])
+    # Checkout aliases are diagnostics, never managed installation evidence.
+    # Physical packages require the separately owned Skills SDK proof lane.
+    codex_runtime_ready = False
+    agents_runtime_ready = False
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
@@ -1338,7 +1340,7 @@ def build_sdk_skill_proof(
             "Managed home installation requires the approved Skills SDK lane; workspace sync does not install home packages. "
             "This legacy workspace-link proof does not establish SDK clearance of physical installations."
         ),
-        "recovery_commands": [
+        "recovery_commands": ([
             {
                 "kind": "refresh_workspace_projection",
                 "command": skills_validation_command(
@@ -1355,6 +1357,7 @@ def build_sdk_skill_proof(
                 },
                 "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
+        ] if not direct_runtime_projection_ready else []) + [
             {
                 "kind": "rerun_runtime_proof",
                 "command": skills_validation_command("proof", *validation_args),
@@ -1379,11 +1382,7 @@ def build_sdk_skill_proof(
         "gate_policy": {
             "required": list(required_gate_ids),
             "runtime_target": runtime_target,
-            "required_semantics": (
-                "user_runtime_ready accepts either supported user runtime link, but both present aliases must resolve to the same workspace runtime."
-                if runtime_target == "any"
-                else f"{required_runtime_gate} and user_runtime_alias_consistent must be true for runtime_target={runtime_target}."
-            ),
+            "required_semantics": "Home readiness requires Skills SDK installation proof; checkout aliases and physical package existence do not establish clearance.",
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_runtime_ready",
@@ -1422,7 +1421,8 @@ def build_sdk_skill_proof(
     }
     if proof["status"] != "pass":
         recovery_guidance = (
-            f"Repository projections only: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. "
+            (f"Missing repository projection: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. " if not direct_runtime_projection_ready else "")
+            +
             "Agent-Skills user relinking is retired. Preserve approved physical packages in ~/.agents/skills "
             "and use the Skills SDK installation/proof lane for managed home packages. "
             "Workspace sync repairs repository projections only; legacy link proof is not physical-installation clearance."
@@ -1436,18 +1436,6 @@ def build_sdk_skill_proof(
             recovery_guidance=recovery_guidance,
             validation_commands=proof["validation_commands"],
         )
-    if proof["status"] == "pass":
-        runtime = proof["runtime_satisfied_by"]
-        operator_action = (
-            "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
-            if runtime == "codex_user_runtime"
-            else "Open or reload the Agents runtime and verify the handle is available there."
-        )
-        proof["live_runtime_invocation"] = {
-            "status": "manual_session_gate",
-            "runtime_satisfied_by": runtime,
-            "operator_action": operator_action,
-        }
     return proof
 
 

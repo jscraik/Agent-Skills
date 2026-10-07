@@ -56,7 +56,7 @@ This design:
 1. Keeps full workflow bodies in canonical source paths.
 2. Makes important routed skills mentionable through command-surface metadata.
 3. Keeps generated runtime and command-surface metadata reproducible.
-4. Separates resolver proof, projection proof, user sync, and live picker proof.
+4. Separates resolver proof, workspace projection, SDK home-installation proof, and live picker proof.
 
 Use these commands to inspect the live surfaces:
 
@@ -68,9 +68,9 @@ python3 bin/ask reviewers resolve skillinspector --json
 ```
 
 `python3 bin/ask skills sync --scope workspace --projection flat` refreshes
-repo-local projection files. `python3 bin/ask skills sync --scope user
---projection flat` refreshes user runtime links and profile-local plugin
-mirrors.
+repo-local projection files. User sync is retired and rejects before mutation.
+Preserve approved physical packages in `~/.agents/skills`; managed home
+installation and proof belong to Skills SDK, not checkout relinking.
 
 These are mutations, not routine validation or managed installation commands.
 Select the existing consumer, approved source, exact targets and explicit

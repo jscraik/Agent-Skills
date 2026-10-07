@@ -265,6 +265,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
+        next_command = None  # Home proof belongs to SDK; do not loop a read-only proof.
         runtime_diagnostics = command_proof.get("runtime_diagnostics")
         recovery_commands = (
             runtime_diagnostics.get("recovery_commands")
@@ -272,7 +273,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             else None
         )
         if isinstance(recovery_commands, list):
-            preview = next(
+            next_command = next(
                 (
                     item.get("command")
                     for item in recovery_commands
@@ -282,8 +283,6 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                 ),
                 None,
             )
-            if preview:
-                next_command = preview
     elif structural_detail["status"] != "pass":
         proof_status = "blocked_structural_quality"
         next_command = structural_detail.get("audit_command") or next_command

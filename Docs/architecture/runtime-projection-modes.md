@@ -24,10 +24,10 @@ not authorize deleting metadata required by other consumers.
 
 `ask skills sync --scope workspace` mutates repository runtime projection surfaces.
 
-`ask skills sync --scope user` relinks user-facing runtime paths. It is not an
-automatic follow-up to workspace sync: it requires explicitly authorised
-transitional recovery for named existing consumers, home targets and an approved
-replacement source. Neither operation substitutes for a managed installation.
+`ask skills sync --scope user` is retired and rejects before mutation, including
+dry-run. Preserve approved physical packages in `~/.agents/skills`; managed home
+installation and proof belong to Skills SDK. Workspace sync cannot install home
+packages, and legacy checkout aliases cannot establish installation clearance.
 
 The legacy shell flag `sync_skills.sh --project-local` maps to the canonical workspace scope.
 
