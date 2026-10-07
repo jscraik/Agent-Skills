@@ -863,7 +863,9 @@ def _observation_recovery_plan_command(context: dict[str, Any]) -> dict[str, Any
 
 def _projection_recovery_preconditions() -> list[str]:
     return [
-        "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
+        "Repair missing repository projections with workspace-only skill sync; "
+        "use the Skills SDK installation and proof lane for home packages. "
+        "Do not run retired user skill sync or relink existing physical packages."
     ]
 
 

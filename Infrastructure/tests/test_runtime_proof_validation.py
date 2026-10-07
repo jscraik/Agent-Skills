@@ -36,6 +36,21 @@ def _assert_partial_probe_and_recovery(testcase: unittest.TestCase, repo_root: P
 
 
 class TestRuntimeProofValidation(unittest.TestCase):
+    def test_projection_recovery_preconditions_retire_home_sync(self) -> None:
+        context = {
+            "claim_status": "blocked", "runtime_status": "blocked_runtime",
+            "handle": "autofix", "runtime_target": "agents",
+            "runtime_failure": {"recovery_guidance": "Use Skills SDK."},
+            "command": "./bin/ask skills proof autofix --json --robot",
+            "runtime_diagnostics": {"recovery_commands": [{"command": "rerun proof"}]},
+        }
+        plan = runtime_adapters._recovery_plan(context)
+        guidance = " ".join(plan["preconditions"])
+        self.assertIn("workspace-only skill sync", guidance)
+        self.assertIn("Skills SDK installation and proof lane", guidance)
+        self.assertIn("Do not run retired user skill sync", guidance)
+        self.assertNotIn("Run workspace and user skill sync", guidance)
+
     def test_legacy_aliases_cannot_clear_home_installation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
