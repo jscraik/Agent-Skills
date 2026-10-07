@@ -317,10 +317,7 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('codex_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertIn('agents_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertEqual(proof['validation_commands'], ['./bin/ask skills proof autofix --json --robot'])
-        if proof.get('status') == 'pass':
-            self.assertEqual(proof['live_runtime_invocation']['status'], 'manual_session_gate')
-        else:
-            self.assertNotIn('live_runtime_invocation', proof)
+        self.assertNotIn('live_runtime_invocation', proof)
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
