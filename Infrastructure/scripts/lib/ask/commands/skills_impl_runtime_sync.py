@@ -10,7 +10,14 @@ def _verify_user_runtime_relinks(
     *,
     dry_run: bool,
 ) -> list[ErrorObject]:
-    """Verify home runtime skill links point at this checkout's projection after user sync."""
+    """Record legacy home-link checks in ``plan`` and return mismatch errors.
+
+    Both literal and resolved targets must match the expected workspace paths.
+    A dry run records ``not_run`` and returns no errors. Link read/resolve
+    OSError failures become ERR_RUNTIME results; errors resolving expected
+    source paths and RuntimeError from symlink loops propagate. No links are
+    changed; user sync no longer calls this helper.
+    """
     checks: list[dict[str, Any]] = []
     errors: list[ErrorObject] = []
     if dry_run:
@@ -297,14 +304,15 @@ def sync_skills(
     plugin_cache_refresh: str | SkillSyncOptions = "auto",
 ) -> CallResult:
     """
-    Synchronizes derived skill views for either the repository workspace or the user environment.
+    Synchronize derived skill views for the repository workspace.
 
     Workspace sync refreshes repository projections. User sync is retired and
-    returns an error before mutation to preserve independently installed skills.
+    returns an error before validating other options or mutating files, even
+    in a dry run, to preserve independently installed skills.
 
     Parameters:
         repo_root (Path): Root path of the repository containing skills directories.
-        scope (str): Either "workspace" to sync repository-derived views or "user" to populate user-local locations.
+        scope (str): "workspace" syncs repository-derived views; "user" is rejected.
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
             SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
@@ -312,7 +320,7 @@ def sync_skills(
             "auto" refreshes best-effort during workspace sync, "skip" runs
             normal projection sync without cache mutation, and "only" refreshes
             plugin runtime caches without changing skill projections. The typed
-            form can additionally select links-only user sync.
+            form must retain user_sync_mode="full" for workspace sync.
 
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -320,10 +328,17 @@ def sync_skills(
           - logs: list of human-readable action logs,
           - policy_identity: identity info from get_policy_identity().
         On error, the result will have status "error" and one or more ErrorObject entries:
-          - ERR_INVALID_SCOPE when `scope` is not "workspace" or "user".
+          - ERR_INVALID_SCOPE for an unsupported scope or links-only workspace sync.
           - ERR_RETIRED_USER_SYNC when the historical user scope is requested.
-          - ERR_VALIDATION when inputs contain disallowed symlinks or other validation failures.
-          - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
+          - ERR_VALIDATION for an invalid cache refresh or user sync mode.
+          - ERR_INVALID_PROJECTION_MODE or ERR_DEFERRED_PROJECTION_MODE for an
+            unsupported projection choice.
+          - ERR_RUNTIME for caught projection mutation or plugin cache failures.
+        Failed syncs can leave partial changes; no rollback is performed.
+
+    Raises:
+        OSError: Filesystem inspection outside the projection mutation handler
+            fails, such as listing the system skill directory.
     """
     result = CallResult()
     if scope == "user":

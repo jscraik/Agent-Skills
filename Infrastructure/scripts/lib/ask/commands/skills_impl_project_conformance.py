@@ -187,7 +187,17 @@ def skills_sdk_capability_evidence(repo_root: Path, scope: str) -> CallResult:
 
 
 def skills_prove(repo_root: Path, handle: str) -> CallResult:
-    """Compose an agent-facing proof scorecard for one skill handle."""
+    """Compose a proof scorecard, treating an unresolved handle as a goal query.
+
+    Return the scorecard in ``data["skill_proof"]`` with reachability, source
+    audit, analytics, and local outcome evidence. Blocked or missing proof
+    returns an error result, retaining underlying proof or goal-resolution
+    errors when available. For blocked reachability, ``next_command`` is the
+    first workspace refresh offered by diagnostics, or None if none is offered.
+    Suggested recovery and workout commands are not executed.
+
+    Filesystem errors from the underlying runtime inspection propagate.
+    """
     result = CallResult()
     result.metadata["command"] = "skills prove"
     query = handle.strip()

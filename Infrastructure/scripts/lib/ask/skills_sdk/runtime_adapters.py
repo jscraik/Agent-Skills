@@ -231,6 +231,11 @@ def _path_is_under(path: Path, parent: Path) -> bool:
 
 
 def _runtime_mode(link: dict[str, object]) -> str:
+    """Classify a root as an unproved workspace alias, unmanaged, or missing.
+
+    A truthy ``points_to_workspace_runtime`` takes precedence over ``exists``;
+    absent flags are treated as false. This classification grants no readiness.
+    """
     if bool(link.get("points_to_workspace_runtime")):
         return "legacy_workspace_alias_unproved"
     if bool(link.get("exists")):
@@ -862,6 +867,7 @@ def _observation_recovery_plan_command(context: dict[str, Any]) -> dict[str, Any
 
 
 def _projection_recovery_preconditions() -> list[str]:
+    """Return recovery guidance separating workspace repair from SDK home installs."""
     return [
         "Repair missing repository projections with workspace-only skill sync; "
         "use the Skills SDK installation and proof lane for home packages. "
@@ -877,7 +883,12 @@ def _recovery_reason(context: dict[str, Any]) -> str:
 
 
 def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
-    """Build the runtime recovery plan for the current proof state."""
+    """Build recovery guidance without executing its commands.
+
+    Observability blockers take precedence. Otherwise, use diagnostic recovery
+    commands, preserving an explicitly empty list; fall back to the proof
+    command only when diagnostic commands are absent or are not a list.
+    """
     recovery_reason = _recovery_reason(context)
     runtime_diagnostics = (
         context.get("runtime_diagnostics")
