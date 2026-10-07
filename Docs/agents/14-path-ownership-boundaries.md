@@ -73,7 +73,9 @@ runtime-local manifests, unknown packages, changed or missing resources, and lin
 cannot grant that proof. Update the record only from an explicitly approved source
 revision, never by blessing current runtime contents. These remain unchecked
 transitional skills: identity does not confer SDK clearance, discovery or live
-invocation proof. Runtime evidence emitted by this transitional path stays partial;
+invocation proof. The default and explicit runtime targets remain blocked even
+when installation identity passes; no runtime is reported as satisfied by a hash
+match alone. Runtime evidence emitted by this transitional path stays partial;
 use the separate SDK and invocation lanes for stronger clearance. No installer or
 runtime mutation is introduced.
 

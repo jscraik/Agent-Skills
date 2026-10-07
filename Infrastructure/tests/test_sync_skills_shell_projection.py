@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Optional
 
 
-SYNC_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
-SYNC_IMPL_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh"
-PATH_IDENTITY_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/path_identity.py"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SYNC_SCRIPT = str(REPO_ROOT / "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh")
+SYNC_IMPL_SCRIPT = str(REPO_ROOT / "Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh")
+PATH_IDENTITY_SCRIPT = str(REPO_ROOT / "Infrastructure/scripts/lifecycle-and-sync/path_identity.py")
 
 
 def _read_sync_impl() -> str:
@@ -38,11 +39,12 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("start_watchdog", script)
         self.assertIn("exit 124", script)
 
-    def test_shell_entrypoint_keeps_flat_legacy_path_reachable(self) -> None:
+    def test_shell_entrypoint_rejects_user_scope_before_delegation(self) -> None:
         script = _read_sync_impl()
 
         delegated_block = script.split("ask_sync_args=(skills sync", 1)[0]
-        self.assertNotIn('"$sync_scope" == "user"', delegated_block)
+        self.assertIn('"$sync_scope" == "user"', delegated_block)
+        self.assertIn('ERR_RETIRED_USER_SYNC', delegated_block)
         self.assertNotIn('"$sync_scope" == "workspace"', delegated_block)
 
     def test_flat_sync_prunes_stale_plugin_owned_entries(self) -> None:
@@ -75,15 +77,21 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("Invalid sync scope: elsewhere", result.stderr)
         self.assertNotIn("Projection mode 'rooted' is parsed", result.stderr)
 
-    def test_user_scope_reaches_legacy_shell_path(self) -> None:
+    def test_user_scope_rejects_dry_run_without_runtime_writes(self) -> None:
         import tempfile
         with tempfile.TemporaryDirectory() as tmp_home:
+            home = Path(tmp_home) / "home"
+            temporary = Path(tmp_home) / "tmp"
+            home.mkdir()
+            temporary.mkdir()
             result = _run_sync_script(
                 ["--user", "--dry-run"],
-                env={"HOME": tmp_home},
+                env={"HOME": str(home), "TMPDIR": str(temporary)},
             )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn("user", result.stdout.lower())
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn("ERR_RETIRED_USER_SYNC", result.stderr)
+            self.assertEqual(list(home.iterdir()), [])
+            self.assertEqual(list(temporary.iterdir()), [])
 
     def test_plugin_cache_only_delegates_to_ask_engine(self) -> None:
         result = _run_sync_script(["--workspace", "--plugin-cache-refresh", "only", "--dry-run"])

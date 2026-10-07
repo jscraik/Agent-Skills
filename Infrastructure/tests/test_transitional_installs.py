@@ -153,7 +153,7 @@ class TestTransitionalInstalls(unittest.TestCase):
         self.record.write_text("[]", encoding="utf-8")
         self.assertEqual(self.verify()["status"], "fail")
 
-    def test_all_runtime_targets_accept_identity_without_checkout_dependency(self) -> None:
+    def test_all_runtime_targets_preserve_identity_without_granting_readiness(self) -> None:
         def absent_source(handle: str, **_kwargs: object) -> dict:
             return {"status": "not_found", "handle": handle, "runtime_visibility": "flat"}
 
@@ -163,7 +163,13 @@ class TestTransitionalInstalls(unittest.TestCase):
                     repo_root=self.repo, home_path=self.home, handle="testing",
                     runtime_target=target, resolve_skill_handle_fn=absent_source,
                 )
-                self.assertEqual(proof["status"], "pass")
+                self.assertEqual(proof["status"], "fail")
+                self.assertEqual(proof["installation_proof"]["status"], "pass")
+                self.assertFalse(proof["gates"]["user_runtime_ready"])
+                self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
+                self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+                self.assertEqual(proof["available_runtimes"], [])
+                self.assertIsNone(proof["runtime_satisfied_by"])
                 self.assertFalse(proof["sdk_clearance"])
                 self.assertFalse(proof["gates"]["canonical_source_exists"])
                 self.assertNotIn("live_runtime_invocation", proof)
@@ -188,7 +194,7 @@ class TestTransitionalInstalls(unittest.TestCase):
         self.assertEqual(result["failed_check_id"], "transitional_identity_only")
         probe = json.loads((self.repo / result["probe_artifact_path"]).read_text(encoding="utf-8"))
         self.assertEqual(probe["proof"]["status"], "partial")
-        self.assertEqual(probe["proof"]["structural_status"], "pass")
+        self.assertEqual(probe["proof"]["structural_status"], "fail")
         self.assertFalse(probe["proof"]["sdk_clearance"])
 
     def test_verification_preserves_contents_and_has_no_runtime_writes(self) -> None:

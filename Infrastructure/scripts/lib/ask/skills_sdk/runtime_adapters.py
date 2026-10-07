@@ -1311,8 +1311,11 @@ def build_sdk_skill_proof(
     transitional_install = verify_transitional_install(
         repo_root=repo_root, home=home_path, handle=normalized,
     )
-    codex_runtime_ready = transitional_install["status"] == "pass"
-    agents_runtime_ready = codex_runtime_ready
+    transitional_copy_verified = transitional_install["status"] == "pass"
+    # File identity proves installation only, not runtime discovery or invocation.
+    # This legacy command has no independent runtime-readiness verifier.
+    codex_runtime_ready = False
+    agents_runtime_ready = False
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
@@ -1329,7 +1332,7 @@ def build_sdk_skill_proof(
         required_runtime_gate,
         "user_runtime_alias_consistent",
     )
-    if user_runtime_ready:
+    if transitional_copy_verified:
         # A complete approved home copy must not depend on retired checkout
         # projections or aliases, including separately protected system roots.
         required_gate_ids = (required_runtime_gate,)
@@ -1343,7 +1346,7 @@ def build_sdk_skill_proof(
         runtime_visibility=runtime_visibility,
     )
     runtime_modes, selected_runtime_aliases = _installed_root_diagnostics(
-        user_runtime_ready, codex_link, agents_link, runtime_aliases, agents_skills / normalized,
+        transitional_copy_verified, codex_link, agents_link, runtime_aliases, agents_skills / normalized,
     )
     runtime_diagnostics = {
         "schema_version": "sdk-skill-runtime-diagnostics.v1",
@@ -1382,7 +1385,7 @@ def build_sdk_skill_proof(
                 },
                 "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
-        ] if not direct_runtime_projection_ready and not user_runtime_ready else []),
+        ] if not direct_runtime_projection_ready and not transitional_copy_verified else []),
     }
     proof = {
         "schema_version": "sdk-skill-proof.v1",
@@ -1398,7 +1401,7 @@ def build_sdk_skill_proof(
         "gate_policy": {
             "required": list(required_gate_ids),
             "runtime_target": runtime_target,
-            "required_semantics": "Home readiness in this command requires approved complete-package transitional identity proof; managed SDK installations need separate SDK proof. Checkout aliases and physical package existence alone do not establish clearance.",
+            "required_semantics": "Approved complete-package identity proves installation only. Runtime discovery and invocation require separate evidence unavailable in this legacy command; identity, checkout aliases and package existence do not establish runtime readiness or SDK clearance.",
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_runtime_ready",
@@ -1437,11 +1440,12 @@ def build_sdk_skill_proof(
     }
     if proof["status"] != "pass":
         recovery_guidance = (
-            (f"Missing repository projection: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. " if not direct_runtime_projection_ready else "")
+            (f"Missing repository projection: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. " if not direct_runtime_projection_ready and not transitional_copy_verified else "")
             +
             "Agent-Skills user relinking is retired. Preserve approved physical packages in ~/.agents/skills "
             "and use the Skills SDK installation/proof lane for managed home packages. "
-            "Workspace sync repairs repository projections only; legacy link proof is not physical-installation clearance."
+            "Workspace sync repairs repository projections only. Installation identity does not prove runtime "
+            "discovery or invocation; this legacy command cannot supply that separate evidence."
         )
         proof["runtime_failure"] = runtime_failure_payload(
             command="skills proof",

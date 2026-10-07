@@ -310,17 +310,15 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('user_runtime_ready', proof['gate_policy']['required'])
         self.assertEqual(
             proof['gate_policy']['required_semantics'],
-            'Home readiness in this command requires approved complete-package transitional identity proof; '
-            'managed SDK installations need separate SDK proof. Checkout aliases and physical package '
-            'existence alone do not establish clearance.',
+            'Approved complete-package identity proves installation only. Runtime discovery and invocation '
+            'require separate evidence unavailable in this legacy command; identity, checkout aliases and '
+            'package existence do not establish runtime readiness or SDK clearance.',
         )
         self.assertIn('codex_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertIn('agents_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertEqual(proof['validation_commands'], ['./bin/ask skills proof autofix --json --robot'])
-        if proof.get('status') == 'pass':
-            self.assertEqual(proof['live_runtime_invocation']['status'], 'manual_session_gate')
-        else:
-            self.assertNotIn('live_runtime_invocation', proof)
+        self.assertNotIn('live_runtime_invocation', proof)
+        self.assertFalse(proof['sdk_clearance'])
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
