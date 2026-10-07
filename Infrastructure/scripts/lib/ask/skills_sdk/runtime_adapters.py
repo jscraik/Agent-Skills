@@ -892,7 +892,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             "Projection links are already present; recover or recheck the live observability lane.",
             "Do not run projection sync as the primary recovery step for missing invocation telemetry.",
         ]
-    elif isinstance(diagnostic_commands, list) and diagnostic_commands:
+    elif isinstance(diagnostic_commands, list):
         next_commands = [
             {
                 "command": str(item.get("command") or context["command"]),
@@ -1359,18 +1359,7 @@ def build_sdk_skill_proof(
                 },
                 "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
-        ] if not direct_runtime_projection_ready else []) + [
-            {
-                "kind": "rerun_runtime_proof",
-                "command": skills_validation_command("proof", *validation_args),
-                "preconditions": ["Inspect existing legacy workspace-link evidence only; physical home installations need SDK proof."],
-                "permission_profile": {
-                    "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
-                    "network": "not required",
-                },
-                "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
-            },
-        ],
+        ] if not direct_runtime_projection_ready else []),
     }
     proof = {
         "schema_version": "sdk-skill-proof.v1",

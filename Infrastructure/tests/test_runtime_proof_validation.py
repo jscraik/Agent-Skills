@@ -42,9 +42,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
             "handle": "autofix", "runtime_target": "agents",
             "runtime_failure": {"recovery_guidance": "Use Skills SDK."},
             "command": "./bin/ask skills proof autofix --json --robot",
-            "runtime_diagnostics": {"recovery_commands": [{"command": "rerun proof"}]},
+            "runtime_diagnostics": {"recovery_commands": []},
         }
         plan = runtime_adapters._recovery_plan(context)
+        self.assertEqual(plan["next_commands"], [])
         guidance = " ".join(plan["preconditions"])
         self.assertIn("workspace-only skill sync", guidance)
         self.assertIn("Skills SDK installation and proof lane", guidance)
@@ -712,7 +713,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertIn("~/.agents/skills", proof["runtime_diagnostics"]["recovery_risk"])
             self.assertIn("Skills SDK", proof["runtime_failure"]["recovery_guidance"])
             recovery_kinds = {entry["kind"] for entry in proof["runtime_diagnostics"]["recovery_commands"]}
-            self.assertEqual(recovery_kinds, {"rerun_runtime_proof"})
+            self.assertEqual(recovery_kinds, set())
             recovery_commands = {
                 entry["kind"]: entry["command"]
                 for entry in proof["runtime_diagnostics"]["recovery_commands"]

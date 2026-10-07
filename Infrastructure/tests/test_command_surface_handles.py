@@ -352,7 +352,7 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
         recovery_commands = proof["runtime_diagnostics"]["recovery_commands"]
-        self.assertEqual([item["kind"] for item in recovery_commands], ["rerun_runtime_proof"])
+        self.assertEqual(recovery_commands, [])
         self.assertTrue(all("sync --scope user" not in item["command"] for item in recovery_commands))
 
     def test_skills_proof_rejects_legacy_agents_alias(self) -> None:
