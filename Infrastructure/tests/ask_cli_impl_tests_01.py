@@ -308,7 +308,11 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('codex_user_link', proof['gates'])
         self.assertIn('user_runtime_ready', proof['gates'])
         self.assertIn('user_runtime_ready', proof['gate_policy']['required'])
-        self.assertIn('either supported user runtime link', proof['gate_policy']['required_semantics'])
+        self.assertEqual(
+            proof['gate_policy']['required_semantics'],
+            'Home readiness requires Skills SDK installation proof; '
+            'checkout aliases and physical package existence do not establish clearance.',
+        )
         self.assertIn('codex_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertIn('agents_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertEqual(proof['validation_commands'], ['./bin/ask skills proof autofix --json --robot'])
