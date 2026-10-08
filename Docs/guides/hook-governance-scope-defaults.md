@@ -16,7 +16,7 @@
 This document defines how governance-oriented commands in this repository should scope mutations and validation outputs.
 
 - Local developer workflows default to project-local scope. For skill sync, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` defaults to the repository workspace scope and treats `--project-local` as a backward-compatible alias.
-- Home projection updates remain available only through explicit user scope.
+- User-scope skill relinking is retired and rejects before mutation.
 - Standalone scripts should require explicit inputs where scope affects data sources or output destinations.
 
 ## Agent Mutation Default
@@ -24,7 +24,7 @@ This document defines how governance-oriented commands in this repository should
 These defaults are mandatory when an agent is asked to implement changes in this repository:
 
 1. The agent applies code and config mutations in this local project by default.
-2. Workspace-level governance or user-level home projection mutation is opt-in only and must be explicitly requested (for example via `--workspace-governance` on `verify-work.sh` or `--user` on `sync_skills.sh`).
+2. Workspace-level governance is opt-in via `--workspace-governance` on `verify-work.sh`. Home installation belongs to the separately authorised Skills SDK lane; Agent-Skills user relinking is retired.
 3. If no target project path is clear, the agent must stop and ask for the exact local project root instead of mutating shared workspace artifacts.
 4. In project-local mode, generated validation outputs must be ephemeral or local to this project and must not overwrite shared tracked artifacts.
 5. When docs and execution scope diverge, the executable project-local contract (`Infrastructure/scripts/validation-and-linting/verify-work.sh` plus explicit script inputs) takes precedence.
@@ -44,7 +44,7 @@ These defaults are mandatory when an agent is asked to implement changes in this
 - Supports explicit scope flags: `--workspace`, `--user`, and the legacy alias `--project-local`.
 - Default behavior remains repository-workspace scoped for direct invocation.
 - `--workspace` and `--project-local` keep sync mutations inside the repository and skip home runtime projections.
-- `--user` is required for home runtime projection updates.
+- `--user` is retained only to reject retired requests before mutation, including dry-run.
 
 3. Standalone hook-governance scripts in this repository
 
@@ -56,7 +56,7 @@ These defaults are mandatory when an agent is asked to implement changes in this
 1. Workspace-by-design scripts:
 
 - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --workspace` for repository-local runtime projection sync
-- `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --user` for explicit home runtime projection sync
+- Managed home installation uses Skills SDK; preserve approved physical packages in `~/.agents/skills`.
 - Any future governance scripts that intentionally aggregate across repositories
 
 2. Scope-inherited scripts (recommended to stay input-driven):
@@ -95,7 +95,6 @@ For direct sync invocation:
 ```bash
 bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --workspace
 bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --project-local  # legacy alias for --workspace
-bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --user           # explicit home runtime projection
 ```
 
 ## Hook Command Shape

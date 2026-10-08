@@ -134,77 +134,49 @@ class TestAskSkillsDoctor(unittest.TestCase):
                 json.dumps(context)
                 self.assertTrue(all(isinstance(event, dict) for event in context["events"].values()))
 
-    def test_runtime_target_codex_fails_closed_when_only_agents_runtime_is_ready(self) -> None:
+    def _legacy_agents_alias_fixture(self, sandbox: Path) -> tuple[Path, Path, dict]:
+        repo_root = sandbox / "repo"
+        for relative in ("Skills/agent-ops/autofix/SKILL.md", ".agents/skills/autofix/SKILL.md"):
+            skill = repo_root / relative
+            skill.parent.mkdir(parents=True)
+            skill.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+        home = sandbox / "home"
+        (home / ".agents").mkdir(parents=True)
+        (home / ".agents/skills").symlink_to(repo_root / ".agents/skills")
+        (home / ".codex").mkdir()
+        resolution = {"status": "ok", "handle": "autofix", "source_path": "Skills/agent-ops/autofix/SKILL.md"}
+        return repo_root, home, resolution
+
+    def test_runtime_targets_reject_legacy_agents_workspace_alias(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            sandbox = Path(tmp)
-            repo_root = sandbox / "repo"
-            canonical_source = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
-            canonical_source.parent.mkdir(parents=True)
-            canonical_source.write_text("---\nname: autofix\n---\n", encoding="utf-8")
-            workspace_handle = repo_root / ".agents" / "skills" / "autofix" / "SKILL.md"
-            workspace_handle.parent.mkdir(parents=True)
-            workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
-            home = sandbox / "home"
-            home.mkdir()
-            (home / ".agents").mkdir()
-            (home / ".agents" / "skills").symlink_to(repo_root / ".agents" / "skills")
-            (home / ".codex").mkdir()
-
-            resolution = {
-                "status": "ok",
-                "handle": "autofix",
-                "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            }
-
+            repo_root, home, resolution = self._legacy_agents_alias_fixture(Path(tmp))
             with (
                 patch("ask.commands.skills_impl.Path.home", return_value=home),
                 patch("ask.commands.skills_impl.resolve_skill_handle", return_value=resolution),
             ):
-                default_result = skills_proof(repo_root, "autofix")
-                codex_result = skills_proof(repo_root, "autofix", runtime_target="codex")
-                agents_result = skills_proof(repo_root, "autofix", runtime_target="agents")
-
-            default_proof = default_result.data["proof"]
-            self.assertEqual(default_result.status, "success")
-            self.assertEqual(default_proof["runtime_target"], "any")
-            self.assertEqual(default_proof["runtime_satisfied_by"], "agents_user_runtime")
-            self.assertTrue(default_proof["gates"]["agents_user_runtime_ready"])
-            self.assertFalse(default_proof["gates"]["codex_user_runtime_ready"])
-
-            codex_proof = codex_result.data["proof"]
-            self.assertEqual(codex_result.status, "error")
-            self.assertEqual(codex_proof["runtime_target"], "codex")
-            self.assertEqual(codex_proof["status"], "fail")
-            self.assertIsNone(codex_proof["runtime_satisfied_by"])
-            self.assertIn("agents_user_runtime", codex_proof["available_runtimes"])
-            self.assertEqual(
-                codex_proof["validation_commands"],
-                ["./bin/ask skills proof autofix --runtime-target codex --json --robot"],
-            )
-            self.assertIn("codex_user_runtime_ready", codex_proof["gate_policy"]["required"])
-            self.assertEqual(
-                codex_proof["runtime_failure"]["failed_check_id"],
-                "codex_user_runtime_ready",
-            )
-            diagnostics = codex_proof["runtime_diagnostics"]
-            self.assertEqual(diagnostics["failed_gate"], "codex_user_runtime_ready")
-            self.assertEqual(
-                diagnostics["runtime_modes"]["codex_user_runtime"],
-                "missing_root",
-            )
-            self.assertEqual(
-                diagnostics["runtime_modes"]["agents_user_runtime"],
-                "root_symlink",
-            )
-            self.assertIn("preview_user_runtime_sync", [
-                item["kind"] for item in diagnostics["recovery_commands"]
-            ])
-
-            agents_proof = agents_result.data["proof"]
-            self.assertEqual(agents_result.status, "success")
-            self.assertEqual(agents_proof["runtime_target"], "agents")
-            self.assertEqual(agents_proof["runtime_satisfied_by"], "agents_user_runtime")
-            self.assertIn("agents_user_runtime_ready", agents_proof["gate_policy"]["required"])
+                results = {target: skills_proof(repo_root, "autofix", runtime_target=target)
+                           for target in ("any", "codex", "agents")}
+            for target, result in results.items():
+                with self.subTest(target=target):
+                    proof = result.data["proof"]
+                    self.assertEqual(result.status, "error")
+                    self.assertEqual(proof["status"], "fail")
+                    self.assertEqual(proof["runtime_target"], target)
+                    self.assertIsNone(proof["runtime_satisfied_by"])
+                    self.assertEqual(proof["available_runtimes"], [])
+                    self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+                    self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
+                    diagnostics = proof["runtime_diagnostics"]
+                    self.assertEqual(diagnostics["runtime_modes"]["codex_user_runtime"], "missing_root")
+                    self.assertEqual(diagnostics["runtime_modes"]["agents_user_runtime"], "legacy_workspace_alias_unproved")
+                    self.assertNotIn("preview_user_runtime_sync", [item["kind"] for item in diagnostics["recovery_commands"]])
+                    if target != "any":
+                        gate = f"{target}_user_runtime_ready"
+                        self.assertIn(gate, proof["gate_policy"]["required"])
+                        self.assertEqual(proof["runtime_failure"]["failed_check_id"], gate)
+                        self.assertEqual(diagnostics["failed_gate"], gate)
+            self.assertEqual(results["codex"].data["proof"]["validation_commands"],
+                             ["./bin/ask skills proof autofix --runtime-target codex --json --robot"])
 
     def test_runtime_target_codex_rejects_per_handle_workspace_bridge(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -20,13 +20,9 @@ python3 bin/ask skills sync --scope workspace --projection flat --json
 python3 bin/ask skills handles --check --json
 ```
 
-User sync is a separate home-runtime mutation. Run it only when recovery
-authority selects those home targets and this checkout as their replacement
-source; workspace refresh does not grant that authority:
-
-```bash
-python3 bin/ask skills sync --scope user --projection flat --json
-```
+User sync is retired and rejects before mutation. Do not relink home targets to
+this checkout. Preserve approved physical packages in `~/.agents/skills`; use
+the authorised Skills SDK installation/proof lane for managed home packages.
 
 Preserve prior working state and verify the selected consumer's discovery and
 behaviour after recovery. Do not require every home link to target this checkout.

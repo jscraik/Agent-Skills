@@ -308,14 +308,17 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('codex_user_link', proof['gates'])
         self.assertIn('user_runtime_ready', proof['gates'])
         self.assertIn('user_runtime_ready', proof['gate_policy']['required'])
-        self.assertIn('either supported user runtime link', proof['gate_policy']['required_semantics'])
+        self.assertEqual(
+            proof['gate_policy']['required_semantics'],
+            'Approved complete-package identity proves installation only. Runtime discovery and invocation '
+            'require separate evidence unavailable in this legacy command; identity, checkout aliases and '
+            'package existence do not establish runtime readiness or SDK clearance.',
+        )
         self.assertIn('codex_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertIn('agents_user_link', proof['gate_policy']['supporting_runtime_diagnostics'])
         self.assertEqual(proof['validation_commands'], ['./bin/ask skills proof autofix --json --robot'])
-        if proof.get('status') == 'pass':
-            self.assertEqual(proof['live_runtime_invocation']['status'], 'manual_session_gate')
-        else:
-            self.assertNotIn('live_runtime_invocation', proof)
+        self.assertNotIn('live_runtime_invocation', proof)
+        self.assertFalse(proof['sdk_clearance'])
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
@@ -350,8 +353,8 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn('claims_boundary', skill_proof)
         self.assertNotIn('sdk_skill_proof', output['data'])
 
-    def test_skills_prove_reachability_blocker_names_a_non_repeating_preview(self):
-        """Verify a blocked proof points to the prerequisite instead of itself."""
+    def test_skills_prove_home_blocker_has_no_noop_workspace_recovery(self):
+        """A ready workspace cannot fix missing SDK home-installation proof."""
         cmd = [sys.executable, 'Infrastructure/bin/ask', 'skills', 'prove', 'simplify', '--json', '--robot']
         with tempfile.TemporaryDirectory() as temp_dir:
             env = os.environ.copy()
@@ -361,7 +364,9 @@ class TestAskCLI(_AskCliTestBase):
         output = json.loads(result.stdout)
         skill_proof = output['data']['skill_proof']
         self.assertEqual(skill_proof['proof_status'], 'blocked_reachability')
-        self.assertEqual(skill_proof['next_command'], './bin/ask skills sync --scope user --projection flat --dry-run --json --robot')
+        self.assertIsNone(skill_proof['next_command'])
+        self.assertEqual(skill_proof['validation_commands'], [])
+        self.assertIn('Skills SDK', output['errors'][0]['fix_suggestion'])
 
     def test_skills_prove_human_output(self):
         """Verify ask skills prove renders the scorecard in non-JSON mode."""
@@ -377,7 +382,7 @@ class TestAskCLI(_AskCliTestBase):
             self.assertIn('Next:', result.stdout)
         else:
             self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-            self.assertIn('skills sync --scope user --projection flat --dry-run', result.stdout)
+            self.assertIn('Skills SDK installation/proof lane', result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_current_target(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -500,7 +505,7 @@ class TestAskCLI(_AskCliTestBase):
         self.assertIn(skill_proof['proof_status'], ('blocked_goal_resolution', 'blocked_reachability', 'reachable_without_outcome_proof'))
         self.assertIn('goal_resolution', skill_proof)
         self.assertIn('recommended_capability', skill_proof['goal_resolution'])
-        self.assertEqual(skill_proof['validation_commands'], [skill_proof['next_command']])
+        self.assertEqual(skill_proof['validation_commands'], [skill_proof['next_command']] if skill_proof['next_command'] else [])
 
     def test_skills_prove_single_token_goal_uses_improve_fallback(self):
         """Verify one-word goals use the same improvement route as phrase goals."""
@@ -561,7 +566,8 @@ class TestAskCLI(_AskCliTestBase):
         self.assertEqual(result.status, 'error')
         self.assertEqual(result.data['skill_proof']['handle'], 'autofix')
         self.assertEqual(result.data['skill_proof']['proof_status'], 'blocked_reachability')
-        self.assertEqual(result.data['skill_proof']['validation_commands'], [result.data['skill_proof']['next_command']])
+        self.assertIsNone(result.data['skill_proof']['next_command'])
+        self.assertEqual(result.data['skill_proof']['validation_commands'], [])
 
     def test_skills_prove_human_output_exposes_validation(self):
         """Verify ask skills prove renders its scorecard validation command."""
@@ -569,7 +575,7 @@ class TestAskCLI(_AskCliTestBase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 2, f'skills prove output: {result.stdout}\nstderr: {result.stderr}')
         self.assertIn("SDK skill proof failed for 'autofix'.", result.stdout)
-        self.assertIn('skills sync --scope user --projection flat --dry-run', result.stdout)
+        self.assertIn('Skills SDK installation/proof lane', result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""

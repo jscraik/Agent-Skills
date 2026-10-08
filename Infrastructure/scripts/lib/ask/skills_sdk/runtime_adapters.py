@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.contracts import runtime_failure_payload, skills_validation_command
+from ask.skills_sdk.transitional_installs import verify_transitional_install
 
 
 ResolveSkillHandle = Callable[..., dict[str, Any]]
@@ -231,8 +232,13 @@ def _path_is_under(path: Path, parent: Path) -> bool:
 
 
 def _runtime_mode(link: dict[str, object]) -> str:
+    """Classify a root as an unproved workspace alias, unmanaged, or missing.
+
+    A truthy ``points_to_workspace_runtime`` takes precedence over ``exists``;
+    absent flags are treated as false. This classification grants no readiness.
+    """
     if bool(link.get("points_to_workspace_runtime")):
-        return "root_symlink"
+        return "legacy_workspace_alias_unproved"
     if bool(link.get("exists")):
         return "foreign_or_unmanaged_root"
     return "missing_root"
@@ -707,6 +713,25 @@ def _apply_runtime_observation_quality(
                 thread_run["claim_status"] = "partial"
 
 
+def _apply_transitional_evidence_boundary(context: dict[str, Any], proof: dict[str, Any]) -> None:
+    """Never promote copy identity or unrelated telemetry into invocation proof."""
+    installation = proof.get("installation_proof")
+    if not isinstance(installation, dict) or installation.get("status") != "pass":
+        return
+    context.update(
+        runtime_status="partial", claim_status="partial", exit_code=2,
+        failed_check_id="transitional_identity_only",
+        blocker="Approved transitional package identity verified; SDK clearance and live invocation remain unproved.",
+    )
+    context["runtime_failure"] = runtime_failure_payload(
+        command="skills proof", error_code="ERR_RUNTIME",
+        failed_check_id=context["failed_check_id"], path="installation_proof",
+        message=context["blocker"],
+        recovery_guidance="Preserve the approved copy; obtain separate SDK admission and explicit skill invocation proof.",
+        validation_commands=[],
+    )
+
+
 def _artifact_record(
     context: dict[str, Any],
     *,
@@ -862,8 +887,11 @@ def _observation_recovery_plan_command(context: dict[str, Any]) -> dict[str, Any
 
 
 def _projection_recovery_preconditions() -> list[str]:
+    """Return recovery guidance separating workspace repair from SDK home installs."""
     return [
-        "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
+        "Repair missing repository projections with workspace-only skill sync; "
+        "use the Skills SDK installation and proof lane for home packages. "
+        "Do not run retired user skill sync or relink existing physical packages."
     ]
 
 
@@ -875,7 +903,7 @@ def _recovery_reason(context: dict[str, Any]) -> str:
 
 
 def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
-    """Build the runtime recovery plan for the current proof state."""
+    """Prefer observability recovery; preserve explicit empty diagnostic commands."""
     recovery_reason = _recovery_reason(context)
     runtime_diagnostics = (
         context.get("runtime_diagnostics")
@@ -890,7 +918,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             "Projection links are already present; recover or recheck the live observability lane.",
             "Do not run projection sync as the primary recovery step for missing invocation telemetry.",
         ]
-    elif isinstance(diagnostic_commands, list) and diagnostic_commands:
+    elif isinstance(diagnostic_commands, list):
         next_commands = [
             {
                 "command": str(item.get("command") or context["command"]),
@@ -1082,28 +1110,10 @@ def emit_sdk_skill_runtime_evidence(
     codex_sessions_root: Path | None = None,
     agents_otel_stats_path: Path | None = None,
 ) -> dict[str, Any]:
-    """
-    Emit runtime-proof evidence files for an explicit 'codex' or 'agents' runtime target.
-    
-    Parameters:
-        repo_root (Path): Repository root used to compute evidence output paths.
-        proof (dict[str, Any]): Command-surface proof payload that must include a `runtime_target` entry.
-        actor_type (str): Actor classification to include in generated evidence (default: "agent").
-    
-    Returns:
-        dict[str, Any]: Result summary containing:
-            - "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
-            - "evidence_dir": repository-relative evidence directory path.
-            - "runtime_card_path": repository-relative path to the written runtime card JSON.
-            - "evidence_receipt_path": repository-relative path to the written receipt JSON.
-            - "artifact_record_path": repository-relative path to the written artifact record JSON.
-            - "probe_artifact_path": repository-relative path to the written probe JSON.
-            - "validation_command": a CLI string that can be used to validate the emitted runtime card.
-            - "runtime_session_status": whether Codex rollout session evidence was attached.
-            - "observability_status": whether Agents OTEL stats evidence was attached.
+    """Write card, receipt and probe artifacts for explicit codex/agents targets.
 
-        If the proof's `runtime_target` is not "codex" or "agents", returns:
-            {"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
+    Other targets return skipped. Summary paths are repository-relative; copy
+    identity alone stays partial even when session telemetry is available.
     """
     runtime_target = str(proof.get("runtime_target") or "")
     if runtime_target not in EVIDENCE_RUNTIME_TARGETS:
@@ -1119,6 +1129,7 @@ def emit_sdk_skill_runtime_evidence(
         agents_otel_stats_path=agents_otel_stats_path,
     )
     _apply_runtime_observation_quality(context, runtime_observation)
+    _apply_transitional_evidence_boundary(context, proof)
     relative_card_path = _repo_relative(repo_root, context["card_path"])
     relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
     relative_artifact_path = _repo_relative(repo_root, context["artifact_path"])
@@ -1177,6 +1188,27 @@ def emit_sdk_skill_runtime_evidence(
     }
 
 
+def _failed_proof_gate(gates: dict[str, Any], required: tuple[str, ...]) -> str | None:
+    """Select the first failed required gate, excluding diagnostic-only gates."""
+    return next((gate for gate in required if not gates.get(gate)), None)
+
+
+def _installed_root_diagnostics(
+    ready: bool, codex_link: dict, agents_link: dict, aliases: dict, package: Path,
+) -> tuple[dict, dict]:
+    if ready:
+        return (
+            {"codex_user_runtime": "selected_physical_agents_install",
+             "agents_user_runtime": "selected_physical_agents_install"},
+            {"status": "single_selected_physical_collection",
+             "distinct_runtime_identity_count": 1, "package_path": str(package)},
+        )
+    return (
+        {"codex_user_runtime": _runtime_mode(codex_link),
+         "agents_user_runtime": _runtime_mode(agents_link)}, aliases,
+    )
+
+
 def build_sdk_skill_proof(
     *,
     repo_root: Path,
@@ -1186,7 +1218,7 @@ def build_sdk_skill_proof(
     home_path: Path,
 ) -> dict[str, Any]:
     """
-    Build a runtime reachability proof for an SDK-flat skill handle.
+    Inspect legacy runtime reachability; managed home clearance is retired here.
     
     Parameters:
         repo_root (Path): Repository root used to resolve workspace paths.
@@ -1196,7 +1228,7 @@ def build_sdk_skill_proof(
         home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
     
     Returns:
-        proof (dict[str, Any]): A proof payload describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
+        proof (dict[str, Any]): Legacy diagnostics plus approved transitional copy identity where available. Neither checkout aliases nor physical package existence alone establish identity, SDK admission or live invocation clearance.
     """
     runtime_target = normalize_runtime_target(runtime_target)
     normalized = handle.strip().lstrip("$") or handle
@@ -1274,8 +1306,16 @@ def build_sdk_skill_proof(
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
     }
-    codex_runtime_ready = bool(codex_link["points_to_workspace_runtime"])
-    agents_runtime_ready = bool(agents_link["points_to_workspace_runtime"])
+    # Codex consumes the selected physical ~/.agents/skills packages too.
+    # This temporary copy proof is deliberately separate from SDK admission.
+    transitional_install = verify_transitional_install(
+        repo_root=repo_root, home=home_path, handle=normalized,
+    )
+    transitional_copy_verified = transitional_install["status"] == "pass"
+    # File identity proves installation only, not runtime discovery or invocation.
+    # This legacy command has no independent runtime-readiness verifier.
+    codex_runtime_ready = False
+    agents_runtime_ready = False
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
@@ -1292,41 +1332,31 @@ def build_sdk_skill_proof(
         required_runtime_gate,
         "user_runtime_alias_consistent",
     )
-    required_gates_passed = all(bool(gates[gate_id]) for gate_id in required_gate_ids)
-    failed_check_id = (
-        None
-        if required_gates_passed
-        else next(
-            (
-                check_id
-                for check_id in (
-                    "resolver",
-                    "canonical_source_exists",
-                    "direct_runtime_projection",
-                    required_runtime_gate,
-                    "user_runtime_alias_consistent",
-                )
-                if not gates.get(check_id)
-            ),
-            "runtime_reachability",
-        )
-    )
+    if transitional_copy_verified:
+        # A complete approved home copy must not depend on retired checkout
+        # projections or aliases, including separately protected system roots.
+        required_gate_ids = (required_runtime_gate,)
+        gates["user_runtime_alias_consistent"] = True
+    failed_check_id = _failed_proof_gate(gates, required_gate_ids)
+    required_gates_passed = failed_check_id is None
     validation_args = [str(normalized)]
     if runtime_target != "any":
         validation_args.extend(["--runtime-target", runtime_target])
     recovery_projection_mode = _proof_recovery_projection_mode(
         runtime_visibility=runtime_visibility,
     )
+    runtime_modes, selected_runtime_aliases = _installed_root_diagnostics(
+        transitional_copy_verified, codex_link, agents_link, runtime_aliases, agents_skills / normalized,
+    )
     runtime_diagnostics = {
         "schema_version": "sdk-skill-runtime-diagnostics.v1",
         "selected_runtime_target": runtime_target,
+        "transitional_install": transitional_install,
         "failed_gate": failed_check_id,
         "expected_workspace_runtime": str(expected_runtime),
-        "runtime_modes": {
-            "codex_user_runtime": _runtime_mode(codex_link),
-            "agents_user_runtime": _runtime_mode(agents_link),
-        },
-        "runtime_aliases": runtime_aliases,
+        "runtime_modes": runtime_modes,
+        "legacy_root_diagnostics": runtime_aliases,
+        "runtime_aliases": selected_runtime_aliases,
         "direct_runtime_projection": {
             "required": requires_direct_projection,
             "path": str(direct_projection_skill),
@@ -1334,28 +1364,11 @@ def build_sdk_skill_proof(
             "runtime_visibility": runtime_visibility,
         },
         "recovery_risk": (
-            "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
+            "Agent-Skills user relinking is retired. Preserve selected physical packages in ~/.agents/skills. "
+            "Managed home installation requires the approved Skills SDK lane; workspace sync does not install home packages. "
+            "This legacy workspace-link proof does not establish SDK clearance of physical installations."
         ),
-        "recovery_commands": [
-            {
-                "kind": "preview_user_runtime_sync",
-                "command": skills_validation_command(
-                    "sync",
-                    "--scope",
-                    "user",
-                    "--projection",
-                    recovery_projection_mode,
-                    "--dry-run",
-                ),
-                "preconditions": [f"Workspace {recovery_projection_mode} projection validates cleanly."],
-                "permission_profile": {
-                    "filesystem": "read workspace and user runtime links",
-                    "network": "not required",
-                },
-                "expected_outcome": (
-                    "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation."
-                ),
-            },
+        "recovery_commands": ([
             {
                 "kind": "refresh_workspace_projection",
                 "command": skills_validation_command(
@@ -1372,39 +1385,15 @@ def build_sdk_skill_proof(
                 },
                 "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
-            {
-                "kind": "apply_user_runtime_sync",
-                "command": skills_validation_command(
-                    "sync",
-                    "--scope",
-                    "user",
-                    "--projection",
-                    recovery_projection_mode,
-                ),
-                "preconditions": ["Dry-run output is acceptable to the operator."],
-                "permission_profile": {
-                    "filesystem": "write home-directory runtime links",
-                    "network": "not required",
-                },
-                "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
-            },
-            {
-                "kind": "rerun_runtime_proof",
-                "command": skills_validation_command("proof", *validation_args),
-                "preconditions": ["User runtime link now points at the workspace projection."],
-                "permission_profile": {
-                    "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
-                    "network": "not required",
-                },
-                "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
-            },
-        ],
+        ] if not direct_runtime_projection_ready and not transitional_copy_verified else []),
     }
     proof = {
         "schema_version": "sdk-skill-proof.v1",
         "handle": normalized,
         "runtime_target": runtime_target,
         "status": "pass" if required_gates_passed else "fail",
+        "installation_proof": transitional_install,
+        "sdk_clearance": False,
         "validation_commands": [
             skills_validation_command("proof", *validation_args),
         ],
@@ -1412,11 +1401,7 @@ def build_sdk_skill_proof(
         "gate_policy": {
             "required": list(required_gate_ids),
             "runtime_target": runtime_target,
-            "required_semantics": (
-                "user_runtime_ready accepts either supported user runtime link, but both present aliases must resolve to the same workspace runtime."
-                if runtime_target == "any"
-                else f"{required_runtime_gate} and user_runtime_alias_consistent must be true for runtime_target={runtime_target}."
-            ),
+            "required_semantics": "Approved complete-package identity proves installation only. Runtime discovery and invocation require separate evidence unavailable in this legacy command; identity, checkout aliases and package existence do not establish runtime readiness or SDK clearance.",
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_runtime_ready",
@@ -1455,8 +1440,12 @@ def build_sdk_skill_proof(
     }
     if proof["status"] != "pass":
         recovery_guidance = (
-            f"Preview with ./bin/ask skills sync --scope user --projection {recovery_projection_mode} --dry-run, "
-            "then run workspace/user sync only if the user-runtime relink plan is acceptable."
+            (f"Missing repository projection: ./bin/ask skills sync --scope workspace --projection {recovery_projection_mode}. " if not direct_runtime_projection_ready and not transitional_copy_verified else "")
+            +
+            "Agent-Skills user relinking is retired. Preserve approved physical packages in ~/.agents/skills "
+            "and use the Skills SDK installation/proof lane for managed home packages. "
+            "Workspace sync repairs repository projections only. Installation identity does not prove runtime "
+            "discovery or invocation; this legacy command cannot supply that separate evidence."
         )
         proof["runtime_failure"] = runtime_failure_payload(
             command="skills proof",
@@ -1467,18 +1456,6 @@ def build_sdk_skill_proof(
             recovery_guidance=recovery_guidance,
             validation_commands=proof["validation_commands"],
         )
-    if proof["status"] == "pass":
-        runtime = proof["runtime_satisfied_by"]
-        operator_action = (
-            "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
-            if runtime == "codex_user_runtime"
-            else "Open or reload the Agents runtime and verify the handle is available there."
-        )
-        proof["live_runtime_invocation"] = {
-            "status": "manual_session_gate",
-            "runtime_satisfied_by": runtime,
-            "operator_action": operator_action,
-        }
     return proof
 
 

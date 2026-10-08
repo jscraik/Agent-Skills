@@ -36,6 +36,52 @@ def _assert_partial_probe_and_recovery(testcase: unittest.TestCase, repo_root: P
 
 
 class TestRuntimeProofValidation(unittest.TestCase):
+    def test_projection_recovery_preconditions_retire_home_sync(self) -> None:
+        context = {
+            "claim_status": "blocked", "runtime_status": "blocked_runtime",
+            "handle": "autofix", "runtime_target": "agents",
+            "runtime_failure": {"recovery_guidance": "Use Skills SDK."},
+            "command": "./bin/ask skills proof autofix --json --robot",
+            "runtime_diagnostics": {"recovery_commands": []},
+        }
+        plan = runtime_adapters._recovery_plan(context)
+        self.assertEqual(plan["next_commands"], [])
+        guidance = " ".join(plan["preconditions"])
+        self.assertIn("workspace-only skill sync", guidance)
+        self.assertIn("Skills SDK installation and proof lane", guidance)
+        self.assertIn("Do not run retired user skill sync", guidance)
+        self.assertNotIn("Run workspace and user skill sync", guidance)
+
+    def test_legacy_aliases_cannot_clear_home_installation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            source = repo / "Skills/agent-ops/autofix/SKILL.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("# source\n", encoding="utf-8")
+            projection = repo / ".agents/skills/autofix"
+            projection.parent.mkdir(parents=True)
+            projection.symlink_to(source.parent)
+            for target in ("any", "codex", "agents"):
+                with self.subTest(target=target):
+                    home = root / target
+                    for runtime in (".codex", ".agents"):
+                        alias = home / runtime / "skills"
+                        alias.parent.mkdir(parents=True)
+                        alias.symlink_to(projection.parent)
+                    proof = runtime_adapters.build_sdk_skill_proof(
+                        repo_root=repo, handle="autofix", runtime_target=target,
+                        resolve_skill_handle_fn=_resolve_autofix_handle, home_path=home,
+                    )
+                    self.assertEqual(proof["status"], "fail")
+                    self.assertTrue(proof["gates"]["direct_runtime_projection"])
+                    self.assertFalse(proof["gates"]["user_runtime_ready"])
+                    self.assertEqual(proof["available_runtimes"], [])
+                    self.assertNotIn("live_runtime_invocation", proof)
+                    recovery = proof["runtime_diagnostics"]["recovery_commands"]
+                    self.assertNotIn("refresh_workspace_projection", {item["kind"] for item in recovery})
+                    self.assertIn("Skills SDK", proof["runtime_failure"]["recovery_guidance"])
+
     def run_validator(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             [sys.executable, str(VALIDATOR), *args],
@@ -479,24 +525,11 @@ class TestRuntimeProofValidation(unittest.TestCase):
             codex_handle.parent.mkdir(parents=True, exist_ok=True)
             codex_handle.symlink_to(source_handle)
 
-            def resolve_skill_handle_fn(
-                _handle: str,
-                *,
-                repo_root_path: Path,
-            ) -> dict[str, object]:
-                del repo_root_path
-                return {
-                    "status": "ok",
-                    "handle": "autofix",
-                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "runtime_visibility": "flat",
-                }
-
             proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="codex",
-                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                resolve_skill_handle_fn=_resolve_autofix_handle,
                 home_path=home_path,
             )
 
@@ -504,12 +537,15 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertFalse(proof["gates"]["codex_user_link"])
             self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
             self.assertIsNone(proof["runtime_satisfied_by"])
+            self.assertIn("refresh_workspace_projection", {
+                item["kind"] for item in proof["runtime_diagnostics"]["recovery_commands"]
+            })
             self.assertEqual(
                 proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
                 "foreign_or_unmanaged_root",
             )
 
-    def test_build_sdk_skill_proof_accepts_flat_source_symlink(self) -> None:
+    def test_build_sdk_skill_proof_preserves_flat_diagnostics_without_clearance(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
@@ -526,31 +562,18 @@ class TestRuntimeProofValidation(unittest.TestCase):
             agents_runtime.parent.mkdir(parents=True, exist_ok=True)
             agents_runtime.symlink_to(workspace_runtime)
 
-            def resolve_skill_handle_fn(
-                _handle: str,
-                *,
-                repo_root_path: Path,
-            ) -> dict[str, object]:
-                del repo_root_path
-                return {
-                    "status": "ok",
-                    "handle": "autofix",
-                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "runtime_visibility": "flat",
-                }
-
             proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="agents",
-                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                resolve_skill_handle_fn=_resolve_autofix_handle,
                 home_path=home_path,
             )
 
-            self.assertEqual(proof["status"], "pass")
+            self.assertEqual(proof["status"], "fail")
             self.assertTrue(proof["gates"]["agents_user_link"])
-            self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
-            self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
+            self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+            self.assertIsNone(proof["runtime_satisfied_by"])
 
     def test_build_sdk_skill_proof_any_rejects_split_alias_with_valid_agents_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -584,13 +607,13 @@ class TestRuntimeProofValidation(unittest.TestCase):
             )
 
             self.assertEqual(proof["status"], "fail")
-            self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
+            self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
             self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
             self.assertFalse(proof["gates"]["user_runtime_alias_consistent"])
-            self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
-            self.assertEqual(proof["runtime_diagnostics"]["failed_gate"], "user_runtime_alias_consistent")
+            self.assertIsNone(proof["runtime_satisfied_by"])
+            self.assertEqual(proof["runtime_diagnostics"]["failed_gate"], "user_runtime_ready")
             self.assertEqual(proof["runtime_diagnostics"]["runtime_aliases"]["status"], "split_brain")
-            self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_alias_consistent")
+            self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_ready")
 
     def test_build_sdk_skill_proof_uses_canonical_source_under_user_runtime_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -633,11 +656,11 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 home_path=home_path,
             )
 
-            self.assertEqual(proof["status"], "pass")
+            self.assertEqual(proof["status"], "fail")
             self.assertTrue(proof["gates"]["agents_user_link"])
             self.assertTrue(proof["gates"]["canonical_source_exists"])
-            self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
-            self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
+            self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+            self.assertIsNone(proof["runtime_satisfied_by"])
 
     def test_build_sdk_skill_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -686,32 +709,17 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
                 "foreign_or_unmanaged_root",
             )
-            self.assertIn("dry-run", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("user relinking is retired", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("~/.agents/skills", proof["runtime_diagnostics"]["recovery_risk"])
+            self.assertIn("Skills SDK", proof["runtime_failure"]["recovery_guidance"])
             recovery_kinds = {entry["kind"] for entry in proof["runtime_diagnostics"]["recovery_commands"]}
-            self.assertTrue(
-                {
-                    "preview_user_runtime_sync",
-                    "refresh_workspace_projection",
-                    "apply_user_runtime_sync",
-                    "rerun_runtime_proof",
-                }.issubset(recovery_kinds)
-            )
+            self.assertEqual(recovery_kinds, set())
             recovery_commands = {
                 entry["kind"]: entry["command"]
                 for entry in proof["runtime_diagnostics"]["recovery_commands"]
             }
-            self.assertEqual(
-                recovery_commands["preview_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-            )
-            self.assertEqual(
-                recovery_commands["refresh_workspace_projection"],
-                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-            )
-            self.assertEqual(
-                recovery_commands["apply_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --json --robot",
-            )
+            self.assertTrue(all("sync --scope user" not in command for command in recovery_commands.values()))
+            self.assertNotIn("refresh_workspace_projection", recovery_commands)
 
 if __name__ == "__main__":
     unittest.main()

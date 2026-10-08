@@ -352,20 +352,10 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
         recovery_commands = proof["runtime_diagnostics"]["recovery_commands"]
-        self.assertEqual(
-            recovery_commands[0]["command"],
-            "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-        )
-        self.assertEqual(
-            recovery_commands[1]["command"],
-            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-        )
-        self.assertEqual(
-            recovery_commands[2]["command"],
-            "./bin/ask skills sync --scope user --projection flat --json --robot",
-        )
+        self.assertEqual(recovery_commands, [])
+        self.assertTrue(all("sync --scope user" not in item["command"] for item in recovery_commands))
 
-    def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
+    def test_skills_proof_rejects_legacy_agents_alias(self) -> None:
         repo_root = self.temp_dir / "repo"
         source = _write_skill_source(repo_root, "he-phase-work", root="Plugins/harness-engineering/skills")
         skills_dir = _link_flat_projection(repo_root, "he-phase-work", source)
@@ -379,12 +369,12 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
             result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
-        self.assertEqual(result.status, "success")
-        self.assertEqual(proof["status"], "pass")
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "fail")
         self.assertEqual(proof["schema_version"], "sdk-skill-proof.v1")
         self.assertTrue(proof["gates"]["agents_user_link"])
-        self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
-        self.assertTrue(proof["gates"]["user_runtime_ready"])
+        self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+        self.assertFalse(proof["gates"]["user_runtime_ready"])
         self.assertEqual(result.data["runtime_evidence"]["status"], "skipped")
         self.assertFalse((repo_root / ".harness" / "evidence").exists())
 
@@ -407,13 +397,13 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
 
         proof = result.data["proof"]
         direct_projection = proof["runtime_diagnostics"]["direct_runtime_projection"]
-        self.assertEqual(result.status, "success")
-        self.assertEqual(proof["status"], "pass")
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "fail")
         self.assertTrue(proof["gates"]["direct_runtime_projection"])
         self.assertTrue(direct_projection["path"].endswith(".agents/skills/agents-sdk/SKILL.md"))
         self.assertNotIn("cloudflare:agents-sdk", direct_projection["path"])
 
-    def test_skills_proof_runtime_target_agents_writes_runtime_card(self) -> None:
+    def test_skills_proof_runtime_target_agents_writes_blocked_runtime_card(self) -> None:
         repo_root = self.temp_dir / "repo"
         source = _write_skill_source(repo_root, "he-phase-work", root="Plugins/harness-engineering/skills")
         skills_dir = _link_flat_projection(repo_root, "he-phase-work", source)
@@ -430,8 +420,8 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         card_path = repo_root / runtime_evidence["runtime_card_path"]
         receipt_path = repo_root / runtime_evidence["evidence_receipt_path"]
         probe_path = repo_root / runtime_evidence["probe_artifact_path"]
-        self.assertEqual(result.status, "success")
-        self.assertEqual(runtime_evidence["status"], "implemented_enforced")
+        self.assertEqual(result.status, "error")
+        self.assertEqual(runtime_evidence["status"], "blocked_runtime")
         self.assertTrue(card_path.is_file())
         self.assertTrue(receipt_path.is_file())
         self.assertTrue(probe_path.is_file())
@@ -439,8 +429,8 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         card = json.loads(card_path.read_text(encoding="utf-8"))
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         self.assertEqual(card["runtime_target"], "agents")
-        self.assertEqual(card["runtime_status"], "implemented_enforced")
-        self.assertEqual(card["evidence_receipts"][0]["claim_status"], "pass")
+        self.assertEqual(card["runtime_status"], "blocked_runtime")
+        self.assertEqual(card["evidence_receipts"][0]["claim_status"], "blocked")
         self.assertEqual(receipt["runtime_target"], "agents")
         self.assertEqual(receipt["probe_artifact_path"], runtime_evidence["probe_artifact_path"])
         self._assert_runtime_card_valid(repo_root, card_path)
@@ -462,9 +452,9 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(proof["status"], "fail")
         self.assertEqual(proof["runtime_target"], "codex")
-        self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
+        self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
         self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
-        self.assertEqual(proof["available_runtimes"], ["agents_user_runtime"])
+        self.assertEqual(proof["available_runtimes"], [])
         self.assertIsNone(proof["runtime_satisfied_by"])
         self.assertIn("codex_user_runtime_ready", proof["gate_policy"]["required"])
         runtime_evidence = result.data["runtime_evidence"]
@@ -505,7 +495,7 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertEqual(proof["status"], "fail")
         self.assertFalse(proof["gates"]["user_runtime_alias_consistent"])
         self.assertIn("user_runtime_alias_consistent", proof["gate_policy"]["required"])
-        self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_alias_consistent")
+        self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_ready")
         self.assertEqual(aliases["status"], "split_brain")
         self.assertEqual(aliases["distinct_runtime_identity_count"], 2)
 

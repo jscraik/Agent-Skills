@@ -18,6 +18,7 @@ _IMPLEMENTATION_FILENAMES = (
     "test_skill_lifecycle_validation_impl_catalog.py",
     "test_skill_lifecycle_validation_impl_discovery.py",
     "test_skill_lifecycle_validation_impl_runtime.py",
+    "test_user_skill_sync_retirement.py",
 )
 
 

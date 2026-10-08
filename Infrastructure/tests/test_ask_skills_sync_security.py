@@ -31,6 +31,16 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         (self.source_dir / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
 
+    def _runtime_snapshot(self) -> dict[str, tuple[int, str | bytes]]:
+        """Capture disposable home and source bytes, modes, and literal links."""
+        root = Path(self.temp_dir)
+        snapshot: dict[str, tuple[int, str | bytes]] = {}
+        for path in root.rglob("*"):
+            mode = path.lstat().st_mode
+            value = str(path.readlink()) if path.is_symlink() else path.read_bytes() if path.is_file() else ""
+            snapshot[str(path.relative_to(root))] = (mode, value)
+        return snapshot
+
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -44,21 +54,18 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertIn("symlink", str(ctx.exception).lower())
 
-    def test_sync_skills_user_scope_writes_codex_and_agents_links(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_writes_codex_and_agents_links(self) -> None:
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
-        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
-        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
-        self.assertFalse((self.fake_home / ".agents" / "plugins").exists())
-        self.assertTrue((self.fake_home / "plugins").is_dir())
-        self.assertFalse((self.fake_home / "plugins").is_symlink())
-        self.assertEqual(result.data["projection_mode"], "flat")
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
     def test_sync_skills_workspace_scope_reports_projection_permission_error(self) -> None:
         with (
@@ -77,7 +84,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn("RUNTIME_PROJECTION_MUTATION_FAILED", result.data["plan"]["warnings"])
         self.assertEqual(result.data["plan"]["validation_status"], "fail")
 
-    def test_sync_skills_user_scope_reports_runtime_link_permission_error(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_reports_runtime_link_permission_error(self) -> None:
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_impl, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
@@ -86,31 +94,28 @@ class TestAskSkillsSyncSecurity(TestCase):
             result = skills_impl.sync_skills(self.repo_root, scope="user", dry_run=False)
 
         self.assertEqual(result.status, "error")
-        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
-        self.assertIn("User runtime link sync failed", result.errors[0].message)
-        self.assertIn("USER_RUNTIME_LINK_SYNC_FAILED", result.data["plan"]["warnings"])
-        self.assertEqual(result.data["plan"]["validation_status"], "fail")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_clears_repo_backed_agents_plugins_symlink(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_clears_repo_backed_agents_plugins_symlink(self) -> None:
         user_plugins = self.fake_home / ".agents" / "plugins"
         user_plugins.parent.mkdir(parents=True, exist_ok=True)
         user_plugins.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_dir())
-        self.assertFalse(user_plugins.is_symlink())
-        self.assertIn(
-            f"Replaced symlinked personal plugin marketplace root with directory: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_clears_stale_worktree_agents_plugins_symlink(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_clears_stale_worktree_agents_plugins_symlink(self) -> None:
         stale_worktree_plugins = Path(self.temp_dir) / "agent-skills-old-worktree" / "Plugins"
         stale_worktree_plugins.mkdir(parents=True)
         (stale_worktree_plugins.parent / ".git").mkdir()
@@ -118,21 +123,19 @@ class TestAskSkillsSyncSecurity(TestCase):
         user_plugins.parent.mkdir(parents=True, exist_ok=True)
         user_plugins.symlink_to(stale_worktree_plugins, target_is_directory=True)
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_dir())
-        self.assertFalse(user_plugins.is_symlink())
-        self.assertIn(
-            f"Replaced symlinked personal plugin marketplace root with directory: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_preserves_non_repo_agents_plugins_symlink(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_preserves_non_repo_agents_plugins_symlink(self) -> None:
         personal_marketplace = Path(self.temp_dir) / "managed-personal-marketplace"
         personal_marketplace.mkdir()
         (personal_marketplace / "marketplace.json").write_text("[]\n", encoding="utf-8")
@@ -140,90 +143,70 @@ class TestAskSkillsSyncSecurity(TestCase):
         user_plugins.parent.mkdir(parents=True, exist_ok=True)
         user_plugins.symlink_to(personal_marketplace, target_is_directory=True)
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_symlink())
-        self.assertEqual(user_plugins.resolve(strict=False), personal_marketplace.resolve(strict=False))
-        self.assertIn(
-            f"Preserved personal plugin marketplace symlink: {user_plugins}",
-            result.data["logs"],
-        )
-        self.assertIn(
-            f"Skipped home plugin mirror refresh for preserved personal plugin marketplace symlink: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_dry_run_plans_agents_plugins_cleanup(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_dry_run_plans_agents_plugins_cleanup(self) -> None:
         user_plugins = self.fake_home / ".agents" / "plugins"
         user_plugins.parent.mkdir(parents=True, exist_ok=True)
         user_plugins.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=True)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_symlink())
-        self.assertIn(
-            f"Remove symlinked personal plugin marketplace root: {user_plugins}",
-            result.data["plan"]["deletes"],
-        )
-        self.assertIn(str(user_plugins), result.data["plan"]["writes"])
-        self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["deletes"], 1)
-        self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["writes"], 1)
-        self.assertIn(
-            f"Would replace symlinked personal plugin marketplace root with directory: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_preserves_existing_agents_plugins_directory(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_preserves_existing_agents_plugins_directory(self) -> None:
         user_plugins = self.fake_home / ".agents" / "plugins"
         user_plugins.mkdir(parents=True)
         (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_dir())
-        self.assertFalse(user_plugins.is_symlink())
-        self.assertEqual((user_plugins / "README.md").read_text(encoding="utf-8"), "user owned\n")
-        self.assertIn(
-            f"Personal plugin marketplace root is already a directory: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
         user_plugins = self.fake_home / "plugins"
         user_plugins.mkdir()
         (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(user_plugins.is_dir())
-        self.assertFalse(user_plugins.is_symlink())
-        self.assertTrue((user_plugins / "README.md").is_file())
-        self.assertIn(
-            f"Ensured plugin mirror directory: {user_plugins}",
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_user_scope_replaces_local_plugin_mirror_copies(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_replaces_local_plugin_mirror_copies(self) -> None:
         plugin_source = self.repo_root / "Plugins" / "harness-engineering"
         plugin_source.mkdir(parents=True)
         (plugin_source / ".codex-plugin").mkdir()
@@ -239,20 +222,17 @@ class TestAskSkillsSyncSecurity(TestCase):
         stale_target.mkdir(parents=True)
         (stale_target / "stale.txt").write_text("stale\n", encoding="utf-8")
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertFalse((stale_target / "stale.txt").exists())
-        self.assertEqual((stale_target / "skills" / "he-phase-work" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
-        self.assertTrue((stale_target / ".codex-repo-plugin-source").is_file())
-        self.assertTrue(
-            any("Replaced home plugin mirror" in item for item in result.data["logs"]),
-            result.data["logs"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
     def test_local_plugin_runtime_sync_preserves_non_local_plugin_entries(self) -> None:
         plugin_source = self.repo_root / "Plugins" / "harness-engineering"
@@ -367,20 +347,22 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(report["pruned_plugins"], ["plugin-b"])
         self.assertTrue((stale_plugin / "SKILL.md").is_file())
 
-    def test_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
         managed_skills = self.fake_home / ".agents" / "skills"
         managed_skills.mkdir(parents=True)
         (managed_skills / "stale.md").write_text("stale\n", encoding="utf-8")
 
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue(managed_skills.is_symlink())
-        self.assertFalse((managed_skills / "stale.md").exists())
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
@@ -570,7 +552,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["requested_projection_mode"], "rooted")
         self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
 
-    def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
         rooted_entry = self.repo_root / ".agents" / "skills" / "agent-ops"
         rooted_entry.mkdir(parents=True)
         (rooted_entry / "SKILL.md").write_text(
@@ -581,6 +563,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         flat_entry.mkdir(parents=True)
         (flat_entry / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
 
+        before = self._runtime_snapshot()
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
                 self.repo_root,
@@ -590,12 +573,11 @@ class TestAskSkillsSyncSecurity(TestCase):
             )
 
         self.assertEqual(result.status, "error")
-        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-        self.assertIn("ROOTED_WORKSPACE_RESIDUE", result.data["plan"]["warnings"])
-        self.assertEqual(result.data["plan"]["rooted_workspace_entries"], ["agent-ops"])
-        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_flat_user_scope_relinks_after_workspace_validation(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_flat_user_scope_relinks_after_workspace_validation(self) -> None:
         workspace_result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -604,6 +586,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
         self.assertEqual(workspace_result.status, "success")
 
+        before = self._runtime_snapshot()
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
                 self.repo_root,
@@ -612,16 +595,12 @@ class TestAskSkillsSyncSecurity(TestCase):
                 projection="flat",
             )
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
-        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
-        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
-        self.assertFalse((self.fake_home / ".agents" / "plugins").exists())
-        self.assertTrue((self.fake_home / "plugins").is_dir())
-        self.assertFalse((self.fake_home / "plugins").is_symlink())
-        self.assertEqual(result.data["projection_mode"], "flat")
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
-    def test_sync_skills_flat_user_scope_relinks_projected_plugin_handles(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_flat_user_scope_relinks_projected_plugin_handles(self) -> None:
         brainstorm_source = self.repo_root / "Plugins" / "harness-engineering" / "skills" / "he-brainstorm"
         brainstorm_source.mkdir(parents=True)
         (brainstorm_source / "SKILL.md").write_text(
@@ -639,6 +618,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertFalse((self.repo_root / ".skillsets" / "command-surface.json").exists())
 
+        before = self._runtime_snapshot()
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
                 self.repo_root,
@@ -647,10 +627,10 @@ class TestAskSkillsSyncSecurity(TestCase):
                 projection="flat",
             )
 
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["projection_mode"], "flat")
-        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
-        self.assertNotIn("ROOTED_WORKSPACE_MIXED_PROJECTION", result.data["plan"]["warnings"])
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
@@ -1367,15 +1347,18 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
-    def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
+    def test_retired_user_sync_preserves_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
+        before = self._runtime_snapshot()
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
         ):
             result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "success")
-        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RETIRED_USER_SYNC")
+        self.assertIn("User sync is retired", result.errors[0].message)
+        self.assertEqual(self._runtime_snapshot(), before)
 
     def test_sync_skills_workspace_refreshes_catalog_projections(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"

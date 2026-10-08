@@ -124,7 +124,7 @@ class TestAskCLI(_AskCliTestBase):
             self.assertIn('Next: ./bin/ask skills proof', result.stdout)
         else:
             self.assertIn("SDK skill proof failed for 'autofix'", result.stdout)
-            self.assertIn('skills sync --scope user --projection flat --dry-run', result.stdout)
+            self.assertIn('Skills SDK installation/proof lane', result.stdout)
 
     def test_repo_doctor_catalog_json_contract(self):
         """
