@@ -106,7 +106,9 @@ Package checks and cases live in [contract.yaml](references/contract.yaml) and
 - An error does not prove that a submission had no effect; avoid unsafe retries.
 - A saved draft or source file does not establish reader access or publication.
 
-## See Also
+## References
+
+### See Also
 
 | Skill | When to use together |
 |---|---|
@@ -115,7 +117,7 @@ Package checks and cases live in [contract.yaml](references/contract.yaml) and
 
 These are optional companion skills, not required package resources.
 
-## References
+### Package references
 
 - [User guide quality](references/user-guide-quality.md): reader-first procedures,
   navigation, accessibility, visual meaning and safe troubleshooting.
