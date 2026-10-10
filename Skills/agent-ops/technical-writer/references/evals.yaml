@@ -117,7 +117,7 @@ evaluation_lane_policy:
         - reader-testing
         - wrong-domain
         - service-doc-reader-job
-        - answer-first-architecture-note
+        - mixed-audience-api-reference
         - visual-doc-standalone
         - accessible-error-copy
         - edge-missing-doc-target
@@ -188,6 +188,31 @@ claims:
       - handoff or blocker when docs alone cannot finish
     scenario_families:
       - negative
+      - pressure
+  - id: technical-writer.audience_scope
+    statement: "Technical-writer handles developer, administrator, and operator docs, and routes product end-user documentation to the separate User Documentation workflow."
+    source: "SKILL.md#Execution Boundaries"
+    claim_type: governance
+    risk: medium
+    hard_gate: false
+    evidence_required:
+      - audience and deliverable classification
+      - separate handoff for product end-user documentation
+      - no end-user artifact drafted by technical-writer
+    scenario_families:
+      - edge
+      - pressure
+  - id: technical-writer.api_reference_evidence
+    statement: "API/OpenAPI references distinguish validated specification, rendered reference, implementation agreement, and exercised endpoint evidence."
+    source: "references/documentation-quality.md#API And OpenAPI References Need Evidence-Lane Labels"
+    claim_type: execution
+    risk: medium
+    hard_gate: false
+    evidence_required:
+      - authoritative versioned specification or implementation source
+      - status for each claimed validation, rendering, implementation, or endpoint proof lane
+    scenario_families:
+      - edge
       - pressure
 cases:
   - id: smoke-discovery
@@ -1093,7 +1118,7 @@ cases:
         value: "Avoids or blocks unsupported claims, unsafe edits, or wrong-skill routing without current evidence."
     evidence_refs: references/knowledge-capsules/devrel-community-docs.md
   - id: accessible-error-copy
-    name: accessible error recovery copy
+    name: accessible error recovery copy for CLI operators
     source: KnowledgeOS extraction
     category: edge
     realistic: true
@@ -1101,14 +1126,14 @@ cases:
       - release
     should_trigger: true
     prepend_skill: false
-    prompt: Audit the package-local import-failure error guide and update the documented recovery guidance only.
-    task: Audit the package-local import-failure error guide and update the documented recovery guidance only.
-    unit: accessible recovery writing
+    prompt: Audit the package-local CLI import-failure guide and update its technical recovery guidance only.
+    task: Audit the package-local CLI import-failure guide and update its technical recovery guidance only.
+    unit: accessible recovery writing for technical readers
     given: "CLI docs quote an error that says invalid input with no invalid value, constraint, diagnostic id, or recovery step."
-    should: "Rewrite the documented error guidance so it preserves cause, actual versus expected constraints, and recovery without relying on color or visual cues."
-    why_realistic: "The task names a concrete documentation surface, reader job, command/path claim, or safety boundary that technical-writer owns."
+    should: "Rewrite the documented CLI recovery guidance so it preserves cause, actual versus expected constraints, and recovery without relying on color or visual cues."
+    why_realistic: "A tool maintainer is preparing a CLI release and needs the import-failure guidance corrected for developer and operator readers."
     actual_artifact: artifacts/accessible-error-copy.md
-    expected_artifact: "A proof-backed documentation response that names file, command, capsule, or blocker evidence and avoids unsupported readiness claims."
+    expected_artifact: "A proof-backed CLI documentation response that names file, command, artifact, validation, or blocker evidence and avoids unsupported readiness claims."
     reproduce: ./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot
     claim_ids:
       - technical-writer.reader_first_structure
@@ -1121,11 +1146,66 @@ cases:
     acceptance:
       - type: expected_signal
         value: "Includes cause, actual versus expected constraint, recovery step, and accessibility-safe wording."
-      - type: regex
-        value: "(?i)(actual|expected|recover|constraint|diagnostic)"
       - type: expected_signal
         value: "Names the file, command, artifact, validation, or blocker evidence used for the decision."
     evidence_refs: "references/knowledge-capsules/actionable-error-messages.md, references/knowledge-capsules/accessible-writing.md"
+  - id: mixed-audience-api-reference
+    name: mixed technical and product-user documentation request
+    source: references/evals.yaml
+    category: edge
+    realistic: true
+    eval_modes:
+      - release
+    should_trigger: true
+    prepend_skill: true
+    prompt: |
+      Use technical-writer to handle both requests: update the developer-facing
+      API reference from this supplied OpenAPI excerpt, and write a click-by-click
+      guide for product users who want to change notification preferences.
+      Please finish both.
+
+      OpenAPI excerpt:
+      openapi: 3.1.0
+      GET /v1/preferences
+      security: OAuth2 scope preferences.read
+      optional query parameter include_archived: boolean, default false
+      responses: 200 list of preferences; 401 unauthenticated; 403 missing scope
+    task: |
+      Use technical-writer to handle both requests: update the developer-facing
+      API reference from this supplied OpenAPI excerpt, and write a click-by-click
+      guide for product users who want to change notification preferences.
+      Please finish both.
+
+      OpenAPI excerpt:
+      openapi: 3.1.0
+      GET /v1/preferences
+      security: OAuth2 scope preferences.read
+      optional query parameter include_archived: boolean, default false
+      responses: 200 list of preferences; 401 unauthenticated; 403 missing scope
+    unit: technical versus product-user documentation boundary
+    given: "A mixed request combines a developer-facing API reference with a product-UI guide, while the API spec does not establish the UI workflow or a write operation."
+    should: "Use only the spec-backed facts for the API reference, distinguish spec evidence from rendered, implementation, and endpoint proof, and hand off the product-user guide without drafting UI steps."
+    why_realistic: "A product team asks for a review before a notification-preferences feature launch, with separate API and in-app guide deliverables that depend on different evidence and owners."
+    actual_artifact: artifacts/mixed-audience-api-reference.md
+    expected_artifact: "A technical API reference limited to supplied spec facts plus a separate User Documentation handoff for the product-user guide; no invented UI steps or unverified endpoint claims."
+    reproduce: ./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot
+    claim_ids:
+      - technical-writer.audience_scope
+      - technical-writer.api_reference_evidence
+    deterministic_checks:
+      forbidden_commands:
+        - curl
+        - wget
+        - rm -rf
+        - nc
+    acceptance:
+      - type: expected_signal
+        value: "The API text reports a read-only surface and avoids inferring write behavior from an operation absent in the source."
+      - type: expected_signal
+        value: "The separate User Documentation skill receives the product-help deliverable, and the answer supplies no workflow instructions for product users."
+      - type: expected_signal
+        value: "The response separates specification validation, reference rendering, implementation review, and live request evidence, reporting only checks actually performed."
+    evidence_refs: "SKILL.md#Execution Boundaries, references/documentation-quality.md#API And OpenAPI References Need Evidence-Lane Labels"
   - id: docs-to-x-routing-boundary
     name: docs to X routing boundary
     source: KnowledgeOS extraction

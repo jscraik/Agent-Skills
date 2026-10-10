@@ -21,7 +21,7 @@ Do not hand-edit runtime projections.
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 85
+- `total_skills`: 86
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: cfe7b0e15020a240
@@ -61,7 +61,7 @@ Do not hand-edit runtime projections.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
 - `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
 - `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
-- `pr-green-sweep` — Collect GitHub, CodeRabbit, Codex review, and CI findings across named PRs; confirm issues against current code and fix them with evidence. Use when the user requests PR review-thread sweeps, CI remediation, or until-green monitoring, merge, and cleanup.
+- `pr-green-sweep` — Review green pull requests, resolve review threads with current-head evidence, merge authorized PRs, and reconcile local branches. Use when the user requests PR closeout, scoped GitHub, CodeRabbit, Codex, or CI finding repairs, or until-green monitoring.
 - `prek-pro` — Review, configure, and troubleshoot prek hooks when users need prek.toml edits, shim installs, hook validation, or pre-commit migration help.
 - `production-deployment` — Plan, execute, and validate production deployments when rollout safety, health checks, observability, rollback, or production-parity verification is required.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
@@ -70,13 +70,14 @@ Do not hand-edit runtime projections.
 - `session-workflow-miner` — Analyze recent Codex session evidence for repeated manual workflows and route them to skills, subagents, validators, or no artifact when Jamie asks what he keeps doing manually.
 - `simplify` — Audit completed implementation work from first principles for unnecessary complexity while preserving required behavior. Use when the user explicitly requests a simplification pass or first-principles reassessment before calling implementation done.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, projection sync, strict audit, reviewer evidence, commit, push, and PR status.
-- `technical-writer` — Audit, rewrite, and validate README, runbook, code-doc, config-doc, package-evidence, and public trust-surface documentation against live repository evidence. Use when documentation needs proof-backed correction, reader-focused review, generated-document ownership, public-access checks, or legacy docs-expert routing.
+- `technical-writer` — Audit, rewrite, and validate developer, administrator, and operator documentation—including API/OpenAPI references—against live repository evidence. Use when these documents need proof-backed correction, reader-focused review, generated-document ownership, public-access checks, or legacy docs-expert routing; route product end-user documentation to the separate User Documentation skill.
 - `testing` — Validate and choose proportionate test proof for tests, CI, coverage, evals, and closeout evidence: map changed files to repo-native commands, place checks at commit, push, and pull-request gates, classify pass/fail/blocked ownership, and preserve trace/regression artifacts. Use when users ask what tests or gates to run, how to design coverage, why validation failed, or what proof supports a claim.
 - `toml` — Create and review TOML configuration with strict typing and predictable structure. Use when editing tool configuration files that require schema-safe TOML.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `typescript` — Use when authoring or reviewing TypeScript code that requires strict type safety, explicit module contracts, and predictable runtime boundaries.
 - `ubiquitous-language` — Builds a project glossary that maps everyday wording to canonical terms, repository actions, and reusable engineering rules. Use when a user asks "what does X mean here?", "define our terms", "standardize this naming", "turn this phrase into a repo action", "grill the domain language", or whether a local correction should apply to similar code.
 - `unslopify` — Audit dead code, stale exports, unused imports, and cleanup candidates. Use when scoped cleanup needs evidence, rollback notes, and repo-native validation.
+- `user-documentation` — Create, review and validate software onboarding, task guides, UI help, FAQs and troubleshooting for non-technical end users. Use when people need to learn how to use a product or dashboard from verified interface evidence; route developer, API and administrator documentation to technical-writer.
 - `uv-python-project-setup` — Create, repair, and validate uv Python project setup. Use when initializing Python apps or libraries, managing uv dependencies, virtual environments, or CI-ready uv workflows.
 - `vale` — Install, repair, and validate Vale prose linting. Use when users need Vale config, style sync, docs lint gates, or broken Vale workflow diagnosis.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
