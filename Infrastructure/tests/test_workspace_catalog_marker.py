@@ -34,3 +34,18 @@ class TestWorkspaceCatalogMarker(TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(path.read_text(encoding="utf-8"), before.replace("120", "1"))
         self.assertIn("`total_skills`: 1", (self.repo_root / "SKILL.md").read_text())
+
+    def test_workspace_sync_preserves_unrecognised_project_readme(self) -> None:
+        """Ordinary project READMEs are caller content, not catalogue projections."""
+        path = self.repo_root / "README.md"
+        before = "# My Project\n\nApplication setup and user-owned notes.\n"
+        path.write_text(before, encoding="utf-8")
+        (self.source_dir / "SKILL.md").write_text(
+            "---\nname: safe-skill\ndescription: Safe skill.\n---\n", encoding="utf-8"
+        )
+        for dry_run in (True, False):
+            result = skills_commands.sync_skills(
+                self.repo_root, scope="workspace", dry_run=dry_run, projection="flat"
+            )
+            self.assertEqual(result.status, "success")
+            self.assertEqual(path.read_text(encoding="utf-8"), before)

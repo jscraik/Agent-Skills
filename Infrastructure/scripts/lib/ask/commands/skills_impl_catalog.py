@@ -629,7 +629,11 @@ def _refresh_catalog_readme(repo_root: Path, catalog_count: int, dry_run: bool) 
     if not path.exists():
         return []
     before = path.read_text(encoding="utf-8")
-    after = refresh_readme_catalog_text(before, catalog_count)
+    try:
+        after = refresh_readme_catalog_text(before, catalog_count)
+    except ValueError:
+        # Workspace sync also serves ordinary projects, whose READMEs are not projections.
+        return []
     after = re.sub(r"currently expects \*\*\d+\*\* skills",
                    f"currently expects **{catalog_count}** skills", after, count=1)
     after = _refresh_readme_cluster_counts(after, repo_root)
