@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from enum import StrEnum
 from pathlib import Path
 
 
@@ -42,6 +43,11 @@ COUNT_PATTERNS: tuple[str, ...] = (
 )
 
 
+class ReadmeIntroMode(StrEnum):
+    LEGACY_HEADING = "legacy-heading"
+    CATALOG_MARKERS = "catalog-markers"
+
+
 def _refresh_count_markers(content: str, catalog_count: str) -> str:
     replacements = (
         (
@@ -74,7 +80,7 @@ def _insert_legacy_intro(content: str) -> str:
     return content
 
 
-def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
+def refresh_readme_catalog_text(content: str, catalog_count: int | str, *, intro_mode: ReadmeIntroMode = ReadmeIntroMode.LEGACY_HEADING) -> str:
     """Return README content with canonical intro and catalog count text."""
     catalog_count = str(catalog_count)
     if content.startswith("# Agent Skills Kit\n") and re.search(
@@ -104,7 +110,7 @@ def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
         if count_replacements:
             break
 
-    if sentence_replacements == 0 and count_replacements == 0:
+    if sentence_replacements == 0 and count_replacements == 0 and intro_mode == ReadmeIntroMode.LEGACY_HEADING:
         content = _insert_legacy_intro(content)
 
     for pattern in SUMMARY_PATTERNS:

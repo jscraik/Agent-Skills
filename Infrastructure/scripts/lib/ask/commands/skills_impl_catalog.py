@@ -31,7 +31,7 @@ from .skills_impl_core import (
     discover_skill_entries,
     render_index,
 )
-from update_readme_catalog_text import refresh_readme_catalog_text
+from update_readme_catalog_text import COUNT_PATTERNS, SUMMARY_PATTERNS, ReadmeIntroMode, refresh_readme_catalog_text
 
 if TYPE_CHECKING:
     from .skills_impl_capabilities import skills_package
@@ -629,11 +629,14 @@ def _refresh_catalog_readme(repo_root: Path, catalog_count: int, dry_run: bool) 
     if not path.exists():
         return []
     before = path.read_text(encoding="utf-8")
-    try:
-        after = refresh_readme_catalog_text(before, catalog_count)
-    except ValueError:
-        # Workspace sync also serves ordinary projects, whose READMEs are not projections.
+    markers = (*SUMMARY_PATTERNS, *COUNT_PATTERNS,
+               r"Catalog parity marker: \*\*\d+ canonical skills\*\*",
+               r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
+               r"currently expects \*\*\d+\*\* skills")
+    if not any(re.search(pattern, before) for pattern in markers):
+        # A common title is not ownership evidence for a catalogue projection.
         return []
+    after = refresh_readme_catalog_text(before, catalog_count, intro_mode=ReadmeIntroMode.CATALOG_MARKERS)
     after = re.sub(r"currently expects \*\*\d+\*\* skills",
                    f"currently expects **{catalog_count}** skills", after, count=1)
     after = _refresh_readme_cluster_counts(after, repo_root)
