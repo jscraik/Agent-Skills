@@ -1,0 +1,28 @@
+interface:
+  display_name: "User Documentation"
+  short_description: "Onboard non-technical users and explain software tasks"
+  default_prompt: "Create a verified onboarding guide for non-technical users of this software using User Documentation."
+policy:
+  allow_implicit_invocation: true
+
+# OpenAI Agents SDK Configuration
+# This file configures how the skill appears in Codex and any MCP dependencies.
+#
+# interface:
+#   display_name: "Optional user-facing name"
+#   short_description: "Optional user-facing description"
+#   icon_small: "./assets/small-logo.svg"    # 16x16px SVG with currentColor fill
+#   icon_large: "./assets/large-logo.png"    # 100x100px PNG/JPG
+#   brand_color: "#3B82F6"
+#   default_prompt: "Optional surrounding prompt"
+#
+# policy:
+#   allow_implicit_invocation: true
+#
+# dependencies:
+#   tools:
+#     - type: "mcp"
+#       value: "serverName"
+#       description: "MCP server description"
+#       transport: "streamable_http"
+#       url: "https://example.com/mcp"

@@ -1,0 +1,42 @@
+schema_version: "1.2"
+skill: user-documentation
+purpose: Help non-technical users onboard and use software through verified task instructions.
+triggers:
+  - Create or improve product onboarding, task guides, UI help, user FAQs or training.
+  - Review instructions against the actual interface and ordinary-user permissions.
+inputs: [task_intent, guide_target, audience, product_version, role, product_evidence, output_format]
+outputs: [user_guide_or_findings, validation_results, editorial_gaps]
+observability: Report the changed target, exact checks, access or version limits and strongest verified document state.
+quality_criteria:
+  task_success:
+    purpose: Make onboarding and everyday software use understandable to the intended non-technical reader.
+    observable_evidence: A recognisable starting point, supported actions, completion checkpoint and safe recovery are available without hidden conversation context.
+  evidence_grounding:
+    purpose: Avoid imaginary interfaces, elevated-role instructions and unsupported success claims.
+    observable_evidence: Important labels and outcomes have identified sources; unavailable product tests and exports stay visibly unverified.
+non_goals:
+  - Developer setup, API references, administration or implementation changes.
+  - Publication, transactions or changing access without explicit authority.
+permission_profile:
+  filesystem:
+    read: [guide_target, product_evidence, applicable_requirements]
+    write: [authorised_document_target]
+  network:
+    required: false
+    allowed_when: Explicitly requested product research or online document work.
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+risks: [invented_ui, role_mismatch, unsafe_retries, private_data, export_loss, proof_overclaim]
+approval_gates: [publication, product_mutation, secret_access, destructive_actions]
+validation: [strict_skill_audit, package_boundary_checks, scenario_quality]
+commands:
+  - "./bin/ask skills audit Skills/agent-ops/user-documentation --level strict --json --robot"
+  - "./bin/ask skills package verify Skills/agent-ops/user-documentation --json --robot"
+  - "./bin/ask sdk eval scenario-quality Skills/agent-ops/user-documentation --preview --json --robot"
+evidence_requirements:
+  - Controls and outcomes match the named product version and reader role.
+  - Source comparison, execution, rendering and user trials remain distinct.
+  - Applied edits are read back; unavailable checks do not pass.
+rollback_procedure: Preserve the original guide; restore only authorised document edits when requested.

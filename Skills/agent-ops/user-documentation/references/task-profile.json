@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-agent-ops-user-documentation",
+  "scope_skill": "Skills/agent-ops/user-documentation",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-10-10",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 3,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {"id": "clarity", "label": "Reader task clarity", "threshold": 0.8, "weight": 0.3, "critical": true},
+    {"id": "specificity", "label": "Supported interface evidence", "threshold": 0.8, "weight": 0.35, "critical": true},
+    {"id": "safety", "label": "Privacy and safe recovery", "threshold": 0.9, "weight": 0.35, "critical": true}
+  ],
+  "delegation": {"mode": "direct", "rationale": "Instruction-only document work; no delegation required or implied."},
+  "learning_posture": {"supported": ["learn", "guided", "execute"], "default": "execute"}
+}

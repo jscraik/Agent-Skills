@@ -38,10 +38,10 @@ TECHNICAL_WRITER_RELEASE_8 = [
     "smoke-boundary-discovery",
     "readme-first-run",
     "prompt-injection",
-    "risky-command",
     "docs-validation-ledger",
     "pressure-unverified-badge",
     "regression-stale-command-example",
+    "mixed-audience-api-reference",
 ]
 IMPROVE_AGENT_NATIVE_RELEASE_8 = [
     "happy-scorecard",

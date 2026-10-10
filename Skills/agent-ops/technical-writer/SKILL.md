@@ -1,6 +1,6 @@
 ---
 name: technical-writer
-description: Audit, rewrite, and validate README, runbook, code-doc, config-doc, package-evidence, and public trust-surface documentation against live repository evidence. Use when documentation needs proof-backed correction, reader-focused review, generated-document ownership, public-access checks, or legacy docs-expert routing.
+description: Audit, rewrite, and validate developer, administrator, and operator documentation—including API/OpenAPI references—against live repository evidence. Use when these documents need proof-backed correction, reader-focused review, generated-document ownership, public-access checks, or legacy docs-expert routing; route product end-user documentation to the separate User Documentation skill.
 triggers:
   - technical writer
   - docs-expert
@@ -21,7 +21,7 @@ metadata:
 # Technical Writer
 
 ## When To Use
-- README, runbook, code-doc, template, config-doc, or trust-surface docs need audit or rewrite.
+- Developer, administrator, or operator READMEs, runbooks, code docs, templates, config docs, API/OpenAPI references, or trust-surface docs need audit or rewrite.
 - Skill package evidence or runtime-boundary docs need proof-backed explanation.
 - Claims need checks against scripts, commands, workflows, tests, repo structure, support paths, or governance docs.
 - Generated, mirrored, registry, or publication docs need canonical ownership and reader-visible validation.
@@ -37,13 +37,20 @@ For audits and broad rewrites, return findings, claim/evidence map, ownership de
 ## Execution Boundaries
 Inspect applicable instructions and preserve the current worktree before drafting. Edit only the canonical documentation owner. Treat generators, runtime or mirrored copies, registries, publication surfaces, user configuration, and external systems as separate lanes. Do not invent commands, paths, versions, access, platform behavior, or readiness claims. Do not change runtime behavior, dependencies, CI, release state, trackers, projections, or publication state without the owning workflow and approval.
 
+Technical-writer owns documentation for developers, administrators, and
+operators. Product end-user guides, product-UI instructions, in-product help,
+customer FAQs or troubleshooting, and end-user training belong in the separate
+User Documentation skill. For a mixed request, work only on the technical
+artifact and route the end-user artifact to User Documentation; if that skill is
+not available, state the handoff instead of drafting end-user content here.
+
 <!-- Discovery-smoke compatibility marker: ## Discovery interview -->
 ### Discovery interview
 Inspect known, read-only surfaces without delay. When the editable boundary is materially unknown, ask one plain-language question before edits: ask which documentation surface to inspect, identify the canonical source path or editable owner, and block edits until that surface is chosen. For a staged package, ask for its source path or editable scope rather than guessing. Ask one round at a time, explain why this matters, and avoid dumping the full interview plan at once.
 
 ## Workflow
 1. Preserve and classify checkout state. Resolve the documentation supply chain: producer, canonical authoring source, generator or sync step, generated artifact, registry or publication surface, reader-visible result, and validator.
-2. Classify the reader job and mode: audit, editorial review, rewrite, validate, or public-content handoff. Infer them from the request and artifact when evidence is strong; ask one plain-language question only when an unresolved answer materially changes ownership, access, publication, or the reader path. Use `references/discovery-interview.md` for deeper underspecified-request guidance.
+2. Classify audience using Execution Boundaries, then classify the mode: audit, editorial review, rewrite, validate, or public-content handoff. For mixed requests, separate technical deliverables from product end-user deliverables before drafting. Infer audience and mode from the request and artifact when evidence is strong; ask one plain-language question only when an unresolved answer materially changes ownership, access, publication, or the reader path. Use `references/discovery-interview.md` for deeper underspecified-request guidance.
 3. Inspect the bounded truth constellation: surfaces that own, generate, consume, publish, validate, or materially constrain the claims. Verify commands and paths with repository search and canonical wrappers.
 4. Build `claim -> evidence, owner, audience visibility, volatility, status, citation`. Mark missing proof as blocked. Keep local source or command evidence separate from hosted, registry, publication, release, and runtime truth.
 5. Search the active glossary before introducing domain language. For terminology migrations, distinguish active reader-facing language, executable identifiers, source paths, generated labels, historical records, and provenance identities.
