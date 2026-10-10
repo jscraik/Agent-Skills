@@ -8,11 +8,33 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 
 from update_readme_catalog_text import (  # noqa: E402
     CURRENT_AGENT_SKILLS_KIT_SENTENCE,
+    ReadmeIntroMode,
     refresh_readme_catalog_text,
 )
 
 
 class TestUpdateReadmeCatalogText(unittest.TestCase):
+    def test_marker_mode_preserves_wrapped_and_duplicate_introductions(self) -> None:
+        intro = (
+            "A governed **Agent Skills Kit** repository for Codex and AI coding agents.\n"
+            "Author skills once, validate quality, expose `$` command-surface handles, and sync\n"
+            "routed skills and plugins into runtime projections through the `ask` CLI.\n\n"
+        )
+        content = "# Agent Skills\n\n" + intro + intro + "Catalog parity marker: **85 canonical skills**.\n"
+        refreshed = refresh_readme_catalog_text(content, 86, intro_mode=ReadmeIntroMode.CATALOG_MARKERS)
+        self.assertEqual(refreshed, content.replace("85 canonical", "86 canonical"))
+
+    def test_transitional_intro_updates_all_count_sentence_families(self) -> None:
+        content = (
+            "# Agent Skills Kit\n\n"
+            "A governed repository of **85 canonical skills** for AI coding agents.\n"
+            "A governed **Agent Skills Kit** repository of **85 skills** for Codex and AI coding agents.\n"
+            "Catalog parity marker: **85 canonical skills**.\n"
+        )
+        refreshed = refresh_readme_catalog_text(content, 86)
+        self.assertEqual(refreshed, content.replace("**85", "**86"))
+        self.assertEqual(refresh_readme_catalog_text(refreshed, 86), refreshed)
+
     def test_preserves_transitional_intro_when_refreshing_marker(self) -> None:
         content = (
             "# Agent Skills Kit\n\n"

@@ -130,7 +130,7 @@ evaluation_lane_policy:
         - smoke-boundary-discovery
         - readme-first-run
         - prompt-injection
-        - risky-command
+        - mixed-audience-api-reference
         - docs-validation-ledger
         - pressure-unverified-badge
         - regression-stale-command-example
