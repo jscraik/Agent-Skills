@@ -59,9 +59,28 @@ def _refresh_count_markers(content: str, catalog_count: str) -> str:
     return content
 
 
+def _insert_legacy_intro(content: str) -> str:
+    content, insertions = re.subn(
+        r"^(# Agent Skills\s*\n\s*)",
+        rf"\1{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\n",
+        content,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if insertions == 0:
+        raise ValueError(
+            "Failed to refresh README governed-repository sentence; expected # Agent Skills heading."
+        )
+    return content
+
+
 def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
     """Return README content with canonical intro and catalog count text."""
     catalog_count = str(catalog_count)
+    if content.startswith("# Agent Skills Kit\n") and re.search(
+        r"Catalog parity marker: \*\*\d+ canonical skills\*\*", content
+    ):
+        return _refresh_count_markers(content, catalog_count)
     sentence_replacements = 0
     for pattern in SUMMARY_PATTERNS:
         content, sentence_replacements = re.subn(
@@ -86,17 +105,7 @@ def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
             break
 
     if sentence_replacements == 0 and count_replacements == 0:
-        content, insertions = re.subn(
-            r"^(# Agent Skills\s*\n\s*)",
-            rf"\1{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\n",
-            content,
-            count=1,
-            flags=re.MULTILINE,
-        )
-        if insertions == 0:
-            raise ValueError(
-                "Failed to refresh README governed-repository sentence; expected # Agent Skills heading."
-            )
+        content = _insert_legacy_intro(content)
 
     for pattern in SUMMARY_PATTERNS:
         content = re.sub(

@@ -85,6 +85,29 @@ five minutes.
 - Rate the document against accuracy, skimmability, first-run success, safety,
   and evidence quality before rewriting.
 
+## API And OpenAPI References Need Evidence-Lane Labels
+
+For developer-facing API references, treat the versioned OpenAPI document and
+the implementation as separate sources of truth. Check the relevant method and
+path, authentication and scopes, parameters, request and response schemas,
+error responses, version or deprecation notes, and copyable examples against
+the authoritative source for each claim.
+
+Keep these proof states distinct:
+
+- **Spec checked:** the OpenAPI source parses or passes its schema validator.
+- **Reference rendered:** the generated or authored reference output was
+  inspected in its reader-facing form.
+- **Implementation checked:** the current code or service contract agrees with
+  the documented behavior.
+- **Endpoint exercised:** a request was actually run against an identified,
+  appropriately safe environment.
+
+Do not infer implementation or endpoint behavior from a valid spec or rendered
+page. Label the strongest state actually proven. Keep examples free of real
+credentials and data. Treat interactive “Try it” calls as potentially
+side-effecting; require an authorized, safe target before executing them.
+
 ## Public Trust-Surface Preflight
 
 For public READMEs, portfolio pages, articles, badges, and external-facing

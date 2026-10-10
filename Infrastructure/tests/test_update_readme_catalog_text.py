@@ -13,6 +13,18 @@ from update_readme_catalog_text import (  # noqa: E402
 
 
 class TestUpdateReadmeCatalogText(unittest.TestCase):
+    def test_preserves_transitional_intro_when_refreshing_marker(self) -> None:
+        content = (
+            "# Agent Skills Kit\n\n"
+            "Agent Skills Kit is the transitional repository.\n\n"
+            "- Catalog parity marker: **85 canonical skills**.\n"
+        )
+
+        refreshed = refresh_readme_catalog_text(content, 86)
+
+        self.assertEqual(refreshed, content.replace("85 canonical", "86 canonical"))
+        self.assertEqual(refresh_readme_catalog_text(refreshed, 86), refreshed)
+
     def test_preserves_current_intro_and_updates_catalog_count(self) -> None:
         content = (
             "# Agent Skills\n\n"

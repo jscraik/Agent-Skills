@@ -1,14 +1,19 @@
 ---
-title: PR merge conflict resolution with isolated worktree and hook-safe push fallback
+title: PR merge conflict resolution with isolated worktree and preserved hooks
 asset_family: pull request conflict remediation
 owner: Agent Skills Team
-source_artifact: product/docs/context7/SKILL.md
-freshness_reviewed_on: 2026-07-10
-last_updated: 2026-04-10
+source_artifact: Skills/agent-ops/context7/SKILL.md
+freshness_reviewed_on: 2026-10-10
+last_updated: 2026-10-10
 review_after_days: 90
 ---
 
-# PR Merge Conflict Resolution With Isolated Worktree And Hook-Safe Push Fallback
+# PR Merge Conflict Resolution With Isolated Worktree And Preserved Hooks
+
+Reviewed against the current [Git workflow standards](/codestyle/13-git-workflow.md)
+on 2026-10-10. The original incident used hook bypasses. That historical
+behaviour is not an approved fallback under current policy; the resolution below
+supersedes that advice. This review does not re-verify the historical hosted PR.
 
 ## Table of Contents
 
@@ -33,18 +38,18 @@ Use this sequence when conflict resolution must be isolated from a dirty working
 1. Create a separate temporary worktree from the PR head branch.
 2. Merge the base branch into that worktree and resolve only files with conflict markers.
 3. Stage conflict files explicitly and verify all conflict markers are removed.
-4. If repo-wide hooks fail or are terminated for unrelated gates, complete the merge commit with `--no-verify` as a bounded exception for conflict-only updates.
-5. Push to the PR head with `--no-verify` only when hook execution is non-deterministically terminated and the branch state is otherwise clean.
-6. Re-check PR mergeability in GitHub immediately after push.
+4. Run required validation and normal signed commit hooks. If a gate fails or is terminated, capture its exact diagnostic and determine whether the defect belongs to the conflict change or another surface.
+5. Repair defects within the authorised scope. For an out-of-scope blocker, continue independent work and request the smallest scope extension needed. Do not bypass hooks, disable signing or claim that unrelated failures are clearance.
+6. Once the normal gates permit delivery, push without force to the authorised PR branch. Re-check its hosted head, checks, review threads and mergeability; a clean local merge alone proves none of those lanes.
 
-For this incident, the resolved conflict set was:
+For the historical incident, the recorded conflict set was (these are historical paths, not current command targets):
 
 - `product/docs/context7/SKILL.md`
 - `product/docs/context7/Infrastructure/references/contract.yaml`
 - `product/docs/context7/Infrastructure/references/evals.yaml`
 - `Skills/uv-python-project-setup/Infrastructure/scripts/README.md`
 
-The durable rule is: isolate merge-conflict work from unrelated local edits first, then treat hook bypass as a narrow operational fallback when blocking signals are external to the conflict delta.
+The durable rule is: isolate merge-conflict work from unrelated local edits and preserve the normal delivery gates. Isolation does not create authority to bypass a failing gate.
 
 ## Evidence
 
@@ -57,7 +62,7 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
   - `5179eedbb98a3f83fc816e00f41f27273372fe79`
 - Verification outcome after push:
   - GitHub PR metadata reported `mergeable: true`.
-- Representative commands used:
+- Historical commands recorded, not a current runbook:
   - `git worktree add ... /tmp/agent-skills-pr104 ...`
   - `git merge --no-edit origin/feature/wiki-llm-reference`
   - `rg -n "^(<<<<<<<|=======|>>>>>>>)" ...`
@@ -70,4 +75,4 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
 
 - Investigate why `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` intermittently terminates under hook execution even with a clean tree.
 - Keep conflict-only remediation commits narrowly scoped and avoid bundling repo-wide drift fixes in the same PR.
-- If hook bypass is used, record exact blocker text and verify PR mergeability and CI checks immediately afterward.
+- Preserve the recorded incident evidence, but use the current hook-preserving sequence for new work. The historical mergeability observation is not current review or CI clearance.
