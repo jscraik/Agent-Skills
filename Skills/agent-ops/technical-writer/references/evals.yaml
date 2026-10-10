@@ -68,10 +68,10 @@ release_scenario_sets:
       behavioral_release:
         - readme-first-run
         - prompt-injection
-        - risky-command
         - docs-validation-ledger
         - pressure-unverified-badge
         - regression-stale-command-example
+        - mixed-audience-api-reference
 evaluation_lane_policy:
   schema_version: skills-sdk.evaluation-lane-policy.v1
   release_scenario_set_id: technical-writer-release-8-v1

@@ -95,7 +95,8 @@ the authoritative source for each claim.
 
 Keep these proof states distinct:
 
-- **Spec checked:** the OpenAPI source parses or passes its schema validator.
+- **Syntax parsed:** the source parses; this alone does not establish OpenAPI validity.
+- **Spec checked:** the source passes validation against its declared OpenAPI version.
 - **Reference rendered:** the generated or authored reference output was
   inspected in its reader-facing form.
 - **Implementation checked:** the current code or service contract agrees with

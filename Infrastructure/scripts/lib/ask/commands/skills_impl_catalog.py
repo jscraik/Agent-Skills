@@ -1,8 +1,40 @@
 from __future__ import annotations
 
+import hashlib
+import importlib.util
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from types import MappingProxyType
+from typing import TYPE_CHECKING, Any
 
 from .skills_impl_core import *  # noqa: F403
+from .skills_impl_core import (
+    CallResult,
+    PACKAGE_VERIFY_SCHEMA_VERSION,
+    TESSL_REVIEW_MIN_SCORE,
+    TESSL_REVIEW_TARGET_SCORE,
+    _ask_validation_command,
+    _parse_tessl_review,
+    _read_skill_frontmatter_fields,
+    _skills_validation_command,
+    _subprocess_env_with_uv_cache,
+    build_sdk_skill_records,
+    discover_catalog_entries,
+    discover_skill_entries,
+    render_index,
+)
+from update_readme_catalog_text import refresh_readme_catalog_text
+
+if TYPE_CHECKING:
+    from .skills_impl_capabilities import skills_package
 
 def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     """Return stable JSON data for a validation subprocess result."""
@@ -587,107 +619,52 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
         skill_index_path.write_text(rendered_index, encoding="utf-8")
         logs.append(f"Refreshed catalog index: {skill_index_path}")
 
-    readme_path = repo_root / "README.md"
-    if readme_path.exists():
-        readme_content = readme_path.read_text(encoding="utf-8")
-        sdk_owner_counts: dict[str, int] = {}
-        for record in build_sdk_skill_records(repo_root_path=repo_root):
-            if record.source_path.startswith("Skills/"):
-                sdk_owner_counts[record.owner] = sdk_owner_counts.get(record.owner, 0) + 1
-
-        updated_readme, replacements = re.subn(
-            r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
-            f"A governed repository of **{catalog_count} skills** for AI coding agents",
-            readme_content,
-            count=1,
-        )
-        if replacements == 0:
-            updated_readme, replacements = re.subn(
-                r"A governed repository of AI coding skills\.",
-                f"A governed repository of **{catalog_count} skills** for AI coding agents.",
-                updated_readme,
-                count=1,
-            )
-        updated_readme = re.sub(
-            r"A governed repository of \*\*skills\*\* for AI coding agents",
-            f"A governed repository of **{catalog_count} skills** for AI coding agents",
-            updated_readme,
-            count=1,
-        )
-        updated_readme = re.sub(
-            r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
-            "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
-            updated_readme,
-            count=1,
-        )
-        updated_readme = re.sub(
-            r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. Author skills once, validate quality, expose `\$`[^.\n]+, and sync routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\nAuthor skills once)",
-            "",
-            updated_readme,
-        )
-        updated_readme = re.sub(
-            r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
-            f"This repository currently exposes **{catalog_count} skills** in the default catalog",
-            updated_readme,
-            count=1,
-        )
-        if sdk_owner_counts:
-            preferred_order = (
-                "agent-ops",
-                "backend-platform",
-                "content-publishing",
-                "frontend-ui",
-                "mobile-native",
-                "product-strategy",
-                "security-ops",
-            )
-            source_counts = sdk_owner_counts
-            cluster_counts = {
-                name: count for name, count in source_counts.items() if name in preferred_order
-            }
-            if cluster_counts:
-                first_party_handle_count = sum(cluster_counts.values())
-                cluster_summary = ", ".join(
-                    f"{name}: {cluster_counts[name]}"
-                    for name in preferred_order
-                    if name in cluster_counts
-                )
-                updated_readme = re.sub(
-                    r"(?:including \*\*\d+ first-party SDK skill names\*\* backed by canonical skill source|including \*\*\d+ first-party handles\*\* backed by canonical skill source|backed by first-party canonical skill\s+source) across \d+ topic clusters \([^)]*\)",
-                    (
-                        f"including **{first_party_handle_count} first-party SDK skill names** backed by canonical "
-                        f"skill source across {len(cluster_counts)} topic clusters ({cluster_summary})"
-                    ),
-                    updated_readme,
-                    count=1,
-                    flags=re.DOTALL,
-                )
-                for name, count in cluster_counts.items():
-                    updated_readme = re.sub(
-                        rf"(\| {re.escape(name)}\s+\|)\s*\d+(\s+\|)",
-                        lambda match, count=count: f"{match.group(1)} {count}{match.group(2)}",
-                        updated_readme,
-                        count=1,
-                    )
-                    updated_readme = re.sub(
-                        rf"(\|\s+\|-- {re.escape(name)}/\s+#\s*)\d+(\s+skills?:)",
-                        lambda match, count=count: f"{match.group(1)}{count}{match.group(2)}",
-                        updated_readme,
-                        count=1,
-                    )
-        updated_readme = re.sub(
-            r"currently expects \*\*\d+\*\* skills",
-            f"currently expects **{catalog_count}** skills",
-            updated_readme,
-            count=1,
-        )
-        if dry_run:
-            if updated_readme != readme_content:
-                logs.append(f"Would refresh README skill count: {readme_path}")
-        elif updated_readme != readme_content:
-            readme_path.write_text(updated_readme, encoding="utf-8")
-            logs.append(f"Refreshed README skill count: {readme_path}")
-
+    logs.extend(_refresh_catalog_readme(repo_root, catalog_count, dry_run))
     return logs
+
+
+def _refresh_catalog_readme(repo_root: Path, catalog_count: int, dry_run: bool) -> list[str]:
+    """Refresh README counts without changing a dry-run's caller-owned bytes."""
+    path = repo_root / "README.md"
+    if not path.exists():
+        return []
+    before = path.read_text(encoding="utf-8")
+    after = refresh_readme_catalog_text(before, catalog_count)
+    after = re.sub(r"currently expects \*\*\d+\*\* skills",
+                   f"currently expects **{catalog_count}** skills", after, count=1)
+    after = _refresh_readme_cluster_counts(after, repo_root)
+    if after == before:
+        return []
+    if dry_run:
+        return [f"Would refresh README skill count: {path}"]
+    path.write_text(after, encoding="utf-8")
+    return [f"Refreshed README skill count: {path}"]
+
+
+def _refresh_readme_cluster_counts(content: str, repo_root: Path) -> str:
+    """Preserve the existing SDK cluster-summary and table-count projection."""
+    preferred = ("agent-ops", "backend-platform", "content-publishing", "frontend-ui",
+                 "mobile-native", "product-strategy", "security-ops")
+    counts: dict[str, int] = {}
+    for record in build_sdk_skill_records(repo_root_path=repo_root):
+        if record.source_path.startswith("Skills/") and record.owner in preferred:
+            counts[record.owner] = counts.get(record.owner, 0) + 1
+    if not counts:
+        return content
+    summary = ", ".join(f"{name}: {counts[name]}" for name in preferred if name in counts)
+    content = re.sub(
+        r"(?:including \*\*\d+ first-party SDK skill names\*\* backed by canonical skill source|including \*\*\d+ first-party handles\*\* backed by canonical skill source|backed by first-party canonical skill\s+source) across \d+ topic clusters \([^)]*\)",
+        f"including **{sum(counts.values())} first-party SDK skill names** backed by canonical "
+        f"skill source across {len(counts)} topic clusters ({summary})",
+        content, count=1, flags=re.DOTALL,
+    )
+    for name, count in counts.items():
+        content = re.sub(rf"(\| {re.escape(name)}\s+\|)\s*\d+(\s+\|)",
+                         lambda match, count=count: f"{match.group(1)} {count}{match.group(2)}",
+                         content, count=1)
+        content = re.sub(rf"(\|\s+\|-- {re.escape(name)}/\s+#\s*)\d+(\s+skills?:)",
+                         lambda match, count=count: f"{match.group(1)}{count}{match.group(2)}",
+                         content, count=1)
+    return content
 
 __all__ = [name for name in globals() if not name.startswith("__")]

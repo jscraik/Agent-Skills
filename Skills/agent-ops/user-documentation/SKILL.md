@@ -106,6 +106,15 @@ Package checks and cases live in [contract.yaml](references/contract.yaml) and
 - An error does not prove that a submission had no effect; avoid unsafe retries.
 - A saved draft or source file does not establish reader access or publication.
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[technical-writer]] | Split developer, API and administrator documentation from end-user guides. |
+| [[verification-before-completion]] | Check evidence before claiming a guide is accurate, saved or published. |
+
+These are optional companion skills, not required package resources.
+
 ## References
 
 - [User guide quality](references/user-guide-quality.md): reader-first procedures,
