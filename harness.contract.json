@@ -128,7 +128,7 @@
     "requiredMiseTools": [
       {
         "tool": "node",
-        "version": "24.13.1"
+        "version": "24.22.1"
       },
       {
         "tool": "pnpm",
