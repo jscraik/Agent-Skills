@@ -3,8 +3,8 @@ title: Harness-engineering CE to HE migration cutover and gate repair
 asset_family: harness-engineering stage naming and routing governance
 owner: Agent Skills Team
 source_artifact: Plugins/harness-engineering/.codex-plugin/plugin.json
-freshness_reviewed_on: 2026-07-21
-last_updated: 2026-07-21
+freshness_reviewed_on: 2026-10-26
+last_updated: 2026-10-26
 review_after_days: 90
 ---
 
@@ -62,6 +62,14 @@ Result: HE naming is now the active canonical path in skills, archive fixtures, 
     family checks.
 
 ## Follow-up
+
+Freshness review on 2026-10-26 confirmed the canonical manifest and HE routing
+remain consistent. Plugin contract validation, packaging hygiene, routing-map
+validation, deferred-context integrity and active/archive-link checks passed.
+The repository validator also passed its skill-authoring family gate; its only
+failure was the six overdue lifecycle review dates addressed by this review.
+This review covers source metadata and local contracts, not a new runtime
+installation, release, or external evaluation.
 
 - Keep HE-only names as canonical in plugin manifests, routing maps, and stage docs; treat new CE-name reintroduction as drift.
 - Require independent CodeRabbit/Codex review artifacts on PR #127 before merge, since this migration changes broad path and routing surfaces.
