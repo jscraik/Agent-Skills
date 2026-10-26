@@ -1,5 +1,7 @@
 # Agent Skills Kit
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/jscraik/Agent-Skills?utm_source=oss&utm_medium=github&utm_campaign=jscraik%2FAgent-Skills&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 Agent Skills Kit is the transitional `agent-skills` repository being separated
 into Skills SDK and Skills Foundry. Complete the separation before refining
 either product:
