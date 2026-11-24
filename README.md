@@ -2,6 +2,64 @@
 
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/jscraik/Agent-Skills?utm_source=oss&utm_medium=github&utm_campaign=jscraik%2FAgent-Skills&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
+Agent Skills Kit contains reusable Agent Skills packages and the transitional
+`ask` CLI for inspecting their source and evidence.
+
+Looking for the portable Python contracts and tooling? Start with the
+standalone [Skills SDK](https://github.com/jscraik/skills-sdk). The `ask`
+commands below belong to this repository; the separation into Skills SDK and
+Skills Foundry is still in progress.
+
+## First five minutes
+
+The first-run route below needs Git, Bash, `python3` (Python 3.12 or newer) and
+`uv`. Prepare the locked Python environment before bootstrap so its short
+status probes do not have to wait for the initial dependency download.
+
+Clone the repository, bootstrap its command surface, then resolve the existing
+`technical-writer` skill:
+
+```bash
+git clone https://github.com/jscraik/Agent-Skills.git
+cd Agent-Skills
+uv sync --frozen --project Infrastructure --python 3.12
+bash scripts/bootstrap-ask.sh --json
+./bin/ask skills resolve technical-writer --json --robot
+```
+
+The resolver returns the skill's source and runtime-visibility information in
+`data.resolution`. The canonical source is
+[`Skills/agent-ops/technical-writer/SKILL.md`](Skills/agent-ops/technical-writer/SKILL.md).
+Resolving a source does not install or activate it. If bootstrap or resolution
+reports an error, inspect the reported blocker before continuing.
+
+The bootstrap checks both `./bin/ask` and its documented Python invocation.
+If the executable cannot run directly, use `python3 bin/ask repo status --json`.
+The bootstrap script and executable both require `python3` to be on `PATH`.
+Without `uv`, the Python 3.12+ fallback requires an environment with the
+dependencies declared in [`Infrastructure/pyproject.toml`](Infrastructure/pyproject.toml)
+already installed. The Python invocation does not bypass missing dependencies.
+
+To diagnose the repository and follow the existing skill journey, see
+[Check a skill](#check-a-skill). For the migration contract, see
+[Migration and ownership](#migration-and-ownership).
+
+## Contents
+
+- [First five minutes](#first-five-minutes)
+- [Migration and ownership](#migration-and-ownership)
+- [Check a skill](#check-a-skill)
+- [Pick the right path](#pick-the-right-path)
+- [Expert and repository commands](#expert-and-repository-commands)
+- [Runtime surfaces](#runtime-surfaces)
+- [Quality and readiness](#quality-and-readiness)
+- [Repository layout](#repository-layout)
+- [Further reading](#further-reading)
+- [Privacy and Data Handling](#privacy-and-data-handling)
+- [Governance](#governance)
+
+## Migration and ownership
+
 Agent Skills Kit is the transitional `agent-skills` repository being separated
 into Skills SDK and Skills Foundry. Complete the separation before refining
 either product:
@@ -39,33 +97,13 @@ For current ownership and cutover rules, read
 describes the existing transitional CLI journey, not proof that separation or
 the destination product backlog is complete.
 
-## Contents
+## Check a skill
 
-- [First five minutes](#first-five-minutes)
-- [Pick the right path](#pick-the-right-path)
-- [Expert and repository commands](#expert-and-repository-commands)
-- [Runtime surfaces](#runtime-surfaces)
-- [Quality and readiness](#quality-and-readiness)
-- [Repository layout](#repository-layout)
-- [Further reading](#further-reading)
-- [Privacy and Data Handling](#privacy-and-data-handling)
-- [Governance](#governance)
-
-## First five minutes
-
-You need Git, Bash, and either `uv` or Python 3.12 or newer. The repository root
-has no package-manager install step.
-
-From a fresh checkout, bootstrap and diagnose the repo-local command surface:
+From the checkout root, diagnose the repo-local command surface:
 
 ```bash
-bash scripts/bootstrap-ask.sh --json
 ./bin/ask repo doctor --json --robot
 ```
-
-The bootstrap verifies both `./bin/ask` and the documented fallback. If the
-wrapper cannot run, use `python3 bin/ask repo status --json` to inspect the
-repository without assuming the managed environment is available.
 
 `repo doctor` separates blocking failures from diagnostic advice and reports
 one next command when action is useful. A linked worktree may intentionally
@@ -75,15 +113,15 @@ reachability, including `sdk check`, will remain blocked there until the
 reported workspace-sync action is deliberately run or the check is repeated in
 the materialized checkout.
 
-For the existing Agent-Skills local skill journey, replace `<skill>` with a handle such as
-`technical-writer`. Run the commands in order, and stop if a result reports a
-blocker or no further action:
+For the existing Agent-Skills local skill journey, continue with
+`technical-writer` or substitute another resolved handle. Run the commands in
+order, and stop if a result reports a blocker or no further action:
 
 ```bash
-./bin/ask sdk start <skill> --json --robot
-./bin/ask sdk check <skill> --json --robot
-./bin/ask skills package verify <skill> --strict --json --robot
-./bin/ask skills prove <skill> --json --robot
+./bin/ask sdk start technical-writer --json --robot
+./bin/ask sdk check technical-writer --json --robot
+./bin/ask skills package verify technical-writer --strict --json --robot
+./bin/ask skills prove technical-writer --json --robot
 ```
 
 This path answers:
